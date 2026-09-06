@@ -29,6 +29,7 @@ def add_lemma(
     chinese_translation: Optional[str] = None,
     french_translation: Optional[str] = None,
     spanish_translation: Optional[str] = None,
+    spanish_latam_translation: Optional[str] = None,
     korean_translation: Optional[str] = None,
     swahili_translation: Optional[str] = None,
     lithuanian_translation: Optional[str] = None,
@@ -106,6 +107,7 @@ def add_lemma(
     translation_map = {
         "lt": lithuanian_translation,
         "es": spanish_translation,
+        "es-419": spanish_latam_translation,
         "fr": french_translation,
         "zh": chinese_translation,
         "ko": korean_translation,

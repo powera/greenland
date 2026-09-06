@@ -1,16 +1,16 @@
-{"guid": "N37_001", "translations": {"ro": "cerc", "pl": "koło", "th": "วงกลม", "ta": "வட்டம்", "kn": "ವೃತ್ತ", "uk": "коло", "bn": "বৃত্ত", "hi": "वृत्त"}}
-{"guid": "N37_002", "translations": {"ro": "pătrat", "pl": "kwadrat", "th": "สี่เหลี่ยมจัตุรัส", "ta": "சதுரம்", "kn": "ಚೌಕ", "uk": "квадрат", "bn": "বর্গ", "hi": "वर्ग"}}
-{"guid": "N37_003", "translations": {"ro": "triunghi", "pl": "trójkąt", "th": "สามเหลี่ยม", "ta": "முக்கோணம்", "kn": "ತ್ರಿಕೋನ", "uk": "трикутник", "bn": "ত্রিভুজ", "hi": "त्रिकोण"}}
-{"guid": "N37_004", "translations": {"ro": "dreptunghi", "pl": "prostokąt", "th": "สี่เหลี่ยมผืนผ้า", "ta": "செவ்வகம்", "kn": "ಆಯತ", "uk": "прямокутник", "bn": "আয়তক্ষেত্র", "hi": "आयत"}}
-{"guid": "N37_005", "translations": {"ro": "oval", "pl": "owal", "th": "วงรี", "ta": "நீள்வட்டம்", "kn": "ಅಂಡಾಕಾರ", "uk": "овал", "bn": "ডিমাকার", "hi": "अण्डाकार"}}
-{"guid": "N37_006", "translations": {"ro": "cub", "pl": "sześcian", "th": "ลูกบาศก์", "ta": "கனசதுரம்", "kn": "ಘನ", "uk": "куб", "bn": "ঘনক", "hi": "घन"}}
-{"guid": "N37_007", "translations": {"ro": "sferă", "pl": "kula", "th": "ทรงกลม", "ta": "கோளம்", "kn": "ಗೋಳ", "uk": "куля", "bn": "গোলক", "hi": "गोला"}}
-{"guid": "N37_008", "translations": {"ro": "cilindru", "pl": "cylinder", "th": "ทรงกระบอก", "ta": "உருளை", "kn": "ಸಿಲಿಂಡರ್", "uk": "циліндр", "bn": "সিলিন্ডার", "hi": "सिलिंडर"}}
-{"guid": "N37_009", "translations": {"ro": "con", "pl": "stożek", "th": "กรวย", "ta": "கூம்பு", "kn": "ಶಂಕು", "uk": "конус", "bn": "শঙ্কু", "hi": "शंकु"}}
-{"guid": "N37_010", "translations": {"ro": "piramidă", "pl": "piramida", "th": "พีระมิด", "ta": "கூம்பகம்", "kn": "ಪಿರಮಿಡ್", "uk": "піраміда", "bn": "পিরামিড", "hi": "पिरामिड"}}
-{"guid": "N37_011", "translations": {"ro": "hexagon", "pl": "sześciokąt", "th": "หกเหลี่ยม", "ta": "அறுகோணம்", "kn": "ಷಡ್ಭುಜ", "uk": "шестикутник", "bn": "ষষ্ঠভুজ", "hi": "षट्भुज"}}
-{"guid": "N37_012", "translations": {"ro": "pentagon", "pl": "pięciokąt", "th": "ห้าเหลี่ยม", "ta": "ஐங்கோணம்", "kn": "ಪಂಚಭುಜ", "uk": "п'ятикутник", "bn": "পঞ্চভুজ", "hi": "पंचभुज"}}
-{"guid": "N37_013", "translations": {"ro": "octogon", "pl": "ośmiokąt", "th": "แปดเหลี่ยม", "ta": "எண்கோணம்", "kn": "ಅಷ್ಟಭುಜ", "uk": "восьмикутник", "bn": "অষ্টভুজ", "hi": "अष्टभुज"}}
+{"guid": "N37_001", "translations": {"ro": "cerc", "pl": "koło", "th": "วงกลม", "ta": "வட்டம்", "kn": "ವೃತ್ತ", "uk": "коло", "bn": "বৃত্ত", "hi": "वृत्त", "bs": "krug"}}
+{"guid": "N37_002", "translations": {"ro": "pătrat", "pl": "kwadrat", "th": "สี่เหลี่ยมจัตุรัส", "ta": "சதுரம்", "kn": "ಚೌಕ", "uk": "квадрат", "bn": "বর্গ", "hi": "वर्ग", "bs": "kvadrat"}}
+{"guid": "N37_003", "translations": {"ro": "triunghi", "pl": "trójkąt", "th": "สามเหลี่ยม", "ta": "முக்கோணம்", "kn": "ತ್ರಿಕೋನ", "uk": "трикутник", "bn": "ত্রিভুজ", "hi": "त्रिकोण", "bs": "trokut"}}
+{"guid": "N37_004", "translations": {"ro": "dreptunghi", "pl": "prostokąt", "th": "สี่เหลี่ยมผืนผ้า", "ta": "செவ்வகம்", "kn": "ಆಯತ", "uk": "прямокутник", "bn": "আয়তক্ষেত্র", "hi": "आयत", "bs": "pravougaonik"}}
+{"guid": "N37_005", "translations": {"ro": "oval", "pl": "owal", "th": "วงรี", "ta": "நீள்வட்டம்", "kn": "ಅಂಡಾಕಾರ", "uk": "овал", "bn": "ডিমাকার", "hi": "अण्डाकार", "bs": "oval"}}
+{"guid": "N37_006", "translations": {"ro": "cub", "pl": "sześcian", "th": "ลูกบาศก์", "ta": "கனசதுரம்", "kn": "ಘನ", "uk": "куб", "bn": "ঘনক", "hi": "घन", "bs": "kocka"}}
+{"guid": "N37_007", "translations": {"ro": "sferă", "pl": "kula", "th": "ทรงกลม", "ta": "கோளம்", "kn": "ಗೋಳ", "uk": "куля", "bn": "গোলক", "hi": "गोला", "bs": "sfera"}}
+{"guid": "N37_008", "translations": {"ro": "cilindru", "pl": "cylinder", "th": "ทรงกระบอก", "ta": "உருளை", "kn": "ಸಿಲಿಂಡರ್", "uk": "циліндр", "bn": "সিলিন্ডার", "hi": "सिलिंडर", "bs": "cilindar"}}
+{"guid": "N37_009", "translations": {"ro": "con", "pl": "stożek", "th": "กรวย", "ta": "கூம்பு", "kn": "ಶಂಕು", "uk": "конус", "bn": "শঙ্কু", "hi": "शंकु", "bs": "kupa"}}
+{"guid": "N37_010", "translations": {"ro": "piramidă", "pl": "piramida", "th": "พีระมิด", "ta": "கூம்பகம்", "kn": "ಪಿರಮಿಡ್", "uk": "піраміда", "bn": "পিরামিড", "hi": "पिरामिड", "bs": "piramida"}}
+{"guid": "N37_011", "translations": {"ro": "hexagon", "pl": "sześciokąt", "th": "หกเหลี่ยม", "ta": "அறுகோணம்", "kn": "ಷಡ್ಭುಜ", "uk": "шестикутник", "bn": "ষষ্ঠভুজ", "hi": "षट्भुज", "bs": "šesterokut"}}
+{"guid": "N37_012", "translations": {"ro": "pentagon", "pl": "pięciokąt", "th": "ห้าเหลี่ยม", "ta": "ஐங்கோணம்", "kn": "ಪಂಚಭುಜ", "uk": "п'ятикутник", "bn": "পঞ্চভুজ", "hi": "पंचभुज", "bs": "peterokut"}}
+{"guid": "N37_013", "translations": {"ro": "octogon", "pl": "ośmiokąt", "th": "แปดเหลี่ยม", "ta": "எண்கோணம்", "kn": "ಅಷ್ಟಭುಜ", "uk": "восьмикутник", "bn": "অষ্টভুজ", "hi": "अष्टभुज", "bs": "oktogon"}}
 {"guid": "N37_014", "translations": {"ro": "formă", "pl": "kształt", "th": "รูปร่าง", "ta": "வடிவம்", "kn": "ಆಕಾರ", "uk": "форма", "bn": "আকৃতি", "hi": "आकार"}}
 {"guid": "N37_015", "translations": {"ro": "unghi", "pl": "kąt", "th": "มุม", "ta": "கோணம்", "kn": "ಕೋನ", "uk": "кут", "bn": "কোণ", "hi": "कोण"}}
 {"guid": "N37_016", "translations": {"ro": "curbă", "pl": "krzywa", "th": "เส้นโค้ง", "ta": "வளைவு", "kn": "ವಕ್ರರೇಖೆ", "uk": "крива", "bn": "কৌক circul?", "hi": "वक्र"}}

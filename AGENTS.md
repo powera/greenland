@@ -64,8 +64,8 @@ source of truth for what a dialect code means.  There are two kinds:
   other respect - their own LemmaTranslation rows, LLM prompt config, release
   column, and audio.  Adding one means four matching registrations: the
   registry entry with translation_target=True, LANGUAGE_FIELDS +
-  LLM_FIELD_TO_LANG_CODE + LANGUAGE_HIERARCHY in translation_helpers.py, a
-  DEFAULT_TRANSLATION_LANGUAGES entry in wordfreq/translation/constants.py,
+  LLM_FIELD_TO_LANG_CODE + LANGUAGE_HIERARCHY in translation_helpers.py, an
+  AVAILABLE_TRANSLATION_LANGUAGES entry in wordfreq/translation/constants.py,
   and prompts/audio/{word,sentence}/<code>.txt.  A test in
   src/tests/storage/test_translation_helpers_languages.py enforces the set.
 * Presentation dialects (es-mx, fr-ca, en-gb) store no text of their own.

@@ -1,7 +1,7 @@
-{"guid": "V06_001", "translations": {"ro": "a fi", "pl": "być", "th": "เป็น", "ta": "இரு", "kn": "ಇರು", "uk": "бути", "bn": "হওয়া", "hi": "होना"}}
+{"guid": "V06_001", "translations": {"ro": "a fi", "pl": "być", "th": "เป็น", "ta": "இரு", "kn": "ಇರು", "uk": "бути", "bn": "হওয়া", "hi": "होना", "bs": "biti"}}
 {"guid": "V06_002", "translations": {"ro": "a avea", "pl": "mieć", "th": "มี", "ta": "வை", "kn": "ಹೊಂದು", "uk": "мати", "bn": "থাকা", "hi": "रखना"}}
 {"guid": "V06_003", "translations": {"ro": "a câștiga", "pl": "zarabiać", "th": "หาเงิน", "ta": "சம்பாதி", "kn": "ಗಳಿಸು", "uk": "заробляти", "bn": "উপার্জন করা", "hi": "कमाना"}}
-{"guid": "V06_004", "translations": {"ro": "cumpăra", "pl": "kupić", "th": "ซื้อ", "ta": "வாங்க", "kn": "ಖರೀದಿಸು", "uk": "купувати", "bn": "কেনা", "hi": "खरीदना"}}
+{"guid": "V06_004", "translations": {"ro": "cumpăra", "pl": "kupić", "th": "ซื้อ", "ta": "வாங்க", "kn": "ಖರೀದಿಸು", "uk": "купувати", "bn": "কেনা", "hi": "खरीदना", "bs": "kupiti"}}
 {"guid": "V06_005", "translations": {"ro": "a da", "pl": "dać", "th": "ให้", "ta": "கொடு", "kn": "ಕೊಡು", "uk": "дати", "bn": "দেওয়া", "hi": "देना"}}
 {"guid": "V06_006", "translations": {"ro": "a lua", "pl": "brać", "th": "เอา", "ta": "எடு", "kn": "ತೆಗೆದುಕೊ", "uk": "брати", "bn": "নেওয়া", "hi": "लेना"}}
 {"guid": "V06_007", "translations": {"ro": "a vinde", "pl": "sprzedać", "th": "ขาย", "ta": "விற்க", "kn": "ಮಾರು", "uk": "продавати", "bn": "বিক্রি করা", "hi": "बेचना"}}

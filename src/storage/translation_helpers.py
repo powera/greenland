@@ -246,7 +246,7 @@ LANGUAGE_HIERARCHY = [
 # Language mappings
 # This is the storage-side source of truth for supported languages (code,
 # display name). The translation LLM path additionally needs prompt data
-# (description, instructions) kept in DEFAULT_TRANSLATION_LANGUAGES in
+# (description, instructions) kept in AVAILABLE_TRANSLATION_LANGUAGES in
 # wordfreq/translation/constants.py. When adding/removing a language here,
 # make the matching change there (and in LLM_FIELD_TO_LANG_CODE below), or the
 # active query_translations path will skip it as "unknown".

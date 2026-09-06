@@ -35,7 +35,7 @@ MAJOR_POS_TYPES = {"noun", "verb", "adjective", "adverb"}
 # storage/translation_helpers.py. When adding/removing a language here, make the
 # matching change in LANGUAGE_FIELDS (and LLM_FIELD_TO_LANG_CODE) there, or the
 # active query_translations path will skip it as "unknown".
-DEFAULT_TRANSLATION_LANGUAGES = {
+AVAILABLE_TRANSLATION_LANGUAGES = {
     "lithuanian": {
         "field": "lithuanian_translation",
         "code": "lt",
@@ -398,7 +398,7 @@ DEFAULT_TRANSLATION_LANGUAGES = {
     },
 }
 
-# Index by language code for fast lookup. Built from DEFAULT_TRANSLATION_LANGUAGES.
-DEFAULT_TRANSLATION_LANGUAGES_BY_CODE = {
-    config["code"]: config for config in DEFAULT_TRANSLATION_LANGUAGES.values()
+# Index by language code for fast lookup. Built from AVAILABLE_TRANSLATION_LANGUAGES.
+AVAILABLE_TRANSLATION_LANGUAGES_BY_CODE = {
+    config["code"]: config for config in AVAILABLE_TRANSLATION_LANGUAGES.values()
 }

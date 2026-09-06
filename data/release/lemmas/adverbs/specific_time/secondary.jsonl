@@ -1,6 +1,6 @@
-{"guid": "D03_001", "translations": {"ro": "astăzi", "pl": "dzisiaj", "th": "วันนี้", "ta": "இன்று", "kn": "ಇಂದು", "uk": "сьогодні", "bn": "আজ", "hi": "आज"}}
-{"guid": "D03_002", "translations": {"ro": "ieri", "pl": "wczoraj", "th": "เมื่อวาน", "ta": "நேற்று", "kn": "ನಿನ್ನೆ", "uk": "вчора", "bn": "গতকাল", "hi": "कल"}}
-{"guid": "D03_003", "translations": {"ro": "mâine", "pl": "jutro", "th": "พรุ่งนี้", "ta": "நாளை", "kn": "ನಾಳೆ", "uk": "завтра", "bn": "কাল", "hi": "कल"}}
+{"guid": "D03_001", "translations": {"ro": "astăzi", "pl": "dzisiaj", "th": "วันนี้", "ta": "இன்று", "kn": "ಇಂದು", "uk": "сьогодні", "bn": "আজ", "hi": "आज", "bs": "danas"}}
+{"guid": "D03_002", "translations": {"ro": "ieri", "pl": "wczoraj", "th": "เมื่อวาน", "ta": "நேற்று", "kn": "ನಿನ್ನೆ", "uk": "вчора", "bn": "গতকাল", "hi": "कल", "bs": "jučer"}}
+{"guid": "D03_003", "translations": {"ro": "mâine", "pl": "jutro", "th": "พรุ่งนี้", "ta": "நாளை", "kn": "ನಾಳೆ", "uk": "завтра", "bn": "কাল", "hi": "कल", "bs": "sutra"}}
 {"guid": "D03_004", "translations": {"ro": "astăzi-noapte", "pl": "dziś wieczorem", "th": "คืนนี้", "ta": "இன்று இரவு", "kn": "ಇಂದು ರಾತ್ರಿ", "uk": "сьогодні ввечері", "bn": "আজ রাতে", "hi": "आज रात"}}
 {"guid": "D03_005", "translations": {"ro": "astăzi dimineață", "pl": "dzisiaj rano", "th": "เช้าวันนี้", "ta": "இன்று காலையில்", "kn": "ಈ ಬೆಳಗ್ಗೆ", "uk": "сьогодні вранці", "bn": "আজ সকালে", "hi": "आज सुबह"}}
 {"guid": "D03_006", "translations": {"ro": "astăzi după-amiază", "pl": "dzisiaj po południu", "th": "วันนี้ตอนบ่าย", "ta": "இன்று மதியம்", "kn": "ಇವತ್ತು ಮಧ್ಯಾಹ್ನ", "uk": "сьогодні вдень", "bn": "আজ দুপুরে", "hi": "आज दोपहर"}}

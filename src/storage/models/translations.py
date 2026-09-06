@@ -18,6 +18,7 @@ class TranslationSet:
     chinese: Optional[Translation] = None
     french: Optional[Translation] = None
     spanish: Optional[Translation] = None
+    spanish_latam: Optional[Translation] = None
     german: Optional[Translation] = None
     portuguese: Optional[Translation] = None
     korean: Optional[Translation] = None
@@ -31,6 +32,7 @@ class TranslationSet:
             "chinese": self.chinese,
             "french": self.french,
             "spanish": self.spanish,
+            "spanish_latam": self.spanish_latam,
             "german": self.german,
             "portuguese": self.portuguese,
             "korean": self.korean,

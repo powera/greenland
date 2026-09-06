@@ -1,9 +1,9 @@
-{"guid": "I99_001", "translations": {"ro": "scuzaţi-mă", "pl": "przepraszam", "th": "ขอโทษ", "ta": "மன்னிக்கவும்", "kn": "ಕ್ಷಮಿಸಿ", "uk": "вибачте", "bn": "ক্ষমা করবেন", "hi": "माफ़ कीजिए"}}
-{"guid": "I99_002", "translations": {"ro": "mulțumesc", "pl": "dziękuję", "th": "ขอบคุณ", "ta": "நன்றி", "kn": "ಧನ್ಯವಾದಗಳು", "uk": "дякую", "bn": "ধন্যবাদ", "hi": "धन्यवाद"}}
-{"guid": "I99_003", "translations": {"ro": "da", "pl": "tak", "th": "ใช่", "ta": "ஆம்", "kn": "ಹೌದು", "uk": "так", "bn": "হ্যাঁ", "hi": "हाँ"}}
-{"guid": "I99_004", "translations": {"ro": "nu", "pl": "nie", "th": "ไม่", "ta": "இல்லை", "kn": "ಇಲ್ಲ", "uk": "ні", "bn": "না", "hi": "नहीं"}}
-{"guid": "I99_005", "translations": {"ro": "te rog", "pl": "proszę", "th": "ได้โปรด", "ta": "தயவுசெய்து", "kn": "ದಯವಿಟ್ಟು", "uk": "будь ласка", "bn": "দয়া করে", "hi": "कृपया"}}
-{"guid": "I99_006", "translations": {"ro": "poate", "pl": "być może", "th": "อาจ", "ta": "ஊசம்", "kn": "ಬಹುಶಃ", "uk": "можливо", "bn": "হয়তো", "hi": "शायद"}}
+{"guid": "I99_001", "translations": {"ro": "scuzaţi-mă", "pl": "przepraszam", "th": "ขอโทษ", "ta": "மன்னிக்கவும்", "kn": "ಕ್ಷಮಿಸಿ", "uk": "вибачте", "bn": "ক্ষমা করবেন", "hi": "माफ़ कीजिए", "bs": "izvinite"}}
+{"guid": "I99_002", "translations": {"ro": "mulțumesc", "pl": "dziękuję", "th": "ขอบคุณ", "ta": "நன்றி", "kn": "ಧನ್ಯವಾದಗಳು", "uk": "дякую", "bn": "ধন্যবাদ", "hi": "धन्यवाद", "bs": "hvala"}}
+{"guid": "I99_003", "translations": {"ro": "da", "pl": "tak", "th": "ใช่", "ta": "ஆம்", "kn": "ಹೌದು", "uk": "так", "bn": "হ্যাঁ", "hi": "हाँ", "bs": "da"}}
+{"guid": "I99_004", "translations": {"ro": "nu", "pl": "nie", "th": "ไม่", "ta": "இல்லை", "kn": "ಇಲ್ಲ", "uk": "ні", "bn": "না", "hi": "नहीं", "bs": "ne"}}
+{"guid": "I99_005", "translations": {"ro": "te rog", "pl": "proszę", "th": "ได้โปรด", "ta": "தயவுசெய்து", "kn": "ದಯವಿಟ್ಟು", "uk": "будь ласка", "bn": "দয়া করে", "hi": "कृपया", "bs": "molim"}}
+{"guid": "I99_006", "translations": {"ro": "poate", "pl": "być może", "th": "อาจ", "ta": "ஊசம்", "kn": "ಬಹುಶಃ", "uk": "можливо", "bn": "হয়তো", "hi": "शायद", "bs": "možda"}}
 {"guid": "I99_007", "translations": {"ro": "cu plăcere", "pl": "proszę", "th": "ยินดี", "ta": "வரவேற்பு", "kn": "ಸ್ವಾಗತ", "uk": "будь ласка", "bn": "স্বাগতম", "hi": "स्वागत है"}}
 {"guid": "I99_008", "translations": {"ro": "scuze", "pl": "przepraszam", "th": "ขอโทษ", "ta": "மன்னிக்கவும்", "kn": "ಕ್ಷಮಿಸಿ", "uk": "вибачте", "bn": "দুঃখিত", "hi": "माफ़ करना"}}
 {"guid": "I99_009", "translations": {"ro": "salut", "pl": "cześć", "th": "สวัสดี", "ta": "வணக்கம்", "kn": "ನಮಸ್ಕಾರ", "uk": "привіт", "bn": "হ্যালো", "hi": "नमस्ते"}}
