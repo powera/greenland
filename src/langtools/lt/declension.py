@@ -4,6 +4,7 @@ from dataclasses import dataclass
 from typing import Dict, List, Mapping, Optional, Set
 
 from clients.wiktionary.types import NounNumberType
+from langtools.lt.utils import palatalize_final
 
 _CASES: tuple[str, ...] = (
     "nominative",
@@ -21,6 +22,13 @@ _IRREGULAR_NOUNS: Set[str] = {
     "sesuo",
     "duktė",
     "moteris",
+    # Two genitive singulars: "petiẽs" (the more common, and the one the
+    # sentence corpus uses) alongside the regular "pẽčio" this module's
+    # masc_ys pattern would build.  A paradigm cannot carry both, and emitting
+    # only the rarer one would contradict the attested text, so the word is
+    # left to the LLM/Wiktionary path.  Its stem is regular otherwise -- the
+    # palatalization below is what makes "pečio" right for the class.
+    "petys",
 }
 
 
@@ -246,6 +254,19 @@ _PATTERNS: tuple[DeclensionPattern, ...] = (
 )
 
 
+def _join(stem: str, palatalized_stem: str, suffix: str) -> str:
+    """Attach *suffix* to whichever stem its first vowel calls for.
+
+    An -i- ending triggers palatalization of a final t/d; every other ending
+    takes the plain stem.  The classes already spell their -i- endings with a
+    leading "i" ("io", "iai", "ių"), so the suffix itself is the condition and
+    no per-class table is needed.
+    """
+    if suffix.startswith("i"):
+        return palatalized_stem + suffix
+    return stem + suffix
+
+
 def _find_pattern(
     noun: str, grammatical_gender: Optional[str] = None
 ) -> Optional[DeclensionPattern]:
@@ -303,12 +324,17 @@ def decline_noun(
         return None
 
     stem = normalized_noun[: -len(pattern.nominative_suffix)]
+    # A t/d stem palatalizes before an -i- ending, so the stem is not constant
+    # across the paradigm: "pavyzdys" gives "pavyzdžio" but "pavyzdys", and
+    # "nykštys" gives "nykščiai" but "nykštį".  Which cases take an -i- ending
+    # varies by class, so the suffix decides rather than a per-class flag.
+    palatalized_stem = palatalize_final(stem)
     forms: Dict[str, str] = {}
     for case_name in _CASES:
         singular_suffix = pattern.singular_suffixes[case_name]
         plural_suffix = pattern.plural_suffixes[case_name]
-        forms[f"{case_name}_singular"] = stem + singular_suffix
-        forms[f"{case_name}_plural"] = stem + plural_suffix
+        forms[f"{case_name}_singular"] = _join(stem, palatalized_stem, singular_suffix)
+        forms[f"{case_name}_plural"] = _join(stem, palatalized_stem, plural_suffix)
 
     forms["number_type"] = NounNumberType.REGULAR.value
     forms["declension_class"] = pattern.class_name
