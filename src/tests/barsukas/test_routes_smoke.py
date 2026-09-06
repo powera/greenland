@@ -53,30 +53,33 @@ class TestQualityHubChecks:
 
 
 class TestRouteSmoke:
-    """Reusable smoke checks for top-level Barsukas sections."""
+    """Reusable smoke checks for top-level Barsukas sections.
 
-    @pytest.mark.parametrize("case", ROUTE_SMOKE_CASES, ids=lambda case: case.name)
-    def test_section_page_returns_200(self, client: FlaskClient, case: RouteSmokeCase) -> None:
-        response = client.get(case.path)
-        assert response.status_code == 200
+    One test over every section rather than a parametrized case each: the app
+    and its seeded database are rebuilt per test, which cost far more than the
+    GET being measured.  All the failures are collected so a broken section
+    still names itself.
+    """
 
-    @pytest.mark.parametrize("case", ROUTE_SMOKE_CASES, ids=lambda case: case.name)
-    def test_section_page_contains_expected_text(
-        self, client: FlaskClient, case: RouteSmokeCase
-    ) -> None:
-        response = client.get(case.path)
-        assert response.status_code == 200
-        html = response.data.decode().lower()
-        assert case.expected_text.lower() in html
+    def test_every_section_page_renders(self, client: FlaskClient) -> None:
+        failures: list[str] = []
 
-    @pytest.mark.parametrize("case", ROUTE_SMOKE_CASES, ids=lambda case: case.name)
-    def test_section_page_does_not_render_builtin_method_text(
-        self, client: FlaskClient, case: RouteSmokeCase
-    ) -> None:
-        response = client.get(case.path)
-        assert response.status_code == 200
-        html = response.data.decode()
-        assert "built-in method" not in html
+        for case in ROUTE_SMOKE_CASES:
+            response = client.get(case.path)
+            if response.status_code != 200:
+                failures.append(f"{case.name} ({case.path}): HTTP {response.status_code}")
+                continue
+
+            html = response.data.decode()
+            if case.expected_text.lower() not in html.lower():
+                failures.append(f"{case.name} ({case.path}): missing {case.expected_text!r}")
+            if "built-in method" in html:
+                failures.append(f"{case.name} ({case.path}): leaked a built-in method")
+
+        assert not failures, "section pages failed to render:\n  " + "\n  ".join(failures)
+
+
+LEMMA_SUBPAGES = ("forms", "audio", "related", "levels")
 
 
 class TestLemmaRoutes:
@@ -101,24 +104,21 @@ class TestLemmaRoutes:
         html = response.data.decode()
         assert "eat" in html
 
-    @pytest.mark.parametrize("subpage", ["forms", "audio", "related", "levels"])
-    def test_view_lemma_subpages_return_200(self, client: FlaskClient, subpage: str) -> None:
-        response = client.get(f"/lemmas/1/{subpage}")
-        assert response.status_code == 200
-        html = response.data.decode()
-        assert "eat" in html
+    def test_view_lemma_subpages_return_200(self, client: FlaskClient) -> None:
+        for subpage in LEMMA_SUBPAGES:
+            response = client.get(f"/lemmas/1/{subpage}")
+            assert response.status_code == 200, f"/lemmas/1/{subpage}"
+            assert "eat" in response.data.decode(), f"/lemmas/1/{subpage}"
 
     def test_view_nonexistent_lemma_redirects(self, client: FlaskClient) -> None:
         response = client.get("/lemmas/9999")
         # Should redirect to the lemma list
         assert response.status_code == 302
 
-    @pytest.mark.parametrize("subpage", ["forms", "audio", "related", "levels"])
-    def test_view_nonexistent_lemma_subpages_redirect(
-        self, client: FlaskClient, subpage: str
-    ) -> None:
-        response = client.get(f"/lemmas/9999/{subpage}")
-        assert response.status_code == 302
+    def test_view_nonexistent_lemma_subpages_redirect(self, client: FlaskClient) -> None:
+        for subpage in LEMMA_SUBPAGES:
+            response = client.get(f"/lemmas/9999/{subpage}")
+            assert response.status_code == 302, f"/lemmas/9999/{subpage}"
 
     def test_view_second_lemma(self, client: FlaskClient) -> None:
         response = client.get("/lemmas/2")

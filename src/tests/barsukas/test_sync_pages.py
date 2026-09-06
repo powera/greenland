@@ -77,24 +77,32 @@ SYNC_PAGES: Tuple[SyncPage, ...] = (
 
 
 class TestSyncPagesRender:
-    """Every sync page renders."""
+    """Every sync page renders.
 
-    @pytest.mark.parametrize("page", SYNC_PAGES, ids=lambda page: page.name)
-    def test_page_returns_200(self, client: FlaskClient, page: SyncPage) -> None:
-        response = client.get(page.path)
-        assert response.status_code == 200
+    One test rather than a parametrized case per page: each case would rebuild
+    the app and reseed the database for a single GET, which cost far more than
+    the request itself.  Every page is still checked -- the loop collects all
+    the failures so one broken page names itself instead of hiding the rest.
+    """
 
-    @pytest.mark.parametrize("page", SYNC_PAGES, ids=lambda page: page.name)
-    def test_page_contains_expected_text(self, client: FlaskClient, page: SyncPage) -> None:
-        response = client.get(page.path)
-        assert page.expected_text.lower() in response.data.decode().lower()
+    def test_every_sync_page_renders(self, client: FlaskClient) -> None:
+        failures: list[str] = []
 
-    @pytest.mark.parametrize("page", SYNC_PAGES, ids=lambda page: page.name)
-    def test_page_does_not_leak_a_bound_method(self, client: FlaskClient, page: SyncPage) -> None:
-        """A macro called without parentheses renders as "<bound method ...>"."""
-        html = client.get(page.path).data.decode()
-        assert "built-in method" not in html
-        assert "bound method" not in html
+        for page in SYNC_PAGES:
+            response = client.get(page.path)
+            if response.status_code != 200:
+                failures.append(f"{page.name} ({page.path}): HTTP {response.status_code}")
+                continue
+
+            html = response.data.decode()
+            if page.expected_text.lower() not in html.lower():
+                failures.append(f"{page.name} ({page.path}): missing {page.expected_text!r}")
+            # A macro called without parentheses renders as "<bound method ...>".
+            for leak in ("built-in method", "bound method"):
+                if leak in html:
+                    failures.append(f"{page.name} ({page.path}): leaked a {leak}")
+
+        assert not failures, "sync pages failed to render:\n  " + "\n  ".join(failures)
 
 
 class TestSyncHub:

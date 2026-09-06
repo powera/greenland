@@ -2,57 +2,66 @@
 # Test targets for greenland.
 #
 #   ./run_tests.sh smoke      fast import/startup checks; run on every commit
-#   ./run_tests.sh portable   base minus tests that need native/optional deps
-#   ./run_tests.sh base       the tests known to pass; run often, not every commit
-#   ./run_tests.sh all        currently identical to base
+#   ./run_tests.sh affected   smoke plus the tests covering your changed files
+#   ./run_tests.sh all        the whole of src/tests
 #
 # Any extra arguments are passed through to pytest, so this works:
-#   ./run_tests.sh base -k combined_rank -x
+#   ./run_tests.sh all -k combined_rank -x
 #
-# base excludes nothing; it is the whole of src/tests. `all` is kept as an
-# alias so existing invocations and docs keep working. (base once excluded
-# clients/audio, which needed the audio submodule synced; those tests target
-# src/clients/audio, run in ~0.2s with no submodule, and are no longer
-# special-cased.)
+# `affected` is the pre-submit target: smoke alone only proves the tree imports,
+# and `all` is more than a single-file change warrants.  It maps each changed
+# file to the test directories that exercise it and runs those.
 #
-# portable is base with the tests that require optional native dependencies
-# removed, so the suite runs cleanly in environments where those wheels do not
-# build or install (jieba, pypinyin, opencc, pykakasi). It is a strict superset
-# of smoke and a strict subset of base. Keep this list in sync with the Testing
-# section of AGENTS.md when it changes.
+# The map is static and lives in src/tests/affected_map.py -- no build step and
+# nothing to regenerate on every edit.  Its entries were measured, not guessed:
+# tools/measure_test_coverage.py runs the suite under per-test coverage and
+# prints which test dirs actually reach each source dir.  Rerun it after a large
+# refactor and update the map by hand.  Over-selection is the intended failure
+# mode: an unmapped path runs the whole suite rather than nothing.
 #
-# Everything else in the tree imports its optional deps behind a try/except and
-# degrades or skips at runtime, so it collects fine without them. Keep it that
-# way: a bare `import jieba` at module scope in anything reachable from src/
-# breaks *collection*, which no marker or exclusion below can recover -- smoke
-# collects the whole tree to find its marked tests and would fail too.
+# `base` and `portable` were removed.  base duplicated all (it was the whole of
+# src/tests), and portable's one path exclusion was stale -- every optional
+# native dep (jieba, pypinyin, opencc, pykakasi) is now gated at runtime behind
+# an *_AVAILABLE flag, so the suite skips cleanly where those wheels are absent
+# instead of needing a separate target.  Keep it that way: a bare `import jieba`
+# at module scope in anything reachable from src/ breaks *collection*, which no
+# marker or exclusion can recover -- smoke collects the whole tree to find its
+# marked tests and would fail too.
 set -euo pipefail
 
 cd "$(dirname "$0")"
 export PYTHONPATH=src
 
-# Tests that cannot pass without optional native deps. Path exclusions rather
-# than marker deselection so that a collection-time failure is also covered.
-PORTABLE_EXCLUDES=(
-  # pypinyin + pykakasi: asserts real reading output for Chinese/Japanese.
-  --ignore=src/tests/exports/wireword/test_readings.py
-)
-
-TARGET="${1:-base}"
+TARGET="${1:-all}"
 shift || true
 
 case "$TARGET" in
   smoke)
     exec python -m pytest src/tests -m smoke "$@"
     ;;
-  portable)
-    exec python -m pytest src/tests "${PORTABLE_EXCLUDES[@]}" "$@"
+  affected)
+    # Keep the selector's own diagnostics on stderr and out of the target list.
+    SELECTED=$(python tools/select_affected_tests.py "$@") || exit $?
+    if [ -z "$SELECTED" ]; then
+      echo "No mapped tests for these changes; running smoke only." >&2
+      exec python -m pytest src/tests -m smoke
+    fi
+    # smoke runs as its own pass, not as `-m smoke` alongside the node ids --
+    # combining them would deselect every selected test that is not marked
+    # smoke.  The failure this repo actually hits is a moved module that
+    # something named as a string, which only a full collect finds.
+    python -m pytest src/tests -m smoke || exit $?
+    exec python -m pytest $SELECTED
     ;;
-  base|all)
+  base|portable)
+    echo "error: the '$TARGET' target was removed; use 'affected' before a commit or 'all'." >&2
+    exit 2
+    ;;
+  all)
     exec python -m pytest src/tests "$@"
     ;;
   *)
-    echo "usage: $0 {smoke|portable|base|all} [pytest args...]" >&2
+    echo "usage: $0 {smoke|affected|all} [pytest args...]" >&2
     exit 2
     ;;
 esac
