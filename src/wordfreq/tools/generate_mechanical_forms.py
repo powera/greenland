@@ -44,7 +44,7 @@ from typing import Callable, Dict, List, Optional, Tuple
 if str(Path(__file__).parent.parent.parent) not in sys.path:
     sys.path.insert(0, str(Path(__file__).parent.parent.parent))
 
-from sqlalchemy.orm import Session
+from sqlalchemy.orm import Session, object_session
 
 from langtools.en.conjugation import expand_verb_forms
 from langtools.en.inflection import (
@@ -65,6 +65,7 @@ from storage.crud.operation_log import log_operation
 from storage.crud.word_token import add_word_token
 from storage.models.enums import GrammaticalForm
 from storage.models.schema import DerivativeForm, Lemma
+from storage.models.variant_form import VariantForm
 from storage.translation_helpers import get_translation
 
 VALID_GRAMMATICAL_FORMS = frozenset(g.value for g in GrammaticalForm)
@@ -324,6 +325,175 @@ def resolve_grammatical_form(language_code: str, pos_type: str, form_key: str) -
     return candidate if candidate in VALID_GRAMMATICAL_FORMS else None
 
 
+def _build_variant_paradigm(
+    session: Session, lemma: Lemma, base_form: VariantForm, language_code: str
+) -> Optional[Dict[str, str]]:
+    """Inflect one variant's base form with the builder its lemma would use.
+
+    A variant is the same lexeme spelled differently, so it inflects by the
+    same rules: "grey" gives "greyer"/"greyest" exactly as "gray" gives
+    "grayer"/"grayest".  Only the spelling of the base form differs, and that
+    spelling is the one thing no rule can derive -- nothing takes "gray" to
+    "grey" -- which is why the base form itself is always kept in the release
+    files and only its inflections are regenerated here.
+
+    Returns None when the variant's base form does not occupy a slot the
+    builders model.  Compass words are stored as ``adjective/en_base``, a
+    placeholder slot with no paradigm behind it, and inflecting it would invent
+    forms rather than recover them.
+    """
+    if language_code != "en":
+        # Non-English variants take their word from the lemma's translation,
+        # which is the lemma's spelling and not the variant's; there is no
+        # equivalent of lemma_text to substitute.  Nothing writes one today.
+        return None
+
+    pos_type = lemma.pos_type.lower()
+    expected_base_slot = FORM_KEYS.get(pos_type, {}).get(
+        BASE_FORM_KEY.get((language_code, pos_type), "")
+    )
+    if not expected_base_slot or base_form.grammatical_form != expected_base_slot:
+        return None
+
+    text = (base_form.variant_form_text or "").strip()
+    if not text or not _is_mechanically_safe_translation(text):
+        return None
+
+    # The variant shares the lemma's grammar -- "grey" is as gradable as
+    # "gray", "donut" as countable as "doughnut" -- so the same facts select
+    # the pattern.  Only irregular *spellings* are dropped: an irregular
+    # plural stored for the lemma ("people") is not the variant's, and
+    # applying it would give the variant the lemma's spelling.
+    if pos_type == "noun":
+        (countability,) = _facts(session, lemma.id, "countability")
+        return build_noun_forms(text, countability, None, None)
+    if pos_type in ("adjective", "adverb"):
+        (gradability,) = _facts(session, lemma.id, "gradability")
+        builder: Callable[..., Optional[Dict[str, str]]] = (
+            build_adjective_forms if pos_type == "adjective" else build_adverb_forms
+        )
+        return builder(text, gradability, None, None)
+    return None
+
+
+def derivable_variant_slots(variant_form: VariantForm) -> frozenset[str]:
+    """The slots :func:`generate_variant_forms` would rebuild for this paradigm.
+
+    Takes any row of a variant paradigm and reports what regenerating that
+    paradigm would produce, so the release export can withhold exactly those
+    and no more.  Empty when the rules decline the variant -- the caller must
+    then keep every form it has, since nothing would put them back.
+
+    Uses the paradigm's own base form as the input, not the row passed in: an
+    inflection is derived from the base form, never from another inflection.
+    """
+    lemma = variant_form.lemma
+    if lemma is None:
+        return frozenset()
+
+    session = object_session(variant_form)
+    if session is None:
+        return frozenset()
+
+    base_form = (
+        session.query(VariantForm)
+        .filter(
+            VariantForm.lemma_id == variant_form.lemma_id,
+            VariantForm.language_code == variant_form.language_code,
+            VariantForm.variant_kind == variant_form.variant_kind,
+            VariantForm.variant_key == variant_form.variant_key,
+            VariantForm.is_base_form.is_(True),
+        )
+        .first()
+    )
+    if base_form is None:
+        return frozenset()
+
+    paradigm = _build_variant_paradigm(session, lemma, base_form, variant_form.language_code)
+    if not paradigm:
+        return frozenset()
+
+    pos_type = lemma.pos_type.lower()
+    slots = {
+        resolve_grammatical_form(variant_form.language_code, pos_type, form_key)
+        for form_key in paradigm
+    }
+    return frozenset(slot for slot in slots if slot is not None)
+
+
+def generate_variant_forms(
+    session: Session, language_code: str, dry_run: bool = False
+) -> Dict[str, int]:
+    """Add the mechanically-derivable inflections of each variant paradigm.
+
+    Mirrors the lemma pass: a variant's base form is the irreducible fact and
+    stays in ``data/release``, while the slots a rule reproduces are rebuilt
+    here so the release does not carry "greyer" beside a "grayer" it withholds.
+
+    Only inflections are ever written; a base form is read, never created.
+    """
+    counts = {"variants_seen": 0, "forms_added": 0, "rules_declined": 0}
+
+    base_forms: List[VariantForm] = (
+        session.query(VariantForm)
+        .filter(
+            VariantForm.language_code == language_code,
+            VariantForm.is_base_form.is_(True),
+        )
+        .all()
+    )
+
+    for base_form in base_forms:
+        counts["variants_seen"] += 1
+        lemma = base_form.lemma
+        if lemma is None:
+            continue
+
+        paradigm = _build_variant_paradigm(session, lemma, base_form, language_code)
+        if not paradigm:
+            counts["rules_declined"] += 1
+            continue
+
+        pos_type = lemma.pos_type.lower()
+        existing = {
+            row.grammatical_form
+            for row in session.query(VariantForm).filter(
+                VariantForm.lemma_id == lemma.id,
+                VariantForm.language_code == language_code,
+                VariantForm.variant_kind == base_form.variant_kind,
+                VariantForm.variant_key == base_form.variant_key,
+            )
+        }
+
+        for form_key, form_text in paradigm.items():
+            grammatical_form = resolve_grammatical_form(language_code, pos_type, form_key)
+            if grammatical_form is None or grammatical_form in existing:
+                continue
+            if not form_text or not form_text.strip():
+                continue
+
+            if not dry_run:
+                token = add_word_token(session, form_text, language_code)
+                session.add(
+                    VariantForm(
+                        lemma_id=lemma.id,
+                        language_code=language_code,
+                        variant_kind=base_form.variant_kind,
+                        variant_key=base_form.variant_key,
+                        grammatical_form=grammatical_form,
+                        variant_form_text=form_text,
+                        word_token_id=token.id,
+                        # Only the row already in the database is the base form;
+                        # everything generated here is an inflection of it.
+                        is_base_form=False,
+                        verified=False,
+                    )
+                )
+            counts["forms_added"] += 1
+
+    return counts
+
+
 def generate(
     config: DataSourceConfig, dry_run: bool = False, languages: Optional[List[str]] = None
 ) -> Dict[str, Dict[str, int]]:
@@ -433,6 +603,13 @@ def generate(
                                 "generator": f"langtools.{language_code} {pos_type}",
                             },
                         )
+
+            # A variant inflects by the same rules as the lemma it belongs to,
+            # so its derivable slots are rebuilt here too -- otherwise the
+            # release would ship "greyer" beside a "grayer" it withholds.
+            counts["variant_forms_added"] = generate_variant_forms(
+                session, language_code, dry_run=dry_run
+            )["forms_added"]
 
         if not dry_run:
             session.commit()

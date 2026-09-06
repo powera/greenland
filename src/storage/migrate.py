@@ -28,7 +28,7 @@ from storage.backend.config import BackendType, DataSourceConfig
 from storage.backend.factory import create_session
 from storage.config.grammar_facts import RELEASE_GRAMMAR_FACT_TYPES
 from storage.release.lemma import decode_db_emoji
-from storage.release.variant import variants_by_language
+from storage.release.variant import release_variants_by_language, variants_by_language
 
 APPROVED_AUDIO_RELEASE_STATUSES = {"approved", "approved_with_issues"}
 
@@ -717,7 +717,7 @@ def export_sqlite_to_release(sqlite_path: str, release_dir: str) -> None:
 
                 # Variant forms (alternate spellings), already grouped per
                 # language and per variant by storage.release.variant.
-                variants_by_lang: Dict[str, List[Dict[str, Any]]] = variants_by_language(
+                variants_by_lang: Dict[str, List[Dict[str, Any]]] = release_variants_by_language(
                     lemma.variant_forms
                 )
 

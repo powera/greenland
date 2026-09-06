@@ -37,7 +37,7 @@ from barsukas.routes.sync.paging import PER_PAGE_CHOICES, paginate
 from storage.crud.operation_log import log_operation
 from storage.models.schema import Lemma
 from storage.models.variant_form import VariantForm
-from storage.release.variant import records_to_paradigms, variants_by_language
+from storage.release.variant import records_to_paradigms, release_variants_by_language
 from storage.translation_helpers import LANGUAGE_HIERARCHY, LANGUAGE_NAMES
 
 logger = logging.getLogger(__name__)
@@ -218,9 +218,10 @@ def _write_variants(guid: str, lang_code: str, rows: List[VariantForm]) -> bool:
         logger.warning(f"Could not resolve release file for {guid} lang={lang_code}")
         return False
 
-    # variants_by_language groups and orders exactly as the exporter does, so a
-    # row written here matches what a full re-export would produce.
-    grouped = variants_by_language(rows)
+    # release_variants_by_language groups, orders and filters exactly as the
+    # exporter does, so a row written here matches what a full re-export would
+    # produce -- including withholding the inflections the generator rebuilds.
+    grouped = release_variants_by_language(rows)
     helpers.write_release_line_partial(file_path, guid, ARRAY_KEY, grouped.get(lang_code, []))
     return True
 

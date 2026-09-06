@@ -25,12 +25,15 @@ from sqlalchemy.orm import Session
 import storage.models  # noqa: F401
 from storage.crud.grammar_fact import add_grammar_fact
 from storage.models.schema import Base, DerivativeForm, Lemma
+from storage.models.variant_form import VariantForm
 from storage.release.mechanical_filter import (
     clear_cache,
     derivable_form_keys,
     is_derivable,
     without_derivable,
 )
+from storage.release.variant import release_variants_by_language
+from wordfreq.tools.generate_mechanical_forms import derivable_variant_slots
 
 
 def _form(
@@ -140,6 +143,82 @@ class MechanicalFilterTest(unittest.TestCase):
         child = self._noun("child", "N01_006")
         self.assertTrue(is_derivable(self.session, dog, _form("noun/en_plural", "dogs")))
         self.assertFalse(is_derivable(self.session, child, _form("noun/en_plural", "children")))
+
+
+class VariantReleaseFilterTest(unittest.TestCase):
+    """Which variant forms reach data/release, and which are regenerated.
+
+    A variant's base form is irreducible -- no rule takes "gray" to "grey" --
+    so it is always written.  Its inflections follow by the same rule that
+    builds the lemma's own, so they are withheld and rebuilt on import; the
+    alternative ships "greyer" beside a "grayer" the export withheld, which
+    reads as a claim that the two spellings inflect differently.
+    """
+
+    def setUp(self) -> None:
+        clear_cache()
+        engine = create_engine("sqlite:///:memory:")
+        Base.metadata.create_all(engine)
+        self.session = Session(engine)
+        self.lemma = Lemma(
+            lemma_text="gray", definition_text="gray", pos_type="adjective", guid="A02_008"
+        )
+        self.session.add(self.lemma)
+        self.session.commit()
+
+    def tearDown(self) -> None:
+        self.session.close()
+        clear_cache()
+
+    def _variant(
+        self, grammatical_form: str, text: str, is_base_form: bool, ipa: str | None = None
+    ) -> VariantForm:
+        row = VariantForm(
+            lemma_id=self.lemma.id,
+            language_code="en",
+            variant_kind="spelling",
+            variant_key="grey",
+            grammatical_form=grammatical_form,
+            variant_form_text=text,
+            is_base_form=is_base_form,
+            ipa_pronunciation=ipa,
+        )
+        self.session.add(row)
+        self.session.commit()
+        return row
+
+    def _exported_texts(self) -> list[str]:
+        grouped = release_variants_by_language(self.lemma.variant_forms)
+        return [form["text"] for form in grouped["en"][0]["forms"]]
+
+    def test_derivable_inflections_are_withheld(self) -> None:
+        """ "grey" ships; "greyer"/"greyest" are rebuilt by the generator."""
+        self._variant("adjective/en_positive", "grey", True)
+        self._variant("adjective/en_comparative", "greyer", False)
+        self._variant("adjective/en_superlative", "greyest", False)
+        self.assertEqual(self._exported_texts(), ["grey"])
+
+    def test_base_form_is_always_written(self) -> None:
+        """No rule derives the variant's spelling, so it can never be dropped."""
+        self._variant("adjective/en_positive", "grey", True)
+        self.assertEqual(self._exported_texts(), ["grey"])
+
+    def test_an_unmodelled_base_slot_keeps_its_paradigm(self) -> None:
+        """The compass words sit in adjective/en_base, which builds nothing.
+
+        Withholding an inflection there would lose it for good, since the
+        generator produces no paradigm to put it back.
+        """
+        self._variant("adjective/en_base", "north-east", True)
+        unmodelled = self._variant("adjective/en_comparative", "north-easter", False)
+        self.assertNotIn(unmodelled.grammatical_form, derivable_variant_slots(unmodelled))
+        self.assertIn("north-easter", self._exported_texts())
+
+    def test_a_pronunciation_keeps_an_inflection(self) -> None:
+        """The builders emit text only, so an IPA-bearing row must survive."""
+        self._variant("adjective/en_positive", "grey", True)
+        self._variant("adjective/en_comparative", "greyer", False, ipa="/ˈɡreɪ.ər/")
+        self.assertEqual(sorted(self._exported_texts()), ["grey", "greyer"])
 
 
 if __name__ == "__main__":
