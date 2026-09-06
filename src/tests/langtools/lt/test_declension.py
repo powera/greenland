@@ -60,6 +60,22 @@ class TestLithuanianMechanicalDeclension(unittest.TestCase):
     def test_refuses_singulare_tantum(self) -> None:
         self.assertIsNone(decline_noun("vilkas", number_type="singulare_tantum"))
 
+    def test_plural_shaped_endings_other_than_ys_decline_themselves(self) -> None:
+        # Only -ys (and -us) plurale tantum reach a singular pattern by
+        # accident; -ai/-os/-ės match none, so they need no fact to be safe.
+        # This is why the number_type audit only had to cover the -ys set.
+        for plurale_tantum in ("lubos", "laiptai", "vartai", "žirklės", "kelnės"):
+            with self.subTest(noun=plurale_tantum):
+                self.assertIsNone(decline_noun(plurale_tantum))
+
+    def test_regular_ys_nouns_still_decline(self) -> None:
+        # The number_type veto must not swallow the ordinary masculine -ys
+        # class that shares the ending with "durys".
+        forms = decline_noun("traukinys")
+        assert forms is not None
+        self.assertEqual(forms["genitive_singular"], "traukinio")
+        self.assertEqual(forms["gender"], "masculine")
+
     def test_requirements_shape(self) -> None:
         requirements = get_declension_requirements()
         self.assertIn("declension_class", requirements)
