@@ -23,9 +23,9 @@ from storage.models.name_entity import NAME_KINDS, Name
 from storage.models.schema import Base
 from storage.release.name import (
     apply_release_record,
-    export_names_to_release,
-    import_names_from_release,
-    name_to_release_record,
+    export_to_release,
+    import_from_release,
+    to_release_record,
     read_release_records,
     read_release_records_by_guid,
 )
@@ -154,7 +154,7 @@ def test_get_name_by_guid_returns_none_when_absent(session: Session) -> None:
 
 def test_record_carries_renderings_and_their_metadata(session: Session) -> None:
     name = _seed_george(session)
-    record = name_to_release_record(name)
+    record = to_release_record(name)
 
     assert record["guid"] == name.guid
     assert record["kind"] == "given_name"
@@ -175,7 +175,7 @@ def test_record_omits_empty_optional_fields(session: Session) -> None:
     assign_name_guid(session, name)
     session.commit()
 
-    record = name_to_release_record(name)
+    record = to_release_record(name)
     for absent_key in ("disambiguation", "gender", "notes", "verified", "translation_metadata"):
         assert absent_key not in record
 
@@ -188,7 +188,7 @@ def test_languages_are_emitted_in_release_order(session: Session) -> None:
         set_name_translation(session, name, language_code=language_code, translation=rendering)
     session.commit()
 
-    record = name_to_release_record(name)
+    record = to_release_record(name)
     assert list(record["translations"]) == ["lt", "zh", "ja"]
 
 
@@ -197,12 +197,12 @@ def test_languages_are_emitted_in_release_order(session: Session) -> None:
 
 def test_export_then_import_preserves_the_name(session: Session, tmp_path: Path) -> None:
     _seed_george(session)
-    assert export_names_to_release(session, tmp_path) == 1
+    assert export_to_release(session, tmp_path) == 1
 
     engine = create_engine("sqlite:///:memory:")
     Base.metadata.create_all(engine)
     with Session(engine) as target:
-        imported, skipped = import_names_from_release(target, tmp_path)
+        imported, skipped = import_from_release(target, tmp_path)
         target.commit()
 
         assert (imported, skipped) == (1, 0)
@@ -223,22 +223,22 @@ def test_export_then_import_preserves_the_name(session: Session, tmp_path: Path)
 
 def test_export_is_byte_stable(session: Session, tmp_path: Path) -> None:
     _seed_george(session)
-    export_names_to_release(session, tmp_path)
+    export_to_release(session, tmp_path)
     first = (tmp_path / "base.jsonl").read_bytes()
-    export_names_to_release(session, tmp_path)
+    export_to_release(session, tmp_path)
     assert (tmp_path / "base.jsonl").read_bytes() == first
 
 
 def test_importing_twice_is_a_no_op(session: Session, tmp_path: Path) -> None:
     _seed_george(session)
-    export_names_to_release(session, tmp_path)
+    export_to_release(session, tmp_path)
 
     engine = create_engine("sqlite:///:memory:")
     Base.metadata.create_all(engine)
     with Session(engine) as target:
-        import_names_from_release(target, tmp_path)
+        import_from_release(target, tmp_path)
         target.commit()
-        assert import_names_from_release(target, tmp_path) == (0, 1)
+        assert import_from_release(target, tmp_path) == (0, 1)
         assert target.query(Name).count() == 1
 
 
@@ -253,7 +253,7 @@ def test_names_without_a_guid_are_not_exported(session: Session, tmp_path: Path)
     session.add(Name(name_text="Draft Person", kind="given_name", guid=None))
     session.commit()
 
-    assert export_names_to_release(session, tmp_path) == 1
+    assert export_to_release(session, tmp_path) == 1
     assert len(read_release_records(tmp_path)) == 1
 
 
@@ -262,7 +262,7 @@ def test_records_are_sorted_by_guid(session: Session, tmp_path: Path) -> None:
         name = create_name(session, name_text=name_text, kind="given_name")
         assign_name_guid(session, name)
     session.commit()
-    export_names_to_release(session, tmp_path)
+    export_to_release(session, tmp_path)
 
     guids = [record["guid"] for record in read_release_records(tmp_path)]
     assert guids == sorted(guids)
@@ -279,7 +279,7 @@ def test_unknown_kind_in_a_release_record_is_rejected(session: Session, tmp_path
         encoding="utf-8",
     )
     with pytest.raises(ValueError, match="Unknown name kind"):
-        import_names_from_release(session, tmp_path)
+        import_from_release(session, tmp_path)
 
 
 # --- Reconciling an existing name ------------------------------------------
@@ -313,9 +313,9 @@ def test_apply_release_record_overwrites_fields_and_renderings(session: Session)
 def test_apply_release_record_round_trips_an_unchanged_record(session: Session) -> None:
     """Applying a name's own record back to it must be a no-op."""
     name = _seed_george(session)
-    before = name_to_release_record(name)
+    before = to_release_record(name)
 
     apply_release_record(session, before, name)
     session.commit()
 
-    assert name_to_release_record(name) == before
+    assert to_release_record(name) == before

@@ -12,11 +12,12 @@ from flask import Blueprint, flash, g, redirect, render_template, request, url_f
 from flask.typing import ResponseReturnValue
 from sqlalchemy.orm import joinedload
 
-from barsukas.routes.sync import release_io
+import constants
+
 from barsukas.routes.sync.actions import is_readonly
+from storage.release import io as release_io
 from storage.crud.operation_log import log_operation
 from storage.models.lemma_relation import LemmaRelationGroup, LemmaRelationMember
-from storage.migrate import _write_jsonl_atomic as migrate_write_jsonl_atomic
 from storage.models.schema import Lemma
 
 logger = logging.getLogger(__name__)
@@ -27,9 +28,7 @@ bp = Blueprint("sync_relation_release", __name__, url_prefix="/sync/relations")
 # __file__ is src/barsukas/routes/sync/sync_relation_release.py
 # .parent = sync/, .parent.parent = routes/, .parent.parent.parent = barsukas/,
 # .parent.parent.parent.parent = src/, .parent.parent.parent.parent.parent = repo root
-DEFAULT_RELATION_RELEASE_DIR = (
-    Path(__file__).parent.parent.parent.parent.parent / "data" / "release" / "lemma_relations"
-)
+DEFAULT_RELATION_RELEASE_DIR = Path(constants.RELEASE_DIR) / "lemma_relations"
 
 
 def _get_relation_release_dir() -> Path:
@@ -128,12 +127,6 @@ def _group_to_release_record(group: LemmaRelationGroup) -> Dict[str, Any]:
         "concept": group.concept_label,
         "members": _get_member_guids(group),
     }
-
-
-def _write_jsonl_atomic(file_path: Path, records: List[Dict[str, Any]]) -> None:
-    """Write JSONL file atomically, creating the parent directory."""
-    file_path.parent.mkdir(parents=True, exist_ok=True)
-    migrate_write_jsonl_atomic(file_path, records)
 
 
 # =============================================================================
@@ -698,7 +691,7 @@ def export_to_jsonl() -> ResponseReturnValue:
     for (relation_type, subtype), records in records_by_file.items():
         records.sort(key=lambda r: r["concept"])
         file_path = release_dir / relation_type / f"{subtype}.jsonl"
-        _write_jsonl_atomic(file_path, records)
+        release_io.write_jsonl_atomic(file_path, records, sort_by_guid=False)
         total_exported += len(records)
 
     log_operation(

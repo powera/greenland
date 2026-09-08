@@ -106,9 +106,7 @@ def test_an_unissued_guid_is_distinguished_from_a_retired_one(client: FlaskClien
     assert "never been retired" in body
 
 
-def test_the_permalink_goes_straight_to_a_live_record(
-    client: FlaskClient, tombstoned: str
-) -> None:
+def test_the_permalink_goes_straight_to_a_live_record(client: FlaskClient, tombstoned: str) -> None:
     """A live GUID redirects to its detail page, not back into the search box."""
     response = client.get(f"/guids/{tombstoned}")
 
@@ -128,9 +126,7 @@ def test_the_permalink_404s_for_a_guid_that_names_nothing(client: FlaskClient) -
     assert client.get("/guids/?guid=N08_404").status_code == 200
 
 
-def test_the_permalink_still_explains_a_retired_guid(
-    client: FlaskClient, tombstoned: str
-) -> None:
+def test_the_permalink_still_explains_a_retired_guid(client: FlaskClient, tombstoned: str) -> None:
     """A tombstoned GUID is not a 404: the number was issued, and what replaced
     it is the answer the caller came for.
 
@@ -146,7 +142,7 @@ def test_the_permalink_still_explains_a_retired_guid(
 
 
 def test_a_string_that_is_not_a_guid_is_reported_as_such(client: FlaskClient) -> None:
-    """"banana" is a typo, not a lemma GUID that was never issued.
+    """ "banana" is a typo, not a lemma GUID that was never issued.
 
     guid_kind() falls back to "lemma" for any unrecognized string, so without a
     separate well-formedness check the search box told users their typo "would

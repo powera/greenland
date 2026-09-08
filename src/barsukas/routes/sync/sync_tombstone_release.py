@@ -4,7 +4,7 @@
 
 A tombstone records that a GUID has been permanently retired.  Until this page
 existed the file moved in one direction only and only in bulk: written by a full
-``sqlite-to-release`` export, and read back only by a complete bootstrap.  There
+``export tombstones`` run, and read back only by a complete bootstrap.  There
 was no way to see that the database and the release file disagreed about which
 GUIDs are spent, which matters because ``storage.utils.guid`` refuses to reissue
 exactly the GUIDs this file names.
@@ -22,8 +22,9 @@ mechanism exists to prevent.  Export is the only action offered here.
 from pathlib import Path
 from typing import Any, Dict, List, Tuple
 
+import constants
+
 from barsukas.routes.sync.record_sync import (
-    REPOSITORY_ROOT,
     RecordSyncSpec,
     build_blueprint,
 )
@@ -32,11 +33,11 @@ from storage.release.tombstone import (
     RELEASE_DIRNAME,
     import_release_record,
     read_release_records_by_guid,
-    tombstone_to_release_record,
+    to_release_record,
     write_release_records,
 )
 
-DEFAULT_TOMBSTONE_RELEASE_DIR = REPOSITORY_ROOT / "data" / "release" / RELEASE_DIRNAME
+DEFAULT_TOMBSTONE_RELEASE_DIR = Path(constants.RELEASE_DIR) / RELEASE_DIRNAME
 
 
 def _get_release_dir() -> Path:
@@ -95,7 +96,7 @@ SPEC = RecordSyncSpec(
     load_release=read_release_records_by_guid,
     write_release=write_release_records,
     query_rows=_query_tombstones,
-    to_record=tombstone_to_release_record,
+    to_record=to_release_record,
     import_record=import_release_record,
     apply_record=_apply_record,
     describe=_describe,

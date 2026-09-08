@@ -29,6 +29,7 @@ from typing import Any, Dict, Iterable, List, Optional, Tuple
 
 from sqlalchemy.orm import Session, selectinload
 
+from storage.release.io import write_jsonl_atomic
 from storage import translation_helpers
 from storage.crud.name_entity import (
     create_name,
@@ -62,7 +63,7 @@ def translation_metadata_record(translation: NameTranslation) -> Dict[str, Any]:
     return metadata
 
 
-def name_to_release_record(name: Name) -> Dict[str, Any]:
+def to_release_record(name: Name) -> Dict[str, Any]:
     """Build the release JSONL record for one name.
 
     Languages are emitted in ``RELEASE_LANGUAGES`` order and then any remaining
@@ -135,18 +136,12 @@ def read_release_records_by_guid(release_dir: Path) -> Dict[str, Dict[str, Any]]
 
 def write_release_records(release_dir: Path, records: Iterable[Dict[str, Any]]) -> Path:
     """Write name records to a release directory, sorted by GUID."""
-    target_dir = Path(release_dir)
-    target_dir.mkdir(parents=True, exist_ok=True)
-    release_file = target_dir / RELEASE_FILENAME
-
-    ordered = sorted(records, key=lambda record: str(record.get("guid") or ""))
-    with release_file.open("w", encoding="utf-8") as handle:
-        for record in ordered:
-            handle.write(json.dumps(record, ensure_ascii=False) + "\n")
+    release_file = Path(release_dir) / RELEASE_FILENAME
+    write_jsonl_atomic(release_file, records, sort_by_guid=True)
     return release_file
 
 
-def export_names_to_release(session: Session, release_dir: Path) -> int:
+def export_to_release(session: Session, release_dir: Path) -> int:
     """Export every GUIDed name to the release directory. Returns the count.
 
     Names without a GUID are drafts - a generator proposed them but they have
@@ -160,7 +155,7 @@ def export_names_to_release(session: Session, release_dir: Path) -> int:
         .order_by(Name.guid)
         .all()
     )
-    write_release_records(release_dir, [name_to_release_record(name) for name in names])
+    write_release_records(release_dir, [to_release_record(name) for name in names])
     return len(names)
 
 
@@ -256,7 +251,7 @@ def import_release_record(session: Session, record: Dict[str, Any]) -> Optional[
     return name
 
 
-def import_names_from_release(session: Session, release_dir: Path) -> Tuple[int, int]:
+def import_from_release(session: Session, release_dir: Path) -> Tuple[int, int]:
     """Import a release directory into the database.
 
     Returns ``(imported, skipped)``, where skipped counts records whose GUID was
@@ -269,4 +264,10 @@ def import_names_from_release(session: Session, release_dir: Path) -> Tuple[int,
             skipped += 1
         else:
             imported += 1
+    # Commit here rather than leaving it to the caller, as the sentence,
+    # tombstone and lemma-audio importers already do. A commit flushes the
+    # whole session, so a module that left work pending was saved only when
+    # some later module in the same run happened to commit -- which made
+    # importing this element type on its own silently lose every row.
+    session.commit()
     return imported, skipped

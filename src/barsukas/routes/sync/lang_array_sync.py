@@ -26,17 +26,19 @@ from flask import Blueprint, flash, g, redirect, render_template, request, url_f
 from flask.typing import ResponseReturnValue
 from werkzeug.wrappers import Response as WerkzeugResponse
 
+import constants
+
 from barsukas.routes.sync import sync_release_helpers as helpers
 from barsukas.routes.sync.actions import SKIP, USE_DB, USE_RELEASE, SyncOutcome, is_readonly
 from barsukas.routes.sync.paging import PER_PAGE_CHOICES, paginate
+from storage.release.derivative_form import form_to_record
 from storage.crud.operation_log import log_operation
 from storage.models.schema import NON_INFLECTION_GRAMMATICAL_FORMS, DerivativeForm, Lemma
 from storage.translation_helpers import LANGUAGE_HIERARCHY, LANGUAGE_NAMES
 
 logger = logging.getLogger(__name__)
 
-REPOSITORY_ROOT = Path(__file__).parent.parent.parent.parent.parent
-DEFAULT_RELEASE_DIR = REPOSITORY_ROOT / "data" / "release" / "lemmas"
+DEFAULT_RELEASE_DIR = Path(constants.RELEASE_DIR) / "lemmas"
 
 
 @dataclass(frozen=True)
@@ -203,7 +205,7 @@ def _write_array(
         file_path,
         guid,
         spec.array_key,
-        [helpers.db_form_to_dict(form=f, include_base_form=spec.has_base_form) for f in forms],
+        [form_to_record(form=f, include_base_form=spec.has_base_form) for f in forms],
     )
     return True
 

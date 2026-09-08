@@ -213,7 +213,7 @@ All sentence creation paths must call this to assign a GUID at creation time:
   discovered through the Buivolas compatibility CLI)
 - Any future manual sentence creation in Barsukas
 
-### Export: `sqlite-to-sentence-release`
+### Export: `export sentences`
 
 Add new migration direction in `migrate.py` (or a standalone script) that:
 

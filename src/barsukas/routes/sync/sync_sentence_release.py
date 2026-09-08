@@ -12,7 +12,8 @@ from flask import Blueprint, flash, g, redirect, render_template, request, url_f
 from flask.typing import ResponseReturnValue
 from sqlalchemy.orm import selectinload
 
-from barsukas.routes.sync import release_io
+import constants
+
 from barsukas.routes.sync.actions import (
     SKIP,
     USE_DB,
@@ -25,8 +26,9 @@ from barsukas.routes.sync.actions import (
     parse_row_actions,
 )
 from barsukas.routes.sync.paging import PER_PAGE_CHOICES, paginate
+from storage.release import io as release_io
 from storage.crud.operation_log import log_operation, log_translation_change
-from storage.migrate import _resolve_primary_lemma_category, _sentence_to_release_record
+from storage.release.sentence import resolve_primary_lemma_category, to_release_record
 from storage.models.name_entity import Name
 from storage.models.schema import (
     AudioQualityReview,
@@ -50,9 +52,7 @@ bp = Blueprint("sync_sentence_release", __name__, url_prefix="/sync/sentences")
 # __file__ is src/barsukas/routes/sync/sync_sentence_release.py
 # .parent = sync/, .parent.parent = routes/, .parent.parent.parent = barsukas/,
 # .parent.parent.parent.parent = src/, .parent.parent.parent.parent.parent = repo root
-DEFAULT_SENTENCE_RELEASE_DIR = (
-    Path(__file__).parent.parent.parent.parent.parent / "data" / "release" / "sentences"
-)
+DEFAULT_SENTENCE_RELEASE_DIR = Path(constants.RELEASE_DIR) / "sentences"
 
 
 def _get_sentence_release_dir() -> Path:
@@ -1265,7 +1265,7 @@ _TYPE_TO_DIR: Dict[str, str] = {
 def _export_file_for_sentence(release_dir: Path, sentence: Any) -> Path:
     """The base.jsonl a sentence belongs in, by collection and primary lemma."""
     collection = sentence.sentence_collection or "general"
-    pos_type, pos_subtype = _resolve_primary_lemma_category(sentence)
+    pos_type, pos_subtype = resolve_primary_lemma_category(sentence)
     dir_name = _TYPE_TO_DIR.get(pos_type, pos_type)
     return release_dir / collection / dir_name / pos_subtype / "base.jsonl"
 
@@ -1443,7 +1443,7 @@ def _find_sync_back_candidates(
             if not release_data:
                 continue
 
-            db_record = _sentence_to_release_record(db_sentence)
+            db_record = to_release_record(db_sentence)
             normalized_release = _normalize_release_sentence_for_compare(release_data)
             if db_record == normalized_release:
                 continue
@@ -1523,7 +1523,7 @@ def apply_export() -> ResponseReturnValue:
     records_by_file: Dict[Path, List[Dict[str, Any]]] = defaultdict(list)
     for sentence in db_sentences:
         target = _export_file_for_sentence(release_dir, sentence)
-        records_by_file[target].append(_sentence_to_release_record(sentence))
+        records_by_file[target].append(to_release_record(sentence))
 
     exported_count = sum(
         release_io.upsert_records(release_file, records)
@@ -1590,7 +1590,7 @@ def apply_export_sync_back() -> ResponseReturnValue:
         release_file = release_io.file_for_guid(guid_files, guid)
         if release_file is None:
             release_file = _export_file_for_sentence(release_dir, sentence)
-        records_by_file[release_file].append(_sentence_to_release_record(sentence))
+        records_by_file[release_file].append(to_release_record(sentence))
 
     updated_count = sum(
         release_io.upsert_records(release_file, records)

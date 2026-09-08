@@ -109,57 +109,76 @@ PYTHONPATH=src python src/wordfreq/tools/manage_difficulty_overrides.py import o
 
 ### Export SQLite to data/release
 
-Use **migrate.py** to export the database back to release format:
+Use the **release CLI**, which takes a direction and one or more element types:
 
 ```bash
-# Export to data/release/lemmas (default)
-PYTHONPATH=src python src/storage/migrate.py sqlite-to-release
+# Export every element type
+PYTHONPATH=src python -m storage.release.cli export all
 
-# Export to data/release/sentences (default)
-PYTHONPATH=src python src/storage/migrate.py sqlite-to-sentence-release
+# Or name the ones you want
+PYTHONPATH=src python -m storage.release.cli export lemmas sentences
+PYTHONPATH=src python -m storage.release.cli export phrases idioms names
+PYTHONPATH=src python -m storage.release.cli export lemma-audio
 
-# Export to data/release/phrases (default)
-PYTHONPATH=src python src/storage/migrate.py sqlite-to-phrase-release
+# Write somewhere other than data/release
+PYTHONPATH=src python -m storage.release.cli export lemmas \
+  --release-root /path/to/output
 
-# Export to data/release/idioms (default)
-PYTHONPATH=src python src/storage/migrate.py sqlite-to-idiom-release
-
-# Export to data/release/names (default)
-PYTHONPATH=src python src/storage/migrate.py sqlite-to-name-release
-
-# Export only lemma audio files
-PYTHONPATH=src python src/storage/migrate.py sqlite-to-lemma-audio-release
-
-# Export to a custom directory
-PYTHONPATH=src python src/storage/migrate.py sqlite-to-release \
-  --release-dir /path/to/output
+# See what would run, without touching anything
+PYTHONPATH=src python -m storage.release.cli export all --dry-run
 ```
 
-Idioms and names also import in the other direction. Both skip records whose
-GUID is already present, so re-running is safe; reconciling a record that
-changed on either side is the sync UI's job, not the importer's:
+Element types: `lemmas`, `sentences`, `phrases`, `idioms`, `names`,
+`lemma-audio`, `tombstones`, plus `database` for the whole-database JSONL dump
+that carries the parts no element type owns (verifications, operation logs,
+audio reviews). `all` selects every element type supporting that direction.
+
+### Import data/release back into SQLite
+
+The same CLI, in the other direction. Importers skip records whose GUID is
+already present, so re-running is safe; reconciling a record that changed on
+both sides is the sync UI's job, not the importer's:
 
 ```bash
-PYTHONPATH=src python src/storage/migrate.py idiom-release-to-sqlite
-PYTHONPATH=src python src/storage/migrate.py name-release-to-sqlite
+PYTHONPATH=src python -m storage.release.cli import idioms names
+PYTHONPATH=src python -m storage.release.cli import all
 ```
+
+Not every element type imports one at a time. Lemmas and sentences are loaded
+by the whole-database path (`import database`, and `bootstrap_database.py`),
+so `import all` covers what it can and skips the rest.
+
+`import database` rebuilds the SQLite file from scratch, so `import all` runs
+it *first* and then applies the per-element importers on top. Running it after
+them would discard what they wrote: the whole-database loader does not read the
+audio that ships inline on each sentence record.
+
+Add `--backend postgres` to read or write a PostgreSQL deployment; the
+connection URL comes from the environment or key file unless `--postgres-url`
+gives one explicitly.
 
 ### Sync lemma audio back from data/release into SQLite
 
-`sqlite-to-lemma-audio-release` only writes files. To pull the approved lemma
-audio in `data/release/lemmas/*/audio.jsonl` **back into** an existing SQLite
-database, use **lemma-audio-release-to-sqlite**. It upserts audio rows matched on
+`export lemma-audio` only writes files. To pull the approved lemma audio in
+`data/release/lemmas/*/audio.jsonl` **back into** an existing SQLite database,
+import it. That upserts audio rows matched on
 `(guid, language_code, voice_name, grammatical_form)`, links each row to its
 lemma by GUID, and leaves local review metadata (`reviewed_by`, `notes`,
 `quality_issues`, acceptance columns) untouched:
 
 ```bash
 # Add/update audio rows from release files
-PYTHONPATH=src python src/storage/migrate.py lemma-audio-release-to-sqlite
+PYTHONPATH=src python -m storage.release.cli import lemma-audio
 
-# Also delete exportable audio rows that are no longer in the release files
-PYTHONPATH=src python src/storage/migrate.py lemma-audio-release-to-sqlite --prune
+# Also delete exportable audio rows no longer in the release files
+PYTHONPATH=src python -m storage.release.cli import lemma-audio --prune
+
+# Limit either direction to one category
+PYTHONPATH=src python -m storage.release.cli import lemma-audio --category nouns/food
 ```
+
+Sentence audio ships inline on each sentence record rather than in its own
+file, and imports with `import sentences`.
 
 ## Sync Capabilities Summary
 
@@ -387,11 +406,11 @@ database id is deliberately **not** part of the record: it changes with every
 bootstrap, and `replacement_guid` carries the only link worth shipping.
 
 Tombstones are never deleted. `/sync/tombstones` therefore offers export but no
-delete, and `tombstone-release-to-sqlite` refreshes existing rows rather than
-skipping them:
+delete, and `import tombstones` refreshes existing rows rather than skipping
+them:
 
 ```bash
-PYTHONPATH=src python src/storage/migrate.py tombstone-release-to-sqlite
+PYTHONPATH=src python -m storage.release.cli import tombstones
 ```
 
 Note that a gap in the numbering does **not** imply a tombstone. Some gaps never

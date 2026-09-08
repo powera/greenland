@@ -23,7 +23,8 @@ from flask import Blueprint, flash, g, redirect, render_template, request, url_f
 from flask.typing import ResponseReturnValue
 from sqlalchemy.orm import selectinload
 
-from barsukas.routes.sync import release_io
+import constants
+
 from barsukas.routes.sync.actions import (
     SKIP,
     USE_DB,
@@ -36,9 +37,10 @@ from barsukas.routes.sync.actions import (
     parse_row_actions,
 )
 from barsukas.routes.sync.paging import PER_PAGE_CHOICES, paginate
+from storage.release import io as release_io
 from storage.crud.operation_log import log_operation, log_translation_change
 from storage.crud.phrase import set_phrase_translation
-from storage.migrate import phrase_to_release_records
+from storage.release.phrase import to_release_records
 from storage.models.schema import Phrase, PhraseTranslation
 from storage.translation_helpers import LANGUAGE_NAMES, RELEASE_LANGUAGES
 
@@ -48,9 +50,7 @@ bp = Blueprint("sync_phrase_release", __name__, url_prefix="/sync/phrases")
 
 # __file__ is src/barsukas/routes/sync/sync_phrase_release.py; five parents up is
 # the repo root.
-DEFAULT_PHRASE_RELEASE_DIR = (
-    Path(__file__).parent.parent.parent.parent.parent / "data" / "release" / "phrases"
-)
+DEFAULT_PHRASE_RELEASE_DIR = Path(constants.RELEASE_DIR) / "phrases"
 
 # Languages compared/synced by the translations mode (English is handled by the
 # concept-label "changes" mode instead).
@@ -663,7 +663,7 @@ def export() -> ResponseReturnValue:
                 }
             )
         else:
-            base_record, _ = phrase_to_release_records(phrase)
+            base_record, _ = to_release_records(phrase)
             if base_record != _normalize_release_phrase(release_phrases[phrase.guid]):
                 sync_back_candidates.append(
                     {
@@ -740,7 +740,7 @@ def _write_phrases_to_release(sync_back: bool) -> ResponseReturnValue:
     # upsert_records merges by GUID, so siblings already in the file survive.
     by_subtype: Dict[str, List[Dict[str, Any]]] = defaultdict(list)
     for phrase in db_phrases:
-        base_record, _ = phrase_to_release_records(phrase)
+        base_record, _ = to_release_records(phrase)
         by_subtype[phrase.phrase_subtype].append(base_record)
 
     written = 0

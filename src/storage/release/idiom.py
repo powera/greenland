@@ -25,6 +25,7 @@ from typing import Any, Dict, Iterable, List, Optional, Tuple
 
 from sqlalchemy.orm import Session, selectinload
 
+from storage.release.io import write_jsonl_atomic
 from storage import translation_helpers
 from storage.crud.idiom import add_idiom_equivalent, create_idiom
 from storage.models.idiom import Idiom, IdiomEquivalent
@@ -60,7 +61,7 @@ def equivalent_to_release_record(equivalent: IdiomEquivalent) -> Dict[str, Any]:
     return record
 
 
-def idiom_to_release_record(idiom: Idiom) -> Dict[str, Any]:
+def to_release_record(idiom: Idiom) -> Dict[str, Any]:
     """Build the release JSONL record for one idiom.
 
     Equivalents are grouped by language and sorted within a language by kind
@@ -128,18 +129,12 @@ def write_release_records(release_dir: Path, records: Iterable[Dict[str, Any]]) 
     Sorting by GUID matches the convention for every other release file: new
     entries append at the end of the namespace and removed GUIDs leave gaps.
     """
-    target_dir = Path(release_dir)
-    target_dir.mkdir(parents=True, exist_ok=True)
-    release_file = target_dir / RELEASE_FILENAME
-
-    ordered = sorted(records, key=lambda record: str(record.get("guid") or ""))
-    with release_file.open("w", encoding="utf-8") as handle:
-        for record in ordered:
-            handle.write(json.dumps(record, ensure_ascii=False) + "\n")
+    release_file = Path(release_dir) / RELEASE_FILENAME
+    write_jsonl_atomic(release_file, records, sort_by_guid=True)
     return release_file
 
 
-def export_idioms_to_release(session: Session, release_dir: Path) -> int:
+def export_to_release(session: Session, release_dir: Path) -> int:
     """Export every GUIDed idiom to the release directory. Returns the count.
 
     Idioms without a GUID are drafts that have not been assigned a place in the
@@ -152,7 +147,7 @@ def export_idioms_to_release(session: Session, release_dir: Path) -> int:
         .order_by(Idiom.guid)
         .all()
     )
-    write_release_records(release_dir, [idiom_to_release_record(idiom) for idiom in idioms])
+    write_release_records(release_dir, [to_release_record(idiom) for idiom in idioms])
     return len(idioms)
 
 
@@ -173,7 +168,7 @@ def apply_release_record(session: Session, record: Dict[str, Any], idiom: Idiom)
     an *addition* and leave the old wording behind; replacing avoids inventing a
     second equivalent nobody asked for. The reverse direction - writing the
     database's idiom into the file - goes through
-    :func:`idiom_to_release_record`, so the two stay symmetric.
+    :func:`to_release_record`, so the two stay symmetric.
     """
     source = record.get("source") or {}
     idiom.source_language_code = source.get("language", idiom.source_language_code)
@@ -258,7 +253,7 @@ def import_release_record(session: Session, record: Dict[str, Any]) -> Optional[
     return idiom
 
 
-def import_idioms_from_release(session: Session, release_dir: Path) -> Tuple[int, int]:
+def import_from_release(session: Session, release_dir: Path) -> Tuple[int, int]:
     """Import a release directory into the database.
 
     Returns ``(imported, skipped)``, where skipped counts records whose GUID was
@@ -271,4 +266,10 @@ def import_idioms_from_release(session: Session, release_dir: Path) -> Tuple[int
             skipped += 1
         else:
             imported += 1
+    # Commit here rather than leaving it to the caller, as the sentence,
+    # tombstone and lemma-audio importers already do. A commit flushes the
+    # whole session, so a module that left work pending was saved only when
+    # some later module in the same run happened to commit -- which made
+    # importing this element type on its own silently lose every row.
+    session.commit()
     return imported, skipped

@@ -1,13 +1,17 @@
 #!/usr/bin/python3
 
-"""Shared JSONL read/write machinery for the ``/sync`` blueprints.
+"""Shared JSONL read/write machinery for the ``data/release`` tree.
 
-Every sync page does the same four things to ``data/release``: read every
+Every reader of the tree does the same four things: read every
 ``base.jsonl`` under a tree into a GUID-keyed dict, work out which file a GUID
 lives in, rewrite some fields on a GUID's line, and rewrite some translations on
 a GUID's line. Each blueprint used to carry its own copy of all four, which is
 why ``concept_label`` updates and ``difficulty_level`` updates had subtly
 different behaviour on a malformed line.
+
+This lives under ``storage`` rather than with the Barsukas sync blueprints that
+first grew it: the per-entity modules beside it need the same machinery, and a
+``storage`` module importing from ``barsukas.routes`` would invert the layering.
 
 One behavioural note beyond deduplication: :func:`build_guid_file_index` scans
 the tree once and answers every lookup from a dict. The per-blueprint
@@ -17,6 +21,8 @@ tree *per GUID*, so applying 2000 selected rows meant 2000 full-tree scans.
 
 import json
 import logging
+import os
+import tempfile
 from pathlib import Path
 from typing import Any, Dict, Iterable, Iterator, List, Optional, Tuple
 
@@ -120,17 +126,43 @@ def file_for_guid(index: Dict[str, Path], guid: str) -> Optional[Path]:
     return index.get(guid)
 
 
+def write_jsonl_atomic(
+    file_path: Path, records: Iterable[Dict[str, Any]], *, sort_by_guid: bool = True
+) -> None:
+    """Write records to a JSONL file atomically, creating parent dirs.
+
+    The temp file is created beside the target so the rename stays on one
+    filesystem and is therefore atomic; that also means the directory has to
+    exist first, which is why this creates it rather than assuming it.
+
+    ``sort_by_guid`` applies the release convention -- entries in GUID order,
+    new ones appending at the end of a namespace and removed ones leaving gaps.
+    Pass False only where the caller has already ordered the records and that
+    order is meaningful (the lemma and sentence exports pre-sort per file).
+    """
+    file_path.parent.mkdir(parents=True, exist_ok=True)
+    ordered = (
+        sorted(records, key=lambda record: str(record.get("guid") or ""))
+        if sort_by_guid
+        else list(records)
+    )
+    with tempfile.NamedTemporaryFile(
+        mode="w", encoding="utf-8", dir=file_path.parent, delete=False, suffix=".tmp"
+    ) as tmp_file:
+        for record in ordered:
+            tmp_file.write(json.dumps(record, ensure_ascii=False) + "\n")
+        tmp_file.flush()
+        os.fsync(tmp_file.fileno())
+    os.replace(tmp_file.name, file_path)
+
+
 def write_jsonl_sorted(file_path: Path, records: Iterable[Dict[str, Any]]) -> None:
     """Write records to a JSONL file sorted by GUID, creating parent dirs.
 
-    Sorting by GUID is the release convention everywhere: new entries append at
-    the end of a namespace and removed GUIDs leave gaps.
+    Thin alias for :func:`write_jsonl_atomic`; kept because the sync
+    blueprints read better naming the sort than the atomicity.
     """
-    file_path.parent.mkdir(parents=True, exist_ok=True)
-    ordered = sorted(records, key=lambda record: str(record.get("guid") or ""))
-    with open(file_path, "w", encoding="utf-8") as handle:
-        for record in ordered:
-            handle.write(json.dumps(record, ensure_ascii=False) + "\n")
+    write_jsonl_atomic(file_path, records, sort_by_guid=True)
 
 
 def _rewrite_matching_lines(

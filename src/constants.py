@@ -29,6 +29,12 @@ except ImportError:
 KEY_DIR = os.path.join(PROJECT_ROOT, "keys")
 OUTPUT_DIR = os.path.join(os.path.dirname(PROJECT_ROOT), "greenland_output")
 
+# The checked-in JSONL release tree: the exported, reviewable form of the
+# linguistic database. Its per-entity subdirectories ("lemmas", "sentences",
+# ...) are named by storage.release.registry rather than spelled out at call
+# sites, so this constant is the only place the root itself is derived.
+RELEASE_DIR = os.path.join(PROJECT_ROOT, "data", "release")
+
 # Wordfreq directories
 WORDFREQ_DATA_DIR = os.path.join(PROJECT_ROOT, "data", "wordfreq")
 WORDFREQ_DB_PATH = os.path.join(WORDFREQ_DATA_DIR, "linguistics.sqlite")

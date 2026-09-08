@@ -490,7 +490,7 @@ class JSONLSession(BaseSession):
                 )
 
             # Word hints -- the slot-level links that decide which category
-            # directory a sentence exports to (_resolve_primary_lemma_category
+            # directory a sentence exports to (storage.release.sentence.resolve_primary_lemma_category
             # reads them). These were not loaded at all, so a bootstrapped
             # database resolved every sentence to misc/misc.
             #

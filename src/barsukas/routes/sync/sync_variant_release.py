@@ -19,7 +19,7 @@ sync would share anyway - the file I/O, the form parsing, the counters, the
 paging, the templates - is shared.
 
 Before this page a variant could only reach ``data/release`` through a
-whole-tree ``sqlite-to-release`` export, which is why exactly one exists there.
+whole-tree ``export lemmas`` run, which is why exactly one exists there.
 """
 
 import logging
@@ -30,6 +30,8 @@ from typing import Any, Dict, List, Set, Tuple
 from flask import Blueprint, flash, g, redirect, render_template, request, url_for
 from flask.typing import ResponseReturnValue
 from werkzeug.wrappers import Response as WerkzeugResponse
+
+import constants
 
 from barsukas.routes.sync import sync_release_helpers as helpers
 from barsukas.routes.sync.actions import SKIP, USE_DB, USE_RELEASE, SyncOutcome, is_readonly
@@ -42,8 +44,7 @@ from storage.translation_helpers import LANGUAGE_HIERARCHY, LANGUAGE_NAMES
 
 logger = logging.getLogger(__name__)
 
-REPOSITORY_ROOT = Path(__file__).parent.parent.parent.parent.parent
-DEFAULT_RELEASE_DIR = REPOSITORY_ROOT / "data" / "release" / "lemmas"
+DEFAULT_RELEASE_DIR = Path(constants.RELEASE_DIR) / "lemmas"
 
 #: Top-level key on the per-language release line.
 ARRAY_KEY = "variants"
