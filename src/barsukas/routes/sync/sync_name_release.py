@@ -28,7 +28,7 @@ from storage.models.name_entity import NAME_KIND_LABELS, Name
 from storage.release.name import (
     apply_release_record,
     import_release_record,
-    name_to_release_record,
+    to_release_record,
     read_release_records_by_guid,
     write_release_records,
 )
@@ -98,7 +98,7 @@ SPEC = RecordSyncSpec(
     load_release=read_release_records_by_guid,
     write_release=write_release_records,
     query_rows=_query_names,
-    to_record=name_to_release_record,
+    to_record=to_release_record,
     import_record=import_release_record,
     apply_record=apply_release_record,
     describe=_describe,

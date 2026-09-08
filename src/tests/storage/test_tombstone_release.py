@@ -21,12 +21,12 @@ from storage.models.guid_tombstone import (
     GuidTombstone,
 )
 from storage.release.tombstone import (
-    export_tombstones_to_release,
+    export_to_release,
     import_release_record,
-    import_tombstones_from_release,
+    import_from_release,
     read_release_records,
     read_release_records_by_guid,
-    tombstone_to_release_record,
+    to_release_record,
     write_release_records,
 )
 from storage.utils.guid import generate_guid
@@ -75,7 +75,7 @@ class TestTombstoneRelease(unittest.TestCase):
         self._tmp.cleanup()
 
     def test_export_writes_every_tombstone_sorted_by_guid(self) -> None:
-        count = export_tombstones_to_release(self.session, self.release_dir)
+        count = export_to_release(self.session, self.release_dir)
 
         records = read_release_records(self.release_dir)
         self.assertEqual(2, count)
@@ -84,7 +84,7 @@ class TestTombstoneRelease(unittest.TestCase):
     def test_export_creates_the_directory(self) -> None:
         self.assertFalse(self.release_dir.exists())
 
-        export_tombstones_to_release(self.session, self.release_dir)
+        export_to_release(self.session, self.release_dir)
 
         self.assertTrue((self.release_dir / "guid_tombstones.jsonl").is_file())
 
@@ -94,34 +94,34 @@ class TestTombstoneRelease(unittest.TestCase):
         assert tombstone is not None
         self.assertEqual(42, tombstone.lemma_id, "the column is still populated locally")
 
-        self.assertNotIn("lemma_id", tombstone_to_release_record(tombstone))
+        self.assertNotIn("lemma_id", to_release_record(tombstone))
 
     def test_unset_optional_fields_are_omitted_rather_than_null(self) -> None:
         tombstone = get_tombstone_by_guid(self.session, "N08_002")
         assert tombstone is not None
 
-        record = tombstone_to_release_record(tombstone)
+        record = to_release_record(tombstone)
 
         for field in ("original_pos_subtype", "replacement_guid", "notes", "changed_by"):
             self.assertNotIn(field, record)
 
     def test_export_is_byte_stable_across_a_round_trip(self) -> None:
         """Re-exporting an unchanged database must not churn the file."""
-        export_tombstones_to_release(self.session, self.release_dir)
+        export_to_release(self.session, self.release_dir)
         first = (self.release_dir / "guid_tombstones.jsonl").read_bytes()
 
-        export_tombstones_to_release(self.session, self.release_dir)
+        export_to_release(self.session, self.release_dir)
 
         self.assertEqual(first, (self.release_dir / "guid_tombstones.jsonl").read_bytes())
 
     def test_import_restores_every_field(self) -> None:
-        export_tombstones_to_release(self.session, self.release_dir)
+        export_to_release(self.session, self.release_dir)
 
         other_path = str(self.tmp_path / "other.sqlite")
         other = create_database_session(other_path)
         ensure_tables_exist(other)
         try:
-            imported = import_tombstones_from_release(other, self.release_dir)
+            imported = import_from_release(other, self.release_dir)
 
             self.assertEqual(2, imported)
             restored = get_tombstone_by_guid(other, "A03_001")
@@ -137,14 +137,14 @@ class TestTombstoneRelease(unittest.TestCase):
             other.close()
 
     def test_importing_twice_refreshes_rather_than_duplicating(self) -> None:
-        export_tombstones_to_release(self.session, self.release_dir)
+        export_to_release(self.session, self.release_dir)
 
         other_path = str(self.tmp_path / "other.sqlite")
         other = create_database_session(other_path)
         ensure_tables_exist(other)
         try:
-            import_tombstones_from_release(other, self.release_dir)
-            import_tombstones_from_release(other, self.release_dir)
+            import_from_release(other, self.release_dir)
+            import_from_release(other, self.release_dir)
 
             self.assertEqual(2, other.query(GuidTombstone).count())
         finally:
@@ -196,14 +196,14 @@ class TestTombstoneRelease(unittest.TestCase):
         other = create_database_session(other_path)
         ensure_tables_exist(other)
         try:
-            import_tombstones_from_release(other, self.release_dir)
+            import_from_release(other, self.release_dir)
 
             self.assertNotEqual("N02_009", generate_guid(other, "noun", "animal"))
         finally:
             other.close()
 
     def test_records_are_read_back_keyed_by_guid(self) -> None:
-        export_tombstones_to_release(self.session, self.release_dir)
+        export_to_release(self.session, self.release_dir)
 
         by_guid = read_release_records_by_guid(self.release_dir)
 

@@ -9,9 +9,8 @@ import argparse
 import json
 import os
 import sys
-from collections import defaultdict
 from pathlib import Path
-from typing import Any, Collection, Dict, List, Optional, Set
+from typing import Any, Collection, Dict, List, Optional
 
 from sqlalchemy.orm import selectinload
 
@@ -24,13 +23,12 @@ if __name__ == "__main__":
 import constants
 from storage.backend.config import BackendType, DataSourceConfig
 from storage.backend.factory import create_session
-from storage.config.grammar_facts import RELEASE_GRAMMAR_FACT_TYPES
 from storage.release import lemma_audio
 from storage.release import phrase as phrase_release
 from storage.release import sentence as sentence_release
 from storage.release.io import write_jsonl_atomic
 from storage.release.lemma import decode_db_emoji
-from storage.release.variant import release_variants_by_language, variants_by_language
+from storage.release.variant import variants_by_language
 
 APPROVED_AUDIO_RELEASE_STATUSES = {"approved", "approved_with_issues"}
 
@@ -460,301 +458,23 @@ def convert_sqlalchemy_tombstone_to_jsonl(tombstone: Any) -> Any:
 
 
 def export_sqlite_to_release(sqlite_path: str, release_dir: str) -> None:
-    """Export SQLite to data/release format.
+    """Export lemmas (and the tombstones that ship beside them) from SQLite.
 
-    This creates per-category directories (e.g., nouns/animal/) containing:
-    - base.jsonl: concept definitions with translations and difficulty_overrides
-      (guid, pos_type, pos_subtype, concept_label, concept_definition,
-       difficulty_level, translations: {lang_code: translation},
-       difficulty_overrides: {lang_code: level})
-    - {lang}.jsonl: per-language data keyed by guid, written only for languages
-      that have derivative_forms (conjugations, inflections, etc.), synonyms
-      (synonyms, abbreviations, expanded forms, and related lexical variants),
-      or grammar_facts (gender, declension, number_type, etc.)
-
-    Args:
-        sqlite_path: Path to SQLite database
-        release_dir: Directory to write release files (e.g., data/release/lemmas)
+    Thin CLI wrapper; the serialization lives in :mod:`storage.release.lemma`
+    and :mod:`storage.release.tombstone`.
     """
-    print(f"Exporting from SQLite ({sqlite_path}) to release format ({release_dir})...")
-
-    from storage import translation_helpers
     from storage.database import create_database_session
-    from storage.models.concept import ConceptLemmaLink
-    from storage.release.tombstone import (
-        RELEASE_DIRNAME as TOMBSTONE_RELEASE_DIRNAME,
-    )
-    from storage.release.tombstone import export_tombstones_to_release
-    from storage.models.schema import Lemma
-    from storage.release.derivative_form import forms_by_language
-    from storage.release.lemma import lemma_to_release_record
-    from storage.release.mechanical_filter import clear_cache, without_derivable
+    from storage.release import lemma as lemma_release
+    from storage.release import tombstone as tombstone_release
 
+    print(f"Exporting from SQLite ({sqlite_path}) to release format ({release_dir})...")
     session = create_database_session(sqlite_path)
-    from storage.utils.session import ensure_tables_exist
-
-    ensure_tables_exist(session)
-
-    # Paradigms are memoized per lemma; a second export in the same process
-    # must re-read facts that may have changed since the first.
-    clear_cache()
-
     try:
-        # Get all lemmas with GUIDs (curated words only)
-        # Eager-load derivative_forms and grammar_facts to avoid N+1 queries
-        lemmas = (
-            session.query(Lemma)
-            .filter(Lemma.guid.isnot(None))
-            .options(
-                selectinload(Lemma.translations),
-                selectinload(Lemma.derivative_forms),
-                selectinload(Lemma.variant_forms),
-                selectinload(Lemma.grammar_facts),
-                # Read by the base record builder.
-                selectinload(Lemma.difficulty_overrides),
-            )
-            .order_by(Lemma.id)
-            .all()
-        )
-        print(f"Found {len(lemmas)} curated lemmas to export")
-
-        # Every lemma's Q-id in one query. Resolving these per lemma inside the
-        # export loop would be one query per word on a whole-tree export.
-        qid_by_lemma_id: Dict[int, str] = dict(
-            session.query(ConceptLemmaLink.lemma_id, ConceptLemmaLink.qid).tuples().all()
-        )
-
-        # Group lemmas by POS type/subtype
-        lemmas_by_category: Dict[tuple, list] = defaultdict(list)
-        for lemma in lemmas:
-            pos_type = lemma.pos_type.lower() if lemma.pos_type else "misc"
-            pos_subtype = lemma.pos_subtype.lower() if lemma.pos_subtype else "other"
-            category = (pos_type, pos_subtype)
-            lemmas_by_category[category].append(lemma)
-
-        print(f"Organized into {len(lemmas_by_category)} categories")
-
-        # Map POS types to directory names (pluralized)
-        type_to_dir = {
-            "noun": "nouns",
-            "verb": "verbs",
-            "adjective": "adjectives",
-            "adverb": "adverbs",
-            "pronoun": "pronouns",
-            "preposition": "prepositions",
-            "conjunction": "conjunctions",
-            "interjection": "interjections",
-            "numeral": "numerals",
-            "particle": "particles",
-        }
-
-        # Track languages encountered
-        all_languages: Set[str] = set()
-
-        # Process each category
-        for (pos_type, pos_subtype), category_lemmas in lemmas_by_category.items():
-            # Determine directory structure
-            dir_name = type_to_dir.get(pos_type, "misc")
-            category_dir = Path(release_dir) / dir_name / pos_subtype
-            category_dir.mkdir(parents=True, exist_ok=True)
-
-            print(f"Exporting {len(category_lemmas)} lemmas to {dir_name}/{pos_subtype}...")
-
-            # Collect base records (now includes translations)
-            base_records = []
-
-            release_lang_set = set(translation_helpers.RELEASE_LANGUAGES)
-            secondary_lang_set = set(translation_helpers.SECONDARY_RELEASE_LANGUAGES)
-            extra_group_lang_sets = {
-                group_name: set(group_languages)
-                for group_name, group_languages in translation_helpers.EXTRA_RELEASE_LANGUAGE_GROUPS.items()
-            }
-
-            # Collect secondary translation records alongside base records
-            secondary_records: List[Dict[str, Any]] = []
-            extra_group_records: Dict[str, List[Dict[str, Any]]] = defaultdict(list)
-
-            for lemma in category_lemmas:
-                # Get all translations
-                all_translations = translation_helpers.get_all_translations(session, lemma)
-
-                # Route each language to the file that carries it. RELEASE_LANGUAGES
-                # ride in the base record, which lemma_to_release_record builds
-                # below, so this loop only needs to note that the language is in
-                # play; the secondary and grouped tiers are collected here.
-                secondary_translations_dict: Dict[str, str] = {}
-                secondary_translation_metadata_dict: Dict[str, Dict[str, str]] = {}
-                extra_group_translations: Dict[str, Dict[str, str]] = defaultdict(dict)
-                extra_group_metadata: Dict[str, Dict[str, Dict[str, str]]] = defaultdict(dict)
-                metadata_by_lang: Dict[str, Dict[str, str]] = {}
-                for trans_obj in lemma.translations:
-                    metadata: Dict[str, str] = {}
-                    # A bare "conventional" on a living language is the assumed
-                    # default and is not written out.
-                    if translation_helpers.translation_status_is_informative(
-                        trans_obj.language_code,
-                        trans_obj.translation_status,
-                        trans_obj.translation_status_note,
-                    ):
-                        metadata["translation_status"] = trans_obj.translation_status
-                        if trans_obj.translation_status_note:
-                            metadata["translation_status_note"] = trans_obj.translation_status_note
-                    if metadata:
-                        metadata_by_lang[trans_obj.language_code] = metadata
-
-                for lang_code, translation in all_translations.items():
-                    if translation and translation.strip():
-                        if lang_code in release_lang_set:
-                            all_languages.add(lang_code)
-                        elif lang_code in secondary_lang_set:
-                            all_languages.add(lang_code)
-                            secondary_translations_dict[lang_code] = translation
-                            if lang_code in metadata_by_lang:
-                                secondary_translation_metadata_dict[lang_code] = metadata_by_lang[
-                                    lang_code
-                                ]
-                        else:
-                            for group_name, group_lang_set in extra_group_lang_sets.items():
-                                if lang_code in group_lang_set:
-                                    all_languages.add(lang_code)
-                                    extra_group_translations[group_name][lang_code] = translation
-                                    if lang_code in metadata_by_lang:
-                                        extra_group_metadata[group_name][lang_code] = (
-                                            metadata_by_lang[lang_code]
-                                        )
-                                    break
-
-                # The base record is built by storage.release.lemma, the same
-                # function the Barsukas sync uses, so the two exports cannot
-                # disagree about it. (They used to: this path wrote
-                # concept_label without the disambiguation and omitted qid and
-                # translation_disambiguations, so a CLI export after UI work
-                # stripped both from the tree.) Secondary and grouped-language
-                # records are this function's own concern and stay below.
-                base_records.append(
-                    lemma_to_release_record(lemma, qid=qid_by_lemma_id.get(lemma.id))
-                )
-
-                # Secondary translations record (guid + translations only)
-                if secondary_translations_dict:
-                    secondary_data: Dict[str, Any] = {
-                        "guid": lemma.guid,
-                        "translations": secondary_translations_dict,
-                    }
-                    if secondary_translation_metadata_dict:
-                        secondary_data["translation_metadata"] = secondary_translation_metadata_dict
-                    secondary_records.append(secondary_data)
-
-                for group_name, group_translations in extra_group_translations.items():
-                    if group_translations:
-                        group_data: Dict[str, Any] = {
-                            "guid": lemma.guid,
-                            "translations": group_translations,
-                        }
-                        group_metadata = extra_group_metadata.get(group_name, {})
-                        if group_metadata:
-                            group_data["translation_metadata"] = group_metadata
-                        extra_group_records[group_name].append(group_data)
-
-            # Write base.jsonl (now includes translations)
-            base_file = category_dir / "base.jsonl"
-            _write_jsonl_atomic(base_file, base_records)
-
-            # Write secondary.jsonl (secondary language translations)
-            secondary_file = category_dir / "secondary.jsonl"
-            _write_jsonl_atomic(secondary_file, secondary_records)
-
-            for group_name, group_records in extra_group_records.items():
-                group_file = category_dir / f"{group_name}.jsonl"
-                _write_jsonl_atomic(group_file, group_records)
-
-            # Collect per-language data (derivative_forms, grammar_facts)
-            # keyed by language code -> list of per-lemma records
-            lang_records: Dict[str, List[Dict[str, Any]]] = defaultdict(list)
-
-            for lemma in category_lemmas:
-                # Derivative forms, split into the array-shaped "forms" and
-                # "synonyms" keys by storage.release.derivative_form -- the same
-                # builder the /sync/derivatives and /sync/synonyms pages use.
-                #
-                # Forms the langtools rules regenerate are withheld: the release
-                # carries only what cannot be derived, and generate_mechanical_forms
-                # puts the rest back on import.  Without this an export after a
-                # bootstrap writes back every generated paradigm.
-                forms_by_lang, synonyms_by_lang = forms_by_language(
-                    without_derivable(session, lemma, lemma.derivative_forms)
-                )
-
-                # Variant forms (alternate spellings), already grouped per
-                # language and per variant by storage.release.variant.
-                variants_by_lang: Dict[str, List[Dict[str, Any]]] = release_variants_by_language(
-                    lemma.variant_forms
-                )
-
-                # Group grammar facts by language (only whitelisted types)
-                facts_by_lang: Dict[str, List[Dict[str, Any]]] = {}
-                for fact in lemma.grammar_facts:
-                    lang = fact.language_code
-                    allowed_types = RELEASE_GRAMMAR_FACT_TYPES.get(lang)
-                    if allowed_types and fact.fact_type in allowed_types:
-                        if lang not in facts_by_lang:
-                            facts_by_lang[lang] = []
-                        facts_by_lang[lang].append(
-                            {
-                                "fact_type": fact.fact_type,
-                                "fact_value": fact.fact_value,
-                            }
-                        )
-
-                # Build per-language records for release languages that have data
-                langs_with_data = (
-                    set(forms_by_lang.keys())
-                    | set(synonyms_by_lang.keys())
-                    | set(variants_by_lang.keys())
-                    | set(facts_by_lang.keys())
-                ) & release_lang_set
-                for lang in langs_with_data:
-                    record: Dict[str, Any] = {"guid": lemma.guid}
-                    if lang in forms_by_lang:
-                        record["forms"] = forms_by_lang[lang]
-                    if lang in synonyms_by_lang:
-                        record["synonyms"] = synonyms_by_lang[lang]
-                    if lang in variants_by_lang:
-                        record["variants"] = variants_by_lang[lang]
-                    if lang in facts_by_lang:
-                        record["grammar_facts"] = facts_by_lang[lang]
-                    lang_records[lang].append(record)
-
-            # Write {lang}.jsonl files for each language that has data
-            for lang, records in sorted(lang_records.items()):
-                lang_file = category_dir / f"{lang}.jsonl"
-                _write_jsonl_atomic(lang_file, records)
-
-            # A language that had rows before and has none now must lose its
-            # file, or the export stops being a rebuild: the stale file would
-            # survive and be re-imported.  This is reachable whenever the last
-            # row for a language goes away -- deleting a translation, or the
-            # mechanical filter withholding a whole category's forms.
-            # "audio" is written by the separate lemma-audio export, so it is
-            # reserved here even though this pass never writes it.
-            reserved_stems = {"base", "secondary", "audio"} | set(extra_group_records)
-            for stale_file in category_dir.glob("*.jsonl"):
-                lang = stale_file.stem
-                if lang in reserved_stems or lang in lang_records:
-                    continue
-                stale_file.unlink()
-
-        print(f"\nExport complete!")
-        print(f"Languages exported: {', '.join(sorted(all_languages))}")
-
-        # Tombstones ship beside the lemma tree rather than inside it, and the
-        # record is built by storage.release.tombstone so the CLI and the sync
-        # blueprint cannot drift apart the way the lemma builders once did.
-        tombstone_count = export_tombstones_to_release(
-            session, Path(release_dir).parent / TOMBSTONE_RELEASE_DIRNAME
+        lemma_release.export_to_release(session, Path(release_dir))
+        tombstone_count = tombstone_release.export_to_release(
+            session, Path(release_dir).parent / tombstone_release.RELEASE_DIRNAME
         )
         print(f"Tombstones exported: {tombstone_count}")
-
     finally:
         session.close()
 
@@ -784,14 +504,14 @@ def export_sqlite_to_idiom_release(sqlite_path: str, release_dir: str) -> None:
     print(f"Exporting idioms from SQLite ({sqlite_path}) to release format ({release_dir})...")
 
     from storage.database import create_database_session
-    from storage.release.idiom import export_idioms_to_release
+    from storage.release.idiom import export_to_release
     from storage.utils.session import ensure_tables_exist
 
     session = create_database_session(sqlite_path)
     ensure_tables_exist(session)
 
     try:
-        exported = export_idioms_to_release(session, Path(release_dir))
+        exported = export_to_release(session, Path(release_dir))
         print(f"Exported {exported} idioms")
         print("Idiom export complete!")
     finally:
@@ -808,14 +528,14 @@ def import_idiom_release_to_sqlite(sqlite_path: str, release_dir: str) -> None:
     print(f"Importing idioms from release format ({release_dir}) into SQLite ({sqlite_path})...")
 
     from storage.database import create_database_session
-    from storage.release.idiom import import_idioms_from_release
+    from storage.release.idiom import import_from_release
     from storage.utils.session import ensure_tables_exist
 
     session = create_database_session(sqlite_path)
     ensure_tables_exist(session)
 
     try:
-        imported, skipped = import_idioms_from_release(session, Path(release_dir))
+        imported, skipped = import_from_release(session, Path(release_dir))
         session.commit()
         print(f"Imported {imported} idioms ({skipped} already present)")
         print("Idiom import complete!")
@@ -834,14 +554,14 @@ def export_sqlite_to_name_release(sqlite_path: str, release_dir: str) -> None:
     print(f"Exporting names from SQLite ({sqlite_path}) to release format ({release_dir})...")
 
     from storage.database import create_database_session
-    from storage.release.name import export_names_to_release
+    from storage.release.name import export_to_release
     from storage.utils.session import ensure_tables_exist
 
     session = create_database_session(sqlite_path)
     ensure_tables_exist(session)
 
     try:
-        exported = export_names_to_release(session, Path(release_dir))
+        exported = export_to_release(session, Path(release_dir))
         print(f"Exported {exported} names")
         print("Name export complete!")
     finally:
@@ -866,14 +586,14 @@ def import_tombstone_release_to_sqlite(sqlite_path: str, release_dir: str) -> No
     )
 
     from storage.database import create_database_session
-    from storage.release.tombstone import import_tombstones_from_release
+    from storage.release.tombstone import import_from_release
     from storage.utils.session import ensure_tables_exist
 
     session = create_database_session(sqlite_path)
     ensure_tables_exist(session)
 
     try:
-        imported = import_tombstones_from_release(session, Path(release_dir))
+        imported = import_from_release(session, Path(release_dir))
         print(f"Imported {imported} tombstones")
         print("Tombstone import complete!")
     finally:
@@ -890,14 +610,14 @@ def import_name_release_to_sqlite(sqlite_path: str, release_dir: str) -> None:
     print(f"Importing names from release format ({release_dir}) into SQLite ({sqlite_path})...")
 
     from storage.database import create_database_session
-    from storage.release.name import import_names_from_release
+    from storage.release.name import import_from_release
     from storage.utils.session import ensure_tables_exist
 
     session = create_database_session(sqlite_path)
     ensure_tables_exist(session)
 
     try:
-        imported, skipped = import_names_from_release(session, Path(release_dir))
+        imported, skipped = import_from_release(session, Path(release_dir))
         session.commit()
         print(f"Imported {imported} names ({skipped} already present)")
         print("Name import complete!")

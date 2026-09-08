@@ -34,8 +34,20 @@ back out. See ``docs/element_types_design.md``.
 
 from __future__ import annotations
 
+from collections import defaultdict
+from dataclasses import dataclass, field
+from pathlib import Path
+
+from sqlalchemy.orm import selectinload
+
+from storage.config.grammar_facts import RELEASE_GRAMMAR_FACT_TYPES
+from storage.release.derivative_form import forms_by_language
+from storage.release.io import write_jsonl_atomic
+from storage.release.mechanical_filter import clear_cache, without_derivable
+from storage.release.variant import release_variants_by_language
+
 import json
-from typing import Any, Dict, List, Optional, Tuple
+from typing import Any, Dict, List, Optional, Set, Tuple
 
 from sqlalchemy.orm import Session
 
@@ -339,3 +351,288 @@ def import_release_record(session: Session, record: Dict[str, Any]) -> Lemma:
 
     apply_translations(session, lemma, record)
     return lemma
+
+
+@dataclass(frozen=True)
+class LemmaExportStats:
+    """What one lemma export wrote."""
+
+    lemmas: int = 0
+    languages: List[str] = field(default_factory=list)
+
+
+def export_to_release(session: Session, release_dir: Path) -> LemmaExportStats:
+    """Export SQLite to data/release format.
+
+    This creates per-category directories (e.g., nouns/animal/) containing:
+    - base.jsonl: concept definitions with translations and difficulty_overrides
+      (guid, pos_type, pos_subtype, concept_label, concept_definition,
+       difficulty_level, translations: {lang_code: translation},
+       difficulty_overrides: {lang_code: level})
+    - {lang}.jsonl: per-language data keyed by guid, written only for languages
+      that have derivative_forms (conjugations, inflections, etc.), synonyms
+      (synonyms, abbreviations, expanded forms, and related lexical variants),
+      or grammar_facts (gender, declension, number_type, etc.)
+
+    Tombstones are *not* written here: they ship beside the lemma tree rather
+    than inside it, and are their own registry entry. A full export runs both.
+    """
+
+    from storage import translation_helpers
+    from storage.models.concept import ConceptLemmaLink
+    from storage.models.schema import Lemma
+    from storage.release.lemma import lemma_to_release_record
+
+    from storage.utils.session import ensure_tables_exist
+
+    ensure_tables_exist(session)
+
+    # Paradigms are memoized per lemma; a second export in the same process
+    # must re-read facts that may have changed since the first.
+    clear_cache()
+
+    # Get all lemmas with GUIDs (curated words only)
+    # Eager-load derivative_forms and grammar_facts to avoid N+1 queries
+    lemmas = (
+        session.query(Lemma)
+        .filter(Lemma.guid.isnot(None))
+        .options(
+            selectinload(Lemma.translations),
+            selectinload(Lemma.derivative_forms),
+            selectinload(Lemma.variant_forms),
+            selectinload(Lemma.grammar_facts),
+            # Read by the base record builder.
+            selectinload(Lemma.difficulty_overrides),
+        )
+        .order_by(Lemma.id)
+        .all()
+    )
+    print(f"Found {len(lemmas)} curated lemmas to export")
+
+    # Every lemma's Q-id in one query. Resolving these per lemma inside the
+    # export loop would be one query per word on a whole-tree export.
+    qid_by_lemma_id: Dict[int, str] = dict(
+        session.query(ConceptLemmaLink.lemma_id, ConceptLemmaLink.qid).tuples().all()
+    )
+
+    # Group lemmas by POS type/subtype
+    lemmas_by_category: Dict[tuple, list] = defaultdict(list)
+    for lemma in lemmas:
+        pos_type = lemma.pos_type.lower() if lemma.pos_type else "misc"
+        pos_subtype = lemma.pos_subtype.lower() if lemma.pos_subtype else "other"
+        category = (pos_type, pos_subtype)
+        lemmas_by_category[category].append(lemma)
+
+    print(f"Organized into {len(lemmas_by_category)} categories")
+
+    # Map POS types to directory names (pluralized)
+    type_to_dir = {
+        "noun": "nouns",
+        "verb": "verbs",
+        "adjective": "adjectives",
+        "adverb": "adverbs",
+        "pronoun": "pronouns",
+        "preposition": "prepositions",
+        "conjunction": "conjunctions",
+        "interjection": "interjections",
+        "numeral": "numerals",
+        "particle": "particles",
+    }
+
+    # Track languages encountered
+    all_languages: Set[str] = set()
+
+    # Process each category
+    for (pos_type, pos_subtype), category_lemmas in lemmas_by_category.items():
+        # Determine directory structure
+        dir_name = type_to_dir.get(pos_type, "misc")
+        category_dir = release_dir / dir_name / pos_subtype
+        category_dir.mkdir(parents=True, exist_ok=True)
+
+        print(f"Exporting {len(category_lemmas)} lemmas to {dir_name}/{pos_subtype}...")
+
+        # Collect base records (now includes translations)
+        base_records = []
+
+        release_lang_set = set(translation_helpers.RELEASE_LANGUAGES)
+        secondary_lang_set = set(translation_helpers.SECONDARY_RELEASE_LANGUAGES)
+        extra_group_lang_sets = {
+            group_name: set(group_languages)
+            for group_name, group_languages in translation_helpers.EXTRA_RELEASE_LANGUAGE_GROUPS.items()
+        }
+
+        # Collect secondary translation records alongside base records
+        secondary_records: List[Dict[str, Any]] = []
+        extra_group_records: Dict[str, List[Dict[str, Any]]] = defaultdict(list)
+
+        for lemma in category_lemmas:
+            # Get all translations
+            all_translations = translation_helpers.get_all_translations(session, lemma)
+
+            # Route each language to the file that carries it. RELEASE_LANGUAGES
+            # ride in the base record, which lemma_to_release_record builds
+            # below, so this loop only needs to note that the language is in
+            # play; the secondary and grouped tiers are collected here.
+            secondary_translations_dict: Dict[str, str] = {}
+            secondary_translation_metadata_dict: Dict[str, Dict[str, str]] = {}
+            extra_group_translations: Dict[str, Dict[str, str]] = defaultdict(dict)
+            extra_group_metadata: Dict[str, Dict[str, Dict[str, str]]] = defaultdict(dict)
+            metadata_by_lang: Dict[str, Dict[str, str]] = {}
+            for trans_obj in lemma.translations:
+                metadata: Dict[str, str] = {}
+                # A bare "conventional" on a living language is the assumed
+                # default and is not written out.
+                if translation_helpers.translation_status_is_informative(
+                    trans_obj.language_code,
+                    trans_obj.translation_status,
+                    trans_obj.translation_status_note,
+                ):
+                    metadata["translation_status"] = trans_obj.translation_status
+                    if trans_obj.translation_status_note:
+                        metadata["translation_status_note"] = trans_obj.translation_status_note
+                if metadata:
+                    metadata_by_lang[trans_obj.language_code] = metadata
+
+            for lang_code, translation in all_translations.items():
+                if translation and translation.strip():
+                    if lang_code in release_lang_set:
+                        all_languages.add(lang_code)
+                    elif lang_code in secondary_lang_set:
+                        all_languages.add(lang_code)
+                        secondary_translations_dict[lang_code] = translation
+                        if lang_code in metadata_by_lang:
+                            secondary_translation_metadata_dict[lang_code] = metadata_by_lang[
+                                lang_code
+                            ]
+                    else:
+                        for group_name, group_lang_set in extra_group_lang_sets.items():
+                            if lang_code in group_lang_set:
+                                all_languages.add(lang_code)
+                                extra_group_translations[group_name][lang_code] = translation
+                                if lang_code in metadata_by_lang:
+                                    extra_group_metadata[group_name][lang_code] = metadata_by_lang[
+                                        lang_code
+                                    ]
+                                break
+
+            # The base record is built by storage.release.lemma, the same
+            # function the Barsukas sync uses, so the two exports cannot
+            # disagree about it. (They used to: this path wrote
+            # concept_label without the disambiguation and omitted qid and
+            # translation_disambiguations, so a CLI export after UI work
+            # stripped both from the tree.) Secondary and grouped-language
+            # records are this function's own concern and stay below.
+            base_records.append(lemma_to_release_record(lemma, qid=qid_by_lemma_id.get(lemma.id)))
+
+            # Secondary translations record (guid + translations only)
+            if secondary_translations_dict:
+                secondary_data: Dict[str, Any] = {
+                    "guid": lemma.guid,
+                    "translations": secondary_translations_dict,
+                }
+                if secondary_translation_metadata_dict:
+                    secondary_data["translation_metadata"] = secondary_translation_metadata_dict
+                secondary_records.append(secondary_data)
+
+            for group_name, group_translations in extra_group_translations.items():
+                if group_translations:
+                    group_data: Dict[str, Any] = {
+                        "guid": lemma.guid,
+                        "translations": group_translations,
+                    }
+                    group_metadata = extra_group_metadata.get(group_name, {})
+                    if group_metadata:
+                        group_data["translation_metadata"] = group_metadata
+                    extra_group_records[group_name].append(group_data)
+
+        # Write base.jsonl (now includes translations)
+        base_file = category_dir / "base.jsonl"
+        write_jsonl_atomic(base_file, base_records)
+
+        # Write secondary.jsonl (secondary language translations)
+        secondary_file = category_dir / "secondary.jsonl"
+        write_jsonl_atomic(secondary_file, secondary_records)
+
+        for group_name, group_records in extra_group_records.items():
+            group_file = category_dir / f"{group_name}.jsonl"
+            write_jsonl_atomic(group_file, group_records)
+
+        # Collect per-language data (derivative_forms, grammar_facts)
+        # keyed by language code -> list of per-lemma records
+        lang_records: Dict[str, List[Dict[str, Any]]] = defaultdict(list)
+
+        for lemma in category_lemmas:
+            # Derivative forms, split into the array-shaped "forms" and
+            # "synonyms" keys by storage.release.derivative_form -- the same
+            # builder the /sync/derivatives and /sync/synonyms pages use.
+            #
+            # Forms the langtools rules regenerate are withheld: the release
+            # carries only what cannot be derived, and generate_mechanical_forms
+            # puts the rest back on import.  Without this an export after a
+            # bootstrap writes back every generated paradigm.
+            forms_by_lang, synonyms_by_lang = forms_by_language(
+                without_derivable(session, lemma, lemma.derivative_forms)
+            )
+
+            # Variant forms (alternate spellings), already grouped per
+            # language and per variant by storage.release.variant.
+            variants_by_lang: Dict[str, List[Dict[str, Any]]] = release_variants_by_language(
+                lemma.variant_forms
+            )
+
+            # Group grammar facts by language (only whitelisted types)
+            facts_by_lang: Dict[str, List[Dict[str, Any]]] = {}
+            for fact in lemma.grammar_facts:
+                lang = fact.language_code
+                allowed_types = RELEASE_GRAMMAR_FACT_TYPES.get(lang)
+                if allowed_types and fact.fact_type in allowed_types:
+                    if lang not in facts_by_lang:
+                        facts_by_lang[lang] = []
+                    facts_by_lang[lang].append(
+                        {
+                            "fact_type": fact.fact_type,
+                            "fact_value": fact.fact_value,
+                        }
+                    )
+
+            # Build per-language records for release languages that have data
+            langs_with_data = (
+                set(forms_by_lang.keys())
+                | set(synonyms_by_lang.keys())
+                | set(variants_by_lang.keys())
+                | set(facts_by_lang.keys())
+            ) & release_lang_set
+            for lang in langs_with_data:
+                record: Dict[str, Any] = {"guid": lemma.guid}
+                if lang in forms_by_lang:
+                    record["forms"] = forms_by_lang[lang]
+                if lang in synonyms_by_lang:
+                    record["synonyms"] = synonyms_by_lang[lang]
+                if lang in variants_by_lang:
+                    record["variants"] = variants_by_lang[lang]
+                if lang in facts_by_lang:
+                    record["grammar_facts"] = facts_by_lang[lang]
+                lang_records[lang].append(record)
+
+        # Write {lang}.jsonl files for each language that has data
+        for lang, records in sorted(lang_records.items()):
+            lang_file = category_dir / f"{lang}.jsonl"
+            write_jsonl_atomic(lang_file, records)
+
+        # A language that had rows before and has none now must lose its
+        # file, or the export stops being a rebuild: the stale file would
+        # survive and be re-imported.  This is reachable whenever the last
+        # row for a language goes away -- deleting a translation, or the
+        # mechanical filter withholding a whole category's forms.
+        # "audio" is written by the separate lemma-audio export, so it is
+        # reserved here even though this pass never writes it.
+        reserved_stems = {"base", "secondary", "audio"} | set(extra_group_records)
+        for stale_file in category_dir.glob("*.jsonl"):
+            lang = stale_file.stem
+            if lang in reserved_stems or lang in lang_records:
+                continue
+            stale_file.unlink()
+
+    print(f"\nExport complete!")
+    print(f"Languages exported: {', '.join(sorted(all_languages))}")
+    return LemmaExportStats(lemmas=len(lemmas), languages=sorted(all_languages))

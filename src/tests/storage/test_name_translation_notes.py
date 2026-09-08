@@ -23,7 +23,7 @@ from storage.models.schema import Base
 from storage.release.name import (
     apply_release_record,
     import_release_record,
-    name_to_release_record,
+    to_release_record,
 )
 
 _RECORD_WITH_NOTES = {
@@ -69,7 +69,7 @@ class TestNameTranslationNotes(unittest.TestCase):
         self.session.commit()
         self.assertIsNotNone(name)
         assert name is not None  # for type checkers
-        self.assertEqual(_RECORD_WITH_NOTES, name_to_release_record(name))
+        self.assertEqual(_RECORD_WITH_NOTES, to_release_record(name))
 
     def test_applying_a_record_clears_the_difference(self) -> None:
         """The bug: after 'use release' the row still differed from its own file."""
@@ -78,13 +78,13 @@ class TestNameTranslationNotes(unittest.TestCase):
         set_name_translation(self.session, name, language_code="lt", translation="Džordžas")
         self.session.commit()
 
-        self.assertNotEqual(_RECORD_WITH_NOTES, name_to_release_record(name))
+        self.assertNotEqual(_RECORD_WITH_NOTES, to_release_record(name))
 
         apply_release_record(self.session, _RECORD_WITH_NOTES, name)
         self.session.commit()
         self.session.refresh(name)
 
-        self.assertEqual(_RECORD_WITH_NOTES, name_to_release_record(name))
+        self.assertEqual(_RECORD_WITH_NOTES, to_release_record(name))
 
     def test_omitted_notes_are_left_alone(self) -> None:
         """A record with no notes must not be treated as 'clear the notes'."""

@@ -57,7 +57,7 @@ def _isoformat(value: Any) -> Optional[str]:
     return str(value)
 
 
-def tombstone_to_release_record(tombstone: GuidTombstone) -> Dict[str, Any]:
+def to_release_record(tombstone: GuidTombstone) -> Dict[str, Any]:
     """Build the release JSONL record for one tombstone."""
     record: Dict[str, Any] = {
         "guid": tombstone.guid,
@@ -111,12 +111,10 @@ def write_release_records(release_dir: Path, records: Iterable[Dict[str, Any]]) 
     return release_file
 
 
-def export_tombstones_to_release(session: Session, release_dir: Path) -> int:
+def export_to_release(session: Session, release_dir: Path) -> int:
     """Export every tombstone to the release directory. Returns the count."""
     tombstones = session.query(GuidTombstone).order_by(GuidTombstone.guid).all()
-    write_release_records(
-        release_dir, [tombstone_to_release_record(tombstone) for tombstone in tombstones]
-    )
+    write_release_records(release_dir, [to_release_record(tombstone) for tombstone in tombstones])
     return len(tombstones)
 
 
@@ -146,7 +144,7 @@ def import_release_record(session: Session, record: Dict[str, Any]) -> GuidTombs
     )
 
 
-def import_tombstones_from_release(session: Session, release_dir: Path) -> int:
+def import_from_release(session: Session, release_dir: Path) -> int:
     """Import every tombstone record from a release directory. Returns the count.
 
     ``create_tombstone`` upserts on the GUID, so re-running this is safe and

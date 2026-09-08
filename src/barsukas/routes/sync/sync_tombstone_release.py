@@ -33,7 +33,7 @@ from storage.release.tombstone import (
     RELEASE_DIRNAME,
     import_release_record,
     read_release_records_by_guid,
-    tombstone_to_release_record,
+    to_release_record,
     write_release_records,
 )
 
@@ -96,7 +96,7 @@ SPEC = RecordSyncSpec(
     load_release=read_release_records_by_guid,
     write_release=write_release_records,
     query_rows=_query_tombstones,
-    to_record=tombstone_to_release_record,
+    to_record=to_release_record,
     import_record=import_release_record,
     apply_record=_apply_record,
     describe=_describe,

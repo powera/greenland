@@ -27,7 +27,7 @@ from barsukas.routes.sync.record_sync import (
 from storage.models.idiom import Idiom
 from storage.release.idiom import (
     apply_release_record,
-    idiom_to_release_record,
+    to_release_record,
     import_release_record,
     read_release_records_by_guid,
     write_release_records,
@@ -94,7 +94,7 @@ SPEC = RecordSyncSpec(
     load_release=read_release_records_by_guid,
     write_release=write_release_records,
     query_rows=_query_idioms,
-    to_record=idiom_to_release_record,
+    to_record=to_release_record,
     import_record=import_release_record,
     apply_record=apply_release_record,
     describe=_describe,

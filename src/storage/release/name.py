@@ -63,7 +63,7 @@ def translation_metadata_record(translation: NameTranslation) -> Dict[str, Any]:
     return metadata
 
 
-def name_to_release_record(name: Name) -> Dict[str, Any]:
+def to_release_record(name: Name) -> Dict[str, Any]:
     """Build the release JSONL record for one name.
 
     Languages are emitted in ``RELEASE_LANGUAGES`` order and then any remaining
@@ -141,7 +141,7 @@ def write_release_records(release_dir: Path, records: Iterable[Dict[str, Any]]) 
     return release_file
 
 
-def export_names_to_release(session: Session, release_dir: Path) -> int:
+def export_to_release(session: Session, release_dir: Path) -> int:
     """Export every GUIDed name to the release directory. Returns the count.
 
     Names without a GUID are drafts - a generator proposed them but they have
@@ -155,7 +155,7 @@ def export_names_to_release(session: Session, release_dir: Path) -> int:
         .order_by(Name.guid)
         .all()
     )
-    write_release_records(release_dir, [name_to_release_record(name) for name in names])
+    write_release_records(release_dir, [to_release_record(name) for name in names])
     return len(names)
 
 
@@ -251,7 +251,7 @@ def import_release_record(session: Session, record: Dict[str, Any]) -> Optional[
     return name
 
 
-def import_names_from_release(session: Session, release_dir: Path) -> Tuple[int, int]:
+def import_from_release(session: Session, release_dir: Path) -> Tuple[int, int]:
     """Import a release directory into the database.
 
     Returns ``(imported, skipped)``, where skipped counts records whose GUID was

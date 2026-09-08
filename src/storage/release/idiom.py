@@ -61,7 +61,7 @@ def equivalent_to_release_record(equivalent: IdiomEquivalent) -> Dict[str, Any]:
     return record
 
 
-def idiom_to_release_record(idiom: Idiom) -> Dict[str, Any]:
+def to_release_record(idiom: Idiom) -> Dict[str, Any]:
     """Build the release JSONL record for one idiom.
 
     Equivalents are grouped by language and sorted within a language by kind
@@ -134,7 +134,7 @@ def write_release_records(release_dir: Path, records: Iterable[Dict[str, Any]]) 
     return release_file
 
 
-def export_idioms_to_release(session: Session, release_dir: Path) -> int:
+def export_to_release(session: Session, release_dir: Path) -> int:
     """Export every GUIDed idiom to the release directory. Returns the count.
 
     Idioms without a GUID are drafts that have not been assigned a place in the
@@ -147,7 +147,7 @@ def export_idioms_to_release(session: Session, release_dir: Path) -> int:
         .order_by(Idiom.guid)
         .all()
     )
-    write_release_records(release_dir, [idiom_to_release_record(idiom) for idiom in idioms])
+    write_release_records(release_dir, [to_release_record(idiom) for idiom in idioms])
     return len(idioms)
 
 
@@ -168,7 +168,7 @@ def apply_release_record(session: Session, record: Dict[str, Any], idiom: Idiom)
     an *addition* and leave the old wording behind; replacing avoids inventing a
     second equivalent nobody asked for. The reverse direction - writing the
     database's idiom into the file - goes through
-    :func:`idiom_to_release_record`, so the two stay symmetric.
+    :func:`to_release_record`, so the two stay symmetric.
     """
     source = record.get("source") or {}
     idiom.source_language_code = source.get("language", idiom.source_language_code)
@@ -253,7 +253,7 @@ def import_release_record(session: Session, record: Dict[str, Any]) -> Optional[
     return idiom
 
 
-def import_idioms_from_release(session: Session, release_dir: Path) -> Tuple[int, int]:
+def import_from_release(session: Session, release_dir: Path) -> Tuple[int, int]:
     """Import a release directory into the database.
 
     Returns ``(imported, skipped)``, where skipped counts records whose GUID was
