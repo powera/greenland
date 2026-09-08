@@ -264,4 +264,10 @@ def import_from_release(session: Session, release_dir: Path) -> Tuple[int, int]:
             skipped += 1
         else:
             imported += 1
+    # Commit here rather than leaving it to the caller, as the sentence,
+    # tombstone and lemma-audio importers already do. A commit flushes the
+    # whole session, so a module that left work pending was saved only when
+    # some later module in the same run happened to commit -- which made
+    # importing this element type on its own silently lose every row.
+    session.commit()
     return imported, skipped

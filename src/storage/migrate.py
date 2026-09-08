@@ -1,11 +1,14 @@
 #!/usr/bin/env python3
-"""Migrate data between SQLite and JSONL storage backends.
+"""Whole-database JSONL dump/load, and path-taking wrappers for the release CLI.
 
-This script allows you to export data from SQLite to JSONL format,
-or import data from JSONL to SQLite.
+The per-element-type serialization all lives in :mod:`storage.release` now, and
+the command line is :mod:`storage.release.cli`. What is left here is the
+whole-database path through the JSONL backend -- the parts of ``data/release``
+no element module owns (verifications, operation logs, audio reviews) travel
+this way -- plus thin wrappers that open a session from a path so callers
+holding a ``sqlite_path`` rather than a ``Session`` keep working.
 """
 
-import argparse
 import json
 import os
 import sys
@@ -20,7 +23,6 @@ if __name__ == "__main__":
     if src_path not in sys.path:
         sys.path.insert(0, src_path)
 
-import constants
 from storage.backend.config import BackendType, DataSourceConfig
 from storage.backend.factory import create_session
 from storage.release import lemma_audio
@@ -695,145 +697,3 @@ def _write_jsonl_atomic(file_path: Path, records: List[Dict[str, Any]]) -> None:
     re-sort them.
     """
     write_jsonl_atomic(file_path, records, sort_by_guid=False)
-
-
-def main() -> None:
-    """Main entry point."""
-    parser = argparse.ArgumentParser(description="Migrate data between storage backends")
-    parser.add_argument(
-        "direction",
-        choices=[
-            "sqlite-to-jsonl",
-            "postgres-to-jsonl",
-            "sqlite-to-release",
-            "sqlite-to-sentence-release",
-            "sqlite-to-phrase-release",
-            "sqlite-to-idiom-release",
-            "idiom-release-to-sqlite",
-            "sqlite-to-name-release",
-            "name-release-to-sqlite",
-            "tombstone-release-to-sqlite",
-            "sqlite-to-lemma-audio-release",
-            "lemma-audio-release-to-sqlite",
-        ],
-        help="Migration direction",
-    )
-    parser.add_argument(
-        "--sqlite-path",
-        default=constants.WORDFREQ_DB_PATH,
-        help=f"Path to SQLite database (default: {constants.WORDFREQ_DB_PATH})",
-    )
-    parser.add_argument(
-        "--postgres-url",
-        default=None,
-        help="PostgreSQL connection URL (reads from env/key file if not provided)",
-    )
-    parser.add_argument(
-        "--jsonl-dir",
-        default="data/working",
-        help="Path to JSONL data directory (default: data/working)",
-    )
-    parser.add_argument(
-        "--release-dir",
-        default=os.path.join(constants.RELEASE_DIR, "lemmas"),
-        help="Path to release directory (default: <release root>/lemmas)",
-    )
-    parser.add_argument(
-        "--prune",
-        action="store_true",
-        help=(
-            "When syncing lemma audio release -> SQLite, delete exportable "
-            "lemma-audio rows that are no longer present in the release files"
-        ),
-    )
-    parser.add_argument(
-        "--category",
-        action="append",
-        dest="categories",
-        metavar="POS_DIR/SUBTYPE",
-        help=(
-            "Limit lemma-audio export/import to one category, e.g. nouns/food. "
-            "Repeatable; omit to process every category"
-        ),
-    )
-    parser.add_argument(
-        "--sentence-release-dir",
-        default=os.path.join(constants.RELEASE_DIR, "sentences"),
-        help="Path to sentence release directory (default: <release root>/sentences)",
-    )
-    parser.add_argument(
-        "--phrase-release-dir",
-        default=os.path.join(constants.RELEASE_DIR, "phrases"),
-        help="Path to phrase release directory (default: <release root>/phrases)",
-    )
-    parser.add_argument(
-        "--idiom-release-dir",
-        default=os.path.join(constants.RELEASE_DIR, "idioms"),
-        help="Path to idiom release directory (default: <release root>/idioms)",
-    )
-    parser.add_argument(
-        "--name-release-dir",
-        default=os.path.join(constants.RELEASE_DIR, "names"),
-        help="Path to name release directory (default: <release root>/names)",
-    )
-    parser.add_argument(
-        "--tombstone-release-dir",
-        default=os.path.join(constants.RELEASE_DIR, "tombstones"),
-        help="Path to tombstone release directory (default: <release root>/tombstones)",
-    )
-
-    args = parser.parse_args()
-
-    lemma_audio_categories: Optional[List[lemma_audio.Category]] = None
-    if args.categories:
-        lemma_audio_categories = []
-        for slug in args.categories:
-            parsed_category = lemma_audio.parse_category_slug(slug)
-            if parsed_category is None:
-                print(f"Invalid --category {slug!r}; expected POS_DIR/SUBTYPE, e.g. nouns/food")
-                sys.exit(1)
-            lemma_audio_categories.append(parsed_category)
-
-    if args.direction == "sqlite-to-jsonl":
-        export_sqlite_to_jsonl(args.sqlite_path, args.jsonl_dir)
-    elif args.direction == "postgres-to-jsonl":
-        postgres_url = args.postgres_url
-        if not postgres_url:
-            # Try to build from environment/key file
-            postgres_url = DataSourceConfig.build_postgres_url()
-        export_postgres_to_jsonl(postgres_url, args.jsonl_dir)
-    elif args.direction == "sqlite-to-release":
-        export_sqlite_to_release(args.sqlite_path, args.release_dir)
-        export_sqlite_to_lemma_audio_release(args.sqlite_path, args.release_dir)
-    elif args.direction == "sqlite-to-sentence-release":
-        export_sqlite_to_sentence_release(args.sqlite_path, args.sentence_release_dir)
-    elif args.direction == "sqlite-to-phrase-release":
-        export_sqlite_to_phrase_release(args.sqlite_path, args.phrase_release_dir)
-    elif args.direction == "sqlite-to-idiom-release":
-        export_sqlite_to_idiom_release(args.sqlite_path, args.idiom_release_dir)
-    elif args.direction == "idiom-release-to-sqlite":
-        import_idiom_release_to_sqlite(args.sqlite_path, args.idiom_release_dir)
-    elif args.direction == "sqlite-to-name-release":
-        export_sqlite_to_name_release(args.sqlite_path, args.name_release_dir)
-    elif args.direction == "name-release-to-sqlite":
-        import_name_release_to_sqlite(args.sqlite_path, args.name_release_dir)
-    elif args.direction == "tombstone-release-to-sqlite":
-        import_tombstone_release_to_sqlite(args.sqlite_path, args.tombstone_release_dir)
-    elif args.direction == "sqlite-to-lemma-audio-release":
-        export_sqlite_to_lemma_audio_release(
-            args.sqlite_path, args.release_dir, categories=lemma_audio_categories
-        )
-    elif args.direction == "lemma-audio-release-to-sqlite":
-        import_lemma_audio_release_to_sqlite(
-            args.sqlite_path,
-            args.release_dir,
-            prune=args.prune,
-            categories=lemma_audio_categories,
-        )
-    else:
-        print(f"Unknown migration direction: {args.direction}")
-        sys.exit(1)
-
-
-if __name__ == "__main__":
-    main()

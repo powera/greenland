@@ -169,3 +169,60 @@ class TestUnshippedFieldsStayOut:
                         if field in entry and entry[field] is None:
                             offenders.setdefault(f"{array_key}.{field}", guid)
         assert not offenders, f"null placeholder keys written: {offenders}"
+
+
+class TestImportPersists:
+    """Importing one element type on its own must reach the disk.
+
+    Every importer commits its own work. That was not always true, and the
+    inconsistency hid itself: a commit flushes the whole session, so a module
+    that left work pending was still saved whenever a later module in the same
+    run committed. Only importing such an element type *alone* lost the rows --
+    which is exactly what scripts/bootstrap.sh does.
+    """
+
+    def test_a_lone_import_reaches_the_disk(self, tmp_path: Path, checked_in_release: Path) -> None:
+        import sqlite3
+        import subprocess
+        import sys
+
+        from regtest.release.conftest import REPOSITORY_ROOT, SOURCE_ROOT, build_database
+
+        database = tmp_path / "import.sqlite"
+        build_database(database, checked_in_release)
+
+        connection = sqlite3.connect(str(database))
+        try:
+            connection.execute("DELETE FROM idiom_equivalents")
+            connection.execute("DELETE FROM idioms")
+            connection.commit()
+        finally:
+            connection.close()
+
+        subprocess.run(
+            [
+                sys.executable,
+                "-m",
+                "storage.release.cli",
+                # Alone, deliberately: pairing this with a second element type
+                # would mask a missing commit rather than expose it.
+                "import",
+                "idioms",
+                "--sqlite-path",
+                str(database),
+                "--release-root",
+                str(checked_in_release),
+            ],
+            cwd=REPOSITORY_ROOT,
+            env={"PYTHONPATH": str(SOURCE_ROOT), "GREENLAND_TEST_MODE": "1", "PATH": ""},
+            check=True,
+            capture_output=True,
+        )
+
+        connection = sqlite3.connect(str(database))
+        try:
+            imported = connection.execute("SELECT COUNT(*) FROM idioms").fetchone()[0]
+        finally:
+            connection.close()
+
+        assert imported > 0, "idiom import did not reach the disk"

@@ -4,7 +4,7 @@
 
 A tombstone records that a GUID has been permanently retired.  Until this page
 existed the file moved in one direction only and only in bulk: written by a full
-``sqlite-to-release`` export, and read back only by a complete bootstrap.  There
+``export tombstones`` run, and read back only by a complete bootstrap.  There
 was no way to see that the database and the release file disagreed about which
 GUIDs are spent, which matters because ``storage.utils.guid`` refuses to reissue
 exactly the GUIDs this file names.

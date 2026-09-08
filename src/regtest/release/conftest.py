@@ -22,14 +22,9 @@ if str(SOURCE_ROOT) not in sys.path:
 
 import constants  # noqa: E402
 
-#: The entity exports that make up a full release write, as
-#: (direction, dir-flag, subdirectory).
-EXPORT_DIRECTIONS = (
-    ("sqlite-to-release", "--release-dir", "lemmas"),
-    ("sqlite-to-sentence-release", "--sentence-release-dir", "sentences"),
-    ("sqlite-to-phrase-release", "--phrase-release-dir", "phrases"),
-    ("sqlite-to-idiom-release", "--idiom-release-dir", "idioms"),
-)
+#: The element types a full release write covers. Not "all": that would also
+#: run the whole-database dump, which writes elsewhere.
+EXPORT_ENTITIES = ("lemmas", "sentences", "phrases", "idioms", "tombstones", "lemma-audio")
 
 
 def read_release_sentences(release_root: Path) -> Dict[str, Dict[str, Any]]:
@@ -90,23 +85,23 @@ def export_release(database_path: Path, destination: Path, seed_from: Path) -> N
     if destination.exists():
         shutil.rmtree(destination)
     shutil.copytree(seed_from, destination)
-    for direction, dir_flag, subdirectory in EXPORT_DIRECTIONS:
-        subprocess.run(
-            [
-                sys.executable,
-                "-m",
-                "storage.migrate",
-                "--sqlite-path",
-                str(database_path),
-                dir_flag,
-                str(destination / subdirectory),
-                direction,
-            ],
-            cwd=REPOSITORY_ROOT,
-            env={"PYTHONPATH": str(SOURCE_ROOT), "GREENLAND_TEST_MODE": "1", "PATH": ""},
-            check=True,
-            capture_output=True,
-        )
+    subprocess.run(
+        [
+            sys.executable,
+            "-m",
+            "storage.release.cli",
+            "export",
+            *EXPORT_ENTITIES,
+            "--sqlite-path",
+            str(database_path),
+            "--release-root",
+            str(destination),
+        ],
+        cwd=REPOSITORY_ROOT,
+        env={"PYTHONPATH": str(SOURCE_ROOT), "GREENLAND_TEST_MODE": "1", "PATH": ""},
+        check=True,
+        capture_output=True,
+    )
 
 
 @pytest.fixture(scope="session")

@@ -55,9 +55,9 @@ echo ""
 # Idioms are small, hand-curated, and have no sync UI yet, so they are loaded
 # here rather than left to the /sync flow that lemmas use.
 echo "=== Step 2: Importing idioms from data/release ==="
-PYTHONPATH=src python -m storage.migrate idiom-release-to-sqlite \
+PYTHONPATH=src python -m storage.release.cli import idioms \
   --sqlite-path "$DB_PATH" \
-  --idiom-release-dir data/release/idioms
+  --release-root data/release
 
 if [[ $? -ne 0 ]]; then
   echo "❌ Failed to import idioms"

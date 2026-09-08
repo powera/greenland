@@ -19,7 +19,7 @@ sync would share anyway - the file I/O, the form parsing, the counters, the
 paging, the templates - is shared.
 
 Before this page a variant could only reach ``data/release`` through a
-whole-tree ``sqlite-to-release`` export, which is why exactly one exists there.
+whole-tree ``export lemmas`` run, which is why exactly one exists there.
 """
 
 import logging

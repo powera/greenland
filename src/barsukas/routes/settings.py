@@ -72,12 +72,12 @@ def migrate_form() -> ResponseReturnValue:
     backend_type = backend_config.backend_type
     jsonl_dir: str = request.form.get("jsonl_dir", "data/working")
 
-    # Determine direction and validate based on backend type
+    # The CLI picks its source backend from the flags below; this only has to
+    # validate that the chosen backend can be read.
     if backend_type == BackendType.POSTGRES:
-        direction = "postgres-to-jsonl"
         # PostgreSQL uses connection URL from config, no file path validation needed
+        pass
     elif backend_type == BackendType.SQLITE:
-        direction = "sqlite-to-jsonl"
         sqlite_path: str = request.form.get("sqlite_path", current_app.config.get("DB_PATH", ""))
         # Validate SQLite path exists
         if not Path(sqlite_path).exists():
@@ -92,8 +92,9 @@ def migrate_form() -> ResponseReturnValue:
         cmd: list[str] = [
             sys.executable,
             "-m",
-            "storage.migrate",
-            direction,
+            "storage.release.cli",
+            "export",
+            "database",
             "--jsonl-dir",
             jsonl_dir,
         ]
@@ -137,14 +138,12 @@ def migrate() -> ResponseReturnValue:
     requested_direction: Optional[str] = data.get("direction") if data else None
 
     if backend_type == BackendType.POSTGRES:
-        direction = "postgres-to-jsonl"
         if requested_direction and requested_direction not in ("postgres-to-jsonl", "auto"):
             return (
                 jsonify({"error": f"Cannot use {requested_direction} with PostgreSQL backend"}),
                 400,
             )
     elif backend_type == BackendType.SQLITE:
-        direction = "sqlite-to-jsonl"
         if requested_direction and requested_direction not in ("sqlite-to-jsonl", "auto"):
             return jsonify({"error": f"Cannot use {requested_direction} with SQLite backend"}), 400
         # Validate SQLite path
@@ -161,8 +160,9 @@ def migrate() -> ResponseReturnValue:
         cmd: list[str] = [
             sys.executable,
             "-m",
-            "storage.migrate",
-            direction,
+            "storage.release.cli",
+            "export",
+            "database",
             "--jsonl-dir",
             jsonl_dir,
         ]
