@@ -5,6 +5,8 @@
 import os
 from pathlib import Path
 
+import constants
+
 
 class Config:
     """Application configuration."""
@@ -29,9 +31,9 @@ class Config:
     OPERATION_LOG_SOURCE = "barsukas-web-interface"
 
     # Validation settings
-    MIN_DIFFICULTY_LEVEL = 1
-    MAX_DIFFICULTY_LEVEL = 36
-    EXCLUDE_DIFFICULTY_LEVEL = -1
+    MIN_DIFFICULTY_LEVEL = constants.MIN_DIFFICULTY_LEVEL
+    MAX_DIFFICULTY_LEVEL = constants.MAX_DIFFICULTY_LEVEL
+    EXCLUDE_DIFFICULTY_LEVEL = constants.EXCLUDE_DIFFICULTY_LEVEL
 
     # Access control
     READONLY = False  # Can be overridden at runtime

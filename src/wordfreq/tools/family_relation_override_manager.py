@@ -52,6 +52,12 @@ from wordfreq.tools.family_relation_priorities import (
 
 # Difficulty level used for excluded/null terms
 EXCLUDED_DIFFICULTY_LEVEL = -1
+FAMILY_NOTES_PREFIX = "Family relation:"
+
+
+def _is_family_override(override: Optional[LemmaDifficultyOverride]) -> bool:
+    """Return whether an override is owned by this derived-data tool."""
+    return bool(override and (override.notes or "").startswith(FAMILY_NOTES_PREFIX))
 
 
 @dataclass
@@ -184,6 +190,9 @@ class FamilyRelationOverrideManager:
             for lemma in lemmas:
                 # Get current override state
                 current_override = get_difficulty_override(self.session, lemma.id, target_language)
+                if current_override is not None and not _is_family_override(current_override):
+                    # Preserve manually maintained and other derived overrides.
+                    continue
                 current_override_level = (
                     current_override.difficulty_level if current_override else None
                 )
@@ -257,7 +266,7 @@ class FamilyRelationOverrideManager:
         self,
         target_language: str,
         dry_run: bool = False,
-        notes_template: str = "Family relation: {reason}",
+        notes_template: str = f"{FAMILY_NOTES_PREFIX} {{reason}}",
     ) -> OverrideSummary:
         """
         Apply family relation overrides for a target language.
@@ -308,7 +317,7 @@ class FamilyRelationOverrideManager:
     def apply_overrides_all_languages(
         self,
         dry_run: bool = False,
-        notes_template: str = "Family relation: {reason}",
+        notes_template: str = f"{FAMILY_NOTES_PREFIX} {{reason}}",
     ) -> Dict[str, OverrideSummary]:
         """
         Apply family relation overrides for all supported languages.
@@ -368,7 +377,7 @@ class FamilyRelationOverrideManager:
         count = 0
         for lemma in self.get_all_family_relation_words():
             override = get_difficulty_override(self.session, lemma.id, target_language)
-            if override:
+            if _is_family_override(override):
                 delete_difficulty_override(self.session, lemma.id, target_language)
                 count += 1
 

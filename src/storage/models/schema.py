@@ -333,7 +333,7 @@ class LemmaDifficultyOverride(Base):
     )  # e.g., "zh", "fr", "de"
     difficulty_level: Mapped[int] = mapped_column(
         Integer, nullable=False
-    )  # Trakaido level (1-20) or -1 to exclude
+    )  # Trakaido level (1-100) or -1 to exclude
 
     # Metadata
     notes: Mapped[Optional[str]] = mapped_column(Text, nullable=True)  # Reason for override

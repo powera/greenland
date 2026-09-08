@@ -121,7 +121,7 @@ class LemmaQueryBuilder:
         """Filter by difficulty level.
 
         Args:
-            level: Difficulty level (1-20 for Trakaido levels), or None to skip filter
+            level: Difficulty level (1-100 for Trakaido levels), or None to skip filter
 
         Returns:
             Self for method chaining

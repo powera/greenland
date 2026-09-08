@@ -52,6 +52,12 @@ from wordfreq.tools.country_word_priorities import (
 
 # Difficulty level for excluded words (not relevant for this language)
 EXCLUDED_LEVEL = -1
+COUNTRY_NOTES_PREFIX = "Country word priority:"
+
+
+def _is_country_override(override: Optional[LemmaDifficultyOverride]) -> bool:
+    """Return whether an override is owned by this derived-data tool."""
+    return bool(override and (override.notes or "").startswith(COUNTRY_NOTES_PREFIX))
 
 
 @dataclass
@@ -260,6 +266,10 @@ class CountryOverrideManager:
             for lemma, relationship in related_words:
                 # Get current state
                 current_override = get_difficulty_override(self.session, lemma.id, target_language)
+                if current_override is not None and not _is_country_override(current_override):
+                    # A manually maintained override is authoritative and must
+                    # not be replaced by this derived country configuration.
+                    continue
                 current_override_level = (
                     current_override.difficulty_level if current_override else None
                 )
@@ -300,7 +310,7 @@ class CountryOverrideManager:
         self,
         target_language: str,
         dry_run: bool = False,
-        notes_template: str = "Country word priority: {reason}",
+        notes_template: str = f"{COUNTRY_NOTES_PREFIX} {{reason}}",
     ) -> OverrideSummary:
         """
         Apply country-related overrides for a target language.
@@ -347,7 +357,7 @@ class CountryOverrideManager:
     def apply_overrides_all_languages(
         self,
         dry_run: bool = False,
-        notes_template: str = "Country word priority: {reason}",
+        notes_template: str = f"{COUNTRY_NOTES_PREFIX} {{reason}}",
     ) -> Dict[str, OverrideSummary]:
         """
         Apply country-related overrides for all supported languages.
@@ -409,7 +419,7 @@ class CountryOverrideManager:
         count = 0
         for lemma in self.get_all_country_related_words():
             override = get_difficulty_override(self.session, lemma.id, target_language)
-            if override:
+            if _is_country_override(override):
                 delete_difficulty_override(self.session, lemma.id, target_language)
                 count += 1
 

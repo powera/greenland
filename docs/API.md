@@ -59,7 +59,7 @@ Search for lemmas by keyword across multiple fields (lemma text, definition, dis
 **Parameters:**
 - `q` (query, required): Search query string
 - `pos_type` (query, optional): Filter by part of speech (e.g., `noun`, `verb`)
-- `difficulty` (query, optional): Filter by difficulty level (1-20, `-1` for excluded, `null` for not set)
+- `difficulty` (query, optional): Filter by difficulty level (1-100, `-1` for excluded, `null` for not set)
 - `limit` (query, optional): Maximum number of results to return (default: 20, max: 100)
 - `offset` (query, optional): Number of results to skip for pagination (default: 0)
 
@@ -179,7 +179,7 @@ GET /api/v1/lemma/N01_001
 - `definition`: The English definition
 - `pos_type`: Part of speech type (noun, verb, adjective, etc.)
 - `pos_subtype`: Part of speech subtype (if populated, otherwise `null`)
-- `difficulty_level`: Difficulty level (1-20, or -1 for excluded, or `null` if not set)
+- `difficulty_level`: Difficulty level (1-100, or -1 for excluded, or `null` if not set)
 - `verified`: Whether the lemma has been human-verified
 - `tags`: JSON array of tags (or `null` if not set)
 - `disambiguation`: Disambiguation text (or `null`)

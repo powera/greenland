@@ -9,6 +9,7 @@ from typing import Any, Dict, List
 
 from sqlalchemy.orm import Session
 
+import constants
 from storage.models.schema import Lemma, Sentence, SentenceTranslation, SentenceWordHint
 
 logger = logging.getLogger(__name__)
@@ -33,7 +34,11 @@ def check_sentence_levels(session: Session, *, fix: bool = False) -> Dict[str, A
                 .all()
             )
             difficulty_levels = [
-                21 if lemma.difficulty_level == -1 else lemma.difficulty_level
+                (
+                    constants.MAX_DIFFICULTY_LEVEL + 1
+                    if lemma.difficulty_level == constants.EXCLUDE_DIFFICULTY_LEVEL
+                    else lemma.difficulty_level
+                )
                 for _word_hint, lemma in word_hints
                 if lemma.difficulty_level is not None
             ]

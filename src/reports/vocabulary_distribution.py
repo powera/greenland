@@ -8,6 +8,7 @@ from typing import Any, Dict
 
 from sqlalchemy import func
 
+import constants
 from agents.common.common_args import add_backend_args, add_common_args, get_data_source_config
 from storage.backend import create_session
 from storage.models.schema import Lemma
@@ -54,21 +55,31 @@ def check_subtype_coverage(session: Any, *, min_expected: int = 10) -> Dict[str,
 
 
 def check_difficulty_level_distribution(session: Any) -> Dict[str, Any]:
-    """Return curated lemma counts and imbalance information for levels 1-20."""
+    """Return curated lemma counts and imbalance information for supported levels."""
     try:
         level_counts = (
             session.query(Lemma.difficulty_level, func.count(Lemma.id).label("count"))
-            .filter(Lemma.difficulty_level.isnot(None), Lemma.guid.isnot(None))
+            .filter(
+                Lemma.difficulty_level.between(
+                    constants.MIN_DIFFICULTY_LEVEL,
+                    constants.MAX_DIFFICULTY_LEVEL,
+                ),
+                Lemma.guid.isnot(None),
+            )
             .group_by(Lemma.difficulty_level)
             .order_by(Lemma.difficulty_level)
             .all()
         )
         distribution = {level: count for level, count in level_counts}
         total_words = sum(distribution.values())
-        average_per_level = total_words / 20 if total_words > 0 else 0
+        populated_levels = len(distribution)
+        average_per_level = total_words / populated_levels if populated_levels else 0
         gaps = []
         imbalanced = []
-        for level in range(1, 21):
+        for level in range(
+            constants.MIN_DIFFICULTY_LEVEL,
+            constants.MAX_DIFFICULTY_LEVEL + 1,
+        ):
             count = distribution.get(level, 0)
             if count == 0:
                 gaps.append(level)

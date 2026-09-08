@@ -17,7 +17,7 @@ Every `Lemma` has a `difficulty_level` field that serves as the default level ac
 The `LemmaDifficultyOverride` table stores language-specific exceptions:
 - `lemma_id`: References the lemma
 - `language_code`: Two-letter language code (e.g., 'zh', 'fr', 'de')
-- `difficulty_level`: Override level (1-20) or -1 to exclude
+- `difficulty_level`: Override level (1-100) or -1 to exclude
 - `notes`: Optional explanation for the override
 
 ### Effective Difficulty Level
