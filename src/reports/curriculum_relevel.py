@@ -437,21 +437,25 @@ def build_warnings(session: Session, assignments: Sequence[Assignment]) -> list[
     seen_inflections: set[tuple[str, int]] = set()
     assignment_by_id = {assignment.lemma_id: assignment for assignment in assignments}
     for derivative_form in english_forms:
+        owner = assignment_by_id.get(derivative_form.lemma_id)
+        if owner is None or (
+            derivative_form.derivative_form_text.casefold() == owner.lemma_text.casefold()
+        ):
+            continue
         matching_assignments = [
             item
             for item in active_text_to_assignments.get(
                 derivative_form.derivative_form_text.casefold(), []
             )
-            if item.lemma_id != derivative_form.lemma_id
+            if item.lemma_id != derivative_form.lemma_id and item.pos_type == owner.pos_type
         ]
         matching_guids = [item.guid for item in matching_assignments]
-        if not matching_guids or derivative_form.lemma_id not in assignment_by_id:
+        if not matching_guids:
             continue
         warning_key = (derivative_form.derivative_form_text.casefold(), derivative_form.lemma_id)
         if warning_key in seen_inflections:
             continue
         seen_inflections.add(warning_key)
-        owner = assignment_by_id[derivative_form.lemma_id]
         warnings.append(
             WarningRow(
                 "inflection-as-lemma",
