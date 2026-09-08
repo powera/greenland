@@ -29,6 +29,23 @@ class TestIdempotence:
         differing = sorted(name for name in first if first[name] != second[name])
         assert not differing, f"{len(differing)} file(s) changed on re-export: {differing[:10]}"
 
+    def test_the_first_pass_reproduces_the_committed_tree(
+        self, checked_in_release: Path, first_pass: Path
+    ) -> None:
+        """One pass over data/release reproduces it byte for byte.
+
+        Stronger than idempotence, and only true since the tree was itself
+        rewritten by the exporter: before that it still held records the schema
+        could not represent, so the first pass normalized them away. Keeping
+        this green means data/release stays something the pipeline can rebuild.
+        """
+        committed = jsonl_digest(checked_in_release)
+        exported = jsonl_digest(first_pass)
+
+        assert set(committed) == set(exported), "the export wrote a different set of files"
+        differing = sorted(name for name in committed if committed[name] != exported[name])
+        assert not differing, f"{len(differing)} file(s) differ from data/release: {differing[:10]}"
+
     def test_the_tree_is_not_empty(self, first_pass: Path) -> None:
         """Guard against a vacuous pass: an empty export would satisfy every
         equality above."""

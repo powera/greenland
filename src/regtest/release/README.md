@@ -19,19 +19,21 @@ GREENLAND_TEST_MODE=1 ./run_tests.sh regtest src/regtest/release
 
 ## What "correct" means here
 
-The pipeline is **not** expected to reproduce `data/release` byte-for-byte on
-the first pass. A release file can legitimately contain things the schema
-cannot hold, and the import drops them:
+`data/release` is a **fixed point**: exporting a database built from the tree
+reproduces the tree byte for byte. That is the strongest form of the property
+and what these tests pin first.
+
+It was not true until the tree was rewritten by the exporter. A release file
+could hold things the schema cannot, and the import dropped them:
 
 * **Unlinked word hints.** A hint referencing neither a lemma nor a name
-  violates `ck_word_hint_has_reference`, so it cannot be stored. These are word
-  tokens predating per-word decomposition ("my", "bike", "math"); the export
-  now drops them rather than writing rows no import can read back.
-* **Hints pointing at a tombstoned lemma.** `S_00780` references `N27_003`,
-  retired as `wrong_category`. The import correctly refuses to resolve a
-  retired GUID.
+  violates `ck_word_hint_has_reference`, so it could not be stored. 704 such
+  hints were word tokens predating per-word decomposition ("my", "bike",
+  "math"); they named no vocabulary and were dropped on every rebuild.
+* **A hint pointing at a tombstoned lemma.** `S_00780` referenced `N27_003`,
+  retired as `wrong_category`, which no import can resolve.
 
-The property that must hold is therefore **idempotence**: exporting a database
-that was itself built from an export reproduces that export exactly. A first
-pass may normalize; a second pass must change nothing. That is what these tests
-pin, along with the specific losses that motivated them.
+Both are now gone from the tree, so the first pass changes nothing. The
+idempotence check is kept as well: it is the assertion that still holds if the
+tree ever drifts again, and it localizes the failure to the pipeline rather
+than to the data.
