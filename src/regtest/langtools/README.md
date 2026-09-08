@@ -3,18 +3,20 @@
 This directory preserves detailed linguistic examples for the rule-based
 `langtools` implementations. These checks are useful while changing mechanical
 conjugation or inflection code, but they are intentionally outside `src/tests`
-so the smoke, portable, base, and all targets do not collect them.
+so the smoke, affected, and all targets do not collect them.
 
-Run the suite explicitly when working on mechanical language generation:
+Run them with the `regtest` target when working on mechanical language
+generation:
 
 ```bash
-GREENLAND_TEST_MODE=1 PYTHONPATH=src python -m pytest src/regtest/langtools
+GREENLAND_TEST_MODE=1 ./run_tests.sh regtest
 ```
 
-A single language or behavior can be selected in the usual pytest way:
+Arguments pass through to pytest, so a single language or behavior can be
+selected the usual way:
 
 ```bash
-GREENLAND_TEST_MODE=1 PYTHONPATH=src python -m pytest \
+GREENLAND_TEST_MODE=1 ./run_tests.sh regtest \
   src/regtest/langtools/test_es_conjugation.py -k ir
 ```
 

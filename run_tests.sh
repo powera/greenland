@@ -4,6 +4,7 @@
 #   ./run_tests.sh smoke      fast import/startup checks; run on every commit
 #   ./run_tests.sh affected   smoke plus the tests covering your changed files
 #   ./run_tests.sh all        the whole of src/tests
+#   ./run_tests.sh regtest    the detailed grammar/linguistic tables in src/regtest
 #
 # Any extra arguments are passed through to pytest, so this works:
 #   ./run_tests.sh all -k combined_rank -x
@@ -18,6 +19,14 @@
 # prints which test dirs actually reach each source dir.  Rerun it after a large
 # refactor and update the map by hand.  Over-selection is the intended failure
 # mode: an unmapped path runs the whole suite rather than nothing.
+#
+# `regtest` runs src/regtest, which none of the other targets collect: pytest's
+# testpaths is src/tests, and `all` names that path directly.  That is on
+# purpose.  The regtests pin *output tables* -- 500-odd verb forms per language,
+# across 20+ languages as they get written -- so their case count grows with
+# linguistic coverage, not with code.  They are the run you want when changing
+# mechanical conjugation or inflection, and noise on an ordinary commit.  Run it
+# when you touch src/langtools or anything else with a src/regtest/ mirror.
 #
 # `base` and `portable` were removed.  base duplicated all (it was the whole of
 # src/tests), and portable's one path exclusion was stale -- every optional
@@ -53,6 +62,9 @@ case "$TARGET" in
     python -m pytest src/tests -m smoke || exit $?
     exec python -m pytest $SELECTED
     ;;
+  regtest)
+    exec python -m pytest src/regtest "$@"
+    ;;
   base|portable)
     echo "error: the '$TARGET' target was removed; use 'affected' before a commit or 'all'." >&2
     exit 2
@@ -61,7 +73,7 @@ case "$TARGET" in
     exec python -m pytest src/tests "$@"
     ;;
   *)
-    echo "usage: $0 {smoke|affected|all} [pytest args...]" >&2
+    echo "usage: $0 {smoke|affected|regtest|all} [pytest args...]" >&2
     exit 2
     ;;
 esac
