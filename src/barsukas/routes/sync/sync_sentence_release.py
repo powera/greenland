@@ -12,6 +12,8 @@ from flask import Blueprint, flash, g, redirect, render_template, request, url_f
 from flask.typing import ResponseReturnValue
 from sqlalchemy.orm import selectinload
 
+import constants
+
 from barsukas.routes.sync import release_io
 from barsukas.routes.sync.actions import (
     SKIP,
@@ -50,9 +52,7 @@ bp = Blueprint("sync_sentence_release", __name__, url_prefix="/sync/sentences")
 # __file__ is src/barsukas/routes/sync/sync_sentence_release.py
 # .parent = sync/, .parent.parent = routes/, .parent.parent.parent = barsukas/,
 # .parent.parent.parent.parent = src/, .parent.parent.parent.parent.parent = repo root
-DEFAULT_SENTENCE_RELEASE_DIR = (
-    Path(__file__).parent.parent.parent.parent.parent / "data" / "release" / "sentences"
-)
+DEFAULT_SENTENCE_RELEASE_DIR = Path(constants.RELEASE_DIR) / "sentences"
 
 
 def _get_sentence_release_dir() -> Path:

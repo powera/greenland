@@ -22,8 +22,9 @@ mechanism exists to prevent.  Export is the only action offered here.
 from pathlib import Path
 from typing import Any, Dict, List, Tuple
 
+import constants
+
 from barsukas.routes.sync.record_sync import (
-    REPOSITORY_ROOT,
     RecordSyncSpec,
     build_blueprint,
 )
@@ -36,7 +37,7 @@ from storage.release.tombstone import (
     write_release_records,
 )
 
-DEFAULT_TOMBSTONE_RELEASE_DIR = REPOSITORY_ROOT / "data" / "release" / RELEASE_DIRNAME
+DEFAULT_TOMBSTONE_RELEASE_DIR = Path(constants.RELEASE_DIR) / RELEASE_DIRNAME
 
 
 def _get_release_dir() -> Path:

@@ -2118,8 +2118,8 @@ def main() -> None:
     )
     parser.add_argument(
         "--release-dir",
-        default="data/release/lemmas",
-        help="Path to release directory (default: data/release/lemmas)",
+        default=os.path.join(constants.RELEASE_DIR, "lemmas"),
+        help="Path to release directory (default: <release root>/lemmas)",
     )
     parser.add_argument(
         "--prune",
@@ -2141,28 +2141,28 @@ def main() -> None:
     )
     parser.add_argument(
         "--sentence-release-dir",
-        default="data/release/sentences",
-        help="Path to sentence release directory (default: data/release/sentences)",
+        default=os.path.join(constants.RELEASE_DIR, "sentences"),
+        help="Path to sentence release directory (default: <release root>/sentences)",
     )
     parser.add_argument(
         "--phrase-release-dir",
-        default="data/release/phrases",
-        help="Path to phrase release directory (default: data/release/phrases)",
+        default=os.path.join(constants.RELEASE_DIR, "phrases"),
+        help="Path to phrase release directory (default: <release root>/phrases)",
     )
     parser.add_argument(
         "--idiom-release-dir",
-        default="data/release/idioms",
-        help="Path to idiom release directory (default: data/release/idioms)",
+        default=os.path.join(constants.RELEASE_DIR, "idioms"),
+        help="Path to idiom release directory (default: <release root>/idioms)",
     )
     parser.add_argument(
         "--name-release-dir",
-        default="data/release/names",
-        help="Path to name release directory (default: data/release/names)",
+        default=os.path.join(constants.RELEASE_DIR, "names"),
+        help="Path to name release directory (default: <release root>/names)",
     )
     parser.add_argument(
         "--tombstone-release-dir",
-        default="data/release/tombstones",
-        help="Path to tombstone release directory (default: data/release/tombstones)",
+        default=os.path.join(constants.RELEASE_DIR, "tombstones"),
+        help="Path to tombstone release directory (default: <release root>/tombstones)",
     )
 
     args = parser.parse_args()

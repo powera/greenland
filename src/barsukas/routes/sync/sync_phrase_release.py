@@ -23,6 +23,8 @@ from flask import Blueprint, flash, g, redirect, render_template, request, url_f
 from flask.typing import ResponseReturnValue
 from sqlalchemy.orm import selectinload
 
+import constants
+
 from barsukas.routes.sync import release_io
 from barsukas.routes.sync.actions import (
     SKIP,
@@ -48,9 +50,7 @@ bp = Blueprint("sync_phrase_release", __name__, url_prefix="/sync/phrases")
 
 # __file__ is src/barsukas/routes/sync/sync_phrase_release.py; five parents up is
 # the repo root.
-DEFAULT_PHRASE_RELEASE_DIR = (
-    Path(__file__).parent.parent.parent.parent.parent / "data" / "release" / "phrases"
-)
+DEFAULT_PHRASE_RELEASE_DIR = Path(constants.RELEASE_DIR) / "phrases"
 
 # Languages compared/synced by the translations mode (English is handled by the
 # concept-label "changes" mode instead).

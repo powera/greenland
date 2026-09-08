@@ -18,8 +18,9 @@ from typing import Any, Dict, List, Tuple
 
 from sqlalchemy.orm import selectinload
 
+import constants
+
 from barsukas.routes.sync.record_sync import (
-    REPOSITORY_ROOT,
     RecordSyncSpec,
     build_blueprint,
 )
@@ -32,7 +33,7 @@ from storage.release.name import (
     write_release_records,
 )
 
-DEFAULT_NAME_RELEASE_DIR = REPOSITORY_ROOT / "data" / "release" / "names"
+DEFAULT_NAME_RELEASE_DIR = Path(constants.RELEASE_DIR) / "names"
 
 
 def _get_release_dir() -> Path:

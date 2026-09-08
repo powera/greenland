@@ -31,6 +31,8 @@ from flask import (
 )
 from flask.typing import ResponseReturnValue
 
+import constants
+
 from storage.migrate import (
     LemmaAudioCategory,
     LemmaAudioKey,
@@ -48,9 +50,7 @@ logger = logging.getLogger(__name__)
 
 bp = Blueprint("sync_lemma_audio_release", __name__, url_prefix="/sync/lemma-audio")
 
-DEFAULT_RELEASE_DIR = (
-    Path(__file__).parent.parent.parent.parent.parent / "data" / "release" / "lemmas"
-)
+DEFAULT_RELEASE_DIR = Path(constants.RELEASE_DIR) / "lemmas"
 
 
 def _get_release_dir() -> Path:

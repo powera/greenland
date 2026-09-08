@@ -26,6 +26,8 @@ from flask import Blueprint, flash, g, redirect, render_template, request, url_f
 from flask.typing import ResponseReturnValue
 from werkzeug.wrappers import Response as WerkzeugResponse
 
+import constants
+
 from barsukas.routes.sync import sync_release_helpers as helpers
 from barsukas.routes.sync.actions import SKIP, USE_DB, USE_RELEASE, SyncOutcome, is_readonly
 from barsukas.routes.sync.paging import PER_PAGE_CHOICES, paginate
@@ -35,8 +37,7 @@ from storage.translation_helpers import LANGUAGE_HIERARCHY, LANGUAGE_NAMES
 
 logger = logging.getLogger(__name__)
 
-REPOSITORY_ROOT = Path(__file__).parent.parent.parent.parent.parent
-DEFAULT_RELEASE_DIR = REPOSITORY_ROOT / "data" / "release" / "lemmas"
+DEFAULT_RELEASE_DIR = Path(constants.RELEASE_DIR) / "lemmas"
 
 
 @dataclass(frozen=True)

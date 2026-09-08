@@ -11,6 +11,8 @@ from typing import Any, Dict, List, Optional, Tuple
 from flask import Blueprint, flash, g, redirect, render_template, request, url_for
 from flask.typing import ResponseReturnValue
 
+import constants
+
 from barsukas.routes.sync import release_io
 from barsukas.routes.sync.actions import (
     SKIP,
@@ -74,9 +76,7 @@ bp = Blueprint("sync_release", __name__, url_prefix="/sync/lemmas")
 # __file__ is src/barsukas/routes/sync/sync_release.py
 # .parent = sync/, .parent.parent = routes/, .parent.parent.parent = barsukas/,
 # .parent.parent.parent.parent = src/, .parent.parent.parent.parent.parent = repo root
-DEFAULT_RELEASE_DIR = (
-    Path(__file__).parent.parent.parent.parent.parent / "data" / "release" / "lemmas"
-)
+DEFAULT_RELEASE_DIR = Path(constants.RELEASE_DIR) / "lemmas"
 
 
 # Marks a per-language *disambiguation* inside a translation-update dict, so the

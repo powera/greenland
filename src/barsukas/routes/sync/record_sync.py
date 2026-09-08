@@ -50,10 +50,6 @@ from storage.crud.operation_log import log_operation
 
 logger = logging.getLogger(__name__)
 
-# The repository root is five parents up from this file
-# (src/barsukas/routes/sync/record_sync.py).
-REPOSITORY_ROOT = Path(__file__).parent.parent.parent.parent.parent
-
 
 @dataclass(frozen=True)
 class RecordSyncSpec:
