@@ -40,7 +40,7 @@ from barsukas.routes.sync.paging import PER_PAGE_CHOICES, paginate
 from storage.release import io as release_io
 from storage.crud.operation_log import log_operation, log_translation_change
 from storage.crud.phrase import set_phrase_translation
-from storage.migrate import phrase_to_release_records
+from storage.release.phrase import to_release_records
 from storage.models.schema import Phrase, PhraseTranslation
 from storage.translation_helpers import LANGUAGE_NAMES, RELEASE_LANGUAGES
 
@@ -663,7 +663,7 @@ def export() -> ResponseReturnValue:
                 }
             )
         else:
-            base_record, _ = phrase_to_release_records(phrase)
+            base_record, _ = to_release_records(phrase)
             if base_record != _normalize_release_phrase(release_phrases[phrase.guid]):
                 sync_back_candidates.append(
                     {
@@ -740,7 +740,7 @@ def _write_phrases_to_release(sync_back: bool) -> ResponseReturnValue:
     # upsert_records merges by GUID, so siblings already in the file survive.
     by_subtype: Dict[str, List[Dict[str, Any]]] = defaultdict(list)
     for phrase in db_phrases:
-        base_record, _ = phrase_to_release_records(phrase)
+        base_record, _ = to_release_records(phrase)
         by_subtype[phrase.phrase_subtype].append(base_record)
 
     written = 0

@@ -33,15 +33,7 @@ from flask.typing import ResponseReturnValue
 
 import constants
 
-from storage.migrate import (
-    LemmaAudioCategory,
-    LemmaAudioKey,
-    export_lemma_audio_release_from_session,
-    import_lemma_audio_release_into_session,
-    parse_lemma_audio_category_slug,
-    parse_lemma_audio_key_token,
-    summarize_lemma_audio_release_diff,
-)
+from storage.release import lemma_audio
 
 if TYPE_CHECKING:
     from barsukas.app import BarsukasFlask
@@ -57,7 +49,7 @@ def _get_release_dir() -> Path:
     return DEFAULT_RELEASE_DIR
 
 
-def _selected_categories(form_key: str = "category") -> Optional[List[LemmaAudioCategory]]:
+def _selected_categories(form_key: str = "category") -> Optional[List[lemma_audio.Category]]:
     """Parse the submitted category slugs, or None when the whole tree is meant.
 
     Unparseable slugs are dropped rather than silently widening the scope; an
@@ -67,9 +59,9 @@ def _selected_categories(form_key: str = "category") -> Optional[List[LemmaAudio
     slugs = request.form.getlist(form_key)
     if not slugs:
         return None
-    categories: List[LemmaAudioCategory] = []
+    categories: List[lemma_audio.Category] = []
     for slug in slugs:
-        category = parse_lemma_audio_category_slug(slug)
+        category = lemma_audio.parse_category_slug(slug)
         if category is None:
             logger.warning(f"Ignoring malformed lemma-audio category slug: {slug!r}")
             continue
@@ -77,14 +69,14 @@ def _selected_categories(form_key: str = "category") -> Optional[List[LemmaAudio
     return categories
 
 
-def _selected_keys() -> Optional[List[LemmaAudioKey]]:
+def _selected_keys() -> Optional[List[lemma_audio.AudioKey]]:
     """Parse the submitted per-row keys, or None when no row selection was made."""
     tokens = request.form.getlist("key")
     if not tokens:
         return None
-    keys: List[LemmaAudioKey] = []
+    keys: List[lemma_audio.AudioKey] = []
     for token in tokens:
-        key = parse_lemma_audio_key_token(token)
+        key = lemma_audio.parse_key_token(token)
         if key is None:
             logger.warning(f"Ignoring malformed lemma-audio key token: {token!r}")
             continue
@@ -97,7 +89,7 @@ def index() -> ResponseReturnValue:
     """Landing page: itemized diff plus scoped Import / Export actions."""
     release_dir = _get_release_dir()
     scope = _get_scope_from_query()
-    diff = summarize_lemma_audio_release_diff(g.db, str(release_dir), categories=scope)
+    diff = lemma_audio.summarize_release_diff(g.db, str(release_dir), categories=scope)
     return render_template(
         "sync_lemma_audio_release/index.html",
         release_dir=str(release_dir),
@@ -106,12 +98,12 @@ def index() -> ResponseReturnValue:
     )
 
 
-def _get_scope_from_query() -> Optional[List[LemmaAudioCategory]]:
+def _get_scope_from_query() -> Optional[List[lemma_audio.Category]]:
     """Optional ``?category=nouns/food`` filter for narrowing the diff view."""
     slug = request.args.get("category", "").strip()
     if not slug:
         return None
-    category = parse_lemma_audio_category_slug(slug)
+    category = lemma_audio.parse_category_slug(slug)
     if category is None:
         return None
     return [category]
@@ -138,7 +130,7 @@ def import_release() -> ResponseReturnValue:
         return redirect(url_for("sync_lemma_audio_release.index"))
 
     try:
-        stats = import_lemma_audio_release_into_session(
+        stats = lemma_audio.import_from_release(
             g.db, str(release_dir), prune=prune, categories=categories, keys=keys
         )
     except Exception as e:  # noqa: BLE001 - surface the failure to the user
@@ -158,7 +150,8 @@ def import_release() -> ResponseReturnValue:
 
 
 def _scope_label(
-    categories: Optional[List[LemmaAudioCategory]], keys: Optional[List[LemmaAudioKey]] = None
+    categories: Optional[List[lemma_audio.Category]],
+    keys: Optional[List[lemma_audio.AudioKey]] = None,
 ) -> str:
     """Human-readable description of what a sync was scoped to, for flash messages."""
     if keys is not None:
@@ -166,9 +159,7 @@ def _scope_label(
     if categories is None:
         return "all lemma audio"
     if len(categories) == 1:
-        from storage.migrate import lemma_audio_category_slug
-
-        return lemma_audio_category_slug(categories[0])
+        return lemma_audio.category_slug(categories[0])
     return f"{len(categories)} categories"
 
 
@@ -188,9 +179,7 @@ def export_release() -> ResponseReturnValue:
         return redirect(url_for("sync_lemma_audio_release.index"))
 
     try:
-        stats = export_lemma_audio_release_from_session(
-            g.db, str(release_dir), categories=categories
-        )
+        stats = lemma_audio.export_to_release(g.db, str(release_dir), categories=categories)
     except Exception as e:  # noqa: BLE001 - surface the failure to the user
         logger.error(f"Lemma audio export failed: {e}")
         flash(f"Export failed: {e}", "error")
