@@ -169,16 +169,26 @@ def to_release_record(sentence: Any) -> Dict[str, Any]:
     word_hints: List[Dict[str, Any]] = []
     for pw in sorted(sentence.word_hints, key=lambda p: p.position):
         lemma_guid = pw.lemma.guid if pw.lemma and pw.lemma.guid else None
+        # See sentence_word_to_record: a name-filled slot has to stay
+        # distinguishable from an unresolved one, but the key is omitted while
+        # proper names are unfinished rather than written as a dead null.
+        hint_name_guid = pw.name.guid if pw.name and pw.name.guid else None
+        # A hint that references neither a lemma nor a name is not exportable:
+        # ck_word_hint_has_reference requires one of them, so an import could
+        # only skip such a row, and the export would be writing something the
+        # schema cannot hold.  These are word *tokens* left over from before
+        # sentences carried per-word decompositions ("my", "bike", "math"),
+        # they name no vocabulary, and the staging back-link they once fed
+        # moved to SentencePendingImport.  Dropping them here is what makes the
+        # release -> database -> release round trip stable.
+        if lemma_guid is None and hint_name_guid is None:
+            continue
         hint: Dict[str, Any] = {
             "position": pw.position,
             "slot_name": pw.slot_name,
             "lemma_guid": lemma_guid,
             "english_text": pw.english_text,
         }
-        # See sentence_word_to_record: a name-filled slot has to stay
-        # distinguishable from an unresolved one, but the key is omitted while
-        # proper names are unfinished rather than written as a dead null.
-        hint_name_guid = pw.name.guid if pw.name and pw.name.guid else None
         if hint_name_guid is not None:
             hint["name_guid"] = hint_name_guid
         word_hints.append(hint)
