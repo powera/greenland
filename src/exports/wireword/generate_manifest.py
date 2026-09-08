@@ -39,6 +39,7 @@ LANGUAGE_VOICE_NAMES: Dict[str, List[str]] = {
     "lt": ["ruta", "jonas"],
     "zh": ["meiling", "zhiyuan"],
     "fr": ["marie", "pierre"],
+    "es": ["maria", "carlos"],
     "ja": ["sakura", "haruto"],  # Placeholder names for Japanese
     "ko": ["yuna", "minho"],  # Placeholder names for Korean
 }
