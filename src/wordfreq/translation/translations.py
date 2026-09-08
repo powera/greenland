@@ -10,6 +10,7 @@ import util.prompt_loader
 from clients.types import Schema, SchemaProperty
 from storage import database as linguistic_db
 from storage.translation_helpers import (
+    ANCIENT_LANGUAGE_GROUP,
     MAX_LLM_LANGUAGES_PER_OPERATION,
     LANGUAGE_NAMES,
     TRANSLATION_STATUS_VALUES,
@@ -20,6 +21,36 @@ from wordfreq.translation.constants import (
 )
 
 logger = logging.getLogger(__name__)
+
+
+# Requirements 7-8 of the word-translation context, added only when an ancient
+# language is among the targets.  ``translation_status`` exists for that group,
+# where how a concept is rendered is itself the evidence words.term_age reads;
+# for a living language a bare "conventional" is the assumed default and is
+# discarded on the way into storage (see
+# storage.translation_helpers.translation_status_is_informative).  Asking for it
+# anyway spent a third of the context on a taxonomy that could not fire, and
+# invited the model to mark ordinary loanwords in living languages.
+ANCIENT_STATUS_REQUIREMENTS = """7. For each translation, classify its historical/native fit:
+   - conventional: ordinary native or historically established vocabulary for the target language
+   - late_construction: a useful learner cue, but a Neo-Latin, post-classical, modern Sanskrit coinage, post-1200 Classical Arabic construction, or otherwise late learned construction
+   - modern_loan: a modern loanword or transliteration rather than native/classical vocabulary
+   - descriptive: a descriptive phrase/compound used because there is no simple ordinary term
+   - modern_reimagining: a genuinely ancient word reapplied to a modern concept, so its attestation says nothing about the concept's age - Sanskrit विमानम् for "airplane" names a flying palace in the epics. Attestation only in myth or literature is not conventional usage
+   - uncertain: use only when the fit is genuinely unclear
+8. For the ancient/classical target language group (Latin, Sanskrit, Ancient Greek, Classical Arabic pre-1200, and Old Norse), expect lexical gaps and do not hide modernity: mark post-classical foods, institutions, clothing, technologies, and modern loans clearly.
+"""
+
+ANCIENT_STATUS_NOTE_INSTRUCTION = " Return an empty status note for conventional translations; otherwise briefly explain the marker."
+
+
+def _requests_ancient_language(languages: List[str]) -> bool:
+    """Whether any target language is scored on translation_status.
+
+    The ancient group has no dialects, so a direct membership test is exact -
+    matching the reasoning in ``translation_status_is_informative``.
+    """
+    return any(lang_code in ANCIENT_LANGUAGE_GROUP for lang_code in languages)
 
 
 def query_translations(
@@ -81,27 +112,34 @@ def query_translations(
     languages_list_lines = []
     language_instructions_lines = []
 
+    # Only the ancient group is scored on translation_status, so only ask for it
+    # when one is present.  For a living language the answer is "conventional"
+    # for nearly every word and is dropped before storage anyway.
+    include_status = _requests_ancient_language(languages)
+
     for lang_code in languages:
         lang_config = AVAILABLE_TRANSLATION_LANGUAGES_BY_CODE.get(lang_code)
         if lang_config is None:
             logger.warning(f"Unknown language code '{lang_code}' requested, skipping")
             continue
+        language_properties = {
+            "translation": SchemaProperty("string", lang_config["description"]),
+        }
+        if include_status:
+            language_properties["translation_status"] = SchemaProperty(
+                "string",
+                "How historically native the translation is: conventional, late_construction, modern_loan, descriptive, modern_reimagining, or uncertain. "
+                "'conventional' is the default and is discarded for modern languages, so it only ever matters that you mark the others.",
+                enum=sorted(TRANSLATION_STATUS_VALUES),
+            )
+            language_properties["translation_status_note"] = SchemaProperty(
+                "string",
+                "Brief note when status is not conventional; otherwise an empty string.",
+            )
         schema_properties[lang_config["field"]] = SchemaProperty(
             "object",
             lang_config["description"],
-            properties={
-                "translation": SchemaProperty("string", lang_config["description"]),
-                "translation_status": SchemaProperty(
-                    "string",
-                    "How historically native the translation is: conventional, late_construction, modern_loan, descriptive, modern_reimagining, or uncertain. "
-                    "'conventional' is the default and is discarded for modern languages, so it only ever matters that you mark the others.",
-                    enum=sorted(TRANSLATION_STATUS_VALUES),
-                ),
-                "translation_status_note": SchemaProperty(
-                    "string",
-                    "Brief note when status is not conventional; otherwise an empty string.",
-                ),
-            },
+            properties=language_properties,
         )
         # Use the canonical language name (without script qualifier) for the prompt bullet list
         display_name = LANGUAGE_NAMES.get(lang_code, lang_code)
@@ -128,8 +166,13 @@ def query_translations(
     # Map language code to full language name (imported from translation_helpers)
     reference_language_name = LANGUAGE_NAMES.get(ref_lang_code, ref_lang_code.capitalize())
 
-    # Format context with language instructions
-    context = context_template.format(language_instructions=language_instructions)
+    # Format context with language instructions, adding the status taxonomy
+    # only for a batch that contains a language scored on it.
+    context = context_template.format(
+        language_instructions=language_instructions,
+        status_requirements=ANCIENT_STATUS_REQUIREMENTS if include_status else "",
+        status_note_instruction=ANCIENT_STATUS_NOTE_INSTRUCTION if include_status else "",
+    )
 
     # Conditionally format reference info and disambiguation instruction
     # If reference language is English, we don't have a true reference translation
