@@ -35,6 +35,7 @@ from sqlalchemy.orm import Session
 import storage.models  # noqa: F401
 from storage.backend.config import BackendType, DataSourceConfig
 from storage.backend.factory import create_session as create_backend_session
+from storage.release.sentence import to_release_record
 from storage.migrate import export_sqlite_to_jsonl, import_jsonl_to_sqlite
 from storage.models import GrammarFact
 from storage.release.lemma import decode_db_emoji, encode_db_emoji
@@ -263,18 +264,17 @@ class ReleaseRoundTripTest(unittest.TestCase):
             )
 
     def test_release_record_preserves_all_word_data_columns(self) -> None:
-        """_sentence_to_release_record carries the full decomposition.
+        """to_release_record carries the full decomposition.
 
         This is the serializer that writes data/release; it shares
         _sentence_word_to_dict with the JSONL export path so a newly added
         SentenceWord column reaches both at once.
         """
-        from storage.migrate import _sentence_to_release_record
 
         engine = create_engine(f"sqlite:///{self.source_db}")
         with Session(engine) as db:
             sentence = db.query(Sentence).one()
-            record = _sentence_to_release_record(sentence)
+            record = to_release_record(sentence)
 
         self.assertIn("words", record, "release record dropped the decomposition")
         verb_word = next(w for w in record["words"] if w.get("word_role") == "verb")

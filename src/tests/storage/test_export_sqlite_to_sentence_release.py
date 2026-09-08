@@ -7,7 +7,7 @@
 had records -- a file for a category that emptied was left on disk. That is
 worse here than on the lemma side, because a sentence's directory is derived
 rather than stored: it comes from the sentence's collection and from
-``_resolve_primary_lemma_category``, so re-categorizing a sentence (or losing
+``resolve_primary_lemma_category``, so re-categorizing a sentence (or losing
 the word hints that resolve its category) moves the record to a new file and
 strands the old one. The next import reads both, and the stale copy wins for
 every field it still carries.

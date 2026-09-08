@@ -18,7 +18,7 @@ from sqlalchemy.orm import Session
 
 from barsukas.routes.sync import sync_sentence_release
 from storage.crud.name_entity import assign_name_guid, create_name
-from storage.migrate import _sentence_to_release_record
+from storage.release.sentence import to_release_record
 from storage.models.schema import (
     AudioQualityReview,
     Sentence,
@@ -140,7 +140,7 @@ class TestAudioRoundTrip:
             follow_redirects=True,
         )
 
-        reexported = _sentence_to_release_record(_sentence(db_session, "S_00003"))
+        reexported = to_release_record(_sentence(db_session, "S_00003"))
         assert reexported["audio"] == original["audio"]
 
 
@@ -225,7 +225,7 @@ class TestNameGuidRoundTrip:
         )
         db_session.commit()
 
-        record = _sentence_to_release_record(_sentence(db_session, "S_00001"))
+        record = to_release_record(_sentence(db_session, "S_00001"))
         assert record["words"][0]["name_guid"] == name.guid
         assert record["words"][0]["lemma_guid"] is None
 

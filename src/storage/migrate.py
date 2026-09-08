@@ -27,6 +27,8 @@ import constants
 from storage.backend.config import BackendType, DataSourceConfig
 from storage.backend.factory import create_session
 from storage.config.grammar_facts import RELEASE_GRAMMAR_FACT_TYPES
+from storage.release import sentence as sentence_release
+from storage.release.io import write_jsonl_atomic
 from storage.release.lemma import decode_db_emoji
 from storage.release.variant import release_variants_by_language, variants_by_language
 
@@ -358,38 +360,6 @@ def convert_sqlalchemy_lemma_to_jsonl(lemma: Any, session: Any = None) -> Any:
     )
 
 
-def _sentence_word_to_dict(word: Any) -> Dict[str, Any]:
-    """Serialize one SentenceWord to its on-disk shape.
-
-    Lemmas are referenced by GUID (the stable, on-disk identifier used
-    throughout data/release); integer lemma_ids are ephemeral and would not
-    survive a JSONL -> SQLite reload. The ``word_role`` key retains the
-    database column name, which the JSONL read path maps back to
-    ``part_of_speech``.
-
-    ``name_guid`` is emitted for the same reason and only when set: a word that
-    resolves to a proper name is not an unresolved gap, and without the key the
-    two cases were indistinguishable on disk (both ``lemma_guid: null``).
-
-    Shared by every sentence-word serialization path so a newly added column
-    reaches all of them at once.
-    """
-    return {
-        "lemma_guid": word.lemma.guid if word.lemma and word.lemma.guid else None,
-        "name_guid": word.name.guid if word.name and word.name.guid else None,
-        "language_code": word.language_code,
-        "position": word.position,
-        "word_role": word.word_role,
-        "english_text": word.english_text,
-        "target_language_text": word.target_language_text,
-        "grammatical_form": word.grammatical_form,
-        "grammatical_case": word.grammatical_case,
-        "declined_form": word.declined_form,
-        "ud_relation": word.ud_relation,
-        "ud_head_position": word.ud_head_position,
-    }
-
-
 def convert_sqlalchemy_sentence_to_jsonl(sentence: Any) -> Any:
     """Convert SQLAlchemy Sentence to JSONL dataclass.
 
@@ -405,7 +375,7 @@ def convert_sqlalchemy_sentence_to_jsonl(sentence: Any) -> Any:
     for trans in sentence.translations:
         translations[trans.language_code] = trans.translation_text
 
-    words = [_sentence_word_to_dict(word) for word in sentence.words]
+    words = [sentence_release.sentence_word_to_record(word) for word in sentence.words]
 
     return jsonl_models.Sentence(
         id=sentence.id,
@@ -784,133 +754,6 @@ def export_sqlite_to_release(sqlite_path: str, release_dir: str) -> None:
             session, Path(release_dir).parent / TOMBSTONE_RELEASE_DIRNAME
         )
         print(f"Tombstones exported: {tombstone_count}")
-
-    finally:
-        session.close()
-
-
-def export_sqlite_to_sentence_release(sqlite_path: str, release_dir: str) -> None:
-    """Export sentences from SQLite to data/release/sentences format.
-
-    Sentences are grouped first by their **collection** (sentence_collection field,
-    defaulting to "general"), then by primary lemma pos_type/pos_subtype — the noun
-    with the lowest GUID among word hints, falling back to misc/misc.
-
-    Structure: {release_dir}/{collection}/{pos_dir}/{pos_subtype}/base.jsonl
-
-    Conversation and rejected sentences are excluded.
-
-    Args:
-        sqlite_path: Path to SQLite database
-        release_dir: Directory to write release files (e.g., data/release/sentences)
-    """
-    print(f"Exporting sentences from SQLite ({sqlite_path}) to release format ({release_dir})...")
-
-    from sqlalchemy.orm import selectinload
-
-    from storage.database import create_database_session
-    from storage.models.schema import (
-        ConversationSentence,
-        Lemma,
-        Sentence,
-        SentenceWordHint,
-        SentenceWord,
-    )
-
-    session = create_database_session(sqlite_path)
-
-    # Map POS types to directory names (pluralized)
-    type_to_dir: Dict[str, str] = {
-        "noun": "nouns",
-        "verb": "verbs",
-        "adjective": "adjectives",
-        "adverb": "adverbs",
-        "pronoun": "pronouns",
-        "preposition": "prepositions",
-        "conjunction": "conjunctions",
-        "interjection": "interjections",
-        "numeral": "numerals",
-        "particle": "particles",
-    }
-
-    try:
-        # Exclude conversation sentences
-        conversation_ids: Set[int] = set(
-            row[0] for row in session.query(ConversationSentence.sentence_id).distinct().all()
-        )
-
-        # Get all sentences with GUIDs, eager-load relationships
-        sentences = (
-            session.query(Sentence)
-            .filter(Sentence.guid.isnot(None))
-            .filter(Sentence.rejected.is_(False))
-            .options(
-                selectinload(Sentence.translations),
-                selectinload(Sentence.word_hints).selectinload(SentenceWordHint.lemma),
-                selectinload(Sentence.words).selectinload(SentenceWord.lemma),
-                selectinload(Sentence.audio_reviews),
-            )
-            .order_by(Sentence.guid)
-            .all()
-        )
-
-        # Filter out conversation sentences
-        sentences = [s for s in sentences if s.id not in conversation_ids]
-        print(f"Found {len(sentences)} non-conversation, non-rejected sentences to export")
-
-        # Group sentences by (collection, pos_type, pos_subtype)
-        sentences_by_category: Dict[Tuple[str, str, str], List[Dict[str, Any]]] = defaultdict(list)
-
-        for sentence in sentences:
-            record = _sentence_to_release_record(sentence)
-            collection = sentence.sentence_collection or "general"
-            pos_type, pos_subtype = _resolve_primary_lemma_category(sentence)
-            sentences_by_category[(collection, pos_type, pos_subtype)].append(record)
-
-        print(f"Organized into {len(sentences_by_category)} categories")
-
-        written_files: Set[Path] = set()
-        for (collection, pos_type, pos_subtype), records in sentences_by_category.items():
-            dir_name = type_to_dir.get(pos_type, pos_type)
-            category_dir = Path(release_dir) / collection / dir_name / pos_subtype
-            category_dir.mkdir(parents=True, exist_ok=True)
-
-            # Sort by GUID within each file
-            records.sort(key=lambda r: r["guid"])
-
-            print(f"Exporting {len(records)} sentences to {collection}/{dir_name}/{pos_subtype}...")
-            base_file = category_dir / "base.jsonl"
-            _write_jsonl_atomic(base_file, records)
-            written_files.add(base_file.resolve())
-
-        # A category that had sentences before and has none now must lose its
-        # file, or the export stops being a rebuild -- the same rule the lemma
-        # export follows above.  This matters more here than on the lemma side
-        # because a sentence's directory is *derived* (from its collection and
-        # its primary lemma's category), not stored: re-categorizing a sentence
-        # moves its record to a different file and leaves the old one behind,
-        # still holding the stale copy that the next import would read back.
-        removed_count = 0
-        for stale_file in Path(release_dir).rglob("base.jsonl"):
-            if stale_file.resolve() in written_files:
-                continue
-            stale_file.unlink()
-            removed_count += 1
-
-        # Prune the directories those files left empty, deepest first, so a
-        # renamed collection does not leave an empty tree behind.  Anything
-        # still holding a file (or a file this export does not manage) stops
-        # the walk up.
-        for stale_dir in sorted(
-            Path(release_dir).rglob("*"), key=lambda p: len(p.parts), reverse=True
-        ):
-            if stale_dir.is_dir() and not any(stale_dir.iterdir()):
-                stale_dir.rmdir()
-
-        if removed_count:
-            print(f"Removed {removed_count} stale category file(s)")
-
-        print("Sentence export complete!")
 
     finally:
         session.close()
@@ -1942,142 +1785,43 @@ def import_lemma_audio_release_to_sqlite(
         session.close()
 
 
-def _resolve_primary_lemma_category(sentence: Any) -> Tuple[str, str]:
-    """Resolve the primary lemma category for directory placement.
+def export_sqlite_to_sentence_release(sqlite_path: str, release_dir: str) -> None:
+    """Export sentences from SQLite to the release tree.
 
-    Returns (pos_type, pos_subtype) based on the noun with the lowest GUID
-    among the sentence's word hints.  Falls back to any lemma with the
-    lowest GUID, or ("misc", "misc") if nothing resolves.
+    Thin CLI wrapper: the serialization lives in
+    :mod:`storage.release.sentence`, which the Barsukas sync calls directly
+    with its own session.
     """
-    lemmas_with_guids = []
-    for pw in sentence.word_hints:
-        if pw.lemma and pw.lemma.guid:
-            lemmas_with_guids.append(pw.lemma)
+    from storage.database import create_database_session
 
-    if not lemmas_with_guids:
-        return ("misc", "misc")
-
-    # Prefer nouns
-    nouns = [l for l in lemmas_with_guids if l.pos_type and l.pos_type.lower() == "noun"]
-    if nouns:
-        best = min(nouns, key=lambda l: l.guid)
-    else:
-        best = min(lemmas_with_guids, key=lambda l: l.guid)
-
-    pos_type = best.pos_type.lower() if best.pos_type else "misc"
-    pos_subtype = best.pos_subtype.lower() if best.pos_subtype else "other"
-    return (pos_type, pos_subtype)
+    print(f"Exporting sentences from SQLite ({sqlite_path}) to release format ({release_dir})...")
+    session = create_database_session(sqlite_path)
+    try:
+        sentence_release.export_to_release(session, Path(release_dir))
+    finally:
+        session.close()
 
 
-def _sentence_to_release_record(sentence: Any) -> Dict[str, Any]:
-    """Convert a Sentence ORM object to a release JSONL record."""
-    from storage.translation_helpers import RELEASE_LANGUAGES
+def import_sentence_audio_release_to_sqlite(sqlite_path: str, release_dir: str) -> None:
+    """Sync sentence audio from the release tree back into SQLite."""
+    from storage.database import create_database_session
 
-    release_lang_set = set(RELEASE_LANGUAGES)
-    translations: Dict[str, str] = {}
-    for trans in sentence.translations:
-        if trans.language_code not in release_lang_set:
-            continue
-        if trans.translation_text and trans.translation_text.strip():
-            translations[trans.language_code] = trans.translation_text
-
-    word_hints: List[Dict[str, Any]] = []
-    for pw in sorted(sentence.word_hints, key=lambda p: p.position):
-        lemma_guid = pw.lemma.guid if pw.lemma and pw.lemma.guid else None
-        word_hints.append(
-            {
-                "position": pw.position,
-                "slot_name": pw.slot_name,
-                "lemma_guid": lemma_guid,
-                # See _sentence_word_to_dict: a name-filled slot has to stay
-                # distinguishable from an unresolved one.
-                "name_guid": pw.name.guid if pw.name and pw.name.guid else None,
-                "english_text": pw.english_text,
-            }
-        )
-
-    record: Dict[str, Any] = {
-        "guid": sentence.guid,
-    }
-    if sentence.sentence_collection:
-        record["collection"] = sentence.sentence_collection
-    # Which agent or corpus file produced this sentence. The release never
-    # carried it, so a bootstrap nulled the column on every row it loaded.
-    if sentence.source_filename:
-        record["source_filename"] = sentence.source_filename
-    if sentence.pattern_type:
-        record["pattern_type"] = sentence.pattern_type
-    if sentence.tense:
-        record["tense"] = sentence.tense
-    if sentence.minimum_level is not None:
-        record["minimum_level"] = sentence.minimum_level
-    if translations:
-        record["translations"] = translations
-    if word_hints:
-        record["word_hints"] = word_hints
-    if sentence.notes:
-        record["notes"] = sentence.notes
-
-    words: List[Dict[str, Any]] = [
-        _sentence_word_to_dict(sentence_word)
-        for sentence_word in sorted(
-            sentence.words,
-            key=lambda current_word: (current_word.language_code, current_word.position),
-        )
-    ]
-    if words:
-        record["words"] = words
-
-    audio: List[Dict[str, Any]] = []
-    for audio_review in sorted(
-        sentence.audio_reviews,
-        key=lambda current_audio: (current_audio.language_code, current_audio.voice_name),
-    ):
-        if audio_review.status not in APPROVED_AUDIO_RELEASE_STATUSES:
-            continue
-        audio.append(
-            {
-                "language_code": audio_review.language_code,
-                "voice_name": audio_review.voice_name,
-                "filename": audio_review.filename,
-                "status": audio_review.status,
-                "expected_text": audio_review.expected_text,
-                "manifest_md5": audio_review.manifest_md5,
-                "s3_prod_url": audio_review.s3_prod_url,
-                "s3_staging_url": audio_review.s3_staging_url,
-                "staging_agent": audio_review.staging_agent,
-            }
-        )
-    if audio:
-        record["audio"] = audio
-
-    return record
+    print(f"Syncing sentence audio from release ({release_dir}) into SQLite ({sqlite_path})...")
+    session = create_database_session(sqlite_path)
+    try:
+        sentence_release.import_audio_from_release(session, Path(release_dir))
+    finally:
+        session.close()
 
 
 def _write_jsonl_atomic(file_path: Path, records: List[Dict[str, Any]]) -> None:
-    """Write JSONL file atomically.
+    """Write a JSONL file atomically, preserving the caller's record order.
 
-    Args:
-        file_path: Path to write to
-        records: List of dictionaries to write as JSONL
+    Thin wrapper over :func:`storage.release.io.write_jsonl_atomic`; the lemma
+    and sentence exports sort each file's records themselves, so this must not
+    re-sort them.
     """
-    # The temp file is created beside the target so the rename below stays on one
-    # filesystem and is therefore atomic; that also means the directory has to
-    # exist first. Exporting into a fresh --release-dir used to fail here, at the
-    # very end of the run, after every lemma file had already been written.
-    file_path.parent.mkdir(parents=True, exist_ok=True)
-
-    # Write to temp file first
-    with tempfile.NamedTemporaryFile(
-        mode="w", encoding="utf-8", dir=file_path.parent, delete=False, suffix=".tmp"
-    ) as tmp_file:
-        for record in records:
-            tmp_file.write(json.dumps(record, ensure_ascii=False) + "\n")
-        tmp_file.flush()
-        os.fsync(tmp_file.fileno())
-
-    # Atomic rename
-    os.replace(tmp_file.name, file_path)
+    write_jsonl_atomic(file_path, records, sort_by_guid=False)
 
 
 def main() -> None:

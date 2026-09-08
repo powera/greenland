@@ -29,6 +29,7 @@ from typing import Any, Dict, Iterable, List, Optional, Tuple
 
 from sqlalchemy.orm import Session, selectinload
 
+from storage.release.io import write_jsonl_atomic
 from storage import translation_helpers
 from storage.crud.name_entity import (
     create_name,
@@ -135,14 +136,8 @@ def read_release_records_by_guid(release_dir: Path) -> Dict[str, Dict[str, Any]]
 
 def write_release_records(release_dir: Path, records: Iterable[Dict[str, Any]]) -> Path:
     """Write name records to a release directory, sorted by GUID."""
-    target_dir = Path(release_dir)
-    target_dir.mkdir(parents=True, exist_ok=True)
-    release_file = target_dir / RELEASE_FILENAME
-
-    ordered = sorted(records, key=lambda record: str(record.get("guid") or ""))
-    with release_file.open("w", encoding="utf-8") as handle:
-        for record in ordered:
-            handle.write(json.dumps(record, ensure_ascii=False) + "\n")
+    release_file = Path(release_dir) / RELEASE_FILENAME
+    write_jsonl_atomic(release_file, records, sort_by_guid=True)
     return release_file
 
 
