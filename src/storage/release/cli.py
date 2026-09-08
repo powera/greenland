@@ -72,6 +72,15 @@ def build_parser() -> argparse.ArgumentParser:
         help=f"Path to SQLite database (default: {constants.WORDFREQ_DB_PATH})",
     )
     parser.add_argument(
+        "--backend",
+        choices=["sqlite", "postgres"],
+        default="sqlite",
+        help=(
+            "Which database to read or write (default: sqlite). Naming postgres "
+            "without --postgres-url reads the URL from the environment/key file"
+        ),
+    )
+    parser.add_argument(
         "--postgres-url",
         default=None,
         help="PostgreSQL connection URL (reads from env/key file if not provided)",
@@ -125,7 +134,13 @@ def parse_categories(
 
 
 def run_database(args: argparse.Namespace) -> None:
-    """Run the whole-database dump or load."""
+    """Run the whole-database dump or load.
+
+    The source backend comes from ``--backend``, not from whether a URL was
+    typed: a Barsukas PostgreSQL deployment invokes this without
+    ``--postgres-url`` and expects the URL to be resolved from the environment
+    or key file, the way the old ``postgres-to-jsonl`` direction did.
+    """
     from storage.migrate import (
         export_postgres_to_jsonl,
         export_sqlite_to_jsonl,
@@ -133,12 +148,14 @@ def run_database(args: argparse.Namespace) -> None:
     )
 
     if args.direction == "export":
-        if args.postgres_url:
-            export_postgres_to_jsonl(args.postgres_url, args.jsonl_dir)
+        if args.backend == "postgres":
+            postgres_url = args.postgres_url or DataSourceConfig.build_postgres_url()
+            export_postgres_to_jsonl(postgres_url, args.jsonl_dir)
         else:
             export_sqlite_to_jsonl(args.sqlite_path, args.jsonl_dir)
     else:
-        import_jsonl_to_sqlite(args.sqlite_path, args.release_root, force=args.force)
+        # Note the parameter order: (release_dir, sqlite_path).
+        import_jsonl_to_sqlite(args.release_root, args.sqlite_path, force=args.force)
 
 
 def options_for(spec: ReleaseEntitySpec, args: argparse.Namespace) -> dict:
@@ -158,9 +175,17 @@ def main(argv: Optional[List[str]] = None) -> int:
     args.categories = parse_categories(parser, args.categories)
 
     wants_database = DATABASE_ENTITY in args.entities or "all" in args.entities
+    wants_every_element = "all" in args.entities
     element_tokens = [token for token in args.entities if token != DATABASE_ENTITY]
+    # "database" on its own means the whole-database dump and nothing else.
+    # Passing an empty token list through as None would have meant "all", so
+    # `export database` -- what both settings.py routes run -- would have
+    # rewritten the entire data/release tree as a side effect.
     try:
-        specs = specs_for(args.direction, element_tokens or None)
+        if wants_every_element or element_tokens:
+            specs = specs_for(args.direction, element_tokens or None)
+        else:
+            specs = []
     except (KeyError, ValueError) as error:
         parser.error(str(error))
 
@@ -173,12 +198,25 @@ def main(argv: Optional[List[str]] = None) -> int:
             parser.error(f"{flag} does not apply to {', '.join(s.name for s in specs) or 'these'}")
 
     release_root = Path(args.release_root)
+    # On import the whole-database load rebuilds the SQLite file from scratch,
+    # so it has to run before the per-element importers that supplement it --
+    # otherwise it discards the sentence and lemma audio they just wrote, since
+    # that path deliberately does not read the inline release audio. On export
+    # the two write to different places and the order does not matter.
+    database_first = wants_database and args.direction == "import"
+
     if args.dry_run:
+        if database_first:
+            print(f"would {args.direction} database")
         for spec in specs:
             print(f"would {args.direction} {spec.name} <-> {spec.release_dir(release_root)}")
-        if wants_database:
+        if wants_database and not database_first:
             print(f"would {args.direction} database")
         return 0
+
+    if database_first:
+        print(f"== {args.direction} database")
+        run_database(args)
 
     if specs:
         config = DataSourceConfig(
@@ -195,17 +233,13 @@ def main(argv: Optional[List[str]] = None) -> int:
                 spec.callable_for(args.direction)(
                     session, spec.release_dir(release_root), **options_for(spec, args)
                 )
-            # The CLI owns the session, so it owns the transaction. The element
-            # modules disagree about this -- some commit, some leave it to the
-            # caller -- so committing here is what makes an import durable
-            # either way. A commit with nothing pending is a no-op.
         except Exception:
             session.rollback()
             raise
         finally:
             session.close()
 
-    if wants_database:
+    if wants_database and not database_first:
         print(f"== {args.direction} database")
         run_database(args)
     return 0

@@ -148,6 +148,15 @@ Not every element type imports one at a time. Lemmas and sentences are loaded
 by the whole-database path (`import database`, and `bootstrap_database.py`),
 so `import all` covers what it can and skips the rest.
 
+`import database` rebuilds the SQLite file from scratch, so `import all` runs
+it *first* and then applies the per-element importers on top. Running it after
+them would discard what they wrote: the whole-database loader does not read the
+audio that ships inline on each sentence record.
+
+Add `--backend postgres` to read or write a PostgreSQL deployment; the
+connection URL comes from the environment or key file unless `--postgres-url`
+gives one explicitly.
+
 ### Sync lemma audio back from data/release into SQLite
 
 `export lemma-audio` only writes files. To pull the approved lemma audio in

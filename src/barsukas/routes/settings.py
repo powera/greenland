@@ -99,10 +99,13 @@ def migrate_form() -> ResponseReturnValue:
             jsonl_dir,
         ]
 
-        # Add backend-specific arguments
+        # Name the backend explicitly. The CLI cannot infer it from the flags:
+        # a PostgreSQL deployment passes no URL here (it is read from the
+        # environment/key file), so without this the export would silently read
+        # the default local SQLite database instead.
+        cmd.extend(["--backend", backend_type.value])
         if backend_type == BackendType.SQLITE:
             cmd.extend(["--sqlite-path", sqlite_path])
-        # PostgreSQL URL is read from env/key file automatically
 
         # Run migration with PYTHONPATH set to src/
         src_dir = str(Path(__file__).parent.parent.parent)
@@ -167,10 +170,13 @@ def migrate() -> ResponseReturnValue:
             jsonl_dir,
         ]
 
-        # Add backend-specific arguments
+        # Name the backend explicitly. The CLI cannot infer it from the flags:
+        # a PostgreSQL deployment passes no URL here (it is read from the
+        # environment/key file), so without this the export would silently read
+        # the default local SQLite database instead.
+        cmd.extend(["--backend", backend_type.value])
         if backend_type == BackendType.SQLITE:
             cmd.extend(["--sqlite-path", sqlite_path])
-        # PostgreSQL URL is read from env/key file automatically
 
         # Run migration with PYTHONPATH set to src/
         src_dir = str(Path(__file__).parent.parent.parent)
