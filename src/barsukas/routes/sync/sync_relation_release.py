@@ -14,8 +14,8 @@ from sqlalchemy.orm import joinedload
 
 import constants
 
-from barsukas.routes.sync import release_io
 from barsukas.routes.sync.actions import is_readonly
+from storage.release import io as release_io
 from storage.crud.operation_log import log_operation
 from storage.models.lemma_relation import LemmaRelationGroup, LemmaRelationMember
 from storage.migrate import _write_jsonl_atomic as migrate_write_jsonl_atomic

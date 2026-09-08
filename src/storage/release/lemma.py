@@ -5,7 +5,7 @@ four file kinds: ``base.jsonl`` for the concept itself, ``{lang}.jsonl`` for
 derivative forms, synonyms and grammar facts, and ``secondary.jsonl`` /
 ``ancient.jsonl`` for the translation tiers that would otherwise make the base
 record unwieldy. **This module owns only the base record.** Locating and
-rewriting the files stays with the caller (``barsukas.routes.sync.release_io``
+rewriting the files stays with the caller (``storage.release.io``
 for the UI, ``storage.migrate`` for the CLI), because that part genuinely
 differs between the two.
 

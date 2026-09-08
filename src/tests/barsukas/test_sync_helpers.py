@@ -14,7 +14,9 @@ from typing import Any, Dict, List
 import pytest
 from flask import Flask
 
-from barsukas.routes.sync import release_io, sync_release_helpers
+from storage.release.derivative_form import form_to_record
+from barsukas.routes.sync import sync_release_helpers
+from storage.release import io as release_io
 from barsukas.routes.sync.paging import PER_PAGE_CHOICES, Page, page_args, paginate
 from storage.models.schema import DerivativeForm
 
@@ -366,18 +368,16 @@ def _derivative(**overrides: Any) -> DerivativeForm:
     return DerivativeForm(**fields)
 
 
-def test_db_form_to_dict_reads_the_form_text() -> None:
+def test_form_to_record_reads_the_form_text() -> None:
     """The column is derivative_form_text; naming it wrong silently exports nothing."""
-    record = sync_release_helpers.db_form_to_dict(form=_derivative(), include_base_form=True)
+    record = form_to_record(form=_derivative(), include_base_form=True)
     assert record["text"] == "šunys"
     assert record["grammatical_form"] == "noun/lt_plural"
 
 
-def test_db_form_to_dict_carries_base_form_only_for_inflections() -> None:
-    inflection = sync_release_helpers.db_form_to_dict(
-        form=_derivative(is_base_form=True), include_base_form=True
-    )
-    synonym = sync_release_helpers.db_form_to_dict(
+def test_form_to_record_carries_base_form_only_for_inflections() -> None:
+    inflection = form_to_record(form=_derivative(is_base_form=True), include_base_form=True)
+    synonym = form_to_record(
         form=_derivative(grammatical_form="synonym", derivative_form_text="kalė"),
         include_base_form=False,
     )
@@ -385,11 +385,11 @@ def test_db_form_to_dict_carries_base_form_only_for_inflections() -> None:
     assert "is_base_form" not in synonym
 
 
-def test_db_form_to_dict_omits_empty_pronunciations() -> None:
-    record = sync_release_helpers.db_form_to_dict(form=_derivative(), include_base_form=True)
+def test_form_to_record_omits_empty_pronunciations() -> None:
+    record = form_to_record(form=_derivative(), include_base_form=True)
     assert "ipa" not in record and "phonetic" not in record
 
-    with_ipa = sync_release_helpers.db_form_to_dict(
+    with_ipa = form_to_record(
         form=_derivative(ipa_pronunciation="ʃuːnʲiːs"), include_base_form=True
     )
     assert with_ipa["ipa"] == "ʃuːnʲiːs"

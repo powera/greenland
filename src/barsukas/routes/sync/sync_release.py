@@ -13,7 +13,6 @@ from flask.typing import ResponseReturnValue
 
 import constants
 
-from barsukas.routes.sync import release_io
 from barsukas.routes.sync.actions import (
     SKIP,
     USE_DB,
@@ -26,6 +25,7 @@ from barsukas.routes.sync.actions import (
     parse_row_actions,
 )
 from barsukas.routes.sync.paging import PER_PAGE_CHOICES, page_args, paginate
+from storage.release import io as release_io
 from storage.config.grammar_facts import (
     get_release_grammar_fact_languages,
     is_release_grammar_fact_type,

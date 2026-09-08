@@ -16,20 +16,8 @@ from pathlib import Path
 from typing import Any, Dict, List, Optional, Set
 
 from storage.models.schema import Lemma
-from storage.release.derivative_form import form_to_record
 
 logger = logging.getLogger(__name__)
-
-
-def db_form_to_dict(form: Any, *, include_base_form: bool) -> Dict[str, Any]:
-    """Convert a DB ``DerivativeForm`` to its release-file dict shape.
-
-    Thin alias for :func:`storage.release.derivative_form.form_to_record`,
-    kept so the sync routes read the same as their sibling helpers here. The
-    record is built in exactly one place so this page and the ``migrate`` CLI
-    cannot drift apart.
-    """
-    return form_to_record(form, include_base_form=include_base_form)
 
 
 def form_key(grammatical_form: str, text: str) -> str:

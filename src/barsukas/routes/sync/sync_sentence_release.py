@@ -14,7 +14,6 @@ from sqlalchemy.orm import selectinload
 
 import constants
 
-from barsukas.routes.sync import release_io
 from barsukas.routes.sync.actions import (
     SKIP,
     USE_DB,
@@ -27,6 +26,7 @@ from barsukas.routes.sync.actions import (
     parse_row_actions,
 )
 from barsukas.routes.sync.paging import PER_PAGE_CHOICES, paginate
+from storage.release import io as release_io
 from storage.crud.operation_log import log_operation, log_translation_change
 from storage.migrate import _resolve_primary_lemma_category, _sentence_to_release_record
 from storage.models.name_entity import Name

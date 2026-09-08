@@ -1,13 +1,17 @@
 #!/usr/bin/python3
 
-"""Shared JSONL read/write machinery for the ``/sync`` blueprints.
+"""Shared JSONL read/write machinery for the ``data/release`` tree.
 
-Every sync page does the same four things to ``data/release``: read every
+Every reader of the tree does the same four things: read every
 ``base.jsonl`` under a tree into a GUID-keyed dict, work out which file a GUID
 lives in, rewrite some fields on a GUID's line, and rewrite some translations on
 a GUID's line. Each blueprint used to carry its own copy of all four, which is
 why ``concept_label`` updates and ``difficulty_level`` updates had subtly
 different behaviour on a malformed line.
+
+This lives under ``storage`` rather than with the Barsukas sync blueprints that
+first grew it: the per-entity modules beside it need the same machinery, and a
+``storage`` module importing from ``barsukas.routes`` would invert the layering.
 
 One behavioural note beyond deduplication: :func:`build_guid_file_index` scans
 the tree once and answers every lookup from a dict. The per-blueprint
