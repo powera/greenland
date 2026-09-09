@@ -33,33 +33,46 @@ from storage.backend.config import DataSourceConfig
 logger = logging.getLogger(__name__)
 
 
-def _load_wordfreq_in_background() -> None:
+def _load_wordfreq_in_background(jsonl_data_dir: str) -> None:
     """Populate the JSONL backend's in-memory DB with wordfreq data.
 
     Sleeps briefly so Flask can finish binding to its port before we start
     contending for the in-memory SQLite engine, then runs the loader. Any
     exception is logged but never propagated — the server stays up either
     way; golden mode just lacks frequency data until restart.
+
+    Args:
+        jsonl_data_dir: Absolute path to the JSONL release directory. This must
+            be the same string create_app() passed to DataSourceConfig, because
+            the factory caches JSONLStorage keyed on that exact path: a bare
+            DataSourceConfig() here would select the SQLite backend instead and
+            silently leave the frequency tables empty.
     """
     import time as _time
 
     try:
         _time.sleep(2.0)
         from storage.backend import create_session as _create_session
-        from storage.backend.config import DataSourceConfig
+        from storage.backend.config import BackendType, DataSourceConfig
         from storage.backend.factory import _jsonl_storage_cache
         from wordfreq.golden_loader import load_wordfreq_into_storage
 
         # Trigger storage cache population if it hasn't happened yet so we can
         # find the JSONLStorage instance to pass to the loader.
-        _create_session(DataSourceConfig()).close()
+        _create_session(
+            DataSourceConfig(
+                backend_type=BackendType.JSONL,
+                jsonl_data_dir=jsonl_data_dir,
+            )
+        ).close()
 
-        if not _jsonl_storage_cache:
-            logger.warning("Golden loader: no JSONL storage instance found; skipping")
+        storage = _jsonl_storage_cache.get(jsonl_data_dir)
+        if storage is None:
+            logger.warning(
+                f"Golden loader: no JSONL storage instance for {jsonl_data_dir}; skipping"
+            )
             return
 
-        # The cache is keyed by data_dir; in golden mode there is exactly one.
-        storage = next(iter(_jsonl_storage_cache.values()))
         logger.info("Golden loader: starting wordfreq load in background thread")
         load_wordfreq_into_storage(storage)
     except Exception:
@@ -270,6 +283,7 @@ def main() -> None:
     if persona.use_jsonl:
         threading.Thread(
             target=_load_wordfreq_in_background,
+            args=(str(jsonl_dir),),
             name="GoldenWordfreqLoader",
             daemon=True,
         ).start()
@@ -304,7 +318,7 @@ def main() -> None:
         elif persona.use_jsonl:
             _poller_config = _DataSourceConfig(
                 backend_type=_BackendType.JSONL,
-                jsonl_data_dir=str(repo_root / (persona.jsonl_data_dir or "data/release")),
+                jsonl_data_dir=str(jsonl_dir),
             )
         else:
             _poller_config = _DataSourceConfig(
