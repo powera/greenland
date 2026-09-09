@@ -1,9 +1,7 @@
 """Unit tests for the temporary curriculum proposal builders."""
 
-from collections import Counter
-
-from reports.curriculum_relevel import _balanced_sizes
-from reports.curriculum_sense_fixes import build_moves
+from reports.curriculum_relevel import _balanced_sizes, _family_reserved_level, _is_us_state
+from reports.curriculum_sense_fixes import plan_sense_levels
 from storage.models.schema import Lemma
 
 
@@ -17,6 +15,25 @@ def test_balanced_sizes_stay_near_target() -> None:
 
 def test_balanced_sizes_split_oversized_cohort() -> None:
     assert _balanced_sizes(92, 2) == [46, 46]
+
+
+def test_family_levels_come_from_reserved_section_values() -> None:
+    mother = _lemma(1, "N35_032", "mother", 63, "very_common")
+    mother.pos_subtype = "family_relation"
+
+    assert _family_reserved_level(mother) == 1
+
+
+def test_us_state_cohort_uses_definition_not_every_region() -> None:
+    state = _lemma(1, "N45_038", "Illinois", 49, "common")
+    state.pos_subtype = "region"
+    state.definition_text = "a state of the United States, in the midwest"
+    country = _lemma(2, "N45_005", "Germany", 49, "common")
+    country.pos_subtype = "region"
+    country.definition_text = "a country in central Europe"
+
+    assert _is_us_state(state)
+    assert not _is_us_state(country)
 
 
 def _lemma(
@@ -38,32 +55,16 @@ def _lemma(
     )
 
 
-def test_sense_fixes_preserve_counts_and_are_idempotent() -> None:
+def test_sense_fixes_space_prominence_ties_idempotently() -> None:
     lemmas = [
         _lemma(1, "N01_001", "example", 10, "very_common"),
         _lemma(2, "N01_002", "example", 10, "rare"),
         _lemma(3, "N01_003", "filler", 28, "common"),
     ]
 
-    class FakeSession:
-        def query(self, _model: type[Lemma]) -> "FakeSession":
-            return self
+    new_levels = plan_sense_levels(lemmas)
 
-        def filter(self, *_conditions: object) -> "FakeSession":
-            return self
-
-        def all(self) -> list[Lemma]:
-            return lemmas
-
-    moves = build_moves(FakeSession())  # type: ignore[arg-type]
-
-    assert Counter(move.old_level for move in moves) == Counter(move.new_level for move in moves)
-    assert {(move.guid, move.new_level) for move in moves} == {
-        ("N01_002", 28),
-        ("N01_003", 10),
-    }
-    new_levels = {move.lemma_id: move.new_level for move in moves}
+    assert new_levels == {1: 10, 2: 28, 3: 28}
     for lemma in lemmas:
-        if lemma.id in new_levels:
-            lemma.difficulty_level = new_levels[lemma.id]
-    assert build_moves(FakeSession()) == []  # type: ignore[arg-type]
+        lemma.difficulty_level = new_levels[lemma.id]
+    assert plan_sense_levels(lemmas) == new_levels

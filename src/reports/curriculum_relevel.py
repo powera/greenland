@@ -26,8 +26,11 @@ from storage.models.schema import (
     LemmaTier,
 )
 from storage.translation_helpers import RELEASE_LANGUAGES
+from wordfreq.data.family_relations_sections import ALL_SECTIONS
 from wordfreq.tools.country_override_manager import CountryOverrideManager
 from wordfreq.tools.country_word_priorities import (
+    CONTINENT_NAMES,
+    COUNTRY_NAMES,
     get_supported_languages as get_country_languages,
 )
 from wordfreq.tools.family_relation_priorities import (
@@ -41,6 +44,24 @@ MAX_LEVEL_SIZE = 55
 PRESERVED_LEVEL_MAX = 5
 WORD_PATTERN = re.compile(r"[a-z0-9]+")
 PROMINENCE_ORDER = {"very_common": 0, "common": 1, None: 1, "uncommon": 2, "rare": 3}
+US_STATE_COHORT_LEVEL = 49
+COUNTRY_COHORT_LEVEL = 50
+
+# Country lemmas remain together at their base cohort, then move per language
+# into these levels. Keep enough general-vocabulary space free that even the
+# largest configured country tier leaves an effective count no greater than 55.
+COUNTRY_LEVEL_CAPACITIES = {
+    10: (25, 40, 30),
+    18: (23, 38, 28),
+    30: (0, 15, 5),
+}
+
+FAMILY_LEVEL_BY_TEXT = {
+    variant.lemma_text.casefold(): variant.difficulty_level
+    for section in ALL_SECTIONS
+    for variant in section.variants
+    if variant.difficulty_level is not None
+}
 
 # These are intentionally broad curriculum themes, not a replacement taxonomy.
 # The stored POS subtype remains the unit kept together inside each theme.
@@ -212,6 +233,26 @@ def _theme(lemma: Lemma) -> str:
     return THEME_BY_SUBTYPE.get(subtype, f"other_{lemma.pos_type}")
 
 
+def _family_reserved_level(lemma: Lemma) -> Optional[int]:
+    """Return the family generator's level for a matching live sense."""
+    if lemma.pos_subtype != "family_relation":
+        return None
+    lemma_text = lemma.lemma_text.casefold()
+    if lemma_text == "cousin":
+        disambiguation = (lemma.disambiguation or "").casefold()
+        if "male" in disambiguation:
+            lemma_text = "male cousin"
+        elif "female" in disambiguation:
+            lemma_text = "female cousin"
+    return FAMILY_LEVEL_BY_TEXT.get(lemma_text)
+
+
+def _is_us_state(lemma: Lemma) -> bool:
+    return lemma.pos_subtype == "region" and "state of the united states" in (
+        lemma.definition_text.casefold()
+    )
+
+
 def _split_subtype_run(items: Sequence[Lemma]) -> list[list[Lemma]]:
     """Split a subtype into movable groups of 5-10 whenever possible."""
     if len(items) < 5:
@@ -278,6 +319,77 @@ def _pack_runs(runs: Sequence[Sequence[Lemma]]) -> list[list[Lemma]]:
     ]
 
 
+def _pack_runs_into_numbered_levels(
+    runs: Sequence[Sequence[Lemma]],
+    *,
+    fixed_counts: Optional[Mapping[int, int]] = None,
+) -> dict[int, list[Lemma]]:
+    """Pack runs into the space left around fixed curriculum cohorts."""
+    run_list = [list(run) for run in runs]
+    occupied_counts = fixed_counts or {}
+    for final_level in range(64, constants.MAX_DIFFICULTY_LEVEL + 1):
+        levels = list(range(PRESERVED_LEVEL_MAX + 1, final_level + 1))
+        best: list[dict[int, tuple[int, int]]] = [{0: (0, -1)}]
+        for level in levels:
+            total_minimum, total_maximum, total_target = COUNTRY_LEVEL_CAPACITIES.get(
+                level,
+                (MIN_LEVEL_SIZE, MAX_LEVEL_SIZE, TARGET_LEVEL_SIZE),
+            )
+            fixed_count = occupied_counts.get(level, 0)
+            if fixed_count > total_maximum:
+                # An explicit named cohort may be one item above the ordinary
+                # range (countries plus continents currently total 56).
+                minimum = maximum = target = 0
+            else:
+                minimum = max(0, total_minimum - fixed_count)
+                maximum = total_maximum - fixed_count
+                target = max(0, total_target - fixed_count)
+            prior = best[-1]
+            current: dict[int, tuple[int, int]] = {}
+            for start_index, (prior_cost, _prior_start) in prior.items():
+                item_count = 0
+                for end_index in range(start_index, len(run_list) + 1):
+                    if end_index > start_index:
+                        item_count += len(run_list[end_index - 1])
+                    if item_count > maximum:
+                        break
+                    if item_count < minimum:
+                        continue
+                    segment = run_list[start_index:end_index]
+                    subtype_count = len(
+                        {
+                            (lemma.pos_type, lemma.pos_subtype or lemma.pos_type)
+                            for run in segment
+                            for lemma in run
+                        }
+                    )
+                    theme_count = len({_theme(run[0]) for run in segment})
+                    segment_cost = (
+                        abs(item_count - target)
+                        + max(0, subtype_count - 1) * 3
+                        + max(0, theme_count - 1) * 25
+                    )
+                    candidate = (prior_cost + segment_cost, start_index)
+                    existing = current.get(end_index)
+                    if existing is None or candidate[0] < existing[0]:
+                        current[end_index] = candidate
+            best.append(current)
+        if len(run_list) not in best[-1]:
+            continue
+
+        packed: dict[int, list[Lemma]] = {}
+        end_index = len(run_list)
+        for level_index in range(len(levels), 0, -1):
+            result = best[level_index][end_index]
+            start_index = result[1]
+            packed[levels[level_index - 1]] = [
+                lemma for run in run_list[start_index:end_index] for lemma in run
+            ]
+            end_index = start_index
+        return packed
+    raise ValueError("Could not pack curriculum runs through level 100")
+
+
 def build_assignments(session: Session, *, mode: str = "auto") -> list[Assignment]:
     """Build the deterministic GUID-to-level proposal from the current database."""
     lemmas = (
@@ -297,6 +409,7 @@ def build_assignments(session: Session, *, mode: str = "auto") -> list[Assignmen
         tiers_by_lemma[tier_row.lemma_id].append(tier_row)
 
     proposed_by_id: dict[int, int] = {}
+    reserved_ids: set[int] = set()
     for lemma in lemmas:
         if lemma.difficulty_level is not None and lemma.difficulty_level <= PRESERVED_LEVEL_MAX:
             proposed_by_id[lemma.id] = lemma.difficulty_level
@@ -309,11 +422,44 @@ def build_assignments(session: Session, *, mode: str = "auto") -> list[Assignmen
         for lemma in lemmas:
             proposed_by_id[lemma.id] = int(lemma.difficulty_level or 0)
 
-    relevel_lemmas = [
-        lemma
-        for lemma in lemmas
-        if lemma.difficulty_level is not None and lemma.difficulty_level > PRESERVED_LEVEL_MAX
-    ]
+    if resolved_mode == "rebuild":
+        for lemma in lemmas:
+            family_level = _family_reserved_level(lemma)
+            if family_level is not None:
+                proposed_by_id[lemma.id] = family_level
+                reserved_ids.add(lemma.id)
+            elif lemma.pos_subtype == "region" and lemma.lemma_text in (
+                COUNTRY_NAMES | CONTINENT_NAMES
+            ):
+                proposed_by_id[lemma.id] = COUNTRY_COHORT_LEVEL
+                reserved_ids.add(lemma.id)
+            elif _is_us_state(lemma):
+                proposed_by_id[lemma.id] = US_STATE_COHORT_LEVEL
+                reserved_ids.add(lemma.id)
+
+        # Family reservations may make an existing early level too large.
+        # Evict the least-supported original entries into the general packer.
+        for early_level in range(constants.MIN_DIFFICULTY_LEVEL, PRESERVED_LEVEL_MAX + 1):
+            assigned_ids = [
+                lemma_id
+                for lemma_id, proposed_level in proposed_by_id.items()
+                if proposed_level == early_level
+            ]
+            overflow = len(assigned_ids) - MAX_LEVEL_SIZE
+            if overflow <= 0:
+                continue
+            eviction_candidates = [
+                lemma
+                for lemma in lemmas
+                if lemma.id in assigned_ids and lemma.id not in reserved_ids
+            ]
+            eviction_candidates.sort(
+                key=lambda lemma: _semantic_key(lemma, tiers_by_lemma), reverse=True
+            )
+            for lemma in eviction_candidates[:overflow]:
+                proposed_by_id.pop(lemma.id)
+
+    relevel_lemmas = [lemma for lemma in lemmas if lemma.id not in proposed_by_id]
     if resolved_mode == "rebuild":
         by_theme: dict[str, list[Lemma]] = defaultdict(list)
         for lemma in relevel_lemmas:
@@ -346,11 +492,14 @@ def build_assignments(session: Session, *, mode: str = "auto") -> list[Assignmen
                 subtype_lemmas.sort(key=lambda lemma: _semantic_key(lemma, tiers_by_lemma))
                 subtype_runs.extend(_split_subtype_run(subtype_lemmas))
 
-        next_level = PRESERVED_LEVEL_MAX + 1
-        for packed_level in _pack_runs(subtype_runs):
+        fixed_counts = Counter(proposed_by_id.values())
+        packed_levels = _pack_runs_into_numbered_levels(
+            subtype_runs,
+            fixed_counts=fixed_counts,
+        )
+        for next_level, packed_level in packed_levels.items():
             for lemma in packed_level:
                 proposed_by_id[lemma.id] = next_level
-            next_level += 1
 
     assignments = [
         Assignment(
@@ -481,7 +630,11 @@ def build_warnings(session: Session, assignments: Sequence[Assignment]) -> list[
     for proposed_level, level_assignments in sorted(by_proposed_level.items()):
         if proposed_level <= PRESERVED_LEVEL_MAX:
             continue
-        if not MIN_LEVEL_SIZE <= len(level_assignments) <= MAX_LEVEL_SIZE:
+        if (
+            proposed_level not in COUNTRY_LEVEL_CAPACITIES
+            and proposed_level != COUNTRY_COHORT_LEVEL
+            and not MIN_LEVEL_SIZE <= len(level_assignments) <= MAX_LEVEL_SIZE
+        ):
             warnings.append(
                 WarningRow(
                     "level-size",

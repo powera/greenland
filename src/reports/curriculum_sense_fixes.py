@@ -1,10 +1,8 @@
 """Preview or apply deterministic curriculum sense-order corrections.
 
-This is the deliberately small second pass over ``curriculum_relevel``.  It
-orders senses of the same English headword by stored prominence, separates
-differently prominent senses that share a level, and then uses unambiguous
-lemmas as count-balancing fillers.  The pass preserves the number of senses in
-every populated level, making it safe to iterate after reviewing the report.
+The pass orders senses of the same English headword by stored prominence.
+Cross-cohort moves reserve a small same-subtype group at their destination;
+the remaining subtype runs are then repacked around those fixed groups.
 """
 
 import argparse
@@ -18,13 +16,25 @@ from typing import Sequence
 from sqlalchemy.orm import Session
 
 import constants
-from reports.curriculum_relevel import PROMINENCE_ORDER, _theme
+from reports.curriculum_relevel import (
+    COUNTRY_COHORT_LEVEL,
+    COUNTRY_LEVEL_CAPACITIES,
+    MAX_LEVEL_SIZE,
+    MIN_LEVEL_SIZE,
+    PROMINENCE_ORDER,
+    TARGET_LEVEL_SIZE,
+    US_STATE_COHORT_LEVEL,
+    _family_reserved_level,
+    _is_us_state,
+)
 from storage.backend import BackendType, DataSourceConfig, create_session
 from storage.crud.operation_log import FieldChange, log_field_changes
 from storage.models.schema import Lemma
+from wordfreq.tools.country_word_priorities import CONTINENT_NAMES, COUNTRY_NAMES
 
 SOURCE = "curriculum/blind-sense-spacing"
 SPACING = 18
+MIN_SUBTYPE_GROUP_SIZE = 5
 
 
 @dataclass(frozen=True)
@@ -105,73 +115,181 @@ def plan_sense_levels(lemmas: Sequence[Lemma]) -> dict[int, int]:
     return proposed
 
 
-def add_count_balancing_moves(
+def _subtype_key(lemma: Lemma) -> tuple[str, str]:
+    return (lemma.pos_type, lemma.pos_subtype or lemma.pos_type)
+
+
+def _level_bounds(level: int) -> tuple[int, int, int]:
+    if level <= 5 or level in {COUNTRY_COHORT_LEVEL, US_STATE_COHORT_LEVEL}:
+        return (0, constants.MAX_DIFFICULTY_LEVEL, 0)
+    return COUNTRY_LEVEL_CAPACITIES.get(
+        level,
+        (MIN_LEVEL_SIZE, MAX_LEVEL_SIZE, TARGET_LEVEL_SIZE),
+    )
+
+
+def _repair_level_sizes(
+    lemmas: Sequence[Lemma], proposed: dict[int, int], fixed_ids: set[int]
+) -> None:
+    """Move coherent pieces only where a sense splice breaks level bounds."""
+    by_id = {lemma.id: lemma for lemma in lemmas}
+    for _attempt in range(len(lemmas)):
+        level_counts = Counter(proposed.values())
+        deficit_levels = [
+            level
+            for level, count in sorted(level_counts.items())
+            if count < _level_bounds(level)[0]
+        ]
+        surplus_levels = [
+            level
+            for level, count in sorted(level_counts.items())
+            if count > _level_bounds(level)[1]
+        ]
+        if not deficit_levels and not surplus_levels:
+            return
+
+        target_level = deficit_levels[0] if deficit_levels else surplus_levels[0]
+        target_count = level_counts[target_level]
+        target_minimum, _target_maximum, target_goal = _level_bounds(target_level)
+        needed = max(1, (target_minimum or target_goal) - target_count)
+        target_subtypes = Counter(
+            _subtype_key(by_id[lemma_id])
+            for lemma_id, assigned_level in proposed.items()
+            if assigned_level == target_level
+        )
+        donor_levels = sorted(
+            (
+                level
+                for level, count in level_counts.items()
+                if level != target_level and count > _level_bounds(level)[0]
+            ),
+            key=lambda level: (
+                level not in surplus_levels,
+                abs(level - target_level),
+                level,
+            ),
+        )
+        moved = False
+        for donor_level in donor_levels:
+            donor_minimum, _donor_maximum, _donor_goal = _level_bounds(donor_level)
+            movable = [
+                by_id[lemma_id]
+                for lemma_id, assigned_level in proposed.items()
+                if assigned_level == donor_level and lemma_id not in fixed_ids
+            ]
+            by_subtype: dict[tuple[str, str], list[Lemma]] = defaultdict(list)
+            for lemma in movable:
+                by_subtype[_subtype_key(lemma)].append(lemma)
+            subtype_options = sorted(
+                by_subtype,
+                key=lambda subtype_key: (
+                    target_subtypes[subtype_key] == 0,
+                    abs(len(by_subtype[subtype_key]) - needed),
+                    subtype_key,
+                ),
+            )
+            for subtype_key in subtype_options:
+                candidates = sorted(
+                    by_subtype[subtype_key],
+                    key=lambda lemma: (lemma.frequency_rank or 10**9, lemma.guid or ""),
+                )
+                existing_target_count = target_subtypes[subtype_key]
+                minimum_move = 1 if existing_target_count >= MIN_SUBTYPE_GROUP_SIZE else 5
+                maximum_move = level_counts[donor_level] - donor_minimum
+                move_count = min(len(candidates), maximum_move, max(needed, minimum_move))
+                remaining_subtype_count = len(candidates) - move_count
+                if move_count < minimum_move or 0 < remaining_subtype_count < 5:
+                    continue
+                for companion in candidates[:move_count]:
+                    proposed[companion.id] = target_level
+                    fixed_ids.add(companion.id)
+                moved = True
+                break
+            if moved:
+                break
+        if not moved:
+            raise RuntimeError(f"Could not repair curriculum sizes around level {target_level}")
+    raise RuntimeError("Curriculum size repair did not converge")
+
+
+def rebalance_around_sense_moves(
     lemmas: Sequence[Lemma], proposed: dict[int, int]
 ) -> list[PlannedMove]:
-    """Restore each level's count with deterministic unambiguous fillers."""
-    current_counts = Counter(int(lemma.difficulty_level or 0) for lemma in lemmas)
-    proposed_counts = Counter(proposed[lemma.id] for lemma in lemmas)
-    deficits: list[int] = []
-    surpluses: list[int] = []
-    for level in sorted(set(current_counts) | set(proposed_counts)):
-        difference = proposed_counts[level] - current_counts[level]
-        if difference < 0:
-            deficits.extend([level] * -difference)
-        elif difference > 0:
-            surpluses.extend([level] * difference)
-    if len(deficits) != len(surpluses):
-        raise RuntimeError("Sense-level plan does not conserve lemma count")
-
+    """Reserve coherent moved groups, then repack all remaining subtype runs."""
     headword_counts = Counter(lemma.lemma_text.casefold() for lemma in lemmas)
-    already_changed = {
-        lemma.id for lemma in lemmas if proposed[lemma.id] != int(lemma.difficulty_level or 0)
+    fixed_ids: set[int] = set()
+    polysemy_ids = {
+        lemma.id for lemma in lemmas if headword_counts[lemma.lemma_text.casefold()] > 1
     }
-    for surplus_level, deficit_level in zip(surpluses, deficits):
-        deficit_themes = Counter(
-            _theme(lemma)
+
+    for lemma in lemmas:
+        family_level = _family_reserved_level(lemma)
+        if family_level is not None:
+            proposed[lemma.id] = family_level
+            fixed_ids.add(lemma.id)
+        elif _is_us_state(lemma):
+            proposed[lemma.id] = US_STATE_COHORT_LEVEL
+            fixed_ids.add(lemma.id)
+        elif lemma.pos_subtype == "region" and lemma.lemma_text in (
+            COUNTRY_NAMES | CONTINENT_NAMES
+        ):
+            proposed[lemma.id] = COUNTRY_COHORT_LEVEL
+            fixed_ids.add(lemma.id)
+        elif int(lemma.difficulty_level or 0) <= 5 and lemma.id not in polysemy_ids:
+            fixed_ids.add(lemma.id)
+    fixed_ids.update(polysemy_ids)
+
+    # A cross-cohort sense move carries enough same-subtype vocabulary with it
+    # to avoid creating an isolated verb, noun subtype, or other singleton.
+    moved_polysemy = [
+        lemma
+        for lemma in lemmas
+        if lemma.id in polysemy_ids and proposed[lemma.id] != int(lemma.difficulty_level or 0)
+    ]
+    required_groups = sorted(
+        {(proposed[lemma.id], _subtype_key(lemma)) for lemma in moved_polysemy}
+    )
+    for target_level, subtype_key in required_groups:
+        fixed_group = [
+            lemma
             for lemma in lemmas
-            if proposed[lemma.id] == deficit_level and lemma.id not in already_changed
-        )
-        preferred_theme = deficit_themes.most_common(1)[0][0] if deficit_themes else None
-        subtype_counts = Counter(
-            (lemma.pos_type, lemma.pos_subtype or lemma.pos_type)
-            for lemma in lemmas
-            if proposed[lemma.id] == surplus_level
-        )
+            if lemma.id in fixed_ids
+            and proposed[lemma.id] == target_level
+            and _subtype_key(lemma) == subtype_key
+        ]
+        needed = max(0, MIN_SUBTYPE_GROUP_SIZE - len(fixed_group))
         candidates = [
             lemma
             for lemma in lemmas
-            if proposed[lemma.id] == surplus_level
-            and lemma.id not in already_changed
-            and headword_counts[lemma.lemma_text.casefold()] == 1
+            if lemma.id not in fixed_ids and _subtype_key(lemma) == subtype_key
         ]
         candidates.sort(
             key=lambda lemma: (
-                _theme(lemma) != preferred_theme,
-                subtype_counts[(lemma.pos_type, lemma.pos_subtype or lemma.pos_type)] <= 5,
-                -(lemma.frequency_rank or 0),
+                int(lemma.difficulty_level or 0) != target_level,
+                abs(int(lemma.difficulty_level or 0) - target_level),
+                lemma.frequency_rank is None,
+                lemma.frequency_rank or 0,
                 lemma.guid or "",
             )
         )
-        if not candidates:
-            raise RuntimeError(f"No filler available at surplus level {surplus_level}")
-        filler = candidates[0]
-        proposed[filler.id] = deficit_level
-        already_changed.add(filler.id)
+        if len(candidates) < needed:
+            # Some small subtypes are spliced across more destinations than
+            # their inventory can support. Keep the reviewed sense move and
+            # leave that thin group visible in the report for manual review.
+            continue
+        for companion in candidates[:needed]:
+            proposed[companion.id] = target_level
+            fixed_ids.add(companion.id)
 
-    if Counter(proposed.values()) != current_counts:
-        raise RuntimeError("Filler moves did not restore the original level counts")
+    _repair_level_sizes(lemmas, proposed, fixed_ids)
+
     moves = [
         PlannedMove(
             lemma_id=lemma.id,
             guid=lemma.guid or "",
             old_level=int(lemma.difficulty_level or 0),
             new_level=proposed[lemma.id],
-            reason=(
-                "sense prominence"
-                if headword_counts[lemma.lemma_text.casefold()] > 1
-                else "count-balancing filler"
-            ),
+            reason=("sense prominence" if lemma.id in polysemy_ids else "cohort rebalance"),
         )
         for lemma in lemmas
         if proposed[lemma.id] != int(lemma.difficulty_level or 0)
@@ -180,9 +298,9 @@ def add_count_balancing_moves(
 
 
 def build_moves(session: Session) -> list[PlannedMove]:
-    """Build the complete count-preserving correction plan."""
+    """Build the complete subtype-aware correction plan."""
     lemmas = _active_lemmas(session)
-    return add_count_balancing_moves(lemmas, plan_sense_levels(lemmas))
+    return rebalance_around_sense_moves(lemmas, plan_sense_levels(lemmas))
 
 
 def _backup_database(database_path: Path) -> Path:

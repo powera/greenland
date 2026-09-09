@@ -36,11 +36,14 @@ from sqlalchemy.orm import Session
 
 from storage.crud.difficulty_override import (
     add_difficulty_override,
+    delete_difficulty_override,
     get_all_overrides_for_lemma,
     get_difficulty_override,
 )
 from storage.models.schema import Lemma, LemmaDifficultyOverride
 from wordfreq.tools.country_word_priorities import (
+    CONTINENT_NAMES,
+    COUNTRY_NAMES,
     COUNTRY_TO_NATIONALITY_MAP,
     TIER_1_LEVEL,
     TIER_2_LEVEL,
@@ -57,7 +60,20 @@ COUNTRY_NOTES_PREFIX = "Country word priority:"
 
 def _is_country_override(override: Optional[LemmaDifficultyOverride]) -> bool:
     """Return whether an override is owned by this derived-data tool."""
-    return bool(override and (override.notes or "").startswith(COUNTRY_NOTES_PREFIX))
+    if override is None:
+        return False
+    if (override.notes or "").startswith(COUNTRY_NOTES_PREFIX):
+        return True
+    # Release imports made before override provenance was exported have blank
+    # notes. Only recognize the exact levels emitted by this tool, preserving
+    # blank manual overrides at unrelated levels.
+    return not override.notes and override.difficulty_level in {
+        EXCLUDED_LEVEL,
+        8,
+        13,
+        18,
+        *get_all_tier_levels(),
+    }
 
 
 @dataclass
@@ -131,6 +147,7 @@ class CountryOverrideManager:
             .filter(
                 Lemma.pos_type == "noun",
                 Lemma.pos_subtype == "region",
+                Lemma.lemma_text.in_(COUNTRY_NAMES | CONTINENT_NAMES),
             )
             .all()
         )
@@ -347,6 +364,28 @@ class CountryOverrideManager:
             )
             applied_count += 1
 
+        # A previous version treated every ``region`` lemma (including US
+        # states and continents) as a country. Remove only rows carrying this
+        # tool's provenance; a dated data repair handles older unlabelled rows.
+        stale_candidates = (
+            self.session.query(LemmaDifficultyOverride)
+            .join(Lemma, LemmaDifficultyOverride.lemma_id == Lemma.id)
+            .filter(
+                LemmaDifficultyOverride.language_code == target_language,
+                Lemma.pos_subtype == "region",
+                Lemma.lemma_text.notin_(COUNTRY_NAMES | CONTINENT_NAMES),
+            )
+            .all()
+        )
+        for stale_override in stale_candidates:
+            if not _is_country_override(stale_override):
+                continue
+            delete_difficulty_override(
+                self.session,
+                stale_override.lemma_id,
+                target_language,
+            )
+
         if not dry_run:
             self.session.commit()
         else:
@@ -414,8 +453,6 @@ class CountryOverrideManager:
         Returns:
             Number of overrides removed
         """
-        from storage.crud.difficulty_override import delete_difficulty_override
-
         count = 0
         for lemma in self.get_all_country_related_words():
             override = get_difficulty_override(self.session, lemma.id, target_language)
