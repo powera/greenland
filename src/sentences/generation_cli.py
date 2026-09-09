@@ -106,7 +106,7 @@ Examples:
     parser.add_argument(
         "--level",
         type=int,
-        help="Generate LLM sentences for lemmas at a specific difficulty level (1-20, for llm mode)",
+        help="Generate LLM sentences for lemmas at a specific difficulty level (1-100, for llm mode)",
     )
     parser.add_argument(
         "--limit",

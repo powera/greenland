@@ -5,6 +5,7 @@ from typing import Any, Dict, List, Optional
 from sqlalchemy import and_
 from sqlalchemy.orm import Session
 
+import constants
 from storage.models.schema import Lemma, LemmaDifficultyOverride
 
 
@@ -22,12 +23,20 @@ def add_difficulty_override(
         session: Database session
         lemma_id: ID of the lemma
         language_code: Language code (e.g., 'zh', 'fr', 'de')
-        difficulty_level: Difficulty level (1-20) or -1 to exclude from language
+        difficulty_level: Difficulty level (1-100) or -1 to exclude from language
         notes: Optional notes explaining the override
 
     Returns:
         The created or updated LemmaDifficultyOverride
     """
+    if difficulty_level != constants.EXCLUDE_DIFFICULTY_LEVEL and not (
+        constants.MIN_DIFFICULTY_LEVEL <= difficulty_level <= constants.MAX_DIFFICULTY_LEVEL
+    ):
+        raise ValueError(
+            f"difficulty_level must be {constants.EXCLUDE_DIFFICULTY_LEVEL} or between "
+            f"{constants.MIN_DIFFICULTY_LEVEL} and {constants.MAX_DIFFICULTY_LEVEL}"
+        )
+
     # Check if override already exists
     existing = (
         session.query(LemmaDifficultyOverride)
@@ -166,7 +175,7 @@ def get_effective_difficulty_level(
         language_code: Language code (e.g., 'zh', 'fr', 'de')
 
     Returns:
-        Effective difficulty level (1-20), -1 (excluded), or None (no level set)
+        Effective difficulty level (1-100), -1 (excluded), or None (no level set)
     """
     # Check for override first
     override = get_difficulty_override(session, lemma.id, language_code)
@@ -266,7 +275,7 @@ def bulk_get_effective_difficulty_levels(
 
     Returns:
         Dictionary mapping lemma_id to effective difficulty level.
-        Level is -1 for excluded, None for no level set, or 1-20 for actual level.
+        Level is -1 for excluded, None for no level set, or 1-100 for an active level.
     """
     if not lemmas:
         return {}

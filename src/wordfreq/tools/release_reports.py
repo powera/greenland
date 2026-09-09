@@ -57,7 +57,7 @@ def report_by_level(release_dir: Optional[Path] = None) -> dict:
         }
     }
 
-    Levels: -1 means excluded, 1-20 are active levels.
+    Levels: -1 means excluded, 1-100 are supported active levels.
     """
     # Structure: level -> pos_type -> subtype -> count
     data: DefaultDict[Optional[int], DefaultDict[str, DefaultDict[str, int]]] = defaultdict(

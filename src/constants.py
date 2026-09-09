@@ -35,6 +35,12 @@ OUTPUT_DIR = os.path.join(os.path.dirname(PROJECT_ROOT), "greenland_output")
 # sites, so this constant is the only place the root itself is derived.
 RELEASE_DIR = os.path.join(PROJECT_ROOT, "data", "release")
 
+# General-vocabulary curriculum bounds. ``-1`` is the intentional exclusion
+# sentinel and is not a curriculum level.
+MIN_DIFFICULTY_LEVEL: int = 1
+MAX_DIFFICULTY_LEVEL: int = 100
+EXCLUDE_DIFFICULTY_LEVEL: int = -1
+
 # Wordfreq directories
 WORDFREQ_DATA_DIR = os.path.join(PROJECT_ROOT, "data", "wordfreq")
 WORDFREQ_DB_PATH = os.path.join(WORDFREQ_DATA_DIR, "linguistics.sqlite")

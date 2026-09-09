@@ -274,7 +274,7 @@ Examples:
     set_parser = subparsers.add_parser("set", help="Set a difficulty override")
     set_parser.add_argument("guid", help="Lemma GUID")
     set_parser.add_argument("language", help="Language code (e.g., zh, fr, de)")
-    set_parser.add_argument("level", type=int, help="Difficulty level (1-20) or -1 to exclude")
+    set_parser.add_argument("level", type=int, help="Difficulty level (1-100) or -1 to exclude")
     set_parser.add_argument("--notes", help="Notes explaining the override")
 
     # View command

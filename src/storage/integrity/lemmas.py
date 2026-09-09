@@ -9,6 +9,7 @@ from typing import Any, Dict, List
 from sqlalchemy import func
 from sqlalchemy.orm import Session
 
+import constants
 from storage.models.schema import DerivativeForm, Lemma
 
 logger = logging.getLogger(__name__)
@@ -193,13 +194,15 @@ def check_duplicate_words(session: Session) -> Dict[str, Any]:
 
 
 def check_invalid_difficulty_levels(session: Session) -> Dict[str, Any]:
-    """Return lemmas with difficulty levels outside 1 through 20."""
+    """Return lemmas outside the curriculum range or exclusion sentinel."""
     try:
         invalid_lemmas = (
             session.query(Lemma)
             .filter(
                 Lemma.difficulty_level.isnot(None),
-                (Lemma.difficulty_level < 1) | (Lemma.difficulty_level > 20),
+                Lemma.difficulty_level != constants.EXCLUDE_DIFFICULTY_LEVEL,
+                (Lemma.difficulty_level < constants.MIN_DIFFICULTY_LEVEL)
+                | (Lemma.difficulty_level > constants.MAX_DIFFICULTY_LEVEL),
             )
             .all()
         )
