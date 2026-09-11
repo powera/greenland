@@ -78,7 +78,7 @@ bebras.py --check all                 # Run all integrity checks (default)
 bebras.py --check orphaned            # Find orphaned records
 bebras.py --check missing-fields      # Find missing required fields
 bebras.py --check duplicates          # Find duplicate GUIDs
-bebras.py --check invalid-levels      # Find levels outside 1-100 (except -1)
+bebras.py --check invalid-levels      # Find levels outside 1-199 (except -1)
 ```
 
 ### lokys (English Validation)

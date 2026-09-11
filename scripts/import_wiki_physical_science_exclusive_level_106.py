@@ -2,17 +2,17 @@
 """Import the chemistry, physics, astronomy and geology vocabulary that only the wiki_physical_science corpus attests.
 
 Sourced from /word-tokens/corpus-skew?corpus=wiki_physical_science&exclusive=1 -- not the
-Zipf-delta list that levels 35-42 were drawn from, but its companion: the words
+Zipf-delta list that levels 66-73 were drawn from, but its companion: the words
 this corpus has and no other corpus in the collection does.  A word with no
 "elsewhere" cannot be scored, so these are reported apart from the skew ranking;
 they are also the sharper list, because being unattested everywhere else is a
 stronger claim about a word's domain than merely being commoner here.
 
-Level 48 continues from the skew batches at 35-42, reusing their corpora in
-the same order.  These lists are disjoint; see the note on the word list below.
+Topic level 106 joins the tail of the ranked physical-science list. These
+corpus-exclusive words are too domain-specific for the general curriculum.
 
 The 35 element names this list originally carried (helium, uranium, tungsten,
-...) moved to import_chemical_elements_level_54.py, which takes all 118 as a
+...) moved to import_chemical_elements_level_111.py, which takes all 118 as a
 closed set rather than the arbitrary subset one corpus happens to attest.  What
 is left reads as what it always should have: a physical-science *concepts*
 list -- processes, quantities, particles and rock types.
@@ -38,7 +38,7 @@ if str(ROOT) not in sys.path:
 
 from scripts.wordlist_import_helper import run_import
 
-DIFFICULTY_LEVEL = 48
+DIFFICULTY_LEVEL = 106
 
 # The corpus-exclusive words of wiki_physical_science on 2026-08-29, ordered by their rank
 # within the corpus and cut at 125, reduced to what words_exist does not already
@@ -56,7 +56,7 @@ DIFFICULTY_LEVEL = 48
 #
 # A word exclusive to one corpus is by construction absent from the others, so
 # these ten lists cannot collide with each other.  Words already claimed by
-# import_unlinked_level_34.py and by the skew batches at 35-42 are removed here,
+# import_unlinked_level_65.py and by the skew batches at 66-73 are removed here,
 # since those lists were drawn from the same token table.
 WORDS: Sequence[str] = (
     "galaxy",

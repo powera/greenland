@@ -563,7 +563,7 @@ def get_argument_parser() -> argparse.ArgumentParser:
         choices=["lt", "zh", "ja", "ko", "fr", "it", "de", "es", "pt", "sw", "vi"],
         help="Target language code (required for populate-only and regenerate modes)",
     )
-    parser.add_argument("--difficulty-level", type=int, help="Filter by difficulty level (1-100)")
+    parser.add_argument("--difficulty-level", type=int, help="Filter by difficulty level (1-199)")
     parser.add_argument(
         "--voices",
         nargs="+",

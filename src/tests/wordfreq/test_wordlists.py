@@ -2,11 +2,14 @@
 
 from __future__ import annotations
 
-from typing import Optional
+import importlib
+from types import ModuleType
+from typing import Optional, Sequence
 
 from sqlalchemy import create_engine
 from sqlalchemy.orm import Session
 
+import constants
 from storage.models.schema import Base, ExternalLexemeAnnotation, WordToken
 from wordfreq.frequency.wordlists import (
     MIN_TOKEN_LENGTH,
@@ -18,6 +21,21 @@ from wordfreq.frequency.wordlists import (
 )
 
 CORPORA = ["cooking", "19th_books", "wiki_linguistics"]
+
+DOMAIN_IMPORT_MODULES: Sequence[str] = (
+    "scripts.import_wiki_arts_level_66",
+    "scripts.import_wiki_biology_level_67",
+    "scripts.import_wiki_geography_level_68",
+    "scripts.import_wiki_history_level_69",
+    "scripts.import_wiki_modern_life_level_70",
+    "scripts.import_wiki_physical_science_level_71",
+    "scripts.import_wiki_society_level_72",
+    "scripts.import_legal_scotus_level_73",
+    "scripts.import_cooking_exclusive_level_82",
+    "scripts.import_wiki_math_exclusive_level_83",
+    "scripts.import_linguistics_basic_level_18",
+    "scripts.import_hyphenated_level_87",
+)
 
 
 def _make_session() -> Session:
@@ -253,3 +271,29 @@ def test_min_token_length_default_is_applied() -> None:
         assert [word.token for word in results] == ["a" * MIN_TOKEN_LENGTH]
     finally:
         session.close()
+
+
+def test_domain_imports_have_reviewed_general_samples_and_topic_remainders() -> None:
+    for module_name in DOMAIN_IMPORT_MODULES:
+        import_module: ModuleType = importlib.import_module(module_name)
+        general_words = tuple(import_module.GENERAL_WORDS)
+        if hasattr(import_module, "TOPIC_WORDS"):
+            words = (*general_words, *tuple(import_module.TOPIC_WORDS))
+        else:
+            words = tuple(import_module.WORDS)
+
+        assert len(general_words) == 40, module_name
+        assert len(set(general_words)) == len(general_words), module_name
+        assert set(general_words) <= set(words), module_name
+        assert import_module.DIFFICULTY_LEVEL <= constants.GENERAL_DIFFICULTY_LEVEL_MAX, module_name
+        assert (
+            import_module.TOPIC_DIFFICULTY_LEVEL >= constants.TOPIC_DIFFICULTY_LEVEL_MIN
+        ), module_name
+
+
+def test_arts_import_exposes_two_explicit_wordlists() -> None:
+    arts_import = importlib.import_module("scripts.import_wiki_arts_level_66")
+
+    assert len(arts_import.GENERAL_WORDS) == 40
+    assert len(arts_import.TOPIC_WORDS) == 40
+    assert set(arts_import.GENERAL_WORDS).isdisjoint(arts_import.TOPIC_WORDS)

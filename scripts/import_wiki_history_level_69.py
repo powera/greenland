@@ -5,9 +5,8 @@ Sourced from /word-tokens/corpus-skew?corpus=wiki_history -- the words whose Zip
 here is furthest above their Zipf in the other corpora, which is what surfaces
 the connective prose of historical narrative -- reigns, campaigns, successions and revolts rather than the function words a raw frequency list would return.
 
-Level 38 places this with the other corpus-skew batches (35-41, one per
-Wikipedia corpus except wiki_math): specialised vocabulary a learner meets well
-after the core.  These lists are disjoint; see the note on the word list below.
+The first 40 ranked words form the history sample at general-curriculum level
+69. The remaining, sharper domain vocabulary is stored at topic level 104.
 
 This script deliberately uses the public ``ROOT/api`` facade.  In particular,
 ``api.lemmas.add_word`` runs Barsukas' intelligent word workflow: the server's
@@ -28,9 +27,10 @@ ROOT = Path(__file__).resolve().parent.parent
 if str(ROOT) not in sys.path:
     sys.path.insert(0, str(ROOT))
 
-from scripts.wordlist_import_helper import run_import
+from scripts.wordlist_import_helper import run_domain_import
 
-DIFFICULTY_LEVEL = 38
+DIFFICULTY_LEVEL = 69
+TOPIC_DIFFICULTY_LEVEL = 104
 
 # The top 200 rows of /word-tokens/corpus-skew?corpus=wiki_history on 2026-08-29,
 # reduced to what words_exist does not already account for, then curated:
@@ -47,7 +47,7 @@ DIFFICULTY_LEVEL = 38
 # A word that scores in more than one corpus is assigned to whichever corpus it
 # leans toward hardest, so these lists are disjoint and a word cannot be
 # imported twice at two different levels.  Words already claimed by
-# import_unlinked_level_34.py are removed here for the same reason.
+# import_unlinked_level_65.py are removed here for the same reason.
 WORDS: Sequence[str] = (
     "career",
     "invaded",
@@ -126,6 +126,57 @@ WORDS: Sequence[str] = (
     "reputation",
 )
 
+GENERAL_WORDS: Sequence[str] = (
+    "invaded",
+    "alliance",
+    "reign",
+    "ally",
+    "emperor",
+    "rebellion",
+    "defeat",
+    "captured",
+    "decisive",
+    "commander",
+    "tribute",
+    "nobility",
+    "throne",
+    "campaign",
+    "clan",
+    "victory",
+    "attacked",
+    "imprisoned",
+    "leader",
+    "revolt",
+    "heir",
+    "leadership",
+    "descent",
+    "conquered",
+    "ruled",
+    "siege",
+    "royal",
+    "defended",
+    "conquest",
+    "appointed",
+    "successor",
+    "expedition",
+    "reform",
+    "ruler",
+    "invasion",
+    "kingdom",
+    "imperial",
+    "legacy",
+    "exile",
+    "surrender",
+)
+
 
 if __name__ == "__main__":
-    raise SystemExit(run_import(WORDS, DIFFICULTY_LEVEL, __doc__ or ""))
+    raise SystemExit(
+        run_domain_import(
+            WORDS,
+            GENERAL_WORDS,
+            DIFFICULTY_LEVEL,
+            TOPIC_DIFFICULTY_LEVEL,
+            __doc__ or "",
+        )
+    )

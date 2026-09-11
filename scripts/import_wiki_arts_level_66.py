@@ -5,9 +5,8 @@ Sourced from /word-tokens/corpus-skew?corpus=wiki_arts -- the words whose Zipf
 here is furthest above their Zipf in the other corpora, which is what surfaces
 architecture, literature, music, the performing and visual arts, and film rather than the function words a raw frequency list would return.
 
-Level 35 places this with the other corpus-skew batches (35-41, one per
-Wikipedia corpus except wiki_math): specialised vocabulary a learner meets well
-after the core.  These lists are disjoint; see the note on the word list below.
+The first 40 ranked words form the arts sample at general-curriculum level 66.
+The remaining, sharper domain vocabulary is stored at topic level 101.
 
 This script deliberately uses the public ``ROOT/api`` facade.  In particular,
 ``api.lemmas.add_word`` runs Barsukas' intelligent word workflow: the server's
@@ -28,9 +27,10 @@ ROOT = Path(__file__).resolve().parent.parent
 if str(ROOT) not in sys.path:
     sys.path.insert(0, str(ROOT))
 
-from scripts.wordlist_import_helper import run_import
+from scripts.wordlist_import_helper import run_tiered_import
 
-DIFFICULTY_LEVEL = 35
+DIFFICULTY_LEVEL = 66
+TOPIC_DIFFICULTY_LEVEL = 101
 
 # The top 200 rows of /word-tokens/corpus-skew?corpus=wiki_arts on 2026-08-29,
 # reduced to what words_exist does not already account for, then curated:
@@ -47,17 +47,13 @@ DIFFICULTY_LEVEL = 35
 # A word that scores in more than one corpus is assigned to whichever corpus it
 # leans toward hardest, so these lists are disjoint and a word cannot be
 # imported twice at two different levels.  Words already claimed by
-# import_unlinked_level_34.py are removed here for the same reason.
-WORDS: Sequence[str] = (
-    "bass",
-    "rhyme",
+# import_unlinked_level_65.py are removed here for the same reason.
+GENERAL_WORDS: Sequence[str] = (
     "musical",
     "genre",
     "animation",
     "novel",
-    "hop",
     "architecture",
-    "animated",
     "orchestra",
     "dance",
     "melody",
@@ -70,7 +66,6 @@ WORDS: Sequence[str] = (
     "drama",
     "opera",
     "audience",
-    "aired",
     "dancer",
     "pop",
     "arts",
@@ -80,32 +75,40 @@ WORDS: Sequence[str] = (
     "poem",
     "dialogue",
     "poetry",
-    "version",
     "theatrical",
     "published",
     "ballet",
-    "influenced",
     "choir",
     "narrative",
     "comic",
     "classical",
+    "artistic",
+    "masterpiece",
+    "performance",
+    "jazz",
+    "theatre",
+    "circus",
+    "exhibition",
+)
+
+TOPIC_WORDS: Sequence[str] = (
+    "bass",
+    "rhyme",
+    "hop",
+    "animated",
+    "aired",
+    "version",
+    "influenced",
     "adapted",
     "reed",
     "ragtime",
-    "artistic",
-    "masterpiece",
     "inspired",
-    "performance",
-    "jazz",
     "poetic",
-    "theatre",
     "dome",
     "pitch",
-    "circus",
     "tenor",
     "manuscript",
     "anonymous",
-    "exhibition",
     "dramatic",
     "waltz",
     "dictionary",
@@ -133,4 +136,12 @@ WORDS: Sequence[str] = (
 
 
 if __name__ == "__main__":
-    raise SystemExit(run_import(WORDS, DIFFICULTY_LEVEL, __doc__ or ""))
+    raise SystemExit(
+        run_tiered_import(
+            GENERAL_WORDS,
+            TOPIC_WORDS,
+            DIFFICULTY_LEVEL,
+            TOPIC_DIFFICULTY_LEVEL,
+            __doc__ or "",
+        )
+    )

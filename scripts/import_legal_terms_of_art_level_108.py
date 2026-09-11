@@ -1,8 +1,8 @@
 #!/usr/bin/env python3
 """Import the legal terms of art -- the multi-word phrases of the law.
 
-Levels 42 and 50 took single words from the legal_scotus corpus, by Zipf skew
-and by corpus exclusivity respectively.  Both miss the vocabulary that carries
+Levels 73 and 108 take single words from the legal_scotus corpus, by Zipf skew
+and by corpus exclusivity respectively. Both miss the vocabulary that carries
 the most legal meaning per token, because a frequency list over whitespace
 tokens cannot see it: "ex post facto" is three ordinary words, "voir dire" is
 two words that are not English at all, and "res ipsa loquitur" is Latin whose
@@ -28,6 +28,9 @@ selects and stores the useful senses.  The script never supplies definitions or
 translations itself.
 
 Running without ``--execute`` only prints the plan and makes no HTTP requests.
+
+These fixed legal phrases join the other specialist legal vocabulary at topic
+level 108.
 """
 
 from __future__ import annotations
@@ -42,12 +45,12 @@ if str(ROOT) not in sys.path:
 
 from scripts.wordlist_import_helper import run_import
 
-DIFFICULTY_LEVEL = 53
+DIFFICULTY_LEVEL = 108
 
 # Standard legal terminology, not a corpus extract.  Checked against
-# ``words_exist`` and against the word lists of levels 34-52, which is what
+# ``words_exist`` and against the preceding general and topic wordlists, which is what
 # removed the bare forms already claimed there ("certiorari", "indictment" and
-# "tolling" belong to level 50, so they appear here only inside a longer phrase
+# "tolling" belong to topic level 108, so they appear here only inside a longer phrase
 # such as "equitable tolling").  "information" and "standing" are omitted
 # entirely: both are already in the database in their ordinary senses, and the
 # legal sense of each is a disambiguation of that lemma rather than a new one.

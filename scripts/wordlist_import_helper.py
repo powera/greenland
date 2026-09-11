@@ -1,8 +1,8 @@
 #!/usr/bin/env python3
 """Shared driver for the corpus-derived wordlist import scripts.
 
-Each ``import_*_level_*.py`` script is a difficulty level, a curated wordlist,
-and a docstring recording where the list came from.  Everything else -- the
+Each ``import_*_level_*.py`` script contains one or two difficulty bands, a
+curated wordlist, and a docstring recording where the list came from. Everything else -- the
 argument parsing, the existence preflight, the pending-queue check, the
 per-word add loop, the summary -- was identical in all of them, copied twenty
 times, so a fix to any of it had to be made twenty times or not at all.  It
@@ -155,11 +155,17 @@ def print_plan(words: Sequence[str], level: int) -> None:
         print(f"{rank:3}. {word}")
 
 
-def execute(words: Sequence[str], level: int, model: str, limit: int | None) -> None:
-    """Import ``words`` at ``level``, skipping what is already accounted for."""
+def execute_assignments(
+    assignments: Sequence[tuple[str, int]], model: str, limit: int | None
+) -> None:
+    """Import ranked ``(word, level)`` assignments, skipping known words."""
     if limit is not None and limit < 1:
         raise RuntimeError("--limit must be at least 1")
 
+    words = [word for word, _level in assignments]
+    level_by_word = {word: level for word, level in assignments}
+    if len(level_by_word) != len(words):
+        raise RuntimeError("A wordlist import assigns the same word more than once")
     existence_data = check_words_exist(words)
     queued = pending_queue_words()
 
@@ -182,6 +188,7 @@ def execute(words: Sequence[str], level: int, model: str, limit: int | None) -> 
     skipped_word_count = existing_count + len(queued_words)
 
     for position, word in enumerate(words_to_add, start=1):
+        level = level_by_word[word]
         print(f"[{position}/{len(words_to_add)}] {word}: importing senses...", flush=True)
         addition_response = add_word(word, model)
         addition_data = _response_data(addition_response, operation=f"adding {word!r}")
@@ -216,6 +223,11 @@ def execute(words: Sequence[str], level: int, model: str, limit: int | None) -> 
     )
 
 
+def execute(words: Sequence[str], level: int, model: str, limit: int | None) -> None:
+    """Import ``words`` at one ``level``, skipping what is already accounted for."""
+    execute_assignments([(word, level) for word in words], model, limit)
+
+
 def run_import(words: Sequence[str], level: int, description: str) -> int:
     """Entry point for a wordlist import script.
 
@@ -236,6 +248,67 @@ def run_import(words: Sequence[str], level: int, description: str) -> int:
     print(f"\nLIVE MODE: Barsukas will use {args.model!r} for paid sense/translation calls.")
     try:
         execute(words, level, args.model, args.limit)
+    except (BarsukasAPIError, RuntimeError) as error:
+        print(f"Import stopped: {error}", file=sys.stderr)
+        return 1
+    return 0
+
+
+def run_domain_import(
+    words: Sequence[str],
+    general_words: Sequence[str],
+    general_level: int,
+    topic_level: int,
+    description: str,
+) -> int:
+    """Import a reviewed domain sample generally and the remainder topically."""
+    general_word_set = set(general_words)
+    unknown_general_words = general_word_set - set(words)
+    if unknown_general_words:
+        raise ValueError(
+            f"General sample contains unknown words: {sorted(unknown_general_words)!r}"
+        )
+    if len(general_word_set) != len(general_words):
+        raise ValueError("General sample contains a duplicate word")
+    ranked_general_words = [word for word in words if word in general_word_set]
+    topic_words = [word for word in words if word not in general_word_set]
+    return run_tiered_import(
+        ranked_general_words,
+        topic_words,
+        general_level,
+        topic_level,
+        description,
+    )
+
+
+def run_tiered_import(
+    general_words: Sequence[str],
+    topic_words: Sequence[str],
+    general_level: int,
+    topic_level: int,
+    description: str,
+) -> int:
+    """Import two explicit, disjoint general and topic wordlists."""
+    all_words = [*general_words, *topic_words]
+    if len(set(all_words)) != len(all_words):
+        raise ValueError("General and topic lists contain a duplicate word")
+    args = parse_args(description)
+    print("General-curriculum sample:")
+    print_plan(general_words, general_level)
+    if topic_words:
+        print("\nTopic-specific remainder:")
+        print_plan(topic_words, topic_level)
+    if not args.execute:
+        print("\nNo API calls made. Re-run with --execute only after approval.")
+        return 0
+
+    print(f"\nLIVE MODE: Barsukas will use {args.model!r} for paid sense/translation calls.")
+    assignments = [
+        *((word, general_level) for word in general_words),
+        *((word, topic_level) for word in topic_words),
+    ]
+    try:
+        execute_assignments(assignments, args.model, args.limit)
     except (BarsukasAPIError, RuntimeError) as error:
         print(f"Import stopped: {error}", file=sys.stderr)
         return 1

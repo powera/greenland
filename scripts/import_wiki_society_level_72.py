@@ -5,12 +5,11 @@ Sourced from /word-tokens/corpus-skew?corpus=wiki_society -- the words whose Zip
 here is furthest above their Zipf in the other corpora, which is what surfaces
 society, philosophy and religion -- law, politics, economics, language, ethics and belief rather than the function words a raw frequency list would return.
 
-Level 41 places this with the other corpus-skew batches (35-41, one per
-Wikipedia corpus except wiki_math): specialised vocabulary a learner meets well
-after the core.  These lists are disjoint; see the note on the word list below.
+The first 40 ranked words form the society sample at general-curriculum level
+72. The remaining, sharper domain vocabulary is stored at topic level 107.
 
 The language and linguistics terms this list originally carried moved to
-import_linguistics_basic_level_18.py and import_linguistics_advanced_level_55.py.
+import_linguistics_basic_level_18.py and import_linguistics_advanced_level_112.py.
 The corpus put them here because encyclopedic prose about language sits inside
 the Level 4 Society list, which is a fact about the corpus rather than about
 the words: "noun" and "vowel" are the app's own metalanguage and belong early,
@@ -35,9 +34,10 @@ ROOT = Path(__file__).resolve().parent.parent
 if str(ROOT) not in sys.path:
     sys.path.insert(0, str(ROOT))
 
-from scripts.wordlist_import_helper import run_import
+from scripts.wordlist_import_helper import run_domain_import
 
-DIFFICULTY_LEVEL = 41
+DIFFICULTY_LEVEL = 72
+TOPIC_DIFFICULTY_LEVEL = 107
 
 # The top 200 rows of /word-tokens/corpus-skew?corpus=wiki_society on 2026-08-29,
 # reduced to what words_exist does not already account for, then curated:
@@ -54,7 +54,7 @@ DIFFICULTY_LEVEL = 41
 # A word that scores in more than one corpus is assigned to whichever corpus it
 # leans toward hardest, so these lists are disjoint and a word cannot be
 # imported twice at two different levels.  Words already claimed by
-# import_unlinked_level_34.py are removed here for the same reason.
+# import_unlinked_level_65.py are removed here for the same reason.
 WORDS: Sequence[str] = (
     "curriculum",
     "ethics",
@@ -134,6 +134,57 @@ WORDS: Sequence[str] = (
     "stimulus",
 )
 
+GENERAL_WORDS: Sequence[str] = (
+    "curriculum",
+    "ethics",
+    "cognitive",
+    "theology",
+    "university",
+    "ethical",
+    "deity",
+    "tradition",
+    "texts",
+    "legal",
+    "ritual",
+    "psychology",
+    "suffrage",
+    "verbal",
+    "comparative",
+    "academic",
+    "bullying",
+    "psychological",
+    "myth",
+    "rights",
+    "slang",
+    "worship",
+    "liberal",
+    "goods",
+    "philosophical",
+    "organize",
+    "reality",
+    "democratic",
+    "masculine",
+    "theft",
+    "philosopher",
+    "ideology",
+    "policy",
+    "currency",
+    "terrorism",
+    "forensic",
+    "doctrine",
+    "spiritual",
+    "moral",
+    "cultural",
+)
+
 
 if __name__ == "__main__":
-    raise SystemExit(run_import(WORDS, DIFFICULTY_LEVEL, __doc__ or ""))
+    raise SystemExit(
+        run_domain_import(
+            WORDS,
+            GENERAL_WORDS,
+            DIFFICULTY_LEVEL,
+            TOPIC_DIFFICULTY_LEVEL,
+            __doc__ or "",
+        )
+    )

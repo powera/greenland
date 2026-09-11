@@ -2,17 +2,17 @@
 """Import the linguistics, philosophy, religion and the social sciences vocabulary that only the wiki_society corpus attests.
 
 Sourced from /word-tokens/corpus-skew?corpus=wiki_society&exclusive=1 -- not the
-Zipf-delta list that levels 35-42 were drawn from, but its companion: the words
+Zipf-delta list that levels 66-73 were drawn from, but its companion: the words
 this corpus has and no other corpus in the collection does.  A word with no
 "elsewhere" cannot be scored, so these are reported apart from the skew ranking;
 they are also the sharper list, because being unattested everywhere else is a
 stronger claim about a word's domain than merely being commoner here.
 
-Level 49 continues from the skew batches at 35-42, reusing their corpora in
-the same order.  These lists are disjoint; see the note on the word list below.
+Topic level 107 joins the tail of the ranked society list. These
+corpus-exclusive words are too domain-specific for the general curriculum.
 
 The language and linguistics terms this list originally carried moved to
-import_linguistics_basic_level_18.py and import_linguistics_advanced_level_55.py.
+import_linguistics_basic_level_18.py and import_linguistics_advanced_level_112.py.
 The corpus put them here because encyclopedic prose about language sits inside
 the Level 4 Society list, which is a fact about the corpus rather than about
 the words: "noun" and "vowel" are the app's own metalanguage and belong early,
@@ -39,7 +39,7 @@ if str(ROOT) not in sys.path:
 
 from scripts.wordlist_import_helper import run_import
 
-DIFFICULTY_LEVEL = 49
+DIFFICULTY_LEVEL = 107
 
 # The corpus-exclusive words of wiki_society on 2026-08-29, ordered by their rank
 # within the corpus and cut at 125, reduced to what words_exist does not already
@@ -57,7 +57,7 @@ DIFFICULTY_LEVEL = 49
 #
 # A word exclusive to one corpus is by construction absent from the others, so
 # these ten lists cannot collide with each other.  Words already claimed by
-# import_unlinked_level_34.py and by the skew batches at 35-42 are removed here,
+# import_unlinked_level_65.py and by the skew batches at 66-73 are removed here,
 # since those lists were drawn from the same token table.
 WORDS: Sequence[str] = (
     "grammatical",

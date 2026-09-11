@@ -32,7 +32,9 @@ def _lemma(guid: str, level: int) -> Lemma:
     )
 
 
-def test_valid_levels_include_100_and_exclusion(session: Session) -> None:
+def test_valid_levels_include_general_and_topic_bands_and_exclusion(
+    session: Session,
+) -> None:
     session.add_all(
         [
             _lemma("N01_001", constants.MIN_DIFFICULTY_LEVEL),
@@ -76,8 +78,10 @@ def test_override_writer_uses_shared_level_bounds(session: Session) -> None:
     session.add(lemma)
     session.flush()
 
-    accepted = add_difficulty_override(session, lemma.id, "lt", 100)
-    assert accepted.difficulty_level == 100
+    accepted = add_difficulty_override(
+        session, lemma.id, "lt", constants.TOPIC_DIFFICULTY_LEVEL_MIN
+    )
+    assert accepted.difficulty_level == constants.TOPIC_DIFFICULTY_LEVEL_MIN
 
-    with pytest.raises(ValueError, match="between 1 and 100"):
-        add_difficulty_override(session, lemma.id, "zh", 101)
+    with pytest.raises(ValueError, match="between 1 and 199"):
+        add_difficulty_override(session, lemma.id, "zh", constants.MAX_DIFFICULTY_LEVEL + 1)

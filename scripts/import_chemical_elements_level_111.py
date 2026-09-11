@@ -27,9 +27,7 @@ whose value is its completeness, and the preflight does that filtering at run
 time anyway.  Expect most of the common elements to be reported as already
 accounted for.
 
-Level 54 sits above the corpus-derived batches (35-53): these are specialist
-vocabulary in the same sense the mathematics list is, learned as a set once the
-general vocabulary is in place.
+Topic level 111 keeps this specialist closed set outside the general curriculum.
 
 This script deliberately uses the public ``ROOT/api`` facade.  In particular,
 ``api.lemmas.add_word`` runs Barsukas' intelligent word workflow: the server's
@@ -52,7 +50,7 @@ if str(ROOT) not in sys.path:
 
 from scripts.wordlist_import_helper import run_import
 
-DIFFICULTY_LEVEL = 54
+DIFFICULTY_LEVEL = 111
 
 # The 118 elements in atomic-number order, 1 (hydrogen) to 118 (oganesson).
 # The comment every ten keeps the position checkable without counting: the

@@ -68,10 +68,9 @@ deliberately:
 The senses these get are the server's to decide, but each is expected to be an
 ordinary lowercase lemma.
 
-Level 56 is a placeholder: it is the next free level today and carries no
-claim about difficulty.  These will be re-leveled with everything else when
-the level plan lands, and the level here should be changed before this runs.
-Unlike the general-vocabulary levels there is no word-count target for it.
+Forty broadly useful compounds form a reviewed general sample at level 87.
+The much larger remainder is supplemental compound vocabulary at topic level
+113; corpus frequency alone is not enough to make all 500 general-purpose.
 
 This script deliberately uses the public ``ROOT/api`` facade.  In particular,
 ``api.lemmas.add_word`` runs Barsukas' intelligent word workflow: the server's
@@ -92,9 +91,10 @@ ROOT = Path(__file__).resolve().parent.parent
 if str(ROOT) not in sys.path:
     sys.path.insert(0, str(ROOT))
 
-from scripts.wordlist_import_helper import run_import
+from scripts.wordlist_import_helper import run_domain_import
 
-DIFFICULTY_LEVEL = 56
+DIFFICULTY_LEVEL = 87
+TOPIC_DIFFICULTY_LEVEL = 113
 
 # Ordered by document spread across the three corpora, commonest first.  The
 # comment on each line is the evidence: how many documents it appeared in, and
@@ -602,6 +602,57 @@ WORDS: Sequence[str] = (
     "post-classical",  # 58 docs, 113 uses
 )
 
+GENERAL_WORDS: Sequence[str] = (
+    "so-called",
+    "well-known",
+    "present-day",
+    "large-scale",
+    "long-term",
+    "modern-day",
+    "short-lived",
+    "best-known",
+    "two-thirds",
+    "post-war",
+    "long-distance",
+    "three-dimensional",
+    "high-speed",
+    "well-being",
+    "full-time",
+    "short-term",
+    "pre-existing",
+    "x-ray",
+    "middle-class",
+    "well-established",
+    "long-standing",
+    "high-quality",
+    "man-made",
+    "small-scale",
+    "non-fiction",
+    "state-owned",
+    "decision-making",
+    "year-round",
+    "non-profit",
+    "left-wing",
+    "right-wing",
+    "high-ranking",
+    "three-quarters",
+    "well-developed",
+    "day-to-day",
+    "full-scale",
+    "working-class",
+    "far-reaching",
+    "best-selling",
+    "re-elected",
+)
+
 
 if __name__ == "__main__":
-    raise SystemExit(run_import(WORDS, DIFFICULTY_LEVEL, __doc__ or ""))
+    raise SystemExit(
+        run_domain_import(
+            WORDS,
+            GENERAL_WORDS,
+            DIFFICULTY_LEVEL,
+            TOPIC_DIFFICULTY_LEVEL,
+            __doc__ or "",
+        )
+    )

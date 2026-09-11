@@ -23,7 +23,7 @@ def add_difficulty_override(
         session: Database session
         lemma_id: ID of the lemma
         language_code: Language code (e.g., 'zh', 'fr', 'de')
-        difficulty_level: Difficulty level (1-100) or -1 to exclude from language
+        difficulty_level: Difficulty level (1-199) or -1 to exclude from language
         notes: Optional notes explaining the override
 
     Returns:
@@ -175,7 +175,7 @@ def get_effective_difficulty_level(
         language_code: Language code (e.g., 'zh', 'fr', 'de')
 
     Returns:
-        Effective difficulty level (1-100), -1 (excluded), or None (no level set)
+        Effective difficulty level (1-199), -1 (excluded), or None (no level set)
     """
     # Check for override first
     override = get_difficulty_override(session, lemma.id, language_code)
@@ -275,7 +275,7 @@ def bulk_get_effective_difficulty_levels(
 
     Returns:
         Dictionary mapping lemma_id to effective difficulty level.
-        Level is -1 for excluded, None for no level set, or 1-100 for an active level.
+        Level is -1 for excluded, None for no level set, or 1-199 for an active level.
     """
     if not lemmas:
         return {}

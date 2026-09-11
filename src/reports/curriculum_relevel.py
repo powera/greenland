@@ -327,7 +327,7 @@ def _pack_runs_into_numbered_levels(
     """Pack runs into the space left around fixed curriculum cohorts."""
     run_list = [list(run) for run in runs]
     occupied_counts = fixed_counts or {}
-    for final_level in range(64, constants.MAX_DIFFICULTY_LEVEL + 1):
+    for final_level in range(64, constants.GENERAL_DIFFICULTY_LEVEL_MAX + 1):
         levels = list(range(PRESERVED_LEVEL_MAX + 1, final_level + 1))
         best: list[dict[int, tuple[int, int]]] = [{0: (0, -1)}]
         for level in levels:
@@ -387,7 +387,9 @@ def _pack_runs_into_numbered_levels(
             ]
             end_index = start_index
         return packed
-    raise ValueError("Could not pack curriculum runs through level 100")
+    raise ValueError(
+        "Could not pack curriculum runs through level " f"{constants.GENERAL_DIFFICULTY_LEVEL_MAX}"
+    )
 
 
 def build_assignments(session: Session, *, mode: str = "auto") -> list[Assignment]:
@@ -398,7 +400,7 @@ def build_assignments(session: Session, *, mode: str = "auto") -> list[Assignmen
             Lemma.guid.isnot(None),
             Lemma.difficulty_level.between(
                 constants.MIN_DIFFICULTY_LEVEL,
-                constants.MAX_DIFFICULTY_LEVEL,
+                constants.GENERAL_DIFFICULTY_LEVEL_MAX,
             ),
         )
         .all()
@@ -736,7 +738,7 @@ def write_report(
 
     mapping_payload = {
         "format": "greenland-curriculum-relevel-v1",
-        "supported_level_max": constants.MAX_DIFFICULTY_LEVEL,
+        "supported_level_max": constants.GENERAL_DIFFICULTY_LEVEL_MAX,
         "assignments": [
             {
                 "guid": item.guid,
@@ -791,7 +793,8 @@ def write_report(
         "",
         f"- Active mapped senses: {len(assignments)}",
         f"- Proposed populated range: 1–{max(by_proposed)}",
-        f"- Reserved empty range: {max(by_proposed) + 1}–{constants.MAX_DIFFICULTY_LEVEL}",
+        "- Reserved empty general-curriculum range: "
+        f"{max(by_proposed) + 1}–{constants.GENERAL_DIFFICULTY_LEVEL_MAX}",
         f"- Review warnings: {len(warnings)}",
         "",
         "## Current levels",
@@ -799,7 +802,10 @@ def write_report(
         "| Level | Count | Leading themes |",
         "|---:|---:|---|",
     ]
-    for level in range(constants.MIN_DIFFICULTY_LEVEL, constants.MAX_DIFFICULTY_LEVEL + 1):
+    for level in range(
+        constants.MIN_DIFFICULTY_LEVEL,
+        constants.GENERAL_DIFFICULTY_LEVEL_MAX + 1,
+    ):
         level_assignments = by_old.get(level, [])
         lines.append(f"| {level} | {len(level_assignments)} | {_themes(level_assignments)} |")
     lines.extend(
@@ -811,7 +817,10 @@ def write_report(
             "|---:|---:|---|---|",
         ]
     )
-    for level in range(constants.MIN_DIFFICULTY_LEVEL, constants.MAX_DIFFICULTY_LEVEL + 1):
+    for level in range(
+        constants.MIN_DIFFICULTY_LEVEL,
+        constants.GENERAL_DIFFICULTY_LEVEL_MAX + 1,
+    ):
         level_assignments = by_proposed.get(level, [])
         source_levels = ", ".join(
             str(value) for value in sorted({a.old_level for a in level_assignments})

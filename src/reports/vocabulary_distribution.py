@@ -76,10 +76,21 @@ def check_difficulty_level_distribution(session: Any) -> Dict[str, Any]:
         average_per_level = total_words / populated_levels if populated_levels else 0
         gaps = []
         imbalanced = []
-        for level in range(
+        general_levels = [
+            level for level in distribution if level <= constants.GENERAL_DIFFICULTY_LEVEL_MAX
+        ]
+        topic_levels = [
+            level for level in distribution if level >= constants.TOPIC_DIFFICULTY_LEVEL_MIN
+        ]
+        inspected_levels = range(
             constants.MIN_DIFFICULTY_LEVEL,
-            constants.MAX_DIFFICULTY_LEVEL + 1,
-        ):
+            max(general_levels, default=0) + 1,
+        )
+        topic_inspected_levels = range(
+            constants.TOPIC_DIFFICULTY_LEVEL_MIN,
+            max(topic_levels, default=constants.TOPIC_DIFFICULTY_LEVEL_MIN - 1) + 1,
+        )
+        for level in (*inspected_levels, *topic_inspected_levels):
             count = distribution.get(level, 0)
             if count == 0:
                 gaps.append(level)
