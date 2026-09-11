@@ -100,6 +100,9 @@
                             <li><a class="dropdown-item" href="{{ url_for('pending_imports.list_pending_imports') }}">
                                 <i class="bi bi-inbox"></i> {{ STRINGS.navigation.get('pending_imports', 'Pending Imports') }}
                             </a></li>
+                            <li><a class="dropdown-item" href="{{ url_for('reports.index') }}">
+                                <i class="bi bi-clipboard-data"></i> {{ STRINGS.navigation.get('reports', 'Reports') }}
+                            </a></li>
                             {% if not config.get('READONLY', False) or config.get('ALLOW_OUTBOUND_CALLS', True) %}
                             <li><hr class="dropdown-divider"></li>
                             <li><h6 class="dropdown-header">{{ STRINGS.navigation.get('generation', 'Generation') }}</h6></li>

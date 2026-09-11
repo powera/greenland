@@ -65,12 +65,16 @@ INTEGRITY_CHECKS: List[Tuple[str, str, str]] = [
     ),
 ]
 
-# Checks that support --fix / fix=True
+# Checks that support --fix / fix=True.
+#
+# "pronunciation-fields" is deliberately absent: its repair nulled out both
+# pronunciation fields on a heuristic guess that the text was a leaked prompt,
+# which destroys good data when the heuristic is wrong and is better handled by
+# regenerating the field. The check still runs as detection.
 FIXABLE_CHECKS = {
     "missing-punctuation",
     "sentence-levels",
     "audio-mismatches",
-    "pronunciation-fields",
 }
 
 
@@ -109,7 +113,8 @@ def run_integrity_check(check_type: str, fix: bool = False) -> Optional[Dict[str
         "audio-mismatches": lambda: legacy_audio_checker.check_audio_translation_mismatches(
             fix=fix
         ),
-        "pronunciation-fields": lambda: legacy_audio_checker.check_pronunciation_fields(fix=fix),
+        # Detection only -- see FIXABLE_CHECKS for why fix is not passed through.
+        "pronunciation-fields": lambda: legacy_audio_checker.check_pronunciation_fields(),
     }
 
     runner = check_map.get(check_type)

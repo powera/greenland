@@ -1,0 +1,33 @@
+/* Reports index: command lines and option lists in the report cards. */
+
+.report-command {
+    background-color: var(--bs-tertiary-bg, #f8f9fa);
+    border: 1px solid var(--bs-border-color, #dee2e6);
+    border-radius: 0.25rem;
+    padding: 0.5rem 0.65rem;
+    /* Commands are long and must not widen the card. */
+    overflow-x: auto;
+    white-space: nowrap;
+}
+
+.report-command code {
+    color: var(--bs-body-color, #212529);
+}
+
+.report-arguments {
+    list-style: none;
+    margin-bottom: 0;
+    padding-left: 0;
+}
+
+.report-arguments li {
+    display: inline-block;
+    margin: 0.15rem 0.3rem 0.15rem 0;
+}
+
+.report-arguments code {
+    background-color: var(--bs-tertiary-bg, #f8f9fa);
+    border-radius: 0.2rem;
+    font-size: 0.85em;
+    padding: 0.1rem 0.35rem;
+}

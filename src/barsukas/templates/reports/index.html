@@ -1,0 +1,67 @@
+{% extends "base.html" %}
+
+{% block title %}Reports{% endblock %}
+
+{% block extra_head %}
+<link rel="stylesheet" href="{{ url_for('static', filename='css/reports.css') }}">
+{% endblock %}
+
+{% block content %}
+<div class="py-4">
+    <h1><i class="bi bi-clipboard-data"></i> Reports</h1>
+    <p class="lead">Read-only analysis passes over the dictionary database</p>
+    <p class="text-muted">
+        Reports answer &ldquo;what does the data look like right now?&rdquo; &mdash; coverage
+        gaps, vocabulary distribution, term age. They live in <code>src/reports/</code>
+        and are run from the command line, since several take minutes over the full
+        lemma table and print tables meant to be read in a terminal or redirected to
+        a file. Pass <code>--help</code> to any of them for the full argument list, and
+        <code>--persona</code> or <code>--backend</code> to choose a database.
+    </p>
+
+    <div class="row row-cols-1 row-cols-lg-2 g-3 mt-3">
+        {% for report in reports %}
+        <div class="col">
+            <div class="card h-100">
+                <div class="card-body">
+                    <h5 class="card-title">
+                        <i class="bi {{ report.icon }}"></i> {{ report.display_name }}
+                        {% if report.writes %}
+                        <span class="badge bg-warning text-dark ms-1"
+                              title="This report can modify data">writes</span>
+                        {% endif %}
+                    </h5>
+                    <h6 class="card-subtitle mb-2 text-muted">{{ report.subtitle }}</h6>
+                    <p class="card-text">{{ report.description }}</p>
+
+                    <div class="report-command">
+                        <code>{{ report.command }}</code>
+                    </div>
+
+                    {% if report.arguments %}
+                    <div class="mt-2">
+                        <small class="text-muted">Options:</small>
+                        <ul class="report-arguments">
+                            {% for argument in report.arguments %}
+                            <li><code>{{ argument }}</code></li>
+                            {% endfor %}
+                        </ul>
+                    </div>
+                    {% endif %}
+                </div>
+                <div class="card-footer text-muted">
+                    <small><code>src/reports/{{ report.name }}.py</code></small>
+                </div>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+
+    <div class="alert alert-info mt-4">
+        <i class="bi bi-info-circle"></i>
+        Looking for the LLM-backed verification and integrity tools? Those live on the
+        <a href="{{ url_for('quality.index') }}">Quality Hub</a> and the
+        <a href="{{ url_for('bebras.index') }}">Data Quality</a> page.
+    </div>
+</div>
+{% endblock %}
