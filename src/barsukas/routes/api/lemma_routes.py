@@ -78,7 +78,7 @@ def search_lemmas() -> ResponseReturnValue:
     Query parameters:
         - q: Optional. Search query to find in lemma text, definition, disambiguation, and translations. An empty/omitted query matches all lemmas (subject to the other filters).
         - pos_type: Optional. Filter by part of speech (e.g., 'noun', 'verb')
-        - difficulty: Optional. Filter by difficulty level (1-100, '-1' for excluded, 'null' for not set)
+        - difficulty: Optional. Filter by difficulty level (1-199, '-1' for excluded, 'null' for not set)
         - limit: Optional. Maximum number of results to return (default: 20, max: 100)
         - offset: Optional. Number of results to skip for pagination (default: 0)
 
@@ -753,7 +753,7 @@ def get_lemma_info(guid: str) -> ResponseReturnValue:
         - definition: The English definition
         - pos_type: Part of speech type (noun, verb, etc.)
         - pos_subtype: Part of speech subtype (if populated)
-        - difficulty_level: Difficulty level (1-100, or -1 for excluded, or null if not set)
+        - difficulty_level: Difficulty level (1-199, or -1 for excluded, or null if not set)
         - verified: Whether the lemma has been human-verified
         - tags: List of tags (empty list if none); see /api/v1/lemma/<guid>/tags
         - disambiguation: Disambiguation text (or null)

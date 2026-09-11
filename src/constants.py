@@ -35,10 +35,13 @@ OUTPUT_DIR = os.path.join(os.path.dirname(PROJECT_ROOT), "greenland_output")
 # sites, so this constant is the only place the root itself is derived.
 RELEASE_DIR = os.path.join(PROJECT_ROOT, "data", "release")
 
-# General-vocabulary curriculum bounds. ``-1`` is the intentional exclusion
+# Curriculum bounds. Levels through 100 are the general-purpose course;
+# 101-199 are topic-specific extensions. ``-1`` is the intentional exclusion
 # sentinel and is not a curriculum level.
 MIN_DIFFICULTY_LEVEL: int = 1
-MAX_DIFFICULTY_LEVEL: int = 100
+GENERAL_DIFFICULTY_LEVEL_MAX: int = 100
+TOPIC_DIFFICULTY_LEVEL_MIN: int = GENERAL_DIFFICULTY_LEVEL_MAX + 1
+MAX_DIFFICULTY_LEVEL: int = 199
 EXCLUDE_DIFFICULTY_LEVEL: int = -1
 
 # Wordfreq directories

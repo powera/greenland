@@ -5,9 +5,9 @@ Sourced from /word-tokens/corpus-skew?corpus=wiki_physical_science -- the words 
 here is furthest above their Zipf in the other corpora, which is what surfaces
 physics, chemistry, astronomy, earth science and molecular biology rather than the function words a raw frequency list would return.
 
-Level 40 places this with the other corpus-skew batches (35-41, one per
-Wikipedia corpus except wiki_math): specialised vocabulary a learner meets well
-after the core.  These lists are disjoint; see the note on the word list below.
+The first 40 ranked words form the physical-science sample at
+general-curriculum level 71. The remaining, sharper domain vocabulary is stored
+at topic level 106.
 
 This script deliberately uses the public ``ROOT/api`` facade.  In particular,
 ``api.lemmas.add_word`` runs Barsukas' intelligent word workflow: the server's
@@ -28,9 +28,10 @@ ROOT = Path(__file__).resolve().parent.parent
 if str(ROOT) not in sys.path:
     sys.path.insert(0, str(ROOT))
 
-from scripts.wordlist_import_helper import run_import
+from scripts.wordlist_import_helper import run_domain_import
 
-DIFFICULTY_LEVEL = 40
+DIFFICULTY_LEVEL = 71
+TOPIC_DIFFICULTY_LEVEL = 106
 
 # The top 200 rows of /word-tokens/corpus-skew?corpus=wiki_physical_science on 2026-08-29,
 # reduced to what words_exist does not already account for, then curated:
@@ -47,7 +48,7 @@ DIFFICULTY_LEVEL = 40
 # A word that scores in more than one corpus is assigned to whichever corpus it
 # leans toward hardest, so these lists are disjoint and a word cannot be
 # imported twice at two different levels.  Words already claimed by
-# import_unlinked_level_34.py are removed here for the same reason.
+# import_unlinked_level_65.py are removed here for the same reason.
 WORDS: Sequence[str] = (
     "particle",
     "atom",
@@ -151,6 +152,57 @@ WORDS: Sequence[str] = (
     "degradation",
 )
 
+GENERAL_WORDS: Sequence[str] = (
+    "particle",
+    "atom",
+    "gravitational",
+    "scattering",
+    "decay",
+    "bond",
+    "atomic",
+    "radiation",
+    "molecule",
+    "quantum",
+    "atmospheric",
+    "crystal",
+    "atmosphere",
+    "phase",
+    "formation",
+    "concentration",
+    "magnitude",
+    "melting",
+    "ion",
+    "momentum",
+    "fluid",
+    "vapor",
+    "organic",
+    "hardness",
+    "emission",
+    "cyclone",
+    "sodium",
+    "magnetic",
+    "vacuum",
+    "nuclear",
+    "transition",
+    "carbonate",
+    "warming",
+    "crust",
+    "molecular",
+    "chloride",
+    "electron",
+    "velocity",
+    "soil",
+    "carbon",
+)
+
 
 if __name__ == "__main__":
-    raise SystemExit(run_import(WORDS, DIFFICULTY_LEVEL, __doc__ or ""))
+    raise SystemExit(
+        run_domain_import(
+            WORDS,
+            GENERAL_WORDS,
+            DIFFICULTY_LEVEL,
+            TOPIC_DIFFICULTY_LEVEL,
+            __doc__ or "",
+        )
+    )

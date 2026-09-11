@@ -2,14 +2,14 @@
 """Import the ingredients, utensils and cooking technique vocabulary that only the cooking corpus attests.
 
 Sourced from /word-tokens/corpus-skew?corpus=cooking&exclusive=1 -- not the
-Zipf-delta list that levels 35-42 were drawn from, but its companion: the words
+Zipf-delta list that levels 66-73 were drawn from, but its companion: the words
 this corpus has and no other corpus in the collection does.  A word with no
 "elsewhere" cannot be scored, so these are reported apart from the skew ranking;
 they are also the sharper list, because being unattested everywhere else is a
 stronger claim about a word's domain than merely being commoner here.
 
-Level 51 continues from the skew batches at 35-42, reusing their corpora in
-the same order.  These lists are disjoint; see the note on the word list below.
+Forty broadly useful kitchen words form a general-curriculum sample at level
+82. The remaining terms belong to the cooking extension at topic level 110.
 
 This script deliberately uses the public ``ROOT/api`` facade.  In particular,
 ``api.lemmas.add_word`` runs Barsukas' intelligent word workflow: the server's
@@ -30,9 +30,10 @@ ROOT = Path(__file__).resolve().parent.parent
 if str(ROOT) not in sys.path:
     sys.path.insert(0, str(ROOT))
 
-from scripts.wordlist_import_helper import run_import
+from scripts.wordlist_import_helper import run_domain_import
 
-DIFFICULTY_LEVEL = 51
+DIFFICULTY_LEVEL = 82
+TOPIC_DIFFICULTY_LEVEL = 110
 
 # The corpus-exclusive words of cooking on 2026-08-29, ordered by their rank
 # within the corpus and cut at 125, reduced to what words_exist does not already
@@ -50,7 +51,7 @@ DIFFICULTY_LEVEL = 51
 #
 # A word exclusive to one corpus is by construction absent from the others, so
 # these ten lists cannot collide with each other.  Words already claimed by
-# import_unlinked_level_34.py and by the skew batches at 35-42 are removed here,
+# import_unlinked_level_65.py and by the skew batches at 66-73 are removed here,
 # since those lists were drawn from the same token table.
 WORDS: Sequence[str] = (
     "teaspoonful",
@@ -178,6 +179,57 @@ WORDS: Sequence[str] = (
     "codfish",
 )
 
+GENERAL_WORDS: Sequence[str] = (
+    "bake",
+    "teaspoon",
+    "tablespoon",
+    "grated",
+    "saucepan",
+    "vanilla",
+    "sieve",
+    "nutmeg",
+    "paprika",
+    "sift",
+    "simmer",
+    "garnish",
+    "custard",
+    "soak",
+    "macaroni",
+    "molasses",
+    "cayenne",
+    "gravy",
+    "veal",
+    "shortening",
+    "asparagus",
+    "froth",
+    "thicken",
+    "mash",
+    "omelet",
+    "knead",
+    "cornstarch",
+    "griddle",
+    "shredded",
+    "flavoring",
+    "seasoning",
+    "puree",
+    "steak",
+    "icing",
+    "cracker",
+    "rhubarb",
+    "creamy",
+    "broth",
+    "rinse",
+    "muffin",
+)
+
 
 if __name__ == "__main__":
-    raise SystemExit(run_import(WORDS, DIFFICULTY_LEVEL, __doc__ or ""))
+    raise SystemExit(
+        run_domain_import(
+            WORDS,
+            GENERAL_WORDS,
+            DIFFICULTY_LEVEL,
+            TOPIC_DIFFICULTY_LEVEL,
+            __doc__ or "",
+        )
+    )

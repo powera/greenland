@@ -5,9 +5,8 @@ Sourced from /word-tokens/corpus-skew?corpus=wiki_biology -- the words whose Zip
 here is furthest above their Zipf in the other corpora, which is what surfaces
 organisms and anatomy -- the ordinary names of plants and animals, and the words for their parts and behaviour rather than the function words a raw frequency list would return.
 
-Level 36 places this with the other corpus-skew batches (35-41, one per
-Wikipedia corpus except wiki_math): specialised vocabulary a learner meets well
-after the core.  These lists are disjoint; see the note on the word list below.
+The first 40 ranked words form the biology sample at general-curriculum level
+67. The remaining, sharper domain vocabulary is stored at topic level 102.
 
 This script deliberately uses the public ``ROOT/api`` facade.  In particular,
 ``api.lemmas.add_word`` runs Barsukas' intelligent word workflow: the server's
@@ -28,9 +27,10 @@ ROOT = Path(__file__).resolve().parent.parent
 if str(ROOT) not in sys.path:
     sys.path.insert(0, str(ROOT))
 
-from scripts.wordlist_import_helper import run_import
+from scripts.wordlist_import_helper import run_domain_import
 
-DIFFICULTY_LEVEL = 36
+DIFFICULTY_LEVEL = 67
+TOPIC_DIFFICULTY_LEVEL = 102
 
 # The top 200 rows of /word-tokens/corpus-skew?corpus=wiki_biology on 2026-08-29,
 # reduced to what words_exist does not already account for, then curated:
@@ -47,7 +47,7 @@ DIFFICULTY_LEVEL = 36
 # A word that scores in more than one corpus is assigned to whichever corpus it
 # leans toward hardest, so these lists are disjoint and a word cannot be
 # imported twice at two different levels.  Words already claimed by
-# import_unlinked_level_34.py are removed here for the same reason.
+# import_unlinked_level_65.py are removed here for the same reason.
 WORDS: Sequence[str] = (
     "maturity",
     "prey",
@@ -121,6 +121,57 @@ WORDS: Sequence[str] = (
     "genetic",
 )
 
+GENERAL_WORDS: Sequence[str] = (
+    "maturity",
+    "prey",
+    "bony",
+    "genus",
+    "moth",
+    "spotted",
+    "extinct",
+    "fin",
+    "nocturnal",
+    "medicinal",
+    "courtship",
+    "tissue",
+    "larvae",
+    "birch",
+    "breed",
+    "beetle",
+    "venom",
+    "cultivation",
+    "crop",
+    "edible",
+    "specimen",
+    "buffalo",
+    "diet",
+    "muscular",
+    "mating",
+    "fossil",
+    "infected",
+    "captivity",
+    "nest",
+    "predator",
+    "striped",
+    "trout",
+    "habitat",
+    "reproductive",
+    "marine",
+    "tropical",
+    "flowering",
+    "ornamental",
+    "poisonous",
+    "genetic",
+)
+
 
 if __name__ == "__main__":
-    raise SystemExit(run_import(WORDS, DIFFICULTY_LEVEL, __doc__ or ""))
+    raise SystemExit(
+        run_domain_import(
+            WORDS,
+            GENERAL_WORDS,
+            DIFFICULTY_LEVEL,
+            TOPIC_DIFFICULTY_LEVEL,
+            __doc__ or "",
+        )
+    )

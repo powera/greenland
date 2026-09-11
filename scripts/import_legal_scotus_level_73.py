@@ -6,11 +6,9 @@ here is furthest above their Zipf in the other corpora, which is what surfaces
 the vocabulary of courts and statutes -- procedure, evidence, remedies, rights and
 regulation rather than the function words a raw frequency list would return.
 
-Level 42 continues the corpus-skew batches (35-41 are one per Wikipedia corpus
-except wiki_math) with the one non-Wikipedia corpus whose vocabulary is a
-coherent domain rather than a period style: specialised vocabulary a learner
-meets well after the core.  These lists are disjoint; see the note on the word
-list below.
+The first 40 ranked words form the legal sample at general-curriculum level 73.
+The remaining, sharper domain vocabulary is stored at topic level 108. These
+lists are disjoint; see the note on the word list below.
 
 This script deliberately uses the public ``ROOT/api`` facade.  In particular,
 ``api.lemmas.add_word`` runs Barsukas' intelligent word workflow: the server's
@@ -31,9 +29,10 @@ ROOT = Path(__file__).resolve().parent.parent
 if str(ROOT) not in sys.path:
     sys.path.insert(0, str(ROOT))
 
-from scripts.wordlist_import_helper import run_import
+from scripts.wordlist_import_helper import run_domain_import
 
-DIFFICULTY_LEVEL = 42
+DIFFICULTY_LEVEL = 73
+TOPIC_DIFFICULTY_LEVEL = 108
 
 # The top 400 rows of /word-tokens/corpus-skew?corpus=legal_scotus on 2026-08-29,
 # reduced to what words_exist does not already account for, then curated:
@@ -47,7 +46,7 @@ DIFFICULTY_LEVEL = 42
 # A word that scores in more than one corpus is assigned to whichever corpus it
 # leans toward hardest, so these lists are disjoint and a word cannot be
 # imported twice at two different levels.  Words already claimed by
-# import_unlinked_level_34.py and by the 35-41 batches are removed here for the
+# import_unlinked_level_65.py and by the 66-72 batches are removed here for the
 # same reason.
 WORDS: Sequence[str] = (
     "discretion",
@@ -190,6 +189,57 @@ WORDS: Sequence[str] = (
     "consent",
 )
 
+GENERAL_WORDS: Sequence[str] = (
+    "statute",
+    "provision",
+    "jury",
+    "petition",
+    "reasonable",
+    "complaint",
+    "employer",
+    "verdict",
+    "trial",
+    "federal",
+    "judgment",
+    "agency",
+    "plea",
+    "comply",
+    "impose",
+    "defendant",
+    "fee",
+    "criminal",
+    "counsel",
+    "eligible",
+    "attorney",
+    "unreasonable",
+    "offense",
+    "warrant",
+    "remedy",
+    "disclosure",
+    "penalty",
+    "compensation",
+    "constitutional",
+    "testimony",
+    "dismiss",
+    "alleged",
+    "appeal",
+    "conviction",
+    "violation",
+    "prosecutor",
+    "prosecution",
+    "plaintiff",
+    "liability",
+    "contract",
+)
+
 
 if __name__ == "__main__":
-    raise SystemExit(run_import(WORDS, DIFFICULTY_LEVEL, __doc__ or ""))
+    raise SystemExit(
+        run_domain_import(
+            WORDS,
+            GENERAL_WORDS,
+            DIFFICULTY_LEVEL,
+            TOPIC_DIFFICULTY_LEVEL,
+            __doc__ or "",
+        )
+    )

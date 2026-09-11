@@ -52,7 +52,7 @@ class FamilyRelationVariant:
     # Optional notes about this variant (usage patterns, NOT translations)
     notes: Optional[str] = None
 
-    # Difficulty level (1-100 for Trakaido, or None for auto-assignment)
+    # General-curriculum level (1-100, or None for auto-assignment)
     difficulty_level: Optional[int] = None
 
     # Tags for additional categorization

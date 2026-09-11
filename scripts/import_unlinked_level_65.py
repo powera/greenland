@@ -9,7 +9,7 @@ translations itself.
 
 Running without ``--execute`` only prints the plan and makes no HTTP requests.
 The live mode first calls the read-only bulk existence endpoint, then imports
-each still-unlinked word and moves every newly created sense to level 34.
+each still-unlinked word and moves every newly created sense to level 65.
 """
 
 from __future__ import annotations
@@ -24,7 +24,7 @@ if str(ROOT) not in sys.path:
 
 from scripts.wordlist_import_helper import run_import
 
-DIFFICULTY_LEVEL = 34
+DIFFICULTY_LEVEL = 65
 
 # Curated in displayed rank order from the first 200 rows of
 # /word-tokens/unlinked on 2026-08-28.  This keeps dictionary headwords and

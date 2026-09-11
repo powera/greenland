@@ -59,7 +59,7 @@ def _active_lemmas(session: Session) -> list[Lemma]:
             Lemma.guid.isnot(None),
             Lemma.difficulty_level.between(
                 constants.MIN_DIFFICULTY_LEVEL,
-                constants.MAX_DIFFICULTY_LEVEL,
+                constants.GENERAL_DIFFICULTY_LEVEL_MAX,
             ),
         )
         .all()
@@ -121,7 +121,7 @@ def _subtype_key(lemma: Lemma) -> tuple[str, str]:
 
 def _level_bounds(level: int) -> tuple[int, int, int]:
     if level <= 5 or level in {COUNTRY_COHORT_LEVEL, US_STATE_COHORT_LEVEL}:
-        return (0, constants.MAX_DIFFICULTY_LEVEL, 0)
+        return (0, constants.GENERAL_DIFFICULTY_LEVEL_MAX, 0)
     return COUNTRY_LEVEL_CAPACITIES.get(
         level,
         (MIN_LEVEL_SIZE, MAX_LEVEL_SIZE, TARGET_LEVEL_SIZE),

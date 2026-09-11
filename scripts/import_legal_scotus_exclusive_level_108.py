@@ -2,14 +2,14 @@
 """Import the courts, procedure and statutory law vocabulary that only the legal_scotus corpus attests.
 
 Sourced from /word-tokens/corpus-skew?corpus=legal_scotus&exclusive=1 -- not the
-Zipf-delta list that levels 35-42 were drawn from, but its companion: the words
+Zipf-delta list that levels 66-73 were drawn from, but its companion: the words
 this corpus has and no other corpus in the collection does.  A word with no
 "elsewhere" cannot be scored, so these are reported apart from the skew ranking;
 they are also the sharper list, because being unattested everywhere else is a
 stronger claim about a word's domain than merely being commoner here.
 
-Level 50 continues from the skew batches at 35-42, reusing their corpora in
-the same order.  These lists are disjoint; see the note on the word list below.
+Topic level 108 joins the tail of the ranked legal list. These corpus-exclusive
+words are too domain-specific for the general curriculum.
 
 This script deliberately uses the public ``ROOT/api`` facade.  In particular,
 ``api.lemmas.add_word`` runs Barsukas' intelligent word workflow: the server's
@@ -32,7 +32,7 @@ if str(ROOT) not in sys.path:
 
 from scripts.wordlist_import_helper import run_import
 
-DIFFICULTY_LEVEL = 50
+DIFFICULTY_LEVEL = 108
 
 # The corpus-exclusive words of legal_scotus on 2026-08-29, ordered by their rank
 # within the corpus and cut at 125, reduced to what words_exist does not already
@@ -50,7 +50,7 @@ DIFFICULTY_LEVEL = 50
 #
 # A word exclusive to one corpus is by construction absent from the others, so
 # these ten lists cannot collide with each other.  Words already claimed by
-# import_unlinked_level_34.py and by the skew batches at 35-42 are removed here,
+# import_unlinked_level_65.py and by the skew batches at 66-73 are removed here,
 # since those lists were drawn from the same token table.
 WORDS: Sequence[str] = (
     "petitioner",

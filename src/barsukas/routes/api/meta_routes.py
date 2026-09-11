@@ -61,7 +61,7 @@ def api_info() -> ResponseReturnValue:
                     "name": "difficulty",
                     "type": "query",
                     "required": False,
-                    "description": "Filter by difficulty level (1-100, '-1' for excluded, 'null' for not set)",
+                    "description": "Filter by difficulty level (1-199, '-1' for excluded, 'null' for not set)",
                 },
                 {
                     "name": "missing_translation",
@@ -92,7 +92,7 @@ def api_info() -> ResponseReturnValue:
                     "name": "difficulty",
                     "type": "query",
                     "required": True,
-                    "description": "Difficulty level (1-100, '-1' for excluded, 'null' for not set)",
+                    "description": "Difficulty level (1-199, '-1' for excluded, 'null' for not set)",
                 },
                 {
                     "name": "pos_type",

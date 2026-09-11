@@ -8,18 +8,18 @@ phrased in them: an exercise that says "the plural of this noun" has already
 assumed both.  Vocabulary a learner needs in order to be taught belongs early,
 whatever its corpus frequency says.
 
-Level 18, which the geography and calendar lemmas vacated (see
-relevel_geography_temporal_to_14.py).  That is far earlier than the corpus-
-derived batches at 35-53, and deliberately so: "consonant" is not a rare word
-in this app's terms even though a general corpus makes it look specialised.
+Forty reviewed teaching terms stay at level 18, which the geography and calendar
+lemmas vacated (see relevel_geography_temporal_to_14.py). That is deliberately
+early: "consonant" is not rare in this app's terms even when a general corpus
+makes it look specialised. The nine narrower terms move to topic level 112.
 
-The long tail goes to level 55 instead -- allophone, ergative, morpheme and the
+The long tail goes to topic level 112 instead -- allophone, ergative, morpheme and the
 rest of the terms only a linguist needs.  The dividing line is whether a
 beginner could meet the word in an ordinary lesson instruction.  "Vowel" and
 "tense" pass; "phoneme" and "orthography" do not, however close their subject
 matter.
 
-Some of these were previously buried in the wiki_society batches at 41 and 49,
+Some of these were previously buried in the wiki_society batches at 72 and 107,
 where the corpus put them because encyclopedic prose about language is
 society-adjacent.  They are pulled out of those lists in the same change: a
 word belongs at the level a learner needs it, not the level its corpus ranks
@@ -44,16 +44,17 @@ ROOT = Path(__file__).resolve().parent.parent
 if str(ROOT) not in sys.path:
     sys.path.insert(0, str(ROOT))
 
-from scripts.wordlist_import_helper import run_import
+from scripts.wordlist_import_helper import run_domain_import
 
 DIFFICULTY_LEVEL = 18
+TOPIC_DIFFICULTY_LEVEL = 112
 
 # Grouped by what the word is *about*, so a gap is visible: the parts of
 # speech, the sounds, the units of writing, the grammar a beginner is taught,
 # and the words for language itself.
 #
-# Six of these also appeared in later lists (stress at 40, translation at 35,
-# capital/object/definition/native at 34) and were removed there rather than
+# Six of these also appeared in later lists (stress at 71, translation at 66,
+# capital/object/definition/native at 65) and were removed there rather than
 # here.  Every one is a word the app uses to explain other words -- the sense
 # wanted is the grammatical "object", not the physical one -- and metalanguage
 # has to be available before the lessons that depend on it.
@@ -117,6 +118,57 @@ WORDS: Sequence[str] = (
     "syntax",
 )
 
+GENERAL_WORDS: Sequence[str] = (
+    "noun",
+    "verb",
+    "adjective",
+    "adverb",
+    "pronoun",
+    "preposition",
+    "conjunction",
+    "vowel",
+    "consonant",
+    "syllable",
+    "accent",
+    "pronunciation",
+    "stress",
+    "alphabet",
+    "spelling",
+    "script",
+    "punctuation",
+    "comma",
+    "apostrophe",
+    "grammar",
+    "tense",
+    "plural",
+    "singular",
+    "gender",
+    "phrase",
+    "clause",
+    "subject",
+    "object",
+    "dialect",
+    "vocabulary",
+    "translation",
+    "meaning",
+    "definition",
+    "example",
+    "fluent",
+    "native",
+    "bilingual",
+    "idiom",
+    "synonym",
+    "opposite",
+)
+
 
 if __name__ == "__main__":
-    raise SystemExit(run_import(WORDS, DIFFICULTY_LEVEL, __doc__ or ""))
+    raise SystemExit(
+        run_domain_import(
+            WORDS,
+            GENERAL_WORDS,
+            DIFFICULTY_LEVEL,
+            TOPIC_DIFFICULTY_LEVEL,
+            __doc__ or "",
+        )
+    )

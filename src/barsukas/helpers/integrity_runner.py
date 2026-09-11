@@ -41,7 +41,7 @@ INTEGRITY_CHECKS: List[Tuple[str, str, str]] = [
     (
         "invalid-levels",
         "Invalid Levels",
-        "Difficulty levels outside the valid 1–100 range",
+        "Difficulty levels outside the valid 1–199 range",
     ),
     (
         "missing-punctuation",
