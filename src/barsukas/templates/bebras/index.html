@@ -264,6 +264,12 @@
                                 missing punctuation and sentence levels). Results stream in real
                                 time so you can watch progress on large databases.
                             </p>
+                            <div class="alert alert-secondary">
+                                <i class="bi bi-clipboard-data"></i>
+                                For a read-only pass you can run anywhere, see
+                                <strong>Database Integrity</strong> and <strong>Stale Audio</strong>
+                                on the <a href="{{ url_for('reports.index') }}">Reports</a> page.
+                            </div>
 
                             <form method="post" action="{{ url_for('bebras.check_integrity') }}">
                                 <div class="mb-4">
@@ -320,7 +326,7 @@
                                         <i class="bi bi-clipboard"></i>
                                     </button>
                                 </div>
-                                <code id="integrity-cli">PYTHONPATH=src python src/agents/bebras.py --check-integrity --check all</code>
+                                <code id="integrity-cli">PYTHONPATH=src python src/reports/integrity.py</code>
                             </div>
                         </div>
                     </div>
@@ -532,6 +538,13 @@
                                     <i class="bi bi-search me-2"></i>Scan for Duplicate Words
                                 </button>
                             </form>
+
+                            <p class="text-muted mt-3 mb-0">
+                                <small>
+                                    Same scan from the command line:
+                                    <code>PYTHONPATH=src python src/reports/integrity.py --check duplicate-words</code>
+                                </small>
+                            </p>
                         </div>
                     </div>
                 </div>

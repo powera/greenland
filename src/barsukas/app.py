@@ -82,6 +82,7 @@ from barsukas.routes import (
     phrases,
     pradzia,
     quality,
+    reports,
     rhymes,
     sentence_stats,
     sentences,
@@ -382,6 +383,7 @@ def create_app(
     app.register_blueprint(batch_operations.bp)
     app.register_blueprint(barsukas_tasks.bp)
     app.register_blueprint(bebras.bp)
+    app.register_blueprint(reports.bp)
     app.register_blueprint(wireword.bp)
     app.register_blueprint(exports.bp)
     app.register_blueprint(api.bp)
