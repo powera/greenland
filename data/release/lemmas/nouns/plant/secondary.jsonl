@@ -1,17 +1,17 @@
-{"guid": "N05_001", "translations": {"ro": "copac", "pl": "drzewo", "th": "ต้นไม้", "ta": "மரம்", "kn": "ಮರ", "uk": "дерево", "bn": "গাছ", "hi": "वृक्ष"}}
-{"guid": "N05_002", "translations": {"ro": "floare", "pl": "kwiat", "th": "ดอกไม้", "ta": "மலர்", "kn": "ಹೂವು", "uk": "квітка", "bn": "ফুল", "hi": "फूल"}}
-{"guid": "N05_003", "translations": {"ro": "ierbă", "pl": "trawa", "th": "หญ้า", "ta": "புல்", "kn": "ಬೆಳೆ/ಗಬ್ಬು", "uk": "трава", "bn": "ঘাস", "hi": "घास"}}
-{"guid": "N05_004", "translations": {"ro": "stejar", "pl": "dąb", "th": "โอ๊ก", "ta": "ஓக்", "kn": "ಒಕ್", "uk": "дуб", "bn": "ওক", "hi": "ओक"}}
-{"guid": "N05_005", "translations": {"ro": "trandafir", "pl": "róża", "th": "กุหลาบ", "ta": "ரோஜா", "kn": "ಗುಲಾಬಿ", "uk": "троянда", "bn": "গোলাপ", "hi": "गुलाब"}}
+{"guid": "N05_001", "translations": {"ro": "copac", "pl": "drzewo", "th": "ต้นไม้", "ta": "மரம்", "kn": "ಮರ", "uk": "дерево", "bn": "গাছ", "hi": "वृक्ष", "bs": "drvo"}}
+{"guid": "N05_002", "translations": {"ro": "floare", "pl": "kwiat", "th": "ดอกไม้", "ta": "மலர்", "kn": "ಹೂವು", "uk": "квітка", "bn": "ফুল", "hi": "फूल", "bs": "cvijet"}}
+{"guid": "N05_003", "translations": {"ro": "ierbă", "pl": "trawa", "th": "หญ้า", "ta": "புல்", "kn": "ಬೆಳೆ/ಗಬ್ಬು", "uk": "трава", "bn": "ঘাস", "hi": "घास", "bs": "trava"}}
+{"guid": "N05_004", "translations": {"ro": "stejar", "pl": "dąb", "th": "โอ๊ก", "ta": "ஓக்", "kn": "ಒಕ್", "uk": "дуб", "bn": "ওক", "hi": "ओक", "bs": "hrast"}}
+{"guid": "N05_005", "translations": {"ro": "trandafir", "pl": "róża", "th": "กุหลาบ", "ta": "ரோஜா", "kn": "ಗುಲಾಬಿ", "uk": "троянда", "bn": "গোলাপ", "hi": "गुलाब", "bs": "ruža"}}
 {"guid": "N05_006", "translations": {"ro": "pădure", "pl": "las", "th": "ป่า", "ta": "காடு", "kn": "ಕಾಡು", "uk": "ліс", "bn": "বন", "hi": "जंगल"}}
-{"guid": "N05_007", "translations": {"ro": "udla", "pl": "chwast", "th": "วัชพืช", "ta": "களிப்புல்", "kn": "ಕಿಡ್ನುಗಿಡ", "uk": "бур'ян", "bn": "বিদেশি-গাছি", "hi": "जंगलीघास"}}
-{"guid": "N05_008", "translations": {"ro": "tufiș", "pl": "krzew", "th": "พุ่มไม้", "ta": "குன்று", "kn": "ತುಣುಕುಭೂಮಿ (Note: better: ಜೇತೆಗೆ? Wait)", "uk": "кущ", "bn": "ঝোড়ে", "hi": "झाड़ी"}}
-{"guid": "N05_009", "translations": {"ro": "viță", "pl": "pnącze", "th": "เถา", "ta": "பயிர்", "kn": "ದಾರಿಘೇಯ", "uk": "ліана", "bn": "বাইন", "hi": "आवृत्ति"}}
-{"guid": "N05_010", "translations": {"ro": "mușchi", "pl": "mech", "th": "ตะไคร่", "ta": "மூச்சு மூலிகை", "kn": "ಕಚ್ಚಿರೆ", "uk": "мох", "bn": "শৈবাল", "hi": "काई"}}
-{"guid": "N05_011", "translations": {"ro": "ferigă", "pl": "paproć", "th": "เฟิร์น", "ta": "பர்ன்", "kn": "ಮಕೆ", "uk": "папороть", "bn": "ফার্ন", "hi": "फर्न"}}
-{"guid": "N05_012", "translations": {"ro": "pin", "pl": "sosna", "th": "สน", "ta": "சொப்பர்", "kn": "ಚಿಗುರುಗಿಡ (ಚಿನ್ನಗ ಔತ?)", "uk": "сосна", "bn": "পাইন", "hi": "सोनस"}}
-{"guid": "N05_013", "translations": {"ro": "palmier", "pl": "palma", "th": "ปาล์ม", "ta": "தேங்காய் மரம்", "kn": "ತೆಂಗಿನಮರ", "uk": "пальма", "bn": "তেঁতুলগাছ", "hi": "पाम"}}
-{"guid": "N05_014", "translations": {"ro": "plantă", "pl": "roślina", "th": "พืช", "ta": "தாவரம்", "kn": "ಸಸ್ಯ", "uk": "рослина", "bn": "গাছ", "hi": "पौधा"}}
-{"guid": "N05_015", "translations": {"ro": "băutură", "pl": "jagoda", "th": "เบอร์รี่", "ta": "முட்டை பழம்", "kn": "ಬೆರಿ", "uk": "ягода", "bn": "গুবি", "hi": "ज़ेरी"}}
+{"guid": "N05_007", "translations": {"ro": "udla", "pl": "chwast", "th": "วัชพืช", "ta": "களிப்புல்", "kn": "ಕಿಡ್ನುಗಿಡ", "uk": "бур'ян", "bn": "বিদেশি-গাছি", "hi": "जंगलीघास", "bs": "korov"}}
+{"guid": "N05_008", "translations": {"ro": "tufiș", "pl": "krzew", "th": "พุ่มไม้", "ta": "குன்று", "kn": "ತುಣುಕುಭೂಮಿ (Note: better: ಜೇತೆಗೆ? Wait)", "uk": "кущ", "bn": "ঝোড়ে", "hi": "झाड़ी", "bs": "grm"}}
+{"guid": "N05_009", "translations": {"ro": "viță", "pl": "pnącze", "th": "เถา", "ta": "பயிர்", "kn": "ದಾರಿಘೇಯ", "uk": "ліана", "bn": "বাইন", "hi": "आवृत्ति", "bs": "penjačica"}}
+{"guid": "N05_010", "translations": {"ro": "mușchi", "pl": "mech", "th": "ตะไคร่", "ta": "மூச்சு மூலிகை", "kn": "ಕಚ್ಚಿರೆ", "uk": "мох", "bn": "শৈবাল", "hi": "काई", "bs": "mahovina"}}
+{"guid": "N05_011", "translations": {"ro": "ferigă", "pl": "paproć", "th": "เฟิร์น", "ta": "பர்ன்", "kn": "ಮಕೆ", "uk": "папороть", "bn": "ফার্ন", "hi": "फर्न", "bs": "paprat"}}
+{"guid": "N05_012", "translations": {"ro": "pin", "pl": "sosna", "th": "สน", "ta": "சொப்பர்", "kn": "ಚಿಗುರುಗಿಡ (ಚಿನ್ನಗ ಔತ?)", "uk": "сосна", "bn": "পাইন", "hi": "सोनस", "bs": "bor"}}
+{"guid": "N05_013", "translations": {"ro": "palmier", "pl": "palma", "th": "ปาล์ม", "ta": "தேங்காய் மரம்", "kn": "ತೆಂಗಿನಮರ", "uk": "пальма", "bn": "তেঁতুলগাছ", "hi": "पाम", "bs": "palma"}}
+{"guid": "N05_014", "translations": {"ro": "plantă", "pl": "roślina", "th": "พืช", "ta": "தாவரம்", "kn": "ಸಸ್ಯ", "uk": "рослина", "bn": "গাছ", "hi": "पौधा", "bs": "biljka"}}
+{"guid": "N05_015", "translations": {"ro": "băutură", "pl": "jagoda", "th": "เบอร์รี่", "ta": "முட்டை பழம்", "kn": "ಬೆರಿ", "uk": "ягода", "bn": "গুবি", "hi": "ज़ेरी", "bs": "bobica"}}
 {"guid": "N05_016", "translations": {"ro": "bob", "pl": "ziarno", "th": "เมล็ด", "ta": "தானியம்", "kn": "ಧಾನ್ಯ", "uk": "зернина", "bn": "শস্যকণা", "hi": "दाना"}}
-{"guid": "N05_017", "translations": {"ro": "nucă", "pl": "orzech", "th": "ถั่ว", "ta": "முந்திரி", "kn": "ಕಾಯಂತ (ಕಡ್ಡಿ)", "uk": "горіх", "bn": "বাদাম", "hi": "नट"}}
+{"guid": "N05_017", "translations": {"ro": "nucă", "pl": "orzech", "th": "ถั่ว", "ta": "முந்திரி", "kn": "ಕಾಯಂತ (ಕಡ್ಡಿ)", "uk": "горіх", "bn": "বাদাম", "hi": "नट", "bs": "orah"}}

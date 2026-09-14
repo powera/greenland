@@ -5,23 +5,23 @@
 {"guid": "N08_005", "translations": {"ro": "carte", "pl": "książka", "th": "หนังสือ", "ta": "புத்தகம்", "kn": "ಪುಸ್ತಕ", "uk": "книга", "bn": "বই", "hi": "पुस्तक", "bs": "knjiga"}}
 {"guid": "N08_006", "translations": {"ro": "cheie", "pl": "klucz", "th": "กุญแจ", "ta": "தூட்டை", "kn": "ಕೀಲುವ", "uk": "ключ", "bn": "চাবি", "hi": "चाबी", "bs": "ključ"}}
 {"guid": "N08_007", "translations": {"ro": "telefon mobil", "pl": "telefon komórkowy", "th": "โทรศัพท์มือถือ", "ta": "செல்போன்", "kn": "ಮೊಬೈಲ್ ಫೋನ್", "uk": "мобільний телефон", "bn": "মোবাইল ফোন", "hi": "मोबाइल फोन", "bs": "mobitel"}}
-{"guid": "N08_008", "translations": {"ro": "ceas", "pl": "zegarek", "th": "นาฬิกา", "ta": "கடிகாரம்", "kn": "ಗಡಿಯಾರ", "uk": "годинник", "bn": "ঘড়ি", "hi": "घड़ी"}}
+{"guid": "N08_008", "translations": {"ro": "ceas", "pl": "zegarek", "th": "นาฬิกา", "ta": "கடிகாரம்", "kn": "ಗಡಿಯಾರ", "uk": "годинник", "bn": "ঘড়ি", "hi": "घड़ी", "bs": "sat"}}
 {"guid": "N08_009", "translations": {"ro": "săculeț", "pl": "torebka", "th": "ถุง", "ta": "பை", "kn": "ಚೀಲ", "uk": "мішечок", "bn": "ব্যাগ", "hi": "थैला", "bs": "vrećica"}}
 {"guid": "N08_010", "translations": {"ro": "portofel", "pl": "portfel", "th": "กระเป๋าสตางค์", "ta": "பணப்பை", "kn": "ಲೆದರಿನ ಪುಸ್ತಕಿಯೋ ಅಥವಾ ಪರ್ಸ್", "uk": "гаманець", "bn": "আর্থিক পকেট/বাটুলি", "hi": "बटुआ", "bs": "novčanik"}}
 {"guid": "N08_011", "translations": {"ro": "ochelari", "pl": "okulary", "th": "แว่นตา", "ta": "கண்ணுக்கண்ணாடி", "kn": "ಕಾನ್ಯಕಣಿ", "uk": "окуляри", "bn": "চশমা", "hi": "चश्मा", "bs": "naočale"}}
 {"guid": "N08_012", "translations": {"ro": "sticlă", "pl": "butelka", "th": "ขวด", "ta": "காவலி", "kn": "ಬಾಟಲ್", "uk": "пляшка", "bn": "বোতল", "hi": "बोतल", "bs": "boca"}}
-{"guid": "N08_013", "translations": {"ro": "cutie", "pl": "pudełko", "th": "กล่อง", "ta": "பெட்டகம்", "kn": "ಪೆಟ್ಟಿಗೆ", "uk": "коробка", "bn": "বোঝা", "hi": "डिब्बा"}}
-{"guid": "N08_014", "translations": {"ro": "hârtie", "pl": "papier", "th": "กระดาษ", "ta": "காகிதம்", "kn": "ಕಾಗದ", "uk": "папір", "bn": "কাগজ", "hi": "कागज़"}}
+{"guid": "N08_013", "translations": {"ro": "cutie", "pl": "pudełko", "th": "กล่อง", "ta": "பெட்டகம்", "kn": "ಪೆಟ್ಟಿಗೆ", "uk": "коробка", "bn": "বোঝা", "hi": "डिब्बा", "bs": "kutija"}}
+{"guid": "N08_014", "translations": {"ro": "hârtie", "pl": "papier", "th": "กระดาษ", "ta": "காகிதம்", "kn": "ಕಾಗದ", "uk": "папір", "bn": "কাগজ", "hi": "कागज़", "bs": "papir"}}
 {"guid": "N08_016", "translations": {"ro": "oglindă", "pl": "lustro", "th": "กระจก", "ta": "கண்ணாடி", "kn": "ಆಯನ", "uk": "дзеркало", "bn": "দোঁয়ালা", "hi": "दर्पण", "bs": "ogledalo"}}
 {"guid": "N08_017", "translations": {"ro": "prosop", "pl": "ręcznik", "th": "ผ้าเช็ดตัว", "ta": "துடிப்புத் துணி", "kn": "ತಣಿಯಲುದ-related?", "uk": "рушник", "bn": "তোয়ালে", "hi": "तौलिया", "bs": "ručnik"}}
-{"guid": "N08_019", "translations": {"ro": "pix", "pl": "długopis", "th": "ปากกา", "ta": "பெனா", "kn": "ಕಲಂ", "uk": "ручка", "bn": "কলম", "hi": "कलम"}}
-{"guid": "N08_020", "translations": {"ro": "creion", "pl": "ołówek", "th": "ดินสอ", "ta": "பென்சில்", "kn": "ಕಲೆಮಣಿಗೆ", "uk": "олівець", "bn": "পেন্সিল", "hi": "पेंसिल"}}
-{"guid": "N08_021", "translations": {"ro": "cuțit", "pl": "nóż", "th": "มีด", "ta": "கத்தி", "kn": "ಚಾಕು", "uk": "ніж", "bn": "চাকু", "hi": "छुरी"}}
-{"guid": "N08_022", "translations": {"ro": "pieptene", "pl": "grzebień", "th": "หวี", "ta": "செம்பு", "kn": "ಕುಂಭಿ", "uk": "гребінець", "bn": "কোম্ব", "hi": "कंघी"}}
-{"guid": "N08_023", "translations": {"ro": "periuta de dinti", "pl": "szczoteczka do zębów", "th": "แปรงสีฟัน", "ta": "பற்கள் சரக்", "kn": "ದಂತತೋಟbrush", "uk": "зубна щітка", "bn": "দাঁতের ব্রাশ", "hi": "दांत का ब्रश"}}
-{"guid": "N08_024", "translations": {"ro": "șnur", "pl": "sznurek", "th": "เชือก", "ta": "நார்", "kn": "ಗಂಟಲು", "uk": "струночка", "bn": "ডোর", "hi": "धागा"}}
-{"guid": "N08_025", "translations": {"ro": "lumânare", "pl": "świeca", "th": "เทียน", "ta": "விளக்குமணல்", "kn": "ಮಣಿಲಾ (ಮಣಿಲೆ)", "uk": "свічка", "bn": "মোমবাতি", "hi": "मोमबत्ती"}}
-{"guid": "N08_026", "translations": {"ro": "spatulă", "pl": "szpatułka", "th": "พายตักอาหาร", "ta": "ஸ்பேச்சுலா", "kn": "ಸ್ಪ್ಯಾಚುಲಾ", "uk": "лопатка", "bn": "স্প্যাটুলা", "hi": "स्पैटुला"}}
+{"guid": "N08_019", "translations": {"ro": "pix", "pl": "długopis", "th": "ปากกา", "ta": "பெனா", "kn": "ಕಲಂ", "uk": "ручка", "bn": "কলম", "hi": "कलम", "bs": "kemijska olovka"}}
+{"guid": "N08_020", "translations": {"ro": "creion", "pl": "ołówek", "th": "ดินสอ", "ta": "பென்சில்", "kn": "ಕಲೆಮಣಿಗೆ", "uk": "олівець", "bn": "পেন্সিল", "hi": "पेंसिल", "bs": "olovka"}}
+{"guid": "N08_021", "translations": {"ro": "cuțit", "pl": "nóż", "th": "มีด", "ta": "கத்தி", "kn": "ಚಾಕು", "uk": "ніж", "bn": "চাকু", "hi": "छुरी", "bs": "nož"}}
+{"guid": "N08_022", "translations": {"ro": "pieptene", "pl": "grzebień", "th": "หวี", "ta": "செம்பு", "kn": "ಕುಂಭಿ", "uk": "гребінець", "bn": "কোম্ব", "hi": "कंघी", "bs": "češal"}}
+{"guid": "N08_023", "translations": {"ro": "periuta de dinti", "pl": "szczoteczka do zębów", "th": "แปรงสีฟัน", "ta": "பற்கள் சரக்", "kn": "ದಂತತೋಟbrush", "uk": "зубна щітка", "bn": "দাঁতের ব্রাশ", "hi": "दांत का ब्रश", "bs": "četkica za zube"}}
+{"guid": "N08_024", "translations": {"ro": "șnur", "pl": "sznurek", "th": "เชือก", "ta": "நார்", "kn": "ಗಂಟಲು", "uk": "струночка", "bn": "ডোর", "hi": "धागा", "bs": "uzica"}}
+{"guid": "N08_025", "translations": {"ro": "lumânare", "pl": "świeca", "th": "เทียน", "ta": "விளக்குமணல்", "kn": "ಮಣಿಲಾ (ಮಣಿಲೆ)", "uk": "свічка", "bn": "মোমবাতি", "hi": "मोमबत्ती", "bs": "svijeća"}}
+{"guid": "N08_026", "translations": {"ro": "spatulă", "pl": "szpatułka", "th": "พายตักอาหาร", "ta": "ஸ்பேச்சுலா", "kn": "ಸ್ಪ್ಯಾಚುಲಾ", "uk": "лопатка", "bn": "স্প্যাটুলা", "hi": "स्पैटुला", "bs": "lopatica"}}
 {"guid": "N08_027", "translations": {"ro": "umbrelă", "pl": "parasol", "th": "ร่ม", "ta": "குடை", "kn": "ಚದರು", "uk": "парасолька", "bn": "ছাতা", "hi": "छाता"}}
 {"guid": "N08_028", "translations": {"ro": "capsator", "pl": "zszywacz", "th": "เครื่องเย็บกระดาษ", "ta": "ஸ்டேபிளர்", "kn": "ಸ್ಟೇಪ್ಲರ್", "uk": "степлер", "bn": "স্টেপলার", "hi": "स्टेपलर"}}
 {"guid": "N08_029", "translations": {"ro": "pernă", "pl": "poduszka", "th": "หมอน", "ta": "தலையணை", "kn": "ತಲೆಹೊಂಬೆ", "uk": "подушка", "bn": "বালিশ", "hi": "तकिया"}}
@@ -34,9 +34,9 @@
 {"guid": "N08_036", "translations": {"ro": "jucărie", "pl": "zabawka", "th": "ของเล่น", "ta": "விளையாட்டு பொருள்", "kn": "ಬದುಕ玩？", "uk": "іграшка", "bn": "খেলনা", "hi": "खिलौना"}}
 {"guid": "N08_037", "translations": {"ro": "bețișoare (de mâncat)", "pl": "pałeczka (do jedzenia)", "th": "ตะเกียบ", "ta": "சாப்ஸ்திக்ஸ்", "kn": "ಚೋಪ್‌ಸ್ಟಿಕ್ಸ್", "uk": "паличка для їжі", "bn": "চপস্টিক্স", "hi": "चॉपस्टिक्स"}}
 {"guid": "N08_040", "translations": {"ro": "pachet", "pl": "pakiet", "th": "พัสดุ", "ta": "பேக்கெட்", "kn": "ಪ್ಯಾಕೆಟ್", "uk": "пакет", "bn": "প্যাকেজ", "hi": "पैकेज"}}
-{"guid": "N08_041", "translations": {"ro": "scaun", "pl": "krzesło", "th": "เก้าอี้", "ta": "குச்சி", "kn": "ಕುರ್ಚಿ", "uk": "стілець", "bn": "চেয়ার", "hi": "कुर्सी"}}
+{"guid": "N08_041", "translations": {"ro": "scaun", "pl": "krzesło", "th": "เก้าอี้", "ta": "குச்சி", "kn": "ಕುರ್ಚಿ", "uk": "стілець", "bn": "চেয়ার", "hi": "कुर्सी", "bs": "sjedalo"}}
 {"guid": "N08_044", "translations": {"ro": "chibrit", "pl": "zapałka", "th": "ไม้ขีดไฟ", "ta": "மெட்ச்", "kn": "ಮ್ಯಾಚ್", "uk": "сірник", "bn": "ম্যাচ", "hi": "माचिस"}}
-{"guid": "N08_046", "translations": {"ro": "lamă", "pl": "ostrze", "th": "คมมีด", "ta": "அரிவாள்_அத்தியானம்", "kn": "ಸತ್ತಿ", "uk": "лезо", "bn": "ধাঁতা", "hi": "धार"}}
+{"guid": "N08_046", "translations": {"ro": "lamă", "pl": "ostrze", "th": "คมมีด", "ta": "அரிவாள்_அத்தியானம்", "kn": "ಸತ್ತಿ", "uk": "лезо", "bn": "ধাঁতা", "hi": "धार", "bs": "oštrica"}}
 {"guid": "N08_049", "translations": {"ro": "lampă", "pl": "lampa", "th": "โคมไฟ", "ta": "மண்லம்பு", "kn": "ದೀಪ", "uk": "лампа", "bn": "ল্যাম্প", "hi": "लैम्प"}}
 {"guid": "N08_050", "translations": {"ro": "torță", "pl": "pochodnia", "th": "คบเพลิง", "ta": "факел", "kn": "ದೀಪstick", "uk": "факел", "bn": "টর্চ", "hi": "факел"}}
 {"guid": "N08_051", "translations": {"ro": "bol", "pl": "miska", "th": "ชาม", "ta": "பயிப்பு", "kn": "ಪದಾರ್ಧ", "uk": "миска", "bn": "পাত্র", "hi": "कटोरा", "bs": "zdjela"}}
@@ -51,11 +51,11 @@
 {"guid": "N08_060", "translations": {"ro": "clemă", "pl": "klips", "th": "ที่หนีบ", "ta": "கிளிப்", "kn": "ಕ್ಲಿಪ್", "uk": "затискач", "bn": "ক্লিপ", "hi": "क्लिप"}}
 {"guid": "N08_061", "translations": {"ro": "monedă", "pl": "moneta", "th": "เหรียญ", "ta": "நாணயம்", "kn": "ನಾಣ್ಯ", "uk": "монета", "bn": "মুদ্রা", "hi": "सिक्का"}}
 {"guid": "N08_062", "translations": {"ro": "ac", "pl": "igła", "th": "เข็ม", "ta": "அணிவடை", "kn": "ಉಳು", "uk": "голка", "bn": "সুঁই", "hi": "सुई"}}
-{"guid": "N08_063", "translations": {"ro": "minge", "pl": "piłka", "th": "ลูกบอล", "ta": "ப spheres", "kn": "ಗೋಲ", "uk": "куля", "bn": "বল", "hi": "गेंद"}}
+{"guid": "N08_063", "translations": {"ro": "minge", "pl": "piłka", "th": "ลูกบอล", "ta": "ப spheres", "kn": "ಗೋಲ", "uk": "куля", "bn": "বল", "hi": "गेंद", "bs": "lopta"}}
 {"guid": "N08_064", "translations": {"ro": "panglică", "pl": "wstążka", "th": "ริบบิ้น", "ta": "பட்டி", "kn": "ರೇಬೆಲ್", "uk": "стрічка", "bn": "ফিতা", "hi": "पट्टी"}}
 {"guid": "N08_065", "translations": {"ro": "brichetă", "pl": "zapalniczka", "th": "ไฟแช็ก", "ta": "லைட்டர்", "kn": "ಲೈಟರ್", "uk": "запальничка", "bn": "লাইটার", "hi": "लाइटर"}}
 {"guid": "N08_066", "translations": {"ro": "dop", "pl": "korek", "th": "จุก", "ta": "கார்க்", "kn": "ಕೊರ್ಕ್", "uk": "пробка", "bn": "করক", "hi": "कॉर्क"}}
-{"guid": "N08_067", "translations": {"ro": "radieră", "pl": "gumka", "th": "ยางลบ", "ta": "ரப்பர்", "kn": "ರಬ್ಬರ್", "uk": "гумка", "bn": "রাবার", "hi": "रबर"}}
+{"guid": "N08_067", "translations": {"ro": "radieră", "pl": "gumka", "th": "ยางลบ", "ta": "ரப்பர்", "kn": "ರಬ್ಬರ್", "uk": "гумка", "bn": "রাবার", "hi": "रबर", "bs": "gumica"}}
 {"guid": "N08_068", "translations": {"ro": "șurub", "pl": "śruba", "th": "สกรู", "ta": "ஸ்க்ரூ", "kn": "ಸ್ಕ್ರೂ", "uk": "гвинт", "bn": "পেরেক", "hi": "पेंचकस का पेंच"}}
 {"guid": "N08_069", "translations": {"ro": "șurub", "pl": "śruba", "th": "สกรู", "ta": "போல்ட்", "kn": "ಗೋಚಿ", "uk": "болт", "bn": "বল্ট", "hi": "बोल्ट"}}
 {"guid": "N08_070", "translations": {"ro": "lanternă portabilă", "pl": "latarka", "th": "ไฟฉาย", "ta": "டார்ச்சு", "kn": "ಟಾರ್ಚ್", "uk": "ліхтарик", "bn": "টর্চ", "hi": "टॉर्च"}}
@@ -68,7 +68,7 @@
 {"guid": "N08_077", "translations": {"ro": "clopot", "pl": "dzwon", "th": "ระฆัง", "ta": "மணி", "kn": "ಘಂಟೆ", "uk": "дзвін", "bn": "ঘণ্টা", "hi": "घंटी"}}
 {"guid": "N08_078", "translations": {"ro": "rame", "pl": "rama", "th": "กรอบ", "ta": "சட்டம்", "kn": "ಚೌಕಟ್ಟು", "uk": "рамка", "bn": "চৌকাঠি", "hi": "फ्रेम"}}
 {"guid": "N08_079", "translations": {"ro": "băț", "pl": "patyk", "th": "ไม้ขีด", "ta": "கொடி", "kn": "ಕಂಬಿ", "uk": "палиця", "bn": "লাঠি", "hi": "लकड़ी का टुकड़ा"}}
-{"guid": "N08_080", "translations": {"ro": "copie", "pl": "kopia", "th": "สำเนา", "ta": "பிரதி", "kn": "ನಕಲಿ", "uk": "копія", "bn": "নকল", "hi": "नक़ल"}}
+{"guid": "N08_080", "translations": {"ro": "copie", "pl": "kopia", "th": "สำเนา", "ta": "பிரதி", "kn": "ನಕಲಿ", "uk": "копія", "bn": "নকল", "hi": "नक़ल", "bs": "kopija"}}
 {"guid": "N08_081", "translations": {"ro": "cadou", "pl": "prezent", "th": "ของขวัญ", "ta": "கொடை", "kn": "ಹಲವು", "uk": "подарунок", "bn": "উপহার", "hi": "उपहार"}}
 {"guid": "N08_082", "translations": {"ro": "puzzle", "pl": "łamigłówka", "th": "ปริศนา", "ta": "முதிர்க்கோழி", "kn": "ಕಲಸುಗುಟ್ಟುವಿಕೆಗೆ", "uk": "головоломка", "bn": "ধাঁধা", "hi": "पहेली"}}
 {"guid": "N08_083", "translations": {"ro": "model", "pl": "model", "th": "แบบจำลอง", "ta": "மாதிரி", "kn": "ಮಾದರಿ", "uk": "модель", "bn": "মডেল", "hi": "मॉडल"}}
@@ -78,7 +78,7 @@
 {"guid": "N08_087", "translations": {"ro": "nasture", "pl": "guzik", "th": "กระดุม", "ta": "பட்டை", "kn": "ಬಟನ್", "uk": "ґудзик", "bn": "বোতাম", "hi": "बटन"}}
 {"guid": "N08_088", "translations": {"ro": "aparat foto", "pl": "aparat fotograficzny", "th": "กล้องถ่ายรูป", "ta": "கேமரா", "kn": "ಕ್ಯಾಮೆರಾ", "uk": "камера", "bn": "ক্যামেরা", "hi": "कैमरा"}}
 {"guid": "N08_089", "translations": {"ro": "pânză", "pl": "płótno", "th": "ผ้าใบ", "ta": "கැන்வாஸ்", "kn": "ಕ್ಯಾಂವಾಸ್", "uk": "полотно", "bn": "ক্যানভাস", "hi": "कैनवास"}}
-{"guid": "N08_090", "translations": {"ro": "card", "pl": "karta", "th": "การ์ด", "ta": "கார்டு", "kn": "ಕಾರ್ಡ್", "uk": "картка", "bn": "কার্ড", "hi": "कार्ड"}}
+{"guid": "N08_090", "translations": {"ro": "card", "pl": "karta", "th": "การ์ด", "ta": "கார்டு", "kn": "ಕಾರ್ಡ್", "uk": "картка", "bn": "কার্ড", "hi": "कार्ड", "bs": "kartica"}}
 {"guid": "N08_091", "translations": {"ro": "guler", "pl": "kołnierz", "th": "ปก", "ta": "காலர்", "kn": "ಕಾಲ್‍ಲರ್", "uk": "комір", "bn": "কলার", "hi": "कालर"}}
 {"guid": "N08_092", "translations": {"ro": "cordon", "pl": "sznur", "th": "เชือก", "ta": "கயிறு", "kn": "ಕ Cord? No must be Kannada script. 'cord' = ಕCORD? Need 'ಕಂಪ' Hmm. Kannada for cord:", "uk": "шнур", "bn": "দড়ি", "hi": "रस्सी"}}
 {"guid": "N08_093", "translations": {"ro": "perdea", "pl": "zasłona", "th": "ผ้าม่าน", "ta": "திரை", "kn": "ಪರದೆ", "uk": "штора", "bn": "পর্দা", "hi": "परदा"}}
@@ -96,7 +96,7 @@
 {"guid": "N08_105", "translations": {"ro": "șosetă", "pl": "skarpetka", "th": "ถุงเท้า", "ta": "மொழா", "kn": "ಜೇಬು", "uk": "панчоха", "bn": "মোজা", "hi": "मोज़ा"}}
 {"guid": "N08_106", "translations": {"ro": "ață", "pl": "nić", "th": "ด้าย", "ta": "நூல்", "kn": "ಉಣ್ಣ", "uk": "нитка", "bn": "সুঁতা", "hi": "सूई"}}
 {"guid": "N08_107", "translations": {"ro": "pantaloni", "pl": "spodnie", "th": "กางเกง", "ta": "சால்வார்", "kn": "ಕಾಲುವೆಗಳ ನೀಪುಗಳು", "uk": "штани", "bn": "ট্রাউজার", "hi": "पतलून"}}
-{"guid": "N08_108", "translations": {"ro": "recipient", "pl": "naczynie", "th": "ภาชนะ", "ta": "பானை", "kn": "ಬಾಣಲೆ", "uk": "посудина", "bn": "বাটি", "hi": "बर्तन"}}
+{"guid": "N08_108", "translations": {"ro": "recipient", "pl": "naczynie", "th": "ภาชนะ", "ta": "பானை", "kn": "ಬಾಣಲೆ", "uk": "посудина", "bn": "বাটি", "hi": "बर्तन", "bs": "posuda"}}
 {"guid": "N08_109", "translations": {"ro": "fluier", "pl": "gwizdek", "th": "นกหวีด", "ta": "ஷிஸ்டில்", "kn": "ಶವ್ಲ್ಪು", "uk": "свисток", "bn": "শিশনি", "hi": "सीटी"}}
 {"guid": "N08_110", "translations": {"ro": "ciomag", "pl": "bat", "th": "แส้", "ta": "அடித்துப்பிடி", "kn": "ಚಮ್ಮಚಿ", "uk": "плеть", "bn": "চামড়ার ফাঁকা", "hi": "फावड़ा"}}
 {"guid": "N08_111", "translations": {"ro": "nod", "pl": "węzeł", "th": "ปม", "ta": "முட்டெண்", "kn": "ಗುಂಡಿ", "uk": "вузол", "bn": "গুটি", "hi": "गांठ"}}

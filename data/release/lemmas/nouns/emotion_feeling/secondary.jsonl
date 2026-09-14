@@ -1,36 +1,36 @@
-{"guid": "N23_001", "translations": {"ro": "fericire", "pl": "szczęście", "th": "ความสุข", "ta": "சாந்தி", "kn": "ಸಂತೋಷ", "uk": "щастя", "bn": "সুখ", "hi": "खुशी"}}
-{"guid": "N23_002", "translations": {"ro": "tristețe", "pl": "smutek", "th": "ความเศร้า", "ta": "துக்கம்", "kn": "ಶೋಕ", "uk": "смуток", "bn": "দুঃখ", "hi": "दुःख"}}
-{"guid": "N23_003", "translations": {"ro": "mânie", "pl": "gniew", "th": "ความโกรธ", "ta": "ஆத்திரம்", "kn": "ಕ್ರೋಧ", "uk": "гнів", "bn": "রাগ", "hi": "क्रोध"}}
-{"guid": "N23_004", "translations": {"ro": "entuziasm", "pl": "podniecenie", "th": "ความตื่นเต้น", "ta": "உத்வேகம்", "kn": "ಉತ್ಸಾಹ", "uk": "збудження", "bn": "উৎসাহ", "hi": "उत्साह"}}
-{"guid": "N23_005", "translations": {"ro": "oboseală", "pl": "zmęczenie", "th": "ความเหนื่อยล้า", "ta": "தூக்கச்சோர்வு", "kn": "ಆಲಸ್ಯ/ಹಗಲುನಿದ್ರೆಯ ಕೊರತೆ/ಕ್ಲಾಂತಿ", "uk": "втома", "bn": "অবসাদ", "hi": "थकान"}}
-{"guid": "N23_006", "translations": {"ro": "frică", "pl": "strach", "th": "ความกลัว", "ta": "பயம்", "kn": "ಭಯ", "uk": "страх", "bn": "ভয়", "hi": "भय"}}
-{"guid": "N23_007", "translations": {"ro": "surpriză", "pl": "zaskoczenie", "th": "ความประหลาดใจ", "ta": "ஆச்சரியம்", "kn": "ಆಶ್ಚರ್ಯ", "uk": "здивування", "bn": "আশ্চর্য", "hi": "आश्चर्य"}}
-{"guid": "N23_008", "translations": {"ro": "îngrijorare", "pl": "niepokój", "th": "ความวิตกกังวล", "ta": "கவலை", "kn": "ಚಿಂತೆಯ", "uk": "тривога", "bn": "উদ্বেগ", "hi": "चिंता"}}
-{"guid": "N23_009", "translations": {"ro": "liniște", "pl": "spokój", "th": "ความสงบ", "ta": "சாந்தி", "kn": "ಶಾಂತಿ", "uk": "спокій", "bn": "শান্তি", "hi": "शांतता"}}
-{"guid": "N23_010", "translations": {"ro": "neliniște", "pl": "nerwowość", "th": "ความกระวนกระวาย", "ta": "அகவலம்", "kn": "ಅವಿಶ್ರಾಂತತೆ", "uk": "тривожність", "bn": "উদ্বেগ", "hi": "चिंताग्रस्तता"}}
-{"guid": "N23_011", "translations": {"ro": "confuzie", "pl": "zamieszanie", "th": "ความสับสน", "ta": "குழப்பம்", "kn": "ಗೊಂದಲ", "uk": "спантеличеність", "bn": "বিভ্রান্তি", "hi": "भ्रम"}}
-{"guid": "N23_012", "translations": {"ro": "rușine", "pl": "wstyd", "th": "ความอับอาย", "ta": "எதோபடிப்பு", "kn": "ಅಸಹಜತೆ", "uk": "сором", "bn": "লজ্জা", "hi": "शर्म"}}
-{"guid": "N23_013", "translations": {"ro": "mândrie", "pl": "duma", "th": "ความภาคภูมิใจ", "ta": "பெருமை", "kn": "ಗರ್ವ", "uk": "гордість", "bn": "গর্ব", "hi": "गौरव"}}
-{"guid": "N23_014", "translations": {"ro": "zelie", "pl": "zazdrość", "th": "ความหึงหวง", "ta": "பொறாமை", "kn": "ಅಸೆಹ", "uk": "ревнощі", "bn": "ইর্ষ্যা", "hi": "ईर्ष्या"}}
-{"guid": "N23_015", "translations": {"ro": "singurătate", "pl": "samotność", "th": "ความเหงา", "ta": "இனிமைபற்றாமை", "kn": "ಏಕಾಂತ", "uk": "самотність", "bn": "একাকিত্ব", "hi": "एकाकीपन"}}
-{"guid": "N23_016", "translations": {"ro": "recunoștință", "pl": "wdzięczność", "th": "ความกตัญญู", "ta": "நன்றிக்குரிய உணர்ச்சி", "kn": "ಕೃತಜ್ಞಾನ", "uk": "вдячність", "bn": "কৃতজ্ঞতা", "hi": "कृतज्ञता"}}
-{"guid": "N23_017", "translations": {"ro": "frustrare", "pl": "frustracja", "th": "ความหงุดหงิด", "ta": "உறக்கமின்மை", "kn": "ನಿರಾಶೆ", "uk": "фрустрація", "bn": "হতাশা", "hi": "निराशा"}}
-{"guid": "N23_018", "translations": {"ro": "speranță", "pl": "nadzieja", "th": "ความหวัง", "ta": "நம்பிக்கை", "kn": "ಆಶೆ", "uk": "надія", "bn": "আশা", "hi": "आशा"}}
-{"guid": "N23_019", "translations": {"ro": "dezamăgire", "pl": "rozczarowanie", "th": "ผิดหวัง", "ta": "நிராசை", "kn": "ನಿರಾಸೆ", "uk": "розчарування", "bn": "নিরাশা", "hi": "निराशा"}}
-{"guid": "N23_020", "translations": {"ro": "curiozitate", "pl": "ciekawość", "th": "ความอยากรู้อยากเห็น", "ta": "ஆர்வம்/விசுவாசம்/விளைவு", "kn": "ಹುಚ್ಚುಹಣೆ/ಆಕಾಂಕ್ಷೆ/ಅತ್ಯಾಸಕ್ತಿ", "uk": "цікавість", "bn": "জিজ্ঞাসা/উৎসুকতা/জিজ্ঞাসা", "hi": "जिज्ञासा"}}
-{"guid": "N23_021", "translations": {"ro": "plictiseală", "pl": "nuda", "th": "ความเบื่อ", "ta": "பேசாமை", "kn": "ಬೆರೆನಿಕೆ", "uk": "нудьга", "bn": "বিরক্তি", "hi": "उब्ज़ार"}}
-{"guid": "N23_022", "translations": {"ro": "veselie", "pl": "radość", "th": "ความร่าเริง", "ta": "மகிழ்ச்சி", "kn": "ಹರ್ಷ", "uk": "жвавість", "bn": "আনন্দ", "hi": "हर्ष"}}
-{"guid": "N23_024", "translations": {"ro": "anxietate", "pl": "niepokój", "th": "ความวิตกกังวล", "ta": "கவலை", "kn": "ಚಿಂತೆ", "uk": "тривога", "bn": "উদ্বেগ", "hi": "चिंता"}}
-{"guid": "N23_025", "translations": {"ro": "bucurie", "pl": "radość", "th": "ความยินดี", "ta": "சந்தோஷம்", "kn": "ಆನಂದ", "uk": "радість", "bn": "আনন্দ", "hi": "आनंद"}}
-{"guid": "N23_026", "translations": {"ro": "durere", "pl": "ból", "th": "ความเจ็บปวด", "ta": "வலி", "kn": "ನೋವು", "uk": "біль", "bn": "বেদনাথা", "hi": "दर्द"}}
-{"guid": "N23_027", "translations": {"ro": "teroare", "pl": "terror", "th": "ความหวาดกลัว", "ta": "பயங்கரம்", "kn": "ಭಯಾಂಕತೆ", "uk": "жах", "bn": "ভয়ানকতা", "hi": "भयभीतता"}}
-{"guid": "N23_028", "translations": {"ro": "dorință", "pl": "pragnienie", "th": "ความปรารถนา", "ta": "ஆகாமை", "kn": "ಆಕಾಂಕ್ಷೆ", "uk": "бажання", "bn": "ইচ্ছা", "hi": "इच्छा"}}
-{"guid": "N23_029", "translations": {"ro": "curaj", "pl": "odwaga", "th": "ความกล้าหาญ", "ta": "துணிவு", "kn": "ಧೈರ್ಯ", "uk": "мужність", "bn": "সাহস", "hi": "साहस"}}
-{"guid": "N23_030", "translations": {"ro": "șoc", "pl": "szok", "th": "ช็อก", "ta": "அதிர்ச்சி", "kn": "ಆಘಾತ", "uk": "шок", "bn": "আঘাত", "hi": "झटका"}}
-{"guid": "N23_031", "translations": {"ro": "dragoste", "pl": "miłość", "th": "ความรัก", "ta": "காதல்", "kn": "ಪ್ರೇಮ", "uk": "кохання", "bn": "ভালবাসা", "hi": "प्यार"}}
-{"guid": "N23_032", "translations": {"ro": "ură", "pl": "nienawiść", "th": "ความเกลียดชัง", "ta": "கோபம்", "kn": "ವೈರ್ಯ", "uk": "ненависть", "bn": "ঘৃণা", "hi": "घृणा"}}
-{"guid": "N23_033", "translations": {"ro": "vinovăție", "pl": "wina", "th": "ความรู้สึกผิด", "ta": "தொறுப்பு உணர்வு", "kn": "ದೋಷಭಾವ", "uk": "вина", "bn": "অপৰাধবোধ", "hi": "दोषबोध"}}
-{"guid": "N23_034", "translations": {"ro": "rușine", "pl": "wstyd", "th": "อับอาย", "ta": "அபமானம்", "kn": "ಶರ್ಮ", "uk": "приниження", "bn": "লজ্জা", "hi": "शर्म"}}
-{"guid": "N23_035", "translations": {"ro": "dezgust", "pl": "odraza", "th": "รังเกียจ", "ta": "அருவருப்பு", "kn": "ಅವಮಾನ", "uk": "огида", "bn": "ঘৃণা", "hi": "घृणा"}}
-{"guid": "N23_036", "translations": {"ro": "compasiune", "pl": "współczucie", "th": "ความสงสาร", "ta": "கருணை", "kn": "daya", "uk": "співчуття", "bn": "অমায়াস", "hi": "दया"}}
-{"guid": "N23_037", "translations": {"ro": "mușcătură", "pl": "ugryzienie", "th": "การกัด", "ta": "குச்சி", "kn": "ದೂರು", "uk": "укус", "bn": "কামড়", "hi": "กัด"}}
+{"guid": "N23_001", "translations": {"ro": "fericire", "pl": "szczęście", "th": "ความสุข", "ta": "சாந்தி", "kn": "ಸಂತೋಷ", "uk": "щастя", "bn": "সুখ", "hi": "खुशी", "bs": "sreća"}}
+{"guid": "N23_002", "translations": {"ro": "tristețe", "pl": "smutek", "th": "ความเศร้า", "ta": "துக்கம்", "kn": "ಶೋಕ", "uk": "смуток", "bn": "দুঃখ", "hi": "दुःख", "bs": "tuga"}}
+{"guid": "N23_003", "translations": {"ro": "mânie", "pl": "gniew", "th": "ความโกรธ", "ta": "ஆத்திரம்", "kn": "ಕ್ರೋಧ", "uk": "гнів", "bn": "রাগ", "hi": "क्रोध", "bs": "ljutnja"}}
+{"guid": "N23_004", "translations": {"ro": "entuziasm", "pl": "podniecenie", "th": "ความตื่นเต้น", "ta": "உத்வேகம்", "kn": "ಉತ್ಸಾಹ", "uk": "збудження", "bn": "উৎসাহ", "hi": "उत्साह", "bs": "uzbuđenje"}}
+{"guid": "N23_005", "translations": {"ro": "oboseală", "pl": "zmęczenie", "th": "ความเหนื่อยล้า", "ta": "தூக்கச்சோர்வு", "kn": "ಆಲಸ್ಯ/ಹಗಲುನಿದ್ರೆಯ ಕೊರತೆ/ಕ್ಲಾಂತಿ", "uk": "втома", "bn": "অবসাদ", "hi": "थकान", "bs": "umor"}}
+{"guid": "N23_006", "translations": {"ro": "frică", "pl": "strach", "th": "ความกลัว", "ta": "பயம்", "kn": "ಭಯ", "uk": "страх", "bn": "ভয়", "hi": "भय", "bs": "strah"}}
+{"guid": "N23_007", "translations": {"ro": "surpriză", "pl": "zaskoczenie", "th": "ความประหลาดใจ", "ta": "ஆச்சரியம்", "kn": "ಆಶ್ಚರ್ಯ", "uk": "здивування", "bn": "আশ্চর্য", "hi": "आश्चर्य", "bs": "iznenađenje"}}
+{"guid": "N23_008", "translations": {"ro": "îngrijorare", "pl": "niepokój", "th": "ความวิตกกังวล", "ta": "கவலை", "kn": "ಚಿಂತೆಯ", "uk": "тривога", "bn": "উদ্বেগ", "hi": "चिंता", "bs": "briga"}}
+{"guid": "N23_009", "translations": {"ro": "liniște", "pl": "spokój", "th": "ความสงบ", "ta": "சாந்தி", "kn": "ಶಾಂತಿ", "uk": "спокій", "bn": "শান্তি", "hi": "शांतता", "bs": "smirenost"}}
+{"guid": "N23_010", "translations": {"ro": "neliniște", "pl": "nerwowość", "th": "ความกระวนกระวาย", "ta": "அகவலம்", "kn": "ಅವಿಶ್ರಾಂತತೆ", "uk": "тривожність", "bn": "উদ্বেগ", "hi": "चिंताग्रस्तता", "bs": "nervoza"}}
+{"guid": "N23_011", "translations": {"ro": "confuzie", "pl": "zamieszanie", "th": "ความสับสน", "ta": "குழப்பம்", "kn": "ಗೊಂದಲ", "uk": "спантеличеність", "bn": "বিভ্রান্তি", "hi": "भ्रम", "bs": "zbunjenost"}}
+{"guid": "N23_012", "translations": {"ro": "rușine", "pl": "wstyd", "th": "ความอับอาย", "ta": "எதோபடிப்பு", "kn": "ಅಸಹಜತೆ", "uk": "сором", "bn": "লজ্জা", "hi": "शर्म", "bs": "neugoda"}}
+{"guid": "N23_013", "translations": {"ro": "mândrie", "pl": "duma", "th": "ความภาคภูมิใจ", "ta": "பெருமை", "kn": "ಗರ್ವ", "uk": "гордість", "bn": "গর্ব", "hi": "गौरव", "bs": "ponos"}}
+{"guid": "N23_014", "translations": {"ro": "zelie", "pl": "zazdrość", "th": "ความหึงหวง", "ta": "பொறாமை", "kn": "ಅಸೆಹ", "uk": "ревнощі", "bn": "ইর্ষ্যা", "hi": "ईर्ष्या", "bs": "ljubomora"}}
+{"guid": "N23_015", "translations": {"ro": "singurătate", "pl": "samotność", "th": "ความเหงา", "ta": "இனிமைபற்றாமை", "kn": "ಏಕಾಂತ", "uk": "самотність", "bn": "একাকিত্ব", "hi": "एकाकीपन", "bs": "usamljenost"}}
+{"guid": "N23_016", "translations": {"ro": "recunoștință", "pl": "wdzięczność", "th": "ความกตัญญู", "ta": "நன்றிக்குரிய உணர்ச்சி", "kn": "ಕೃತಜ್ಞಾನ", "uk": "вдячність", "bn": "কৃতজ্ঞতা", "hi": "कृतज्ञता", "bs": "zahvalnost"}}
+{"guid": "N23_017", "translations": {"ro": "frustrare", "pl": "frustracja", "th": "ความหงุดหงิด", "ta": "உறக்கமின்மை", "kn": "ನಿರಾಶೆ", "uk": "фрустрація", "bn": "হতাশা", "hi": "निराशा", "bs": "frustracija"}}
+{"guid": "N23_018", "translations": {"ro": "speranță", "pl": "nadzieja", "th": "ความหวัง", "ta": "நம்பிக்கை", "kn": "ಆಶೆ", "uk": "надія", "bn": "আশা", "hi": "आशा", "bs": "nada"}}
+{"guid": "N23_019", "translations": {"ro": "dezamăgire", "pl": "rozczarowanie", "th": "ผิดหวัง", "ta": "நிராசை", "kn": "ನಿರಾಸೆ", "uk": "розчарування", "bn": "নিরাশা", "hi": "निराशा", "bs": "razočaranje"}}
+{"guid": "N23_020", "translations": {"ro": "curiozitate", "pl": "ciekawość", "th": "ความอยากรู้อยากเห็น", "ta": "ஆர்வம்/விசுவாசம்/விளைவு", "kn": "ಹುಚ್ಚುಹಣೆ/ಆಕಾಂಕ್ಷೆ/ಅತ್ಯಾಸಕ್ತಿ", "uk": "цікавість", "bn": "জিজ্ঞাসা/উৎসুকতা/জিজ্ঞাসা", "hi": "जिज्ञासा", "bs": "radoznalost"}}
+{"guid": "N23_021", "translations": {"ro": "plictiseală", "pl": "nuda", "th": "ความเบื่อ", "ta": "பேசாமை", "kn": "ಬೆರೆನಿಕೆ", "uk": "нудьга", "bn": "বিরক্তি", "hi": "उब्ज़ार", "bs": "dosada"}}
+{"guid": "N23_022", "translations": {"ro": "veselie", "pl": "radość", "th": "ความร่าเริง", "ta": "மகிழ்ச்சி", "kn": "ಹರ್ಷ", "uk": "жвавість", "bn": "আনন্দ", "hi": "हर्ष", "bs": "veselost"}}
+{"guid": "N23_024", "translations": {"ro": "anxietate", "pl": "niepokój", "th": "ความวิตกกังวล", "ta": "கவலை", "kn": "ಚಿಂತೆ", "uk": "тривога", "bn": "উদ্বেগ", "hi": "चिंता", "bs": "tjeskoba"}}
+{"guid": "N23_025", "translations": {"ro": "bucurie", "pl": "radość", "th": "ความยินดี", "ta": "சந்தோஷம்", "kn": "ಆನಂದ", "uk": "радість", "bn": "আনন্দ", "hi": "आनंद", "bs": "radost"}}
+{"guid": "N23_026", "translations": {"ro": "durere", "pl": "ból", "th": "ความเจ็บปวด", "ta": "வலி", "kn": "ನೋವು", "uk": "біль", "bn": "বেদনাথা", "hi": "दर्द", "bs": "bol"}}
+{"guid": "N23_027", "translations": {"ro": "teroare", "pl": "terror", "th": "ความหวาดกลัว", "ta": "பயங்கரம்", "kn": "ಭಯಾಂಕತೆ", "uk": "жах", "bn": "ভয়ানকতা", "hi": "भयभीतता", "bs": "užas"}}
+{"guid": "N23_028", "translations": {"ro": "dorință", "pl": "pragnienie", "th": "ความปรารถนา", "ta": "ஆகாமை", "kn": "ಆಕಾಂಕ್ಷೆ", "uk": "бажання", "bn": "ইচ্ছা", "hi": "इच्छा", "bs": "želja"}}
+{"guid": "N23_029", "translations": {"ro": "curaj", "pl": "odwaga", "th": "ความกล้าหาญ", "ta": "துணிவு", "kn": "ಧೈರ್ಯ", "uk": "мужність", "bn": "সাহস", "hi": "साहस", "bs": "hrabrost"}}
+{"guid": "N23_030", "translations": {"ro": "șoc", "pl": "szok", "th": "ช็อก", "ta": "அதிர்ச்சி", "kn": "ಆಘಾತ", "uk": "шок", "bn": "আঘাত", "hi": "झटका", "bs": "šok"}}
+{"guid": "N23_031", "translations": {"ro": "dragoste", "pl": "miłość", "th": "ความรัก", "ta": "காதல்", "kn": "ಪ್ರೇಮ", "uk": "кохання", "bn": "ভালবাসা", "hi": "प्यार", "bs": "ljubav"}}
+{"guid": "N23_032", "translations": {"ro": "ură", "pl": "nienawiść", "th": "ความเกลียดชัง", "ta": "கோபம்", "kn": "ವೈರ್ಯ", "uk": "ненависть", "bn": "ঘৃণা", "hi": "घृणा", "bs": "mržnja"}}
+{"guid": "N23_033", "translations": {"ro": "vinovăție", "pl": "wina", "th": "ความรู้สึกผิด", "ta": "தொறுப்பு உணர்வு", "kn": "ದೋಷಭಾವ", "uk": "вина", "bn": "অপৰাধবোধ", "hi": "दोषबोध", "bs": "krivnja"}}
+{"guid": "N23_034", "translations": {"ro": "rușine", "pl": "wstyd", "th": "อับอาย", "ta": "அபமானம்", "kn": "ಶರ್ಮ", "uk": "приниження", "bn": "লজ্জা", "hi": "शर्म", "bs": "stid"}}
+{"guid": "N23_035", "translations": {"ro": "dezgust", "pl": "odraza", "th": "รังเกียจ", "ta": "அருவருப்பு", "kn": "ಅವಮಾನ", "uk": "огида", "bn": "ঘৃণা", "hi": "घृणा", "bs": "gađenje"}}
+{"guid": "N23_036", "translations": {"ro": "compasiune", "pl": "współczucie", "th": "ความสงสาร", "ta": "கருணை", "kn": "daya", "uk": "співчуття", "bn": "অমায়াস", "hi": "दया", "bs": "suosjećanje"}}
+{"guid": "N23_037", "translations": {"ro": "mușcătură", "pl": "ugryzienie", "th": "การกัด", "ta": "குச்சி", "kn": "ದೂರು", "uk": "укус", "bn": "কামড়", "hi": "กัด", "bs": "ugriz"}}

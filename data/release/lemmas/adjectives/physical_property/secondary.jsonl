@@ -1,79 +1,79 @@
-{"guid": "A18_001", "translations": {"ro": "înalt", "pl": "wysoki", "th": "สูง", "ta": "உயர்ந்த", "kn": "ಎತ್ತರದ", "uk": "високий", "bn": "উচ্চ", "hi": "ऊँचा"}}
-{"guid": "A18_002", "translations": {"ro": "scund", "pl": "niski", "th": "ต่ำ", "ta": "தாழ்ந்த", "kn": "ಕಡಿಮೆ", "uk": "низький", "bn": "নিম্ন", "hi": "निम्न"}}
-{"guid": "A18_003", "translations": {"ro": "lung", "pl": "długi", "th": "ยาว", "ta": "நீளமான", "kn": "ಉದ್ದವಾದ", "uk": "довгий", "bn": "লম্বা", "hi": "लंबा"}}
-{"guid": "A18_004", "translations": {"ro": "scurt", "pl": "krótki", "th": "สั้น", "ta": "குட்டையான", "kn": "ಗಿಡ್ಡ", "uk": "короткий", "bn": "ছোট", "hi": "छोटा"}}
-{"guid": "A18_005", "translations": {"ro": "lat", "pl": "szeroki", "th": "กว้าง", "ta": "அகலமான", "kn": "ಅಗಲವಾದ", "uk": "широкий", "bn": "প্রশস্ত", "hi": "चौड़ा"}}
-{"guid": "A18_006", "translations": {"ro": "adânc", "pl": "głęboki", "th": "ลึก", "ta": "ஆழமான", "kn": "ಆಳವಾದ", "uk": "глибокий", "bn": "গভীর", "hi": "गहरा"}}
-{"guid": "A18_007", "translations": {"ro": "frumos", "pl": "piękny", "th": "สวย", "ta": "அழகான", "kn": "ಸುಂದರವಾದ", "uk": "гарний", "bn": "সুন্দর", "hi": "सुंदर"}}
-{"guid": "A18_008", "translations": {"ro": "rece", "pl": "zimny", "th": "เย็น", "ta": "குளிர்ந்த", "kn": "ತಣ್ಣನೆಯ", "uk": "холодний", "bn": "ঠান্ডা", "hi": "ठंडा"}}
-{"guid": "A18_009", "translations": {"ro": "fierbinte", "pl": "gorący", "th": "ร้อน", "ta": "சூடான", "kn": "ಬಿಸಿಯಾದ", "uk": "гарячий", "bn": "গরম", "hi": "गरम"}}
-{"guid": "A18_010", "translations": {"ro": "întunecat", "pl": "ciemny", "th": "มืด", "ta": "இருண்ட", "kn": "ಕತ್ತಲೆಯ", "uk": "темний", "bn": "অন্ধকার", "hi": "अँधेरा"}}
-{"guid": "A18_011", "translations": {"ro": "ud", "pl": "mokry", "th": "เปียก", "ta": "ஈரமான", "kn": "ಒದ್ದೆಯಾದ", "uk": "мокрий", "bn": "ভেজা", "hi": "गीला"}}
-{"guid": "A18_012", "translations": {"ro": "uscat", "pl": "suchy", "th": "แห้ง", "ta": "உலர்ந்த", "kn": "ಒಣ", "uk": "сухий", "bn": "শুকনো", "hi": "सूखा"}}
+{"guid": "A18_001", "translations": {"ro": "înalt", "pl": "wysoki", "th": "สูง", "ta": "உயர்ந்த", "kn": "ಎತ್ತರದ", "uk": "високий", "bn": "উচ্চ", "hi": "ऊँचा", "bs": "visok"}}
+{"guid": "A18_002", "translations": {"ro": "scund", "pl": "niski", "th": "ต่ำ", "ta": "தாழ்ந்த", "kn": "ಕಡಿಮೆ", "uk": "низький", "bn": "নিম্ন", "hi": "निम्न", "bs": "nizak"}}
+{"guid": "A18_003", "translations": {"ro": "lung", "pl": "długi", "th": "ยาว", "ta": "நீளமான", "kn": "ಉದ್ದವಾದ", "uk": "довгий", "bn": "লম্বা", "hi": "लंबा", "bs": "dug"}}
+{"guid": "A18_004", "translations": {"ro": "scurt", "pl": "krótki", "th": "สั้น", "ta": "குட்டையான", "kn": "ಗಿಡ್ಡ", "uk": "короткий", "bn": "ছোট", "hi": "छोटा", "bs": "kratak"}}
+{"guid": "A18_005", "translations": {"ro": "lat", "pl": "szeroki", "th": "กว้าง", "ta": "அகலமான", "kn": "ಅಗಲವಾದ", "uk": "широкий", "bn": "প্রশস্ত", "hi": "चौड़ा", "bs": "širok"}}
+{"guid": "A18_006", "translations": {"ro": "adânc", "pl": "głęboki", "th": "ลึก", "ta": "ஆழமான", "kn": "ಆಳವಾದ", "uk": "глибокий", "bn": "গভীর", "hi": "गहरा", "bs": "dubok"}}
+{"guid": "A18_007", "translations": {"ro": "frumos", "pl": "piękny", "th": "สวย", "ta": "அழகான", "kn": "ಸುಂದರವಾದ", "uk": "гарний", "bn": "সুন্দর", "hi": "सुंदर", "bs": "lijep"}}
+{"guid": "A18_008", "translations": {"ro": "rece", "pl": "zimny", "th": "เย็น", "ta": "குளிர்ந்த", "kn": "ತಣ್ಣನೆಯ", "uk": "холодний", "bn": "ঠান্ডা", "hi": "ठंडा", "bs": "hladan"}}
+{"guid": "A18_009", "translations": {"ro": "fierbinte", "pl": "gorący", "th": "ร้อน", "ta": "சூடான", "kn": "ಬಿಸಿಯಾದ", "uk": "гарячий", "bn": "গরম", "hi": "गरम", "bs": "vruć"}}
+{"guid": "A18_010", "translations": {"ro": "întunecat", "pl": "ciemny", "th": "มืด", "ta": "இருண்ட", "kn": "ಕತ್ತಲೆಯ", "uk": "темний", "bn": "অন্ধকার", "hi": "अँधेरा", "bs": "mračan"}}
+{"guid": "A18_011", "translations": {"ro": "ud", "pl": "mokry", "th": "เปียก", "ta": "ஈரமான", "kn": "ಒದ್ದೆಯಾದ", "uk": "мокрий", "bn": "ভেজা", "hi": "गीला", "bs": "mokar"}}
+{"guid": "A18_012", "translations": {"ro": "uscat", "pl": "suchy", "th": "แห้ง", "ta": "உலர்ந்த", "kn": "ಒಣ", "uk": "сухий", "bn": "শুকনো", "hi": "सूखा", "bs": "suh"}}
 {"guid": "A18_013", "translations": {"ro": "tăcut", "pl": "cichy", "th": "เงียบ", "ta": "மௌனமான", "kn": "ಮೌನ", "uk": "тихий", "bn": "নীরব", "hi": "मौन"}}
-{"guid": "A18_014", "translations": {"ro": "greu", "pl": "ciężki", "th": "หนัก", "ta": "கனமான", "kn": "ಭಾರವಾದ", "uk": "важкий", "bn": "ভারী", "hi": "भारी"}}
-{"guid": "A18_015", "translations": {"ro": "înalt", "pl": "wysoki", "th": "สูง", "ta": "உயரமான", "kn": "ಎತ್ತರದ", "uk": "високий", "bn": "লম্বা", "hi": "लंबा"}}
-{"guid": "A18_016", "translations": {"ro": "rapid", "pl": "szybki", "th": "เร็ว", "ta": "வேகமான", "kn": "ವೇಗವಾದ", "uk": "швидкий", "bn": "দ্রুত", "hi": "तेज़"}}
-{"guid": "A18_017", "translations": {"ro": "sigur", "pl": "bezpieczny", "th": "ปลอดภัย", "ta": "பாதுகாப்பான", "kn": "ಸುರಕ್ಷಿತ", "uk": "безпечний", "bn": "নিরাপদ", "hi": "सुरक्षित"}}
-{"guid": "A18_018", "translations": {"ro": "strălucitor", "pl": "jasny", "th": "สว่าง", "ta": "பிரகாசமான", "kn": "ಪ್ರಕಾಶಮಾನ", "uk": "яскравий", "bn": "উজ্জ্বল", "hi": "उज्ज्वल"}}
-{"guid": "A18_019", "translations": {"ro": "viu", "pl": "żywy", "th": "มีชีวิต", "ta": "உயிருள்ள", "kn": "ಜೀವಂತ", "uk": "живий", "bn": "সজীব", "hi": "जिंदा"}}
+{"guid": "A18_014", "translations": {"ro": "greu", "pl": "ciężki", "th": "หนัก", "ta": "கனமான", "kn": "ಭಾರವಾದ", "uk": "важкий", "bn": "ভারী", "hi": "भारी", "bs": "težak"}}
+{"guid": "A18_015", "translations": {"ro": "înalt", "pl": "wysoki", "th": "สูง", "ta": "உயரமான", "kn": "ಎತ್ತರದ", "uk": "високий", "bn": "লম্বা", "hi": "लंबा", "bs": "visok"}}
+{"guid": "A18_016", "translations": {"ro": "rapid", "pl": "szybki", "th": "เร็ว", "ta": "வேகமான", "kn": "ವೇಗವಾದ", "uk": "швидкий", "bn": "দ্রুত", "hi": "तेज़", "bs": "brz"}}
+{"guid": "A18_017", "translations": {"ro": "sigur", "pl": "bezpieczny", "th": "ปลอดภัย", "ta": "பாதுகாப்பான", "kn": "ಸುರಕ್ಷಿತ", "uk": "безпечний", "bn": "নিরাপদ", "hi": "सुरक्षित", "bs": "siguran"}}
+{"guid": "A18_018", "translations": {"ro": "strălucitor", "pl": "jasny", "th": "สว่าง", "ta": "பிரகாசமான", "kn": "ಪ್ರಕಾಶಮಾನ", "uk": "яскравий", "bn": "উজ্জ্বল", "hi": "उज्ज्वल", "bs": "svijetao"}}
+{"guid": "A18_019", "translations": {"ro": "viu", "pl": "żywy", "th": "มีชีวิต", "ta": "உயிருள்ள", "kn": "ಜೀವಂತ", "uk": "живий", "bn": "সজীব", "hi": "जिंदा", "bs": "živ"}}
 {"guid": "A18_020", "translations": {"ro": "brusc", "pl": "nagły", "th": "กะทันหัน", "ta": "திடீரென்ற", "kn": "ಹಠಾತ್", "uk": "раптовий", "bn": "হঠাৎ", "hi": "हठात्"}}
-{"guid": "A18_021", "translations": {"ro": "gros", "pl": "gruby", "th": "หนา", "ta": "தடிமனான", "kn": "ದಪ್ಪ", "uk": "товстий", "bn": "ঠটা?", "hi": "मोटा"}}
+{"guid": "A18_021", "translations": {"ro": "gros", "pl": "gruby", "th": "หนา", "ta": "தடிமனான", "kn": "ದಪ್ಪ", "uk": "товстий", "bn": "ঠটা?", "hi": "मोटा", "bs": "debeo"}}
 {"guid": "A18_022", "translations": {"ro": "strâmt", "pl": "ciasny", "th": "แน่น", "ta": "இறுக்கமான", "kn": "ಬಿಗಿಯಾದ", "uk": "щільний", "bn": "টাইট", "hi": "टाइट"}}
-{"guid": "A18_023", "translations": {"ro": "larg", "pl": "luźny", "th": "หลวม", "ta": "தளர்வான", "kn": "ಸಡಿಲ", "uk": "вільний", "bn": "ঢিলা", "hi": "ढीला"}}
-{"guid": "A18_024", "translations": {"ro": "larg", "pl": "szeroki", "th": "กว้าง", "ta": "பரந்த", "kn": "ವಿಶಾಲ", "uk": "широкий", "bn": "চওড়া", "hi": "चौड़ा"}}
-{"guid": "A18_025", "translations": {"ro": "răcoros", "pl": "chłodny", "th": "เย็นสบาย", "ta": "குளிர்ச்சியான", "kn": "ತಂಪಾದ", "uk": "прохолодний", "bn": "ঠাণ্ডা", "hi": "ठंडा"}}
-{"guid": "A18_026", "translations": {"ro": "gol", "pl": "nagi", "th": "เปลือย", "ta": "நிர்வாணமான", "kn": "ಬರಿಯ", "uk": "оголений", "bn": "নগ্ন", "hi": "नग्न"}}
-{"guid": "A18_027", "translations": {"ro": "curat", "pl": "czysty", "th": "สะอาด", "ta": "சுத்தமான", "kn": "ಶುಚಿಯಾದ", "uk": "чистий", "bn": "স্বচ্ছ", "hi": "साफ़"}}
+{"guid": "A18_023", "translations": {"ro": "larg", "pl": "luźny", "th": "หลวม", "ta": "தளர்வான", "kn": "ಸಡಿಲ", "uk": "вільний", "bn": "ঢিলা", "hi": "ढीला", "bs": "labav"}}
+{"guid": "A18_024", "translations": {"ro": "larg", "pl": "szeroki", "th": "กว้าง", "ta": "பரந்த", "kn": "ವಿಶಾಲ", "uk": "широкий", "bn": "চওড়া", "hi": "चौड़ा", "bs": "širok"}}
+{"guid": "A18_025", "translations": {"ro": "răcoros", "pl": "chłodny", "th": "เย็นสบาย", "ta": "குளிர்ச்சியான", "kn": "ತಂಪಾದ", "uk": "прохолодний", "bn": "ঠাণ্ডা", "hi": "ठंडा", "bs": "svjež"}}
+{"guid": "A18_026", "translations": {"ro": "gol", "pl": "nagi", "th": "เปลือย", "ta": "நிர்வாணமான", "kn": "ಬರಿಯ", "uk": "оголений", "bn": "নগ্ন", "hi": "नग्न", "bs": "nag"}}
+{"guid": "A18_027", "translations": {"ro": "curat", "pl": "czysty", "th": "สะอาด", "ta": "சுத்தமான", "kn": "ಶುಚಿಯಾದ", "uk": "чистий", "bn": "স্বচ্ছ", "hi": "साफ़", "bs": "čist"}}
 {"guid": "A18_028", "translations": {"ro": "obișnuit", "pl": "zwykły", "th": "ปกติ", "ta": "வழக்கமான", "kn": "ಸಾಮಾನ್ಯ", "uk": "звичайний", "bn": "স্বাভাবিক", "hi": "सामान्य"}}
 {"guid": "A18_029", "translations": {"ro": "zgomotos", "pl": "głośny", "th": "ดัง", "ta": "உரத்த", "kn": "ಜೋರಾದ", "uk": "гучний", "bn": "শক্ত শব্দযুক্ত", "hi": "तेज़ आवाज़ वाला"}}
-{"guid": "A18_030", "translations": {"ro": "slab", "pl": "przyciemniony", "th": "สลัว", "ta": "மங்கலான", "kn": "ಮಸುಕಾದ", "uk": "приглушений", "bn": "অন্ধকারময়", "hi": "অন্ধকারময়"}}
-{"guid": "A18_031", "translations": {"ro": "flămând", "pl": "głodny", "th": "หิว", "ta": "பசியான", "kn": "ಹಸಿದ", "uk": "голодний", "bn": "ক্ষুধার্ত", "hi": "भूखा"}}
-{"guid": "A18_032", "translations": {"ro": "bolnav", "pl": "chory", "th": "ป่วย", "ta": "நோய்வாய்ப்பட்ட", "kn": "ಅನಾರೋಗ್ಯದ", "uk": "хворий", "bn": "অসুস্থ", "hi": "बीमार"}}
-{"guid": "A18_033", "translations": {"ro": "strălucitor", "pl": "lśniący", "th": "ส่องแสง", "ta": "ஒளிரும்", "kn": "ಹೊಳೆಯುವ", "uk": "сяючий", "bn": "উজ্জ্বল", "hi": "चमकदार"}}
-{"guid": "A18_034", "translations": {"ro": "familiar", "pl": "znajomy", "th": "คุ้นเคย", "ta": "பரிச்சயமான", "kn": "ಪರಿಚಿತ", "uk": "знайомий", "bn": "পরিচিত", "hi": "परिचित"}}
-{"guid": "A18_035", "translations": {"ro": "bogat", "pl": "bogaty", "th": "รวย", "ta": "பணக்கார", "kn": "ಶ್ರೀಮಂತ", "uk": "заможний", "bn": "ধনী", "hi": "अਮੀर"}}
-{"guid": "A18_036", "translations": {"ro": "neted", "pl": "gładki", "th": "เรียบ", "ta": "மென்மையான", "kn": "ನಯವಾದ", "uk": "гладкий", "bn": "মসৃণ", "hi": "मुलায়েম"}}
+{"guid": "A18_030", "translations": {"ro": "slab", "pl": "przyciemniony", "th": "สลัว", "ta": "மங்கலான", "kn": "ಮಸುಕಾದ", "uk": "приглушений", "bn": "অন্ধকারময়", "hi": "অন্ধকারময়", "bs": "prigušen"}}
+{"guid": "A18_031", "translations": {"ro": "flămând", "pl": "głodny", "th": "หิว", "ta": "பசியான", "kn": "ಹಸಿದ", "uk": "голодний", "bn": "ক্ষুধার্ত", "hi": "भूखा", "bs": "gladan"}}
+{"guid": "A18_032", "translations": {"ro": "bolnav", "pl": "chory", "th": "ป่วย", "ta": "நோய்வாய்ப்பட்ட", "kn": "ಅನಾರೋಗ್ಯದ", "uk": "хворий", "bn": "অসুস্থ", "hi": "बीमार", "bs": "bolestan"}}
+{"guid": "A18_033", "translations": {"ro": "strălucitor", "pl": "lśniący", "th": "ส่องแสง", "ta": "ஒளிரும்", "kn": "ಹೊಳೆಯುವ", "uk": "сяючий", "bn": "উজ্জ্বল", "hi": "चमकदार", "bs": "sjajan"}}
+{"guid": "A18_034", "translations": {"ro": "familiar", "pl": "znajomy", "th": "คุ้นเคย", "ta": "பரிச்சயமான", "kn": "ಪರಿಚಿತ", "uk": "знайомий", "bn": "পরিচিত", "hi": "परिचित", "bs": "poznat"}}
+{"guid": "A18_035", "translations": {"ro": "bogat", "pl": "bogaty", "th": "รวย", "ta": "பணக்கார", "kn": "ಶ್ರೀಮಂತ", "uk": "заможний", "bn": "ধনী", "hi": "अਮੀर", "bs": "bogat"}}
+{"guid": "A18_036", "translations": {"ro": "neted", "pl": "gładki", "th": "เรียบ", "ta": "மென்மையான", "kn": "ನಯವಾದ", "uk": "гладкий", "bn": "মসৃণ", "hi": "मुलায়েম", "bs": "glad"}}
 {"guid": "A18_037", "translations": {"ro": "exterior", "pl": "zewnętrzny", "th": "ภายนอก", "ta": "வெளிப்புற", "kn": "ಹೊರಗಿನ", "uk": "зовнішній", "bn": "বহির্মুখী", "hi": "बाहरी"}}
-{"guid": "A18_038", "translations": {"ro": "plutitor", "pl": "pływający", "th": "ลอย", "ta": "மிதக்கும்", "kn": "ತೇಲುವ", "uk": "плавучий", "bn": "ভাসমান", "hi": "तैरता"}}
-{"guid": "A18_039", "translations": {"ro": "orb", "pl": "ślepy", "th": "ตาบอด", "ta": "குருடான", "kn": "ಕುರುಡ", "uk": "сліпий", "bn": "অন্ধ", "hi": "अंधा"}}
-{"guid": "A18_040", "translations": {"ro": "rănit", "pl": "ranny", "th": "บาดเจ็บ", "ta": "காயமடைந்த", "kn": "ಗಾಯಗೊಂಡ", "uk": "поранений", "bn": "আহত", "hi": "घायल"}}
+{"guid": "A18_038", "translations": {"ro": "plutitor", "pl": "pływający", "th": "ลอย", "ta": "மிதக்கும்", "kn": "ತೇಲುವ", "uk": "плавучий", "bn": "ভাসমান", "hi": "तैरता", "bs": "plutajući"}}
+{"guid": "A18_039", "translations": {"ro": "orb", "pl": "ślepy", "th": "ตาบอด", "ta": "குருடான", "kn": "ಕುರುಡ", "uk": "сліпий", "bn": "অন্ধ", "hi": "अंधा", "bs": "slijep"}}
+{"guid": "A18_040", "translations": {"ro": "rănit", "pl": "ranny", "th": "บาดเจ็บ", "ta": "காயமடைந்த", "kn": "ಗಾಯಗೊಂಡ", "uk": "поранений", "bn": "আহত", "hi": "घायल", "bs": "ranjen"}}
 {"guid": "A18_041", "translations": {"ro": "treaz", "pl": "przebudzony", "th": "ตื่น", "ta": "விழிப்பான", "kn": "ಎಚ್ಚರವಾದ", "uk": "несплячий", "bn": "জাগ্রত", "hi": "जागृत"}}
 {"guid": "A18_042", "translations": {"ro": "interesat", "pl": "zainteresowany", "th": "สนใจ", "ta": "ஆர்வமுள்ள", "kn": "ಆಸಕ್ತ", "uk": "зацікавлений", "bn": "আগ্রহী", "hi": "रुच"}}
-{"guid": "A18_043", "translations": {"ro": "înghețat", "pl": "zamrożony", "th": "แช่แข็ง", "ta": "உறைந்த", "kn": "ಹೆಪ್ಪುಗಟ್ಟಿದ", "uk": "замерзлий", "bn": "জমাট", "hi": "जमāया"}}
+{"guid": "A18_043", "translations": {"ro": "înghețat", "pl": "zamrożony", "th": "แช่แข็ง", "ta": "உறைந்த", "kn": "ಹೆಪ್ಪುಗಟ್ಟಿದ", "uk": "замерзлий", "bn": "জমাট", "hi": "जमāया", "bs": "smrznut"}}
 {"guid": "A18_045", "translations": {"ro": "numit", "pl": "nazwany", "th": "ที่ชื่อว่า", "ta": "பெயரிடப்பட்ட", "kn": "ಹೆಸರಿಸಲಾದ", "uk": "іменований", "bn": "নামক", "hi": "नामित"}}
-{"guid": "A18_046", "translations": {"ro": "ușor", "pl": "lekki", "th": "เบา", "ta": "இலகுவான", "kn": "ಹಗುರವಾದ", "uk": "легкий", "bn": "হালকা", "hi": "हल्का"}}
-{"guid": "A18_047", "translations": {"ro": "mort", "pl": "martwy", "th": "ตาย", "ta": "இறந்த", "kn": "ಸತ್ತ", "uk": "мертвий", "bn": "মৃত", "hi": "मृत"}}
-{"guid": "A18_048", "translations": {"ro": "deschis", "pl": "otwarty", "th": "เปิด", "ta": "திறந்த", "kn": "ತೆರೆದ", "uk": "відкритий", "bn": "খোলা", "hi": "खुला"}}
-{"guid": "A18_049", "translations": {"ro": "ciudat", "pl": "dziwny", "th": "แปลก", "ta": "விசித்திரமான", "kn": "ವಿಚಿತ್ರ", "uk": "дивний", "bn": "অদ্ভুত", "hi": "अजीब"}}
-{"guid": "A18_050", "translations": {"ro": "stâng", "pl": "lewy", "th": "ซ้าย", "ta": "இடது", "kn": "ಎಡ", "uk": "лівий", "bn": "বাম", "hi": "बायाँ"}}
-{"guid": "A18_051", "translations": {"ro": "pierdut", "pl": "zgubiony", "th": "หลงทาง", "ta": "தொலைந்த", "kn": "ಕಳೆದುಹೋದ", "uk": "загублений", "bn": "হারা", "hi": "खोया"}}
+{"guid": "A18_046", "translations": {"ro": "ușor", "pl": "lekki", "th": "เบา", "ta": "இலகுவான", "kn": "ಹಗುರವಾದ", "uk": "легкий", "bn": "হালকা", "hi": "हल्का", "bs": "lagan"}}
+{"guid": "A18_047", "translations": {"ro": "mort", "pl": "martwy", "th": "ตาย", "ta": "இறந்த", "kn": "ಸತ್ತ", "uk": "мертвий", "bn": "মৃত", "hi": "मृत", "bs": "mrtav"}}
+{"guid": "A18_048", "translations": {"ro": "deschis", "pl": "otwarty", "th": "เปิด", "ta": "திறந்த", "kn": "ತೆರೆದ", "uk": "відкритий", "bn": "খোলা", "hi": "खुला", "bs": "otvoren"}}
+{"guid": "A18_049", "translations": {"ro": "ciudat", "pl": "dziwny", "th": "แปลก", "ta": "விசித்திரமான", "kn": "ವಿಚಿತ್ರ", "uk": "дивний", "bn": "অদ্ভুত", "hi": "अजीब", "bs": "čudan"}}
+{"guid": "A18_050", "translations": {"ro": "stâng", "pl": "lewy", "th": "ซ้าย", "ta": "இடது", "kn": "ಎಡ", "uk": "лівий", "bn": "বাম", "hi": "बायाँ", "bs": "lijevi"}}
+{"guid": "A18_051", "translations": {"ro": "pierdut", "pl": "zgubiony", "th": "หลงทาง", "ta": "தொலைந்த", "kn": "ಕಳೆದುಹೋದ", "uk": "загублений", "bn": "হারা", "hi": "खोया", "bs": "izgubljen"}}
 {"guid": "A18_052", "translations": {"ro": "plecat", "pl": "nieobecny", "th": "ไปแล้ว", "ta": "போனவன்", "kn": "ಹೋದ", "uk": "зниклий", "bn": "নিরুদ্দিষ্ট", "hi": "অতীত"}}
-{"guid": "A18_053", "translations": {"ro": "spart", "pl": "złamany", "th": "แตก", "ta": "உடைந்த", "kn": "ಮುರಿದ", "uk": "поламаний", "bn": "ভঙ্গ", "hi": "टूटा"}}
-{"guid": "A18_054", "translations": {"ro": "închis", "pl": "zamknięty", "th": "ปิด", "ta": "மூடிய", "kn": "ಮುಚ್ಚಿದ", "uk": "закритий", "bn": "বন্ধ", "hi": "बंद"}}
-{"guid": "A18_055", "translations": {"ro": "plat", "pl": "płaski", "th": "แบน", "ta": "தட்டையான", "kn": "ಚಪ್ಪಟೆ", "uk": "плоский", "bn": "সমতল", "hi": "समतल"}}
-{"guid": "A18_056", "translations": {"ro": "îngust", "pl": "wąski", "th": "แคบ", "ta": "குறுகிய", "kn": "ಕಿರಿದಾದ", "uk": "вузький", "bn": "সঙ্কীর্ণ", "hi": "संकीर्ण"}}
-{"guid": "A18_057", "translations": {"ro": "palid", "pl": "blady", "th": "ซีด", "ta": "வெளிறிய", "kn": "ಬಿಳಿಚಿದ", "uk": "блідий", "bn": "ফ্যাকাশে", "hi": "फीका"}}
-{"guid": "A18_058", "translations": {"ro": "slab", "pl": "słaby", "th": "จาง", "ta": "மெலிதான", "kn": "ಕ್ಷೀಣ", "uk": "слабкий", "bn": "ধূসর", "hi": "कमज़ोर"}}
-{"guid": "A18_059", "translations": {"ro": "ascuns", "pl": "ukryty", "th": "ซ่อน", "ta": "மறைந்த", "kn": "ಅಡಗಿದ", "uk": "прихований", "bn": "গোপন", "hi": "छिपा"}}
-{"guid": "A18_060", "translations": {"ro": "ascuțit", "pl": "ostry", "th": "คม", "ta": "கூர்மையான", "kn": "ಹರಿತವಾದ", "uk": "гострий", "bn": "শ্যাপ", "hi": "तेज़"}}
-{"guid": "A18_061", "translations": {"ro": "cald", "pl": "ciepły", "th": "อุ่น", "ta": "வெதுவெதுப்பான", "kn": "ಬೆಚ್ಚಗಿನ", "uk": "теплий", "bn": "উষ্ণ", "hi": "गरम"}}
-{"guid": "A18_062", "translations": {"ro": "subțire", "pl": "cienki", "th": "บาง", "ta": "மெல்லிய", "kn": "ತೆಳುವಾದ", "uk": "тонкий", "bn": "পাতলা", "hi": "पतला"}}
-{"guid": "A18_063", "translations": {"ro": "moale", "pl": "miękki", "th": "นุ่ม", "ta": "மென்மையான", "kn": "ಮೃದುವಾದ", "uk": "м'який", "bn": "নরম", "hi": "नरम"}}
-{"guid": "A18_065", "translations": {"ro": "îndoit", "pl": "zgięty", "th": "งอ", "ta": "வளைந்த", "kn": "ಬಾಗಿದ", "uk": "зігнутий", "bn": "বাঁকা", "hi": "मुड़ा"}}
-{"guid": "A18_066", "translations": {"ro": "prezent", "pl": "obecny", "th": "อยู่", "ta": "இருக்கின்ற", "kn": "ಪ್ರಸ್ತುತ", "uk": "присутній", "bn": "উপস্থিত", "hi": "उपस्थित"}}
-{"guid": "A18_067", "translations": {"ro": "lent", "pl": "wolny", "th": "ช้า", "ta": "மெதுவான", "kn": "ನಿಧಾನ", "uk": "повільний", "bn": "ধীর", "hi": "धीमा"}}
-{"guid": "A18_068", "translations": {"ro": "liniștit", "pl": "cichy", "th": "เงียบ", "ta": "அமைதியான", "kn": "ಶಾಂತ", "uk": "тихий", "bn": "নীরব", "hi": "शांत"}}
-{"guid": "A18_069", "translations": {"ro": "dur", "pl": "twardy", "th": "แข็ง", "ta": "கடினமான", "kn": "ಗಟ್ಟಿಯಾದ", "uk": "твердий", "bn": "কঠিন", "hi": "कठोर"}}
-{"guid": "A18_070", "translations": {"ro": "murdar", "pl": "brudny", "th": "สกปรก", "ta": "அழுக்கான", "kn": "ಕೊಳಕು", "uk": "брудний", "bn": "ময়লা", "hi": "गंदा"}}
-{"guid": "A18_071", "translations": {"ro": "aspru", "pl": "szorstki", "th": "หยาบ", "ta": "கரடுமுரடான", "kn": "ಒರಟಾದ", "uk": "шорсткий", "bn": "খাঁজখাঁজানো", "hi": "खुरदरा"}}
-{"guid": "A18_072", "translations": {"ro": "tânăr", "pl": "młody", "th": "หนุ่มสาว", "ta": "இளம்", "kn": "ಯುವ", "uk": "молодий", "bn": "যুব", "hi": "युवा"}}
-{"guid": "A18_073", "translations": {"ro": "bătrân", "pl": "stary", "th": "เก่า", "ta": "வயதான", "kn": "ಹಳೆಯ", "uk": "старий", "bn": "বয়স্ক", "hi": "बुज़ुर्ग"}}
-{"guid": "A18_074", "translations": {"ro": "confortabil", "pl": "wygodny", "th": "สบาย", "ta": "வசதியான", "kn": "ಆರಾಮದಾಯಕ", "uk": "зручний", "bn": "আরামদায়ক", "hi": "आरामदायक"}}
+{"guid": "A18_053", "translations": {"ro": "spart", "pl": "złamany", "th": "แตก", "ta": "உடைந்த", "kn": "ಮುರಿದ", "uk": "поламаний", "bn": "ভঙ্গ", "hi": "टूटा", "bs": "slomljen"}}
+{"guid": "A18_054", "translations": {"ro": "închis", "pl": "zamknięty", "th": "ปิด", "ta": "மூடிய", "kn": "ಮುಚ್ಚಿದ", "uk": "закритий", "bn": "বন্ধ", "hi": "बंद", "bs": "zatvoren"}}
+{"guid": "A18_055", "translations": {"ro": "plat", "pl": "płaski", "th": "แบน", "ta": "தட்டையான", "kn": "ಚಪ್ಪಟೆ", "uk": "плоский", "bn": "সমতল", "hi": "समतल", "bs": "ravan"}}
+{"guid": "A18_056", "translations": {"ro": "îngust", "pl": "wąski", "th": "แคบ", "ta": "குறுகிய", "kn": "ಕಿರಿದಾದ", "uk": "вузький", "bn": "সঙ্কীর্ণ", "hi": "संकीर्ण", "bs": "uzak"}}
+{"guid": "A18_057", "translations": {"ro": "palid", "pl": "blady", "th": "ซีด", "ta": "வெளிறிய", "kn": "ಬಿಳಿಚಿದ", "uk": "блідий", "bn": "ফ্যাকাশে", "hi": "फीका", "bs": "blijed"}}
+{"guid": "A18_058", "translations": {"ro": "slab", "pl": "słaby", "th": "จาง", "ta": "மெலிதான", "kn": "ಕ್ಷೀಣ", "uk": "слабкий", "bn": "ধূসর", "hi": "कमज़ोर", "bs": "slab"}}
+{"guid": "A18_059", "translations": {"ro": "ascuns", "pl": "ukryty", "th": "ซ่อน", "ta": "மறைந்த", "kn": "ಅಡಗಿದ", "uk": "прихований", "bn": "গোপন", "hi": "छिपा", "bs": "skriven"}}
+{"guid": "A18_060", "translations": {"ro": "ascuțit", "pl": "ostry", "th": "คม", "ta": "கூர்மையான", "kn": "ಹರಿತವಾದ", "uk": "гострий", "bn": "শ্যাপ", "hi": "तेज़", "bs": "oštar"}}
+{"guid": "A18_061", "translations": {"ro": "cald", "pl": "ciepły", "th": "อุ่น", "ta": "வெதுவெதுப்பான", "kn": "ಬೆಚ್ಚಗಿನ", "uk": "теплий", "bn": "উষ্ণ", "hi": "गरम", "bs": "topao"}}
+{"guid": "A18_062", "translations": {"ro": "subțire", "pl": "cienki", "th": "บาง", "ta": "மெல்லிய", "kn": "ತೆಳುವಾದ", "uk": "тонкий", "bn": "পাতলা", "hi": "पतला", "bs": "tanak"}}
+{"guid": "A18_063", "translations": {"ro": "moale", "pl": "miękki", "th": "นุ่ม", "ta": "மென்மையான", "kn": "ಮೃದುವಾದ", "uk": "м'який", "bn": "নরম", "hi": "नरम", "bs": "mek"}}
+{"guid": "A18_065", "translations": {"ro": "îndoit", "pl": "zgięty", "th": "งอ", "ta": "வளைந்த", "kn": "ಬಾಗಿದ", "uk": "зігнутий", "bn": "বাঁকা", "hi": "मुड़ा", "bs": "savijen"}}
+{"guid": "A18_066", "translations": {"ro": "prezent", "pl": "obecny", "th": "อยู่", "ta": "இருக்கின்ற", "kn": "ಪ್ರಸ್ತುತ", "uk": "присутній", "bn": "উপস্থিত", "hi": "उपस्थित", "bs": "prisutan"}}
+{"guid": "A18_067", "translations": {"ro": "lent", "pl": "wolny", "th": "ช้า", "ta": "மெதுவான", "kn": "ನಿಧಾನ", "uk": "повільний", "bn": "ধীর", "hi": "धीमा", "bs": "spor"}}
+{"guid": "A18_068", "translations": {"ro": "liniștit", "pl": "cichy", "th": "เงียบ", "ta": "அமைதியான", "kn": "ಶಾಂತ", "uk": "тихий", "bn": "নীরব", "hi": "शांत", "bs": "tih"}}
+{"guid": "A18_069", "translations": {"ro": "dur", "pl": "twardy", "th": "แข็ง", "ta": "கடினமான", "kn": "ಗಟ್ಟಿಯಾದ", "uk": "твердий", "bn": "কঠিন", "hi": "कठोर", "bs": "tvrd"}}
+{"guid": "A18_070", "translations": {"ro": "murdar", "pl": "brudny", "th": "สกปรก", "ta": "அழுக்கான", "kn": "ಕೊಳಕು", "uk": "брудний", "bn": "ময়লা", "hi": "गंदा", "bs": "prljav"}}
+{"guid": "A18_071", "translations": {"ro": "aspru", "pl": "szorstki", "th": "หยาบ", "ta": "கரடுமுரடான", "kn": "ಒರಟಾದ", "uk": "шорсткий", "bn": "খাঁজখাঁজানো", "hi": "खुरदरा", "bs": "hrapav"}}
+{"guid": "A18_072", "translations": {"ro": "tânăr", "pl": "młody", "th": "หนุ่มสาว", "ta": "இளம்", "kn": "ಯುವ", "uk": "молодий", "bn": "যুব", "hi": "युवा", "bs": "mlad"}}
+{"guid": "A18_073", "translations": {"ro": "bătrân", "pl": "stary", "th": "เก่า", "ta": "வயதான", "kn": "ಹಳೆಯ", "uk": "старий", "bn": "বয়স্ক", "hi": "बुज़ुर्ग", "bs": "star"}}
+{"guid": "A18_074", "translations": {"ro": "confortabil", "pl": "wygodny", "th": "สบาย", "ta": "வசதியான", "kn": "ಆರಾಮದಾಯಕ", "uk": "зручний", "bn": "আরামদায়ক", "hi": "आरामदायक", "bs": "udoban"}}
 {"guid": "A18_075", "translations": {"ro": "lung", "pl": "długi", "th": "ยาว", "ta": "நீண்ட", "kn": "ಉದ್ದ", "uk": "довгий", "bn": "লম্বা", "hi": "लंबा"}}
-{"guid": "A18_076", "translations": {"ro": "zgomotos", "pl": "hałaśliwy", "th": "เสียงดัง", "ta": "சத்தமான", "kn": "ಗದ್ದಲದ", "uk": "галасливий", "bn": "শোরগোলপূর্ণ", "hi": "शोरगुलभरा"}}
-{"guid": "A18_077", "translations": {"ro": "stâncos", "pl": "skalisty", "th": "เป็นหิน", "ta": "பாறையான", "kn": "ಬಂಡೆಯ", "uk": "кам'янистий", "bn": "পাথুরে", "hi": "पथरीला"}}
-{"guid": "A18_078", "translations": {"ro": "bolnav", "pl": "chory", "th": "ป่วย", "ta": "நோய்வாய்ப்பட்ட", "kn": "ಅನಾರೋಗ್ಯದ", "uk": "хворий", "bn": "অসুস্থ", "hi": "बीमार"}}
-{"guid": "A18_079", "translations": {"ro": "dureros", "pl": "bolesny", "th": "เจ็บ", "ta": "புண்ணான", "kn": "ನೋವಿನ", "uk": "болісний", "bn": "বেদনাদায়ক", "hi": "दर्दनाक"}}
-{"guid": "A18_080", "translations": {"ro": "de lemn", "pl": "drewniany", "th": "ไม้", "ta": "மரத்தாலான", "kn": "ಮರದ", "uk": "дерев'яний", "bn": "কাঠের", "hi": "लकड़ी का"}}
+{"guid": "A18_076", "translations": {"ro": "zgomotos", "pl": "hałaśliwy", "th": "เสียงดัง", "ta": "சத்தமான", "kn": "ಗದ್ದಲದ", "uk": "галасливий", "bn": "শোরগোলপূর্ণ", "hi": "शोरगुलभरा", "bs": "bučan"}}
+{"guid": "A18_077", "translations": {"ro": "stâncos", "pl": "skalisty", "th": "เป็นหิน", "ta": "பாறையான", "kn": "ಬಂಡೆಯ", "uk": "кам'янистий", "bn": "পাথুরে", "hi": "पथरीला", "bs": "stjenovit"}}
+{"guid": "A18_078", "translations": {"ro": "bolnav", "pl": "chory", "th": "ป่วย", "ta": "நோய்வாய்ப்பட்ட", "kn": "ಅನಾರೋಗ್ಯದ", "uk": "хворий", "bn": "অসুস্থ", "hi": "बीमार", "bs": "bolestan"}}
+{"guid": "A18_079", "translations": {"ro": "dureros", "pl": "bolesny", "th": "เจ็บ", "ta": "புண்ணான", "kn": "ನೋವಿನ", "uk": "болісний", "bn": "বেদনাদায়ক", "hi": "दर्दनाक", "bs": "bolan"}}
+{"guid": "A18_080", "translations": {"ro": "de lemn", "pl": "drewniany", "th": "ไม้", "ta": "மரத்தாலான", "kn": "ಮರದ", "uk": "дерев'яний", "bn": "কাঠের", "hi": "लकड़ी का", "bs": "drven"}}
 {"guid": "A18_083", "translations": {"ro": "sărac", "pl": "biedny", "th": "จน", "ta": "ஏழையான", "kn": "ಬಡ", "uk": "бідний", "bn": "গরীব", "hi": "गरीब"}}

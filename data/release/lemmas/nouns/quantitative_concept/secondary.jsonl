@@ -1,16 +1,16 @@
 {"guid": "N22_001", "translations": {"ro": "putere", "pl": "moc", "th": "พลังงานกำลัง", "ta": "சக்தி", "kn": "ಶಕ್ತಿ", "uk": "потужність", "bn": "শক্তি", "hi": "शक्ति"}}
-{"guid": "N22_002", "translations": {"ro": "timp", "pl": "czas", "th": "เวลา", "ta": "நேரம்", "kn": "ಸಮಯ", "uk": "час", "bn": "সময়", "hi": "समय"}}
+{"guid": "N22_002", "translations": {"ro": "timp", "pl": "czas", "th": "เวลา", "ta": "நேரம்", "kn": "ಸಮಯ", "uk": "час", "bn": "সময়", "hi": "समय", "bs": "vrijeme"}}
 {"guid": "N22_003", "translations": {"ro": "jumătate", "pl": "połowa", "th": "ครึ่ง", "ta": "அரை", "kn": "ಅರ್ಧ", "uk": "половина", "bn": "অর্ধ", "hi": "अर्ध"}}
-{"guid": "N22_004", "translations": {"ro": "parte", "pl": "część", "th": "ส่วน", "ta": "பகுதி", "kn": "ಭಾಗ", "uk": "частина", "bn": "অংশ", "hi": "भाग"}}
+{"guid": "N22_004", "translations": {"ro": "parte", "pl": "część", "th": "ส่วน", "ta": "பகுதி", "kn": "ಭಾಗ", "uk": "частина", "bn": "অংশ", "hi": "भाग", "bs": "dio"}}
 {"guid": "N22_005", "translations": {"ro": "punct", "pl": "punkt", "th": "จุด", "ta": "புள்ளி", "kn": "ಬಿಂದು", "uk": "крапка", "bn": "বিন্দু", "hi": "बिंदु"}}
-{"guid": "N22_006", "translations": {"ro": "număr", "pl": "liczba", "th": "จำนวน", "ta": "எண்", "kn": "ಸಂಖ್ಯೆ", "uk": "число", "bn": "সংখ্যা", "hi": "संख्या"}}
+{"guid": "N22_006", "translations": {"ro": "număr", "pl": "liczba", "th": "จำนวน", "ta": "எண்", "kn": "ಸಂಖ್ಯೆ", "uk": "число", "bn": "সংখ্যা", "hi": "संख्या", "bs": "broj"}}
 {"guid": "N22_007", "translations": {"ro": "forță", "pl": "siła", "th": "พลัง", "ta": "பலம்", "kn": "ಶಕ್ತಿ", "uk": "сила", "bn": "শক্তি", "hi": "शक्ति"}}
 {"guid": "N22_008", "translations": {"ro": "forță", "pl": "siła", "th": "กำลัง", "ta": "சக்தி", "kn": "ಶಕ್ತಿ", "uk": "сила", "bn": "শক্তি", "hi": "शक्ति"}}
 {"guid": "N22_009", "translations": {"ro": "distanță", "pl": "odległość", "th": "ระยะทาง", "ta": "தொலைவு", "kn": "ದೂರ", "uk": "відстань", "bn": "দূরত্ব", "hi": "दूरी"}}
 {"guid": "N22_010", "translations": {"ro": "cifră", "pl": "cyfra", "th": "หลักตัวเลข", "ta": "எண்", "kn": "ಅಂಕಿ", "uk": "цифра", "bn": "অঙ্ক", "hi": "अंक"}}
 {"guid": "N22_011", "translations": {"ro": "viteză", "pl": "prędkość", "th": "ความเร็ว", "ta": "வேகம்", "kn": "ವೇಗ", "uk": "швидкість", "bn": "গতিবেগ", "hi": "गति"}}
 {"guid": "N22_012", "translations": {"ro": "nivel", "pl": "poziom", "th": "ระดับ", "ta": "மட்டம்", "kn": "ಮಟ್ಟ", "uk": "рівень", "bn": "স্তর", "hi": "स्तर"}}
-{"guid": "N22_013", "translations": {"ro": "grup", "pl": "grupa", "th": "กลุ่ม", "ta": "குழு", "kn": "ಗುಂಪು", "uk": "група", "bn": "গোষ্ঠী", "hi": "समूह"}}
+{"guid": "N22_013", "translations": {"ro": "grup", "pl": "grupa", "th": "กลุ่ม", "ta": "குழு", "kn": "ಗುಂಪು", "uk": "група", "bn": "গোষ্ঠী", "hi": "समूह", "bs": "grupa"}}
 {"guid": "N22_014", "translations": {"ro": "lungime", "pl": "długość", "th": "ความยาว", "ta": "நீளம்", "kn": "ಎತ್ತರದೊಡ್ಡತೆ", "uk": "довжина", "bn": "দৈর্ঘ্য", "hi": "लंबाई"}}
 {"guid": "N22_015", "translations": {"ro": "mărime", "pl": "rozmiar", "th": "ขนาด", "ta": "அளவு", "kn": "ಆಕರ", "uk": "розмір", "bn": "আয়তন", "hi": "आकार"}}
 {"guid": "N22_016", "translations": {"ro": "bucată", "pl": "kawałek", "th": "ชิ้น", "ta": "துண்டு", "kn": "ಟುಂಡು", "uk": "шматок", "bn": "টুকরা", "hi": "टुकड़ा"}}
@@ -32,7 +32,7 @@
 {"guid": "N22_032", "translations": {"ro": "sold", "pl": "saldo", "th": "ยอดคงเหลือ", "ta": "மீதமுள்ள தொகை", "kn": "ಬಾಕಿ", "uk": "залишок", "bn": "অবশিষ্ট", "hi": "शेष"}}
 {"guid": "N22_033", "translations": {"ro": "comparare", "pl": "porównanie", "th": "การเปรียบเทียบ", "ta": "போகுபார்ப்பு", "kn": "ದುಲಾಗಣೆ", "uk": "порівняння", "bn": "তুলনা", "hi": "तुलना"}}
 {"guid": "N22_034", "translations": {"ro": "împărțire", "pl": "dzielenie", "th": "การหาร", "ta": "பகந்தல்", "kn": "ಭಾಗಿಸು", "uk": "ділення", "bn": "ভাগফল", "hi": "भाग (गणित)"}}
-{"guid": "N22_035", "translations": {"ro": "interval", "pl": "zakres", "th": "ช่วง", "ta": "விகிதத்தரம்", "kn": "ಶ್ರೇಣಿ", "uk": "діапазон", "bn": "পরিসর", "hi": "परास"}}
+{"guid": "N22_035", "translations": {"ro": "interval", "pl": "zakres", "th": "ช่วง", "ta": "விகிதத்தரம்", "kn": "ಶ್ರೇಣಿ", "uk": "діапазон", "bn": "পরিসর", "hi": "परास", "bs": "raspon"}}
 {"guid": "N22_036", "translations": {"ro": "scară", "pl": "skala", "th": "มาตราส่วน", "ta": "அளவுகோல்", "kn": "ತೂಕಮಾಪನದ ಮಟ್ಟ", "uk": "шкала", "bn": "পড়িমাপমান", "hi": "मानदण्ड"}}
 {"guid": "N22_037", "translations": {"ro": "unitate", "pl": "jednostka", "th": "หน่วย", "ta": "அலகு", "kn": "ಘನಕ", "uk": "одиниця", "bn": "একক", "hi": "इकाई"}}
 {"guid": "N22_038", "translations": {"ro": "strat", "pl": "warstwa", "th": "ชั้น", "ta": "பட்டு", "kn": "ಸ್ತರ", "uk": "шар", "bn": "স্তর", "hi": "स्तर"}}

@@ -1,14 +1,20 @@
-{"guid": "N04_001", "translations": {"ro": "răceală", "pl": "przeziębienie", "th": "หวัด", "ta": "குளிரலாச்சி", "kn": "ಸಣ್ಣಜ್ವರ", "uk": "звичайна застуда", "bn": "সর্দি", "hi": "सर्दी"}}
-{"guid": "N04_002", "translations": {"ro": "febră", "pl": "gorączka", "th": "ไข้", "ta": "காய்ச்சல்", "kn": "ಜ್ವರ", "uk": "лихоманка", "bn": "জ্বর", "hi": "बुखार"}}
-{"guid": "N04_003", "translations": {"ro": "cefalee", "pl": "ból głowy", "th": "ปวดหัว", "ta": "தலைவலி", "kn": "ತಲೆನೋವು", "uk": "головний біль", "bn": "মাথাব্যথা", "hi": "सिरदर्द"}}
-{"guid": "N04_004", "translations": {"ro": "tuse", "pl": "kaszel", "th": "ไอ", "ta": "இருமல்", "kn": "ಕುಸಿರಾಟ", "uk": "кашель", "bn": "কাশি", "hi": "खाँसी"}}
-{"guid": "N04_005", "translations": {"ro": "gripă", "pl": "grypa", "th": "ไข้หวัดใหญ่", "ta": "புழு நீர்", "kn": "ಫ್ಲೂ", "uk": "грип", "bn": "ইনফ্লুয়েঞ্জা", "hi": "इन्फ्लुएन्जा"}}
-{"guid": "N04_006", "translations": {"ro": "alergie", "pl": "alergia", "th": "ภูมิแพ้", "ta": "அலர்ஜி", "kn": "ಅಲರ್ಜಿ", "uk": "алергія", "bn": "অ্যালার্জি", "hi": "एलर्जी"}}
-{"guid": "N04_007", "translations": {"ro": "infecție", "pl": "infekcja", "th": "การติดเชื้อ", "ta": "அறிகுறி இல்லாதது", "kn": "ಸಂಕ್ರಾಮಣೆ", "uk": "інфекція", "bn": "সংক্রমণ", "hi": "संक्रमण"}}
-{"guid": "N04_009", "translations": {"ro": "leziune", "pl": "uraz", "th": "บาดเจ็บ", "ta": "காயம்", "kn": "ಗಾಯ", "uk": "травма", "bn": "আঘাত", "hi": "चोट"}}
-{"guid": "N04_010", "translations": {"ro": "boală", "pl": "choroba", "th": "โรค", "ta": "நோய்", "kn": "ರೋಗ", "uk": "хвороба", "bn": "রোগ", "hi": "रोग"}}
-{"guid": "N04_011", "translations": {"ro": "cancer", "pl": "rak", "th": "มะเร็ง", "ta": "கோசு நோய்", "kn": "ಕ್ಯಾನ್ಸರ್", "uk": "рак", "bn": "ক্যান্সার", "hi": "कैंसर"}}
-{"guid": "N04_012", "translations": {"ro": "diabet", "pl": "cukrzyca", "th": "เบาหวาน", "ta": "நோயாச் சர்க்கரை", "kn": "ಮಧುಮೇಹ", "uk": "діабет", "bn": "মধুমেহ", "hi": "मधुमेह"}}
-{"guid": "N04_013", "translations": {"ro": "astmă", "pl": "astma", "th": "หืด", "ta": "ஆஸ்துமா", "kn": "ಅಸ್ತ್ಮಾ", "uk": "астма", "bn": "অস্থমা", "hi": "अस्थमा"}}
-{"guid": "N04_014", "translations": {"ro": "rănă", "pl": "rana", "th": "บาดแผล", "ta": "காயம்", "kn": "ಚೇತನಾಡು", "uk": "рана", "bn": "ঘা", "hi": "घाव"}}
-{"guid": "N04_015", "translations": {"ro": "arsură solară", "pl": "oparzenie słoneczne", "th": "ผิวไหม้แดด", "ta": "சூரியக்காய்ச்சல்", "kn": "ಸೂರ್ಯರಸಿಕಾ", "uk": "сонячний опік", "bn": "সানবার্ন", "hi": "सूर्यदाह"}}
+{"guid": "N04_001", "translations": {"ro": "răceală", "pl": "przeziębienie", "th": "หวัด", "ta": "குளிரலாச்சி", "kn": "ಸಣ್ಣಜ್ವರ", "uk": "звичайна застуда", "bn": "সর্দি", "hi": "सर्दी", "bs": "prehlada"}}
+{"guid": "N04_002", "translations": {"ro": "febră", "pl": "gorączka", "th": "ไข้", "ta": "காய்ச்சல்", "kn": "ಜ್ವರ", "uk": "лихоманка", "bn": "জ্বর", "hi": "बुखार", "bs": "groznica"}}
+{"guid": "N04_003", "translations": {"ro": "cefalee", "pl": "ból głowy", "th": "ปวดหัว", "ta": "தலைவலி", "kn": "ತಲೆನೋವು", "uk": "головний біль", "bn": "মাথাব্যথা", "hi": "सिरदर्द", "bs": "glavobolja"}}
+{"guid": "N04_004", "translations": {"ro": "tuse", "pl": "kaszel", "th": "ไอ", "ta": "இருமல்", "kn": "ಕುಸಿರಾಟ", "uk": "кашель", "bn": "কাশি", "hi": "खाँसी", "bs": "kašalj"}}
+{"guid": "N04_005", "translations": {"ro": "gripă", "pl": "grypa", "th": "ไข้หวัดใหญ่", "ta": "புழு நீர்", "kn": "ಫ್ಲೂ", "uk": "грип", "bn": "ইনফ্লুয়েঞ্জা", "hi": "इन्फ्लुएन्जा", "bs": "gripa"}}
+{"guid": "N04_006", "translations": {"ro": "alergie", "pl": "alergia", "th": "ภูมิแพ้", "ta": "அலர்ஜி", "kn": "ಅಲರ್ಜಿ", "uk": "алергія", "bn": "অ্যালার্জি", "hi": "एलर्जी", "bs": "alergija"}}
+{"guid": "N04_007", "translations": {"ro": "infecție", "pl": "infekcja", "th": "การติดเชื้อ", "ta": "அறிகுறி இல்லாதது", "kn": "ಸಂಕ್ರಾಮಣೆ", "uk": "інфекція", "bn": "সংক্রমণ", "hi": "संक्रमण", "bs": "infekcija"}}
+{"guid": "N04_009", "translations": {"ro": "leziune", "pl": "uraz", "th": "บาดเจ็บ", "ta": "காயம்", "kn": "ಗಾಯ", "uk": "травма", "bn": "আঘাত", "hi": "चोट", "bs": "povreda"}}
+{"guid": "N04_010", "translations": {"ro": "boală", "pl": "choroba", "th": "โรค", "ta": "நோய்", "kn": "ರೋಗ", "uk": "хвороба", "bn": "রোগ", "hi": "रोग", "bs": "bolest"}}
+{"guid": "N04_011", "translations": {"ro": "cancer", "pl": "rak", "th": "มะเร็ง", "ta": "கோசு நோய்", "kn": "ಕ್ಯಾನ್ಸರ್", "uk": "рак", "bn": "ক্যান্সার", "hi": "कैंसर", "bs": "rak"}}
+{"guid": "N04_012", "translations": {"ro": "diabet", "pl": "cukrzyca", "th": "เบาหวาน", "ta": "நோயாச் சர்க்கரை", "kn": "ಮಧುಮೇಹ", "uk": "діабет", "bn": "মধুমেহ", "hi": "मधुमेह", "bs": "dijabetes"}}
+{"guid": "N04_013", "translations": {"ro": "astmă", "pl": "astma", "th": "หืด", "ta": "ஆஸ்துமா", "kn": "ಅಸ್ತ್ಮಾ", "uk": "астма", "bn": "অস্থমা", "hi": "अस्थमा", "bs": "astma"}}
+{"guid": "N04_014", "translations": {"ro": "rănă", "pl": "rana", "th": "บาดแผล", "ta": "காயம்", "kn": "ಚೇತನಾಡು", "uk": "рана", "bn": "ঘা", "hi": "घाव", "bs": "rana"}}
+{"guid": "N04_015", "translations": {"ro": "arsură solară", "pl": "oparzenie słoneczne", "th": "ผิวไหม้แดด", "ta": "சூரியக்காய்ச்சல்", "kn": "ಸೂರ್ಯರಸಿಕಾ", "uk": "сонячний опік", "bn": "সানবার্ন", "hi": "सूर्यदाह", "bs": "opekotina od sunca"}}
+{"guid": "N04_016", "translations": {"bs": "infarkt miokarda"}}
+{"guid": "N04_017", "translations": {"bs": "prehlada"}}
+{"guid": "N04_018", "translations": {"bs": "upala grla"}}
+{"guid": "N04_019", "translations": {"bs": "curenje nosa"}}
+{"guid": "N04_020", "translations": {"bs": "trovanje hranom"}}
+{"guid": "N04_021", "translations": {"bs": "prijelom kosti"}}

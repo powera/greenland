@@ -11,8 +11,8 @@
 {"guid": "N37_011", "translations": {"ro": "hexagon", "pl": "sześciokąt", "th": "หกเหลี่ยม", "ta": "அறுகோணம்", "kn": "ಷಡ್ಭುಜ", "uk": "шестикутник", "bn": "ষষ্ঠভুজ", "hi": "षट्भुज", "bs": "šesterokut"}}
 {"guid": "N37_012", "translations": {"ro": "pentagon", "pl": "pięciokąt", "th": "ห้าเหลี่ยม", "ta": "ஐங்கோணம்", "kn": "ಪಂಚಭುಜ", "uk": "п'ятикутник", "bn": "পঞ্চভুজ", "hi": "पंचभुज", "bs": "peterokut"}}
 {"guid": "N37_013", "translations": {"ro": "octogon", "pl": "ośmiokąt", "th": "แปดเหลี่ยม", "ta": "எண்கோணம்", "kn": "ಅಷ್ಟಭುಜ", "uk": "восьмикутник", "bn": "অষ্টভুজ", "hi": "अष्टभुज", "bs": "oktogon"}}
-{"guid": "N37_014", "translations": {"ro": "formă", "pl": "kształt", "th": "รูปร่าง", "ta": "வடிவம்", "kn": "ಆಕಾರ", "uk": "форма", "bn": "আকৃতি", "hi": "आकार"}}
-{"guid": "N37_015", "translations": {"ro": "unghi", "pl": "kąt", "th": "มุม", "ta": "கோணம்", "kn": "ಕೋನ", "uk": "кут", "bn": "কোণ", "hi": "कोण"}}
-{"guid": "N37_016", "translations": {"ro": "curbă", "pl": "krzywa", "th": "เส้นโค้ง", "ta": "வளைவு", "kn": "ವಕ್ರರೇಖೆ", "uk": "крива", "bn": "কৌক circul?", "hi": "वक्र"}}
-{"guid": "N37_017", "translations": {"ro": "margine", "pl": "krawędź", "th": "ขอบ", "ta": "விளிம்பு", "kn": "ಅಂಚು", "uk": "край", "bn": "প্রান্ত", "hi": "किनारा"}}
-{"guid": "N37_018", "translations": {"ro": "stea", "pl": "gwiazda", "th": "ดาว", "ta": "நட்சத்திரம்", "kn": "ನಕ್ಷತ್ರ", "uk": "зірка", "bn": "তারা", "hi": "तारा"}}
+{"guid": "N37_014", "translations": {"ro": "formă", "pl": "kształt", "th": "รูปร่าง", "ta": "வடிவம்", "kn": "ಆಕಾರ", "uk": "форма", "bn": "আকৃতি", "hi": "आकार", "bs": "oblik"}}
+{"guid": "N37_015", "translations": {"ro": "unghi", "pl": "kąt", "th": "มุม", "ta": "கோணம்", "kn": "ಕೋನ", "uk": "кут", "bn": "কোণ", "hi": "कोण", "bs": "ugao"}}
+{"guid": "N37_016", "translations": {"ro": "curbă", "pl": "krzywa", "th": "เส้นโค้ง", "ta": "வளைவு", "kn": "ವಕ್ರರೇಖೆ", "uk": "крива", "bn": "কৌক circul?", "hi": "वक्र", "bs": "krivulja"}}
+{"guid": "N37_017", "translations": {"ro": "margine", "pl": "krawędź", "th": "ขอบ", "ta": "விளிம்பு", "kn": "ಅಂಚು", "uk": "край", "bn": "প্রান্ত", "hi": "किनारा", "bs": "rub"}}
+{"guid": "N37_018", "translations": {"ro": "stea", "pl": "gwiazda", "th": "ดาว", "ta": "நட்சத்திரம்", "kn": "ನಕ್ಷತ್ರ", "uk": "зірка", "bn": "তারা", "hi": "तारा", "bs": "zvijezda"}}

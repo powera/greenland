@@ -1,7 +1,7 @@
 {"guid": "N07_001", "translations": {"ro": "casă", "pl": "dom", "th": "บ้าน", "ta": "வீடு", "kn": "ಮನೆ", "uk": "будинок", "bn": "বাড়ি", "hi": "घर", "el": "σπίτι", "bs": "kuća"}}
 {"guid": "N07_002", "translations": {"ro": "școală", "pl": "szkoła", "th": "โรงเรียน", "ta": "பள்ளி", "kn": "ಶಾಲೆ", "uk": "школа", "bn": "বিদ্যালয়", "hi": "विद्यालय", "el": "σχολείο", "bs": "škola"}}
 {"guid": "N07_003", "translations": {"ro": "spital", "pl": "szpital", "th": "โรงพยาบาล", "ta": "மருத்துவமனை", "kn": "ಆಸ್ಪತ್ರೆ", "uk": "лікарня", "bn": "হাসপাতাল", "hi": "अस्पताल", "el": "νοσοκομείο", "bs": "bolnica"}}
-{"guid": "N07_004", "translations": {"ro": "biserică", "pl": "kościół", "th": "โบสถ์", "ta": "தேவாலயம்", "kn": "ಚರ್ಚ್", "uk": "церква", "bn": "চর্চ্চা", "hi": "गिरजा"}}
+{"guid": "N07_004", "translations": {"ro": "biserică", "pl": "kościół", "th": "โบสถ์", "ta": "தேவாலயம்", "kn": "ಚರ್ಚ್", "uk": "церква", "bn": "চর্চ্চা", "hi": "गिरजा", "bs": "crkva"}}
 {"guid": "N07_005", "translations": {"ro": "magazin", "pl": "sklep", "th": "ร้านค้า", "ta": "அங்காடி", "kn": "ಅಂಗಡಿ", "uk": "магазин", "bn": "দোকান", "hi": "दुकान", "el": "κατάστημα", "bs": "prodavnica"}}
 {"guid": "N07_006", "translations": {"ro": "restaurant", "pl": "restauracja", "th": "ร้านอาหาร", "ta": "உணவகம்", "kn": "ರೆಸ್ಟೋರೆಂಟ್", "uk": "ресторан", "bn": "রেস্তোরাঁ", "hi": "रेस्टोराँ", "el": "εστιατόριο", "bs": "restoran"}}
 {"guid": "N07_007", "translations": {"ro": "hotel", "pl": "hotel", "th": "โรงแรม", "ta": "விடுதி", "kn": "ಹೋಟೆಲ್", "uk": "готель", "bn": "হোটেল", "hi": "होटल", "el": "ξενοδοχείο", "bs": "hotel"}}
@@ -9,59 +9,82 @@
 {"guid": "N07_009", "translations": {"ro": "bibliotecă", "pl": "biblioteka", "th": "ห้องสมุด", "ta": "நூலகம்", "kn": "ಗ್ರಂಥಾಲಯ", "uk": "бібліотека", "bn": "গ্রন্থাগার", "hi": "पुस्तकालय", "el": "βιβλιοθήκη", "bs": "biblioteka"}}
 {"guid": "N07_010", "translations": {"ro": "muzeu", "pl": "muzeum", "th": "พิพิธภัณฑ์", "ta": "அருங்காட்சியகம்", "kn": "ವಸ್ತುಸಂಗ್ರಹಾಲಯ", "uk": "музей", "bn": "মিউজিয়াম", "hi": "संग्रहालय", "el": "μουσείο", "bs": "muzej"}}
 {"guid": "N07_011", "translations": {"ro": "stație de pompieri", "pl": "remiza strażacka", "th": "สถานีดับเพลิง", "ta": "தீ நிலையம்", "kn": "ಅಗ್ನಿಶಾಮಕ ಕೇಂದ್ರ", "uk": "пожежна частина", "bn": "অগ্নিনির্বাপণ কেন্দ্র", "hi": "अग्निशमन स्टेशन", "el": "πυροσβεστικός σταθμός", "bs": "vatrogasna stanica"}}
-{"guid": "N07_012", "translations": {"ro": "farmacie", "pl": "apteka", "th": "ร้านขายยา", "ta": "மருந்தகம்", "kn": "ಔಷಧಾಲಯ", "uk": "аптека", "bn": "ফার্মেসি", "hi": "फ़ार्मेसी"}}
-{"guid": "N07_013", "translations": {"ro": "brutărie", "pl": "piekarnia", "th": "ร้านเบเกอรี่", "ta": "பேக்கரி", "kn": "ಬೇಕರಿ", "uk": "пекарня", "bn": "বেকারি", "hi": "बेकरी"}}
-{"guid": "N07_014", "translations": {"ro": "benzinărie", "pl": "stacja benzynowa", "th": "ปั๊มน้ำมัน", "ta": "எரிவாயு நிலையம்", "kn": "ಪೆಟ್ರೋಲ್ ಬಂಕ್", "uk": "автозаправна станція", "bn": "পেট্রোলপাম্প", "hi": "पेट्रोल पम्प"}}
-{"guid": "N07_015", "translations": {"ro": "oficiu poștal", "pl": "poczta", "th": "ที่ทำการไปรษณีย์", "ta": "தபால் அலுவலகம்", "kn": "ಅಂಚೆ ಕಚೇರಿ", "uk": "пошта", "bn": "পোস্ট অফিস", "hi": "डाकघर"}}
-{"guid": "N07_016", "translations": {"ro": "ambasadă", "pl": "ambasada", "th": "สถานทูต", "ta": "தூதரகம்", "kn": "ರಾಯಭಾರ ಕಚೇರಿ", "uk": "посольство", "bn": "দূতাবাস", "hi": "दूतावास"}}
-{"guid": "N07_017", "translations": {"ro": "fabrică", "pl": "fabryka", "th": "โรงงาน", "ta": "தொழிற்சாலை", "kn": "ಕಾರ್ಖಾನೆ", "uk": "фабрика", "bn": "কারখানা", "hi": "कारखाना"}}
+{"guid": "N07_012", "translations": {"ro": "farmacie", "pl": "apteka", "th": "ร้านขายยา", "ta": "மருந்தகம்", "kn": "ಔಷಧಾಲಯ", "uk": "аптека", "bn": "ফার্মেসি", "hi": "फ़ार्मेसी", "bs": "apoteka"}}
+{"guid": "N07_013", "translations": {"ro": "brutărie", "pl": "piekarnia", "th": "ร้านเบเกอรี่", "ta": "பேக்கரி", "kn": "ಬೇಕರಿ", "uk": "пекарня", "bn": "বেকারি", "hi": "बेकरी", "bs": "pekara"}}
+{"guid": "N07_014", "translations": {"ro": "benzinărie", "pl": "stacja benzynowa", "th": "ปั๊มน้ำมัน", "ta": "எரிவாயு நிலையம்", "kn": "ಪೆಟ್ರೋಲ್ ಬಂಕ್", "uk": "автозаправна станція", "bn": "পেট্রোলপাম্প", "hi": "पेट्रोल पम्प", "bs": "benzinska crpka"}}
+{"guid": "N07_015", "translations": {"ro": "oficiu poștal", "pl": "poczta", "th": "ที่ทำการไปรษณีย์", "ta": "தபால் அலுவலகம்", "kn": "ಅಂಚೆ ಕಚೇರಿ", "uk": "пошта", "bn": "পোস্ট অফিস", "hi": "डाकघर", "bs": "pošta"}}
+{"guid": "N07_016", "translations": {"ro": "ambasadă", "pl": "ambasada", "th": "สถานทูต", "ta": "தூதரகம்", "kn": "ರಾಯಭಾರ ಕಚೇರಿ", "uk": "посольство", "bn": "দূতাবাস", "hi": "दूतावास", "bs": "ambasada"}}
+{"guid": "N07_017", "translations": {"ro": "fabrică", "pl": "fabryka", "th": "โรงงาน", "ta": "தொழிற்சாலை", "kn": "ಕಾರ್ಖಾನೆ", "uk": "фабрика", "bn": "কারখানা", "hi": "कारखाना", "bs": "fabrika"}}
 {"guid": "N07_018", "translations": {"ro": "cort", "pl": "namiot", "th": "เต็นท์", "ta": "கூடாரம்", "kn": "ಡೇರೆ", "uk": "намет", "bn": "তাম্বু", "hi": "तम्बू"}}
-{"guid": "N07_019", "translations": {"ro": "hambar", "pl": "stodoła", "th": "โรงนา", "ta": "களஞ்சியம்", "kn": "ಗೋದಾಮು", "uk": "комора", "bn": "খামারঘর", "hi": "खलिहान"}}
-{"guid": "N07_020", "translations": {"ro": "sală de sport", "pl": "siłownia", "th": "ยิม", "ta": "உடற்பயிற்சிக்கூடம்", "kn": "ವ್ಯಾಯಾಮಶಾಲೆ", "uk": "спортзал", "bn": "জিম", "hi": "जिम"}}
-{"guid": "N07_021", "translations": {"ro": "teatru", "pl": "teatr", "th": "โรงละคร", "ta": "அரங்கம்", "kn": "ರಂಗಮಂದಿರ", "uk": "театр", "bn": "থিয়েটার", "hi": "थिएटर"}}
-{"guid": "N07_022", "translations": {"ro": "aeroport", "pl": "lotnisko", "th": "สนามบิน", "ta": "விமான நிலையம்", "kn": "ವಿಮಾನ ನಿಲ್ದಾಣ", "uk": "аеропорт", "bn": "এয়ারপোর্ট", "hi": "हवाईअड्डा"}}
-{"guid": "N07_025", "translations": {"ro": "cantină", "pl": "stołówka", "th": "โรงอาหาร", "ta": "உணவுக்கூடம்", "kn": "ಕ್ಯಾಂಟೀನ್", "uk": "кафетерій", "bn": "ক্যাফেটেরিয়া", "hi": "कैफेटेरिया"}}
-{"guid": "N07_026", "translations": {"ro": "apartament", "pl": "mieszkanie", "th": "อพาร์ตเมนต์", "ta": "அடுக்குமாடி குடியிருப்பு", "kn": "ಅಪಾರ್ಟ್ಮೆಂಟ್", "uk": "квартира", "bn": "ফ্ল্যাট", "hi": "अपार्टमेंट"}}
-{"guid": "N07_027", "translations": {"ro": "cimitir", "pl": "cmentarz", "th": "สุสาน", "ta": "கல்லறை", "kn": "ಸ್ಮಶಾನ", "uk": "кляштор?", "bn": "কবরস্থান", "hi": "কবরস্থান"}}
-{"guid": "N07_028", "translations": {"ro": "piață", "pl": "rynek", "th": "ตลาด", "ta": "சந்தை", "kn": "ಮಾರುಕಟ್ಟೆ", "uk": "ринок", "bn": "বাজার", "hi": "बाज़ार"}}
+{"guid": "N07_019", "translations": {"ro": "hambar", "pl": "stodoła", "th": "โรงนา", "ta": "களஞ்சியம்", "kn": "ಗೋದಾಮು", "uk": "комора", "bn": "খামারঘর", "hi": "खलिहान", "bs": "štala"}}
+{"guid": "N07_020", "translations": {"ro": "sală de sport", "pl": "siłownia", "th": "ยิม", "ta": "உடற்பயிற்சிக்கூடம்", "kn": "ವ್ಯಾಯಾಮಶಾಲೆ", "uk": "спортзал", "bn": "জিম", "hi": "जिम", "bs": "teretana"}}
+{"guid": "N07_021", "translations": {"ro": "teatru", "pl": "teatr", "th": "โรงละคร", "ta": "அரங்கம்", "kn": "ರಂಗಮಂದಿರ", "uk": "театр", "bn": "থিয়েটার", "hi": "थिएटर", "bs": "pozorište"}}
+{"guid": "N07_022", "translations": {"ro": "aeroport", "pl": "lotnisko", "th": "สนามบิน", "ta": "விமான நிலையம்", "kn": "ವಿಮಾನ ನಿಲ್ದಾಣ", "uk": "аеропорт", "bn": "এয়ারপোর্ট", "hi": "हवाईअड्डा", "bs": "aerodrom"}}
+{"guid": "N07_025", "translations": {"ro": "cantină", "pl": "stołówka", "th": "โรงอาหาร", "ta": "உணவுக்கூடம்", "kn": "ಕ್ಯಾಂಟೀನ್", "uk": "кафетерій", "bn": "ক্যাফেটেরিয়া", "hi": "कैफेटेरिया", "bs": "menza"}}
+{"guid": "N07_026", "translations": {"ro": "apartament", "pl": "mieszkanie", "th": "อพาร์ตเมนต์", "ta": "அடுக்குமாடி குடியிருப்பு", "kn": "ಅಪಾರ್ಟ್ಮೆಂಟ್", "uk": "квартира", "bn": "ফ্ল্যাট", "hi": "अपार्टमेंट", "bs": "stan"}}
+{"guid": "N07_027", "translations": {"ro": "cimitir", "pl": "cmentarz", "th": "สุสาน", "ta": "கல்லறை", "kn": "ಸ್ಮಶಾನ", "uk": "кляштор?", "bn": "কবরস্থান", "hi": "কবরস্থান", "bs": "groblje"}}
+{"guid": "N07_028", "translations": {"ro": "piață", "pl": "rynek", "th": "ตลาด", "ta": "சந்தை", "kn": "ಮಾರುಕಟ್ಟೆ", "uk": "ринок", "bn": "বাজার", "hi": "बाज़ार", "bs": "pijaca"}}
 {"guid": "N07_029", "translations": {"ro": "castel", "pl": "zamek", "th": "ปราสาท", "ta": "கோட்டை", "kn": "ಕೋಟೆ", "uk": "замок", "bn": "কেল্লা", "hi": "किला"}}
-{"guid": "N07_030", "translations": {"ro": "birou", "pl": "biuro", "th": "สำนักงาน", "ta": "அலுவலகம்", "kn": "ಕಚೇರಿ", "uk": "офіс", "bn": "অফিস", "hi": "कार्यालय"}}
-{"guid": "N07_031", "translations": {"ro": "bucătărie", "pl": "kuchnia", "th": "ครัว", "ta": "சமையலறை", "kn": "ಅಡುಗೆಮನೆ", "uk": "кухня", "bn": "রান্নাঘর", "hi": "रसोईघर"}}
-{"guid": "N07_032", "translations": {"ro": "dormitor", "pl": "sypialnia", "th": "ห้องนอน", "ta": "படுக்கையறை", "kn": "ಮಲಗುವ ಕೋಣೆ", "uk": "спальня", "bn": "বেডরুম", "hi": "शयनकक्ष"}}
-{"guid": "N07_033", "translations": {"ro": "subsol", "pl": "piwnica", "th": "ชั้นใต้ดิน", "ta": "நிலவறை", "kn": "ನೆಲಮಾಳಿಗೆ", "uk": "підвал", "bn": "রুমঘরใต้ভূমি", "hi": "तहखाना"}}
-{"guid": "N07_034", "translations": {"ro": "dulap", "pl": "szafa", "th": "ตู้เสื้อผ้า", "ta": "அலமாரி", "kn": "ಕಪಾಟು", "uk": "шафа", "bn": "অলএইভ", "hi": "अलमारी"}}
-{"guid": "N07_035", "translations": {"ro": "cameră de zi", "pl": "salon", "th": "ห้องนั่งเล่น", "ta": "அமர்விடம்", "kn": "ಕೂರುವ ಕೋಣೆ", "uk": "вітальня", "bn": "আসবাবঘর", "hi": "बैठकघर"}}
-{"guid": "N07_036", "translations": {"ro": "baie", "pl": "łazienka", "th": "ห้องน้ำ", "ta": "குளியலறை", "kn": "ಸ್ನಾನಗೃಹ", "uk": "ванна кімната", "bn": "বাথরুম", "hi": "बाथरूम"}}
-{"guid": "N07_037", "translations": {"ro": "patio", "pl": "patio", "th": "ลานบ้าน", "ta": "முற்றம்", "kn": "ಅಂಗಳ", "uk": "патіо", "bn": "প্যাটিও", "hi": "पाटियो"}}
-{"guid": "N07_038", "translations": {"ro": "mansardă", "pl": "strych", "th": "ห้องใต้หลังคา", "ta": "மாடி அறை", "kn": "ಮಾಳಿಗೆ", "uk": "горище", "bn": "ছাদতলা", "hi": "अटारी"}}
-{"guid": "N07_039", "translations": {"ro": "sufragerie", "pl": "jadalnia", "th": "ห้องรับประทานอาหาร", "ta": "சாப்பாட்டு அறை", "kn": "ಊಟದ ಕೋಣೆ", "uk": "столова", "bn": "ভোজনকক্ষ", "hi": "भोजनकक्ष"}}
-{"guid": "N07_040", "translations": {"ro": "spălătorie", "pl": "pralnia", "th": "ห้องซักผ้า", "ta": "சலவையறை", "kn": "ಬಟ್ಟೆ ಒಗೆಯುವ ಕೋಣೆ", "uk": "пральня", "bn": "লন্ড্রি রুম", "hi": "लॉन्ड्री रूम"}}
-{"guid": "N07_041", "translations": {"ro": "acasă", "pl": "dom", "th": "บ้าน", "ta": "இல்லம்", "kn": "ಮನೆ", "uk": "будинок", "bn": "বাড়ি", "hi": "घर"}}
-{"guid": "N07_042", "translations": {"ro": "sală", "pl": "sala", "th": "ห้องโถง", "ta": "மண்டபம்", "kn": "ಸಭಾಂಗಣ", "uk": "зал", "bn": "হল", "hi": "हॉल"}}
-{"guid": "N07_043", "translations": {"ro": "turn", "pl": "wieża", "th": "หอคอย", "ta": "கோபுரம்", "kn": "ಗೋಪುರ", "uk": "вежа", "bn": "বজরা", "hi": "मीनार"}}
-{"guid": "N07_044", "translations": {"ro": "fermă", "pl": "farma", "th": "ฟาร์ม", "ta": "பண்ணை", "kn": "ಕೃಷಿ", "uk": "ферма", "bn": "খামার", "hi": "खेत/फार্ম"}}
-{"guid": "N07_045", "translations": {"ro": "pasaj", "pl": "przejście", "th": "ทางเดิน", "ta": "நடைபாதை", "kn": "ಹಾದಿ", "uk": "прохід", "bn": "সড়কপথ", "hi": "मार्ग"}}
-{"guid": "N07_046", "translations": {"ro": "clădire", "pl": "budynek", "th": "อาคาร", "ta": "கட்டடம்", "kn": "ಕಟ್ಟಡ", "uk": "будинок", "bn": "ভবন", "hi": "इमारत"}}
+{"guid": "N07_030", "translations": {"ro": "birou", "pl": "biuro", "th": "สำนักงาน", "ta": "அலுவலகம்", "kn": "ಕಚೇರಿ", "uk": "офіс", "bn": "অফিস", "hi": "कार्यालय", "bs": "ured"}}
+{"guid": "N07_031", "translations": {"ro": "bucătărie", "pl": "kuchnia", "th": "ครัว", "ta": "சமையலறை", "kn": "ಅಡುಗೆಮನೆ", "uk": "кухня", "bn": "রান্নাঘর", "hi": "रसोईघर", "bs": "kuhinja"}}
+{"guid": "N07_032", "translations": {"ro": "dormitor", "pl": "sypialnia", "th": "ห้องนอน", "ta": "படுக்கையறை", "kn": "ಮಲಗುವ ಕೋಣೆ", "uk": "спальня", "bn": "বেডরুম", "hi": "शयनकक्ष", "bs": "spavaća soba"}}
+{"guid": "N07_033", "translations": {"ro": "subsol", "pl": "piwnica", "th": "ชั้นใต้ดิน", "ta": "நிலவறை", "kn": "ನೆಲಮಾಳಿಗೆ", "uk": "підвал", "bn": "রুমঘরใต้ভূমি", "hi": "तहखाना", "bs": "podrum"}}
+{"guid": "N07_034", "translations": {"ro": "dulap", "pl": "szafa", "th": "ตู้เสื้อผ้า", "ta": "அலமாரி", "kn": "ಕಪಾಟು", "uk": "шафа", "bn": "অলএইভ", "hi": "अलमारी", "bs": "ormar"}}
+{"guid": "N07_035", "translations": {"ro": "cameră de zi", "pl": "salon", "th": "ห้องนั่งเล่น", "ta": "அமர்விடம்", "kn": "ಕೂರುವ ಕೋಣೆ", "uk": "вітальня", "bn": "আসবাবঘর", "hi": "बैठकघर", "bs": "dnevni boravak"}}
+{"guid": "N07_036", "translations": {"ro": "baie", "pl": "łazienka", "th": "ห้องน้ำ", "ta": "குளியலறை", "kn": "ಸ್ನಾನಗೃಹ", "uk": "ванна кімната", "bn": "বাথরুম", "hi": "बाथरूम", "bs": "kupatilo"}}
+{"guid": "N07_037", "translations": {"ro": "patio", "pl": "patio", "th": "ลานบ้าน", "ta": "முற்றம்", "kn": "ಅಂಗಳ", "uk": "патіо", "bn": "প্যাটিও", "hi": "पाटियो", "bs": "terasa"}}
+{"guid": "N07_038", "translations": {"ro": "mansardă", "pl": "strych", "th": "ห้องใต้หลังคา", "ta": "மாடி அறை", "kn": "ಮಾಳಿಗೆ", "uk": "горище", "bn": "ছাদতলা", "hi": "अटारी", "bs": "potkrovlje"}}
+{"guid": "N07_039", "translations": {"ro": "sufragerie", "pl": "jadalnia", "th": "ห้องรับประทานอาหาร", "ta": "சாப்பாட்டு அறை", "kn": "ಊಟದ ಕೋಣೆ", "uk": "столова", "bn": "ভোজনকক্ষ", "hi": "भोजनकक्ष", "bs": "trpezarija"}}
+{"guid": "N07_040", "translations": {"ro": "spălătorie", "pl": "pralnia", "th": "ห้องซักผ้า", "ta": "சலவையறை", "kn": "ಬಟ್ಟೆ ಒಗೆಯುವ ಕೋಣೆ", "uk": "пральня", "bn": "লন্ড্রি রুম", "hi": "लॉन्ड्री रूम", "bs": "praonica"}}
+{"guid": "N07_041", "translations": {"ro": "acasă", "pl": "dom", "th": "บ้าน", "ta": "இல்லம்", "kn": "ಮನೆ", "uk": "будинок", "bn": "বাড়ি", "hi": "घर", "bs": "dom"}}
+{"guid": "N07_042", "translations": {"ro": "sală", "pl": "sala", "th": "ห้องโถง", "ta": "மண்டபம்", "kn": "ಸಭಾಂಗಣ", "uk": "зал", "bn": "হল", "hi": "हॉल", "bs": "dvorana"}}
+{"guid": "N07_043", "translations": {"ro": "turn", "pl": "wieża", "th": "หอคอย", "ta": "கோபுரம்", "kn": "ಗೋಪುರ", "uk": "вежа", "bn": "বজরা", "hi": "मीनार", "bs": "kula"}}
+{"guid": "N07_044", "translations": {"ro": "fermă", "pl": "farma", "th": "ฟาร์ม", "ta": "பண்ணை", "kn": "ಕೃಷಿ", "uk": "ферма", "bn": "খামার", "hi": "खेत/फार্ম", "bs": "farma"}}
+{"guid": "N07_045", "translations": {"ro": "pasaj", "pl": "przejście", "th": "ทางเดิน", "ta": "நடைபாதை", "kn": "ಹಾದಿ", "uk": "прохід", "bn": "সড়কপথ", "hi": "मार्ग", "bs": "prolaz"}}
+{"guid": "N07_046", "translations": {"ro": "clădire", "pl": "budynek", "th": "อาคาร", "ta": "கட்டடம்", "kn": "ಕಟ್ಟಡ", "uk": "будинок", "bn": "ভবন", "hi": "इमारत", "bs": "zgrada"}}
 {"guid": "N07_047", "translations": {"ro": "cameră", "pl": "komnata", "th": "ห้องประชุม", "ta": "அறை", "kn": "ಕೊಠಡಿ", "uk": "зал", "bn": "চেম্বার", "hi": "मंडप"}}
-{"guid": "N07_048", "translations": {"ro": "celulă", "pl": "cela", "th": "ห้องขัง", "ta": "அறை", "kn": "ಕೋಣೆ", "uk": "камера", "bn": "কক্ষ", "hi": "कोठरी"}}
-{"guid": "N07_049", "translations": {"ro": "grădină", "pl": "ogród", "th": "สวน", "ta": "தோட்டம்", "kn": "ತೋಟ", "uk": "сад", "bn": "বাগান", "hi": "बगीचा"}}
-{"guid": "N07_050", "translations": {"ro": "parc", "pl": "park", "th": "สวนสาธารณะ", "ta": "பூங்கா", "kn": "ಉದ್ಯಾನವನ", "uk": "парк", "bn": "পার্ক", "hi": "उद्यान"}}
-{"guid": "N07_051", "translations": {"ro": "cameră", "pl": "pokój", "th": "ห้อง", "ta": "அறை", "kn": "ಕೋಣೆ", "uk": "кімната", "bn": "ঘর", "hi": "कमरा"}}
-{"guid": "N07_052", "translations": {"ro": "închisoare", "pl": "więzienie", "th": "คุก", "ta": "சிறைச்சாலை", "kn": "ಸೆರೆಮನೆ", "uk": "в'язниця", "bn": "কারাগার", "hi": "कारागार"}}
-{"guid": "N07_053", "translations": {"ro": "moschee", "pl": "meczet", "th": "มัสยิด", "ta": "மசூதி", "kn": "ಮಸೀದಿ", "uk": "мечеть", "bn": "মসজিদ", "hi": "मस्जिद"}}
-{"guid": "N07_054", "translations": {"ro": "garaj", "pl": "garaż", "th": "โรงรถ", "ta": "கார் நிறுத்துமிடம்", "kn": "ಗ್ಯಾರೇಜ್", "uk": "гараж", "bn": "গ্যারেজ", "hi": "गेराज"}}
-{"guid": "N07_055", "translations": {"ro": "templu", "pl": "świątynia", "th": "วัด", "ta": "கோயில்", "kn": "ದೇವಸ್ಥಾನ", "uk": "храм", "bn": "মন্দির", "hi": "मंदिर"}}
-{"guid": "N07_056", "translations": {"ro": "stație", "pl": "stacja", "th": "สถานี", "ta": "நிலையம்", "kn": "ನಿಲ್ದಾಣ", "uk": "станція", "bn": "স্টেশন", "hi": "स्टेशन"}}
-{"guid": "N07_057", "translations": {"ro": "stadion", "pl": "stadion", "th": "สนามกีฬา", "ta": "அரங்கம்", "kn": "ಕ್ರೀಡಾಂಗಣ", "uk": "стадіон", "bn": "স্টেডিয়াম", "hi": "स्टेडियम"}}
-{"guid": "N07_058", "translations": {"ro": "palat", "pl": "pałac", "th": "พระราชวัง", "ta": "அரண்மனை", "kn": "ಅರಮನೆ", "uk": "палац", "bn": "প্রাসাদ", "hi": "महल"}}
-{"guid": "N07_059", "translations": {"ro": "depozit", "pl": "magazyn", "th": "โกดัง", "ta": "கிடங்கு", "kn": "ಗೋದಾಮು", "uk": "склад", "bn": "গুদাম", "hi": "गोदाम"}}
-{"guid": "N07_060", "translations": {"ro": "clinică", "pl": "klinika", "th": "คลินิก", "ta": "மருத்துவமனை", "kn": "ಚಿಕಿತ್ಸಾಲಯ", "uk": "клініка", "bn": "ক্লিনিক", "hi": "क्लिनिक"}}
+{"guid": "N07_048", "translations": {"ro": "celulă", "pl": "cela", "th": "ห้องขัง", "ta": "அறை", "kn": "ಕೋಣೆ", "uk": "камера", "bn": "কক্ষ", "hi": "कोठरी", "bs": "ćelija"}}
+{"guid": "N07_049", "translations": {"ro": "grădină", "pl": "ogród", "th": "สวน", "ta": "தோட்டம்", "kn": "ತೋಟ", "uk": "сад", "bn": "বাগান", "hi": "बगीचा", "bs": "vrt"}}
+{"guid": "N07_050", "translations": {"ro": "parc", "pl": "park", "th": "สวนสาธารณะ", "ta": "பூங்கா", "kn": "ಉದ್ಯಾನವನ", "uk": "парк", "bn": "পার্ক", "hi": "उद्यान", "bs": "park"}}
+{"guid": "N07_051", "translations": {"ro": "cameră", "pl": "pokój", "th": "ห้อง", "ta": "அறை", "kn": "ಕೋಣೆ", "uk": "кімната", "bn": "ঘর", "hi": "कमरा", "bs": "soba"}}
+{"guid": "N07_052", "translations": {"ro": "închisoare", "pl": "więzienie", "th": "คุก", "ta": "சிறைச்சாலை", "kn": "ಸೆರೆಮನೆ", "uk": "в'язниця", "bn": "কারাগার", "hi": "कारागार", "bs": "zatvor"}}
+{"guid": "N07_053", "translations": {"ro": "moschee", "pl": "meczet", "th": "มัสยิด", "ta": "மசூதி", "kn": "ಮಸೀದಿ", "uk": "мечеть", "bn": "মসজিদ", "hi": "मस्जिद", "bs": "džamija"}}
+{"guid": "N07_054", "translations": {"ro": "garaj", "pl": "garaż", "th": "โรงรถ", "ta": "கார் நிறுத்துமிடம்", "kn": "ಗ್ಯಾರೇಜ್", "uk": "гараж", "bn": "গ্যারেজ", "hi": "गेराज", "bs": "garaža"}}
+{"guid": "N07_055", "translations": {"ro": "templu", "pl": "świątynia", "th": "วัด", "ta": "கோயில்", "kn": "ದೇವಸ್ಥಾನ", "uk": "храм", "bn": "মন্দির", "hi": "मंदिर", "bs": "hram"}}
+{"guid": "N07_056", "translations": {"ro": "stație", "pl": "stacja", "th": "สถานี", "ta": "நிலையம்", "kn": "ನಿಲ್ದಾಣ", "uk": "станція", "bn": "স্টেশন", "hi": "स्टेशन", "bs": "stanica"}}
+{"guid": "N07_057", "translations": {"ro": "stadion", "pl": "stadion", "th": "สนามกีฬา", "ta": "அரங்கம்", "kn": "ಕ್ರೀಡಾಂಗಣ", "uk": "стадіон", "bn": "স্টেডিয়াম", "hi": "स्टेडियम", "bs": "stadion"}}
+{"guid": "N07_058", "translations": {"ro": "palat", "pl": "pałac", "th": "พระราชวัง", "ta": "அரண்மனை", "kn": "ಅರಮನೆ", "uk": "палац", "bn": "প্রাসাদ", "hi": "महल", "bs": "palača"}}
+{"guid": "N07_059", "translations": {"ro": "depozit", "pl": "magazyn", "th": "โกดัง", "ta": "கிடங்கு", "kn": "ಗೋದಾಮು", "uk": "склад", "bn": "গুদাম", "hi": "गोदाम", "bs": "skladište"}}
+{"guid": "N07_060", "translations": {"ro": "clinică", "pl": "klinika", "th": "คลินิก", "ta": "மருத்துவமனை", "kn": "ಚಿಕಿತ್ಸಾಲಯ", "uk": "клініка", "bn": "ক্লিনিক", "hi": "क्लिनिक", "bs": "klinika"}}
 {"guid": "N07_061", "translations": {"ro": "studio", "pl": "studio", "th": "สตูดิโอ", "ta": "பணியறை", "kn": "ಸ್ಟುಡಿಯೊ", "uk": "студія", "bn": "স্টুডিও", "hi": "स्टूडियो"}}
-{"guid": "N07_062", "translations": {"ro": "magazin", "pl": "sklep", "th": "ร้าน", "ta": "கடை", "kn": "ಅಂಗಡಿ", "uk": "магазин", "bn": "দোকান", "hi": "दुकान"}}
-{"guid": "N07_063", "translations": {"ro": "doc", "pl": "dok", "th": "ท่าเรือ", "ta": "துறைமுகம்", "kn": "ಡಾಕ್", "uk": "пристань", "bn": "ঘাট", "hi": "घाट"}}
-{"guid": "N07_064", "translations": {"ro": "port", "pl": "port", "th": "ท่าเรือ", "ta": "துறைமுகம்", "kn": "ಬಂದರು", "uk": "порт", "bn": "বন্দর", "hi": "बंदरगाह"}}
-{"guid": "N07_065", "translations": {"ro": "grădină zoologică", "pl": "zoo", "th": "สวนสัตว์", "ta": "விலங்குக் காட்சிச்சாலை", "kn": "ಮೃಗಾಲಯ", "uk": "зоопарк", "bn": "জীববিজ্ঞান উদ্যান", "hi": "चिड़ियाघर"}}
-{"guid": "N07_066", "translations": {"ro": "curte", "pl": "podwórko", "th": "ลาน", "ta": "முற்றம்", "kn": "ಅಂಗಳ", "uk": "двір", "bn": "বাড়ির আঙিনা", "hi": "आँगन"}}
-{"guid": "N07_067", "translations": {"ro": "tabără", "pl": "obóz", "th": "ค่าย", "ta": "முகாம்", "kn": "ಶಿಬಿರ", "uk": "табір", "bn": "শিবির", "hi": "शिबির"}}
-{"guid": "N07_068", "translations": {"ro": "teren", "pl": "boisko", "th": "สนาม", "ta": "மைதானம்", "kn": "ಮೈದಾನ", "uk": "поле", "bn": "বড় মাঠ", "hi": "मैदान"}}
+{"guid": "N07_062", "translations": {"ro": "magazin", "pl": "sklep", "th": "ร้าน", "ta": "கடை", "kn": "ಅಂಗಡಿ", "uk": "магазин", "bn": "দোকান", "hi": "दुकान", "bs": "prodavnica"}}
+{"guid": "N07_063", "translations": {"ro": "doc", "pl": "dok", "th": "ท่าเรือ", "ta": "துறைமுகம்", "kn": "ಡಾಕ್", "uk": "пристань", "bn": "ঘাট", "hi": "घाट", "bs": "pristanište"}}
+{"guid": "N07_064", "translations": {"ro": "port", "pl": "port", "th": "ท่าเรือ", "ta": "துறைமுகம்", "kn": "ಬಂದರು", "uk": "порт", "bn": "বন্দর", "hi": "बंदरगाह", "bs": "luka"}}
+{"guid": "N07_065", "translations": {"ro": "grădină zoologică", "pl": "zoo", "th": "สวนสัตว์", "ta": "விலங்குக் காட்சிச்சாலை", "kn": "ಮೃಗಾಲಯ", "uk": "зоопарк", "bn": "জীববিজ্ঞান উদ্যান", "hi": "चिड़ियाघर", "bs": "zoološki vrt"}}
+{"guid": "N07_066", "translations": {"ro": "curte", "pl": "podwórko", "th": "ลาน", "ta": "முற்றம்", "kn": "ಅಂಗಳ", "uk": "двір", "bn": "বাড়ির আঙিনা", "hi": "आँगन", "bs": "dvorište"}}
+{"guid": "N07_067", "translations": {"ro": "tabără", "pl": "obóz", "th": "ค่าย", "ta": "முகாம்", "kn": "ಶಿಬಿರ", "uk": "табір", "bn": "শিবির", "hi": "शिबির", "bs": "kamp"}}
+{"guid": "N07_068", "translations": {"ro": "teren", "pl": "boisko", "th": "สนาม", "ta": "மைதானம்", "kn": "ಮೈದಾನ", "uk": "поле", "bn": "বড় মাঠ", "hi": "मैदान", "bs": "igralište"}}
 {"guid": "N07_069", "translations": {"ro": "ring", "pl": "ring", "th": "เวที", "ta": "குத்துச்சண்டை அரங்கம்", "kn": "ಬಾಕ್ಸಿಂಗ್ ರಿಂಗ್", "uk": "ринг", "bn": "রিং", "hi": "रिंग"}}
+{"guid": "N07_070", "translations": {"bs": "srednja škola"}}
+{"guid": "N07_071", "translations": {"bs": "osnovna škola"}}
+{"guid": "N07_072", "translations": {"bs": "osnovna škola"}}
+{"guid": "N07_073", "translations": {"bs": "internat"}}
+{"guid": "N07_074", "translations": {"bs": "stambena zgrada"}}
+{"guid": "N07_075", "translations": {"bs": "poslovna zgrada"}}
+{"guid": "N07_076", "translations": {"bs": "garaža za parkiranje"}}
+{"guid": "N07_077", "translations": {"bs": "trgovački centar"}}
+{"guid": "N07_078", "translations": {"bs": "prodavnica mješovite robe"}}
+{"guid": "N07_079", "translations": {"bs": "robna kuća"}}
+{"guid": "N07_080", "translations": {"bs": "prodavnica mješovite robe"}}
+{"guid": "N07_081", "translations": {"bs": "autobuska stanica"}}
+{"guid": "N07_082", "translations": {"bs": "željeznička stanica"}}
+{"guid": "N07_083", "translations": {"bs": "stanica metroa"}}
+{"guid": "N07_084", "translations": {"bs": "policijska stanica"}}
+{"guid": "N07_085", "translations": {"bs": "bazen za plivanje"}}
+{"guid": "N07_086", "translations": {"bs": "zabavni park"}}
+{"guid": "N07_087", "translations": {"bs": "gradska vijećnica"}}
+{"guid": "N07_088", "translations": {"bs": "javna biblioteka"}}
+{"guid": "N07_089", "translations": {"bs": "umjetnička galerija"}}
+{"guid": "N07_090", "translations": {"bs": "kino"}}
+{"guid": "N07_091", "translations": {"bs": "koncertna dvorana"}}
+{"guid": "N07_092", "translations": {"bs": "starački dom"}}
