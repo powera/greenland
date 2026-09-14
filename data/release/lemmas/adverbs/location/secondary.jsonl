@@ -1,15 +1,15 @@
-{"guid": "D07_001", "translations": {"ro": "acum", "pl": "teraz", "th": "ตอนนี้", "ta": "இப்பொழுது", "kn": "ಇಗೋಂದೆ", "uk": "зараз", "bn": "এখন", "hi": "अब"}}
-{"guid": "D07_002", "translations": {"ro": "întotdeauna", "pl": "zawsze", "th": "เสมอ", "ta": "எப்பொழுதும்", "kn": "ಎಲ್ಲೆಲ್ಲಾ", "uk": "завжди", "bn": "সবসময়", "hi": "हमेशा"}}
-{"guid": "D07_003", "translations": {"ro": "niciodată", "pl": "nigdy", "th": "ไม่เคย", "ta": "ஒருபோதும்", "kn": "ಎಲ್ಲಾ ಸಾರಿ ಇಲ್ಲ", "uk": "ніколи", "bn": "কখনও", "hi": "कभी नहीं"}}
-{"guid": "D07_004", "translations": {"ro": "adesea", "pl": "często", "th": "บ่อย", "ta": "அகின்றபோது", "kn": "ಅಕಸದಾಗಿ", "uk": "часто", "bn": "প্রায়ই", "hi": "अक्सर"}}
-{"guid": "D07_005", "translations": {"ro": "uneori", "pl": "czasami", "th": "บางครั้ง", "ta": "சிலசமயங்களில்", "kn": "ಕೆಲವೊಮ್ಮೆ", "uk": "іноді", "bn": "কখনও কখনও", "hi": "कभी-कभी"}}
-{"guid": "D07_006", "translations": {"ro": "aici", "pl": "tutaj", "th": "ที่นี่", "ta": "இங்கே", "kn": "ಇಲ್ಲಿ", "uk": "тут", "bn": "এখানে", "hi": "यहाँ"}}
-{"guid": "D07_007", "translations": {"ro": "acolo", "pl": "tam", "th": "ที่นั่น", "ta": "அங்கே", "kn": "ಅಲ್ಲಿ", "uk": "там", "bn": "ওখানে", "hi": "वहाँ"}}
-{"guid": "D07_008", "translations": {"ro": "peste tot", "pl": "wszędzie", "th": "ทุกที่", "ta": "எல்லாம் இடங்களில்", "kn": "ಎಲ್ಲೆಡೆ", "uk": "усюди", "bn": "সব জায়গায়", "hi": "हर जगह"}}
-{"guid": "D07_009", "translations": {"ro": "nicăieri", "pl": "nigdzie", "th": "ไม่ที่ไหน", "ta": "எங்கிலும் இல்லை", "kn": "ಎಲ್ಲೀನವಿಲ್ಲ", "uk": "ніде", "bn": "কোথাওই না", "hi": "कहीं नहीं"}}
-{"guid": "D07_010", "translations": {"ro": "deja", "pl": "już", "th": "แล้ว", "ta": "இன்னும் முன்பு", "kn": "ಇದರ ಮೊದಲು", "uk": "вже", "bn": "ইতিপূর্বে", "hi": "पहले ही"}}
-{"guid": "D07_011", "translations": {"ro": "curând", "pl": "wkrótce", "th": "เร็วๆนี้", "ta": "விரைவில்", "kn": "ಶೀಘ್ರವೇ", "uk": "незабаром", "bn": "শীঘ্রই", "hi": "जल्दी"}}
-{"guid": "D07_012", "translations": {"ro": "recent", "pl": "niedawno", "th": "เมื่อเร็วๆนี้", "ta": "சமீபத்தில்", "kn": "ಇತ್ತೀಚೆಗೆ", "uk": "недавно", "bn": "সম্প্রতি", "hi": "हाल ही में"}}
+{"guid": "D07_001", "translations": {"ro": "acum", "pl": "teraz", "th": "ตอนนี้", "ta": "இப்பொழுது", "kn": "ಇಗೋಂದೆ", "uk": "зараз", "bn": "এখন", "hi": "अब", "bs": "sada"}}
+{"guid": "D07_002", "translations": {"ro": "întotdeauna", "pl": "zawsze", "th": "เสมอ", "ta": "எப்பொழுதும்", "kn": "ಎಲ್ಲೆಲ್ಲಾ", "uk": "завжди", "bn": "সবসময়", "hi": "हमेशा", "bs": "uvijek"}}
+{"guid": "D07_003", "translations": {"ro": "niciodată", "pl": "nigdy", "th": "ไม่เคย", "ta": "ஒருபோதும்", "kn": "ಎಲ್ಲಾ ಸಾರಿ ಇಲ್ಲ", "uk": "ніколи", "bn": "কখনও", "hi": "कभी नहीं", "bs": "nikad"}}
+{"guid": "D07_004", "translations": {"ro": "adesea", "pl": "często", "th": "บ่อย", "ta": "அகின்றபோது", "kn": "ಅಕಸದಾಗಿ", "uk": "часто", "bn": "প্রায়ই", "hi": "अक्सर", "bs": "često"}}
+{"guid": "D07_005", "translations": {"ro": "uneori", "pl": "czasami", "th": "บางครั้ง", "ta": "சிலசமயங்களில்", "kn": "ಕೆಲವೊಮ್ಮೆ", "uk": "іноді", "bn": "কখনও কখনও", "hi": "कभी-कभी", "bs": "ponekad"}}
+{"guid": "D07_006", "translations": {"ro": "aici", "pl": "tutaj", "th": "ที่นี่", "ta": "இங்கே", "kn": "ಇಲ್ಲಿ", "uk": "тут", "bn": "এখানে", "hi": "यहाँ", "bs": "ovdje"}}
+{"guid": "D07_007", "translations": {"ro": "acolo", "pl": "tam", "th": "ที่นั่น", "ta": "அங்கே", "kn": "ಅಲ್ಲಿ", "uk": "там", "bn": "ওখানে", "hi": "वहाँ", "bs": "tamo"}}
+{"guid": "D07_008", "translations": {"ro": "peste tot", "pl": "wszędzie", "th": "ทุกที่", "ta": "எல்லாம் இடங்களில்", "kn": "ಎಲ್ಲೆಡೆ", "uk": "усюди", "bn": "সব জায়গায়", "hi": "हर जगह", "bs": "svuda"}}
+{"guid": "D07_009", "translations": {"ro": "nicăieri", "pl": "nigdzie", "th": "ไม่ที่ไหน", "ta": "எங்கிலும் இல்லை", "kn": "ಎಲ್ಲೀನವಿಲ್ಲ", "uk": "ніде", "bn": "কোথাওই না", "hi": "कहीं नहीं", "bs": "nigdje"}}
+{"guid": "D07_010", "translations": {"ro": "deja", "pl": "już", "th": "แล้ว", "ta": "இன்னும் முன்பு", "kn": "ಇದರ ಮೊದಲು", "uk": "вже", "bn": "ইতিপূর্বে", "hi": "पहले ही", "bs": "već"}}
+{"guid": "D07_011", "translations": {"ro": "curând", "pl": "wkrótce", "th": "เร็วๆนี้", "ta": "விரைவில்", "kn": "ಶೀಘ್ರವೇ", "uk": "незабаром", "bn": "শীঘ্রই", "hi": "जल्दी", "bs": "uskoro"}}
+{"guid": "D07_012", "translations": {"ro": "recent", "pl": "niedawno", "th": "เมื่อเร็วๆนี้", "ta": "சமீபத்தில்", "kn": "ಇತ್ತೀಚೆಗೆ", "uk": "недавно", "bn": "সম্প্রতি", "hi": "हाल ही में", "bs": "nedavno"}}
 {"guid": "D07_013", "translations": {"ro": "departe", "pl": "daleko", "th": "ไกล", "ta": "தூரமாக", "kn": "ದೂರಕ್ಕೆ", "uk": "далеко", "bn": "দূরে", "hi": "दूर"}}
 {"guid": "D07_014", "translations": {"ro": "departe", "pl": "daleko", "th": "ไกล", "ta": "தூரமாக", "kn": "ದೂರ", "uk": "далеко", "bn": "দূরে", "hi": "दूर"}}
 {"guid": "D07_015", "translations": {"ro": "aproape", "pl": "blisko", "th": "ใกล้", "ta": "அருகில்", "kn": "ಹತ್ತಿರ", "uk": "поруч", "bn": "নিকটেই", "hi": "पास"}}

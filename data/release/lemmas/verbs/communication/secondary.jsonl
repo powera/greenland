@@ -1,7 +1,7 @@
-{"guid": "V09_001", "translations": {"ro": "vorbi", "pl": "mówić", "th": "พูด", "ta": "பேசு", "kn": "ಮಾತನಾಡು", "uk": "говорити", "bn": "কথা বলা", "hi": "बोलना"}}
+{"guid": "V09_001", "translations": {"ro": "vorbi", "pl": "mówić", "th": "พูด", "ta": "பேசு", "kn": "ಮಾತನಾಡು", "uk": "говорити", "bn": "কথা বলা", "hi": "बोलना", "bs": "govoriti"}}
 {"guid": "V09_002", "translations": {"ro": "vorbi", "pl": "mówić", "th": "พูด", "ta": "பேசு", "kn": "ಮಾತನಾಡು", "uk": "говорити", "bn": "কথা বলা", "hi": "बोलना"}}
-{"guid": "V09_003", "translations": {"ro": "spune", "pl": "powiedzieć", "th": "บอก", "ta": "புலம்புதல்", "kn": "ಹೇಳು", "uk": "сказати", "bn": "বলা", "hi": "कहना"}}
-{"guid": "V09_004", "translations": {"ro": "întreba", "pl": "pytać", "th": "ถาม", "ta": "கேட்பு", "kn": "ಕುಂಬಳಿಸು", "uk": "питати", "bn": "জিজ্ঞাসা করা", "hi": "पूछना"}}
+{"guid": "V09_003", "translations": {"ro": "spune", "pl": "powiedzieć", "th": "บอก", "ta": "புலம்புதல்", "kn": "ಹೇಳು", "uk": "сказати", "bn": "বলা", "hi": "कहना", "bs": "reći"}}
+{"guid": "V09_004", "translations": {"ro": "întreba", "pl": "pytać", "th": "ถาม", "ta": "கேட்பு", "kn": "ಕುಂಬಳಿಸು", "uk": "питати", "bn": "জিজ্ঞাসা করা", "hi": "पूछना", "bs": "pitati"}}
 {"guid": "V09_005", "translations": {"ro": "răspunde", "pl": "odpowiedzieć", "th": "ตอบ", "ta": "பதில் கூறு", "kn": "ಉತ್ತರಿಸು", "uk": "відповісти", "bn": "উত্তর দেওয়া", "hi": "उत्तर देना"}}
 {"guid": "V09_006", "translations": {"ro": "spune", "pl": "powiedzieć", "th": "พูด", "ta": "சொல்வது", "kn": "ಹೇಳುವುದು", "uk": "сказати", "bn": "কওয়া", "hi": "कहना", "bs": "reći"}}
 {"guid": "V09_007", "translations": {"ro": "a chema", "pl": "wołać", "th": "ร้องเรียก", "ta": "கொஞ்", "kn": "ಶುಟ್ಟು", "uk": "кликати", "bn": "ডাকা", "hi": "ड बुलाना"}}

@@ -1,5 +1,5 @@
-{"guid": "D10_001", "translations": {"ro": "destul", "pl": "wystarczająco", "th": "เพียงพอ", "ta": "போதுமான", "kn": "ತಕ್ಕಷ್ಟು", "uk": "достатньо", "bn": "পর্যাপ্ত", "hi": "पर्याप्त"}}
-{"guid": "D10_002", "translations": {"ro": "complet", "pl": "całkowicie", "th": "โดยสมบูรณ์", "ta": "முழுமையாக", "kn": "ಸಂಪೂರ್ಣವಾಗಿ", "uk": "повністю", "bn": "সম্পূর্ণভাবে", "hi": "पूरी तरह"}}
-{"guid": "D10_003", "translations": {"ro": "parțial", "pl": "częściowo", "th": "บางส่วน", "ta": "பகுதியாக", "kn": "Partly", "uk": "частково", "bn": "আংশিকভাবে", "hi": "आंशिकतः"}}
-{"guid": "D10_004", "translations": {"ro": "complet", "pl": "całkowicie", "th": "อย่างเต็มที่", "ta": "முழுமையாக", "kn": "ಸಂಪೂರ್ಣವಾಗಿ", "uk": "повністю", "bn": "সম্পূর্ণভাবে", "hi": "पूर्णतः"}}
-{"guid": "D10_005", "translations": {"ro": "complet", "pl": "całkowicie", "th": "ทั้งหมด", "ta": "முழுமையாக", "kn": "ಸಂಪೂರ್ಣವಾಗಿ", "uk": "повністю", "bn": "সম্পূর্ণভাবে", "hi": "पूਰੀ तरह"}}
+{"guid": "D10_001", "translations": {"ro": "destul", "pl": "wystarczająco", "th": "เพียงพอ", "ta": "போதுமான", "kn": "ತಕ್ಕಷ್ಟು", "uk": "достатньо", "bn": "পর্যাপ্ত", "hi": "पर्याप्त", "bs": "dovoljno"}}
+{"guid": "D10_002", "translations": {"ro": "complet", "pl": "całkowicie", "th": "โดยสมบูรณ์", "ta": "முழுமையாக", "kn": "ಸಂಪೂರ್ಣವಾಗಿ", "uk": "повністю", "bn": "সম্পূর্ণভাবে", "hi": "पूरी तरह", "bs": "potpuno"}}
+{"guid": "D10_003", "translations": {"ro": "parțial", "pl": "częściowo", "th": "บางส่วน", "ta": "பகுதியாக", "kn": "Partly", "uk": "частково", "bn": "আংশিকভাবে", "hi": "आंशिकतः", "bs": "djelomično"}}
+{"guid": "D10_004", "translations": {"ro": "complet", "pl": "całkowicie", "th": "อย่างเต็มที่", "ta": "முழுமையாக", "kn": "ಸಂಪೂರ್ಣವಾಗಿ", "uk": "повністю", "bn": "সম্পূর্ণভাবে", "hi": "पूर्णतः", "bs": "potpuno"}}
+{"guid": "D10_005", "translations": {"ro": "complet", "pl": "całkowicie", "th": "ทั้งหมด", "ta": "முழுமையாக", "kn": "ಸಂಪೂರ್ಣವಾಗಿ", "uk": "повністю", "bn": "সম্পূর্ণভাবে", "hi": "पूਰੀ तरह", "bs": "potpuno"}}

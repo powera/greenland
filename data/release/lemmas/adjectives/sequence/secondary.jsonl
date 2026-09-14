@@ -1,5 +1,5 @@
-{"guid": "A15_011", "translations": {"ro": "ultimul", "pl": "ostatni", "th": "สุดท้าย", "ta": "கடைசி", "kn": "ಕೊನೆಯ", "uk": "останній", "bn": "শেষ", "hi": "अंतिम"}}
-{"guid": "A15_012", "translations": {"ro": "final", "pl": "końcowy", "th": "สุดท้าย", "ta": "இறுதி", "kn": "ಅಂತಿಮ", "uk": "остаточний", "bn": "চূড়ান্ত", "hi": "अंतिम"}}
+{"guid": "A15_011", "translations": {"ro": "ultimul", "pl": "ostatni", "th": "สุดท้าย", "ta": "கடைசி", "kn": "ಕೊನೆಯ", "uk": "останній", "bn": "শেষ", "hi": "अंतिम", "bs": "posljednji"}}
+{"guid": "A15_012", "translations": {"ro": "final", "pl": "końcowy", "th": "สุดท้าย", "ta": "இறுதி", "kn": "ಅಂತಿಮ", "uk": "остаточний", "bn": "চূড়ান্ত", "hi": "अंतिम", "bs": "konačan"}}
 {"guid": "A15_013", "translations": {"ro": "următor", "pl": "następny", "th": "ถัดไป", "ta": "அடுத்த", "kn": "ಮುಂದಿನ", "uk": "наступний", "bn": "পরবর্তী", "hi": "अगला"}}
 {"guid": "A15_014", "translations": {"ro": "anterior", "pl": "poprzedni", "th": "ก่อนหน้า", "ta": "முந்தைய", "kn": "ಹಿಂದಿನ", "uk": "попередній", "bn": "পূর্ববর্তী", "hi": "पूर्व"}}
 {"guid": "A15_015", "translations": {"ro": "următor", "pl": "następujący", "th": "ต่อไปนี้", "ta": "தொடர்ந்து வரும்", "kn": "ಕೆಳಗಿನ", "uk": "наступний", "bn": "পরবর্তী", "hi": "अगला"}}

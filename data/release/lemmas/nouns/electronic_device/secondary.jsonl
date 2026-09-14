@@ -1,15 +1,15 @@
-{"guid": "N57_001", "translations": {"ro": "imprimantă", "pl": "drukarka", "th": "เครื่องพิมพ์", "ta": "அச்சுப்பொறி", "kn": "ಮುದ್ರಕ", "uk": "принтер", "bn": "প্রিন্টার", "hi": "प्रिंटर"}}
-{"guid": "N57_002", "translations": {"ro": "aparat foto", "pl": "aparat fotograficzny", "th": "กล้องถ่ายรูป", "ta": "புகைப்படக் கருவி", "kn": "ಫೋಟೋ ಕ್ಯಾಮೆರಾ", "uk": "фотоапарат", "bn": "ফটোক্যামেরা", "hi": "फोटोकैमरा"}}
-{"guid": "N57_003", "translations": {"ro": "televizor", "pl": "telewizor", "th": "โทรทัศน์", "ta": "தொலைக்காட்சி", "kn": "ದೂರದರ್ಶನ", "uk": "телевізор", "bn": "টেলিভিশন", "hi": "टेलीविजन"}}
-{"guid": "N57_004", "translations": {"ro": "radio", "pl": "radio", "th": "วิทยุ", "ta": "வானொலி", "kn": "ರೇಡಿಯೋ", "uk": "радіо", "bn": "রেডিও", "hi": "रेडियो"}}
-{"guid": "N57_005", "translations": {"ro": "difuzor", "pl": "głośnik", "th": "ลำโพง", "ta": "ஒலிபெருக்கி", "kn": "ಸ್ಪೀಕರ್", "uk": "гучномовець", "bn": "স্পিকার", "hi": "स्पीकर"}}
-{"guid": "N57_006", "translations": {"ro": "căști", "pl": "słuchawki", "th": "หูฟัง", "ta": "காதணிப்பொறி", "kn": "ಹೆಡ್‌ಫೋನ್", "uk": "навушники", "bn": "হেডফোন", "hi": "हैडफ़ोन"}}
-{"guid": "N57_007", "translations": {"ro": "încărcător", "pl": "ładowarka", "th": "เครื่องชาร์จ", "ta": "சார்ஜர்", "kn": "ಚಾರ್ಜರ್", "uk": "зарядний пристрій", "bn": "চার্জার", "hi": "चार्जर"}}
-{"guid": "N57_008", "translations": {"ro": "baterie", "pl": "bateria", "th": "แบตเตอรี่", "ta": "மின்கலம்", "kn": "ಬ್ಯಾಟರಿ", "uk": "акумулятор", "bn": "বাতারি", "hi": "बैटरी"}}
-{"guid": "N57_009", "translations": {"ro": "calculator", "pl": "kalkulator", "th": "เครื่องคิดเลข", "ta": "கணிப்பான்", "kn": "ಕ್ಯಾಲ್ಕುಲೇಟರ್", "uk": "калькулятор", "bn": "ক্যালকুলেটর", "hi": "कैलकुलेटर"}}
+{"guid": "N57_001", "translations": {"ro": "imprimantă", "pl": "drukarka", "th": "เครื่องพิมพ์", "ta": "அச்சுப்பொறி", "kn": "ಮುದ್ರಕ", "uk": "принтер", "bn": "প্রিন্টার", "hi": "प्रिंटर", "bs": "pisač"}}
+{"guid": "N57_002", "translations": {"ro": "aparat foto", "pl": "aparat fotograficzny", "th": "กล้องถ่ายรูป", "ta": "புகைப்படக் கருவி", "kn": "ಫೋಟೋ ಕ್ಯಾಮೆರಾ", "uk": "фотоапарат", "bn": "ফটোক্যামেরা", "hi": "फोटोकैमरा", "bs": "fotoaparat"}}
+{"guid": "N57_003", "translations": {"ro": "televizor", "pl": "telewizor", "th": "โทรทัศน์", "ta": "தொலைக்காட்சி", "kn": "ದೂರದರ್ಶನ", "uk": "телевізор", "bn": "টেলিভিশন", "hi": "टेलीविजन", "bs": "televizor"}}
+{"guid": "N57_004", "translations": {"ro": "radio", "pl": "radio", "th": "วิทยุ", "ta": "வானொலி", "kn": "ರೇಡಿಯೋ", "uk": "радіо", "bn": "রেডিও", "hi": "रेडियो", "bs": "radio"}}
+{"guid": "N57_005", "translations": {"ro": "difuzor", "pl": "głośnik", "th": "ลำโพง", "ta": "ஒலிபெருக்கி", "kn": "ಸ್ಪೀಕರ್", "uk": "гучномовець", "bn": "স্পিকার", "hi": "स्पीकर", "bs": "zvučnik"}}
+{"guid": "N57_006", "translations": {"ro": "căști", "pl": "słuchawki", "th": "หูฟัง", "ta": "காதணிப்பொறி", "kn": "ಹೆಡ್‌ಫೋನ್", "uk": "навушники", "bn": "হেডফোন", "hi": "हैडफ़ोन", "bs": "slušalice"}}
+{"guid": "N57_007", "translations": {"ro": "încărcător", "pl": "ładowarka", "th": "เครื่องชาร์จ", "ta": "சார்ஜர்", "kn": "ಚಾರ್ಜರ್", "uk": "зарядний пристрій", "bn": "চার্জার", "hi": "चार्जर", "bs": "punjač"}}
+{"guid": "N57_008", "translations": {"ro": "baterie", "pl": "bateria", "th": "แบตเตอรี่", "ta": "மின்கலம்", "kn": "ಬ್ಯಾಟರಿ", "uk": "акумулятор", "bn": "বাতারি", "hi": "बैटरी", "bs": "baterija"}}
+{"guid": "N57_009", "translations": {"ro": "calculator", "pl": "kalkulator", "th": "เครื่องคิดเลข", "ta": "கணிப்பான்", "kn": "ಕ್ಯಾಲ್ಕುಲೇಟರ್", "uk": "калькулятор", "bn": "ক্যালকুলেটর", "hi": "कैलकुलेटर", "bs": "kalkulator"}}
 {"guid": "N57_010", "translations": {"ro": "ecran", "pl": "ekran", "th": "หน้าจอ", "ta": "திரை", "kn": "ಪರದೆ", "uk": "екран", "bn": "স্ক্রিন", "hi": "स्क्रीन"}}
-{"guid": "N57_011", "translations": {"ro": "cameră video", "pl": "kamera wideo", "th": "กล้องวิดีโอ", "ta": "வீடியோ கேமரா", "kn": "ವೀಡಿಯೋ ಕ್ಯಾಮೆರಾ", "uk": "відеокамера", "bn": "ভিডিও ক্যামেরা", "hi": "वीडियो कैमरा"}}
-{"guid": "N57_012", "translations": {"ro": "calculator", "pl": "komputer", "th": "คอมพิวเตอร์", "ta": "கணினி", "kn": "ಕಂಪ್ಯೂಟರ್", "uk": "комп'ютер", "bn": "কম্পিউটার", "hi": "कम्प्यूटर"}}
+{"guid": "N57_011", "translations": {"ro": "cameră video", "pl": "kamera wideo", "th": "กล้องวิดีโอ", "ta": "வீடியோ கேமரா", "kn": "ವೀಡಿಯೋ ಕ್ಯಾಮೆರಾ", "uk": "відеокамера", "bn": "ভিডিও ক্যামেরা", "hi": "वीडियो कैमरा", "bs": "videokamera"}}
+{"guid": "N57_012", "translations": {"ro": "calculator", "pl": "komputer", "th": "คอมพิวเตอร์", "ta": "கணினி", "kn": "ಕಂಪ್ಯೂಟರ್", "uk": "комп'ютер", "bn": "কম্পিউটার", "hi": "कम्प्यूटर", "bs": "računar"}}
 {"guid": "N57_013", "translations": {"ro": "telefon", "pl": "telefon", "th": "โทรศัพท์", "ta": "தொலைபேசி", "kn": "ದೂರವಾಣಿ", "uk": "телефон", "bn": "টেলিফোন", "hi": "टेलीफोन"}}
 {"guid": "N57_014", "translations": {"ro": "laptop", "pl": "laptop", "th": "แล็ปท็อป", "ta": "மடிக்கணினி", "kn": "ಲ್ಯಾಪ್‌ಟಾಪ್", "uk": "ноутбук", "bn": "ল্যাপটপ", "hi": "लैपटॉप"}}
 {"guid": "N57_015", "translations": {"ro": "microfon", "pl": "mikrofon", "th": "ไมโครโฟน", "ta": "ஒலிவாங்கி", "kn": "ಮೈಕ್ರೋಫೋನ್", "uk": "мікрофон", "bn": "মাইক্রোফোন", "hi": "माइक्रोफोन"}}

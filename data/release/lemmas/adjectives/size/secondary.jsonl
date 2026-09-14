@@ -1,9 +1,9 @@
-{"guid": "A01_001", "translations": {"ro": "mare", "pl": "duży", "th": "ใหญ่", "ta": "பெரிய", "kn": "ದೊಡ್ಡ", "uk": "великий", "bn": "বড়", "hi": "बड़ा"}}
-{"guid": "A01_002", "translations": {"ro": "mic", "pl": "mały", "th": "เล็ก", "ta": "சிறிய", "kn": "ಸಣ್ಣ", "uk": "малий", "bn": "ছোট", "hi": "छोटा"}}
-{"guid": "A01_003", "translations": {"ro": "mare", "pl": "duży", "th": "ใหญ่", "ta": "பெரிய", "kn": "ದೊಡ್ಡ", "uk": "великий", "bn": "বড়", "hi": "बड़ा"}}
-{"guid": "A01_004", "translations": {"ro": "minuscul", "pl": "malutki", "th": "จิ๋ว", "ta": "மிகச்சிறிய", "kn": "ಅತಿಸಣ್ಣ", "uk": "крихітний", "bn": "ক্ষুদ্র", "hi": "नन्हा"}}
-{"guid": "A01_005", "translations": {"ro": "imens", "pl": "ogromny", "th": "มหึมา", "ta": "மகத்தான", "kn": "ಬೃಹತ್", "uk": "величезний", "bn": "বিশাল", "hi": "विशाल"}}
-{"guid": "A01_006", "translations": {"ro": "mediu", "pl": "średni", "th": "ปานกลาง", "ta": "நடுத்தரமான", "kn": "ಮಧ್ಯಮ", "uk": "середній", "bn": "মধ্যম", "hi": "मध्यम"}}
-{"guid": "A01_007", "translations": {"ro": "enorm", "pl": "olbrzymi", "th": "มโหฬาร", "ta": "மிகப்பெரிய", "kn": "ಅಗಾಧ", "uk": "огромний", "bn": "বিশাল", "hi": "विशाल"}}
-{"guid": "A01_008", "translations": {"ro": "miniatural", "pl": "miniaturowy", "th": "จิ๋ว", "ta": "நுண்ணிய", "kn": "ಸೂಕ್ಷ್ಮ", "uk": "мініатюрний", "bn": "ক্ষুদ্রমাত্রাই", "hi": "सूक्ष्म"}}
-{"guid": "A01_009", "translations": {"ro": "gras", "pl": "gruby", "th": "อ้วน", "ta": "குண்டான", "kn": "ದಪ್ಪ", "uk": "товстий", "bn": "চর্বিবহুল", "hi": "मोटा"}}
+{"guid": "A01_001", "translations": {"ro": "mare", "pl": "duży", "th": "ใหญ่", "ta": "பெரிய", "kn": "ದೊಡ್ಡ", "uk": "великий", "bn": "বড়", "hi": "बड़ा", "bs": "velik"}}
+{"guid": "A01_002", "translations": {"ro": "mic", "pl": "mały", "th": "เล็ก", "ta": "சிறிய", "kn": "ಸಣ್ಣ", "uk": "малий", "bn": "ছোট", "hi": "छोटा", "bs": "mali"}}
+{"guid": "A01_003", "translations": {"ro": "mare", "pl": "duży", "th": "ใหญ่", "ta": "பெரிய", "kn": "ದೊಡ್ಡ", "uk": "великий", "bn": "বড়", "hi": "बड़ा", "bs": "velik"}}
+{"guid": "A01_004", "translations": {"ro": "minuscul", "pl": "malutki", "th": "จิ๋ว", "ta": "மிகச்சிறிய", "kn": "ಅತಿಸಣ್ಣ", "uk": "крихітний", "bn": "ক্ষুদ্র", "hi": "नन्हा", "bs": "sićušan"}}
+{"guid": "A01_005", "translations": {"ro": "imens", "pl": "ogromny", "th": "มหึมา", "ta": "மகத்தான", "kn": "ಬೃಹತ್", "uk": "величезний", "bn": "বিশাল", "hi": "विशाल", "bs": "ogroman"}}
+{"guid": "A01_006", "translations": {"ro": "mediu", "pl": "średni", "th": "ปานกลาง", "ta": "நடுத்தரமான", "kn": "ಮಧ್ಯಮ", "uk": "середній", "bn": "মধ্যম", "hi": "मध्यम", "bs": "srednji"}}
+{"guid": "A01_007", "translations": {"ro": "enorm", "pl": "olbrzymi", "th": "มโหฬาร", "ta": "மிகப்பெரிய", "kn": "ಅಗಾಧ", "uk": "огромний", "bn": "বিশাল", "hi": "विशाल", "bs": "ogroman"}}
+{"guid": "A01_008", "translations": {"ro": "miniatural", "pl": "miniaturowy", "th": "จิ๋ว", "ta": "நுண்ணிய", "kn": "ಸೂಕ್ಷ್ಮ", "uk": "мініатюрний", "bn": "ক্ষুদ্রমাত্রাই", "hi": "सूक्ष्म", "bs": "minijaturan"}}
+{"guid": "A01_009", "translations": {"ro": "gras", "pl": "gruby", "th": "อ้วน", "ta": "குண்டான", "kn": "ದಪ್ಪ", "uk": "товстий", "bn": "চর্বিবহুল", "hi": "मोटा", "bs": "debeo"}}
