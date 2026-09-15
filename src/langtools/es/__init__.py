@@ -24,9 +24,18 @@ Rule-based conjugation (no network/LLM required):
 
     forms = conjugate("hablar")
     # forms["1s_present"] == "hablo", etc.
+    # Pronominal verbs work too: conjugate("levantarse")["1s_present"]
+    # == "me levanto".
+
+Rule-based adjective agreement:
+    from langtools.es.inflection import build_adjective_forms
+
+    forms = build_adjective_forms("rojo")
+    # forms["singular_f"] == "roja", etc.
 """
 
-from langtools.es.conjugation import conjugate, conjugate_safe
+from langtools.es.conjugation import conjugate, conjugate_safe, is_reflexive
+from langtools.es.inflection import build_adjective_forms
 from langtools.es.types import (
     AdjectiveDeclension,
     AdverbForms,
@@ -58,9 +67,11 @@ __all__ = [
     "NounDeclension",
     "SpanishGender",
     "VerbConjugation",
-    # Rule-based conjugation
+    # Rule-based conjugation and inflection
+    "build_adjective_forms",
     "conjugate",
     "conjugate_safe",
+    "is_reflexive",
     # Convenience functions
     "get_spanish_adjective_forms",
     "get_spanish_adverb_forms",

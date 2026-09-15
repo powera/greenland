@@ -39,6 +39,27 @@ Legend:
 5. Dispatcher standardization at top-level `src/langtools/*.py` should continue
    to converge toward language-first dynamic import entrypoints.
 
+## Spanish mechanical coverage (2026-09-15)
+
+`es` now generates verb and adjective forms mechanically for essentially the
+whole release vocabulary; only multi-word phrases ("darse cuenta", "de mala
+calidad") fall through to the LLM.
+
+- `es/orthography.py` is new: syllable nuclei, stress placement, and
+  written-accent add/drop.  Both the conjugator (enclitic pronouns) and the
+  adjective inflector (plural formation) need the same primitives.
+- `es/conjugation.py` replaced the hand-listed `-cer/-cir` table with the
+  actual rules (vowel → `-zco`, consonant → `c` → `z`), added `-ger/-gir`,
+  `-quir` and `-guar` spelling, the `i` → `y` preterite for vowel stems
+  (`leyó`, `leíste`), palatal stems that swallow the `i` (`gruñó`), the `-eír`
+  family, the `hue-` spelling (`huelo`), accented `-iar`/`-uar` boot forms
+  (`envío`, `actúo`), and pronominal verbs (`me levanto`, `levántate`).
+- `es/inflection.py` covers the gendered consonant endings (`hablador`,
+  `francés`), invariant comparatives, and consonant plurals with their accent
+  shifts (`jóvenes`, `comunes`).
+- Detailed tables live in `src/regtest/langtools/test_es_*.py`; run them with
+  `./run_tests.sh regtest`.
+
 ## Adjective coverage + conjugation API (2026-06-15)
 
 - **Adjective forms** are now configured for all core languages. `es`, `fr`,

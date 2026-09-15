@@ -2,7 +2,13 @@
 
 import unittest
 
-from langtools.es.conjugation import conjugate, conjugate_safe, get_verb_class, get_stem
+from langtools.es.conjugation import (
+    conjugate,
+    conjugate_safe,
+    get_stem,
+    get_verb_class,
+    is_reflexive,
+)
 
 
 class TestVerbClassification(unittest.TestCase):
@@ -497,11 +503,22 @@ class TestConjugateSafe(unittest.TestCase):
         self.assertIn("1s_present", forms)
         self.assertEqual(warnings, [])
 
-    def test_warning_for_potential_irregular(self) -> None:
-        """Verbs ending in -cer not in our table get a warning."""
-        forms, warnings = conjugate_safe("vencer")
+    def test_no_warning_for_rule_covered_spelling(self) -> None:
+        """-cer/-ger/-guir spelling shifts are rules now, not guesses."""
+        for verb in ("vencer", "florecer", "coger", "seguir", "averiguar"):
+            forms, warnings = conjugate_safe(verb)
+            self.assertIn("1s_present", forms)
+            self.assertEqual(warnings, [], verb)
+
+    def test_warning_for_lexically_ambiguous_iar(self) -> None:
+        """cambiar glides but enviar accents; an unlisted -iar verb is a guess."""
+        forms, warnings = conjugate_safe("chirriar")
         self.assertIn("1s_present", forms)
-        self.assertTrue(len(warnings) > 0)
+        self.assertEqual(len(warnings), 1)
+
+    def test_no_warning_for_listed_iar(self) -> None:
+        _forms, warnings = conjugate_safe("enviar")
+        self.assertEqual(warnings, [])
 
 
 class TestUirVerbs(unittest.TestCase):
@@ -566,6 +583,432 @@ class TestUcirVerbs(unittest.TestCase):
         assert forms is not None
         self.assertEqual(forms["1s_subjunctive_present"], "traduzca")
         self.assertEqual(forms["3p_subjunctive_present"], "traduzcan")
+
+
+class TestCerCirSpelling(unittest.TestCase):
+    """A vowel before -cer/-cir gives -zco; a consonant gives c → z."""
+
+    def test_vowel_stem_takes_zco(self) -> None:
+        for infinitive, first_singular in [
+            ("conocer", "conozco"),
+            ("florecer", "florezco"),
+            ("fortalecer", "fortalezco"),
+            ("nacer", "nazco"),
+            ("agradecer", "agradezco"),
+            ("lucir", "luzco"),
+        ]:
+            forms = conjugate(infinitive)
+            assert forms is not None
+            self.assertEqual(forms["1s_present"], first_singular, infinitive)
+            self.assertEqual(forms["2s_present"], get_stem(infinitive) + "es", infinitive)
+
+    def test_vowel_stem_subjunctive(self) -> None:
+        forms = conjugate("florecer")
+        assert forms is not None
+        self.assertEqual(
+            [forms[f"{person}_subjunctive_present"] for person in ("1s", "2s", "1p", "3p")],
+            ["florezca", "florezcas", "florezcamos", "florezcan"],
+        )
+
+    def test_consonant_stem_takes_c_to_z(self) -> None:
+        for infinitive, first_singular, subjunctive in [
+            ("vencer", "venzo", "venza"),
+            ("convencer", "convenzo", "convenza"),
+            ("ejercer", "ejerzo", "ejerza"),
+            ("esparcir", "esparzo", "esparza"),
+            ("zurcir", "zurzo", "zurza"),
+        ]:
+            forms = conjugate(infinitive)
+            assert forms is not None
+            self.assertEqual(forms["1s_present"], first_singular, infinitive)
+            self.assertEqual(forms["1s_subjunctive_present"], subjunctive, infinitive)
+
+    def test_mecer_escapes_the_vowel_rule(self) -> None:
+        forms = conjugate("mecer")
+        assert forms is not None
+        self.assertEqual(forms["1s_present"], "mezo")
+        self.assertEqual(forms["1s_subjunctive_present"], "meza")
+
+    def test_cocer_combines_stem_change_and_c_to_z(self) -> None:
+        forms = conjugate("cocer")
+        assert forms is not None
+        self.assertEqual(forms["1s_present"], "cuezo")
+        self.assertEqual(forms["2s_present"], "cueces")
+        self.assertEqual(forms["1p_present"], "cocemos")
+        self.assertEqual(forms["1s_subjunctive_present"], "cueza")
+        self.assertEqual(forms["1p_subjunctive_present"], "cozamos")
+
+    def test_torcer(self) -> None:
+        forms = conjugate("torcer")
+        assert forms is not None
+        self.assertEqual(forms["1s_present"], "tuerzo")
+        self.assertEqual(forms["3s_present"], "tuerce")
+        self.assertEqual(forms["1p_subjunctive_present"], "torzamos")
+
+
+class TestGerGirQuirSpelling(unittest.TestCase):
+    """The consonant sound stays put while the spelling moves."""
+
+    def test_ger_gir_take_j_before_back_vowels(self) -> None:
+        for infinitive, first_singular in [
+            ("coger", "cojo"),
+            ("escoger", "escojo"),
+            ("recoger", "recojo"),
+            ("proteger", "protejo"),
+            ("emerger", "emerjo"),
+            ("dirigir", "dirijo"),
+            ("exigir", "exijo"),
+            ("surgir", "surjo"),
+        ]:
+            forms = conjugate(infinitive)
+            assert forms is not None
+            self.assertEqual(forms["1s_present"], first_singular, infinitive)
+            self.assertEqual(forms["1s_subjunctive_present"], first_singular[:-1] + "a")
+
+    def test_ger_keeps_g_before_front_vowels(self) -> None:
+        forms = conjugate("coger")
+        assert forms is not None
+        self.assertEqual(forms["2s_present"], "coges")
+        self.assertEqual(forms["3p_present"], "cogen")
+        self.assertEqual(forms["3s_preterite"], "cogió")
+
+    def test_quir_takes_c_before_back_vowels(self) -> None:
+        forms = conjugate("delinquir")
+        assert forms is not None
+        self.assertEqual(forms["1s_present"], "delinco")
+        self.assertEqual(forms["2s_present"], "delinques")
+        self.assertEqual(forms["1s_subjunctive_present"], "delinca")
+        self.assertEqual(forms["gerund"], "delinquiendo")
+
+    def test_guar_writes_dieresis_before_e(self) -> None:
+        forms = conjugate("averiguar")
+        assert forms is not None
+        self.assertEqual(forms["1s_preterite"], "averigüé")
+        self.assertEqual(forms["2s_preterite"], "averiguaste")
+        self.assertEqual(forms["1s_subjunctive_present"], "averigüe")
+        self.assertEqual(forms["1p_subjunctive_present"], "averigüemos")
+
+
+class TestVowelStemPreterite(unittest.TestCase):
+    """leer, creer, caer, oír: unstressed i → y, and a written hiatus elsewhere."""
+
+    def test_leer_full_preterite(self) -> None:
+        forms = conjugate("leer")
+        assert forms is not None
+        self.assertEqual(
+            [forms[f"{person}_preterite"] for person in ("1s", "2s", "3s", "1p", "2p", "3p")],
+            ["leí", "leíste", "leyó", "leímos", "leísteis", "leyeron"],
+        )
+
+    def test_creer_and_caer(self) -> None:
+        creer = conjugate("creer")
+        assert creer is not None
+        self.assertEqual(creer["3s_preterite"], "creyó")
+        self.assertEqual(creer["2s_preterite"], "creíste")
+        self.assertEqual(creer["3p_preterite"], "creyeron")
+
+        caer = conjugate("caer")
+        assert caer is not None
+        self.assertEqual(caer["3s_preterite"], "cayó")
+        self.assertEqual(caer["1p_preterite"], "caímos")
+
+    def test_oir_preterite(self) -> None:
+        forms = conjugate("oír")
+        assert forms is not None
+        self.assertEqual(forms["1s_preterite"], "oí")
+        self.assertEqual(forms["3s_preterite"], "oyó")
+        self.assertEqual(forms["3p_preterite"], "oyeron")
+
+    def test_past_participles_carry_the_hiatus_accent(self) -> None:
+        for infinitive, participle in [
+            ("leer", "leído"),
+            ("creer", "creído"),
+            ("caer", "caído"),
+            ("oír", "oído"),
+            ("poseer", "poseído"),
+        ]:
+            forms = conjugate(infinitive)
+            assert forms is not None
+            self.assertEqual(forms["past_participle"], participle, infinitive)
+
+    def test_consonant_stems_keep_the_plain_participle(self) -> None:
+        forms = conjugate("comer")
+        assert forms is not None
+        self.assertEqual(forms["past_participle"], "comido")
+
+
+class TestPalatalStems(unittest.TestCase):
+    """Stems in ñ / ll / ch swallow the i of -ió, -ieron and -iendo."""
+
+    def test_gruñir(self) -> None:
+        forms = conjugate("gruñir")
+        assert forms is not None
+        self.assertEqual(forms["3s_preterite"], "gruñó")
+        self.assertEqual(forms["3p_preterite"], "gruñeron")
+        self.assertEqual(forms["2s_preterite"], "gruñiste")
+        self.assertEqual(forms["gerund"], "gruñendo")
+
+    def test_bullir(self) -> None:
+        forms = conjugate("bullir")
+        assert forms is not None
+        self.assertEqual(forms["3s_preterite"], "bulló")
+        self.assertEqual(forms["3p_preterite"], "bulleron")
+        self.assertEqual(forms["gerund"], "bullendo")
+
+    def test_reñir_combines_with_the_stem_change(self) -> None:
+        forms = conjugate("reñir")
+        assert forms is not None
+        self.assertEqual(forms["1s_present"], "riño")
+        self.assertEqual(forms["1p_present"], "reñimos")
+        self.assertEqual(forms["3s_preterite"], "riñó")
+        self.assertEqual(forms["3p_preterite"], "riñeron")
+        self.assertEqual(forms["gerund"], "riñendo")
+
+
+class TestAccentedGlideVerbs(unittest.TestCase):
+    """enviar → envío, actuar → actúo, but cambiar → cambio."""
+
+    def test_listed_iar_verbs_accent_the_boot(self) -> None:
+        forms = conjugate("enviar")
+        assert forms is not None
+        self.assertEqual(
+            [forms[f"{person}_present"] for person in ("1s", "2s", "3s", "1p", "2p", "3p")],
+            ["envío", "envías", "envía", "enviamos", "enviáis", "envían"],
+        )
+        self.assertEqual(forms["1s_subjunctive_present"], "envíe")
+        self.assertEqual(forms["1p_subjunctive_present"], "enviemos")
+        self.assertEqual(forms["1s_preterite"], "envié")
+
+    def test_unlisted_iar_verbs_glide(self) -> None:
+        for infinitive, first_singular in [
+            ("cambiar", "cambio"),
+            ("estudiar", "estudio"),
+            ("limpiar", "limpio"),
+            ("odiar", "odio"),
+        ]:
+            forms = conjugate(infinitive)
+            assert forms is not None
+            self.assertEqual(forms["1s_present"], first_singular, infinitive)
+
+    def test_uar_accents_except_after_g_or_c(self) -> None:
+        for infinitive, first_singular in [
+            ("actuar", "actúo"),
+            ("continuar", "continúo"),
+            ("situar", "sitúo"),
+            ("graduar", "gradúo"),
+            ("evaluar", "evalúo"),
+        ]:
+            forms = conjugate(infinitive)
+            assert forms is not None
+            self.assertEqual(forms["1s_present"], first_singular, infinitive)
+
+        for infinitive, first_singular in [
+            ("averiguar", "averiguo"),
+            ("evacuar", "evacuo"),
+            ("adecuar", "adecuo"),
+        ]:
+            forms = conjugate(infinitive)
+            assert forms is not None
+            self.assertEqual(forms["1s_present"], first_singular, infinitive)
+
+
+class TestOlerAndAdquirir(unittest.TestCase):
+    def test_oler_writes_the_initial_diphthong_with_h(self) -> None:
+        forms = conjugate("oler")
+        assert forms is not None
+        self.assertEqual(
+            [forms[f"{person}_present"] for person in ("1s", "2s", "3s", "1p", "2p", "3p")],
+            ["huelo", "hueles", "huele", "olemos", "oléis", "huelen"],
+        )
+        self.assertEqual(forms["1s_subjunctive_present"], "huela")
+        self.assertEqual(forms["1p_subjunctive_present"], "olamos")
+        self.assertEqual(forms["gerund"], "oliendo")
+
+    def test_adquirir(self) -> None:
+        forms = conjugate("adquirir")
+        assert forms is not None
+        self.assertEqual(forms["1s_present"], "adquiero")
+        self.assertEqual(forms["3s_present"], "adquiere")
+        self.assertEqual(forms["1p_present"], "adquirimos")
+        self.assertEqual(forms["1s_subjunctive_present"], "adquiera")
+
+
+class TestArStemChangeSpellingOrder(unittest.TestCase):
+    """The stem change lands before the spelling fix: jugar → juegue."""
+
+    def test_jugar_subjunctive(self) -> None:
+        forms = conjugate("jugar")
+        assert forms is not None
+        self.assertEqual(
+            [
+                forms[f"{person}_subjunctive_present"]
+                for person in ("1s", "2s", "3s", "1p", "2p", "3p")
+            ],
+            ["juegue", "juegues", "juegue", "juguemos", "juguéis", "jueguen"],
+        )
+
+    def test_g_and_z_stem_changers(self) -> None:
+        for infinitive, boot, flat in [
+            ("colgar", "cuelgue", "colguemos"),
+            ("rogar", "ruegue", "roguemos"),
+            ("negar", "niegue", "neguemos"),
+            ("regar", "riegue", "reguemos"),
+            ("forzar", "fuerce", "forcemos"),
+            ("almorzar", "almuerce", "almorcemos"),
+            ("empezar", "empiece", "empecemos"),
+            ("comenzar", "comience", "comencemos"),
+        ]:
+            forms = conjugate(infinitive)
+            assert forms is not None
+            self.assertEqual(forms["1s_subjunctive_present"], boot, infinitive)
+            self.assertEqual(forms["1p_subjunctive_present"], flat, infinitive)
+
+
+class TestEirVerbs(unittest.TestCase):
+    """reír, sonreír, freír: e → i plus a written hiatus."""
+
+    def test_reir_present(self) -> None:
+        forms = conjugate("reír")
+        assert forms is not None
+        self.assertEqual(
+            [forms[f"{person}_present"] for person in ("1s", "2s", "3s", "1p", "2p", "3p")],
+            ["río", "ríes", "ríe", "reímos", "reís", "ríen"],
+        )
+
+    def test_reir_preterite_and_subjunctive(self) -> None:
+        forms = conjugate("reír")
+        assert forms is not None
+        self.assertEqual(
+            [forms[f"{person}_preterite"] for person in ("1s", "2s", "3s", "1p", "2p", "3p")],
+            ["reí", "reíste", "rio", "reímos", "reísteis", "rieron"],
+        )
+        self.assertEqual(
+            [
+                forms[f"{person}_subjunctive_present"]
+                for person in ("1s", "2s", "3s", "1p", "2p", "3p")
+            ],
+            ["ría", "rías", "ría", "riamos", "riais", "rían"],
+        )
+
+    def test_reir_future_drops_the_infinitive_accent(self) -> None:
+        forms = conjugate("reír")
+        assert forms is not None
+        self.assertEqual(forms["1s_future"], "reiré")
+        self.assertEqual(forms["3p_future"], "reirán")
+        self.assertEqual(forms["1s_conditional"], "reiría")
+
+    def test_reir_nonfinite_and_imperative(self) -> None:
+        forms = conjugate("reír")
+        assert forms is not None
+        self.assertEqual(forms["gerund"], "riendo")
+        self.assertEqual(forms["past_participle"], "reído")
+        self.assertEqual(forms["2s_imperative"], "ríe")
+        self.assertEqual(forms["2p_imperative"], "reíd")
+
+    def test_sonreir_takes_the_accent_on_the_third_singular(self) -> None:
+        forms = conjugate("sonreír")
+        assert forms is not None
+        self.assertEqual(forms["1s_present"], "sonrío")
+        self.assertEqual(forms["1p_present"], "sonreímos")
+        self.assertEqual(forms["3s_preterite"], "sonrió")
+        self.assertEqual(forms["3p_preterite"], "sonrieron")
+        self.assertEqual(forms["gerund"], "sonriendo")
+
+    def test_freir_keeps_its_irregular_participle(self) -> None:
+        forms = conjugate("freír")
+        assert forms is not None
+        self.assertEqual(forms["1s_present"], "frío")
+        self.assertEqual(forms["3s_preterite"], "frio")
+        self.assertEqual(forms["past_participle"], "frito")
+
+
+class TestReflexiveVerbs(unittest.TestCase):
+    """Pronominal verbs: proclitic on finite forms, enclitic elsewhere."""
+
+    def test_detection(self) -> None:
+        self.assertTrue(is_reflexive("levantarse"))
+        self.assertTrue(is_reflexive("irse"))
+        self.assertFalse(is_reflexive("hablar"))
+        self.assertFalse(is_reflexive("casa"))
+        self.assertFalse(is_reflexive("darse cuenta"))
+
+    def test_levantarse_present(self) -> None:
+        forms = conjugate("levantarse")
+        assert forms is not None
+        self.assertEqual(
+            [forms[f"{person}_present"] for person in ("1s", "2s", "3s", "1p", "2p", "3p")],
+            [
+                "me levanto",
+                "te levantas",
+                "se levanta",
+                "nos levantamos",
+                "os levantáis",
+                "se levantan",
+            ],
+        )
+
+    def test_levantarse_other_tenses(self) -> None:
+        forms = conjugate("levantarse")
+        assert forms is not None
+        self.assertEqual(forms["1s_preterite"], "me levanté")
+        self.assertEqual(forms["3s_imperfect"], "se levantaba")
+        self.assertEqual(forms["1p_future"], "nos levantaremos")
+        self.assertEqual(forms["2p_conditional"], "os levantaríais")
+        self.assertEqual(forms["3p_subjunctive_present"], "se levanten")
+
+    def test_levantarse_nonfinite_and_imperative(self) -> None:
+        forms = conjugate("levantarse")
+        assert forms is not None
+        self.assertEqual(forms["infinitive"], "levantarse")
+        self.assertEqual(forms["gerund"], "levantándose")
+        self.assertEqual(forms["past_participle"], "levantado")
+        self.assertEqual(
+            [forms[f"{person}_imperative"] for person in ("2s", "3s", "1p", "2p", "3p")],
+            ["levántate", "levántese", "levantémonos", "levantaos", "levántense"],
+        )
+
+    def test_reflexive_of_a_stem_changer(self) -> None:
+        forms = conjugate("sentarse")
+        assert forms is not None
+        self.assertEqual(forms["1s_present"], "me siento")
+        self.assertEqual(forms["1p_present"], "nos sentamos")
+        self.assertEqual(forms["2s_imperative"], "siéntate")
+        self.assertEqual(forms["2p_imperative"], "sentaos")
+
+    def test_ir_verbs_keep_the_hiatus_in_the_vosotros_imperative(self) -> None:
+        forms = conjugate("vestirse")
+        assert forms is not None
+        self.assertEqual(forms["2p_imperative"], "vestíos")
+        self.assertEqual(forms["1p_imperative"], "vistámonos")
+
+    def test_irse_keeps_the_d(self) -> None:
+        forms = conjugate("irse")
+        assert forms is not None
+        self.assertEqual(forms["1s_present"], "me voy")
+        self.assertEqual(forms["2s_imperative"], "vete")
+        self.assertEqual(forms["1p_imperative"], "vámonos")
+        self.assertEqual(forms["2p_imperative"], "idos")
+        self.assertEqual(forms["gerund"], "yéndose")
+
+    def test_reflexive_of_an_irregular_verb(self) -> None:
+        forms = conjugate("ponerse")
+        assert forms is not None
+        self.assertEqual(forms["1s_present"], "me pongo")
+        self.assertEqual(forms["1s_future"], "me pondré")
+        self.assertEqual(forms["2s_imperative"], "ponte")
+        self.assertEqual(forms["past_participle"], "puesto")
+
+    def test_reflexive_of_an_eir_verb(self) -> None:
+        forms = conjugate("reírse")
+        assert forms is not None
+        self.assertEqual(forms["1s_present"], "me río")
+        self.assertEqual(forms["2s_imperative"], "ríete")
+        self.assertEqual(forms["2p_imperative"], "reíos")
+        self.assertEqual(forms["gerund"], "riéndose")
+
+    def test_multiword_phrases_are_not_conjugated(self) -> None:
+        self.assertIsNone(conjugate("darse cuenta"))
+        self.assertIsNone(conjugate("estar de pie"))
 
 
 if __name__ == "__main__":

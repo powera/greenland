@@ -11,7 +11,9 @@ Irregular verbs are handled via:
 4. Fully irregular verb tables for ser, ir, haber, etc.
 """
 
-from typing import Dict, List, Optional, Tuple
+from typing import Dict, List, Optional, Set, Tuple
+
+from langtools.es.orthography import respell_with_stress, stressed_nucleus, strip_accents
 
 # ---------------------------------------------------------------------------
 # Regular endings
@@ -91,11 +93,29 @@ STEM_CHANGING_VERBS: Dict[str, str] = {
     "negar": "e>ie",
     "recomendar": "e>ie",
     "sentar": "e>ie",
+    "acertar": "e>ie",
+    "apretar": "e>ie",
+    "atravesar": "e>ie",
+    "calentar": "e>ie",
+    "confesar": "e>ie",
+    "encerrar": "e>ie",
+    "helar": "e>ie",
+    "manifestar": "e>ie",
+    "merendar": "e>ie",
+    "nevar": "e>ie",
+    "quebrar": "e>ie",
+    "regar": "e>ie",
+    "tropezar": "e>ie",
     "entender": "e>ie",
     "perder": "e>ie",
     "querer": "e>ie",
     "defender": "e>ie",
     "encender": "e>ie",
+    "ascender": "e>ie",
+    "atender": "e>ie",
+    "descender": "e>ie",
+    "extender": "e>ie",
+    "verter": "e>ie",
     "sentir": "e>ie",
     "mentir": "e>ie",
     "preferir": "e>ie",
@@ -104,6 +124,13 @@ STEM_CHANGING_VERBS: Dict[str, str] = {
     "hervir": "e>ie",
     "sugerir": "e>ie",
     "advertir": "e>ie",
+    "adherir": "e>ie",
+    "arrepentir": "e>ie",
+    "consentir": "e>ie",
+    "digerir": "e>ie",
+    "herir": "e>ie",
+    "invertir": "e>ie",
+    "referir": "e>ie",
     # o → ue
     "contar": "o>ue",
     "encontrar": "o>ue",
@@ -115,11 +142,30 @@ STEM_CHANGING_VERBS: Dict[str, str] = {
     "probar": "o>ue",
     "almorzar": "o>ue",
     "rogar": "o>ue",
+    "acordar": "o>ue",
+    "acostar": "o>ue",
+    "apostar": "o>ue",
+    "aprobar": "o>ue",
+    "colgar": "o>ue",
+    "comprobar": "o>ue",
+    "demostrar": "o>ue",
+    "forzar": "o>ue",
+    "rodar": "o>ue",
+    "sonar": "o>ue",
+    "tostar": "o>ue",
     "poder": "o>ue",
     "volver": "o>ue",
     "mover": "o>ue",
     "resolver": "o>ue",
     "soler": "o>ue",
+    "cocer": "o>ue",
+    "doler": "o>ue",
+    "devolver": "o>ue",
+    "envolver": "o>ue",
+    "llover": "o>ue",
+    "morder": "o>ue",
+    "oler": "o>ue",
+    "torcer": "o>ue",
     "dormir": "o>ue",
     "morir": "o>ue",
     # e → i (only -ir verbs)
@@ -129,16 +175,23 @@ STEM_CHANGING_VERBS: Dict[str, str] = {
     "seguir": "e>i",
     "vestir": "e>i",
     "medir": "e>i",
-    "reír": "e>i",
-    "sonreír": "e>i",
     "competir": "e>i",
     "impedir": "e>i",
     "conseguir": "e>i",
     "perseguir": "e>i",
     "corregir": "e>i",
     "elegir": "e>i",
+    "despedir": "e>i",
+    "gemir": "e>i",
+    "rendir": "e>i",
+    "reñir": "e>i",
+    "teñir": "e>i",
+    "ceñir": "e>i",
     # u → ue
     "jugar": "u>ue",
+    # i → ie
+    "adquirir": "i>ie",
+    "inquirir": "i>ie",
 }
 
 
@@ -158,46 +211,28 @@ def _apply_stem_change(stem: str, from_v: str, to_v: str) -> str:
 def _spelling_adjust_ar_subj(stem: str) -> str:
     """Adjust -ar verb stem for subjunctive (stem + e-vowel endings).
 
-    c → qu, g → gu, z → c before 'e'.
+    c → qu, g → gu, z → c, gu → gü before 'e'.
     """
     if stem.endswith("c"):
         return stem[:-1] + "qu"
+    if stem.endswith("gu"):
+        # The u must stay audible: averiguar → averigüe.
+        return stem[:-1] + "ü"
     if stem.endswith("g"):
         return stem + "u"
     if stem.endswith("z"):
         return stem[:-1] + "c"
-    return stem
-
-
-def _spelling_adjust_er_ir_subj(stem: str) -> str:
-    """Adjust -er/-ir verb stem for subjunctive (stem + a-vowel endings).
-
-    gu → g, qu → c before 'a' (reverse of -ar pattern).
-    Also: g → j before 'a' for verbs like coger/proteger.
-    """
-    if stem.endswith("gu"):
-        return stem[:-1]  # drop u
-    if stem.endswith("qu"):
-        return stem[:-2] + "c"
-    if stem.endswith("g"):
-        return stem[:-1] + "j"
     return stem
 
 
 def _spelling_adjust_preterite_yo(stem: str, verb_class: str) -> str:
     """Adjust stem for 1s preterite of -ar verbs.
 
-    c → qu, g → gu, z → c before 'é'.
+    c → qu, g → gu, z → c, gu → gü before 'é'.
     """
     if verb_class != "ar":
         return stem
-    if stem.endswith("c"):
-        return stem[:-1] + "qu"
-    if stem.endswith("g"):
-        return stem + "u"
-    if stem.endswith("z"):
-        return stem[:-1] + "c"
-    return stem
+    return _spelling_adjust_ar_subj(stem)
 
 
 # ---------------------------------------------------------------------------
@@ -455,33 +490,271 @@ FULLY_IRREGULAR: Dict[str, Dict[str, str]] = {
 }
 
 # ---------------------------------------------------------------------------
-# -ucir verbs (conducir, producir, traducir, etc.)
-# These share a pattern: 1s present -uzco, irregular preterite -uj-
+# -ucir verbs (conducir, producir, traducir, etc.) take the -zco present below
+# and an irregular -uj- preterite.
 # ---------------------------------------------------------------------------
 
-_UCIR_1S_SUFFIX = "uzco"
-
 # ---------------------------------------------------------------------------
-# -cer/-cir verbs that add -zco in 1s present (conocer, parecer, etc.)
+# -cer/-cir spelling families
+#
+# A vowel before the -cer/-cir ending gives the inchoative -zco pattern
+# (conocer -> conozco, florecer -> florezco, traducir -> traduzco); a consonant
+# before it gives a plain c -> z swap before the back vowels (vencer -> venzo,
+# esparcir -> esparzo).  Only a short list of verbs escapes the vowel rule.
 # ---------------------------------------------------------------------------
 
-_CER_ZCO_VERBS = {
-    "agradecer",
-    "aparecer",
-    "conocer",
-    "crecer",
-    "desaparecer",
-    "establecer",
-    "favorecer",
-    "merecer",
-    "nacer",
-    "obedecer",
-    "ofrecer",
-    "parecer",
-    "pertenecer",
-    "permanecer",
-    "reconocer",
+_ZCO_EXCEPTIONS: Set[str] = {
+    "cocer",
+    "contrahacer",
+    "deshacer",
+    "escocer",
+    "hacer",
+    "mecer",
+    "recocer",
+    "rehacer",
+    "remecer",
+    "satisfacer",
 }
+
+_VOWELS = "aeiouáéíóú"
+
+# -iar verbs that stress the weak vowel in the boot forms (enviar -> envío)
+# rather than gliding over it (cambiar -> cambio).  The split is lexical, so
+# the accented ones are listed; -uar follows a rule instead (see below).
+ACCENTED_IAR_VERBS: Set[str] = {
+    "ampliar",
+    "confiar",
+    "criar",
+    "desafiar",
+    "desviar",
+    "enfriar",
+    "enviar",
+    "espiar",
+    "fiar",
+    "guiar",
+    "liar",
+    "resfriar",
+    "rociar",
+    "vaciar",
+    "variar",
+}
+
+# Stems that already end in a palatal absorb the i of -ió / -ieron / -iendo:
+# gruñir -> gruñó, gruñendo; bullir -> bulleron.
+_I_ABSORBING_STEM_ENDINGS = ("ñ", "ll", "ch")
+
+
+def _stresses_weak_vowel(inf: str) -> bool:
+    """True if the boot forms break the glide and accent the stem's i/u.
+
+    -uar follows the spelling: the u is a silent digraph marker after g or c
+    (averiguar → averiguo, evacuar → evacuo) and a full vowel otherwise
+    (actuar → actúo, continuar → continúo).  -iar is lexical.
+    """
+    if inf in ACCENTED_IAR_VERBS:
+        return True
+    if inf.endswith("uar"):
+        return len(inf) > 3 and inf[-4] not in "gc"
+    return False
+
+
+def _takes_zco(inf: str) -> bool:
+    """True for -cer/-cir verbs with the inchoative -zco 1s present."""
+    if inf in _ZCO_EXCEPTIONS or not inf.endswith(("cer", "cir")):
+        return False
+    before_c = inf[:-3]
+    return bool(before_c) and before_c[-1] in _VOWELS
+
+
+def _takes_c_to_z(inf: str) -> bool:
+    """True for -cer/-cir verbs that simply write c as z before o/a."""
+    return inf.endswith(("cer", "cir")) and not _takes_zco(inf)
+
+
+def _has_strong_vowel_stem(stem: str) -> bool:
+    """True if ``stem`` ends in a strong vowel, as in leer, creer, caer, oír."""
+    return bool(stem) and stem[-1] in "aeoáéó"
+
+
+def _absorbs_i(stem: str) -> bool:
+    """True if ``stem`` swallows the i of an -i- initial ending."""
+    return stem.endswith(_I_ABSORBING_STEM_ENDINGS)
+
+
+def _spelling_adjust_before_back_vowel(inf: str, stem: str) -> str:
+    """Adjust a stem for the -o/-a endings (1s present and the subjunctive).
+
+    Spanish keeps the consonant sound constant and moves the spelling:
+    coger -> cojo, seguir -> sigo, delinquir -> delinco, vencer -> venzo.
+    """
+    if inf.endswith(("ger", "gir")) and stem.endswith("g"):
+        return stem[:-1] + "j"
+    if inf.endswith("guir") and stem.endswith("gu"):
+        return stem[:-1]
+    if inf.endswith("quir") and stem.endswith("qu"):
+        return stem[:-2] + "c"
+    if _takes_c_to_z(inf) and stem.endswith("c"):
+        return stem[:-1] + "z"
+    return stem
+
+
+def _accent_final_weak_vowel(stem: str) -> str:
+    """Write an accent on the stem's final i/u (envi- -> enví-, continu- -> continú-)."""
+    if stem.endswith("i"):
+        return stem[:-1] + "í"
+    if stem.endswith("u"):
+        return stem[:-1] + "ú"
+    return stem
+
+
+def _restore_initial_h(stem: str) -> str:
+    """Spanish writes a word-initial ue/ie diphthong with a silent h (oler -> huelo)."""
+    if stem.startswith(("ue", "ie")):
+        return "h" + stem
+    return stem
+
+
+# ---------------------------------------------------------------------------
+# The -eír family (reír, sonreír, freír)
+#
+# These combine the e→i change with a hiatus that has to be written: río but
+# reímos, rio but sonrió.  The pattern is regular within the family, so it is
+# generated from the prefix before -eír.
+# ---------------------------------------------------------------------------
+
+EIR_VERBS: Set[str] = {
+    "desleír",
+    "engreír",
+    "freír",
+    "refreír",
+    "reír",
+    "sofreír",
+    "sonreír",
+}
+
+
+def _conjugate_eir(inf: str) -> Dict[str, str]:
+    """Build the full table for an -eír verb from its prefix."""
+    prefix = inf[:-3]
+    forms: Dict[str, str] = {"infinitive": inf}
+
+    present = ("ío", "íes", "íe", "eímos", "eís", "íen")
+    preterite = ("eí", "eíste", "io", "eímos", "eísteis", "ieron")
+    subjunctive = ("ía", "ías", "ía", "iamos", "iais", "ían")
+    for i, person in enumerate(PERSONS):
+        forms[f"{person}_present"] = prefix + present[i]
+        forms[f"{person}_subjunctive_present"] = prefix + subjunctive[i]
+        pret = prefix + preterite[i]
+        if i == 2:
+            # rio is a monosyllable and takes no accent; sonrió does.
+            pret = respell_with_stress(pret, len(pret) - 1)
+        forms[f"{person}_preterite"] = pret
+
+    stem = prefix + "e"
+    future_stem = prefix + "eir"
+    for i, person in enumerate(PERSONS):
+        forms[f"{person}_imperfect"] = stem + _ER_IMPERFECT[i]
+        forms[f"{person}_future"] = future_stem + _FUTURE[i]
+        forms[f"{person}_conditional"] = future_stem + _CONDITIONAL[i]
+
+    forms["2s_imperative"] = prefix + "íe"
+    forms["3s_imperative"] = prefix + "ía"
+    forms["1p_imperative"] = prefix + "iamos"
+    forms["2p_imperative"] = prefix + "eíd"
+    forms["3p_imperative"] = prefix + "ían"
+
+    forms["gerund"] = prefix + "iendo"
+    forms["past_participle"] = IRREGULAR_PAST_PARTICIPLES.get(inf, prefix + "eído")
+    return forms
+
+
+# ---------------------------------------------------------------------------
+# Reflexive (pronominal) verbs
+#
+# levantarse conjugates as levantar plus a reflexive pronoun: proclitic before
+# a finite form (me levanto), enclitic on the infinitive, the gerund and the
+# affirmative imperative (levantarse, levantándose, levántate).
+# ---------------------------------------------------------------------------
+
+REFLEXIVE_CLITICS: Dict[str, str] = {
+    "1s": "me",
+    "2s": "te",
+    "3s": "se",
+    "1p": "nos",
+    "2p": "os",
+    "3p": "se",
+}
+
+_PROCLITIC_TENSES = (
+    "present",
+    "preterite",
+    "imperfect",
+    "future",
+    "conditional",
+    "subjunctive_present",
+)
+
+# irse keeps the d of its vosotros imperative: idos, not *ios.
+_KEEPS_IMPERATIVE_D = {"irse"}
+
+
+def is_reflexive(infinitive: str) -> bool:
+    """True if ``infinitive`` is a pronominal infinitive such as ``levantarse``."""
+    inf = infinitive.lower().strip()
+    return inf.endswith("se") and get_verb_class(inf[:-2]) is not None
+
+
+def _attach_enclitic(form: str, clitic: str, drop_final: int = 0) -> str:
+    """Attach ``clitic`` to ``form``, respelling the written accent if needed.
+
+    ``drop_final`` removes that many trailing letters first, for the imperatives
+    that lose a consonant before the pronoun (levantad + os → levantaos).  The
+    stress is read from the untrimmed form, which is where it actually falls.
+    """
+    stressed_index = stressed_nucleus(form)
+    stem = strip_accents(form)
+    if drop_final:
+        stem = stem[:-drop_final]
+    combined = stem + clitic
+    if stressed_index is None:
+        return combined
+    return respell_with_stress(combined, stressed_index)
+
+
+def _conjugate_reflexive(inf: str) -> Optional[Dict[str, str]]:
+    """Conjugate a pronominal verb from its base verb plus reflexive pronouns."""
+    base_forms = conjugate(inf[:-2])
+    if base_forms is None:
+        return None
+
+    forms: Dict[str, str] = {"infinitive": inf}
+    for tense in _PROCLITIC_TENSES:
+        for person in PERSONS:
+            key = f"{person}_{tense}"
+            base_form = base_forms.get(key)
+            if base_form:
+                forms[key] = f"{REFLEXIVE_CLITICS[person]} {base_form}"
+
+    for person in ("2s", "3s", "3p"):
+        forms[f"{person}_imperative"] = _attach_enclitic(
+            base_forms[f"{person}_imperative"], REFLEXIVE_CLITICS[person]
+        )
+
+    # nosotros drops the -s before -nos: levantemos + nos → levantémonos.
+    imperative_1p = base_forms["1p_imperative"]
+    forms["1p_imperative"] = _attach_enclitic(
+        imperative_1p, "nos", drop_final=1 if imperative_1p.endswith("s") else 0
+    )
+
+    # vosotros drops the -d before -os: levantad + os → levantaos, vestid + os
+    # → vestíos.
+    imperative_2p = base_forms["2p_imperative"]
+    drops_d = imperative_2p.endswith("d") and inf not in _KEEPS_IMPERATIVE_D
+    forms["2p_imperative"] = _attach_enclitic(imperative_2p, "os", drop_final=1 if drops_d else 0)
+
+    forms["gerund"] = _attach_enclitic(base_forms["gerund"], "se")
+    forms["past_participle"] = base_forms["past_participle"]
+    return forms
 
 
 # ---------------------------------------------------------------------------
@@ -534,9 +807,15 @@ def conjugate(infinitive: str) -> Optional[Dict[str, str]]:
     Returns None if the infinitive is not a recognised Spanish verb form.
     """
     inf = infinitive.lower().strip()
+    if is_reflexive(inf):
+        return _conjugate_reflexive(inf)
+
     verb_class = get_verb_class(inf)
     if verb_class is None:
         return None
+
+    if inf in EIR_VERBS:
+        return _conjugate_eir(inf)
 
     forms: Dict[str, str] = {}
     forms["infinitive"] = inf
@@ -629,31 +908,32 @@ def _conjugate_present(
     # Handle irregular 1s
     irr_1s = IRREGULAR_1S_PRESENT.get(inf)
 
-    # Handle -cer/-cir zco pattern
-    is_ucir = inf.endswith("ucir")
-    is_zco = inf in _CER_ZCO_VERBS
+    is_zco = _takes_zco(inf)
     is_uir = _is_uir_verb(inf)
+    is_accented_glide = _stresses_weak_vowel(inf)
 
     for i, person in enumerate(PERSONS):
         key = f"{person}_present"
         if i == 0 and irr_1s:
             forms[key] = irr_1s
-        elif i == 0 and is_ucir:
-            forms[key] = stem[:-2] + _UCIR_1S_SUFFIX
         elif i == 0 and is_zco:
             forms[key] = stem[:-1] + "zco"
         else:
             s = stem
             if sc_type and i in _BOOT_INDICES:
                 from_v, to_v = STEM_CHANGE_MAP[sc_type]
-                s = _apply_stem_change(stem, from_v, to_v)
+                s = _restore_initial_h(_apply_stem_change(stem, from_v, to_v))
             # -uir verbs insert y in the boot (construyo, but construimos)
             if is_uir and i in _BOOT_INDICES:
                 s = stem + "y"
-            # -guir verbs drop the silent u before -o (yo sigo / distingo);
-            # the u stays before -e endings (sigues, sigue, siguen).
-            if inf.endswith("guir") and endings[i].startswith("o") and s.endswith("u"):
-                s = s[:-1]
+            # enviar -> envío, continuar -> continúo: the boot forms break the
+            # glide and take the written accent.
+            if is_accented_glide and i in _BOOT_INDICES:
+                s = _accent_final_weak_vowel(s)
+            # The 1s -o ending triggers the same spelling shifts as the
+            # subjunctive: cojo, sigo, delinco, venzo.
+            if endings[i].startswith("o"):
+                s = _spelling_adjust_before_back_vowel(inf, s)
             forms[key] = s + endings[i]
 
 
@@ -694,6 +974,19 @@ def _conjugate_preterite(
                 forms[f"{person}_preterite"] = stem + endings[i]
         return
 
+    # Stems ending in a strong vowel turn the unstressed i of the ending into y
+    # in 3s/3p and take a written accent elsewhere: leí, leíste, leyó, leímos,
+    # leísteis, leyeron.
+    if verb_class in ("er", "ir") and _has_strong_vowel_stem(stem):
+        for i, person in enumerate(PERSONS):
+            ending = endings[i]
+            if i in (2, 5):
+                ending = "y" + ending[1:]
+            elif ending.startswith("i"):
+                ending = "í" + ending[1:]
+            forms[f"{person}_preterite"] = stem + ending
+        return
+
     # Stem-changing -ir verbs: e→i or o→u in 3s and 3p preterite
     ir_pret_change: Optional[Tuple[str, str]] = None
     if verb_class == "ir" and sc_type:
@@ -704,13 +997,17 @@ def _conjugate_preterite(
 
     for i, person in enumerate(PERSONS):
         s = stem
+        ending = endings[i]
         # Spelling change for 1s -ar preterite
         if i == 0:
             s = _spelling_adjust_preterite_yo(s, verb_class)
         # -ir stem changes in 3s (i=2) and 3p (i=5)
         if ir_pret_change and i in (2, 5):
             s = _apply_stem_change(stem, ir_pret_change[0], ir_pret_change[1])
-        forms[f"{person}_preterite"] = s + endings[i]
+        # gruñir → gruñó / gruñeron, bullir → bulló / bulleron
+        if i in (2, 5) and _absorbs_i(s) and ending.startswith("i"):
+            ending = ending[1:]
+        forms[f"{person}_preterite"] = s + ending
 
 
 def _conjugate_imperfect(
@@ -743,29 +1040,19 @@ def _conjugate_subjunctive_present(
     # The subjunctive stem is based on the 1s present indicative
     # For verbs with irregular 1s, derive subjunctive stem from that
     irr_1s = IRREGULAR_1S_PRESENT.get(inf)
-    is_ucir = inf.endswith("ucir")
-    is_zco = inf in _CER_ZCO_VERBS
 
     if irr_1s:
         # Drop the -o from 1s to get subjunctive stem
         subj_stem = irr_1s[:-1] if irr_1s.endswith("o") else irr_1s
-        subj_endings = REGULAR_ENDINGS[verb_class]["subjunctive_present"]
         for i, person in enumerate(PERSONS):
-            forms[f"{person}_subjunctive_present"] = subj_stem + subj_endings[i]
+            forms[f"{person}_subjunctive_present"] = subj_stem + endings[i]
         return
 
-    if is_ucir:
-        subj_stem = stem[:-2] + "uzc"
-        subj_endings = REGULAR_ENDINGS[verb_class]["subjunctive_present"]
-        for i, person in enumerate(PERSONS):
-            forms[f"{person}_subjunctive_present"] = subj_stem + subj_endings[i]
-        return
-
-    if is_zco:
+    if _takes_zco(inf):
+        # conocer → conozca, traducir → traduzca, florecer → florezca
         subj_stem = stem[:-1] + "zc"
-        subj_endings = REGULAR_ENDINGS[verb_class]["subjunctive_present"]
         for i, person in enumerate(PERSONS):
-            forms[f"{person}_subjunctive_present"] = subj_stem + subj_endings[i]
+            forms[f"{person}_subjunctive_present"] = subj_stem + endings[i]
         return
 
     if _is_uir_verb(inf):
@@ -779,7 +1066,9 @@ def _conjugate_subjunctive_present(
     if verb_class == "ar":
         adj_stem = _spelling_adjust_ar_subj(stem)
     else:
-        adj_stem = _spelling_adjust_er_ir_subj(stem)
+        adj_stem = _spelling_adjust_before_back_vowel(inf, stem)
+
+    is_accented_glide = _stresses_weak_vowel(inf)
 
     # Stem-changing verbs in subjunctive:
     # Boot pattern in 1s,2s,3s,3p; nosotros/vosotros keep original stem
@@ -788,16 +1077,22 @@ def _conjugate_subjunctive_present(
         s = adj_stem
         if sc_type and i in _BOOT_INDICES:
             from_v, to_v = STEM_CHANGE_MAP[sc_type]
+            # The stem change comes first: jugar → jueg- → juegue, not jugu- →
+            # juguee, because the spelling fix depends on the changed stem.
+            changed = _apply_stem_change(stem, from_v, to_v)
             if verb_class == "ar":
-                s = _apply_stem_change(_spelling_adjust_ar_subj(stem), from_v, to_v)
+                changed = _spelling_adjust_ar_subj(changed)
             else:
-                s = _apply_stem_change(_spelling_adjust_er_ir_subj(stem), from_v, to_v)
+                changed = _spelling_adjust_before_back_vowel(inf, changed)
+            s = _restore_initial_h(changed)
         elif sc_type and verb_class == "ir" and i in (3, 4):
             # 1p/2p subjunctive for -ir stem-changers
             if sc_type in ("e>ie", "e>i"):
                 s = _apply_stem_change(adj_stem, "e", "i")
             elif sc_type == "o>ue":
                 s = _apply_stem_change(adj_stem, "o", "u")
+        if is_accented_glide and i in _BOOT_INDICES:
+            s = _accent_final_weak_vowel(s)
         forms[f"{person}_subjunctive_present"] = s + endings[i]
 
 
@@ -856,13 +1151,18 @@ def _make_gerund(
         elif sc_type == "o>ue":
             stem = _apply_stem_change(stem, "o", "u")
 
-    # Avoid triple-vowel: if stem ends in a vowel and class is er/ir,
-    # use -yendo instead of -iendo (e.g., leer → leyendo, oír → oyendo)
-    if verb_class in ("er", "ir") and stem and stem[-1] in "aeiouáéíóú":
-        return stem + "yendo"
-
     if verb_class == "ar":
         return stem + "ando"
+
+    # Avoid an unstressed i between vowels: leer → leyendo, oír → oyendo.
+    # A stem-final gu/qu is a digraph, not a vowel (seguir → siguiendo).
+    if stem and stem[-1] in "aeiouáéíóú" and not stem.endswith(("gu", "qu")):
+        return stem + "yendo"
+
+    # gruñir → gruñendo, bullir → bullendo
+    if _absorbs_i(stem):
+        return stem + "endo"
+
     return stem + "iendo"
 
 
@@ -871,6 +1171,10 @@ def _make_past_participle(inf: str, verb_class: str) -> str:
     stem = get_stem(inf)
     if verb_class == "ar":
         return stem + "ado"
+    # A strong vowel before the ending makes a hiatus that needs the accent:
+    # leer → leído, caer → caído, oír → oído.
+    if _has_strong_vowel_stem(stem):
+        return stem + "ído"
     return stem + "ido"
 
 
@@ -888,19 +1192,17 @@ def conjugate_safe(infinitive: str) -> Tuple[Dict[str, str], List[str]]:
 
     inf = infinitive.lower().strip()
 
-    # Warn if verb might have irregularities we don't cover
-    if (
-        inf not in FULLY_IRREGULAR
-        and inf not in IRREGULAR_PRETERITE
-        and inf not in STEM_CHANGING_VERBS
-        and inf not in IRREGULAR_1S_PRESENT
-        and inf not in IRREGULAR_FUTURE_STEMS
-        and inf not in IRREGULAR_PAST_PARTICIPLES
-        and inf not in _CER_ZCO_VERBS
-        and not inf.endswith("ucir")
-    ):
-        # Check for patterns that might indicate unregistered irregularity
-        if inf.endswith(("cer", "cir", "ger", "gir", "guir", "guar")):
-            warnings.append(f"'{inf}' may have spelling changes not covered by this module")
+    # Warn if the verb may have irregularities beyond the rules applied above.
+    known_irregular = (
+        inf in FULLY_IRREGULAR
+        or inf in IRREGULAR_PRETERITE
+        or inf in STEM_CHANGING_VERBS
+        or inf in IRREGULAR_1S_PRESENT
+        or inf in IRREGULAR_FUTURE_STEMS
+        or inf in IRREGULAR_PAST_PARTICIPLES
+    )
+    if not known_irregular and inf.endswith("iar") and inf not in ACCENTED_IAR_VERBS:
+        # cambiar → cambio but enviar → envío; only -iar is lexical.
+        warnings.append(f"'{inf}' may stress the weak vowel in its boot forms")
 
     return result, warnings
