@@ -1,13 +1,19 @@
 #!/usr/bin/python3
 
-"""Spanish language form generation."""
+"""Spanish language form generation.
+
+Covers Peninsular Spanish (``es``) and its storage dialect, Latin American
+Spanish (``es-419``).  Both read their own translation text and share the same
+mechanical rules; only the 2p slot differs, where es-419 says "ustedes hablan"
+(see :func:`langtools.es.conjugation.conjugate_for_dialect`).
+"""
 
 import json
 import logging
 from typing import Callable, Dict, Tuple
 
 from clients.unified_client import UnifiedLLMClient
-from langtools.es.conjugation import conjugate
+from langtools.es.conjugation import conjugate_for_dialect
 from langtools.es.inflection import build_adjective_forms
 from langtools.form_registry import FORM_SPECS
 from langtools.llm_forms_base import query_forms
@@ -23,6 +29,9 @@ from storage.translation_helpers import get_translation
 
 logger = logging.getLogger(__name__)
 
+LANGUAGE_CODE = "es"
+DIALECT_LANGUAGE_CODE = "es-419"
+
 ADJECTIVE_FORM_MAPPING: Dict[str, GrammaticalForm] = FORM_SPECS[("es", "adjective")].form_mapping
 NOUN_FORM_MAPPING: Dict[str, GrammaticalForm] = FORM_SPECS[("es", "noun")].form_mapping
 VERB_FORM_MAPPING: Dict[str, GrammaticalForm] = FORM_SPECS[("es", "verb")].form_mapping
@@ -32,7 +41,13 @@ _DEF_PAST_SOURCE = "preterite"
 
 
 def _project_spanish_forms_to_registry(forms: Dict[str, str]) -> Dict[str, str]:
-    """Project rich Spanish conjugation output to registry-required fields."""
+    """Project rich Spanish conjugation output to registry-required fields.
+
+    The registry carries present, past and future; the conjugator also returns
+    the imperfect, conditional, subjunctive, imperative and non-finite forms,
+    which have no slot and are dropped here.  "past" is the preterite, which is
+    the simple past both varieties use.
+    """
     projected_forms: Dict[str, str] = {}
     for form_name in VERB_FORM_MAPPING:
         person, tense = form_name.split("_", 1)
@@ -47,34 +62,40 @@ def _project_spanish_forms_to_registry(forms: Dict[str, str]) -> Dict[str, str]:
 
 
 def get_noun_forms(
-    client: UnifiedLLMClient, lemma_id: int, get_session_func: Callable[[], Session]
+    client: UnifiedLLMClient,
+    lemma_id: int,
+    get_session_func: Callable[[], Session],
+    language_code: str = LANGUAGE_CODE,
 ) -> Tuple[Dict[str, str], bool]:
     """Query LLM for Spanish noun forms."""
-    return query_forms(FORM_SPECS[("es", "noun")], client, lemma_id, get_session_func)
+    return query_forms(FORM_SPECS[(language_code, "noun")], client, lemma_id, get_session_func)
 
 
 def get_verb_forms(
-    client: UnifiedLLMClient, lemma_id: int, get_session_func: Callable[[], Session]
+    client: UnifiedLLMClient,
+    lemma_id: int,
+    get_session_func: Callable[[], Session],
+    language_code: str = LANGUAGE_CODE,
 ) -> Tuple[Dict[str, str], bool]:
     """Generate Spanish verb forms mechanically when possible, else use LLM."""
     session = get_session_func()
     lemma = session.query(linguistic_db.Lemma).filter(linguistic_db.Lemma.id == lemma_id).first()
 
     if lemma and lemma.pos_type.lower() == "verb":
-        spanish_verb = get_translation(session, lemma, "es")
+        spanish_verb = get_translation(session, lemma, language_code)
         if spanish_verb:
-            conjugation_forms = conjugate(spanish_verb)
+            conjugation_forms = conjugate_for_dialect(spanish_verb, language_code)
             if conjugation_forms:
                 projected_forms = _project_spanish_forms_to_registry(conjugation_forms)
                 merged_forms = apply_verb_form_overrides(
                     projected_forms,
-                    get_verb_form_overrides(session, lemma.id, "es"),
+                    get_verb_form_overrides(session, lemma.id, language_code),
                 )
                 if merged_forms:
                     linguistic_db.log_query(
                         session,
                         word=spanish_verb,
-                        query_type="spanish_verb_conjugations",
+                        query_type=FORM_SPECS[(language_code, "verb")].query_type,
                         prompt="[mechanical langtools.es.conjugation]",
                         response=json.dumps(
                             {
@@ -86,12 +107,12 @@ def get_verb_forms(
                         model=client.default_model,
                     )
                     return merged_forms, True
-            override_forms = get_complete_verb_form_overrides(session, lemma.id, "es")
+            override_forms = get_complete_verb_form_overrides(session, lemma.id, language_code)
             if override_forms:
                 linguistic_db.log_query(
                     session,
                     word=spanish_verb,
-                    query_type="spanish_verb_conjugations",
+                    query_type=FORM_SPECS[(language_code, "verb")].query_type,
                     prompt="[grammar fact verb_form_* overrides]",
                     response=json.dumps(
                         {
@@ -103,27 +124,34 @@ def get_verb_forms(
                     model=client.default_model,
                 )
                 return override_forms, True
-            logger.info("Falling back to LLM for Spanish verb '%s'", spanish_verb)
+            logger.info("Falling back to LLM for %s verb '%s'", language_code, spanish_verb)
 
-    return query_forms(FORM_SPECS[("es", "verb")], client, lemma_id, get_session_func)
+    return query_forms(FORM_SPECS[(language_code, "verb")], client, lemma_id, get_session_func)
 
 
 def get_adjective_forms(
-    client: UnifiedLLMClient, lemma_id: int, get_session_func: Callable[[], Session]
+    client: UnifiedLLMClient,
+    lemma_id: int,
+    get_session_func: Callable[[], Session],
+    language_code: str = LANGUAGE_CODE,
 ) -> Tuple[Dict[str, str], bool]:
-    """Generate Spanish adjective forms mechanically when possible, else use LLM."""
+    """Generate Spanish adjective forms mechanically when possible, else use LLM.
+
+    Adjective agreement is identical in every Spanish variety, so es and es-419
+    share the rules and differ only in the text they start from.
+    """
     session = get_session_func()
     lemma = session.query(linguistic_db.Lemma).filter(linguistic_db.Lemma.id == lemma_id).first()
 
     if lemma and lemma.pos_type.lower() == "adjective":
-        spanish_adjective = get_translation(session, lemma, "es")
+        spanish_adjective = get_translation(session, lemma, language_code)
         if spanish_adjective:
             adjective_forms = build_adjective_forms(spanish_adjective)
             if adjective_forms:
                 linguistic_db.log_query(
                     session,
                     word=spanish_adjective,
-                    query_type="spanish_adjective_forms",
+                    query_type=FORM_SPECS[(language_code, "adjective")].query_type,
                     prompt="[mechanical langtools.es.inflection]",
                     response=json.dumps(
                         {
@@ -135,9 +163,11 @@ def get_adjective_forms(
                     model=client.default_model,
                 )
                 return adjective_forms, True
-            logger.info("Falling back to LLM for Spanish adjective '%s'", spanish_adjective)
+            logger.info(
+                "Falling back to LLM for %s adjective '%s'", language_code, spanish_adjective
+            )
 
-    return query_forms(FORM_SPECS[("es", "adjective")], client, lemma_id, get_session_func)
+    return query_forms(FORM_SPECS[(language_code, "adjective")], client, lemma_id, get_session_func)
 
 
 def query_spanish_noun_forms(
@@ -159,3 +189,24 @@ def query_spanish_verb_conjugations(
 ) -> Tuple[Dict[str, str], bool]:
     """Backward-compatible alias for verb form generation."""
     return get_verb_forms(client, lemma_id, get_session_func)
+
+
+def query_latin_american_spanish_noun_forms(
+    client: UnifiedLLMClient, lemma_id: int, get_session_func: Callable[[], Session]
+) -> Tuple[Dict[str, str], bool]:
+    """Noun form generation for the es-419 storage dialect."""
+    return get_noun_forms(client, lemma_id, get_session_func, DIALECT_LANGUAGE_CODE)
+
+
+def query_latin_american_spanish_adjective_forms(
+    client: UnifiedLLMClient, lemma_id: int, get_session_func: Callable[[], Session]
+) -> Tuple[Dict[str, str], bool]:
+    """Adjective form generation for the es-419 storage dialect."""
+    return get_adjective_forms(client, lemma_id, get_session_func, DIALECT_LANGUAGE_CODE)
+
+
+def query_latin_american_spanish_verb_conjugations(
+    client: UnifiedLLMClient, lemma_id: int, get_session_func: Callable[[], Session]
+) -> Tuple[Dict[str, str], bool]:
+    """Verb conjugation for the es-419 storage dialect (ustedes in the 2p slot)."""
+    return get_verb_forms(client, lemma_id, get_session_func, DIALECT_LANGUAGE_CODE)

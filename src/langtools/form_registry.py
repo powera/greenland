@@ -306,6 +306,22 @@ def _build_spec_from_config(
     )
 
 
+def _dialect_naming(lang_name: str, pos_type: str) -> Dict[str, str]:
+    """Query type and schema name for a dialect, mirroring the parent's pattern.
+
+    ``Latin American Spanish`` + ``verb`` gives
+    ``latin_american_spanish_verb_conjugations`` and
+    ``LatinAmericanSpanishVerbConjugations``.
+    """
+    slug = lang_name.lower().replace(" ", "_")
+    camel = "".join(part.capitalize() for part in lang_name.split())
+    suffix = "conjugations" if pos_type == "verb" else "forms"
+    return {
+        "query_type": f"{slug}_{pos_type}_{suffix}",
+        "schema_name": f"{camel}{pos_type.capitalize()}{suffix.capitalize()}",
+    }
+
+
 def _auto_register_from_forms_configs() -> None:
     """Scan langtools/*/forms_config.py and register missing FORM_SPECS entries."""
     langtools_dir = Path(__file__).resolve().parent
@@ -327,6 +343,17 @@ def _auto_register_from_forms_configs() -> None:
         lang_code: str = getattr(mod, "LANGUAGE_CODE", lang_dir)
         lang_name: str = getattr(mod, "LANGUAGE_NAME", lang_dir.capitalize())
 
+        # A storage dialect declared here gets its own specs, so its forms are
+        # generated, stored and exported as a language of its own.  It reuses
+        # the parent's prompts; the dialect note is appended when the LLM
+        # fallback runs (see words.verb_forms.build_verb_forms_prompt).
+        dialect_names = getattr(mod, "DIALECT_LANGUAGE_NAMES", None)
+        registrations: List[Tuple[str, str]] = [(lang_code, lang_name)]
+        if isinstance(dialect_names, dict):
+            registrations.extend(
+                (str(code), str(name)) for code, name in sorted(dialect_names.items())
+            )
+
         for attr_name in sorted(dir(mod)):
             if not attr_name.endswith("_CONFIG"):
                 continue
@@ -337,11 +364,19 @@ def _auto_register_from_forms_configs() -> None:
             if pos_type not in _POS_TYPE_MAP:
                 continue
 
-            spec_key = (lang_code, pos_type)
-            if spec_key in FORM_SPECS:
-                continue  # hand-coded entry takes precedence
+            for form_lang_code, form_lang_name in registrations:
+                spec_key = (form_lang_code, pos_type)
+                if spec_key in FORM_SPECS:
+                    continue  # hand-coded entry takes precedence
 
-            FORM_SPECS[spec_key] = _build_spec_from_config(lang_code, lang_name, pos_type, cfg)
+                dialect_config = dict(cfg)
+                if form_lang_code != lang_code:
+                    dialect_config.update(_dialect_naming(form_lang_name, pos_type))
+                    dialect_config.setdefault("prompt_path", f"{lang_code}/{pos_type}")
+
+                FORM_SPECS[spec_key] = _build_spec_from_config(
+                    form_lang_code, form_lang_name, pos_type, dialect_config
+                )
 
 
 _auto_register_from_forms_configs()

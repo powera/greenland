@@ -15,7 +15,6 @@ These are consumed by ``enums.py`` (dynamic member creation) and
 
 from typing import Any, Dict, List, Tuple
 
-
 # -- POS prefix used in enum member names and value strings ----------------
 
 _POS_PREFIXES: Dict[str, Tuple[str, str]] = {
@@ -88,13 +87,23 @@ def expand_enum_values(config: Dict[str, Any], lang_code: str, pos_type: str) ->
     return {field: f"{val_prefix}/{lc}_{field}" for field in expand_fields(config)}
 
 
+def enum_member_language(lang_code: str) -> str:
+    """Return the language part of an enum member name.
+
+    A dialect's dash is not valid in an identifier, so it becomes an
+    underscore: ``es-419`` → ``ES_419``.  The enum *value* keeps the real
+    language code, since that is what rows are filtered by.
+    """
+    return lang_code.upper().replace("-", "_")
+
+
 def expand_enum_names(config: Dict[str, Any], lang_code: str, pos_type: str) -> Dict[str, str]:
     """Map each form field to its enum *member name*.
 
     Example: ``"nominative_singular"`` → ``"NOUN_LV_NOMINATIVE_SINGULAR"``
     """
     member_prefix, _ = _pos_parts(pos_type)
-    uc = lang_code.upper()
+    uc = enum_member_language(lang_code)
     return {field: f"{member_prefix}_{uc}_{field.upper()}" for field in expand_fields(config)}
 
 

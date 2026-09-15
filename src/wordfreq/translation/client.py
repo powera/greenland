@@ -358,6 +358,31 @@ class LinguisticClient:
         """Query LLM for Spanish adjective forms."""
         return spanish.query_spanish_adjective_forms(self.client, lemma_id, self.get_session)
 
+    # Latin American Spanish (es-419) forms.  A storage dialect with its own
+    # translations and its own derivative_forms rows; the paradigm is Spanish
+    # with the ustedes form in the 2p slot.
+    def query_latin_american_spanish_noun_forms(self, lemma_id: int) -> Tuple[Dict[str, str], bool]:
+        """Query LLM for Latin American Spanish noun forms."""
+        return spanish.query_latin_american_spanish_noun_forms(
+            self.client, lemma_id, self.get_session
+        )
+
+    def query_latin_american_spanish_verb_conjugations(
+        self, lemma_id: int
+    ) -> Tuple[Dict[str, str], bool]:
+        """Query LLM for Latin American Spanish verb conjugations."""
+        return spanish.query_latin_american_spanish_verb_conjugations(
+            self.client, lemma_id, self.get_session
+        )
+
+    def query_latin_american_spanish_adjective_forms(
+        self, lemma_id: int
+    ) -> Tuple[Dict[str, str], bool]:
+        """Query LLM for Latin American Spanish adjective forms."""
+        return spanish.query_latin_american_spanish_adjective_forms(
+            self.client, lemma_id, self.get_session
+        )
+
     # German forms
     def query_german_noun_forms(self, lemma_id: int) -> Tuple[Dict[str, str], bool]:
         """Query LLM for German noun forms."""

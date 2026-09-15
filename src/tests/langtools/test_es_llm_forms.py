@@ -50,7 +50,7 @@ class TestSpanishVerbLlmForms(unittest.TestCase):
         with (
             patch("langtools.es.llm_forms.get_translation", return_value="hablar"),
             patch(
-                "langtools.es.llm_forms.conjugate",
+                "langtools.es.llm_forms.conjugate_for_dialect",
                 return_value={
                     "1s_present": "hablo",
                     "1s_preterite": "hablé",
@@ -76,7 +76,7 @@ class TestSpanishVerbLlmForms(unittest.TestCase):
 
         with (
             patch("langtools.es.llm_forms.get_translation", return_value="xyz"),
-            patch("langtools.es.llm_forms.conjugate", return_value=None),
+            patch("langtools.es.llm_forms.conjugate_for_dialect", return_value=None),
             patch(
                 "langtools.es.llm_forms.query_forms", return_value=({"1s_present": "xyz"}, True)
             ) as mock_query_forms,

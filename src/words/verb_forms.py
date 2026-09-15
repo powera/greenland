@@ -11,6 +11,7 @@ from clients.unified_client import UnifiedLLMClient
 from storage.backend.config import DataSourceConfig
 
 import util.prompt_loader
+from langtools.dialect_overrides import get_base_language, get_llm_prompt_note
 from langtools.verb_forms import get_language_verb_forms_config
 
 logger = logging.getLogger(__name__)
@@ -28,10 +29,16 @@ def build_verb_forms_prompt(
     """Build the shared verb-form prompt for one language/word pair."""
     _ = config  # reserved for future prompt variations
 
-    prompt_path = f"{language_code.lower()}/verb"
+    # A dialect has no prompt directory of its own -- it shares its parent's
+    # paradigm -- so es-419 reads es/verb and adds its own dialect note.
+    prompt_path = f"{get_base_language(language_code).lower()}/verb"
     context = util.prompt_loader.get_context("language_forms", prompt_path)
     language_config = get_language_verb_forms_config(language_code)
     prompt_note = language_config.get("prompt_note", "")
+
+    dialect_note = get_llm_prompt_note(language_code)
+    if dialect_note:
+        prompt_note = f"{prompt_note}\n{dialect_note}".strip() if prompt_note else dialect_note
 
     prompt = util.prompt_loader.get_prompt("language_forms", prompt_path).format(
         verb=word,

@@ -39,6 +39,32 @@ Legend:
 5. Dispatcher standardization at top-level `src/langtools/*.py` should continue
    to converge toward language-first dynamic import entrypoints.
 
+## es-419 as a form-storing language (2026-09-15)
+
+Latin American Spanish now stores and exports its own paradigms, so WireWord
+carries verb tense tables for `es` and `es-419` alike.
+
+- A `forms_config.py` may declare `DIALECT_LANGUAGE_NAMES`; every code listed
+  gets its own `GrammaticalForm` members (`verb/es-419_1s_present`), its own
+  `FORM_SPECS` entries and its own `derivative_forms` rows, which is what the
+  export filters on.  Only `es` opts in today -- `zh-tw` and `pt-br` are
+  untouched.
+- `es.conjugation.conjugate_for_dialect` is the dialect-aware entry point, and
+  `langtools.conjugation.conjugate` prefers it when a language defines one,
+  passing the *unresolved* code.  es-419 differs from es in the 2p slot alone,
+  which takes the ustedes form; the `past` slot is the preterite, which is the
+  simple past both varieties use.
+- `manifest_grammar` and `person_labels` now pass the requested code to a
+  language module's getter when it declares a `language_code` parameter, so
+  `es/manifest.py` and `es/pronouns.py` can vary by variety.  es-419's manifest
+  keeps all six person slots and reports `second_person_plural: ustedes`.
+- `ustedes` moved from es's 2p pronoun list to nothing (it takes the 3p verb
+  form, so offering it beside `habláis` was wrong); es-419's 2p is `ustedes`.
+- `generate_mechanical_forms` covers `("es", "verb")` and all of `es-419`.  The
+  TODO blocking Spanish verbs is cleared: agreement against the Spanish in
+  `data/release/sentences` is 93%, up from the 78.8% recorded there, and the
+  residual disagreements are translation choices rather than bad morphology.
+
 ## Spanish mechanical coverage (2026-09-15)
 
 `es` now generates verb and adjective forms mechanically for essentially the

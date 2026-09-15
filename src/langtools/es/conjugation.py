@@ -13,6 +13,7 @@ Irregular verbs are handled via:
 
 from typing import Dict, List, Optional, Set, Tuple
 
+from langtools.dialect_overrides import get_translation_language
 from langtools.es.orthography import respell_with_stress, stressed_nucleus, strip_accents
 
 # ---------------------------------------------------------------------------
@@ -107,6 +108,7 @@ STEM_CHANGING_VERBS: Dict[str, str] = {
     "regar": "e>ie",
     "tropezar": "e>ie",
     "entender": "e>ie",
+    "tener": "e>ie",
     "perder": "e>ie",
     "querer": "e>ie",
     "defender": "e>ie",
@@ -117,6 +119,7 @@ STEM_CHANGING_VERBS: Dict[str, str] = {
     "extender": "e>ie",
     "verter": "e>ie",
     "sentir": "e>ie",
+    "venir": "e>ie",
     "mentir": "e>ie",
     "preferir": "e>ie",
     "convertir": "e>ie",
@@ -169,6 +172,7 @@ STEM_CHANGING_VERBS: Dict[str, str] = {
     "dormir": "o>ue",
     "morir": "o>ue",
     # e → i (only -ir verbs)
+    "decir": "e>i",
     "pedir": "e>i",
     "servir": "e>i",
     "repetir": "e>i",
@@ -268,6 +272,7 @@ IRREGULAR_PRETERITE: Dict[str, Tuple[str, Tuple[str, ...]]] = {
     "estar": ("estuv", _STRONG_PRET_ENDINGS),
     "haber": ("hub", _STRONG_PRET_ENDINGS),
     "hacer": ("hic", _STRONG_PRET_ENDINGS),  # 3s: hizo handled below
+    "satisfacer": ("satisfic", _STRONG_PRET_ENDINGS),  # 3s: satisfizo
     "poder": ("pud", _STRONG_PRET_ENDINGS),
     "poner": ("pus", _STRONG_PRET_ENDINGS),
     "querer": ("quis", _STRONG_PRET_ENDINGS),
@@ -279,6 +284,9 @@ IRREGULAR_PRETERITE: Dict[str, Tuple[str, Tuple[str, ...]]] = {
     "conducir": ("conduj", _STRONG_PRET_ENDINGS_J),
     "producir": ("produj", _STRONG_PRET_ENDINGS_J),
     "traducir": ("traduj", _STRONG_PRET_ENDINGS_J),
+    # ver has regular endings but no written accents: the 1s and 3s are
+    # monosyllables (vi, vio), so nothing marks the stress.
+    "ver": ("v", ("i", "iste", "io", "imos", "isteis", "ieron")),
 }
 
 # ---------------------------------------------------------------------------
@@ -296,11 +304,32 @@ IRREGULAR_1S_PRESENT: Dict[str, str] = {
     "poner": "pongo",
     "saber": "sé",
     "salir": "salgo",
+    "satisfacer": "satisfago",
     "tener": "tengo",
     "traer": "traigo",
     "valer": "valgo",
     "venir": "vengo",
     "ver": "veo",
+}
+
+# ---------------------------------------------------------------------------
+# Present-indicative slots that no rule reaches
+#
+# Only the differing slots are listed; every other person still comes from the
+# regular machinery.  oír inserts a consonantal y outside the 1s, and ver is a
+# monosyllable whose 2p takes no written accent (veis, not *véis).
+# ---------------------------------------------------------------------------
+
+IRREGULAR_PRESENT_SLOTS: Dict[str, Dict[str, str]] = {
+    "oír": {
+        "2s_present": "oyes",
+        "3s_present": "oye",
+        "1p_present": "oímos",
+        "3p_present": "oyen",
+    },
+    "ver": {
+        "2p_present": "veis",
+    },
 }
 
 # ---------------------------------------------------------------------------
@@ -669,6 +698,154 @@ def _conjugate_eir(inf: str) -> Dict[str, str]:
 
 
 # ---------------------------------------------------------------------------
+# Dialects
+#
+# Latin American Spanish has no vosotros: the second person plural is
+# "ustedes", which takes third-person-plural agreement.  Every other slot is
+# identical to Peninsular Spanish, and the "past" slot both varieties use is
+# the preterite, which es-419 prefers anyway.
+# ---------------------------------------------------------------------------
+
+USTEDES_DIALECTS: Set[str] = {"es-419"}
+
+_USTEDES_SOURCE_PERSON = "3p"
+_USTEDES_TARGET_PERSON = "2p"
+
+
+def uses_ustedes(language_code: str) -> bool:
+    """True if this variety says "ustedes" where Peninsular Spanish says "vosotros".
+
+    Resolved through the variety whose text the code reads, so the presentation
+    dialects above es-419 (es-mx and friends) follow it rather than Peninsular
+    Spanish.
+    """
+    code = (language_code or "").strip().lower()
+    return get_translation_language(code) in USTEDES_DIALECTS or code in USTEDES_DIALECTS
+
+
+def apply_ustedes(forms: Dict[str, str]) -> Dict[str, str]:
+    """Return *forms* with every 2p slot replaced by its ustedes (3p) form."""
+    adjusted = dict(forms)
+    for key, value in forms.items():
+        if not key.startswith(f"{_USTEDES_SOURCE_PERSON}_"):
+            continue
+        target_key = f"{_USTEDES_TARGET_PERSON}_{key[len(_USTEDES_SOURCE_PERSON) + 1:]}"
+        if target_key in adjusted:
+            adjusted[target_key] = value
+    return adjusted
+
+
+def conjugate_for_dialect(infinitive: str, language_code: str) -> Optional[Dict[str, str]]:
+    """Conjugate *infinitive* for a Spanish variety.
+
+    ``es`` gives the Peninsular paradigm; ``es-419`` gives the same paradigm
+    with the ustedes form in the 2p slot (hablan, not habláis).
+    """
+    forms = conjugate(infinitive)
+    if forms is None:
+        return None
+    if uses_ustedes(language_code):
+        return apply_ustedes(forms)
+    return forms
+
+
+# ---------------------------------------------------------------------------
+# Compound verbs
+#
+# A prefixed verb inherits its base verb's whole paradigm: obtener conjugates
+# as tener, proponer as poner, prever as ver.  The stress does not move when
+# the prefix is added, but the spelling can (vio -> previó), so each form is
+# respelled rather than concatenated blindly.
+#
+# Only unambiguous bases are matched by suffix.  "-ver" is not one of them --
+# volver, mover and resolver all end that way without being ver compounds --
+# so the ver family is listed explicitly.
+# ---------------------------------------------------------------------------
+
+COMPOUND_SUFFIX_BASES: Tuple[str, ...] = (
+    "tener",
+    "venir",
+    "decir",
+    "poner",
+    "hacer",
+    "traer",
+    "salir",
+    "caer",
+    "oír",
+)
+
+COMPOUND_EXPLICIT_BASES: Dict[str, str] = {
+    "entrever": "ver",
+    "prever": "ver",
+    "rever": "ver",
+}
+
+# bendecir and maldecir follow decir in the present but not elsewhere: their
+# future is regular and so is the participle they use as a verb.
+_REGULARISED_DECIR_COMPOUNDS: Set[str] = {"bendecir", "maldecir"}
+
+
+def get_compound_base(infinitive: str) -> Optional[str]:
+    """Return the base verb ``infinitive`` is a prefixed compound of, if any."""
+    inf = infinitive.lower().strip()
+    explicit = COMPOUND_EXPLICIT_BASES.get(inf)
+    if explicit:
+        return explicit
+    for base in COMPOUND_SUFFIX_BASES:
+        if inf != base and inf.endswith(base):
+            return base
+    return None
+
+
+def _is_registered(inf: str) -> bool:
+    """True if some table already describes this verb, so it is not a compound."""
+    return (
+        inf in FULLY_IRREGULAR
+        or inf in EIR_VERBS
+        or inf in STEM_CHANGING_VERBS
+        or inf in IRREGULAR_1S_PRESENT
+        or inf in IRREGULAR_PRETERITE
+        or inf in IRREGULAR_FUTURE_STEMS
+        or inf in IRREGULAR_PRESENT_SLOTS
+    )
+
+
+def _prefix_form(prefix: str, form: str) -> str:
+    """Attach ``prefix`` to ``form``, keeping the stress on the same vowel."""
+    if not form:
+        return form
+    stressed_index = stressed_nucleus(form)
+    combined = prefix + strip_accents(form)
+    if stressed_index is None:
+        return combined
+    return respell_with_stress(combined, stressed_index + len(prefix))
+
+
+def _conjugate_compound(inf: str) -> Optional[Dict[str, str]]:
+    """Conjugate a prefixed compound from its base verb's paradigm."""
+    base = get_compound_base(inf)
+    if base is None:
+        return None
+    base_forms = conjugate(base)
+    if base_forms is None:
+        return None
+
+    prefix = inf[: len(inf) - len(base)]
+    forms = {key: _prefix_form(prefix, value) for key, value in base_forms.items()}
+    forms["infinitive"] = inf
+
+    if inf in _REGULARISED_DECIR_COMPOUNDS:
+        for i, person in enumerate(PERSONS):
+            forms[f"{person}_future"] = inf + _FUTURE[i]
+            forms[f"{person}_conditional"] = inf + _CONDITIONAL[i]
+        forms["past_participle"] = get_stem(inf) + "ido"
+        # bendice, not *bendí: only decir itself shortens its tú imperative.
+        forms["2s_imperative"] = forms["3s_present"]
+
+    return forms
+
+
+# ---------------------------------------------------------------------------
 # Reflexive (pronominal) verbs
 #
 # levantarse conjugates as levantar plus a reflexive pronoun: proclitic before
@@ -817,6 +994,11 @@ def conjugate(infinitive: str) -> Optional[Dict[str, str]]:
     if inf in EIR_VERBS:
         return _conjugate_eir(inf)
 
+    if not _is_registered(inf):
+        compound_forms = _conjugate_compound(inf)
+        if compound_forms is not None:
+            return compound_forms
+
     forms: Dict[str, str] = {}
     forms["infinitive"] = inf
 
@@ -825,7 +1007,7 @@ def conjugate(infinitive: str) -> Optional[Dict[str, str]]:
         overrides = FULLY_IRREGULAR[inf]
         forms.update(overrides)
         # Fill in future/conditional if not overridden
-        fut_stem = IRREGULAR_FUTURE_STEMS.get(inf, inf)
+        fut_stem = IRREGULAR_FUTURE_STEMS.get(inf, strip_accents(inf))
         for tense, endings in [("future", _FUTURE), ("conditional", _CONDITIONAL)]:
             for i, person in enumerate(PERSONS):
                 key = f"{person}_{tense}"
@@ -859,6 +1041,7 @@ def conjugate(infinitive: str) -> Optional[Dict[str, str]]:
 
     # --- Present indicative ---
     _conjugate_present(forms, inf, stem, verb_class, sc_type)
+    forms.update(IRREGULAR_PRESENT_SLOTS.get(inf, {}))
 
     # --- Preterite ---
     _conjugate_preterite(forms, inf, stem, verb_class, sc_type)
@@ -867,7 +1050,9 @@ def conjugate(infinitive: str) -> Optional[Dict[str, str]]:
     _conjugate_imperfect(forms, inf, stem, verb_class)
 
     # --- Future ---
-    fut_stem = IRREGULAR_FUTURE_STEMS.get(inf, inf)
+    # The future is built on the whole infinitive, but without its written
+    # accent: oír → oiré, not *oíré.
+    fut_stem = IRREGULAR_FUTURE_STEMS.get(inf, strip_accents(inf))
     for i, person in enumerate(PERSONS):
         forms[f"{person}_future"] = fut_stem + _FUTURE[i]
 
@@ -949,9 +1134,9 @@ def _conjugate_preterite(
         pret_stem, pret_endings = IRREGULAR_PRETERITE[inf]
         for i, person in enumerate(PERSONS):
             form_val = pret_stem + pret_endings[i]
-            # hacer 3s: hic + o → hizo (c→z before o)
-            if inf == "hacer" and i == 2:
-                form_val = "hizo"
+            # hacer 3s: hic + o → hizo (c→z before o), and likewise satisfizo
+            if i == 2 and pret_stem.endswith("ic"):
+                form_val = pret_stem[:-1] + "zo"
             forms[f"{person}_preterite"] = form_val
         return
 

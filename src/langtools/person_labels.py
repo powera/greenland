@@ -3,9 +3,10 @@
 from __future__ import annotations
 
 from importlib import util
+from inspect import signature
 from pathlib import Path
 from types import ModuleType
-from typing import Optional, TypedDict
+from typing import Any, Optional, TypedDict
 
 from langtools.dialect_overrides import get_base_language
 
@@ -63,6 +64,22 @@ def _load_pronouns_module(language_code: str) -> ModuleType:
     return module
 
 
+def _call_with_optional_language(getter: Any, language_code: str) -> Any:
+    """Call a language-module getter, passing the code only if it takes one.
+
+    Most languages ignore the dialect; the ones whose varieties differ (es vs
+    es-419) declare a ``language_code`` parameter and receive the unresolved
+    code, since resolving it to the parent is exactly what loses the dialect.
+    """
+    try:
+        parameters = signature(getter).parameters
+    except (TypeError, ValueError):
+        return getter()
+    if "language_code" in parameters:
+        return getter(language_code)
+    return getter()
+
+
 def _build_pronoun_metadata(
     pronouns_by_person: dict[str, list[str]],
 ) -> dict[str, PersonPronounEntry]:
@@ -112,7 +129,7 @@ def get_person_pronoun_variants(
     if not callable(variants_getter):
         return None
 
-    variants = variants_getter()
+    variants = _call_with_optional_language(variants_getter, language_code)
     if not isinstance(variants, dict):
         return None
     return variants
@@ -137,7 +154,7 @@ def get_person_pronoun_data(language_code: str) -> Optional[dict[str, PersonPron
     # computes has_multiple/is_ambiguous consistently.
     list_getter = getattr(module, "get_subject_pronouns_by_person", None)
     if callable(list_getter):
-        pronouns_by_person = list_getter()
+        pronouns_by_person = _call_with_optional_language(list_getter, language_code)
         if isinstance(pronouns_by_person, dict):
             return _build_pronoun_metadata(pronouns_by_person)
 
@@ -146,7 +163,7 @@ def get_person_pronoun_data(language_code: str) -> Optional[dict[str, PersonPron
     if not callable(metadata_getter):
         return None
 
-    metadata = metadata_getter()
+    metadata = _call_with_optional_language(metadata_getter, language_code)
     if not isinstance(metadata, dict):
         return None
     return metadata
