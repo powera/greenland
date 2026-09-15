@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 from importlib import util
+from inspect import signature
 from pathlib import Path
 from types import ModuleType
 from typing import Any, Optional
@@ -36,6 +37,22 @@ def _load_manifest_module(language_code: str) -> ModuleType:
     return module
 
 
+def _call_with_optional_language(getter: Any, language_code: str) -> Any:
+    """Call a language-module getter, passing the code only if it takes one.
+
+    Most languages ignore the dialect; the ones whose varieties differ (es vs
+    es-419) declare a ``language_code`` parameter and receive the unresolved
+    code, since resolving it to the parent is exactly what loses the dialect.
+    """
+    try:
+        parameters = signature(getter).parameters
+    except (TypeError, ValueError):
+        return getter()
+    if "language_code" in parameters:
+        return getter(language_code)
+    return getter()
+
+
 def get_manifest_conjugation_config(language_code: str) -> Optional[dict[str, Any]]:
     """Return manifest grammar config for a target language, if available."""
     if not language_code:
@@ -50,7 +67,7 @@ def get_manifest_conjugation_config(language_code: str) -> Optional[dict[str, An
     if not callable(getter):
         return None
 
-    config = getter()
+    config = _call_with_optional_language(getter, language_code)
     if not isinstance(config, dict):
         return None
 

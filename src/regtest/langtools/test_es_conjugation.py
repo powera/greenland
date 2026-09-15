@@ -4,10 +4,13 @@ import unittest
 
 from langtools.es.conjugation import (
     conjugate,
+    conjugate_for_dialect,
     conjugate_safe,
+    get_compound_base,
     get_stem,
     get_verb_class,
     is_reflexive,
+    uses_ustedes,
 )
 
 
@@ -1009,6 +1012,209 @@ class TestReflexiveVerbs(unittest.TestCase):
     def test_multiword_phrases_are_not_conjugated(self) -> None:
         self.assertIsNone(conjugate("darse cuenta"))
         self.assertIsNone(conjugate("estar de pie"))
+
+
+class TestHighFrequencyIrregulars(unittest.TestCase):
+    """The verbs a learner meets first, which are also the most irregular."""
+
+    def test_tener(self) -> None:
+        forms = conjugate("tener")
+        assert forms is not None
+        self.assertEqual(
+            [forms[f"{person}_present"] for person in ("1s", "2s", "3s", "1p", "2p", "3p")],
+            ["tengo", "tienes", "tiene", "tenemos", "tenéis", "tienen"],
+        )
+        self.assertEqual(forms["1s_future"], "tendré")
+        self.assertEqual(forms["3s_preterite"], "tuvo")
+        self.assertEqual(forms["1s_subjunctive_present"], "tenga")
+        self.assertEqual(forms["2s_imperative"], "ten")
+
+    def test_venir(self) -> None:
+        forms = conjugate("venir")
+        assert forms is not None
+        self.assertEqual(
+            [forms[f"{person}_present"] for person in ("1s", "2s", "3s", "1p", "2p", "3p")],
+            ["vengo", "vienes", "viene", "venimos", "venís", "vienen"],
+        )
+        self.assertEqual(forms["3s_preterite"], "vino")
+        self.assertEqual(forms["2s_imperative"], "ven")
+
+    def test_decir(self) -> None:
+        forms = conjugate("decir")
+        assert forms is not None
+        self.assertEqual(
+            [forms[f"{person}_present"] for person in ("1s", "2s", "3s", "1p", "2p", "3p")],
+            ["digo", "dices", "dice", "decimos", "decís", "dicen"],
+        )
+        self.assertEqual(forms["3p_preterite"], "dijeron")
+        self.assertEqual(forms["1s_future"], "diré")
+        self.assertEqual(forms["past_participle"], "dicho")
+
+    def test_oir(self) -> None:
+        forms = conjugate("oír")
+        assert forms is not None
+        self.assertEqual(
+            [forms[f"{person}_present"] for person in ("1s", "2s", "3s", "1p", "2p", "3p")],
+            ["oigo", "oyes", "oye", "oímos", "oís", "oyen"],
+        )
+        self.assertEqual(forms["3s_preterite"], "oyó")
+        self.assertEqual(forms["1s_future"], "oiré")
+        self.assertEqual(forms["gerund"], "oyendo")
+        self.assertEqual(forms["past_participle"], "oído")
+
+    def test_ver_is_monosyllabic_and_takes_no_accents(self) -> None:
+        forms = conjugate("ver")
+        assert forms is not None
+        self.assertEqual(forms["2p_present"], "veis")
+        self.assertEqual(
+            [forms[f"{person}_preterite"] for person in ("1s", "2s", "3s", "1p", "2p", "3p")],
+            ["vi", "viste", "vio", "vimos", "visteis", "vieron"],
+        )
+
+    def test_satisfacer_follows_hacer(self) -> None:
+        forms = conjugate("satisfacer")
+        assert forms is not None
+        self.assertEqual(forms["1s_present"], "satisfago")
+        self.assertEqual(forms["3s_preterite"], "satisfizo")
+        self.assertEqual(forms["past_participle"], "satisfecho")
+
+    def test_accented_infinitives_lose_the_accent_in_the_future(self) -> None:
+        for infinitive, future in [("oír", "oiré"), ("reír", "reiré"), ("freír", "freiré")]:
+            forms = conjugate(infinitive)
+            assert forms is not None
+            self.assertEqual(forms["1s_future"], future, infinitive)
+
+
+class TestCompoundVerbs(unittest.TestCase):
+    """A prefixed verb inherits its base verb's paradigm."""
+
+    def test_base_detection(self) -> None:
+        self.assertEqual(get_compound_base("obtener"), "tener")
+        self.assertEqual(get_compound_base("proponer"), "poner")
+        self.assertEqual(get_compound_base("prever"), "ver")
+        self.assertIsNone(get_compound_base("tener"))
+        self.assertIsNone(get_compound_base("hablar"))
+
+    def test_volver_is_not_a_ver_compound(self) -> None:
+        """-ver is not matched by suffix: volver and mover are not ver compounds."""
+        for infinitive in ("volver", "mover", "resolver", "llover"):
+            self.assertIsNone(get_compound_base(infinitive), infinitive)
+        forms = conjugate("volver")
+        assert forms is not None
+        self.assertEqual(forms["1s_present"], "vuelvo")
+
+    def test_tener_compounds(self) -> None:
+        for infinitive, first_singular, third_singular in [
+            ("obtener", "obtengo", "obtiene"),
+            ("mantener", "mantengo", "mantiene"),
+            ("detener", "detengo", "detiene"),
+            ("sostener", "sostengo", "sostiene"),
+        ]:
+            forms = conjugate(infinitive)
+            assert forms is not None, infinitive
+            self.assertEqual(forms["1s_present"], first_singular, infinitive)
+            self.assertEqual(forms["3s_present"], third_singular, infinitive)
+            self.assertEqual(forms["1s_future"], infinitive[:-5] + "tendré", infinitive)
+
+    def test_poner_and_hacer_compounds_keep_the_irregular_participle(self) -> None:
+        proponer = conjugate("proponer")
+        assert proponer is not None
+        self.assertEqual(proponer["3s_preterite"], "propuso")
+        self.assertEqual(proponer["past_participle"], "propuesto")
+
+        deshacer = conjugate("deshacer")
+        assert deshacer is not None
+        self.assertEqual(deshacer["3s_preterite"], "deshizo")
+        self.assertEqual(deshacer["past_participle"], "deshecho")
+
+    def test_prefix_moves_the_accent_not_the_stress(self) -> None:
+        """vio is a monosyllable; previó is not, so it takes the accent."""
+        forms = conjugate("prever")
+        assert forms is not None
+        self.assertEqual(forms["3s_preterite"], "previó")
+        self.assertEqual(forms["1s_preterite"], "preví")
+        self.assertEqual(forms["1s_present"], "preveo")
+        self.assertEqual(forms["2s_present"], "prevés")
+        self.assertEqual(forms["past_participle"], "previsto")
+
+    def test_traer_and_caer_compounds(self) -> None:
+        atraer = conjugate("atraer")
+        assert atraer is not None
+        self.assertEqual(atraer["1s_present"], "atraigo")
+        self.assertEqual(atraer["3s_preterite"], "atrajo")
+        self.assertEqual(atraer["past_participle"], "atraído")
+
+        recaer = conjugate("recaer")
+        assert recaer is not None
+        self.assertEqual(recaer["3s_preterite"], "recayó")
+
+    def test_bendecir_keeps_a_regular_future_and_participle(self) -> None:
+        forms = conjugate("bendecir")
+        assert forms is not None
+        self.assertEqual(forms["3s_present"], "bendice")
+        self.assertEqual(forms["3s_preterite"], "bendijo")
+        self.assertEqual(forms["1s_future"], "bendeciré")
+        self.assertEqual(forms["past_participle"], "bendecido")
+        self.assertEqual(forms["2s_imperative"], "bendice")
+
+    def test_predecir_follows_decir_throughout(self) -> None:
+        forms = conjugate("predecir")
+        assert forms is not None
+        self.assertEqual(forms["1s_future"], "prediré")
+        self.assertEqual(forms["past_participle"], "predicho")
+
+
+class TestLatinAmericanSpanish(unittest.TestCase):
+    """es-419 is Spanish with the ustedes form in the 2p slot."""
+
+    def test_variety_detection(self) -> None:
+        self.assertFalse(uses_ustedes("es"))
+        self.assertTrue(uses_ustedes("es-419"))
+        # Presentation dialects read es-419's text, so they follow it.
+        self.assertTrue(uses_ustedes("es-mx"))
+
+    def test_regular_verb_differs_only_in_2p(self) -> None:
+        peninsular = conjugate_for_dialect("hablar", "es")
+        latin_american = conjugate_for_dialect("hablar", "es-419")
+        assert peninsular is not None and latin_american is not None
+
+        self.assertEqual(peninsular["2p_present"], "habláis")
+        self.assertEqual(latin_american["2p_present"], "hablan")
+        self.assertEqual(latin_american["2p_present"], latin_american["3p_present"])
+
+        differing = {key for key in peninsular if peninsular[key] != latin_american.get(key)}
+        self.assertTrue(all(key.startswith("2p_") for key in differing), differing)
+
+    def test_every_tense_swaps_its_2p(self) -> None:
+        forms = conjugate_for_dialect("hablar", "es-419")
+        assert forms is not None
+        for tense in ("present", "preterite", "imperfect", "future", "conditional"):
+            self.assertEqual(forms[f"2p_{tense}"], forms[f"3p_{tense}"], tense)
+
+    def test_irregular_verb(self) -> None:
+        forms = conjugate_for_dialect("tener", "es-419")
+        assert forms is not None
+        self.assertEqual(
+            [forms[f"{person}_present"] for person in ("1s", "2s", "3s", "1p", "2p", "3p")],
+            ["tengo", "tienes", "tiene", "tenemos", "tienen", "tienen"],
+        )
+
+    def test_imperative_uses_the_ustedes_command(self) -> None:
+        forms = conjugate_for_dialect("hablar", "es-419")
+        assert forms is not None
+        self.assertEqual(forms["2p_imperative"], "hablen")
+        peninsular = conjugate_for_dialect("hablar", "es")
+        assert peninsular is not None
+        self.assertEqual(peninsular["2p_imperative"], "hablad")
+
+    def test_reflexive_verb(self) -> None:
+        forms = conjugate_for_dialect("levantarse", "es-419")
+        assert forms is not None
+        self.assertEqual(forms["2p_present"], "se levantan")
+        self.assertEqual(forms["2p_imperative"], "levántense")
+
+    def test_unknown_verb_still_declines(self) -> None:
+        self.assertIsNone(conjugate_for_dialect("darse cuenta", "es-419"))
 
 
 if __name__ == "__main__":

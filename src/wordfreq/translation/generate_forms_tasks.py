@@ -151,6 +151,23 @@ _TASK_OVERRIDES: Dict[Tuple[str, str], Dict[str, Any]] = {
         "threshold": 4,
         "client_method": "query_spanish_adjective_forms",
     },
+    # Latin American Spanish — the same paradigms over es-419's own text.
+    ("es-419", "noun"): {
+        "fetcher": "translation",
+        "threshold": 2,
+        "gender": True,
+        "client_method": "query_latin_american_spanish_noun_forms",
+    },
+    ("es-419", "verb"): {
+        "fetcher": "translation",
+        "threshold": 10,
+        "client_method": "query_latin_american_spanish_verb_conjugations",
+    },
+    ("es-419", "adjective"): {
+        "fetcher": "translation",
+        "threshold": 4,
+        "client_method": "query_latin_american_spanish_adjective_forms",
+    },
     # Italian — translation fetcher, gender on nouns
     ("it", "noun"): {"fetcher": "translation", "threshold": 2, "gender": True},
     ("it", "verb"): {"fetcher": "translation", "threshold": 10},

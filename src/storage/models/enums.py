@@ -397,6 +397,13 @@ def _auto_extend_grammatical_form() -> None:
 
         lang_code: str = getattr(mod, "LANGUAGE_CODE", lang_dir)
 
+        # A storage dialect keeps its own paradigm rows, so it needs its own
+        # members: verb/es-419_1s_present alongside verb/es_1s_present.
+        dialect_names = getattr(mod, "DIALECT_LANGUAGE_NAMES", None)
+        form_lang_codes: list[str] = [lang_code]
+        if isinstance(dialect_names, dict):
+            form_lang_codes.extend(str(code) for code in dialect_names)
+
         # Optional direct enum overrides for legacy/stable values that don't
         # map cleanly to form-pattern expansion.
         overrides = getattr(mod, "GRAMMATICAL_FORM_OVERRIDES", None)
@@ -415,9 +422,10 @@ def _auto_extend_grammatical_form() -> None:
                 continue
             # Derive pos_type from the attribute name: NOUN_CONFIG → noun
             pos_type = attr_name.removesuffix("_CONFIG").lower()
-            for member_name, value_str in get_all_enum_pairs(cfg, lang_code, pos_type):
-                if value_str not in existing_values and member_name not in new_members:
-                    new_members[member_name] = value_str
+            for form_lang_code in form_lang_codes:
+                for member_name, value_str in get_all_enum_pairs(cfg, form_lang_code, pos_type):
+                    if value_str not in existing_values and member_name not in new_members:
+                        new_members[member_name] = value_str
 
     # Dynamically extend the enum
     if new_members:

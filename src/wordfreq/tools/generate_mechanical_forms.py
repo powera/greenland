@@ -8,9 +8,10 @@ stored in ``data/release``; this script puts them back after a release import,
 so the release files only have to carry the ones the rules cannot derive.
 
 Currently covers English (nouns, adjectives, adverbs, verbs), Lithuanian
-(nouns, verbs), and French and Spanish (adjectives, verbs).  For English the
-lemma text is the word; for the others it is the lemma's translation into that
-language.
+(nouns, verbs), French (adjectives, verbs) and both stored Spanish varieties,
+es and es-419 (adjectives, verbs).  For English the lemma text is the word; for
+the others it is the lemma's translation into that language -- es-419 has its
+own translations, so it is conjugated from its own text rather than from es's.
 
 No LLM is involved.  The builders are called directly rather than through
 ``LinguisticClient``, whose ``query_*_forms`` entry points fall back to a model
@@ -52,7 +53,7 @@ from langtools.en.inflection import (
     build_adverb_forms,
     build_noun_forms,
 )
-from langtools.es.conjugation import conjugate as es_conjugate
+from langtools.es.conjugation import conjugate_for_dialect as es_conjugate
 from langtools.es.inflection import build_adjective_forms as es_build_adjective_forms
 from langtools.fr.conjugation import conjugate as fr_conjugate
 from langtools.fr.inflection import build_adjective_forms as fr_build_adjective_forms
@@ -108,6 +109,7 @@ BASE_FORM_KEY: Dict[Tuple[str, str], str] = {
     ("fr", "adjective"): "singular_m",
     ("fr", "verb"): "infinitive",
     ("es", "adjective"): "singular_m",
+    ("es-419", "adjective"): "singular_m",
     # Spanish has no verb/es_infinitive slot, so no generated form is the base.
 }
 
@@ -121,30 +123,41 @@ LT_NOUN_METADATA_KEYS = frozenset({"number_type", "declension_class", "gender"})
 # decline_noun recomputes it from the noun plus its gender.
 METADATA_FACT_TYPES: Dict[str, str] = {"gender": "grammatical_gender"}
 
-# Kept ready for the TODO on SUPPORTED below: this mapping is correct and was
-# validated against sentence_words; it is the conjugator that needs fixing, so
-# enabling ("es", "verb") is the only change required here.
-#
 # The Spanish conjugator emits a fuller paradigm than GrammaticalForm models:
 # it returns preterite, imperfect, conditional, subjunctive and imperative
 # forms, while the enum has only present/past/future per person. Present and
 # future map by name; "past" is the preterite, which is how the existing
-# sentence data uses verb/es_*_past ("compró", "encontró", "vio"). The tenses
-# with no enum slot are skipped rather than forced into an approximate one.
-ES_VERB_KEYS: Dict[str, str] = {
-    **{
-        f"{person}_present": f"verb/es_{person}_present"
-        for person in ("1s", "2s", "3s", "1p", "2p", "3p")
-    },
-    **{
-        f"{person}_future": f"verb/es_{person}_future"
-        for person in ("1s", "2s", "3s", "1p", "2p", "3p")
-    },
-    **{
-        f"{person}_preterite": f"verb/es_{person}_past"
-        for person in ("1s", "2s", "3s", "1p", "2p", "3p")
-    },
-}
+# sentence data uses verb/es_*_past ("compró", "encontró", "vio"), and which is
+# also the simple past Latin American Spanish prefers. The tenses with no enum
+# slot are skipped rather than forced into an approximate one.
+_ES_VERB_PERSONS = ("1s", "2s", "3s", "1p", "2p", "3p")
+
+
+def _es_verb_keys(language_code: str) -> Dict[str, str]:
+    """Builder key -> GrammaticalForm value for one Spanish variety."""
+    return {
+        **{
+            f"{person}_present": f"verb/{language_code}_{person}_present"
+            for person in _ES_VERB_PERSONS
+        },
+        **{
+            f"{person}_future": f"verb/{language_code}_{person}_future"
+            for person in _ES_VERB_PERSONS
+        },
+        **{
+            f"{person}_preterite": f"verb/{language_code}_{person}_past"
+            for person in _ES_VERB_PERSONS
+        },
+    }
+
+
+ES_VERB_KEYS: Dict[str, Dict[str, str]] = {code: _es_verb_keys(code) for code in ("es", "es-419")}
+
+# The Spanish varieties that store their own paradigms.  es-419 is a storage
+# dialect: it has its own translations, its own derivative_forms rows and its
+# own GrammaticalForm slots, and differs from es only in the 2p slot, which
+# conjugate_for_dialect fills with the ustedes form.
+SPANISH_LANGUAGE_CODES = ("es", "es-419")
 
 # Which (language, POS) pairs have a rule-based builder at all.
 #
@@ -161,7 +174,8 @@ SUPPORTED: Dict[str, Tuple[str, ...]] = {
     "en": ("noun", "adjective", "adverb", "verb"),
     "lt": ("noun", "verb"),
     "fr": ("adjective", "verb"),
-    "es": ("adjective",),
+    "es": ("adjective", "verb"),
+    "es-419": ("adjective", "verb"),
 }
 
 
@@ -241,10 +255,12 @@ def _build_non_english(
         if pos_type == "adjective":
             return fr_build_adjective_forms(word), {}
 
-    if language_code == "es":
+    if language_code in SPANISH_LANGUAGE_CODES:
         if pos_type == "verb":
-            return es_conjugate(word), {}
+            # es-419 differs only in the 2p slot, which takes the ustedes form.
+            return es_conjugate(word, language_code), {}
         if pos_type == "adjective":
+            # Adjective agreement is the same in every Spanish variety.
             return es_build_adjective_forms(word), {}
 
     return None, {}
@@ -318,8 +334,8 @@ def resolve_grammatical_form(language_code: str, pos_type: str, form_key: str) -
     if language_code == "en":
         return FORM_KEYS[pos_type].get(form_key)
 
-    if language_code == "es" and pos_type == "verb":
-        return ES_VERB_KEYS.get(form_key)
+    if pos_type == "verb" and language_code in ES_VERB_KEYS:
+        return ES_VERB_KEYS[language_code].get(form_key)
 
     candidate = f"{pos_type}/{language_code}_{form_key}"
     return candidate if candidate in VALID_GRAMMATICAL_FORMS else None

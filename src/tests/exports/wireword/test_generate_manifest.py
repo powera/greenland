@@ -81,14 +81,37 @@ def test_generate_manifest_includes_spanish_conjugation_tense_metadata(tmp_path:
     tenses = manifest["config"]["grammar"]["conjugation"]["tenses"]
 
     assert [tense["id"] for tense in tenses] == ["past", "pres", "fut"]
+    # ustedes takes the 3p verb form, so it is not offered beside vosotros,
+    # whose slot holds habláis.  es-419 puts it on 2p instead -- see below.
     assert manifest["config"]["grammar"]["conjugation"]["person_labels"] == {
         "1s": "yo",
         "2s": "tú/usted",
         "3s": "él/ella",
         "1p": "nosotros/nosotras",
-        "2p": "vosotros/vosotras/ustedes",
+        "2p": "vosotros/vosotras",
         "3p": "ellos/ellas",
     }
+    assert "second_person_plural" not in manifest["config"]["grammar"]["conjugation"]
+
+
+def test_generate_manifest_gives_es_419_the_ustedes_second_person_plural(
+    tmp_path: Path,
+) -> None:
+    """es-419 keeps all six slots; its 2p is ustedes, not vosotros."""
+    _write_level_file(tmp_path)
+
+    success, manifest_path = generate_manifest(str(tmp_path), "es-419")
+
+    assert success
+    manifest = _load_manifest(manifest_path)
+    conjugation = manifest["config"]["grammar"]["conjugation"]
+
+    assert [tense["id"] for tense in conjugation["tenses"]] == ["past", "pres", "fut"]
+    for tense in conjugation["tenses"]:
+        assert tense["person_slots"] == ["1s", "2s", "3s", "1p", "2p", "3p"]
+    assert conjugation["second_person_plural"] == "ustedes"
+    assert conjugation["person_labels"]["2p"] == "ustedes"
+    assert conjugation["person_labels"]["3p"] == "ellos/ellas"
 
 
 def test_generate_manifest_omits_conjugation_tense_metadata_for_other_languages(

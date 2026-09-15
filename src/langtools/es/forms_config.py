@@ -5,6 +5,16 @@ from typing import Any, Dict
 LANGUAGE_CODE = "es"
 LANGUAGE_NAME = "Spanish"
 
+# Storage dialects that keep their own copies of these paradigms.  es-419 holds
+# the same tenses and slots as es; only the 2p slot differs, where Latin
+# American Spanish says "ustedes hablan" rather than "vosotros habláis" (see
+# langtools.es.conjugation.conjugate_for_dialect).  A dialect listed here gets
+# its own GrammaticalForm members, FORM_SPECS entries and derivative_forms rows,
+# which is what lets the WireWord export carry it as a language of its own.
+DIALECT_LANGUAGE_NAMES: Dict[str, str] = {
+    "es-419": "Latin American Spanish",
+}
+
 NOUN_CONFIG: Dict[str, Any] = {
     "type": "singular_plural",
     "query_type": "spanish_noun_forms",
