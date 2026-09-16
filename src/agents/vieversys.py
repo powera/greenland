@@ -61,6 +61,7 @@ from clients.audio.s3_uploader import S3AudioUploader
 from audiotools import s3_ops
 from audiotools.manifest_rebuild import write_manifest_for_directory
 from audiotools.review_records import clear_review_verdict, find_existing_review
+from langtools.dialect_overrides import get_translation_target_dialects
 from storage.backend import create_session as create_backend_session
 from storage.backend.config import BackendType, DataSourceConfig
 from storage.models.schema import (
@@ -1292,7 +1293,12 @@ def main() -> None:
     if args.languages and len(args.languages) != 1:
         parser.error("Vieversys accepts exactly one value for --languages")
     language_code = args.languages[0].lower() if args.languages else None
-    supported_languages = set(TIER_1_LANGUAGES + TIER_2_LANGUAGES + TIER_3_LANGUAGES)
+    # Storage dialects (zh-tw, es-419, pt-br) record audio of their own text and
+    # are named by their own code, so they belong here alongside the tiers; the
+    # tier lists hold base languages only.
+    supported_languages = set(
+        TIER_1_LANGUAGES + TIER_2_LANGUAGES + TIER_3_LANGUAGES + get_translation_target_dialects()
+    )
     if language_code is not None and language_code not in supported_languages:
         parser.error(
             f"Unsupported language '{language_code}'. Choose from: "
