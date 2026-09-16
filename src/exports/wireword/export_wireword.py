@@ -62,10 +62,10 @@ from words.emoji import emoji_values
 logger = logging.getLogger(__name__)
 
 LANGUAGE_EXPORT_MAX_LEVELS: Dict[str, int] = {
-    "lt": 30,
+    "lt": 64,
     "es": 30,
-    "fr": 20,
-    "zh": 20,
+    "fr": 30,
+    "zh": 30,
 }
 DEFAULT_EXPORT_MAX_LEVEL = 10
 
