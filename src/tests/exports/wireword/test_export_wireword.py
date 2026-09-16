@@ -1,5 +1,14 @@
 from storage.backend.config import BackendType, DataSourceConfig
-from exports.wireword.export_wireword import WirewordExporter
+from exports.wireword.export_wireword import LANGUAGE_EXPORT_MAX_LEVELS, WirewordExporter
+
+
+def test_language_export_max_levels_cover_full_curricula() -> None:
+    assert LANGUAGE_EXPORT_MAX_LEVELS == {
+        "lt": 64,
+        "es": 30,
+        "fr": 30,
+        "zh": 30,
+    }
 
 
 def test_format_missing_verb_translation_warning_preview_and_count() -> None:
