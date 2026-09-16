@@ -208,6 +208,14 @@ class TestGptVoiceLookup(unittest.TestCase):
         voice = GptVoice.from_openai_voice(Voice.ASH, "zh")
         self.assertEqual(voice, GptVoice.GPT_ZH_M1)
 
+    def test_from_openai_voice_resolves_storage_dialect(self) -> None:
+        """Storage dialects use their base language's speaker definitions."""
+        voice = GptVoice.from_openai_voice(Voice.NOVA, "zh-tw")
+        self.assertEqual(voice, GptVoice.GPT_ZH_F1)
+
+        voice = GptVoice.from_openai_voice(Voice.ASH, "es-419")
+        self.assertEqual(voice, GptVoice.GPT_ES_M1)
+
 
 class TestCharacterNames(unittest.TestCase):
     """Test character name functions."""

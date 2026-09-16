@@ -319,6 +319,13 @@ class GptVoice(Enum):
         """
         Get a GptVoice from an OpenAI voice and language.
 
+        A dialect falls back to its base language's voices, the same way
+        ``DEFAULT_GPT_VOICES`` registers them: no voice is defined per dialect
+        because the accent comes from the TTS instructions (see
+        ``prompts/audio/``), not from the speaker.  Without the fallback a
+        caller that resolves voices this way -- the workqueue audio handler
+        does -- rejects every dialect code as an invalid voice name.
+
         Args:
             openai_voice: OpenAI Voice enum
             language_code: Language code
@@ -326,9 +333,10 @@ class GptVoice(Enum):
         Returns:
             First matching GptVoice or None
         """
-        for voice in cls:
-            if voice.openai_voice == openai_voice and voice.language_code == language_code:
-                return voice
+        for candidate in (language_code, get_base_language(language_code)):
+            for voice in cls:
+                if voice.openai_voice == openai_voice and voice.language_code == candidate:
+                    return voice
         return None
 
 
