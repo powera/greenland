@@ -12,6 +12,19 @@ The sources:
     1. every enabled wordfreq corpus (see ``frequency.corpus.CORPUS_CONFIGS``)
     2. tier sources (3): cambridge_yle, cefr, basic_english
 
+Before any of that, the mechanically-derivable forms are regenerated.
+``data/release`` deliberately carries only the forms the langtools rules
+*cannot* derive (see ``storage.release.mechanical_filter``), so a lemma whose
+whole paradigm is regular -- "pharmacist", "librarian" -- arrives with no
+``DerivativeForm`` rows at all, not even its base form, while an irregular or
+a lemma carrying a pronunciation ("accountant", "child") arrives with some.
+``storage.admin.bootstrap`` puts the derivable ones back with
+``generate_mechanical_forms`` after a release import; golden mode loads the
+same files into memory and so needs the same step, or half the dictionary has
+no forms.  That is not cosmetic: ``storage.lexeme.get_lexeme`` returns None for
+a lemma with no forms in a language, so the frequency rollup, the per-corpus
+ranks and the combined rank all skip it.
+
 After loading, ``Lemma.frequency_rank`` is recomputed from the rolled-up
 lexeme frequencies and tier signals so the dictionary/lemma views surface
 the combined rank without a separate sync step.
@@ -35,6 +48,7 @@ from wordfreq.tiers.basic_english import BasicEnglishImporter
 from wordfreq.tiers.cambridge_yle import CambridgeYleImporter
 from wordfreq.tiers.cefr import CefrImporter
 from wordfreq.tiers.runner import run_import as run_tier_import
+from wordfreq.tools.generate_mechanical_forms import generate_for_session
 
 if TYPE_CHECKING:
     from storage.backend.jsonl.storage import JSONLStorage
@@ -42,7 +56,7 @@ if TYPE_CHECKING:
 logger = logging.getLogger(__name__)
 
 
-def _make_session_for_storage(storage: "JSONLStorage") -> Session:
+def _make_session_for_storage(storage: "JSONLStorage", expire_on_commit: bool = True) -> Session:
     """Open a raw SQLAlchemy session against the storage's cached SQLite engine.
 
     Triggers cache population (loading JSONL lemmas into the in-memory DB) on
@@ -61,8 +75,28 @@ def _make_session_for_storage(storage: "JSONLStorage") -> Session:
 
     engine = storage._cached_sqlite_engine
     assert engine is not None, "JSONL cached SQLite engine should be populated by now"
-    factory = sessionmaker(bind=engine)
+    factory = sessionmaker(bind=engine, expire_on_commit=expire_on_commit)
     return factory()
+
+
+def _generate_mechanical_forms(storage: "JSONLStorage") -> dict[str, Any]:
+    """Rebuild the forms the release files withhold as derivable.
+
+    Runs on a session of its own, before the corpus load, so the forms exist
+    for ``link_forms_to_word_tokens`` to attach tokens to -- the same order
+    ``storage.admin.bootstrap`` uses after a release import.
+
+    ``expire_on_commit=False`` is what makes this bearable here.
+    ``add_word_token`` commits once per new token, and a committing session
+    expires every object it holds; against an in-memory database whose
+    identity map is the whole dictionary that is quadratic, and the pass takes
+    minutes instead of the tens of seconds it takes with expiry off.
+    """
+    session = _make_session_for_storage(storage, expire_on_commit=False)
+    try:
+        return generate_for_session(session)
+    finally:
+        session.close()
 
 
 def _ensure_corpus_rows(session: Session) -> None:
@@ -94,23 +128,36 @@ def load_wordfreq_into_storage(storage: "JSONLStorage") -> dict[str, Any]:
     """Load all seven wordfreq sources into the JSONL backend's in-memory DB.
 
     Steps, in order:
-      1. Open a session against the cached SQLite engine (warming it if needed).
-      2. Insert ``Corpus`` rows so the combined-rank pass sees real weights.
-      3. Import each enabled wordfreq corpus.
-      4. Run each tier importer (Cambridge YLE, CEFR, Basic English).
-      5. Compute and write ``Lemma.frequency_rank`` from the loaded data.
+      1. Regenerate the mechanically-derivable forms the release withholds, so
+         every lemma has its paradigm (and its base form) before anything reads
+         one.
+      2. Open a session against the cached SQLite engine (warming it if needed).
+      3. Insert ``Corpus`` rows so the combined-rank pass sees real weights.
+      4. Import each enabled wordfreq corpus.
+      5. Run each tier importer (Cambridge YLE, CEFR, Basic English).
+      6. Compute and write ``Lemma.frequency_rank`` from the loaded data.
 
     Per-source failures are logged and recorded in the returned summary but do
     not abort the rest of the load.
     """
     started = time.monotonic()
     summary: dict[str, Any] = {
+        "mechanical_forms": {},
         "corpora": {},
         "tiers": {},
         "derivative_form_links": 0,
         "combined_rank": None,
         "elapsed_seconds": 0.0,
     }
+
+    logger.info("Golden loader: generating mechanically-derivable forms")
+    try:
+        summary["mechanical_forms"] = _generate_mechanical_forms(storage)
+        added = sum(counts["forms_added"] for counts in summary["mechanical_forms"].values())
+        logger.info(f"Golden loader: generated {added} derivative forms from the release facts")
+    except Exception as e:
+        logger.exception("Golden loader: mechanical form generation failed")
+        summary["mechanical_forms"] = {"error": str(e)}
 
     session = _make_session_for_storage(storage)
     try:
