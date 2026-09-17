@@ -210,10 +210,10 @@
       ]
     },
     {
-      "id": "country",
-      "label": "Pays",
+      "id": "region",
+      "label": "Région",
       "groups": [
-        "Pays"
+        "Région"
       ],
       "avoidDecoys": [
         "city",
@@ -227,7 +227,7 @@
         "Ville"
       ],
       "avoidDecoys": [
-        "country",
+        "region",
         "nationality"
       ]
     },
@@ -238,7 +238,7 @@
         "Nationalité"
       ],
       "avoidDecoys": [
-        "country",
+        "region",
         "city"
       ]
     },

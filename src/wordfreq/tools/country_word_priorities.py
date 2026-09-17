@@ -191,8 +191,12 @@ COUNTRY_PRIORITIES: Dict[str, Dict[int, List[str]]] = {
         # Nordic and Baltic countries use default level (30)
     },
     # -------------------------------------------------------------------------
-    # SPANISH (es) - Latin American context, European ties
+    # SPANISH (es) - European (Peninsular) context
     # -------------------------------------------------------------------------
+    # Paired with es-419 below: the two differ only in which countries lead.
+    # European Spanish puts Spain and its European neighbors first; es-419
+    # leads with the Latin American republics.  Keep any other change in sync
+    # across both entries.
     "es": {
         TIER_1_LEVEL: [
             "Spain",  # Home country (or cultural origin)
@@ -213,6 +217,32 @@ COUNTRY_PRIORITIES: Dict[str, Dict[int, List[str]]] = {
             "India",
         ],
         # Nordic and Baltic countries use default level (30)
+    },
+    # -------------------------------------------------------------------------
+    # LATIN AMERICAN SPANISH (es-419) - Latin American context
+    # -------------------------------------------------------------------------
+    # Same language as "es" above; only the country ordering differs.  The
+    # Spanish-speaking republics and their regional neighbors lead, and Spain
+    # moves to Tier 2 as the cultural origin rather than the home country.
+    "es-419": {
+        TIER_1_LEVEL: [
+            "Mexico",  # Largest Spanish-speaking country
+            "Argentina",  # Major regional power
+            "Chile",  # Major regional power
+            "United States",  # English-speaking (always Tier 1) + largest diaspora
+            "England",  # English-speaking (always Tier 1)
+            "Canada",  # English-speaking (always Tier 1)
+            "Australia",  # English-speaking (always Tier 1)
+            "Brazil",  # Regional neighbor
+        ],
+        TIER_2_LEVEL: [
+            "Spain",  # Cultural origin, not the home country here
+            "Peru",  # Regional
+            "Cuba",  # Regional
+            "China",  # Major trade partner
+            "Japan",  # Economic ties
+        ],
+        # European countries other than Spain use default level (30)
     },
     # -------------------------------------------------------------------------
     # GERMAN (de) - Central European focus
