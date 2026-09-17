@@ -20,6 +20,7 @@ from typing import Any, Optional
 
 from barsukas.config import Config
 from barsukas.app import create_app
+from barsukas.golden_wordfreq_status import complete_load, start_load
 from barsukas.personas import (
     list_personas,
     PersonaConfig,
@@ -77,6 +78,8 @@ def _load_wordfreq_in_background(jsonl_data_dir: str) -> None:
         load_wordfreq_into_storage(storage)
     except Exception:
         logger.exception("Golden loader: background wordfreq load failed")
+    finally:
+        complete_load()
 
 
 def run_flask_server(
@@ -281,6 +284,7 @@ def main() -> None:
     # In golden/hosted mode (JSONL backend), populate the in-memory wordfreq
     # tables in a background thread so Flask can start serving immediately.
     if persona.use_jsonl:
+        start_load()
         threading.Thread(
             target=_load_wordfreq_in_background,
             args=(str(jsonl_dir),),

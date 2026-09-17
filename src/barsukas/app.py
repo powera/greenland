@@ -19,6 +19,7 @@ from pathlib import Path
 from typing import Any, Callable, Dict, Optional, cast
 
 from barsukas.config import Config
+from barsukas.golden_wordfreq_status import is_loading as is_golden_wordfreq_loading
 from barsukas.personas import PersonaConfig
 from barsukas.helpers.strings import (
     SUPPORTED_UI_LANGS,
@@ -514,6 +515,7 @@ def create_app(
         return " ".join(emoji_values(lemma))
 
     app.jinja_env.filters["lemma_emoji"] = lemma_emoji_text
+    app.jinja_env.globals["is_golden_wordfreq_loading"] = is_golden_wordfreq_loading
 
     # Register filter to extract grammatical case from grammatical_form
     def extract_case(grammatical_form: Optional[str]) -> Optional[str]:
