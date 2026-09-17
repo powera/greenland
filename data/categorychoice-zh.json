@@ -210,10 +210,10 @@
       ]
     },
     {
-      "id": "country",
-      "label": "国家",
+      "id": "region",
+      "label": "地区",
       "groups": [
-        "国家"
+        "地区"
       ],
       "avoidDecoys": [
         "city",
@@ -227,7 +227,7 @@
         "城市"
       ],
       "avoidDecoys": [
-        "country",
+        "region",
         "nationality"
       ]
     },
@@ -238,7 +238,7 @@
         "国籍"
       ],
       "avoidDecoys": [
-        "country",
+        "region",
         "city"
       ]
     },

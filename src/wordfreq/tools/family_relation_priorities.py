@@ -422,6 +422,11 @@ EXCLUDED_TERMS: Dict[str, Set[str]] = {
     },
 }
 
+# Latin American Spanish shares European Spanish's kinship system exactly - the
+# two varieties differ in vocabulary and country emphasis, not in which family
+# terms exist.  Aliased rather than copied so the two cannot drift apart.
+EXCLUDED_TERMS["es-419"] = EXCLUDED_TERMS["es"]
+
 # Default exclusions for languages not explicitly configured
 DEFAULT_EXCLUDED_TERMS: Set[str] = {
     # By default, exclude specialized terms that require linguistic analysis

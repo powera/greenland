@@ -133,22 +133,22 @@
       "avoidDecoys": ["time-period"]
     },
     {
-      "id": "country",
-      "label": "Countries",
-      "groups": ["Country"],
+      "id": "region",
+      "label": "Regions",
+      "groups": ["Region"],
       "avoidDecoys": ["city", "nationality"]
     },
     {
       "id": "city",
       "label": "Cities",
       "groups": ["City"],
-      "avoidDecoys": ["country", "nationality"]
+      "avoidDecoys": ["region", "nationality"]
     },
     {
       "id": "nationality",
       "label": "Nationalities",
       "groups": ["Nationality"],
-      "avoidDecoys": ["country", "city"]
+      "avoidDecoys": ["region", "city"]
     },
     {
       "id": "definite-quantity",
