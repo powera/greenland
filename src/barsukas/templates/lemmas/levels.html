@@ -3,6 +3,7 @@
 {% block title %}{{ lemma.lemma_text }} - Frequency & Levels{% endblock %}
 
 {% block content %}
+{% include '_wordfreq_loading.html' %}
 {% include 'lemmas/_lemma_nav.html' %}
 
 <!-- Base Difficulty -->
