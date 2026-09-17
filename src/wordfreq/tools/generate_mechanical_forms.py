@@ -515,122 +515,137 @@ def generate(
 ) -> Dict[str, Dict[str, int]]:
     """Add missing mechanical forms for every supported language.
 
+    Opens a session from *config* and hands it to :func:`generate_for_session`.
+    Callers that already hold a session -- the golden loader works against an
+    in-memory database that no DataSourceConfig can name -- should call that
+    directly.
+
     Returns per-language counts of lemmas examined, forms written, and lemmas
     the rules declined to inflect.
     """
     session = create_session(config)
+    try:
+        return generate_for_session(session, dry_run=dry_run, languages=languages)
+    finally:
+        session.close()
+
+
+def generate_for_session(
+    session: Session, dry_run: bool = False, languages: Optional[List[str]] = None
+) -> Dict[str, Dict[str, int]]:
+    """Add missing mechanical forms to an already-open session.
+
+    The session is committed (unless *dry_run*) but not closed: it belongs to
+    the caller.
+
+    Existing forms and facts are never overwritten, so this is additive and
+    safe to re-run against a database that has already been generated into.
+    """
     selected = languages or list(SUPPORTED)
     stats: Dict[str, Dict[str, int]] = {}
 
-    try:
-        for language_code in selected:
-            pos_types = SUPPORTED[language_code]
-            counts = {
-                "lemmas_seen": 0,
-                "lemmas_written": 0,
-                "forms_added": 0,
-                "rules_declined": 0,
-                "facts_added": 0,
+    for language_code in selected:
+        pos_types = SUPPORTED[language_code]
+        counts = {
+            "lemmas_seen": 0,
+            "lemmas_written": 0,
+            "forms_added": 0,
+            "rules_declined": 0,
+            "facts_added": 0,
+        }
+        stats[language_code] = counts
+
+        lemmas: List[Lemma] = session.query(Lemma).filter(Lemma.pos_type.in_(list(pos_types))).all()
+
+        for lemma in lemmas:
+            counts["lemmas_seen"] += 1
+            pos_type = lemma.pos_type.lower()
+
+            paradigm, metadata = build_for_lemma_with_metadata(session, lemma, language_code)
+            if not paradigm:
+                counts["rules_declined"] += 1
+                continue
+
+            # Persist what the builder worked out about the paradigm.  The
+            # gender decline_noun infers is worth storing even though it is
+            # recomputable: other languages get gender from an LLM, and a
+            # release file that carried only the exceptions would be read as
+            # "no fact" for every regular noun rather than "regular".
+            for metadata_key, fact_type in METADATA_FACT_TYPES.items():
+                fact_value = metadata.get(metadata_key)
+                if not fact_value:
+                    continue
+                if get_grammar_fact_value(session, lemma.id, language_code, fact_type):
+                    continue
+                if not dry_run:
+                    add_grammar_fact(
+                        session,
+                        lemma_id=lemma.id,
+                        language_code=language_code,
+                        fact_type=fact_type,
+                        fact_value=fact_value,
+                        notes="derived mechanically by generate_mechanical_forms",
+                    )
+                counts["facts_added"] += 1
+
+            existing = {
+                row.grammatical_form
+                for row in session.query(DerivativeForm).filter(
+                    DerivativeForm.lemma_id == lemma.id,
+                    DerivativeForm.language_code == language_code,
+                )
             }
-            stats[language_code] = counts
 
-            lemmas: List[Lemma] = (
-                session.query(Lemma).filter(Lemma.pos_type.in_(list(pos_types))).all()
-            )
-
-            for lemma in lemmas:
-                counts["lemmas_seen"] += 1
-                pos_type = lemma.pos_type.lower()
-
-                paradigm, metadata = build_for_lemma_with_metadata(session, lemma, language_code)
-                if not paradigm:
-                    counts["rules_declined"] += 1
+            added = 0
+            for form_key, form_text in paradigm.items():
+                grammatical_form = resolve_grammatical_form(language_code, pos_type, form_key)
+                if grammatical_form is None or grammatical_form in existing:
+                    continue
+                if not form_text or not form_text.strip():
                     continue
 
-                # Persist what the builder worked out about the paradigm.  The
-                # gender decline_noun infers is worth storing even though it is
-                # recomputable: other languages get gender from an LLM, and a
-                # release file that carried only the exceptions would be read as
-                # "no fact" for every regular noun rather than "regular".
-                for metadata_key, fact_type in METADATA_FACT_TYPES.items():
-                    fact_value = metadata.get(metadata_key)
-                    if not fact_value:
-                        continue
-                    if get_grammar_fact_value(session, lemma.id, language_code, fact_type):
-                        continue
-                    if not dry_run:
-                        add_grammar_fact(
-                            session,
+                if not dry_run:
+                    token = add_word_token(session, form_text, language_code)
+                    session.add(
+                        DerivativeForm(
                             lemma_id=lemma.id,
+                            derivative_form_text=form_text,
+                            word_token_id=token.id,
                             language_code=language_code,
-                            fact_type=fact_type,
-                            fact_value=fact_value,
-                            notes="derived mechanically by generate_mechanical_forms",
+                            grammatical_form=grammatical_form,
+                            is_base_form=(form_key == BASE_FORM_KEY.get((language_code, pos_type))),
+                            verified=False,
                         )
-                    counts["facts_added"] += 1
-
-                existing = {
-                    row.grammatical_form
-                    for row in session.query(DerivativeForm).filter(
-                        DerivativeForm.lemma_id == lemma.id,
-                        DerivativeForm.language_code == language_code,
                     )
-                }
+                added += 1
 
-                added = 0
-                for form_key, form_text in paradigm.items():
-                    grammatical_form = resolve_grammatical_form(language_code, pos_type, form_key)
-                    if grammatical_form is None or grammatical_form in existing:
-                        continue
-                    if not form_text or not form_text.strip():
-                        continue
+            if added:
+                counts["lemmas_written"] += 1
+                counts["forms_added"] += added
+                if not dry_run:
+                    log_operation(
+                        session,
+                        operation_type="mechanical_forms_generated",
+                        source="generate_mechanical_forms",
+                        entity_type="derivative_form",
+                        lemma_id=lemma.id,
+                        details={
+                            "language_code": language_code,
+                            "pos_type": pos_type,
+                            "forms_added": added,
+                            "generator": f"langtools.{language_code} {pos_type}",
+                        },
+                    )
 
-                    if not dry_run:
-                        token = add_word_token(session, form_text, language_code)
-                        session.add(
-                            DerivativeForm(
-                                lemma_id=lemma.id,
-                                derivative_form_text=form_text,
-                                word_token_id=token.id,
-                                language_code=language_code,
-                                grammatical_form=grammatical_form,
-                                is_base_form=(
-                                    form_key == BASE_FORM_KEY.get((language_code, pos_type))
-                                ),
-                                verified=False,
-                            )
-                        )
-                    added += 1
+        # A variant inflects by the same rules as the lemma it belongs to,
+        # so its derivable slots are rebuilt here too -- otherwise the
+        # release would ship "greyer" beside a "grayer" it withholds.
+        counts["variant_forms_added"] = generate_variant_forms(
+            session, language_code, dry_run=dry_run
+        )["forms_added"]
 
-                if added:
-                    counts["lemmas_written"] += 1
-                    counts["forms_added"] += added
-                    if not dry_run:
-                        log_operation(
-                            session,
-                            operation_type="mechanical_forms_generated",
-                            source="generate_mechanical_forms",
-                            entity_type="derivative_form",
-                            lemma_id=lemma.id,
-                            details={
-                                "language_code": language_code,
-                                "pos_type": pos_type,
-                                "forms_added": added,
-                                "generator": f"langtools.{language_code} {pos_type}",
-                            },
-                        )
-
-            # A variant inflects by the same rules as the lemma it belongs to,
-            # so its derivable slots are rebuilt here too -- otherwise the
-            # release would ship "greyer" beside a "grayer" it withholds.
-            counts["variant_forms_added"] = generate_variant_forms(
-                session, language_code, dry_run=dry_run
-            )["forms_added"]
-
-        if not dry_run:
-            session.commit()
-    finally:
-        session.close()
+    if not dry_run:
+        session.commit()
 
     return stats
 

@@ -1,6 +1,7 @@
 {% if config.get('PERSONA') in ('golden', 'hosted', 'scholar') and is_golden_wordfreq_loading() %}
 <div class="alert alert-info" role="status">
     <span class="spinner-border spinner-border-sm me-2" aria-hidden="true"></span>
-    Word-frequency data is loading. Corpus details and combined ranks may be incomplete.
+    Word-frequency data and mechanically-derived forms are loading.
+    Corpus details, combined ranks and regular paradigms may be incomplete.
 </div>
 {% endif %}
