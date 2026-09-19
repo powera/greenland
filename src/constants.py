@@ -35,13 +35,29 @@ OUTPUT_DIR = os.path.join(os.path.dirname(PROJECT_ROOT), "greenland_output")
 # sites, so this constant is the only place the root itself is derived.
 RELEASE_DIR = os.path.join(PROJECT_ROOT, "data", "release")
 
-# Curriculum bounds. Levels through 100 are the general-purpose course;
-# 101-199 are topic-specific extensions. ``-1`` is the intentional exclusion
-# sentinel and is not a curriculum level.
+# Curriculum bounds, in three bands with deliberate gaps between them:
+#
+#   1-20        the curated general core, taught in order
+#   100-499     "named" units, each a single pos_subtype (Animals 3, Body
+#               Parts, Appliances 2)
+#   1000-1299   topic-specific extensions, outside the general course
+#
+# The gaps are the point. Each old level 21-64 maps to ``100 + (old-21)*5``,
+# and the five numbers it owns are where its single-topic units go: the level
+# that held a mixed bag of 45 words becomes Animals 5, Disease 4 and so on,
+# without renumbering anything after it.
+#
+# Within the named band the numbers are **not** a teaching order. A unit is
+# reached when its prerequisites are met, so Disease 1 at 670 may well come
+# before Animals 9 at 129. Only the core (1-20) is strictly sequential.
+#
+# ``-1`` is the intentional exclusion sentinel, not a level.
 MIN_DIFFICULTY_LEVEL: int = 1
-GENERAL_DIFFICULTY_LEVEL_MAX: int = 100
-TOPIC_DIFFICULTY_LEVEL_MIN: int = GENERAL_DIFFICULTY_LEVEL_MAX + 1
-MAX_DIFFICULTY_LEVEL: int = 199
+CORE_DIFFICULTY_LEVEL_MAX: int = 20
+NAMED_DIFFICULTY_LEVEL_MIN: int = 100
+GENERAL_DIFFICULTY_LEVEL_MAX: int = 499
+TOPIC_DIFFICULTY_LEVEL_MIN: int = 1000
+MAX_DIFFICULTY_LEVEL: int = 1299
 EXCLUDE_DIFFICULTY_LEVEL: int = -1
 
 # Wordfreq directories

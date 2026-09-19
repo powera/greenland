@@ -2,7 +2,7 @@
 """Import the anatomy, taxonomy and the life sciences vocabulary that only the wiki_biology corpus attests.
 
 Sourced from /word-tokens/corpus-skew?corpus=wiki_biology&exclusive=1 -- not the
-Zipf-delta list that levels 66-73 were drawn from, but its companion: the words
+Zipf-delta list that levels 330-400 were drawn from, but its companion: the words
 this corpus has and no other corpus in the collection does.  A word with no
 "elsewhere" cannot be scored, so these are reported apart from the skew ranking;
 they are also the sharper list, because being unattested everywhere else is a
@@ -32,7 +32,7 @@ if str(ROOT) not in sys.path:
 
 from scripts.wordlist_import_helper import run_import
 
-DIFFICULTY_LEVEL = 102
+DIFFICULTY_LEVEL = 1010
 
 # The corpus-exclusive words of wiki_biology on 2026-08-29, ordered by their rank
 # within the corpus and cut at 125, reduced to what words_exist does not already
@@ -50,7 +50,7 @@ DIFFICULTY_LEVEL = 102
 #
 # A word exclusive to one corpus is by construction absent from the others, so
 # these ten lists cannot collide with each other.  Words already claimed by
-# import_unlinked_level_65.py and by the skew batches at 66-73 are removed here,
+# import_unlinked_level_320.py and by the skew batches at 330-400 are removed here,
 # since those lists were drawn from the same token table.
 WORDS: Sequence[str] = (
     "subspecies",

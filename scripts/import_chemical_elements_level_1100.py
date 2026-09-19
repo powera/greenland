@@ -50,7 +50,7 @@ if str(ROOT) not in sys.path:
 
 from scripts.wordlist_import_helper import run_import
 
-DIFFICULTY_LEVEL = 111
+DIFFICULTY_LEVEL = 1100
 
 # The 118 elements in atomic-number order, 1 (hydrogen) to 118 (oganesson).
 # The comment every ten keeps the position checkable without counting: the

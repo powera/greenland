@@ -6,8 +6,8 @@ here is furthest above their Zipf in the other corpora, which is what surfaces
 physics, chemistry, astronomy, earth science and molecular biology rather than the function words a raw frequency list would return.
 
 The first 40 ranked words form the physical-science sample at
-general-curriculum level 71. The remaining, sharper domain vocabulary is stored
-at topic level 106.
+general-curriculum level 380. The remaining, sharper domain vocabulary is stored
+at topic level 1050.
 
 This script deliberately uses the public ``ROOT/api`` facade.  In particular,
 ``api.lemmas.add_word`` runs Barsukas' intelligent word workflow: the server's
@@ -30,8 +30,8 @@ if str(ROOT) not in sys.path:
 
 from scripts.wordlist_import_helper import run_domain_import
 
-DIFFICULTY_LEVEL = 71
-TOPIC_DIFFICULTY_LEVEL = 106
+DIFFICULTY_LEVEL = 380
+TOPIC_DIFFICULTY_LEVEL = 1050
 
 # The top 200 rows of /word-tokens/corpus-skew?corpus=wiki_physical_science on 2026-08-29,
 # reduced to what words_exist does not already account for, then curated:
@@ -48,7 +48,7 @@ TOPIC_DIFFICULTY_LEVEL = 106
 # A word that scores in more than one corpus is assigned to whichever corpus it
 # leans toward hardest, so these lists are disjoint and a word cannot be
 # imported twice at two different levels.  Words already claimed by
-# import_unlinked_level_65.py are removed here for the same reason.
+# import_unlinked_level_320.py are removed here for the same reason.
 WORDS: Sequence[str] = (
     "particle",
     "atom",

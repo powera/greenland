@@ -1,14 +1,14 @@
 #!/usr/bin/env python3
-"""Import the political and military history vocabulary that only the wiki_history corpus attests.
+"""Import the physical and human geography vocabulary that only the wiki_geography corpus attests.
 
-Sourced from /word-tokens/corpus-skew?corpus=wiki_history&exclusive=1 -- not the
-Zipf-delta list that levels 66-73 were drawn from, but its companion: the words
+Sourced from /word-tokens/corpus-skew?corpus=wiki_geography&exclusive=1 -- not the
+Zipf-delta list that levels 330-400 were drawn from, but its companion: the words
 this corpus has and no other corpus in the collection does.  A word with no
 "elsewhere" cannot be scored, so these are reported apart from the skew ranking;
 they are also the sharper list, because being unattested everywhere else is a
 stronger claim about a word's domain than merely being commoner here.
 
-Topic level 104 joins the tail of the ranked history list. These
+Topic level 103 joins the tail of the ranked geography list. These
 corpus-exclusive words are too domain-specific for the general curriculum.
 
 This script deliberately uses the public ``ROOT/api`` facade.  In particular,
@@ -32,14 +32,14 @@ if str(ROOT) not in sys.path:
 
 from scripts.wordlist_import_helper import run_import
 
-DIFFICULTY_LEVEL = 104
+DIFFICULTY_LEVEL = 1020
 
-# The corpus-exclusive words of wiki_history on 2026-08-29, ordered by their rank
+# The corpus-exclusive words of wiki_geography on 2026-08-29, ordered by their rank
 # within the corpus and cut at 125, reduced to what words_exist does not already
 # account for, then curated.  Dropped: capitalized tokens and tokens carrying
 # digits or punctuation (proper nouns and possessives the exclusivity test cannot
 # separate), tokens under four letters, mangled diacritics left by the corpus
-# load ("cole"), wiki markup fragments and
+# load ("ppen", "sseldorf", "rdoba"), wiki markup fragments and
 # participles whose headword survives in the list.  Plurals are dropped whenever
 # the singular is an attested word at all, not merely when the singular also
 # appears in this list -- the earlier, narrower rule left ~120 plurals behind; a
@@ -50,49 +50,64 @@ DIFFICULTY_LEVEL = 104
 #
 # A word exclusive to one corpus is by construction absent from the others, so
 # these ten lists cannot collide with each other.  Words already claimed by
-# import_unlinked_level_65.py and by the skew batches at 66-73 are removed here,
+# import_unlinked_level_320.py and by the skew batches at 330-400 are removed here,
 # since those lists were drawn from the same token table.
 WORDS: Sequence[str] = (
-    "honorary",
-    "autobiography",
-    "papal",
-    "vassal",
-    "assassinated",
-    "casualties",
-    "besieged",
-    "ambassador",
-    "deposed",
-    "exiled",
-    "regent",
-    "sultan",
-    "faction",
-    "invade",
-    "unification",
-    "caliph",
-    "memoirs",
-    "archives",
-    "coronation",
-    "raid",
-    "aftermath",
-    "archaeology",
-    "historiography",
-    "accession",
-    "dynastic",
-    "samurai",
-    "sacked",
-    "interred",
-    "posthumous",
-    "emigrants",
-    "excavation",
-    "rivalry",
-    "guerrilla",
-    "truce",
-    "apartheid",
-    "bureaucracy",
-    "domination",
-    "chronology",
-    "medalists",
-    "chancellor",
+    "populous",
+    "strait",
+    "metro",
+    "coastline",
+    "tributary",
+    "explorer",
+    "confluence",
+    "suburban",
+    "offshore",
+    "southernmost",
+    "steppe",
+    "prefecture",
+    "upstream",
+    "northernmost",
+    "suburb",
+    "ecoregion",
+    "snowfall",
+    "urbanization",
+    "deforestation",
+    "commuter",
+    "commune",
+    "protectorate",
+    "metropolis",
+    "rift",
+    "landlocked",
+    "montane",
+    "annexation",
+    "agglomeration",
+    "slum",
+    "physiographic",
+    "terminus",
+    "landmass",
+    "highland",
+    "easternmost",
+    "seaport",
+    "inflow",
+    "pipeline",
+    "motorway",
+    "mangrove",
+    "shoreline",
+    "silt",
+    "uplift",
+    "borough",
+    "hilly",
+    "emigration",
+    "uninhabited",
+    "scenic",
+    "stronghold",
+    "geographer",
+    "headwaters",
+    "citadel",
+    "westernmost",
+    "migrant",
+    "geopolitical",
+    "exporter",
 )
 
 

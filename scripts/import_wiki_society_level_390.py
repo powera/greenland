@@ -6,10 +6,10 @@ here is furthest above their Zipf in the other corpora, which is what surfaces
 society, philosophy and religion -- law, politics, economics, language, ethics and belief rather than the function words a raw frequency list would return.
 
 The first 40 ranked words form the society sample at general-curriculum level
-72. The remaining, sharper domain vocabulary is stored at topic level 107.
+390. The remaining, sharper domain vocabulary is stored at topic level 1060.
 
 The language and linguistics terms this list originally carried moved to
-import_linguistics_basic_level_18.py and import_linguistics_advanced_level_112.py.
+import_linguistics_basic_level_460.py and import_linguistics_advanced_level_1110.py.
 The corpus put them here because encyclopedic prose about language sits inside
 the Level 4 Society list, which is a fact about the corpus rather than about
 the words: "noun" and "vowel" are the app's own metalanguage and belong early,
@@ -36,8 +36,8 @@ if str(ROOT) not in sys.path:
 
 from scripts.wordlist_import_helper import run_domain_import
 
-DIFFICULTY_LEVEL = 72
-TOPIC_DIFFICULTY_LEVEL = 107
+DIFFICULTY_LEVEL = 390
+TOPIC_DIFFICULTY_LEVEL = 1060
 
 # The top 200 rows of /word-tokens/corpus-skew?corpus=wiki_society on 2026-08-29,
 # reduced to what words_exist does not already account for, then curated:
@@ -54,7 +54,7 @@ TOPIC_DIFFICULTY_LEVEL = 107
 # A word that scores in more than one corpus is assigned to whichever corpus it
 # leans toward hardest, so these lists are disjoint and a word cannot be
 # imported twice at two different levels.  Words already claimed by
-# import_unlinked_level_65.py are removed here for the same reason.
+# import_unlinked_level_320.py are removed here for the same reason.
 WORDS: Sequence[str] = (
     "curriculum",
     "ethics",
