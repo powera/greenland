@@ -1,205 +1,56 @@
 #!/usr/bin/python3
 
-"""Enumeration types for linguistic models."""
+"""Enumeration types for linguistic models.
+
+The ``*Subtype`` enums are **generated** from
+:data:`storage.models.guid_prefixes.SUBTYPE_DEFS`, which is the single source of
+truth for what subtypes exist. Adding one means editing that table, not this
+file -- these classes exist so that ``NounSubtype.LEGAL_DOCUMENT`` keeps
+working and so the enums cannot drift from the GUID prefixes.
+
+One deliberate asymmetry is preserved from the hand-written version: each enum
+has a bare ``OTHER = "other"`` member, while the prefix table keys the same
+bucket ``"<pos>_other"``. The catch-all is reachable by GUID but is not offered
+as a classification choice, and
+``src/tests/storage/test_pos_enum_helpers.py`` asserts exactly that.
+"""
 
 import enum
+from typing import Dict, Type
+
+from storage.models.guid_prefixes import SUBTYPE_DEFS
+
+# The catch-all every POS type carries. Keyed "<pos>_other" in SUBTYPE_DEFS but
+# exposed as the bare value here; see the module docstring.
+_CATCH_ALL_VALUE = "other"
 
 
-class NounSubtype(enum.Enum):
-    """Subtypes for nouns.
+def _build_subtype_enum(pos_type: str, class_name: str) -> Type[enum.Enum]:
+    """Build one ``*Subtype`` enum from the subtype table.
 
-    NOTE: When adding/modifying subtypes, update SUBTYPE_GUID_PREFIXES
-    in guid_prefixes.py to keep GUID assignments in sync.
+    Member names are ``subtype.upper()`` unless the definition overrides it
+    with ``member_name``. The ``<pos>_other`` key becomes ``OTHER = "other"``.
     """
+    members: Dict[str, str] = {}
+    for subtype, spec in SUBTYPE_DEFS[pos_type].items():
+        if subtype == f"{pos_type}_other":
+            members["OTHER"] = _CATCH_ALL_VALUE
+            continue
+        members[spec.member_name or subtype.upper()] = subtype
 
-    # People and Living Things
-    OCCUPATION = "occupation"  # Professions and roles (teacher, doctor, accountant)
-    FAMILY_RELATION = "family_relation"  # Family members (brother, uncle, cousin, parent)
-    HUMAN = "human"
-    HONORIFIC = "honorific"  # Titles and forms of address (Sir, Lord, Mr., Mrs., Dr.)
-
-    ANIMAL = "animal"
-    BODY_PART = "body_part"
-    DISEASE_CONDITION = "disease_condition"
-    PLANT = "plant"
-    PLANT_PART = "plant_part"  # Parts of plants (leaf, root, seed, petal, bark)
-
-    # Food and Consumables
-    FOOD = "food"  # Solid consumables (bread, apple, rice, meat)
-    BEVERAGE = "beverage"  # Liquid consumables (water, coffee, tea, juice)
-
-    # Physical Objects and Structures
-    BUILDING_STRUCTURE = "building_structure"
-    BUILDING_PART = (
-        "building_part"  # Parts of buildings (door, window, wall, floor, ceiling, roof, stairs)
-    )
-    FURNITURE = "furniture"  # Furniture items (table, chair, desk, sofa, bed)
-    SMALL_MOVABLE_OBJECT = "small_movable_object"
-    CLOTHING_ACCESSORY = "clothing_accessory"
-    ARTWORK_ARTIFACT = "artwork_artifact"
-    NATURAL_FEATURE = "natural_feature"
-    TOOL = "tool"  # Hand tools and generic tools (hammer, saw, wrench, screwdriver)
-    ELECTRONIC_DEVICE = "electronic_device"  # Computers, phones, TVs, radios, cameras
-    APPLIANCE = "appliance"  # Kitchen and household appliances (blender, microwave, toaster)
-    WEAPON = "weapon"  # Weapons and arms (sword, gun, bow, shield)
-    VEHICLE = "vehicle"  # Transportation (car, truck, bicycle, boat, airplane)
-    PATH_INFRASTRUCTURE = "path_infrastructure"
-
-    # Materials and Substances
-    MATERIAL_SUBSTANCE = "material_substance"
-    CHEMICAL_COMPOUND = (
-        "chemical_compound"  # Chemical elements and compounds (oxygen, lithium, carbon dioxide)
-    )
-    MEDICATION_REMEDY = "medication_remedy"
-
-    # Abstract Concepts and Ideas
-    CONCEPT_IDEA = "concept_idea"
-    COMMUNICATION_INFORMATION = "communication_information"  # Language, messages, information (word, language, message, news)
-    TECHNOLOGY_DIGITAL = (
-        "technology_digital"  # Digital/computing concepts (internet, email, website, data)
-    )
-    ABSTRACT_CONDITION = (
-        "abstract_condition"  # Abstract conditions, situations (peace, danger, luck, fate)
-    )
-    SOCIAL_INSTITUTION = (
-        "social_institution"  # Organizations, collective structures (government, army, company)
-    )
-    ACTIVITY = "activity"  # Activities and hobbies (reading, cooking, sports, dancing, hiking)
-    SYMBOLIC_ELEMENT = "symbolic_element"
-    QUALITY_ATTRIBUTE = "quality_attribute"
-    MENTAL_CONSTRUCT = "mental_construct"
-    KNOWLEDGE_DOMAIN = "knowledge_domain"
-    QUANTITATIVE_CONCEPT = "quantitative_concept"
-    EMOTION_FEELING = "emotion_feeling"
-    SHAPE = "shape"  # Geometric shapes (circle, triangle, square, rectangle, etc.)
-
-    # Processes and Time
-    PROCESS_EVENT = "process_event"
-    TIME_PERIOD = "time_period"
-
-    # Groups and Collections
-    GROUP_PEOPLE = "group_people"
-    GROUP_ANIMAL = "animal_grouping_term"  # Measure words for animals (flock, herd, head)
-    COLLECTION_THINGS = "collection_things"
-
-    # Named Entities
-    PERSONAL_NAME = "personal_name"
-    PLACE_NAME = "place_name"  # Generic place nouns (room, street, etc.)
-    REGION = "region"  # Countries, states, and similar political regions
-    CITY = "city"  # Cities (Vilnius, Paris, Tokyo)
-    GEOGRAPHIC_PLACE = "geographic_place"  # Named geographic features (Atlantic Ocean, Pacific Ocean, Indian Ocean)
-    ORGANIZATION_NAME = "organization_name"
-
-    # Temporal Names
-    TEMPORAL_NAME = "temporal_name"  # Days of week, months, etc.
-
-    # Nationality and Measurement
-    NATIONALITY = "nationality"
-    UNIT_OF_MEASUREMENT = "unit_of_measurement"
-
-    # Other
-    OTHER = "other"
+    # A plain Enum, not a str mixin: the hand-written classes these replace
+    # were plain, and a mixin would quietly make ``member == "legal_document"``
+    # true, hiding comparisons that should have used ``.value``.
+    built = enum.Enum(class_name, members)  # type: ignore[misc]
+    built.__doc__ = f"Subtypes for {pos_type}s. Generated from SUBTYPE_DEFS in guid_prefixes.py."
+    return built
 
 
-class VerbSubtype(enum.Enum):
-    """Subtypes for verbs."""
-
-    PHYSICAL_ACTION = "physical_action"  # Physical actions (push, pull, lift, eat, drink)
-    CREATION_ACTION = "creation_action"  # Creating things (make, create, build)
-    DESTRUCTION_ACTION = "destruction_action"  # Destroying (break, destroy, demolish)
-    MENTAL_STATE = "mental_state"  # Cognition (know, believe, understand, think)
-    EMOTIONAL_STATE = "emotional_state"  # Feelings (love, hate, fear, enjoy)
-    PERCEPTION = "perception"  # Sensory verbs (see, hear, smell, taste, feel, touch)
-    COMMUNICATION = "communication"  # Speaking and writing (say, tell, speak, write, read)
-    POSSESSION = "possession"  # Having/owning (have, own, possess, give, take)
-    EXISTENCE = "existence"  # Living/existing (live, exist, die, survive, stay, remain)
-    DEVELOPMENT = "development"  # Growing/evolving (grow, develop, evolve, mature)
-    CHANGE = "change"  # Transforming (become, transform, change, turn)
-    DIRECTIONAL_MOVEMENT = "directional_movement"  # Moving with direction (go, come, enter, leave)
-    MANNER_MOVEMENT = "manner_movement"  # Way of moving (walk, run, swim, fly, crawl)
-    OTHER = "other"
-
-
-class AdjectiveSubtype(enum.Enum):
-    """Subtypes for adjectives.
-
-    NOTE: When adding/modifying subtypes, update SUBTYPE_GUID_PREFIXES
-    in guid_prefixes.py to keep GUID assignments in sync.
-    """
-
-    SIZE = "size"  # Size descriptions (big, small, huge, tiny)
-    COLOR = "color"  # Color descriptions (red, blue, green, yellow)
-    SHAPE = "shape"  # Shape descriptions (round, square, triangular, oval)
-    TEXTURE = "texture"  # Texture descriptions (soft, hard, smooth, rough)
-    PERSONAL_QUALITY = "personal_quality"  # Character/personality traits (honest, kind, brave, lazy, clever, polite)
-    PHYSICAL_PROPERTY = "physical_property"  # Physical properties and states (dimensions, weight, temperature, condition: high, low, heavy, light, cold, hot, wet, dry, open, closed)
-    CONDITION = (
-        "condition"  # Physical/temporal state (hot, cold, wet, dry, clean, dirty, new, old, fresh)
-    )
-    EMOTION = "emotion"  # Emotional states (happy, sad, angry, excited, tired, scared)
-    QUALITY = "quality"  # Evaluative and abstract properties (good, bad, excellent, important, possible, necessary, real, clear, simple)
-    AESTHETIC = "aesthetic"  # Beauty or appearance (beautiful, ugly, pretty, handsome)
-    IMPORTANCE = "importance"  # Importance or priority (important, essential, trivial, critical)
-    ORIGIN = "origin"  # Origin or source (American, Chinese, domestic, foreign)
-    LOCATION = "location"  # Where a thing is situated (northern, coastal, inland, urban, rural)
-    PURPOSE = "purpose"  # Purpose or function (educational, medical, industrial, recreational)
-    MATERIAL = "material"  # Material composition (wooden, metal, plastic, cotton)
-    # DEFINITE_QUANTITY removed: moved to numeral POS
-    INDEFINITE_QUANTITY = "indefinite_quantity"  # Inexact amounts (many, few, some, several)
-    DURATION = "duration"  # Time duration (brief, long, eternal, temporary)
-    FREQUENCY = "frequency"  # Frequency of occurrence (daily, occasional, rare, frequent)
-    SEQUENCE = "sequence"  # Order or sequence (first, last, next, previous)
-    OTHER = "other"
-
-
-class NumeralSubtype(enum.Enum):
-    """Subtypes for numerals.
-
-    NOTE: When adding/modifying subtypes, update SUBTYPE_GUID_PREFIXES
-    in guid_prefixes.py to keep GUID assignments in sync.
-    """
-
-    CARDINAL = "cardinal"  # Cardinal numbers (one, two, three, 100)
-    ORDINAL = "ordinal"  # Ordinal numbers (first, second, third, 100th)
-
-
-class AdverbSubtype(enum.Enum):
-    """Subtypes for adverbs."""
-
-    # Manner
-    STYLE = "style"  # Manner or style of action (quickly, carefully, well, slowly, badly, easily)
-    ATTITUDE = "attitude"  # Attitude or approach (eagerly, reluctantly, willingly, gladly, sadly)
-
-    # Temporal
-    SPECIFIC_TIME = (
-        "specific_time"  # Specific time references (now, today, yesterday, tomorrow, tonight)
-    )
-    RELATIVE_TIME = (
-        "relative_time"  # Relative time references (already, soon, recently, lately, previously)
-    )
-    DURATION = (
-        "duration"  # Duration of time (briefly, temporarily, permanently, forever, momentarily)
-    )
-    DEFINITE_FREQUENCY = (
-        "definite_frequency"  # Specific frequency (daily, weekly, monthly, yearly, hourly)
-    )
-    INDEFINITE_FREQUENCY = "indefinite_frequency"  # Inexact frequency (often, sometimes, rarely, seldom, always, never)
-
-    # Spatial
-    DIRECTION = (
-        "direction"  # Directional movement (up, down, forward, backward, left, right, north)
-    )
-    LOCATION = "location"  # Position or place (here, there, everywhere, nowhere, somewhere, inside, outside)
-    DISTANCE = "distance"  # Distance references (nearby, far, close, away, afar)
-
-    # Degree
-    INTENSITY = (
-        "intensity"  # Intensity or degree (very, extremely, slightly, quite, rather, too, enough)
-    )
-    COMPLETENESS = "completeness"  # Degree of completeness (entirely, partly, completely, fully, partially, halfway)
-    APPROXIMATION = "approximation"  # Approximation (almost, nearly, exactly, approximately, precisely, roughly)
-
-    OTHER = "other"
+NounSubtype = _build_subtype_enum("noun", "NounSubtype")
+VerbSubtype = _build_subtype_enum("verb", "VerbSubtype")
+AdjectiveSubtype = _build_subtype_enum("adjective", "AdjectiveSubtype")
+AdverbSubtype = _build_subtype_enum("adverb", "AdverbSubtype")
+NumeralSubtype = _build_subtype_enum("numeral", "NumeralSubtype")
 
 
 class GrammaticalForm(enum.Enum):

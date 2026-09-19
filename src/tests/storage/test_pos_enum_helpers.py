@@ -14,7 +14,12 @@ from typing import Iterable, cast
 import pytest
 
 from storage.models.enums import NounSubtype
-from storage.models.guid_prefixes import SUBTYPE_GUID_PREFIXES
+from storage.models.guid_prefixes import (
+    SUBTYPE_DEFS,
+    SUBTYPE_GUID_PREFIXES,
+    get_subtype_def,
+    subtype_for_prefix,
+)
 from storage.utils.enums import (
     VALID_POS_TYPES,
     get_all_pos_subtypes,
@@ -135,3 +140,68 @@ def test_get_all_pos_subtypes_is_sorted_and_includes_bare_pos_types() -> None:
 
     assert all_subtypes == sorted(set(all_subtypes))
     assert VALID_POS_TYPES <= set(all_subtypes)
+
+
+# --- SUBTYPE_DEFS, the single source of truth -------------------------------
+
+
+def test_derived_prefix_map_matches_the_definitions() -> None:
+    """SUBTYPE_GUID_PREFIXES is generated, so it cannot be edited out of sync."""
+    for pos_type, subtypes in SUBTYPE_DEFS.items():
+        for subtype, spec in subtypes.items():
+            assert SUBTYPE_GUID_PREFIXES[pos_type][subtype] == spec.prefix
+
+
+def test_prefixes_are_globally_unique() -> None:
+    """A prefix identifies one subtype across every POS, which PREFIX_TO_SUBTYPE assumes.
+
+    Uniqueness *within* a POS type is covered separately; this is the stronger
+    claim the inverted map depends on, since it is keyed by prefix alone.
+    """
+    seen: dict[str, tuple[str, str]] = {}
+    for pos_type, subtypes in SUBTYPE_DEFS.items():
+        for subtype, spec in subtypes.items():
+            assert spec.prefix not in seen, (
+                f"{pos_type}/{subtype} reuses prefix {spec.prefix} "
+                f"already held by {seen[spec.prefix]}"
+            )
+            seen[spec.prefix] = (pos_type, subtype)
+
+
+def test_inverted_map_round_trips() -> None:
+    for pos_type, subtypes in SUBTYPE_DEFS.items():
+        for subtype, spec in subtypes.items():
+            assert subtype_for_prefix(spec.prefix) == (pos_type, subtype)
+
+
+def test_every_subtype_has_a_definition_lookup() -> None:
+    for pos_type, subtypes in SUBTYPE_DEFS.items():
+        for subtype in subtypes:
+            assert get_subtype_def(pos_type, subtype) is not None
+    assert get_subtype_def("noun", "not_a_subtype") is None
+    assert get_subtype_def("not_a_pos", "human") is None
+
+
+def test_examples_do_not_leak_into_descriptions() -> None:
+    """A description is a gloss; examples belong in their own field.
+
+    These are what a generated classification prompt renders, so a description
+    carrying a parenthesised example list would double up against `examples`.
+    """
+    for pos_type, subtypes in SUBTYPE_DEFS.items():
+        for subtype, spec in subtypes.items():
+            assert not spec.description.endswith(
+                ")"
+            ), f"{pos_type}/{subtype} description looks like it still holds examples"
+
+
+def test_comments_are_never_prompt_material() -> None:
+    """``comment`` is maintainer-only and must not be confused with description.
+
+    Nothing that builds a prompt may read it; this pins the field's existence
+    and its separation so a future prompt generator has an unambiguous contract.
+    """
+    for subtypes in SUBTYPE_DEFS.values():
+        for spec in subtypes.values():
+            if spec.comment:
+                assert spec.comment != spec.description
