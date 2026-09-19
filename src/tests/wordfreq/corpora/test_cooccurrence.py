@@ -122,6 +122,16 @@ def test_verb_clusters_group_by_shared_profile() -> None:
 
 
 def test_hardcoded_verbs_are_named_and_not_derived() -> None:
-    """The three auxiliaries are placed by hand; see the module docstring."""
-    assert set(HARDCODED_VERB_LEVELS) == {"be", "have", "do"}
+    """These verbs are placed by hand; see the module docstring."""
+    assert set(HARDCODED_VERB_LEVELS) == {"be", "have", "like"}
     assert all(level > 0 for level in HARDCODED_VERB_LEVELS.values())
+
+
+def test_do_is_not_hardcoded() -> None:
+    """'do' is deliberately absent, and the comment saying so must stay true.
+
+    Unlike "be" and "have" it has no teachable content sense -- its uses are
+    auxiliary, emphatic and pro-verb -- so it is not in the lemma table and
+    must not be given a level here.
+    """
+    assert "do" not in HARDCODED_VERB_LEVELS

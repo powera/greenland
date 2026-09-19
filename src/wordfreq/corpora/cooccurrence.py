@@ -48,35 +48,54 @@ DEFAULT_MIN_VERB_COUNT: Final[int] = 30
 #: chance co-occurrence cannot produce a spectacular lift.
 DEFAULT_MIN_PAIR_COUNT: Final[int] = 5
 
-# ``be``, ``have`` and ``do`` are placed by hand, not measured, and the tool
-# must not imply otherwise.
+# These verbs are placed by hand, not measured, and the tool must not imply
+# otherwise. Two different reasons put a verb here.
 #
-# Their English counts are dominated by *auxiliary* uses -- "I have seen", "I
-# was going", "did you go" -- which are periphrastic tense rather than the
-# verb.  Other languages do not build tenses this way, so an English count
+# ``be`` and ``have``: their English counts are dominated by *auxiliary* uses
+# -- "I have seen", "I was going" -- which are periphrastic tense rather than
+# the verb. Other languages do not build tenses this way, so an English count
 # says nothing about where the lemma belongs in a Lithuanian or Spanish
-# course.  They are also too polysemous to gloss word-for-word early: "be" is
-# copula, existential and auxiliary at once, and is stored as a single
-# undisambiguated lemma, unlike "make" which is split into create/earn senses.
+# course. They are also polysemous: "be" is copula, existential and auxiliary
+# at once, stored as a single undisambiguated lemma, unlike "make" which is
+# split into create/earn senses.
 #
-# They are still needed early -- a learner cannot build a sentence without
-# them -- so the levels here are a judgment call to be edited by hand.  Do not
+# ``like``: the measurement simply gets it wrong. It scores 4.3x on ``animal``
+# because of "animals like wolves" -- the preposition, not the verb -- so the
+# flat profile that marks a general-purpose verb never shows up for it. It is
+# one of the most broadly combinable verbs in the language and belongs early
+# regardless of what the corpus says.
+#
+# All of them are needed early -- a learner cannot build a sentence without
+# them -- so the levels here are a judgment call to be edited by hand. Do not
 # replace this with a derived value.
 HARDCODED_VERB_LEVELS: Final[Mapping[str, int]] = {
     "be": 3,
     "have": 4,
-    "do": 6,
+    "like": 4,
 }
+
+# ``do`` is deliberately *not* here, and not in the lemma table either.
+#
+# ``be`` and ``have`` are stored with their content senses -- "to exist", "to
+# possess" -- which are teachable word-for-word. ``do`` has no equivalent: its
+# uses are auxiliary ("did you go"), emphatic ("I *do* like it") and pro-verb
+# ("she did too"), none of which survives a word-for-word gloss, and none of
+# which a Lithuanian or Spanish course expresses with a single verb. Leaving it
+# out is a decision, not an oversight; do not "fix" it by adding a level.
 
 
 def _auxiliary_surface_forms() -> frozenset[str]:
-    """Every inflected form of the hardcoded verbs, for exclusion.
+    """Every auxiliary surface form, for exclusion from the scan.
 
     Sourced from ``langtools.en``'s auxiliary list rather than written out
     again here, so the two cannot disagree about whether "has" is one.  The
     list also carries the modals ("will", "must"), which are excluded for the
     same reason: they are tense and mood machinery, not vocabulary a noun
     group needs.
+
+    This is not the same set as :data:`HARDCODED_VERB_LEVELS`. "like" is
+    hardcoded because the measurement misreads it, but its occurrences are
+    still ordinary evidence for the verbs around it, so it stays in the scan.
     """
     from langtools.en.grammatical_words import ENGLISH_AUXILIARY_VERBS
 
