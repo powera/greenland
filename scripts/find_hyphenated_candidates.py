@@ -69,11 +69,10 @@ things to add rather than a census.  That check is a local database read; pass
 from __future__ import annotations
 
 import argparse
-import json
 import logging
 import sys
 from pathlib import Path
-from typing import Dict, Iterator, List, Optional, Sequence, Tuple
+from typing import Dict, List, Optional, Sequence
 
 ROOT = Path(__file__).resolve().parent.parent
 if str(ROOT / "src") not in sys.path:
@@ -82,102 +81,27 @@ if str(ROOT / "src") not in sys.path:
 import constants
 from storage.backend import create_session
 from storage.backend.config import BackendType, DataSourceConfig
-from wordfreq.corpora.book_lists import get_book_list, get_corpus_names
-from wordfreq.corpora.download_gutenberg import text_path
+from wordfreq.corpora.documents import (
+    SOURCE_NAMES,
+    gutenberg_documents,
+    scotus_documents,
+    wikipedia_documents,
+)
 from wordfreq.corpora.download_scotus import default_cache_dir as scotus_cache_dir
-from wordfreq.corpora.gutenberg_text import strip_gutenberg_boilerplate
 from wordfreq.corpora.hyphenated import (
     CATEGORY_GENERAL,
     CATEGORY_ORDER,
     DEFAULT_MIN_CASE_EVIDENCE,
     DEFAULT_PROPER_SHARE,
     DEFAULT_SOLID_RATIO,
-    Document,
     HyphenatedCandidate,
     HyphenatedStats,
     group_by_category,
     rank_candidates,
     scan_source,
 )
-from wordfreq.corpora.scotus_text import iter_opinions
 
 logger = logging.getLogger("find_hyphenated_candidates")
-
-# The SCOTUS builder's own floors, so this scan sees the same text the corpus
-# does rather than a wider or narrower slice of it.
-SCOTUS_MIN_CHARS = 2000
-SCOTUS_MIN_YEAR = 1950
-
-SOURCE_NAMES = ("gutenberg", "scotus", "wikipedia")
-
-
-def gutenberg_documents(cache_dir: Path) -> Iterator[Document]:
-    """Every cached book across all Gutenberg book lists, deduplicated.
-
-    A book may appear in more than one list; it is yielded once, or its
-    compounds would be counted twice for no reason.
-    """
-    seen: set[int] = set()
-    for corpus_name in get_corpus_names():
-        book_list = get_book_list(corpus_name)
-        for book in book_list.books:
-            if book.gutenberg_id in seen:
-                continue
-            seen.add(book.gutenberg_id)
-            path = text_path(cache_dir, book.gutenberg_id)
-            if not path.exists():
-                logger.debug("not cached, skipping: %s", path)
-                continue
-            raw_text = path.read_text(encoding="utf-8", errors="replace")
-            # The same strip analyze_book performs. Without it the licence
-            # header dominates the report: "re-use", "machine-readable",
-            # "non-profit" and "e-mail" appear in every single book because
-            # Project Gutenberg's boilerplate says so, not because the
-            # 19th-century novels do.
-            yield book.slug, strip_gutenberg_boilerplate(raw_text)
-
-
-def scotus_documents(cache_dir: Path) -> Iterator[Document]:
-    """Every opinion in every cached CAP case."""
-    for path in sorted(cache_dir.glob("case_*.json")):
-        try:
-            case = json.loads(path.read_text(encoding="utf-8"))
-        except ValueError:
-            logger.warning("%s: unreadable, skipping", path)
-            continue
-        for opinion in iter_opinions(case, min_chars=SCOTUS_MIN_CHARS, min_year=SCOTUS_MIN_YEAR):
-            yield opinion.slug, opinion.text
-
-
-def wikipedia_documents() -> Iterator[Document]:
-    """Every article of every Wikipedia corpus, deduplicated by title.
-
-    Imported lazily: ``build_wikipedia`` reaches the dump snapshot at import
-    time, and that lives on an external drive.
-    """
-    from wordfreq.corpora.build_wikipedia import (
-        WIKIPEDIA_CORPORA,
-        slugify_title,
-        wikitext_to_plain_text,
-    )
-    from wordfreq.corpora.wikipedia.article_lists import flatten
-    from wordfreq.corpora.wikipedia.wiki_dump import WikiLoader
-
-    loader = WikiLoader()
-    seen: set[str] = set()
-    for corpus in WIKIPEDIA_CORPORA.values():
-        for title in flatten(corpus.articles):
-            if title in seen:
-                continue
-            seen.add(title)
-            try:
-                wikitext = loader.get_text_from_page(title)
-            except (ValueError, RuntimeError) as error:
-                logger.debug("%s: %s", title, error)
-                continue
-            text = wikitext_to_plain_text(wikitext, title)
-            if text:
-                yield slugify_title(title), text
 
 
 def known_words(config: DataSourceConfig) -> List[str]:
