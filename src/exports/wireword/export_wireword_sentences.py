@@ -17,7 +17,6 @@ GREENLAND_SRC_PATH = str(Path(__file__).parent.parent.parent)
 if GREENLAND_SRC_PATH not in sys.path:
     sys.path.insert(0, GREENLAND_SRC_PATH)
 
-from barsukas.config import Config
 import constants
 from storage.backend.config import BackendType, DataSourceConfig
 from storage.backend.factory import create_session
@@ -34,6 +33,12 @@ from exports.wireword.readings import build_translation_reading_fields
 
 # Configure logging
 logger = logging.getLogger(__name__)
+
+# Exported level for a sentence whose minimum_level could not be computed:
+# past every band, so level-ordered consumers sort it last. Deliberately not
+# derived from MAX_DIFFICULTY_LEVEL, which is the widest valid level rather
+# than a value beyond the curriculum.
+UNKNOWN_SENTENCE_LEVEL = 9999
 
 
 class WirewordSentenceExporter:
@@ -318,12 +323,24 @@ class WirewordSentenceExporter:
                 # Include optional metadata
                 if sentence.source_filename:
                     sentence_entry["source"] = sentence.source_filename
-                # TODO: Remove level=21 fallback once wireword consumers no longer require
-                # minimum_level field. Currently they compute sentence levels from word levels.
+                # A sentence with no computed level gets a sentinel meaning
+                # "past everything shipped", so a consumer that sorts or
+                # filters by level puts it last rather than first.
+                #
+                # This must not be MAX_DIFFICULTY_LEVEL + 1: that constant is
+                # the widest *valid* value (1299, the top of the topic band),
+                # so +1 lands the sentinel deep inside the curriculum's own
+                # numbering instead of beyond it. The sentinel is a number no
+                # real level reaches; see the band comment in constants.py.
+                #
+                # TODO: Remove this fallback once wireword consumers no longer
+                # require minimum_level. They compute sentence levels from word
+                # levels themselves, which is what actually gates a sentence --
+                # this field only decides which data file it ships in.
                 if sentence.minimum_level is not None and sentence.minimum_level != -1:
                     sentence_entry["minimum_level"] = sentence.minimum_level
                 else:
-                    sentence_entry["minimum_level"] = Config.MAX_DIFFICULTY_LEVEL + 1
+                    sentence_entry["minimum_level"] = UNKNOWN_SENTENCE_LEVEL
 
                 # Only include audio if present
                 if audio_dict:
