@@ -48,3 +48,12 @@ llm_temp/
 
 # coverage data from tools/measure_test_coverage.py
 .coverage
+
+# per-run output from the wordlist import scripts (logs/<run>/<script>.log).
+# One timestamped directory per run, so these accumulate indefinitely; what the
+# run actually created is in the database and the operation log.
+logs/
+
+# generated reports and derived data files written next to the code
+verb_placement_report.txt
+data/wordfreq/cooccurrence.json
