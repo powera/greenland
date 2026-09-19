@@ -1,15 +1,23 @@
 """Summarize the verb co-occurrence artifact as something readable.
 
-``data/wordfreq/cooccurrence.json`` holds every scored pairing for ~300 verbs,
+``data/wordfreq/cooccurrence.json`` holds every scored pairing for ~320 verbs,
 which is too dense to read.  This turns it into a plain-text report answering
-the two questions the curriculum actually asks:
+the questions the curriculum actually asks:
 
-1. Which verbs does each noun group need?  A named unit (Animals 3, Food 2)
-   should pull its verbs in with it, and that means knowing which verbs lean
-   on it.
-2. How do the most frequent verbs get introduced?  In the core there are no
-   verb groups to attach to, so each one has to be placed against the nouns
-   it needs -- and a verb taught before its objects has nothing to say.
+1. Are the most frequent verbs usable when they arrive -- is there anything
+   yet for them to take as an object?
+2. Which verbs are general-purpose enough to seed the early levels with?  A
+   verb that goes with any noun makes example sentences possible for every
+   group, and a flat affinity profile is what identifies one.
+3. Which verbs does each noun group need, for when a named unit is cut?
+
+Two things the report deliberately does *not* treat as problems:
+
+* A verb arriving later than a group it suits.  Cows can be introduced
+  without "steal"; what matters is whether a group has *enough* usable verbs,
+  not all of them.
+* A noun group at L1-L3 with no verbs at all.  Those levels are noun-only on
+  purpose, building 50-100 memorized words before sentences start.
 
 The report is read-only and writes a text file.  It takes the levels from the
 database so the "taught at" column reflects reality rather than the artifact.
@@ -40,6 +48,21 @@ TOP_SUBTYPES = 3
 
 #: A pairing below this lift is not worth naming as an attachment.
 MIN_LIFT = 1.5
+
+# A general-purpose verb ("like", "see", "want") combines with almost any noun,
+# so it leans on nothing in particular and its top lift stays low.  These are
+# the verbs the early levels need: a few of them make an example sentence
+# possible for every group, even an awkward one.  Rare verbs also look flat --
+# thin evidence, not versatility -- so a frequency floor comes with it.
+GENERAL_VERB_MAX_LIFT = 2.5
+GENERAL_VERB_MIN_COUNT = 1000
+
+# Levels at or below this are deliberately noun-only (or nearly so): the course
+# builds a base of 50-100 memorized nouns before verbs and sentences start.
+# The database matches that intent -- 41 nouns after L1, 83 after L2, 117 after
+# L3, with the first verbs at L3 -- so a group arriving here with no verb is
+# the design working, not a gap, and the report must not flag it.
+NOUN_ONLY_LEVEL_MAX = 3
 
 # Subtypes that are not things a verb takes as an object.  A high lift for one
 # of these is a real fact about the verb's company -- "say" does occur near
@@ -188,11 +211,18 @@ def write_report(
             for item in entry["subtypes"]
             if item["lift"] >= MIN_LIFT and item["subtype"] not in NON_OBJECT_SUBTYPES
         ]
-        object_level = (
-            first_level_of_subtype(concrete[0]["subtype"], level_by_word, subtype_by_word)
-            if concrete
-            else None
-        )
+        # The earliest object of *any* of its concrete subtypes, not just the
+        # best-lift one: "put" is usable as soon as there is something to put,
+        # whether or not that thing is an appliance.
+        candidate_levels = [
+            candidate
+            for candidate in (
+                first_level_of_subtype(item["subtype"], level_by_word, subtype_by_word)
+                for item in concrete
+            )
+            if candidate is not None
+        ]
+        object_level = min(candidate_levels) if candidate_levels else None
         object_text = str(object_level) if object_level is not None else "-"
         marker = ""
         if level is not None and object_level is not None and level < object_level:
@@ -211,9 +241,48 @@ def write_report(
         lines.append("None of these arrive before their objects.")
     lines.append("")
 
-    # --- Section 2: hardcoded verbs -----------------------------------
+    # --- Section 2: general-purpose verbs -----------------------------
+    general: List[Tuple[float, str, int, Optional[int]]] = []
+    for verb, entry in verbs.items():
+        subtypes_for_verb: List[Dict[str, Any]] = entry["subtypes"]
+        if not subtypes_for_verb or entry["occurrences"] < GENERAL_VERB_MIN_COUNT:
+            continue
+        top_lift = subtypes_for_verb[0]["lift"]
+        if top_lift <= GENERAL_VERB_MAX_LIFT:
+            general.append((top_lift, verb, entry["occurrences"], level_by_word.get(verb)))
+    general.sort()
+
     lines.append("")
-    lines.append("2. HARDCODED VERBS (not measured)")
+    lines.append("2. GENERAL-PURPOSE VERBS (the ones to seed the core with)")
+    lines.append("-" * 72)
+    lines.append("")
+    lines.append("A verb that combines with almost any noun has a *flat* profile: it")
+    lines.append("sits near many subtypes without leaning hard on any, so its top lift")
+    lines.append("is low. That is the opposite of what section 4 rewards, and it is")
+    lines.append("exactly what the early levels need -- a few of these make example")
+    lines.append("sentences possible for every group, even if the sentences are")
+    lines.append("awkward. 'I like the cow' is a usable card; a group with no verb at")
+    lines.append("all is not.")
+    lines.append("")
+    lines.append("Frequency matters as well as flatness: a rare verb looks flat because")
+    lines.append("its evidence is thin, not because it is versatile.")
+    lines.append("")
+    lines.append("This list is a starting point, not the answer. It misses verbs whose")
+    lines.append("spelling is shared with something else: 'like' belongs here on any")
+    lines.append("reading, but scores 4.3x on animal because of 'animals like wolves'")
+    lines.append("-- the preposition, not the verb. Check the obvious candidates by")
+    lines.append("hand before trusting an omission.")
+    lines.append("")
+    lines.append(f"{'verb':<14}{'top lift':>10}{'occurrences':>13}{'taught':>9}")
+    lines.append(f"{'-' * 14}{'-' * 10:>10}{'-' * 13:>13}{'-' * 9:>9}")
+    for top_lift, verb, occurrences, verb_level in general[:20]:
+        level_text = f"L{verb_level}" if verb_level is not None else "-"
+        lines.append(f"{verb:<14}{top_lift:>9.1f}x{occurrences:>13,}{level_text:>9}")
+    lines.append("")
+
+    # --- Section 3: hardcoded verbs -----------------------------------
+    lines.append("")
+    lines.append("3. HARDCODED VERBS (not measured)")
     lines.append("-" * 72)
     lines.append("")
     lines.append("These are placed by hand. Their English counts are mostly auxiliary")
@@ -236,7 +305,7 @@ def write_report(
                 by_subtype[subtype_item["subtype"]].append((group_verb, subtype_item["lift"]))
 
     lines.append("")
-    lines.append("3. WHICH VERBS EACH NOUN GROUP NEEDS")
+    lines.append("4. WHICH VERBS EACH NOUN GROUP NEEDS")
     lines.append("-" * 72)
     lines.append("")
     lines.append("Read this when cutting a named unit: these are the verbs that lean")
@@ -244,15 +313,56 @@ def write_report(
     lines.append("A verb appears under every group it leans on, which is the point --")
     lines.append("'wear' belongs with clothing and with body parts.")
     lines.append("")
+    lines.append("A verb arriving later than the group is normal and mostly fine: you")
+    lines.append("can introduce cows without 'steal'. What matters is whether the group")
+    lines.append("has ENOUGH usable verbs when it arrives, so each group is marked with")
+    lines.append("how many of its verbs are taught by then.")
+    lines.append("")
+    lines.append(f"Groups first taught at L{NOUN_ONLY_LEVEL_MAX} or earlier are marked")
+    lines.append("'noun-only stage' and are never flagged. Those levels deliberately")
+    lines.append("hold nouns alone, building a base of 50-100 memorized words before")
+    lines.append("verbs and sentences start -- 41 nouns after L1, 83 after L2. A food")
+    lines.append("group at L1 with no verb is the design working, not a gap.")
+    lines.append("")
+
+    starved: List[Tuple[str, int, int]] = []
     for subtype in sorted(by_subtype):
         entries = sorted(by_subtype[subtype], key=lambda pair: -pair[1])[:10]
         first_level = first_level_of_subtype(subtype, level_by_word, subtype_by_word)
-        level_note = f"first taught L{first_level}" if first_level is not None else "not taught"
+        if first_level is None:
+            level_note = "not taught"
+        else:
+            ready = sum(
+                1
+                for verb, _lift in by_subtype[subtype]
+                if (level_by_word.get(verb) or 10**9) <= first_level
+            )
+            if first_level <= NOUN_ONLY_LEVEL_MAX:
+                level_note = f"first taught L{first_level}, noun-only stage"
+            else:
+                level_note = f"first taught L{first_level}, ready {ready}"
+                if ready < 2:
+                    starved.append((subtype, first_level, ready))
         lines.append(f"{subtype}  ({level_note})")
         for verb, lift in entries:
             verb_level = level_by_word.get(verb)
             verb_level_text = f"L{verb_level}" if verb_level is not None else "-"
-            lines.append(f"    {verb:<16}{lift:>6.1f}x   taught {verb_level_text}")
+            marker = ""
+            if first_level is not None and verb_level is not None and verb_level <= first_level:
+                marker = "  *"
+            lines.append(f"    {verb:<16}{lift:>6.1f}x   taught {verb_level_text}{marker}")
+        lines.append("")
+
+    if starved:
+        lines.append("")
+        lines.append("GROUPS ARRIVING WITH FEWER THAN TWO USABLE VERBS")
+        lines.append("-" * 72)
+        lines.append("")
+        lines.append("These are the ones worth fixing -- either pull a verb down, or move")
+        lines.append("the group later.")
+        lines.append("")
+        for subtype, first_level, ready in sorted(starved, key=lambda item: item[1]):
+            lines.append(f"  L{first_level:<5} {subtype:<28} {ready} usable verb(s)")
         lines.append("")
 
     output.write_text("\n".join(lines) + "\n", encoding="utf-8")
