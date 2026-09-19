@@ -10,7 +10,7 @@ from typing import Any, Dict, List, Optional, TypedDict, cast
 
 from api._mirror import mirrored_route
 from api._http import get_json, patch_json, post_json
-from api.constants import API_V1_PREFIX
+from api.constants import API_V1_PREFIX, LLM_TIMEOUT_SECONDS
 
 
 class SearchResult(TypedDict, total=False):
@@ -253,7 +253,13 @@ def words_exist(words: List[str], include_exclusions: bool = True) -> WordsExist
 
 
 @mirrored_route("/api/v1/words/add", "POST")
-def add_word(word: str, model: str) -> Any:
+def add_word(
+    word: str,
+    model: str,
+    difficulty_level: Optional[int] = None,
+    *,
+    timeout: float = LLM_TIMEOUT_SECONDS,
+) -> Any:
     """Add a single English word to the database, from just the word.
 
     Unlike :func:`add_lemmas` (which takes fully specified lemma rows), this runs
@@ -272,13 +278,74 @@ def add_word(word: str, model: str) -> Any:
     lemmas, and come back in ``pending_senses``. A word whose every sense is
     diverted returns ``status`` ``"pending_review"``.
 
+    ``difficulty_level`` creates the lemmas at that level instead of the -1
+    default. A curated import should pass it rather than PATCHing each returned
+    GUID afterwards: the patch is a second call that can fail after the lemma is
+    committed, leaving it at -1 where :func:`words_exist` counts it as done and
+    no later run revisits it.
+
     There is no preview mode: a preview needs the LLM call, and that call is
     non-deterministic, so it cannot predict what a committing run writes.
+
+    ``timeout`` defaults to :data:`api.constants.LLM_TIMEOUT_SECONDS` rather
+    than the short default: the server does not abandon the add when the
+    client stops waiting, so a timeout here means a paid-for write lands with
+    the caller believing it failed.
     """
-    return post_json(
-        f"{API_V1_PREFIX}/words/add",
-        {"word": word, "model": model},
-    )
+    payload: Dict[str, Any] = {"word": word, "model": model}
+    if difficulty_level is not None:
+        payload["difficulty_level"] = difficulty_level
+    return post_json(f"{API_V1_PREFIX}/words/add", payload, timeout=timeout)
+
+
+@mirrored_route("/api/v1/terms/add", "POST")
+def add_term(
+    term: str,
+    model: str,
+    *,
+    pos_type: str,
+    pos_subtype: str,
+    definition: str,
+    difficulty_level: Optional[int] = None,
+    tags: Optional[List[str]] = None,
+    timeout: float = LLM_TIMEOUT_SECONDS,
+) -> Any:
+    """Add one fully specified term, generating only its translations.
+
+    The third add path. :func:`add_lemmas` takes everything pre-specified and
+    makes no LLM call; :func:`add_word` takes a bare word and asks the LLM for
+    senses, POS and translations alike. This supplies the term, POS, subtype
+    and definition -- what a curated list already knows -- and asks the LLM for
+    the translations only. **Makes an LLM call and costs money.**
+
+    Use it for a term whose senses the discovery pipeline cannot enumerate. A
+    borrowed term like "ex post facto" has no native English headword to find,
+    so :func:`add_word` tries to invent one.
+
+    ``pos_subtype`` may be a catch-all ``*_other``: unlike :func:`add_word`,
+    where that signals the LLM failed to place a sense and diverts it to the
+    pending queue, here it is the caller stating the term has no better
+    subtype, and the lemma is written.
+
+    ``definition`` is required -- it tells the model which sense to translate.
+
+    Exactly one lemma per call. A term already accounted for returns ``status``
+    ``"already_exists"`` with nothing written, checked before the LLM call so a
+    re-run is free. Languages the model returned nothing for come back in
+    ``missing_languages`` and the lemma is still created.
+    """
+    payload: Dict[str, Any] = {
+        "term": term,
+        "model": model,
+        "pos_type": pos_type,
+        "pos_subtype": pos_subtype,
+        "definition": definition,
+    }
+    if difficulty_level is not None:
+        payload["difficulty_level"] = difficulty_level
+    if tags:
+        payload["tags"] = tags
+    return post_json(f"{API_V1_PREFIX}/terms/add", payload, timeout=timeout)
 
 
 @mirrored_route("/api/v1/lemma/<guid>", "GET")

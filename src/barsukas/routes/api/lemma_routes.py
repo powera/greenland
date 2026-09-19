@@ -1097,6 +1097,10 @@ def add_word_endpoint() -> ResponseReturnValue:
     JSON body:
       - ``word``: the English word to add (required).
       - ``model``: LLM model name (required).
+      - ``difficulty_level``: level to create the lemmas at (optional;
+        defaults to -1, unset). Lets a curated import stamp the level as the
+        lemma is written instead of PATCHing each GUID afterwards, where a
+        failed patch would strand the lemma at -1.
 
     Synchronous, one word per request. A word already accounted for -- as a
     lemma, disambiguated lemma, English derivative form or alternate spelling --
@@ -1112,6 +1116,7 @@ def add_word_endpoint() -> ResponseReturnValue:
     request still sending ``dry_run`` is rejected rather than silently written.
     """
     from storage.backend.config import BackendType, DataSourceConfig
+    from words.add_word import DIFFICULTY_LEVEL as ADD_WORD_DEFAULT_DIFFICULTY
     from words.add_word import add_word
 
     model, error = _require_model()
@@ -1132,6 +1137,21 @@ def add_word_endpoint() -> ResponseReturnValue:
             "writes. Remove the flag to write, or do not call this endpoint."
         )
 
+    difficulty_value = payload.get("difficulty_level", ADD_WORD_DEFAULT_DIFFICULTY)
+    try:
+        difficulty_level = int(difficulty_value)
+    except (TypeError, ValueError):
+        return _build_error_response("difficulty_level must be an integer")
+
+    if difficulty_level != Config.EXCLUDE_DIFFICULTY_LEVEL and (
+        difficulty_level < Config.MIN_DIFFICULTY_LEVEL
+        or difficulty_level > Config.MAX_DIFFICULTY_LEVEL
+    ):
+        return _build_error_response(
+            f"difficulty_level must be between {Config.MIN_DIFFICULTY_LEVEL} and "
+            f"{Config.MAX_DIFFICULTY_LEVEL}, or {Config.EXCLUDE_DIFFICULTY_LEVEL}"
+        )
+
     config = DataSourceConfig(
         backend_type=BackendType.SQLITE,
         sqlite_path=Config.DB_PATH,
@@ -1144,6 +1164,7 @@ def add_word_endpoint() -> ResponseReturnValue:
         config=config,
         model=model,
         source=Config.OPERATION_LOG_SOURCE,
+        difficulty_level=difficulty_level,
     )
 
     if result.status == "error":
@@ -1174,6 +1195,123 @@ def add_word_endpoint() -> ResponseReturnValue:
             "model": model,
             "created": len(result.senses),
             "pending": len(result.pending_senses),
+        },
+    )
+
+
+@bp.route("/v1/terms/add", methods=["POST"])
+@mirrored_facade("/api/v1/terms/add", "POST")
+def add_term_endpoint() -> ResponseReturnValue:
+    """Add one fully specified term, generating only its translations.
+
+    The third add path, between the other two. ``/v1/lemmas/add`` takes
+    everything pre-specified including translations and makes no LLM call;
+    ``/v1/words/add`` takes a bare word and asks the LLM for senses, POS and
+    translations alike. This endpoint takes the term, its POS, subtype and
+    definition -- the facts a curated list already knows -- and asks the LLM for
+    the translations alone. **It makes an LLM call and costs money.**
+
+    Use it for a term whose senses the sense-discovery pipeline cannot
+    enumerate: a borrowed term like "ex post facto" has no native English
+    headword to find and no sense inventory to size, so ``/v1/words/add``
+    mangles it.
+
+    JSON body:
+      - ``term``: the English term, which may be several words (required).
+      - ``pos_type`` / ``pos_subtype``: required; must be a pair that has a
+        GUID prefix. A caller-specified ``*_other`` subtype is honored rather
+        than diverted to the pending queue -- unlike ``/v1/words/add``, where
+        ``*_other`` signals the LLM failed to place the sense, here it is the
+        caller stating the term has no better subtype.
+      - ``definition``: required. It is what tells the model which sense to
+        translate; a borrowed term's sense cannot be inferred from its form.
+      - ``model``: LLM model name (required).
+      - ``difficulty_level``: level to create the lemma at (optional; defaults
+        to -1, unset).
+      - ``tags``: optional list of free-form tags, e.g. ``["legal"]``.
+
+    Exactly one lemma is created per request; there is no sense selection. A
+    term already accounted for is returned with ``status: "already_exists"``
+    and nothing is written, and that check runs before the LLM call, so a
+    re-run is free. A target language the model returned nothing for comes back
+    in ``missing_languages``; the lemma is still created.
+    """
+    from storage.backend.config import BackendType, DataSourceConfig
+    from words.add_term import DIFFICULTY_LEVEL as ADD_TERM_DEFAULT_DIFFICULTY
+    from words.add_term import add_term
+
+    model, error = _require_model()
+    if error is not None:
+        return error
+
+    payload = request.get_json(silent=True) or {}
+
+    required_values: Dict[str, str] = {}
+    for field_name in ("term", "pos_type", "pos_subtype", "definition"):
+        field_value = payload.get(field_name)
+        if not isinstance(field_value, str) or not field_value.strip():
+            return _build_error_response(f"{field_name} is required and must be a non-empty string")
+        required_values[field_name] = field_value.strip()
+
+    difficulty_value = payload.get("difficulty_level", ADD_TERM_DEFAULT_DIFFICULTY)
+    try:
+        difficulty_level = int(difficulty_value)
+    except (TypeError, ValueError):
+        return _build_error_response("difficulty_level must be an integer")
+
+    if difficulty_level != Config.EXCLUDE_DIFFICULTY_LEVEL and (
+        difficulty_level < Config.MIN_DIFFICULTY_LEVEL
+        or difficulty_level > Config.MAX_DIFFICULTY_LEVEL
+    ):
+        return _build_error_response(
+            f"difficulty_level must be between {Config.MIN_DIFFICULTY_LEVEL} and "
+            f"{Config.MAX_DIFFICULTY_LEVEL}, or {Config.EXCLUDE_DIFFICULTY_LEVEL}"
+        )
+
+    tags_raw = payload.get("tags")
+    tags: Optional[List[str]] = None
+    if tags_raw is not None:
+        if not isinstance(tags_raw, list):
+            return _build_error_response("tags must be a list of strings")
+        tags = []
+        for tag in tags_raw:
+            if not isinstance(tag, str) or not tag.strip():
+                return _build_error_response("tags entries must be non-empty strings")
+            tags.append(tag.strip())
+
+    config = DataSourceConfig(
+        backend_type=BackendType.SQLITE,
+        sqlite_path=Config.DB_PATH,
+        model=model,
+        debug=Config.DEBUG,
+    )
+    result = add_term(
+        g.db,
+        required_values["term"],
+        pos_type=required_values["pos_type"],
+        pos_subtype=required_values["pos_subtype"],
+        definition=required_values["definition"],
+        config=config,
+        difficulty_level=difficulty_level,
+        tags=tags,
+        source=Config.OPERATION_LOG_SOURCE,
+    )
+
+    if result.status == "error":
+        return _build_error_response(result.error or "failed to add term")
+
+    data = {
+        "term": result.term,
+        "status": result.status,
+        "guid": result.guid,
+        "translations": result.translations,
+        "missing_languages": result.missing_languages,
+    }
+    return _build_success_response(
+        data,
+        {
+            "model": model,
+            "created": 1 if result.status == "created" else 0,
         },
     )
 

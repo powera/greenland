@@ -101,6 +101,19 @@ class PendingImport(Base):
     # Example sentence showing this word in context (helps LLM pick the right sense)
     example_sentence: Mapped[Optional[str]] = mapped_column(Text, nullable=True)
 
+    # JSON object of language code -> translation, for the translations the
+    # staging call's LLM response already contained. ``disambiguation_translation``
+    # above holds only one language and exists to pin the sense down for a
+    # reviewer; this holds the full set so approval can reuse it instead of
+    # paying a second time for an answer that may differ from the one the
+    # reviewer approved. Read/write it with storage.crud.pending_import_senses.
+    translations: Mapped[Optional[str]] = mapped_column(Text, nullable=True)
+
+    # JSON array of English example sentences returned alongside the sense.
+    # Kept as raw strings rather than Sentence rows: a staged term has no lemma
+    # to hang a SentenceWordHint on, so these are promoted at approval time.
+    example_sentences: Mapped[Optional[str]] = mapped_column(Text, nullable=True)
+
     # JSON array of free-form tags to apply to the lemma this import becomes,
     # e.g. ["legal"] for words staged from a statutory corpus. Mirrors
     # Lemma.tags; read/write it with storage.crud.lemma_tags.

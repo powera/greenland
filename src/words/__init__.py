@@ -18,9 +18,11 @@ from words.synonyms import (
     store_synonym_forms,
 )
 from words.word2vec import rebuild_embeddings, refresh_lemma_embedding, suggest_similar_lemmas
+from words.add_term import AddTermResult, add_term
 from words.translation import (
     build_multi_target_translation_prompt,
     build_single_target_translation_prompt,
+    build_term_translation_prompt,
     query_multi_word_translation,
     query_single_word_translation,
 )
@@ -45,8 +47,11 @@ __all__ = [
     "refresh_lemma_embedding",
     "rebuild_embeddings",
     "suggest_similar_lemmas",
+    "AddTermResult",
+    "add_term",
     "build_single_target_translation_prompt",
     "build_multi_target_translation_prompt",
+    "build_term_translation_prompt",
     "query_single_word_translation",
     "query_multi_word_translation",
     "build_verb_forms_prompt",

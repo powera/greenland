@@ -46,12 +46,19 @@ from langtools.en.utils import (
 from langtools.collation import strip_diacritics
 from storage.backend.config import DataSourceConfig
 from storage.crud.derivative_form import add_derivative_form
-from storage.crud.operation_log import log_translation_change
+from storage.crud.operation_log import (
+    PENDING_IMPORT_CREATE,
+    log_entity_operation,
+    log_translation_change,
+)
+from storage.crud.sentence import add_sentence
+from storage.crud.sentence_translation import add_sentence_translation
 from storage.models.guid_prefixes import SUBTYPE_GUID_PREFIXES
 from storage.models.schema import (
     SENSE_PROMINENCE_COMMON,
     ExternalLexemeAnnotation,
     Lemma,
+    SentenceWordHint,
     WordToken,
 )
 from storage.queries.lemma import word_exists_in_english
@@ -69,7 +76,13 @@ from wordfreq.translation.word_processing import determine_default_grammatical_f
 
 logger = logging.getLogger(__name__)
 
-# Per CLAUDE.md: newly added words default to -1 (unset difficulty).
+# Per CLAUDE.md: newly added words default to -1 (unset difficulty). A caller
+# that already knows the level -- a curated wordlist import, which picks the
+# level before it picks the word -- passes ``difficulty_level`` instead, so the
+# lemma is created at its final level. Stamping it here rather than PATCHing
+# afterwards is what keeps the two steps atomic: a separate patch call can fail
+# after the lemma is committed, stranding it at -1 where the existence guard
+# counts it as done and no later run revisits it.
 DIFFICULTY_LEVEL = -1
 # Languages the definitions call already returns per sense, stored as the lemma
 # is created so no second LLM call is needed for them.
@@ -116,6 +129,20 @@ _MAX_TIED_SENSES = 5
 # Sentinel key set on a sense dict to route it to the pending queue for a reason
 # other than its POS subtype. Not part of the LLM schema.
 _REVIEW_REASON_KEY = "_review_reason"
+
+# Collection tag for the example sentences the definitions call returns. These
+# are not teaching material: the model wrote them to illustrate one sense of one
+# word, nobody chose them for a curriculum, and they carry no translations. The
+# tag keeps them separable from sentences that were authored as lessons, so a
+# level rollup or an export can exclude them. They are stored with
+# ``minimum_level`` unset for the same reason -- a difficulty would imply they
+# had been placed in the curriculum.
+EXAMPLE_SENTENCE_COLLECTION = "llm_word_examples"
+
+# How many examples to keep per sense. The prompt asks for up to three and the
+# model generally returns one; the cap is here so a model that returns ten does
+# not quietly fill the sentence table.
+_MAX_EXAMPLES_PER_SENSE = 3
 
 # Prefix marking a pending row that was queued under a *different* term than the
 # word that produced it ("stand-in", queued while adding "double"). The queried
@@ -567,8 +594,23 @@ def _stage_for_review(
 
     by_lang_code = convert_llm_response_to_lang_codes(sense)
     disambiguation = (by_lang_code.get(REVIEW_DISAMBIGUATION_LANGUAGE) or "").strip()
+    # The definitions call returned a full translation set and example
+    # sentences for this sense, exactly as it does for a sense that becomes a
+    # lemma. The created-lemma branch keeps both; this one used to keep only
+    # the single disambiguation language, so approval re-queried the LLM for
+    # translations already paid for -- and could get a different answer than
+    # the reviewer approved.
+    staged_translations = {
+        lang_code: value
+        for lang_code, value in by_lang_code.items()
+        if lang_code in TRANSLATION_LANGUAGES and value
+    }
+    raw_examples = sense.get("examples")
+    staged_examples = (
+        raw_examples[:_MAX_EXAMPLES_PER_SENSE] if isinstance(raw_examples, list) else []
+    )
 
-    create_pending_import(
+    pending = create_pending_import(
         session,
         english_word=word,
         definition=definition_text,
@@ -586,6 +628,31 @@ def _stage_for_review(
         frequency_rank=frequency_rank,
         sense_prominence=sense.get("sense_prominence"),
         notes=f"add_word: {reason}",
+        translations=staged_translations,
+        example_sentences=staged_examples,
+        # The first example doubles as the single-sentence review context that
+        # classification and the approval LLM call already read.
+        example_sentence=staged_examples[0] if staged_examples else None,
+    )
+    # Logged in the same transaction as the staging write, so a rollback cannot
+    # leave an entry claiming a term was queued when it was not. Without this a
+    # staged sense was invisible in the log: only the lemma an approval later
+    # minted showed up, with no record of when the term was queued or by which
+    # run, and a sense that was queued and never approved left no trace at all.
+    log_entity_operation(
+        session,
+        source=source,
+        operation_type=PENDING_IMPORT_CREATE,
+        fact={
+            "pending_import_id": pending.id,
+            "english_word": word,
+            "definition": definition_text,
+            "pos_type": pos_type,
+            "pos_subtype": pending.pos_subtype,
+            "target_kind": pending.target_kind,
+            "reason": reason,
+            "frequency_rank": frequency_rank,
+        },
     )
     session.commit()
     return True
@@ -724,6 +791,73 @@ def _select_senses(
     return [dict(sense) for sense in deduped], dropped + cap_dropped + collapsed
 
 
+def _store_sense_examples(
+    session: Session,
+    lemma: Lemma,
+    sense: Dict[str, Any],
+    *,
+    source: str,
+) -> int:
+    """Store the LLM's example sentences for one sense. Returns how many were kept.
+
+    The definitions call already returns these -- the schema asks for them and
+    the prompt requests up to three per sense -- so they are paid for whether or
+    not they are stored. They were previously discarded.
+
+    English only, and deliberately: the model was asked to illustrate an English
+    sense, not to translate a sentence, so there is nothing to store for the
+    other languages and no second call is made to get one. A later pass can
+    translate these if they are wanted as teaching material.
+
+    The link back to the lemma is a ``SentenceWordHint`` rather than a
+    ``SentenceWord``: a hint records which lemma a sentence was built to
+    exercise, which is exactly what this is, while SentenceWord is the
+    authoritative per-position breakdown and would need a parse these raw
+    strings have not had.
+    """
+    raw_examples = sense.get("examples")
+    if not isinstance(raw_examples, list):
+        return 0
+
+    stored = 0
+    for raw_example in raw_examples:
+        if stored >= _MAX_EXAMPLES_PER_SENSE:
+            break
+        if not isinstance(raw_example, str):
+            continue
+        example_text = raw_example.strip()
+        if not example_text:
+            continue
+
+        sentence = add_sentence(
+            session,
+            source_filename=f"add_word:{lemma.lemma_text}",
+            notes=f"LLM example for {lemma.guid}: {lemma.definition_text[:80]}",
+            sentence_collection=EXAMPLE_SENTENCE_COLLECTION,
+            source=source,
+        )
+        add_sentence_translation(
+            session,
+            sentence,
+            "en",
+            example_text,
+            source=source,
+        )
+        session.add(
+            SentenceWordHint(
+                sentence_id=sentence.id,
+                lemma_id=lemma.id,
+                position=0,
+                # slot_name carries the POS, matching what the generators write.
+                slot_name=lemma.pos_type,
+                english_text=lemma.lemma_text,
+            )
+        )
+        stored += 1
+
+    return stored
+
+
 def _store_sense_translations(
     session: Session, lemma: Lemma, sense: Dict[str, Any], *, source: str, model: Optional[str]
 ) -> Dict[str, str]:
@@ -776,6 +910,7 @@ def add_word(
     config: DataSourceConfig,
     model: Optional[str] = None,
     source: str = "add_word",
+    difficulty_level: int = DIFFICULTY_LEVEL,
 ) -> AddWordResult:
     """Add a single English word to the database, from just the word.
 
@@ -806,6 +941,11 @@ def add_word(
         config: Data source configuration for the ``LinguisticClient``.
         model: LLM model override; falls back to ``config.model``.
         source: Operation-log source tag.
+        difficulty_level: Level to create every lemma at. Defaults to
+            :data:`DIFFICULTY_LEVEL` (-1, unset), which is what the Barsukas UI
+            wants: a human adding a word has not decided its level yet. A
+            curated import that already knows the level passes it here so the
+            lemma is never written at -1.
 
     Returns:
         An :class:`AddWordResult` describing what was created.
@@ -989,7 +1129,7 @@ def add_word(
                 pos_type=pos_type,
                 pos_subtype=pos_subtype,
                 guid=guid,
-                difficulty_level=DIFFICULTY_LEVEL,
+                difficulty_level=difficulty_level,
                 confidence=0.0,
                 verified=False,
                 sense_prominence=prominence,
@@ -1016,6 +1156,9 @@ def add_word(
             sense_result.translations = _store_sense_translations(
                 session, new_lemma, sense, source=source, model=client_model
             )
+            # The definitions call already returned example sentences for this
+            # sense; keep them rather than paying for them and dropping them.
+            _store_sense_examples(session, new_lemma, sense, source=source)
 
             # A lemma's English text is stored on Lemma rather than in
             # LemmaTranslation, but the token-frequency system reaches lemmas
@@ -1047,6 +1190,15 @@ def add_word(
                 phonetic_pronunciation=(sense.get("phonetic_spelling") or None),
                 source=source,
             )
+
+            # Record the corpus rank on the lemma itself, not only in the
+            # operation log. This runs after the derivative form is attached
+            # because the rank is a property of the token the form just linked:
+            # a lemma reached through no DerivativeForm has nothing to roll up
+            # from, and downstream consumers read Lemma.frequency_rank rather
+            # than re-deriving it. _lookup_frequency already resolved the
+            # POS-directed lookup, so this is a store, not a second search.
+            new_lemma.frequency_rank = frequency_rank
 
             # Commit per sense: a multi-sense word is a series of small writes,
             # so a failure on a later sense does not discard the earlier ones.

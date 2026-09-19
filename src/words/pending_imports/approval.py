@@ -35,6 +35,10 @@ from storage.backend.config import DataSourceConfig
 from storage.crud.concept import create_concept, get_concept_by_slug
 from storage.crud.lemma_tags import add_tags, read_pending_import_tags
 from storage.crud.name_entity import get_or_create_name
+from storage.crud.pending_import_senses import (
+    read_pending_import_example_sentences,
+    read_pending_import_translations,
+)
 from storage.models.concept import normalize_concept_slug
 from storage.models.imports import (
     TARGET_KIND_CONCEPT,
@@ -45,6 +49,7 @@ from storage.models.imports import (
 )
 from storage.models.name_entity import NAME_KINDS, normalize_name_text
 from storage.models.schema import Lemma
+from storage.translation_helpers import LANG_CODE_TO_LLM_FIELD
 from util.logging_config import get_logger
 from words.emoji import attach_pending_emoji_to_lemma, release_pending_emoji
 from words.pending_imports.classification import DEFAULT_NAME_KIND
@@ -263,6 +268,9 @@ def approve_as_lemma(
     # Read before the pending row is deleted below; applied to the lemma
     # once process_word() has created it.
     pending_tags = read_pending_import_tags(pending)
+    # Read here for the same reason as the tags: the row is deleted below, and
+    # these are applied to the lemma only once process_word() has created it.
+    pending_examples = read_pending_import_example_sentences(pending)
 
     logger.info(f"Approving word '{word}' (sense: {pending_definition[:60]}...)")
 
@@ -282,15 +290,24 @@ def approve_as_lemma(
     if pending_pos_type and pending_pos_subtype:
         # Already staged via the detail page — use stored values to avoid a redundant LLM call.
         logger.info(f"Using pre-staged data for '{word}': {pending_pos_type}/{pending_pos_subtype}")
-        definitions_list: List[Dict[str, Any]] = [
-            {
-                "pos": pending_pos_type,
-                "pos_subtype": pending_pos_subtype,
-                "definition": pending_definition,
-                "lemma": word,
-                "sense_prominence": pending_prominence,
-            }
-        ]
+        staged_definition: Dict[str, Any] = {
+            "pos": pending_pos_type,
+            "pos_subtype": pending_pos_subtype,
+            "definition": pending_definition,
+            "lemma": word,
+            "sense_prominence": pending_prominence,
+        }
+        # Put the translations the staging call already returned back under the
+        # LLM field names process_word reads, so this branch stays a genuine
+        # no-LLM path: without them the lemma would be created untranslated and
+        # a later pass would pay again for an answer already bought -- and one
+        # the reviewer never saw. Field names come from translation_helpers per
+        # CLAUDE.md, not a local mapping.
+        for lang_code, translation in read_pending_import_translations(pending).items():
+            llm_field = LANG_CODE_TO_LLM_FIELD.get(lang_code)
+            if llm_field:
+                staged_definition[llm_field] = translation
+        definitions_list: List[Dict[str, Any]] = [staged_definition]
     else:
         definitions_list, llm_success = client.query_definitions(
             word, example_sentence=example_sentence
@@ -382,6 +399,24 @@ def approve_as_lemma(
     # a corpus ingested with `genys --tags legal` needs no second pass.
     if new_lemma is not None and pending_tags:
         add_tags(session, new_lemma, pending_tags, source="pending-import-approval")
+        session.commit()
+
+    # Promote the example sentences carried from staging. They were paid for by
+    # the staging call and had no lemma to attach to until now; _store_sense_examples
+    # is reused rather than reimplemented so a staged sense and a directly
+    # created one end up with the same SentenceWordHint shape.
+    if new_lemma is not None and pending_examples:
+        # Imported here, not at module scope: words.add_word imports
+        # words.pending_imports.staging, so a top-level import back into this
+        # package would close a cycle.
+        from words.add_word import _store_sense_examples
+
+        _store_sense_examples(
+            session,
+            new_lemma,
+            {"examples": pending_examples},
+            source="pending-import-approval",
+        )
         session.commit()
 
     logger.info(f"Successfully approved and imported '{word}' (lemma_id={new_lemma_id})")
