@@ -25,6 +25,36 @@ NEW_PROMPTS_DIR = Path(constants.SRC_DIR).parent / "prompts"
 _prompt_cache: Dict[str, str] = {}
 
 
+# Placeholder a classification context file carries in place of a hand-written
+# subtype list. Expanded from storage.models.guid_prefixes, which is the single
+# source of truth for what subtypes exist; see _expand_subtype_list.
+SUBTYPE_LIST_PLACEHOLDER = "{subtype_list}"
+
+
+def _expand_subtype_list(prompt_text: str, subtype: Optional[str]) -> str:
+    """Substitute the generated subtype bullet list into a context file.
+
+    Only files that opt in by carrying :data:`SUBTYPE_LIST_PLACEHOLDER` are
+    touched, and only when ``subtype`` names a POS type that has subtypes, so
+    every other prompt loads byte-for-byte as before.
+
+    The list is generated rather than written out because the classification
+    schema's enum is already generated from the same table: a hand-maintained
+    copy in the prompt drifts, and had -- it offered subtypes with no GUID
+    prefix while omitting most of the real ones.
+    """
+    if subtype is None or SUBTYPE_LIST_PLACEHOLDER not in prompt_text:
+        return prompt_text
+
+    # Imported here, not at module scope: storage.models pulls in SQLAlchemy and
+    # the whole model registry, which a prompt read should not require.
+    from storage.models.guid_prefixes import SUBTYPE_DEFS, render_subtype_list
+
+    if subtype not in SUBTYPE_DEFS:
+        return prompt_text
+    return prompt_text.replace(SUBTYPE_LIST_PLACEHOLDER, render_subtype_list(subtype))
+
+
 def _resolve_prompt_path(category: str, prompt_type: str, filename: str) -> Path:
     """
     Resolve the path to a prompt file, checking both new and legacy locations.
@@ -84,6 +114,8 @@ def get_context(category: str, prompt_type: str, subtype: Optional[str] = None) 
     try:
         with open(file_path, "r", encoding="utf-8") as f:
             prompt_text = f.read().strip()
+
+        prompt_text = _expand_subtype_list(prompt_text, subtype)
 
         # Cache the result
         _prompt_cache[cache_key] = prompt_text
