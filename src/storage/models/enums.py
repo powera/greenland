@@ -16,7 +16,7 @@ as a classification choice, and
 """
 
 import enum
-from typing import Dict, Type
+from typing import Any, Dict
 
 from storage.models.guid_prefixes import SUBTYPE_DEFS
 
@@ -25,11 +25,17 @@ from storage.models.guid_prefixes import SUBTYPE_DEFS
 _CATCH_ALL_VALUE = "other"
 
 
-def _build_subtype_enum(pos_type: str, class_name: str) -> Type[enum.Enum]:
+def _build_subtype_enum(pos_type: str, class_name: str) -> Any:
     """Build one ``*Subtype`` enum from the subtype table.
 
     Member names are ``subtype.upper()`` unless the definition overrides it
     with ``member_name``. The ``<pos>_other`` key becomes ``OTHER = "other"``.
+
+    Returns ``Any`` rather than ``Type[enum.Enum]`` deliberately. A functional
+    Enum has no statically known members, so a precise annotation would make
+    every ``NounSubtype.PERSONAL_NAME`` in the codebase a mypy error even
+    though it resolves fine at runtime -- the hand-written classes these
+    replace typed those accesses, and this keeps them accepted.
     """
     members: Dict[str, str] = {}
     for subtype, spec in SUBTYPE_DEFS[pos_type].items():
