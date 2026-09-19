@@ -44,16 +44,25 @@ MAX_LEVEL_SIZE = 55
 PRESERVED_LEVEL_MAX = 5
 WORD_PATTERN = re.compile(r"[a-z0-9]+")
 PROMINENCE_ORDER = {"very_common": 0, "common": 1, None: 1, "uncommon": 2, "rare": 3}
-US_STATE_COHORT_LEVEL = 49
-COUNTRY_COHORT_LEVEL = 50
+
+# Where the two big name cohorts sit after the band renumbering (migration
+# 20260919): old L49 and L50 mapped to 240 and 245, which is where the rows
+# actually are. These constants must name the live levels, or the packer
+# reserves space at a level nothing occupies and then collides with the real
+# cohort.
+US_STATE_COHORT_LEVEL = 240
+COUNTRY_COHORT_LEVEL = 245
 
 # Country lemmas remain together at their base cohort, then move per language
 # into these levels. Keep enough general-vocabulary space free that even the
 # largest configured country tier leaves an effective count no greater than 55.
+#
+# The keys are curriculum levels and moved with everything else: old 10 and 18
+# are in the core and unchanged, old 30 became 145.
 COUNTRY_LEVEL_CAPACITIES = {
     10: (25, 40, 30),
     18: (23, 38, 28),
-    30: (0, 15, 5),
+    145: (0, 15, 5),
 }
 
 FAMILY_LEVEL_BY_TEXT = {
@@ -324,7 +333,19 @@ def _pack_runs_into_numbered_levels(
     *,
     fixed_counts: Optional[Mapping[int, int]] = None,
 ) -> dict[int, list[Lemma]]:
-    """Pack runs into the space left around fixed curriculum cohorts."""
+    """Pack runs into the space left around fixed curriculum cohorts.
+
+    .. warning::
+
+       This packer still assumes the pre-band curriculum: consecutive integer
+       levels holding 40-55 mixed-subtype words each. After migration
+       20260919 the named band is sparse (one old level every 5 numbers) and a
+       named unit is a single subtype of ~15 words, so the sizes below and the
+       ``range`` start of 64 -- which is inside the dead 21-99 gap -- no longer
+       describe anything real. Rewriting this for named units is the relevel
+       redesign; it is not a matter of retuning the constants, so they are left
+       naming the old scheme rather than given plausible-looking new values.
+    """
     run_list = [list(run) for run in runs]
     occupied_counts = fixed_counts or {}
     for final_level in range(64, constants.GENERAL_DIFFICULTY_LEVEL_MAX + 1):

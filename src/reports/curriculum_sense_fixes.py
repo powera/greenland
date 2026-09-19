@@ -33,6 +33,15 @@ from storage.models.schema import Lemma
 from wordfreq.tools.country_word_priorities import CONTINENT_NAMES, COUNTRY_NAMES
 
 SOURCE = "curriculum/blind-sense-spacing"
+
+# How far apart two senses of one headword are pushed, in raw level numbers.
+#
+# 18 was chosen when levels were consecutive integers, so it meant "18 levels
+# of other vocabulary in between". After migration 20260919 the named band
+# steps by 5, so 18 spans between 3 and 4 units there and means something
+# quite different depending on which band a sense sits in. This module can
+# write to the database (``--apply``), so do not run it against banded levels
+# until the spacing is expressed in units rather than integers.
 SPACING = 18
 MIN_SUBTYPE_GROUP_SIZE = 5
 
