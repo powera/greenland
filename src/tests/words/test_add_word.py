@@ -9,6 +9,7 @@ translation-duplicate collapse, subtype normalization, and the diversion of
 catch-all ``*_other`` subtypes to the pending-import queue.
 """
 
+import json
 from pathlib import Path
 from typing import Any, Dict, Generator, List, Tuple
 
@@ -18,12 +19,21 @@ from sqlalchemy.engine import Engine
 from sqlalchemy.orm import Session, sessionmaker
 
 from storage.backend.config import BackendType, DataSourceConfig
+from storage.crud.operation_log import PENDING_IMPORT_CREATE
+from storage.crud.pending_import_senses import (
+    read_pending_import_example_sentences,
+    read_pending_import_translations,
+)
+from storage.models.operation_log import OperationLog
 from storage.models import Base, Lemma, WordToken
+from storage.models.schema import Sentence, SentenceWordHint
 from storage.models.imports import PendingImport
 from storage.models.variant_form import VARIANT_KIND_SPELLING, VariantForm
 from words import add_word as add_word_module
 from words.add_word import (
     AddWordResult,
+    EXAMPLE_SENTENCE_COLLECTION,
+    _MAX_EXAMPLES_PER_SENSE,
     _apply_pos_sense_cap,
     _drop_translation_duplicates,
     _MAX_TIED_SENSES,
@@ -95,9 +105,13 @@ def _def(
     pos: str = "noun",
     pos_subtype: str = "animal",
     prominence: str = "common",
-    **translations: str,
+    **extra: Any,
 ) -> Dict[str, Any]:
-    """Build one LLM definition dict. Translation kwargs use LLM field names."""
+    """Build one LLM definition dict.
+
+    Translation kwargs use LLM field names; ``examples`` takes the sentence
+    list the definitions call returns alongside them.
+    """
     entry: Dict[str, Any] = {
         "definition": definition,
         "pos": pos,
@@ -109,7 +123,7 @@ def _def(
         "french_translation": "traduction",
         "chinese_translation": "翻译",
     }
-    entry.update(translations)
+    entry.update(extra)
     return entry
 
 
@@ -402,6 +416,121 @@ def test_normalize_subtype_replaces_cross_pos_value_with_other() -> None:
 
 
 # --- add_word end to end ----------------------------------------------------
+
+
+def test_add_word_stores_the_llm_example_sentences(
+    session: Session, config: DataSourceConfig, patch_client: Any
+) -> None:
+    """Examples come back with the definitions, so they are kept, not discarded.
+
+    English only and unlevelled: the model illustrated an English sense rather
+    than translating a sentence, and nothing has placed these in a curriculum.
+    """
+    patch_client(
+        [
+            _def(
+                "a domesticated carnivore",
+                pos="noun",
+                pos_subtype="animal",
+                examples=["The dog barked.", "She walked her dog."],
+            )
+        ]
+    )
+    _seed_word_token(session, "dog", rank=300)
+
+    result = add_word(session, "dog", config=config)
+    assert result.status == "created"
+
+    sentences = session.query(Sentence).all()
+    assert len(sentences) == 2
+    assert {s.sentence_collection for s in sentences} == {EXAMPLE_SENTENCE_COLLECTION}
+    # Unlevelled on purpose: a difficulty would imply a curriculum placement.
+    assert {s.minimum_level for s in sentences} == {None}
+
+    texts = {t.translation_text for s in sentences for t in s.translations}
+    assert texts == {"The dog barked.", "She walked her dog."}
+    # English only -- no second call is made to translate an example.
+    assert {t.language_code for s in sentences for t in s.translations} == {"en"}
+
+    lemma = session.query(Lemma).filter(Lemma.lemma_text == "dog").one()
+    hints = session.query(SentenceWordHint).all()
+    assert len(hints) == 2
+    assert {hint.lemma_id for hint in hints} == {lemma.id}
+
+
+def test_add_word_caps_examples_per_sense(
+    session: Session, config: DataSourceConfig, patch_client: Any
+) -> None:
+    """A model that returns ten examples does not fill the sentence table."""
+    patch_client(
+        [
+            _def(
+                "a domesticated carnivore",
+                pos="noun",
+                pos_subtype="animal",
+                examples=[f"Example {index}." for index in range(10)],
+            )
+        ]
+    )
+    _seed_word_token(session, "dog", rank=300)
+
+    add_word(session, "dog", config=config)
+
+    assert session.query(Sentence).count() == _MAX_EXAMPLES_PER_SENSE
+
+
+def test_add_word_without_examples_stores_no_sentences(
+    session: Session, config: DataSourceConfig, patch_client: Any
+) -> None:
+    """A sense with no examples is not a failure and writes nothing."""
+    patch_client([_def("a domesticated carnivore", pos="noun", pos_subtype="animal")])
+    _seed_word_token(session, "dog", rank=300)
+
+    result = add_word(session, "dog", config=config)
+
+    assert result.status == "created"
+    assert session.query(Sentence).count() == 0
+
+
+def test_add_word_stamps_explicit_difficulty_level(
+    session: Session, config: DataSourceConfig, patch_client: Any
+) -> None:
+    """An explicit level is written onto every created lemma.
+
+    The wordlist imports know the level before they know the word, and used to
+    PATCH it on afterwards. That second call could fail once the lemma was
+    already committed, leaving it at -1 where the existence guard counts it as
+    done and no re-run revisits it.
+    """
+    fake = patch_client(
+        [
+            _def(
+                "a financial institution",
+                pos="noun",
+                pos_subtype="social_institution",
+                lithuanian_translation="bankas",
+                sense_prominence="very_common",
+            ),
+            _def(
+                "the land alongside a river",
+                pos="noun",
+                pos_subtype="natural_feature",
+                lithuanian_translation="krantas",
+                sense_prominence="very_common",
+            ),
+        ]
+    )
+    _seed_word_token(session, "bank", rank=300)
+
+    result = add_word(session, "bank", config=config, difficulty_level=420)
+
+    assert result.status == "created"
+    assert len(result.senses) == 2
+    assert fake.calls == 1
+
+    lemmas = session.query(Lemma).filter(Lemma.lemma_text == "bank").all()
+    assert len(lemmas) == 2
+    assert {lemma.difficulty_level for lemma in lemmas} == {420}
 
 
 def test_add_word_creates_lemma(
@@ -769,6 +898,125 @@ def test_other_subtype_on_open_class_is_queued_not_written(
 
     assert len(result.pending_senses) == 1
     assert result.pending_senses[0].guid == ""
+
+
+def test_queued_sense_carries_translations_and_examples(
+    session: Session, config: DataSourceConfig, patch_client: Any
+) -> None:
+    """A diverted sense keeps the detail the LLM call already returned.
+
+    The branch that creates a lemma stores the full translation set and the
+    example sentences; this one used to keep only the single disambiguation
+    language, so approval paid a second time for translations already bought.
+    """
+    patch_client(
+        [
+            _def(
+                "to watch over and protect",
+                pos="verb",
+                pos_subtype="verb_other",
+                lithuanian_translation="saugoti",
+                examples=["The dog guards the gate.", "He guarded the secret."],
+            )
+        ]
+    )
+
+    result = add_word(session, "guard", config=config)
+    assert result.status == "pending_review"
+
+    pending = session.query(PendingImport).filter(PendingImport.english_word == "guard").one()
+
+    carried = read_pending_import_translations(pending)
+    assert carried["lt"] == "saugoti"
+    assert carried["fr"] == "traduction"
+    assert carried["zh"] == "翻译"
+
+    assert read_pending_import_example_sentences(pending) == [
+        "The dog guards the gate.",
+        "He guarded the secret.",
+    ]
+    # The first example doubles as the single-sentence review context that
+    # classification and the approval LLM call read.
+    assert pending.example_sentence == "The dog guards the gate."
+
+
+def test_queued_sense_without_examples_carries_none(
+    session: Session, config: DataSourceConfig, patch_client: Any
+) -> None:
+    """A sense the LLM gave no examples for stages cleanly, with NULL columns."""
+    patch_client(
+        [
+            _def(
+                "to watch over and protect",
+                pos="verb",
+                pos_subtype="verb_other",
+                lithuanian_translation="saugoti",
+            )
+        ]
+    )
+
+    add_word(session, "guard", config=config)
+
+    pending = session.query(PendingImport).filter(PendingImport.english_word == "guard").one()
+    assert pending.example_sentences is None
+    assert pending.example_sentence is None
+    assert read_pending_import_example_sentences(pending) == []
+
+
+def test_queueing_a_sense_is_written_to_the_operation_log(
+    session: Session, config: DataSourceConfig, patch_client: Any
+) -> None:
+    """Staging is recorded, so a queued sense is not invisible until approval."""
+    patch_client(
+        [
+            _def(
+                "to watch over and protect",
+                pos="verb",
+                pos_subtype="verb_other",
+                lithuanian_translation="saugoti",
+            )
+        ]
+    )
+
+    add_word(session, "guard", config=config)
+
+    entries = (
+        session.query(OperationLog)
+        .filter(OperationLog.operation_type == PENDING_IMPORT_CREATE)
+        .all()
+    )
+    assert len(entries) == 1
+
+    pending = session.query(PendingImport).filter(PendingImport.english_word == "guard").one()
+    fact = json.loads(entries[0].fact)
+    assert fact["english_word"] == "guard"
+    assert fact["pending_import_id"] == pending.id
+    assert fact["pos_type"] == "verb"
+    assert "verb_other" in fact["reason"]
+
+
+def test_a_sense_already_queued_is_not_logged_twice(
+    session: Session, config: DataSourceConfig, patch_client: Any
+) -> None:
+    """The dedup short-circuit returns before logging, so a re-run adds no entry."""
+    sense = _def(
+        "to watch over and protect",
+        pos="verb",
+        pos_subtype="verb_other",
+        lithuanian_translation="saugoti",
+    )
+    patch_client([sense])
+    add_word(session, "guard", config=config)
+
+    patch_client([sense])
+    add_word(session, "guard", config=config)
+
+    entries = (
+        session.query(OperationLog)
+        .filter(OperationLog.operation_type == PENDING_IMPORT_CREATE)
+        .count()
+    )
+    assert entries == 1
 
 
 def test_cross_pos_subtype_on_open_class_is_queued_as_other(

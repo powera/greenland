@@ -82,6 +82,26 @@ def test_add_sentence_logs_against_its_guid(session: Session) -> None:
     assert _fact(entry)["pattern_type"] == "SVO"
 
 
+def test_add_sentence_stores_and_logs_its_collection(session: Session) -> None:
+    """The collection is persisted and recorded, so a set's origin is auditable."""
+    sentence = add_sentence(
+        session,
+        sentence_collection="llm_word_examples",
+        source=SOURCE,
+    )
+
+    assert sentence.sentence_collection == "llm_word_examples"
+    (entry,) = _logs(session, SENTENCE_CREATE)
+    assert _fact(entry)["sentence_collection"] == "llm_word_examples"
+
+
+def test_add_sentence_defaults_to_no_collection(session: Session) -> None:
+    """Existing callers keep writing uncollected sentences."""
+    sentence = add_sentence(session, pattern_type="SVO")
+
+    assert sentence.sentence_collection is None
+
+
 def test_update_sentence_records_only_what_changed(session: Session) -> None:
     sentence = add_sentence(session, pattern_type="SVO", tense="past")
 

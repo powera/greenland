@@ -48,6 +48,7 @@ def add_sentence(
     verified: bool = False,
     notes: Optional[str] = None,
     source: Optional[str] = None,
+    sentence_collection: Optional[str] = None,
 ) -> Sentence:
     """Create a new sentence.
 
@@ -59,6 +60,9 @@ def add_sentence(
         verified: Whether this sentence has been verified
         notes: Optional notes about the sentence
         source: Who is creating this, for the operation log. None skips logging.
+        sentence_collection: Which sentence set this belongs to. Marks where a
+            sentence came from, so a set that was not written as teaching
+            material can be told apart from one that was.
 
     Returns:
         Created Sentence object
@@ -70,6 +74,7 @@ def add_sentence(
         source_filename=source_filename,
         verified=verified,
         notes=notes,
+        sentence_collection=sentence_collection,
         minimum_level=None,  # Will be calculated later
     )
     session.add(sentence)
@@ -86,6 +91,7 @@ def add_sentence(
                 "tense": tense,
                 "source_filename": source_filename,
                 "verified": verified,
+                "sentence_collection": sentence_collection,
             },
         )
 

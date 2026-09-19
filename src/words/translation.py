@@ -101,6 +101,62 @@ def build_multi_target_translation_prompt(
     return context, prompt, schema
 
 
+def build_term_translation_prompt(
+    term: str,
+    definition: str,
+    pos_type: str,
+    target_languages: Sequence[str],
+    source_language: str = "en",
+) -> Tuple[str, str, Dict[str, Any]]:
+    """Build context, prompt and schema for translating one fully specified term.
+
+    Distinct from :func:`build_multi_target_translation_prompt` in two ways that
+    matter for a borrowed term like "ex post facto":
+
+    * The term may be several words. The single-word builder says "single word"
+      three times and asks for a lemma/base form, which invites the model to
+      reduce a fixed phrase to one of its words.
+    * A definition is supplied and included, so the model translates the sense
+      the caller means rather than guessing from the surface form.
+
+    The instruction about borrowings is the point of this path: a term that a
+    target language borrows unchanged should come back unchanged, not calqued
+    into an invented native phrase. Latin legal terms are the motivating case --
+    Romance and Baltic legal writing alike use "ex post facto" as-is.
+    """
+    normalized_targets: List[str] = [language.lower() for language in target_languages]
+    context = util.prompt_loader.get_context("translation", "word")
+
+    target_lines = "\n".join(f"- {code}: {_language_name(code)}" for code in normalized_targets)
+    prompt = (
+        f'Translate the {pos_type} "{term}" from {_language_name(source_language)} '
+        "into each requested target language.\n"
+        f"It means: {definition}\n"
+        "The term may be more than one word; translate the whole term, not a part of it.\n"
+        "If the target language conventionally borrows this term unchanged -- as legal and "
+        "scholarly registers often do with Latin -- return the borrowed form as used in that "
+        "language rather than inventing a literal translation.\n"
+        "Otherwise return the conventional native equivalent, in base form.\n"
+        "Target languages:\n"
+        f"{target_lines}"
+    )
+
+    schema_properties = {
+        language: {
+            "type": "string",
+            "description": f"Translation of the term into {_language_name(language)}",
+        }
+        for language in normalized_targets
+    }
+    schema: Dict[str, Any] = {
+        "type": "object",
+        "properties": schema_properties,
+        "required": list(schema_properties.keys()),
+    }
+
+    return context, prompt, schema
+
+
 def query_single_word_translation(
     source_word: str,
     source_language: str,

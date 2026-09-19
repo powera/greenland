@@ -96,6 +96,14 @@ DERIVATIVE_FORM_CREATE = "derivative_form_create"
 DERIVATIVE_FORM_UPDATE = "derivative_form_update"
 DERIVATIVE_FORM_DELETE = "derivative_form_delete"
 
+# Operation types for the pending-import queue. A staged term has no GUID --
+# it is precisely a term that has not become an entity yet -- so these log with
+# entity_guid=None and carry the queue row's id and English term in the fact,
+# the same way the variant and derivative-form families identify a row that
+# owns no GUID of its own. The approval that later mints a lemma logs its own
+# lemma_create against the new GUID; this records how the term got queued.
+PENDING_IMPORT_CREATE = "pending_import_create"
+
 # Operation types for GUID retirement. The entity here is the retired GUID
 # itself rather than a row that owns it -- a tombstone exists precisely because
 # the thing that held the GUID is gone.

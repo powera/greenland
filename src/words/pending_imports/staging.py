@@ -14,7 +14,7 @@ noun is marked as a name at staging time rather than after someone notices a
 import sys
 import time
 from pathlib import Path
-from typing import Any, Dict, List, Optional, cast
+from typing import Any, Dict, List, Mapping, Optional, Sequence, cast
 
 # Add src directory to path
 GREENLAND_SRC_PATH = str(Path(__file__).parent.parent.parent)
@@ -25,6 +25,10 @@ from sqlalchemy import func
 from sqlalchemy.orm import Session
 
 import constants
+from storage.crud.pending_import_senses import (
+    serialize_example_sentences,
+    serialize_translations,
+)
 from storage.models.imports import TARGET_KIND_LEMMA, PendingImport
 from storage.translation_helpers import LANG_CODE_TO_LLM_FIELD
 from util.logging_config import get_logger
@@ -70,6 +74,8 @@ def create_pending_import(
     name_kind: Optional[str] = None,
     concept_type: Optional[str] = None,
     sense_prominence: Optional[str] = None,
+    translations: Optional[Mapping[str, str]] = None,
+    example_sentences: Optional[Sequence[str]] = None,
     classify: bool = True,
 ) -> PendingImport:
     """Stage one term for review, classified into a target kind.
@@ -104,6 +110,12 @@ def create_pending_import(
         sense_prominence: How common this sense is for its surface form, when
             the staging call already rated it. Carried onto the lemma at
             approval. None leaves the lemma at the schema default.
+        translations: Language code -> translation the staging call already
+            returned. Carried so approval can reuse them instead of paying for
+            a second, possibly different, answer.
+        example_sentences: English sentences illustrating the sense, returned
+            by the same call. Kept as raw strings until there is a lemma to
+            attach them to.
         classify: Run the rule-tier classifier when ``target_kind`` is None.
             Off for callers that know they are staging vocabulary.
 
@@ -151,6 +163,8 @@ def create_pending_import(
         notes=notes,
         example_sentence=example_sentence,
         sense_prominence=sense_prominence,
+        translations=serialize_translations(translations or {}),
+        example_sentences=serialize_example_sentences(example_sentences or []),
     )
     session.add(pending)
     session.flush()
