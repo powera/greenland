@@ -17,7 +17,9 @@ from storage.models.enums import NounSubtype
 from storage.models.guid_prefixes import (
     SUBTYPE_DEFS,
     SUBTYPE_GUID_PREFIXES,
+    classifiable_subtypes,
     get_subtype_def,
+    render_subtype_list,
     subtype_for_prefix,
 )
 from storage.utils.enums import (
@@ -205,3 +207,31 @@ def test_comments_are_never_prompt_material() -> None:
         for spec in subtypes.values():
             if spec.comment:
                 assert spec.comment != spec.description
+
+
+def test_a_deprecated_subtype_keeps_its_prefix_and_enum_member() -> None:
+    """Deprecation retires a subtype as a *choice*, not as an identifier.
+
+    personal_name is the case: names live in the names table under the E*
+    prefixes, so no new lemma should be filed under N29 -- but term_age and a
+    sentence pattern still name the enum member, and any GUID ever issued under
+    it has to keep resolving. So the member and the prefix stay while the
+    classification prompts drop it.
+    """
+    spec = SUBTYPE_DEFS["noun"]["personal_name"]
+    assert spec.deprecated
+    assert spec.prefix == "N29"
+    assert NounSubtype.PERSONAL_NAME.value == "personal_name"
+    assert SUBTYPE_GUID_PREFIXES["noun"]["personal_name"] == "N29"
+
+
+def test_deprecated_subtypes_are_withheld_from_classification() -> None:
+    for pos_type, subtypes in SUBTYPE_DEFS.items():
+        offered = set(classifiable_subtypes(pos_type))
+        rendered = render_subtype_list(pos_type)
+        for subtype, spec in subtypes.items():
+            if spec.deprecated:
+                assert subtype not in offered
+                assert f"- {subtype}:" not in rendered
+            else:
+                assert subtype in offered

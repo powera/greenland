@@ -32,6 +32,7 @@ from storage.backend.config import DataSourceConfig
 from storage.crud.grammar_fact import get_grammar_facts
 from storage.crud.lemma import get_lemma_by_guid
 from storage.lexeme import get_lexeme
+from storage.models.guid_prefixes import SUBTYPE_DEFS, classifiable_subtypes
 from storage.models import (
     DerivativeForm,
     GrammarFact,
@@ -132,6 +133,15 @@ def auto_populate_lemma() -> ResponseReturnValue:
         else:
             context = f'English word: "{word}"'
 
+        # Built from SUBTYPE_DEFS rather than written inline: the list that was
+        # here offered "tool_machine", which has no GUID prefix and therefore
+        # could never be stored, while omitting most of the real subtypes.
+        subtype_options = "\n".join(
+            f"   - For {pos_type}s: " + ", ".join(sorted(classifiable_subtypes(pos_type)))
+            for pos_type, subtypes in SUBTYPE_DEFS.items()
+            if len(subtypes) > 1
+        )
+
         prompt = f"""Analyze this word and provide its linguistic properties:
 
 {context}
@@ -140,12 +150,7 @@ Provide:
 1. A clear, concise definition (1-2 sentences)
 2. Part of speech (pos_type): Choose from: noun, verb, adjective, adverb, pronoun, preposition, conjunction, interjection, determiner, numeral
 3. Part of speech subtype (pos_subtype): Choose the most appropriate:
-   - For nouns: animal, body_part, building_structure, clothing_accessory, concept_idea, emotion_feeling, food, beverage, furniture, vehicle, plant, plant_part, human, material_substance, nationality, natural_feature, personal_name, place_name, small_movable_object, temporal_name, time_period, tool_machine, unit_of_measurement
-   - For verbs: physical_action, creation_action, destruction_action, mental_state, emotional_state, perception, communication, possession, existence, development, change, directional_movement, manner_movement
-   - For adjectives: size, color, shape, texture, personal_quality, condition, quality, aesthetic, importance, origin, purpose, material, indefinite_quantity, duration, frequency, sequence
-   - For adverbs: style, attitude, specific_time, relative_time, duration, direction, location, distance, intensity, completeness, approximation, definite_frequency, indefinite_frequency
-   - For numerals: cardinal, ordinal
-   - For other POS: use appropriate subtype or "other"
+{subtype_options}
 
 The definition should be suitable for language learners."""
 

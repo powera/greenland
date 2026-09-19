@@ -30,19 +30,19 @@ VALID_POS_TYPES = {
 
 
 def get_subtype_enum(pos_type: str) -> Optional[enum.EnumMeta]:
-    """Get the appropriate subtype enum class based on part of speech."""
-    pos_type = pos_type.lower()
-    if pos_type == "noun":
-        return NounSubtype
-    elif pos_type == "verb":
-        return VerbSubtype
-    elif pos_type == "adjective":
-        return AdjectiveSubtype
-    elif pos_type == "adverb":
-        return AdverbSubtype
-    elif pos_type == "numeral":
-        return NumeralSubtype
-    return None
+    """Get the appropriate subtype enum class based on part of speech.
+
+    The classes are built at import time from SUBTYPE_DEFS and so are typed
+    ``Any``; the cast restores the precise type for callers of this function.
+    """
+    by_pos = {
+        "noun": NounSubtype,
+        "verb": VerbSubtype,
+        "adjective": AdjectiveSubtype,
+        "adverb": AdverbSubtype,
+        "numeral": NumeralSubtype,
+    }
+    return cast(Optional[enum.EnumMeta], by_pos.get(pos_type.lower()))
 
 
 def get_subtype_values_for_pos(pos_type: str) -> List[str]:

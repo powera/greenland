@@ -36,6 +36,11 @@ class SubtypeDef:
         comment: Maintainer note. Never sent to an LLM.
         member_name: Enum member name, when it is not ``subtype.upper()``.
             Only ``animal_grouping_term`` (``GROUP_ANIMAL``) needs this.
+        deprecated: The subtype is no longer a valid choice for new words. It
+            keeps its prefix and its enum member -- existing GUIDs and the code
+            that names it must go on working -- but it is withheld from every
+            classification prompt so nothing new is filed under it. The prefix
+            is never reissued.
     """
 
     prefix: str
@@ -43,11 +48,16 @@ class SubtypeDef:
     examples: List[str] = field(default_factory=list)
     comment: str = ""
     member_name: Optional[str] = None
+    deprecated: bool = False
 
 
 SUBTYPE_DEFS: Dict[str, Dict[str, SubtypeDef]] = {
     "noun": {
-        "human": SubtypeDef(prefix="N01"),
+        "human": SubtypeDef(
+            prefix="N01",
+            description="People and human roles not covered by a narrower subtype",
+            examples=["person", "adult", "baby", "friend", "expert"],
+        ),
         "family_relation": SubtypeDef(
             prefix="N35",
             description="Family members",
@@ -63,10 +73,26 @@ SUBTYPE_DEFS: Dict[str, Dict[str, SubtypeDef]] = {
             description="Titles and forms of address",
             examples=["Sir", "Lord", "Mr.", "Mrs.", "Dr."],
         ),
-        "animal": SubtypeDef(prefix="N02"),
-        "body_part": SubtypeDef(prefix="N03"),
-        "disease_condition": SubtypeDef(prefix="N04"),
-        "plant": SubtypeDef(prefix="N05"),
+        "animal": SubtypeDef(
+            prefix="N02",
+            description="Animals",
+            examples=["dog", "bird", "fish", "bee", "wolf"],
+        ),
+        "body_part": SubtypeDef(
+            prefix="N03",
+            description="Parts of a human or animal body",
+            examples=["arm", "eye", "heart", "muscle", "bone"],
+        ),
+        "disease_condition": SubtypeDef(
+            prefix="N04",
+            description="Illnesses, injuries and medical conditions",
+            examples=["cancer", "fever", "allergy", "infection", "broken bone"],
+        ),
+        "plant": SubtypeDef(
+            prefix="N05",
+            description="Whole plants",
+            examples=["rose", "oak", "bush", "moss", "weed"],
+        ),
         "plant_part": SubtypeDef(
             prefix="N38",
             description="Parts of plants",
@@ -82,7 +108,11 @@ SUBTYPE_DEFS: Dict[str, Dict[str, SubtypeDef]] = {
             description="Liquid consumables",
             examples=["water", "coffee", "tea", "juice"],
         ),
-        "building_structure": SubtypeDef(prefix="N07"),
+        "building_structure": SubtypeDef(
+            prefix="N07",
+            description="Buildings and built structures",
+            examples=["house", "hospital", "bridge", "library", "port"],
+        ),
         "building_part": SubtypeDef(
             prefix="N47",
             description="Parts of buildings",
@@ -93,15 +123,31 @@ SUBTYPE_DEFS: Dict[str, Dict[str, SubtypeDef]] = {
             description="Furniture items",
             examples=["table", "chair", "desk", "sofa", "bed"],
         ),
-        "small_movable_object": SubtypeDef(prefix="N08"),
-        "clothing_accessory": SubtypeDef(prefix="N09"),
-        "artwork_artifact": SubtypeDef(prefix="N10"),
+        "small_movable_object": SubtypeDef(
+            prefix="N08",
+            description="Portable everyday objects",
+            examples=["cup", "key", "book", "bottle", "wallet"],
+        ),
+        "clothing_accessory": SubtypeDef(
+            prefix="N09",
+            description="Clothing and things worn",
+            examples=["shirt", "shoe", "hat", "glove", "ring"],
+        ),
+        "artwork_artifact": SubtypeDef(
+            prefix="N10",
+            description="Made works and cultural artifacts",
+            examples=["statue", "photograph", "mural", "comic book", "crossword puzzle"],
+        ),
         "legal_document": SubtypeDef(
             prefix="N58",
             description="Documents with legal force",
             examples=["will", "deed", "passport", "subpoena"],
         ),
-        "natural_feature": SubtypeDef(prefix="N11"),
+        "natural_feature": SubtypeDef(
+            prefix="N11",
+            description="Natural formations and phenomena",
+            examples=["river", "island", "cloud", "beach", "star"],
+        ),
         "tool": SubtypeDef(
             prefix="N12",
             description="Hand tools and generic tools",
@@ -126,15 +172,31 @@ SUBTYPE_DEFS: Dict[str, Dict[str, SubtypeDef]] = {
             description="Transportation",
             examples=["car", "truck", "bicycle", "boat", "airplane"],
         ),
-        "path_infrastructure": SubtypeDef(prefix="N13"),
-        "material_substance": SubtypeDef(prefix="N14"),
+        "path_infrastructure": SubtypeDef(
+            prefix="N13",
+            description="Ways through a place and the infrastructure of routes",
+            examples=["road", "bridge", "sidewalk", "intersection", "bus stop"],
+        ),
+        "material_substance": SubtypeDef(
+            prefix="N14",
+            description="Materials and stuff things are made of",
+            examples=["wood", "metal", "glass", "oil", "brick"],
+        ),
         "chemical_compound": SubtypeDef(
             prefix="N15",
             description="Chemical elements and compounds",
             examples=["oxygen", "lithium", "carbon dioxide"],
         ),
-        "medication_remedy": SubtypeDef(prefix="N16"),
-        "concept_idea": SubtypeDef(prefix="N17"),
+        "medication_remedy": SubtypeDef(
+            prefix="N16",
+            description="Medicines and treatments",
+            examples=["aspirin", "vaccine", "antibiotic", "ointment", "painkiller"],
+        ),
+        "concept_idea": SubtypeDef(
+            prefix="N17",
+            description="General abstractions with no narrower subtype",
+            examples=["fact", "effect", "type", "case", "way"],
+        ),
         "communication_information": SubtypeDef(
             prefix="N50",
             description="Language, messages, information",
@@ -160,33 +222,85 @@ SUBTYPE_DEFS: Dict[str, Dict[str, SubtypeDef]] = {
             description="Activities and hobbies",
             examples=["reading", "cooking", "sports", "dancing", "hiking"],
         ),
-        "symbolic_element": SubtypeDef(prefix="N18"),
-        "quality_attribute": SubtypeDef(prefix="N19"),
-        "mental_construct": SubtypeDef(prefix="N20"),
+        "symbolic_element": SubtypeDef(
+            prefix="N18",
+            description="Symbols, marks and notational elements",
+            examples=["digit", "numeral", "graph", "motif", "license plate"],
+        ),
+        "quality_attribute": SubtypeDef(
+            prefix="N19",
+            description="A named property something has, treated as a thing",
+            examples=["importance", "efficiency", "durability", "reputation", "hardness"],
+        ),
+        "mental_construct": SubtypeDef(
+            prefix="N20",
+            description="Products of thought: ideas held, formed or believed",
+            examples=["idea", "belief", "theory", "decision", "doubt"],
+        ),
         "legal_concept": SubtypeDef(
             prefix="N59",
             description="Legal doctrines and standards",
             examples=["stare decisis", "probable cause"],
         ),
-        "knowledge_domain": SubtypeDef(prefix="N21"),
-        "quantitative_concept": SubtypeDef(prefix="N22"),
-        "emotion_feeling": SubtypeDef(prefix="N23"),
+        "knowledge_domain": SubtypeDef(
+            prefix="N21",
+            description="Fields of study and bodies of knowledge",
+            examples=["biology", "history", "philosophy", "mathematics", "machine learning"],
+        ),
+        "quantitative_concept": SubtypeDef(
+            prefix="N22",
+            description="Amounts, measures and magnitudes as concepts",
+            examples=["number", "distance", "size", "level", "half"],
+        ),
+        "emotion_feeling": SubtypeDef(
+            prefix="N23",
+            description="Emotions and felt states",
+            examples=["fear", "joy", "anger", "pride", "shame"],
+        ),
         "shape": SubtypeDef(
             prefix="N37",
             description="Geometric shapes",
             examples=["circle", "triangle", "square", "rectangle", "etc."],
         ),
-        "process_event": SubtypeDef(prefix="N24"),
-        "time_period": SubtypeDef(prefix="N25"),
-        "group_people": SubtypeDef(prefix="N26"),
+        "process_event": SubtypeDef(
+            prefix="N24",
+            description="Things that happen or unfold over time",
+            examples=["war", "flight", "development", "process", "attempt"],
+        ),
+        "time_period": SubtypeDef(
+            prefix="N25",
+            description="Spans and points of time",
+            examples=["year", "hour", "century", "night", "autumn"],
+        ),
+        "group_people": SubtypeDef(
+            prefix="N26",
+            description="Organized or recognizable groups of people",
+            examples=["team", "audience", "orchestra", "clan", "working class"],
+        ),
         "animal_grouping_term": SubtypeDef(
             prefix="N27",
             description="Measure words for animals",
             examples=["flock", "herd", "head"],
             member_name="GROUP_ANIMAL",
         ),
-        "collection_things": SubtypeDef(prefix="N28"),
-        "personal_name": SubtypeDef(prefix="N29"),
+        "collection_things": SubtypeDef(
+            prefix="N28",
+            description="Sets and aggregations of things",
+            examples=["collection", "equipment", "goods", "edition", "first aid kit"],
+        ),
+        "personal_name": SubtypeDef(
+            prefix="N29",
+            description="Given or full names of individuals",
+            deprecated=True,
+            comment=(
+                "Deprecated: personal names live in the names table under the "
+                "E* prefixes, not as lemmas, and no lemma has carried this "
+                "subtype for some time. The member and prefix stay because "
+                "words.term_age and a sentence pattern still name it, and N29 "
+                "must never be reissued. Stage a name as a pending import with "
+                "target_kind='name' instead."
+            ),
+        ),
         "place_name": SubtypeDef(
             prefix="N30",
             description="Generic place nouns",
@@ -206,10 +320,22 @@ SUBTYPE_DEFS: Dict[str, Dict[str, SubtypeDef]] = {
             description="Named geographic features",
             examples=["Atlantic Ocean", "Pacific Ocean", "Indian Ocean"],
         ),
-        "organization_name": SubtypeDef(prefix="N31"),
+        "organization_name": SubtypeDef(
+            prefix="N31",
+            description="Named organizations and companies",
+            examples=["Coca-Cola", "agency", "small business"],
+        ),
         "temporal_name": SubtypeDef(prefix="N32", description="Days of week, months, etc."),
-        "nationality": SubtypeDef(prefix="N33"),
-        "unit_of_measurement": SubtypeDef(prefix="N34"),
+        "nationality": SubtypeDef(
+            prefix="N33",
+            description="A person of a nationality or origin",
+            examples=["American", "Lithuanian", "Finn", "Englishman", "Pole"],
+        ),
+        "unit_of_measurement": SubtypeDef(
+            prefix="N34",
+            description="Units things are measured in",
+            examples=["meter", "kilogram", "liter", "degree", "mile"],
+        ),
         "noun_other": SubtypeDef(prefix="N99", member_name="OTHER"),
     },
     "verb": {
@@ -643,6 +769,19 @@ def subtype_for_prefix(prefix: str) -> Optional[tuple[str, str]]:
     return PREFIX_TO_SUBTYPE.get(prefix)
 
 
+def classifiable_subtypes(pos_type: str) -> List[str]:
+    """Subtypes a classifier may choose for ``pos_type``, deprecated ones excluded.
+
+    Use this anywhere a list of choices is offered to a model or a person, so a
+    deprecated subtype is retired in one place rather than in each prompt.
+    ``SUBTYPE_DEFS`` itself still holds it: a GUID already issued under a
+    retired subtype has to keep resolving.
+    """
+    return [
+        subtype for subtype, spec in SUBTYPE_DEFS.get(pos_type, {}).items() if not spec.deprecated
+    ]
+
+
 # GUID prefixes for phrase subtypes. Phrases (fixed traveler/greeting
 # expressions, e.g. "Where is the toilet?") live in their own ``phrases`` table
 # rather than ``lemmas``, so they are not part of SUBTYPE_GUID_PREFIXES above.
@@ -703,6 +842,10 @@ def render_subtype_list(pos_type: str) -> str:
     """
     lines = []
     for subtype, spec in SUBTYPE_DEFS[pos_type].items():
+        # A deprecated subtype keeps its prefix and enum member but is not a
+        # choice any more, so offering it would invite new words into it.
+        if spec.deprecated:
+            continue
         # The prompt offers the catch-all under the bare name the enum uses.
         name = "other" if subtype == f"{pos_type}_other" else subtype
         text = spec.description
