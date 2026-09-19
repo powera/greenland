@@ -36,7 +36,7 @@ if str(ROOT) not in sys.path:
 
 from scripts.wordlist_import_helper import run_import
 
-DIFFICULTY_LEVEL = 14
+DIFFICULTY_LEVEL = 450
 
 # 70 words, grouped by their YLE theme.
 WORDS: Sequence[str] = (

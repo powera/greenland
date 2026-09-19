@@ -83,5 +83,5 @@ def test_override_writer_uses_shared_level_bounds(session: Session) -> None:
     )
     assert accepted.difficulty_level == constants.TOPIC_DIFFICULTY_LEVEL_MIN
 
-    with pytest.raises(ValueError, match="between 1 and 199"):
+    with pytest.raises(ValueError, match=f"between 1 and {constants.MAX_DIFFICULTY_LEVEL}"):
         add_difficulty_override(session, lemma.id, "zh", constants.MAX_DIFFICULTY_LEVEL + 1)

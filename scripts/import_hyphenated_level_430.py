@@ -68,7 +68,7 @@ deliberately:
 The senses these get are the server's to decide, but each is expected to be an
 ordinary lowercase lemma.
 
-Forty broadly useful compounds form a reviewed general sample at level 87.
+Forty broadly useful compounds form a reviewed general sample at level 430.
 The much larger remainder is supplemental compound vocabulary at topic level
 113; corpus frequency alone is not enough to make all 500 general-purpose.
 
@@ -93,8 +93,8 @@ if str(ROOT) not in sys.path:
 
 from scripts.wordlist_import_helper import run_domain_import
 
-DIFFICULTY_LEVEL = 87
-TOPIC_DIFFICULTY_LEVEL = 113
+DIFFICULTY_LEVEL = 430
+TOPIC_DIFFICULTY_LEVEL = 1120
 
 # Ordered by document spread across the three corpora, commonest first.  The
 # comment on each line is the evidence: how many documents it appeared in, and

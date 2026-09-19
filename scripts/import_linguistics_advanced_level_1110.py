@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """Import the technical linguistics vocabulary -- the long tail.
 
-The companion to import_linguistics_basic_level_18.py, and the other side of
+The companion to import_linguistics_basic_level_460.py, and the other side of
 one dividing line: could a beginner meet this word in an ordinary lesson
 instruction?  "Vowel" and "tense" could, and are at 18.  "Allophone" and
 "ergative" could not, however close their subject matter, and are here.
@@ -14,7 +14,7 @@ defensible selection rather than a complete one.
 Sourced from the wiki_linguistics corpus, which is what that corpus was built
 for -- Wikipedia's Level 5 Language list, 592 articles of grammar, phonetics,
 writing systems and language families.  Terms already in the wiki_society
-batches at 72 and 107 are pulled out of those lists in the same change; the
+batches at 390 and 1060 are pulled out of those lists in the same change; the
 corpus put them there because encyclopedic prose about language is
 society-adjacent, which is a fact about the corpus and not about the word.
 
@@ -39,12 +39,12 @@ if str(ROOT) not in sys.path:
 
 from scripts.wordlist_import_helper import run_import
 
-DIFFICULTY_LEVEL = 112
+DIFFICULTY_LEVEL = 1110
 
 # Grouped by subfield.  Every one of these is attested in wiki_linguistics;
 # the terms a beginner needs went to level 18 instead.
 #
-# "transitive" also appears at topic level 109 (wiki_math), the one word shared with
+# "transitive" also appears at topic level 1080 (wiki_math), the one word shared with
 # another list.  The senses are unrelated -- a transitive *relation* and a
 # transitive *verb* -- and add_word resolves senses server-side, so the pair is
 # kept here rather than split from "intransitive", which is unintelligible

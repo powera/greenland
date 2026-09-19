@@ -8,18 +8,18 @@ phrased in them: an exercise that says "the plural of this noun" has already
 assumed both.  Vocabulary a learner needs in order to be taught belongs early,
 whatever its corpus frequency says.
 
-Forty reviewed teaching terms stay at level 18, which the geography and calendar
-lemmas vacated (see relevel_geography_temporal_to_14.py). That is deliberately
-early: "consonant" is not rare in this app's terms even when a general corpus
-makes it look specialised. The nine narrower terms move to topic level 112.
+Forty reviewed teaching terms enter at level 460, and the nine narrower ones at
+topic level 1110.  The dividing line is whether a beginner could meet the word
+in an ordinary lesson instruction: "vowel" and "tense" pass, "phoneme" and
+"orthography" do not, however close their subject matter.
 
-The long tail goes to topic level 112 instead -- allophone, ergative, morpheme and the
-rest of the terms only a linguist needs.  The dividing line is whether a
-beginner could meet the word in an ordinary lesson instruction.  "Vowel" and
-"tense" pass; "phoneme" and "orthography" do not, however close their subject
-matter.
+Level 460 is a staging number, not a difficulty claim.  These words belong
+early by the argument above, but every corpus-derived list enters the named
+band first and is pulled down into the core as the named units are cut; see the
+curriculum band comment in ``src/constants.py``.  This list is the one to move
+first.
 
-Some of these were previously buried in the wiki_society batches at 72 and 107,
+Some of these were previously buried in the wiki_society batches at 390 and 1060,
 where the corpus put them because encyclopedic prose about language is
 society-adjacent.  They are pulled out of those lists in the same change: a
 word belongs at the level a learner needs it, not the level its corpus ranks
@@ -46,8 +46,8 @@ if str(ROOT) not in sys.path:
 
 from scripts.wordlist_import_helper import run_domain_import
 
-DIFFICULTY_LEVEL = 18
-TOPIC_DIFFICULTY_LEVEL = 112
+DIFFICULTY_LEVEL = 460
+TOPIC_DIFFICULTY_LEVEL = 1110
 
 # Grouped by what the word is *about*, so a gap is visible: the parts of
 # speech, the sounds, the units of writing, the grammar a beginner is taught,

@@ -45,12 +45,12 @@ if str(ROOT) not in sys.path:
 
 from scripts.wordlist_import_helper import run_import
 
-DIFFICULTY_LEVEL = 108
+DIFFICULTY_LEVEL = 1130
 
 # Standard legal terminology, not a corpus extract.  Checked against
 # ``words_exist`` and against the preceding general and topic wordlists, which is what
 # removed the bare forms already claimed there ("certiorari", "indictment" and
-# "tolling" belong to topic level 108, so they appear here only inside a longer phrase
+# "tolling" belong to topic level 1070, so they appear here only inside a longer phrase
 # such as "equitable tolling").  "information" and "standing" are omitted
 # entirely: both are already in the database in their ordinary senses, and the
 # legal sense of each is a disambiguation of that lemma rather than a new one.

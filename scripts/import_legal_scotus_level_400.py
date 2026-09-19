@@ -6,8 +6,8 @@ here is furthest above their Zipf in the other corpora, which is what surfaces
 the vocabulary of courts and statutes -- procedure, evidence, remedies, rights and
 regulation rather than the function words a raw frequency list would return.
 
-The first 40 ranked words form the legal sample at general-curriculum level 73.
-The remaining, sharper domain vocabulary is stored at topic level 108. These
+The first 40 ranked words form the legal sample at general-curriculum level 400.
+The remaining, sharper domain vocabulary is stored at topic level 1070. These
 lists are disjoint; see the note on the word list below.
 
 This script deliberately uses the public ``ROOT/api`` facade.  In particular,
@@ -31,8 +31,8 @@ if str(ROOT) not in sys.path:
 
 from scripts.wordlist_import_helper import run_domain_import
 
-DIFFICULTY_LEVEL = 73
-TOPIC_DIFFICULTY_LEVEL = 108
+DIFFICULTY_LEVEL = 400
+TOPIC_DIFFICULTY_LEVEL = 1070
 
 # The top 400 rows of /word-tokens/corpus-skew?corpus=legal_scotus on 2026-08-29,
 # reduced to what words_exist does not already account for, then curated:
@@ -46,7 +46,7 @@ TOPIC_DIFFICULTY_LEVEL = 108
 # A word that scores in more than one corpus is assigned to whichever corpus it
 # leans toward hardest, so these lists are disjoint and a word cannot be
 # imported twice at two different levels.  Words already claimed by
-# import_unlinked_level_65.py and by the 66-72 batches are removed here for the
+# import_unlinked_level_320.py and by the 330-390 batches are removed here for the
 # same reason.
 WORDS: Sequence[str] = (
     "discretion",
