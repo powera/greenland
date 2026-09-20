@@ -22,8 +22,11 @@ the rest of the technical tail.
 This script deliberately uses the public ``ROOT/api`` facade.  In particular,
 ``api.lemmas.add_word`` runs Barsukas' intelligent word workflow: the server's
 LLM identifies the senses and supplies their translations, then the server
-selects and stores the useful senses.  The script never supplies definitions or
-translations itself.
+selects and stores the useful senses.  The wordlist supplies no definitions or
+translations of its own.
+
+The religious borrowings are the exception, and go through ``add_term`` with
+their POS and definition supplied.  See TERMS below.
 
 Running without ``--execute`` only prints the plan and makes no HTTP requests.
 """
@@ -38,7 +41,7 @@ ROOT = Path(__file__).resolve().parent.parent
 if str(ROOT) not in sys.path:
     sys.path.insert(0, str(ROOT))
 
-from scripts.wordlist_import_helper import run_import
+from scripts.wordlist_import_helper import TermEntry, run_mixed_import
 
 DIFFICULTY_LEVEL = 1060
 
@@ -75,14 +78,11 @@ WORDS: Sequence[str] = (
     "afterlife",
     "rebirth",
     "cognition",
-    "dharma",
     "normative",
     "organizational",
     "authoritarian",
     "materialism",
     "orthodox",
-    "hadith",
-    "jinn",
     "dualism",
     "activism",
     "globalization",
@@ -104,7 +104,6 @@ WORDS: Sequence[str] = (
     "humanistic",
     "heresy",
     "liberalism",
-    "mantra",
     "communal",
     "anthropologist",
     "innate",
@@ -129,7 +128,6 @@ WORDS: Sequence[str] = (
     "smuggling",
     "anthropological",
     "celibacy",
-    "rabbinic",
     "interpersonal",
     "monastic",
     "paganism",
@@ -143,22 +141,87 @@ WORDS: Sequence[str] = (
     "causality",
     "evangelical",
     "stratification",
-    "halal",
     "theistic",
     "fallacy",
-    "nirvana",
     "empiricism",
-    "kosher",
     "liturgy",
     "epithet",
     "taboo",
-    "tantric",
-    "rabbi",
     "feminism",
     "methodological",
     "ecumenical",
 )
 
+# The religious vocabulary the corpus attests here, given explicitly rather than
+# sent through sense discovery.  Each is a borrowing that the target languages
+# take unchanged or transliterate, so there is no native English headword for
+# the LLM to find: asked what "halal" means it settles on "permissible" and
+# translates that instead, which is a different word and lands the entry in the
+# pending queue.  The definition below is what the term denotes; the server is
+# asked for the translations alone.
+TERMS: Sequence[TermEntry] = (
+    TermEntry(
+        "dharma",
+        "noun",
+        "mental_construct",
+        "the moral law and duty underlying Hindu and Buddhist teaching",
+    ),
+    TermEntry(
+        "hadith",
+        "noun",
+        "communication_information",
+        "a recorded saying or act of Muhammad, used as a source of Islamic law",
+    ),
+    TermEntry(
+        "jinn",
+        "noun",
+        "human",
+        "a spirit of Islamic belief, able to appear in human or animal form",
+    ),
+    TermEntry(
+        "mantra",
+        "noun",
+        "communication_information",
+        "a word or phrase repeated in meditation or prayer",
+    ),
+    TermEntry(
+        "nirvana",
+        "noun",
+        "abstract_condition",
+        "the release from suffering and rebirth sought in Buddhism",
+    ),
+    TermEntry(
+        "halal",
+        "adjective",
+        "belief_cultural",
+        "permitted under Islamic law, especially of food",
+    ),
+    TermEntry(
+        "kosher",
+        "adjective",
+        "belief_cultural",
+        "prepared according to Jewish dietary law",
+    ),
+    TermEntry(
+        "rabbi",
+        "noun",
+        "human",
+        "a Jewish religious leader and teacher of the law",
+    ),
+    TermEntry(
+        "rabbinic",
+        "adjective",
+        "belief_cultural",
+        "of rabbis or the Jewish legal tradition they developed",
+    ),
+    TermEntry(
+        "tantric",
+        "adjective",
+        "belief_cultural",
+        "of the esoteric ritual texts and practices of Tantra",
+    ),
+)
+
 
 if __name__ == "__main__":
-    raise SystemExit(run_import(WORDS, DIFFICULTY_LEVEL, __doc__ or ""))
+    raise SystemExit(run_mixed_import(WORDS, TERMS, DIFFICULTY_LEVEL, __doc__ or ""))
