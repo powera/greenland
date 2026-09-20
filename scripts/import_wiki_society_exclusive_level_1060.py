@@ -11,12 +11,13 @@ stronger claim about a word's domain than merely being commoner here.
 Topic level 107 joins the tail of the ranked society list. These
 corpus-exclusive words are too domain-specific for the general curriculum.
 
-The language and linguistics terms this list originally carried moved to
-import_linguistics_basic_level_460.py and import_linguistics_advanced_level_1110.py.
-The corpus put them here because encyclopedic prose about language sits inside
-the Level 4 Society list, which is a fact about the corpus rather than about
-the words: "noun" and "vowel" are the app's own metalanguage and belong early,
-and "phoneme" and "orthography" belong with the rest of the technical tail.
+The language and linguistics terms live in import_linguistics_basic_level_460.py
+and import_linguistics_advanced_level_1110.py, not here.  The corpus attests
+them here because encyclopedic prose about language sits inside the Level 4
+Society list, which is a fact about the corpus rather than about the words:
+"noun" and "vowel" are the app's own metalanguage and belong early, and
+"phoneme", "orthography" and the writing-system and phonetics terms belong with
+the rest of the technical tail.
 
 This script deliberately uses the public ``ROOT/api`` facade.  In particular,
 ``api.lemmas.add_word`` runs Barsukas' intelligent word workflow: the server's
@@ -60,16 +61,13 @@ DIFFICULTY_LEVEL = 1060
 # import_unlinked_level_320.py and by the skew batches at 330-400 are removed here,
 # since those lists were drawn from the same token table.
 WORDS: Sequence[str] = (
-    "grammatical",
     "sociology",
     "anthropology",
-    "phonetic",
     "capitalism",
     "baptism",
     "epistemology",
     "metaphysical",
     "metaphysics",
-    "phonological",
     "capitalist",
     "underworld",
     "liturgical",
@@ -93,37 +91,27 @@ WORDS: Sequence[str] = (
     "empathy",
     "ontological",
     "veneration",
-    "phonemic",
     "determinism",
     "monotheistic",
     "spirituality",
     "denomination",
-    "voiceless",
     "idealism",
     "mystical",
-    "braille",
     "theologian",
     "monism",
-    "kanji",
     "circumcision",
     "esoteric",
     "humanistic",
-    "syllabic",
     "heresy",
     "liberalism",
     "mantra",
     "communal",
     "anthropologist",
-    "lexicon",
-    "colloquial",
     "innate",
-    "linguist",
-    "isolate",
     "humanitarian",
     "sociologist",
     "atheism",
     "euthanasia",
-    "cuneiform",
     "schism",
     "naturalism",
     "reincarnation",
@@ -134,7 +122,6 @@ WORDS: Sequence[str] = (
     "ontology",
     "pantheon",
     "positivism",
-    "articulation",
     "worldview",
     "epistemological",
     "colonialism",

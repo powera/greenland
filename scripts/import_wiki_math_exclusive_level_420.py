@@ -8,8 +8,8 @@ this corpus has and no other corpus in the collection does.  A word with no
 they are also the sharper list, because being unattested everywhere else is a
 stronger claim about a word's domain than merely being commoner here.
 
-Forty broadly useful mathematics words form a general-curriculum sample at
-level 420. The remaining terms belong to the mathematics extension at topic
+Thirty-nine broadly useful mathematics words form a general-curriculum sample
+at level 420. The remaining terms belong to the mathematics extension at topic
 level 1080.
 
 This script deliberately uses the public ``ROOT/api`` facade.  In particular,
@@ -42,7 +42,9 @@ TOPIC_DIFFICULTY_LEVEL = 1080
 # digits or punctuation (proper nouns and possessives the exclusivity test cannot
 # separate), tokens under four letters, mangled diacritics left by the corpus
 # load ("thinsp", "mdash"), wiki markup fragments and
-# participles whose headword survives in the list.  Plurals are dropped whenever
+# participles whose headword survives in the list, fragments that occur mainly
+# inside compounds ("theoretic", "finitely"), dominantly non-mathematical words
+# ("positional") and bare Greek letter names ("zeta").  Plurals are dropped whenever
 # the singular is an attested word at all, not merely when the singular also
 # appears in this list -- the earlier, narrower rule left ~120 plurals behind; a
 # few -s words that are their own lemma are kept (blues, goods, ethics, memoirs,
@@ -96,7 +98,6 @@ WORDS: Sequence[str] = (
     "subtraction",
     "computable",
     "stochastic",
-    "finitely",
     "combinatorics",
     "hyperbola",
     "binomial",
@@ -115,7 +116,6 @@ WORDS: Sequence[str] = (
     "sheaf",
     "homomorphism",
     "combinatorial",
-    "theoretic",
     "countable",
     "exponent",
     "divisor",
@@ -134,10 +134,8 @@ WORDS: Sequence[str] = (
     "distributive",
     "asymptotic",
     "irreducible",
-    "positional",
     "morphism",
     "parametric",
-    "zeta",
     "cardinality",
     "quadrature",
     "recursive",
@@ -200,29 +198,28 @@ GENERAL_WORDS: Sequence[str] = (
     "infinity",
     "logarithm",
     "associative",
-    "determinant",
-    "affine",
     "numeral",
     "polygon",
-    "permutation",
     "convergence",
-    "hyperbolic",
     "parabola",
     "subtraction",
-    "computable",
-    "combinatorics",
     "hyperbola",
-    "binomial",
     "optimization",
     "regression",
-    "conic",
     "sine",
     "cosine",
     "exponent",
+    "diagonal",
     "factorial",
+    "postulate",
+    "recursive",
     "fractal",
     "parallelogram",
+    "recursion",
+    "trigonometry",
+    "closure",
     "hypotenuse",
+    "radians",
 )
 
 
