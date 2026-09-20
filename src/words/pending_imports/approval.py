@@ -36,6 +36,7 @@ from storage.crud.concept import create_concept, get_concept_by_slug
 from storage.crud.lemma_tags import add_tags, read_pending_import_tags
 from storage.crud.name_entity import get_or_create_name
 from storage.crud.pending_import_senses import (
+    read_pending_import_context_sentence,
     read_pending_import_example_sentences,
     read_pending_import_translations,
 )
@@ -279,7 +280,7 @@ def approve_as_lemma(
     client_config = data_source_config.with_model(model, debug=debug)
     client = LinguisticClient(config=client_config)
 
-    example_sentence: Optional[str] = pending.example_sentence
+    example_sentence: Optional[str] = read_pending_import_context_sentence(pending)
 
     # Rated at staging time, when it was rated at all. The pre-staged branch
     # below makes no LLM call, so this is the only place that rating can come

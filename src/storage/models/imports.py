@@ -98,9 +98,6 @@ class PendingImport(Base):
         String, nullable=True, index=True
     )  # e.g., animals, physical_action
 
-    # Example sentence showing this word in context (helps LLM pick the right sense)
-    example_sentence: Mapped[Optional[str]] = mapped_column(Text, nullable=True)
-
     # JSON object of language code -> translation, for the translations the
     # staging call's LLM response already contained. ``disambiguation_translation``
     # above holds only one language and exists to pin the sense down for a
@@ -125,6 +122,15 @@ class PendingImport(Base):
     # rating the staging call already paid for would be thrown away. NULL means
     # unrated, and the lemma keeps the schema default.
     sense_prominence: Mapped[Optional[str]] = mapped_column(String, nullable=True)
+
+    # The word the staging call was *asked about*, when the LLM answered with a
+    # different headword: "pro se" for a row stored as "without a lawyer".
+    # ``english_word`` holds the LLM's answer, so it is the only thing an
+    # importer can match on, and a re-glossed word therefore looks absent from
+    # the queue and gets re-sent and paid for on every later run. NULL means the
+    # row was queued for some other reason and ``english_word`` is already the
+    # queried word. Write it with storage.crud.pending_import_senses.
+    queried_word: Mapped[Optional[str]] = mapped_column(String, nullable=True, index=True)
 
     # Optional metadata
     source: Mapped[Optional[str]] = mapped_column(String, nullable=True)  # Where this came from

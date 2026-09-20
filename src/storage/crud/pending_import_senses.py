@@ -91,6 +91,19 @@ def read_pending_import_example_sentences(pending_import: PendingImport) -> List
     )
 
 
+def read_pending_import_context_sentence(pending_import: PendingImport) -> Optional[str]:
+    """The one sentence to show a reviewer, or None when the row carries none.
+
+    The staged sentences are a list, but everything that wants *context* for a
+    single term -- the review templates, proper-noun classification, synonym
+    screening, the approval call -- wants one sentence, and the first is the
+    one the staging LLM returned first. This is that choice in one place; there
+    is no separate column holding a chosen sentence.
+    """
+    sentences = read_pending_import_example_sentences(pending_import)
+    return sentences[0] if sentences else None
+
+
 def serialize_translations(translations: Mapping[str, str]) -> Optional[str]:
     """Encode translations for storage, collapsing the empty mapping to NULL.
 

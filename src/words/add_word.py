@@ -582,6 +582,7 @@ def _stage_for_review(
     frequency_rank: Optional[int],
     source: str,
     reason: str,
+    queried_word: Optional[str] = None,
 ) -> bool:
     """Write one sense to the pending-import queue. Returns False if already there.
 
@@ -627,12 +628,14 @@ def _stage_for_review(
         source=source,
         frequency_rank=frequency_rank,
         sense_prominence=sense.get("sense_prominence"),
+        # Only set when it differs: NULL says english_word is already the word
+        # that was asked about, which is true of every non-divergent row.
+        queried_word=(
+            queried_word if queried_word and queried_word.casefold() != word.casefold() else None
+        ),
         notes=f"add_word: {reason}",
         translations=staged_translations,
         example_sentences=staged_examples,
-        # The first example doubles as the single-sentence review context that
-        # classification and the approval LLM call already read.
-        example_sentence=staged_examples[0] if staged_examples else None,
     )
     # Logged in the same transaction as the staging write, so a rollback cannot
     # leave an entry claiming a term was queued when it was not. Without this a
@@ -1081,6 +1084,7 @@ def add_word(
                     frequency_rank=frequency_rank,
                     source=source,
                     reason=review_reason,
+                    queried_word=normalized,
                 )
                 if staged:
                     result.pending_senses.append(
