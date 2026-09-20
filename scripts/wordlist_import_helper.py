@@ -119,9 +119,11 @@ def pending_queue_words() -> Set[str]:
     LLM on the next run and paid for again, only for the server to drop the
     result as a duplicate.  Filter it out here instead.
 
-    This asks ``/api/words`` for the one column it wants rather than paging the
-    review view: that view returns fifty rows a request and counts synonym
-    candidates for each, none of which is read here.
+    This asks ``/api/words``, which returns both the word each row is filed
+    under and the word it was queried with.  The two differ whenever the
+    staging LLM answered with another headword -- "bona fide" is filed as "in
+    good faith" -- and skipping on the filed word alone would re-send the term
+    that was actually asked about, paying for it again on every run.
     """
     response = pending_import_words(target_kind="lemma")
     data = _response_data(response, operation="listing pending import words")

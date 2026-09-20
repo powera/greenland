@@ -778,7 +778,7 @@ def api_list() -> ResponseReturnValue:
 @bp.route("/api/words")
 @mirrored_facade("/pending-imports/api/words", "GET")
 def api_words() -> ResponseReturnValue:
-    """JSON API: every queued english_word matching the filters, unpaginated.
+    """JSON API: every word this queue accounts for, unpaginated.
 
     The wordlist importers ask one question of this queue -- which words are
     already waiting for review, so a run does not pay the LLM for them again --
@@ -789,16 +789,23 @@ def api_words() -> ResponseReturnValue:
     doing that on every run, with twenty scripts in a batch and a queue that
     grows as they go, spends most of its wall clock here.
 
-    This returns the single column, in one request, with no per-row work.  It
-    takes the same filters as ``/api/list`` so a caller can narrow by
-    ``target_kind`` the way the importers do.
+    Both columns are returned, and an importer must skip a word matching
+    either.  ``english_word`` is what the row is filed under, which for a
+    divergent sense is the headword the LLM answered with rather than the term
+    that was asked about ("in good faith" for "bona fide").  ``queried_word``
+    is that term.  Matching on the filed word alone makes a re-glossed word
+    look absent from the queue, so it is re-sent and paid for on every later
+    run, and the server files another pending row beside the first.
+
+    Returns one flat, deduplicated list: the caller wants membership, not which
+    column a word came from.  It takes the same filters as ``/api/list`` so a
+    caller can narrow by ``target_kind`` the way the importers do.
     """
     query = _build_filtered_query()
-    words = [
-        english_word
-        for (english_word,) in query.with_entities(PendingImport.english_word).all()
-        if english_word and english_word.strip()
-    ]
+    rows = query.with_entities(PendingImport.english_word, PendingImport.queried_word).all()
+    words = sorted(
+        {word.strip() for row in rows for word in row if isinstance(word, str) and word.strip()}
+    )
     return jsonify(
         {
             "data": {"words": words},
