@@ -256,6 +256,11 @@ One of `lemma` (vocabulary, the default), `name` (proper noun), or `concept`
   - Returns `{"data": [...], "metadata": {"total": N, "page": P, "total_pages": T}}`.
   - Each item: `id`, `english_word`, `definition`, `disambiguation_translation`, `disambiguation_language`, `target_kind`, `name_kind`, `concept_type`, `pos_type`, `pos_subtype`, `example_sentence`, `source`, `frequency_rank`, `notes`, `added_at`.
 
+- `GET /pending-imports/api/words[?search=...][&pos_type=...][&pos_subtype=...][&source=...][&language=...][&target_kind=...]`
+  - Every queued `english_word` matching the filters, unpaginated, in one request.
+  - Returns `{"data": {"words": [...]}, "metadata": {"total": N}}`.
+  - The cheap path for callers that only need the words: no pagination and no per-row synonym-candidate work, unlike `/api/list`.
+
 - `POST /pending-imports/<id>/set-kind` (form submit, not JSON)
   - Fields: `target_kind` (required), `name_kind`, `concept_type`. Redirects to the detail page.
 

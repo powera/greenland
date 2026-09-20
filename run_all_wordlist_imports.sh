@@ -1,10 +1,11 @@
 #!/usr/bin/env bash
 # One-off driver: run the corpus-derived wordlist imports in serial.
 #
-# Covers every scripts/import_*_level_*.py wordlist on this branch, in level
-# order.  One script is deliberately absent: import_yle_names.py, which seeds
-# the names table rather than a wordlist and takes none of the flags passed
-# through here.
+# Covers the corpus-derived wordlists on this branch, in level order.
+#
+# The YLE lists (440, 450, 470) are held back, and import_yle_names.py is not a
+# wordlist at all -- it seeds the names table and takes none of the flags passed
+# through here.  See the note below SCRIPTS for the YLE hold.
 #
 # These scripts POST to the live Barsukas server, which makes paid LLM calls for
 # every word it has not seen.  They are idempotent -- the helper's preflight
@@ -41,10 +42,7 @@ SCRIPTS=(
   import_cooking_exclusive_level_410
   import_wiki_math_exclusive_level_420
   import_hyphenated_level_430
-  import_yle_starters_level_440
-  import_yle_movers_level_450
   import_linguistics_basic_level_460
-  import_yle_flyers_level_470
   import_wiki_arts_exclusive_level_1000
   import_wiki_biology_exclusive_level_1010
   import_wiki_geography_exclusive_level_1020
@@ -57,6 +55,20 @@ SCRIPTS=(
   import_linguistics_advanced_level_1110
   import_legal_terms_of_art_level_1130
 )
+
+# Held back: the Cambridge YLE lists.
+#
+#   import_yle_starters_level_440
+#   import_yle_movers_level_450
+#   import_yle_flyers_level_470
+#
+# Roughly thirty of their words carry a sense hint in a comment -- "tick" is the
+# checkmark not the insect, "pool" the swimming pool, "chemist" the UK pharmacy
+# -- and those hints are for the reviewer of the pending queue, not the API:
+# add_word takes only the word, so the LLM picks the sense itself.  Until that
+# is settled these are run by hand, one list at a time, where the queue can be
+# checked after each.  They are not a corpus extract like the rest of SCRIPTS
+# and nothing here depends on them.
 
 failed=()
 for name in "${SCRIPTS[@]}"; do

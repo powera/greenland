@@ -60,6 +60,36 @@ def find_pending_import_duplicates() -> Any:
 
 
 @mirrored_route("/pending-imports/api/list", "GET")
+def pending_import_words(
+    *,
+    search: Optional[str] = None,
+    pos_type: Optional[str] = None,
+    pos_subtype: Optional[str] = None,
+    source: Optional[str] = None,
+    language: Optional[str] = None,
+    target_kind: Optional[str] = None,
+) -> Any:
+    """Every queued ``english_word`` matching the filters, in one request.
+
+    The cheap counterpart to :func:`list_pending_imports` for callers that want
+    only the words -- chiefly the wordlist importers, which survey the queue to
+    avoid re-sending a word that is already awaiting review.  Unpaginated, and
+    the server does no per-row work, so this is one request rather than one per
+    fifty rows.
+    """
+    return get_json(
+        f"{_PENDING_IMPORTS_PREFIX}/api/words",
+        {
+            "search": search,
+            "pos_type": pos_type,
+            "pos_subtype": pos_subtype,
+            "source": source,
+            "language": language,
+            "target_kind": target_kind,
+        },
+    )
+
+
 def list_pending_imports(
     *,
     search: Optional[str] = None,

@@ -17,7 +17,7 @@ models in `src/storage/`.
   `BARSUKAS_API_URL` env var), API path prefix, default timeout, user-agent.
 - `api/_mirror.py` — the `mirrored_route` decorator (see "Mirroring contract"
   below).
-- `api/_http.py` — minimal `requests.get`-based JSON transport and
+- `api/_http.py` — minimal pooled-`Session` JSON transport and
   `BarsukasAPIError`.
 - `api/lemmas.py` — search and lemma-detail endpoints.
 - `api/sentences.py` — sentence-domain aggregates.

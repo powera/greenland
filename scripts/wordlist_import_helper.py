@@ -44,7 +44,7 @@ if str(ROOT) not in sys.path:
     sys.path.insert(0, str(ROOT))
 
 from api import BarsukasAPIError
-from api.batch_operations import list_pending_imports
+from api.batch_operations import pending_import_words
 from api.constants import BASE_URL
 from api.lemmas import add_term, add_word, words_exist
 
@@ -118,25 +118,21 @@ def pending_queue_words() -> Set[str]:
     whose senses were all diverted to review would otherwise be re-sent to the
     LLM on the next run and paid for again, only for the server to drop the
     result as a duplicate.  Filter it out here instead.
-    """
-    pending_words: Set[str] = set()
-    page = 1
-    while True:
-        response = list_pending_imports(target_kind="lemma", page=page)
-        rows = _response_data(response, operation="listing pending imports")
-        if not isinstance(rows, list):
-            raise RuntimeError(f"Pending-import listing returned invalid data: {rows!r}")
-        for row in rows:
-            if isinstance(row, dict):
-                english_word = row.get("english_word")
-                if isinstance(english_word, str) and english_word.strip():
-                    pending_words.add(english_word.strip().lower())
 
-        metadata = response.get("metadata") if isinstance(response, Mapping) else None
-        total_pages = metadata.get("total_pages", 1) if isinstance(metadata, Mapping) else 1
-        if not isinstance(total_pages, int) or page >= total_pages:
-            return pending_words
-        page += 1
+    This asks ``/api/words`` for the one column it wants rather than paging the
+    review view: that view returns fifty rows a request and counts synonym
+    candidates for each, none of which is read here.
+    """
+    response = pending_import_words(target_kind="lemma")
+    data = _response_data(response, operation="listing pending import words")
+    if not isinstance(data, Mapping):
+        raise RuntimeError(f"Pending-import word listing returned invalid data: {data!r}")
+
+    words = data.get("words")
+    if not isinstance(words, list):
+        raise RuntimeError(f"Pending-import word listing returned invalid words: {words!r}")
+
+    return {word.strip().lower() for word in words if isinstance(word, str) and word.strip()}
 
 
 def parse_args(description: str) -> argparse.Namespace:
@@ -169,9 +165,16 @@ def print_plan(words: Sequence[str], level: int) -> None:
 
 
 def execute_assignments(
-    assignments: Sequence[tuple[str, int]], model: str, limit: int | None
+    assignments: Sequence[tuple[str, int]],
+    model: str,
+    limit: int | None,
+    queued: Set[str] | None = None,
 ) -> None:
-    """Import ranked ``(word, level)`` assignments, skipping known words."""
+    """Import ranked ``(word, level)`` assignments, skipping known words.
+
+    ``queued`` is the pending-import survey, passed in when a caller has
+    already made it so one run does not repeat the request.
+    """
     if limit is not None and limit < 1:
         raise RuntimeError("--limit must be at least 1")
 
@@ -180,7 +183,8 @@ def execute_assignments(
     if len(level_by_word) != len(words):
         raise RuntimeError("A wordlist import assigns the same word more than once")
     existence_data = check_words_exist(words)
-    queued = pending_queue_words()
+    if queued is None:
+        queued = pending_queue_words()
 
     unaccounted_words = [word for word in words if not bool(existence_data.get(word, False))]
     queued_words = [word for word in unaccounted_words if word in queued]
@@ -238,9 +242,15 @@ def execute_assignments(
     )
 
 
-def execute(words: Sequence[str], level: int, model: str, limit: int | None) -> None:
+def execute(
+    words: Sequence[str],
+    level: int,
+    model: str,
+    limit: int | None,
+    queued: Set[str] | None = None,
+) -> None:
     """Import ``words`` at one ``level``, skipping what is already accounted for."""
-    execute_assignments([(word, level) for word in words], model, limit)
+    execute_assignments([(word, level) for word in words], model, limit, queued=queued)
 
 
 class TermEntry(NamedTuple):
@@ -274,6 +284,7 @@ def execute_terms(
     model: str,
     limit: int | None,
     tags: Sequence[str] | None = None,
+    queued: Set[str] | None = None,
 ) -> None:
     """Import fully specified ``terms`` at one ``level``.
 
@@ -289,7 +300,8 @@ def execute_terms(
         raise RuntimeError("A term import lists the same term more than once")
 
     existence_data = check_words_exist(term_texts)
-    queued = pending_queue_words()
+    if queued is None:
+        queued = pending_queue_words()
 
     unaccounted = [entry for entry in terms if not bool(existence_data.get(entry.term, False))]
     queued_entries = [entry for entry in unaccounted if entry.term in queued]
@@ -439,10 +451,13 @@ def run_mixed_import(
 
     print(f"\nLIVE MODE: Barsukas will use {args.model!r} for paid calls.")
     try:
+        # Surveyed once and handed to both halves: the queue is one request now,
+        # but it is still a request, and nothing between the two calls changes it.
+        queued = pending_queue_words()
         if words:
-            execute([*words], level, args.model, args.limit)
+            execute([*words], level, args.model, args.limit, queued=queued)
         if terms:
-            execute_terms(terms, level, args.model, args.limit, tags=tags)
+            execute_terms(terms, level, args.model, args.limit, tags=tags, queued=queued)
     except (BarsukasAPIError, RuntimeError, requests.exceptions.RequestException) as error:
         print(f"Import stopped: {error}", file=sys.stderr)
         return 1
