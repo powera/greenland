@@ -22,6 +22,10 @@ Those lists are :class:`TermEntry` rows carrying the POS, subtype and
 definition, and go to ``api.lemmas.add_term``, where the server's LLM supplies
 the translations only.
 
+:func:`run_mixed_import` is for the common case where one level needs both:
+a domain wordlist that is mostly ordinary English plus the few borrowings in
+it that sense discovery would mistranslate.
+
 Without ``--execute`` the run prints its plan and makes no HTTP requests at
 all, which is the state every one of these scripts is committed in.
 """
@@ -391,6 +395,54 @@ def run_import(words: Sequence[str], level: int, description: str) -> int:
     print(f"\nLIVE MODE: Barsukas will use {args.model!r} for paid sense/translation calls.")
     try:
         execute(words, level, args.model, args.limit)
+    except (BarsukasAPIError, RuntimeError, requests.exceptions.RequestException) as error:
+        print(f"Import stopped: {error}", file=sys.stderr)
+        return 1
+    return 0
+
+
+def run_mixed_import(
+    words: Sequence[str],
+    terms: Sequence[TermEntry],
+    level: int,
+    description: str,
+    tags: Sequence[str] | None = None,
+) -> int:
+    """Import one level's wordlist and its term list in a single run.
+
+    Most curated lists need both paths.  A domain list is mostly ordinary
+    English that sense discovery handles well, but carries a handful of
+    borrowings -- "dharma", "abjad" -- that it cannot: asked what "halal"
+    means, the model finds "permissible" and translates that instead, and the
+    entry lands in the pending queue under a word nobody looked up.  Splitting
+    those into a second file would separate them from the provenance note that
+    explains where the whole list came from, so a script passes both shapes
+    here: bare strings for ``add_word``, :class:`TermEntry` rows for
+    ``add_term``.
+
+    ``tags`` applies to the terms only, matching :func:`run_term_import`.
+    """
+    term_texts = [entry.term for entry in terms]
+    collisions = set(words) & set(term_texts)
+    if collisions:
+        raise ValueError(f"A word is listed both as a word and as a term: {sorted(collisions)!r}")
+
+    args = parse_args(description)
+    print("Sense-discovery wordlist:")
+    print_plan(words, level)
+    if terms:
+        print("\nFully specified terms:")
+        print_term_plan(terms, level)
+    if not args.execute:
+        print("\nNo API calls made. Re-run with --execute only after approval.")
+        return 0
+
+    print(f"\nLIVE MODE: Barsukas will use {args.model!r} for paid calls.")
+    try:
+        if words:
+            execute([*words], level, args.model, args.limit)
+        if terms:
+            execute_terms(terms, level, args.model, args.limit, tags=tags)
     except (BarsukasAPIError, RuntimeError, requests.exceptions.RequestException) as error:
         print(f"Import stopped: {error}", file=sys.stderr)
         return 1

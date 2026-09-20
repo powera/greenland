@@ -18,6 +18,11 @@ batches at 390 and 1060 are pulled out of those lists in the same change; the
 corpus put them there because encyclopedic prose about language is
 society-adjacent, which is a fact about the corpus and not about the word.
 
+The list runs both import paths.  The ordinary English terms go through sense
+discovery; the borrowings and the writing systems are given with their POS and
+definition, because the LLM has no native headword to resolve them to.  See
+TERMS below.
+
 Two entries are dual-use.  "Isolate" is a language isolate here and an ordinary
 verb elsewhere, and "articulation" is a place of articulation here and a joint
 -- or a clearly expressed idea -- elsewhere.  Both are kept for the same reason
@@ -43,7 +48,7 @@ ROOT = Path(__file__).resolve().parent.parent
 if str(ROOT) not in sys.path:
     sys.path.insert(0, str(ROOT))
 
-from scripts.wordlist_import_helper import run_import
+from scripts.wordlist_import_helper import TermEntry, run_mixed_import
 
 DIFFICULTY_LEVEL = 1110
 
@@ -138,35 +143,20 @@ WORDS: Sequence[str] = (
     "connotation",
     "denotation",
     "metonymy",
-    "calque",
     "cognate",
     # Writing systems.
     "orthography",
     "diacritic",
     "logogram",
-    "syllabary",
-    "abjad",
-    "abugida",
     "transliteration",
     "romanization",
     "grapheme",
     "ligature",
-    "braille",
-    "kanji",
-    "cuneiform",
     "syllabic",
     # Language change and contact.
-    "substrate",
-    "creole",
-    "pidgin",
-    "koine",
-    "diglossia",
-    "isogloss",
-    "sprachbund",
     "loanword",
     "borrowing",
     "attested",
-    "proto",
     "vernacular",
     "register",
     "colloquial",
@@ -174,6 +164,105 @@ WORDS: Sequence[str] = (
     "corpus",
 )
 
+# The writing systems and the language-contact vocabulary, given explicitly.
+# Two reasons a term is here rather than in WORDS above.  Most are borrowings
+# that every language keeps as themselves -- "abjad" is Arabic, "calque" and
+# "koine" French and Greek, "sprachbund" German-inside-English -- so sense
+# discovery has no native headword to find and invents a descriptive gloss
+# instead, translating that.  "Substrate" is the opposite problem: ordinary
+# English whose dominant sense is not this one, so the LLM resolves it to the
+# chemistry sense.  Either way the definition is a fact the curated list
+# already knows.  ("Proto-" was dropped rather than defined: it is a bound
+# prefix, not a word, and nothing is gained by storing it as a lemma.)
+TERMS: Sequence[TermEntry] = (
+    # Writing systems.
+    TermEntry(
+        "syllabary",
+        "noun",
+        "symbolic_element",
+        "a writing system whose characters each stand for a syllable",
+    ),
+    TermEntry(
+        "abjad",
+        "noun",
+        "symbolic_element",
+        "a writing system recording consonants only, as in Arabic and Hebrew",
+    ),
+    TermEntry(
+        "abugida",
+        "noun",
+        "symbolic_element",
+        "a writing system whose consonant signs carry an inherent vowel",
+    ),
+    TermEntry(
+        "braille",
+        "noun",
+        "symbolic_element",
+        "a writing system of raised dots read by touch",
+    ),
+    TermEntry(
+        "kanji",
+        "noun",
+        "symbolic_element",
+        "the Chinese characters used in Japanese writing",
+    ),
+    TermEntry(
+        "cuneiform",
+        "noun",
+        "symbolic_element",
+        "the wedge-shaped script of ancient Mesopotamia",
+    ),
+    # Language contact and change.
+    TermEntry(
+        "calque",
+        "noun",
+        "communication_information",
+        "a word formed by translating the parts of a foreign expression",
+    ),
+    TermEntry(
+        "koine",
+        "noun",
+        "communication_information",
+        "a common dialect arising from the mixing of related varieties",
+    ),
+    TermEntry(
+        "diglossia",
+        "noun",
+        "concept_idea",
+        "the use of two varieties of a language for separate social purposes",
+    ),
+    TermEntry(
+        "isogloss",
+        "noun",
+        "concept_idea",
+        "a boundary on a map marking where a linguistic feature changes",
+    ),
+    TermEntry(
+        "sprachbund",
+        "noun",
+        "concept_idea",
+        "a group of unrelated languages made alike by long contact",
+    ),
+    TermEntry(
+        "creole",
+        "noun",
+        "communication_information",
+        "a stable language that has developed from a pidgin",
+    ),
+    TermEntry(
+        "pidgin",
+        "noun",
+        "communication_information",
+        "a simplified contact language used between groups with no common tongue",
+    ),
+    TermEntry(
+        "substrate",
+        "noun",
+        "communication_information",
+        "an earlier language leaving traces in the one that displaced it",
+    ),
+)
+
 
 if __name__ == "__main__":
-    raise SystemExit(run_import(WORDS, DIFFICULTY_LEVEL, __doc__ or ""))
+    raise SystemExit(run_mixed_import(WORDS, TERMS, DIFFICULTY_LEVEL, __doc__ or ""))
