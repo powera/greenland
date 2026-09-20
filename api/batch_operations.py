@@ -69,13 +69,19 @@ def pending_import_words(
     language: Optional[str] = None,
     target_kind: Optional[str] = None,
 ) -> Any:
-    """Every queued ``english_word`` matching the filters, in one request.
+    """Every word the pending queue accounts for, in one request.
 
     The cheap counterpart to :func:`list_pending_imports` for callers that want
     only the words -- chiefly the wordlist importers, which survey the queue to
     avoid re-sending a word that is already awaiting review.  Unpaginated, and
     the server does no per-row work, so this is one request rather than one per
     fifty rows.
+
+    The list covers both the word a row is filed under and the word it was
+    queried with, which differ whenever the staging LLM answered with another
+    headword ("in good faith" filed for "bona fide").  A caller skipping on
+    membership therefore skips a re-glossed word too, instead of paying to
+    stage it a second time.
     """
     return get_json(
         f"{_PENDING_IMPORTS_PREFIX}/api/words",

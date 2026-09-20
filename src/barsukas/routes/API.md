@@ -257,8 +257,9 @@ One of `lemma` (vocabulary, the default), `name` (proper noun), or `concept`
   - Each item: `id`, `english_word`, `definition`, `disambiguation_translation`, `disambiguation_language`, `target_kind`, `name_kind`, `concept_type`, `pos_type`, `pos_subtype`, `example_sentence`, `source`, `frequency_rank`, `notes`, `added_at`.
 
 - `GET /pending-imports/api/words[?search=...][&pos_type=...][&pos_subtype=...][&source=...][&language=...][&target_kind=...]`
-  - Every queued `english_word` matching the filters, unpaginated, in one request.
-  - Returns `{"data": {"words": [...]}, "metadata": {"total": N}}`.
+  - Every word the queue accounts for, unpaginated, in one request.
+  - Returns `{"data": {"words": [...]}, "metadata": {"total": N}}`, one deduplicated sorted list.
+  - Covers both `english_word` (what a row is filed under) and `queried_word` (the term asked about, when the LLM answered with a different headword). A caller testing membership skips a re-glossed word rather than re-staging it.
   - The cheap path for callers that only need the words: no pagination and no per-row synonym-candidate work, unlike `/api/list`.
 
 - `POST /pending-imports/<id>/set-kind` (form submit, not JSON)
