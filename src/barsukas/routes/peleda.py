@@ -15,16 +15,11 @@ from sqlalchemy import func
 from sqlalchemy.orm import Query
 
 from barsukas.helpers.strings import load_barsukas_strings
-from barsukas.routes.categories import (
-    ADJECTIVE_GROUPS,
-    ADVERB_GROUPS,
-    NOUN_GROUPS,
-    SUBTYPE_DESCRIPTIONS,
-    VERB_GROUPS,
-)
+from barsukas.routes.categories import SUBTYPE_DESCRIPTIONS
 from langtools.collation import SORT_KEY_LANGUAGES
 from langtools.ja.gojuon import KANA_TO_ROW, ROW_MEMBERS
 from langtools.letters import get_letters
+from storage.models.guid_prefixes import subtype_groups
 from storage.models.schema import (
     DerivativeForm,
     Lemma,
@@ -80,15 +75,6 @@ _CJK_SORT_KEY_LANGUAGES = frozenset({"zh", "ja", "ko"})
 # All languages that use sort_key for ORDER BY (CJK + Latin + Cyrillic +
 # Brahmic/Thai).
 _SORT_KEY_LANGUAGES = _CJK_SORT_KEY_LANGUAGES | SORT_KEY_LANGUAGES
-
-# Groups for building the category dropdown, keyed by POS type.
-_POS_SUBTYPE_GROUPS: Dict[str, Dict[str, List[str]]] = {
-    "noun": NOUN_GROUPS,
-    "verb": VERB_GROUPS,
-    "adjective": ADJECTIVE_GROUPS,
-    "adverb": ADVERB_GROUPS,
-    "numeral": {"Numerals": ["cardinal", "ordinal"]},
-}
 
 
 def _get_display_langs(source_lang: str) -> List[str]:
@@ -302,10 +288,11 @@ def _build_category_options(available: set[Tuple[str, str]]) -> List[Dict[str, A
     """
     result: List[Dict[str, Any]] = []
     for pos_type in ("noun", "verb", "adjective", "adverb", "numeral"):
-        groups = _POS_SUBTYPE_GROUPS.get(pos_type, {})
+        # The dropdown is flat, so the group headings are dropped here and only
+        # their ordering is kept.
         descriptions = SUBTYPE_DESCRIPTIONS.get(pos_type, {})
         items: List[Dict[str, str]] = []
-        for _group_name, subtypes in groups.items():
+        for subtypes in subtype_groups(pos_type).values():
             for subtype in subtypes:
                 if (pos_type, subtype) in available:
                     items.append(

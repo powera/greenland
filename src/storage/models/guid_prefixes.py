@@ -36,6 +36,13 @@ class SubtypeDef:
         comment: Maintainer note. Never sent to an LLM.
         member_name: Enum member name, when it is not ``subtype.upper()``.
             Only ``animal_grouping_term`` (``GROUP_ANIMAL``) needs this.
+        group: Heading this subtype is displayed under on the category page,
+            scoped to its POS -- a noun "Other" and a verb "Other" are separate
+            headings. Grouping is presentation only: nothing derives a GUID or
+            a prompt from it. It lives here so that adding a subtype makes it
+            visible in the UI by the same edit that gives it a prefix; when it
+            was a separate hand-written list, three subtypes had been defined
+            here and rendered nowhere.
         deprecated: The subtype is no longer a valid choice for new words. It
             keeps its prefix and its enum member -- existing GUIDs and the code
             that names it must go on working -- but it is withheld from every
@@ -48,6 +55,7 @@ class SubtypeDef:
     examples: List[str] = field(default_factory=list)
     comment: str = ""
     member_name: Optional[str] = None
+    group: str = "Other"
     deprecated: bool = False
 
 
@@ -57,236 +65,283 @@ SUBTYPE_DEFS: Dict[str, Dict[str, SubtypeDef]] = {
             prefix="N01",
             description="People and human roles not covered by a narrower subtype",
             examples=["person", "adult", "baby", "friend", "expert"],
+            group="People and Living Things",
         ),
         "family_relation": SubtypeDef(
             prefix="N35",
             description="Family members",
             examples=["brother", "uncle", "cousin", "parent"],
+            group="People and Living Things",
         ),
         "occupation": SubtypeDef(
             prefix="N36",
             description="Professions and roles",
             examples=["teacher", "doctor", "accountant"],
+            group="People and Living Things",
         ),
         "honorific": SubtypeDef(
             prefix="N48",
             description="Titles and forms of address",
             examples=["Sir", "Lord", "Mr.", "Mrs.", "Dr."],
+            group="People and Living Things",
         ),
         "animal": SubtypeDef(
             prefix="N02",
             description="Animals",
             examples=["dog", "bird", "fish", "bee", "wolf"],
+            group="People and Living Things",
         ),
         "body_part": SubtypeDef(
             prefix="N03",
             description="Parts of a human or animal body",
             examples=["arm", "eye", "heart", "muscle", "bone"],
+            group="People and Living Things",
         ),
         "disease_condition": SubtypeDef(
             prefix="N04",
             description="Illnesses, injuries and medical conditions",
             examples=["cancer", "fever", "allergy", "infection", "broken bone"],
+            group="People and Living Things",
         ),
         "plant": SubtypeDef(
             prefix="N05",
             description="Whole plants",
             examples=["rose", "oak", "bush", "moss", "weed"],
+            group="People and Living Things",
         ),
         "plant_part": SubtypeDef(
             prefix="N38",
             description="Parts of plants",
             examples=["leaf", "root", "seed", "petal", "bark"],
+            group="People and Living Things",
         ),
         "food": SubtypeDef(
             prefix="N06",
             description="Solid consumables",
             examples=["bread", "apple", "rice", "meat"],
+            group="Food and Consumables",
         ),
         "beverage": SubtypeDef(
             prefix="N42",
             description="Liquid consumables",
             examples=["water", "coffee", "tea", "juice"],
+            group="Food and Consumables",
         ),
         "building_structure": SubtypeDef(
             prefix="N07",
             description="Buildings and built structures",
             examples=["house", "hospital", "bridge", "library", "port"],
+            group="Physical Objects and Structures",
         ),
         "building_part": SubtypeDef(
             prefix="N47",
             description="Parts of buildings",
             examples=["door", "window", "wall", "floor", "ceiling", "roof", "stairs"],
+            group="Physical Objects and Structures",
         ),
         "furniture": SubtypeDef(
             prefix="N39",
             description="Furniture items",
             examples=["table", "chair", "desk", "sofa", "bed"],
+            group="Physical Objects and Structures",
         ),
         "small_movable_object": SubtypeDef(
             prefix="N08",
             description="Portable everyday objects",
             examples=["cup", "key", "book", "bottle", "wallet"],
+            group="Physical Objects and Structures",
         ),
         "clothing_accessory": SubtypeDef(
             prefix="N09",
             description="Clothing and things worn",
             examples=["shirt", "shoe", "hat", "glove", "ring"],
+            group="Physical Objects and Structures",
         ),
         "artwork_artifact": SubtypeDef(
             prefix="N10",
             description="Made works and cultural artifacts",
             examples=["statue", "photograph", "mural", "comic book", "crossword puzzle"],
+            group="Physical Objects and Structures",
         ),
         "legal_document": SubtypeDef(
             prefix="N58",
             description="Documents with legal force",
             examples=["will", "deed", "passport", "subpoena"],
+            group="Abstract Concepts and Ideas",
         ),
         "natural_feature": SubtypeDef(
             prefix="N11",
             description="Natural formations and phenomena",
             examples=["river", "island", "cloud", "beach", "star"],
+            group="Physical Objects and Structures",
         ),
         "tool": SubtypeDef(
             prefix="N12",
             description="Hand tools and generic tools",
             examples=["hammer", "saw", "wrench", "screwdriver"],
+            group="Physical Objects and Structures",
         ),
         "electronic_device": SubtypeDef(
             prefix="N57",
             description="Computers, phones, TVs, radios, cameras",
+            group="Physical Objects and Structures",
         ),
         "appliance": SubtypeDef(
             prefix="N43",
             description="Kitchen and household appliances",
             examples=["blender", "microwave", "toaster"],
+            group="Physical Objects and Structures",
         ),
         "weapon": SubtypeDef(
             prefix="N44",
             description="Weapons and arms",
             examples=["sword", "gun", "bow", "shield"],
+            group="Physical Objects and Structures",
         ),
         "vehicle": SubtypeDef(
             prefix="N40",
             description="Transportation",
             examples=["car", "truck", "bicycle", "boat", "airplane"],
+            group="Physical Objects and Structures",
         ),
         "path_infrastructure": SubtypeDef(
             prefix="N13",
             description="Ways through a place and the infrastructure of routes",
             examples=["road", "bridge", "sidewalk", "intersection", "bus stop"],
+            group="Physical Objects and Structures",
         ),
         "material_substance": SubtypeDef(
             prefix="N14",
             description="Materials and stuff things are made of",
             examples=["wood", "metal", "glass", "oil", "brick"],
+            group="Materials and Substances",
         ),
         "chemical_compound": SubtypeDef(
             prefix="N15",
             description="Chemical elements and compounds",
             examples=["oxygen", "lithium", "carbon dioxide"],
+            group="Materials and Substances",
         ),
         "medication_remedy": SubtypeDef(
             prefix="N16",
             description="Medicines and treatments",
             examples=["aspirin", "vaccine", "antibiotic", "ointment", "painkiller"],
+            group="Materials and Substances",
         ),
         "concept_idea": SubtypeDef(
             prefix="N17",
             description="General abstractions with no narrower subtype",
             examples=["fact", "effect", "type", "case", "way"],
+            group="Abstract Concepts and Ideas",
         ),
         "communication_information": SubtypeDef(
             prefix="N50",
             description="Language, messages, information",
             examples=["word", "language", "message", "news"],
+            group="Abstract Concepts and Ideas",
         ),
         "technology_digital": SubtypeDef(
             prefix="N52",
             description="Digital/computing concepts",
             examples=["internet", "email", "website", "data"],
+            group="Abstract Concepts and Ideas",
         ),
         "abstract_condition": SubtypeDef(
             prefix="N54",
             description="Abstract conditions, situations",
             examples=["peace", "danger", "luck", "fate"],
+            group="Abstract Concepts and Ideas",
         ),
         "social_institution": SubtypeDef(
             prefix="N55",
             description="Organizations, collective structures",
             examples=["government", "army", "company"],
+            group="Abstract Concepts and Ideas",
         ),
         "activity": SubtypeDef(
             prefix="N41",
             description="Activities and hobbies",
             examples=["reading", "cooking", "sports", "dancing", "hiking"],
+            group="Abstract Concepts and Ideas",
         ),
         "symbolic_element": SubtypeDef(
             prefix="N18",
             description="Symbols, marks and notational elements",
             examples=["digit", "numeral", "graph", "motif", "license plate"],
+            group="Abstract Concepts and Ideas",
         ),
         "quality_attribute": SubtypeDef(
             prefix="N19",
             description="A named property something has, treated as a thing",
             examples=["importance", "efficiency", "durability", "reputation", "hardness"],
+            group="Abstract Concepts and Ideas",
         ),
         "mental_construct": SubtypeDef(
             prefix="N20",
             description="Products of thought: ideas held, formed or believed",
             examples=["idea", "belief", "theory", "decision", "doubt"],
+            group="Abstract Concepts and Ideas",
         ),
         "legal_concept": SubtypeDef(
             prefix="N59",
             description="Legal doctrines and standards",
             examples=["stare decisis", "probable cause"],
+            group="Abstract Concepts and Ideas",
         ),
         "knowledge_domain": SubtypeDef(
             prefix="N21",
             description="Fields of study and bodies of knowledge",
             examples=["biology", "history", "philosophy", "mathematics", "machine learning"],
+            group="Abstract Concepts and Ideas",
         ),
         "quantitative_concept": SubtypeDef(
             prefix="N22",
             description="Amounts, measures and magnitudes as concepts",
             examples=["number", "distance", "size", "level", "half"],
+            group="Abstract Concepts and Ideas",
         ),
         "emotion_feeling": SubtypeDef(
             prefix="N23",
             description="Emotions and felt states",
             examples=["fear", "joy", "anger", "pride", "shame"],
+            group="Abstract Concepts and Ideas",
         ),
         "shape": SubtypeDef(
             prefix="N37",
             description="Geometric shapes",
             examples=["circle", "triangle", "square", "rectangle", "etc."],
+            group="Abstract Concepts and Ideas",
         ),
         "process_event": SubtypeDef(
             prefix="N24",
             description="Things that happen or unfold over time",
             examples=["war", "flight", "development", "process", "attempt"],
+            group="Processes and Time",
         ),
         "time_period": SubtypeDef(
             prefix="N25",
             description="Spans and points of time",
             examples=["year", "hour", "century", "night", "autumn"],
+            group="Processes and Time",
         ),
         "group_people": SubtypeDef(
             prefix="N26",
             description="Organized or recognizable groups of people",
             examples=["team", "audience", "orchestra", "clan", "working class"],
+            group="Groups and Collections",
         ),
         "animal_grouping_term": SubtypeDef(
             prefix="N27",
             description="Measure words for animals",
             examples=["flock", "herd", "head"],
             member_name="GROUP_ANIMAL",
+            group="Groups and Collections",
         ),
         "collection_things": SubtypeDef(
             prefix="N28",
             description="Sets and aggregations of things",
             examples=["collection", "equipment", "goods", "edition", "first aid kit"],
+            group="Groups and Collections",
         ),
         "personal_name": SubtypeDef(
             prefix="N29",
@@ -300,109 +355,138 @@ SUBTYPE_DEFS: Dict[str, Dict[str, SubtypeDef]] = {
                 "must never be reissued. Stage a name as a pending import with "
                 "target_kind='name' instead."
             ),
+            group="Named Entities",
         ),
         "place_name": SubtypeDef(
             prefix="N30",
             description="Generic place nouns",
             examples=["room", "street", "etc."],
+            group="Named Entities",
         ),
         "region": SubtypeDef(
             prefix="N45",
             description="Countries, states, and similar political regions",
+            group="Named Entities",
         ),
         "city": SubtypeDef(
             prefix="N46",
             description="Cities",
             examples=["Vilnius", "Paris", "Tokyo"],
+            group="Named Entities",
         ),
         "geographic_place": SubtypeDef(
             prefix="N56",
             description="Named geographic features",
             examples=["Atlantic Ocean", "Pacific Ocean", "Indian Ocean"],
+            group="Named Entities",
         ),
         "organization_name": SubtypeDef(
             prefix="N31",
             description="Named organizations and companies",
             examples=["Coca-Cola", "agency", "small business"],
+            group="Named Entities",
         ),
-        "temporal_name": SubtypeDef(prefix="N32", description="Days of week, months, etc."),
+        "temporal_name": SubtypeDef(
+            prefix="N32",
+            description="Days of week, months, etc.",
+            group="Other Categories",
+        ),
         "nationality": SubtypeDef(
             prefix="N33",
             description="A person of a nationality or origin",
             examples=["American", "Lithuanian", "Finn", "Englishman", "Pole"],
+            group="Other Categories",
         ),
         "unit_of_measurement": SubtypeDef(
             prefix="N34",
             description="Units things are measured in",
             examples=["meter", "kilogram", "liter", "degree", "mile"],
+            group="Other Categories",
         ),
-        "noun_other": SubtypeDef(prefix="N99", member_name="OTHER"),
+        "noun_other": SubtypeDef(
+            prefix="N99",
+            member_name="OTHER",
+            group="Other Categories",
+        ),
     },
     "verb": {
         "physical_action": SubtypeDef(
             prefix="V01",
             description="Physical actions",
             examples=["push", "pull", "lift", "eat", "drink"],
+            group="Physical Actions",
         ),
         "creation_action": SubtypeDef(
             prefix="V02",
             description="Creating things",
             examples=["make", "create", "build"],
+            group="Physical Actions",
         ),
         "destruction_action": SubtypeDef(
             prefix="V03",
             description="Destroying",
             examples=["break", "destroy", "demolish"],
+            group="Physical Actions",
         ),
         "mental_state": SubtypeDef(
             prefix="V04",
             description="Cognition",
             examples=["know", "believe", "understand", "think"],
+            group="Mental and Emotional",
         ),
         "emotional_state": SubtypeDef(
             prefix="V05",
             description="Feelings",
             examples=["love", "hate", "fear", "enjoy"],
+            group="Mental and Emotional",
         ),
         "perception": SubtypeDef(
             prefix="V10",
             description="Sensory verbs",
             examples=["see", "hear", "smell", "taste", "feel", "touch"],
+            group="Mental and Emotional",
         ),
         "communication": SubtypeDef(
             prefix="V09",
             description="Speaking and writing",
             examples=["say", "tell", "speak", "write", "read"],
+            group="Communication and Possession",
         ),
         "possession": SubtypeDef(
             prefix="V06",
             description="Having/owning",
             examples=["have", "own", "possess", "give", "take"],
+            group="Communication and Possession",
         ),
         "existence": SubtypeDef(
             prefix="V11",
             description="Living/existing",
             examples=["live", "exist", "die", "survive", "stay", "remain"],
+            group="Existence and Change",
         ),
         "development": SubtypeDef(
             prefix="V07",
             description="Growing/evolving",
             examples=["grow", "develop", "evolve", "mature"],
+            group="Existence and Change",
         ),
         "change": SubtypeDef(
             prefix="V08",
             description="Transforming",
             examples=["become", "transform", "change", "turn"],
+            group="Existence and Change",
         ),
         "directional_movement": SubtypeDef(
             prefix="V12",
             description="Moving with direction",
             examples=["go", "come", "enter", "leave"],
+            group="Movement",
         ),
         "manner_movement": SubtypeDef(
             prefix="V13",
             description="Way of moving",
             examples=["walk", "run", "swim", "fly", "crawl"],
+            group="Movement",
         ),
         "verb_other": SubtypeDef(prefix="V99", member_name="OTHER"),
     },
@@ -411,26 +495,31 @@ SUBTYPE_DEFS: Dict[str, Dict[str, SubtypeDef]] = {
             prefix="A01",
             description="Size descriptions",
             examples=["big", "small", "huge", "tiny"],
+            group="Physical Properties",
         ),
         "color": SubtypeDef(
             prefix="A02",
             description="Color descriptions",
             examples=["red", "blue", "green", "yellow"],
+            group="Physical Properties",
         ),
         "shape": SubtypeDef(
             prefix="A03",
             description="Shape descriptions",
             examples=["round", "square", "triangular", "oval"],
+            group="Physical Properties",
         ),
         "texture": SubtypeDef(
             prefix="A04",
             description="Texture descriptions",
             examples=["soft", "hard", "smooth", "rough"],
+            group="Physical Properties",
         ),
         "personal_quality": SubtypeDef(
             prefix="A16",
             description="Character/personality traits",
             examples=["honest", "kind", "brave", "lazy", "clever", "polite"],
+            group="Personal and Emotional",
         ),
         "physical_property": SubtypeDef(
             prefix="A18",
@@ -450,6 +539,7 @@ SUBTYPE_DEFS: Dict[str, Dict[str, SubtypeDef]] = {
                 "open",
                 "closed",
             ],
+            group="Physical Properties",
         ),
         "condition": SubtypeDef(
             prefix="A17",
@@ -465,11 +555,13 @@ SUBTYPE_DEFS: Dict[str, Dict[str, SubtypeDef]] = {
                 "old",
                 "fresh",
             ],
+            group="Personal and Emotional",
         ),
         "emotion": SubtypeDef(
             prefix="A19",
             description="Emotional states",
             examples=["happy", "sad", "angry", "excited", "tired", "scared"],
+            group="Personal and Emotional",
         ),
         "quality": SubtypeDef(
             prefix="A05",
@@ -485,56 +577,67 @@ SUBTYPE_DEFS: Dict[str, Dict[str, SubtypeDef]] = {
                 "clear",
                 "simple",
             ],
+            group="Evaluative",
         ),
         "aesthetic": SubtypeDef(
             prefix="A06",
             description="Beauty or appearance",
             examples=["beautiful", "ugly", "pretty", "handsome"],
+            group="Evaluative",
         ),
         "importance": SubtypeDef(
             prefix="A07",
             description="Importance or priority",
             examples=["important", "essential", "trivial", "critical"],
+            group="Evaluative",
         ),
         "origin": SubtypeDef(
             prefix="A08",
             description="Origin or source",
             examples=["American", "Chinese", "domestic", "foreign"],
+            group="Origin and Material",
         ),
         "location": SubtypeDef(
             prefix="A20",
             description="Where a thing is situated",
             examples=["northern", "coastal", "inland", "urban", "rural"],
+            group="Origin and Material",
         ),
         "purpose": SubtypeDef(
             prefix="A09",
             description="Purpose or function",
             examples=["educational", "medical", "industrial", "recreational"],
+            group="Origin and Material",
         ),
         "material": SubtypeDef(
             prefix="A10",
             description="Material composition",
             examples=["wooden", "metal", "plastic", "cotton"],
+            group="Origin and Material",
         ),
         "indefinite_quantity": SubtypeDef(
             prefix="A12",
             description="Inexact amounts",
             examples=["many", "few", "some", "several"],
+            group="Quantity and Time",
         ),
         "duration": SubtypeDef(
             prefix="A13",
             description="Time duration",
             examples=["brief", "long", "eternal", "temporary"],
+            group="Quantity and Time",
         ),
         "frequency": SubtypeDef(
             prefix="A14",
             description="Frequency of occurrence",
             examples=["daily", "occasional", "rare", "frequent"],
+            group="Quantity and Time",
         ),
         "sequence": SubtypeDef(
             prefix="A15",
             description="Order or sequence",
             examples=["first", "last", "next", "previous"],
+            group="Quantity and Time",
         ),
         "spatial_orientation": SubtypeDef(
             prefix="A21",
@@ -547,6 +650,7 @@ SUBTYPE_DEFS: Dict[str, Dict[str, SubtypeDef]] = {
                 "orthogonal",
                 "diagonal",
             ],
+            group="Technical and Domain",
         ),
         "chemical_physical": SubtypeDef(
             prefix="A22",
@@ -559,6 +663,7 @@ SUBTYPE_DEFS: Dict[str, Dict[str, SubtypeDef]] = {
                 "magnetic",
                 "igneous",
             ],
+            group="Technical and Domain",
         ),
         "biological_type": SubtypeDef(
             prefix="A23",
@@ -571,16 +676,19 @@ SUBTYPE_DEFS: Dict[str, Dict[str, SubtypeDef]] = {
                 "arboreal",
                 "venomous",
             ],
+            group="Technical and Domain",
         ),
         "belief_cultural": SubtypeDef(
             prefix="A24",
             description="Religious, philosophical or cultural tradition",
             examples=["liturgical", "monastic", "monotheistic", "rabbinic", "mystical"],
+            group="Technical and Domain",
         ),
         "temporal_status": SubtypeDef(
             prefix="A25",
             description="Standing in time rather than duration",
             examples=["archaic", "posthumous", "retroactive", "extant", "obsolete"],
+            group="Quantity and Time",
         ),
         "mathematical": SubtypeDef(
             prefix="A26",
@@ -592,11 +700,13 @@ SUBTYPE_DEFS: Dict[str, Dict[str, SubtypeDef]] = {
                 "countable",
                 "orthogonal",
             ],
+            group="Technical and Domain",
         ),
         "legal": SubtypeDef(
             prefix="A27",
             description="Legal standing, right or duty",
             examples=["statutory", "constitutional", "liable", "lawful", "permissible"],
+            group="Technical and Domain",
         ),
         "adjective_other": SubtypeDef(prefix="A99", member_name="OTHER"),
     },
@@ -605,21 +715,25 @@ SUBTYPE_DEFS: Dict[str, Dict[str, SubtypeDef]] = {
             prefix="D01",
             description="Manner or style of action",
             examples=["quickly", "carefully", "well", "slowly", "badly", "easily"],
+            group="Manner",
         ),
         "attitude": SubtypeDef(
             prefix="D02",
             description="Attitude or approach",
             examples=["eagerly", "reluctantly", "willingly", "gladly", "sadly"],
+            group="Manner",
         ),
         "specific_time": SubtypeDef(
             prefix="D03",
             description="Specific time references",
             examples=["now", "today", "yesterday", "tomorrow", "tonight"],
+            group="Temporal",
         ),
         "relative_time": SubtypeDef(
             prefix="D04",
             description="Relative time references",
             examples=["already", "soon", "recently", "lately", "previously"],
+            group="Temporal",
         ),
         "duration": SubtypeDef(
             prefix="D05",
@@ -631,11 +745,13 @@ SUBTYPE_DEFS: Dict[str, Dict[str, SubtypeDef]] = {
                 "forever",
                 "momentarily",
             ],
+            group="Temporal",
         ),
         "direction": SubtypeDef(
             prefix="D06",
             description="Directional movement",
             examples=["up", "down", "forward", "backward", "left", "right", "north"],
+            group="Spatial",
         ),
         "location": SubtypeDef(
             prefix="D07",
@@ -649,11 +765,13 @@ SUBTYPE_DEFS: Dict[str, Dict[str, SubtypeDef]] = {
                 "inside",
                 "outside",
             ],
+            group="Spatial",
         ),
         "distance": SubtypeDef(
             prefix="D08",
             description="Distance references",
             examples=["nearby", "far", "close", "away", "afar"],
+            group="Spatial",
         ),
         "intensity": SubtypeDef(
             prefix="D09",
@@ -667,6 +785,7 @@ SUBTYPE_DEFS: Dict[str, Dict[str, SubtypeDef]] = {
                 "too",
                 "enough",
             ],
+            group="Degree",
         ),
         "completeness": SubtypeDef(
             prefix="D10",
@@ -679,6 +798,7 @@ SUBTYPE_DEFS: Dict[str, Dict[str, SubtypeDef]] = {
                 "partially",
                 "halfway",
             ],
+            group="Degree",
         ),
         "approximation": SubtypeDef(
             prefix="D11",
@@ -691,16 +811,19 @@ SUBTYPE_DEFS: Dict[str, Dict[str, SubtypeDef]] = {
                 "precisely",
                 "roughly",
             ],
+            group="Degree",
         ),
         "definite_frequency": SubtypeDef(
             prefix="D12",
             description="Specific frequency",
             examples=["daily", "weekly", "monthly", "yearly", "hourly"],
+            group="Temporal",
         ),
         "indefinite_frequency": SubtypeDef(
             prefix="D13",
             description="Inexact frequency",
             examples=["often", "sometimes", "rarely", "seldom", "always", "never"],
+            group="Temporal",
         ),
         "adverb_other": SubtypeDef(prefix="D99", member_name="OTHER"),
     },
@@ -727,11 +850,13 @@ SUBTYPE_DEFS: Dict[str, Dict[str, SubtypeDef]] = {
             prefix="Z01",
             description="Cardinal numbers",
             examples=["one", "two", "three", "100"],
+            group="Numerals",
         ),
         "ordinal": SubtypeDef(
             prefix="Z02",
             description="Ordinal numbers",
             examples=["first", "second", "third", "100th"],
+            group="Numerals",
         ),
     },
 }
@@ -780,6 +905,30 @@ def classifiable_subtypes(pos_type: str) -> List[str]:
     return [
         subtype for subtype, spec in SUBTYPE_DEFS.get(pos_type, {}).items() if not spec.deprecated
     ]
+
+
+def subtype_groups(pos_type: str) -> Dict[str, List[str]]:
+    """One POS type's live subtypes, bucketed by ``group`` for display.
+
+    Subtypes are ordered by GUID prefix within each group, and the groups by
+    their lowest prefix. Nothing depends on a hand-chosen order, and since a
+    prefix is only ever issued above the current maximum, a newly added subtype
+    sorts to the end of its group rather than into the middle of a list.
+
+    Deprecated subtypes are omitted: the page offers these as live categories to
+    browse, so it wants the same filter ``classifiable_subtypes`` applies.
+
+    Returns the catch-all under the bare enum name ("other"), matching how
+    callers key it, not the ``<pos>_other`` key used in the table.
+    """
+    buckets: Dict[str, List[tuple[str, str]]] = {}
+    for subtype, spec in SUBTYPE_DEFS.get(pos_type, {}).items():
+        if spec.deprecated:
+            continue
+        name = "other" if subtype == f"{pos_type}_other" else subtype
+        buckets.setdefault(spec.group, []).append((spec.prefix, name))
+    ordered = sorted(buckets.items(), key=lambda kv: min(prefix for prefix, _ in kv[1]))
+    return {group: [name for _, name in sorted(entries)] for group, entries in ordered}
 
 
 # GUID prefixes for phrase subtypes. Phrases (fixed traveler/greeting
