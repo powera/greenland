@@ -48,6 +48,11 @@ from sqlalchemy.orm import Query
 
 from storage.backend.config import DataSourceConfig
 from storage.crud.derivative_form import add_derivative_form
+from storage.crud.pending_import_senses import (
+    read_pending_import_context_sentence,
+    read_pending_import_example_sentences,
+    serialize_example_sentences,
+)
 from storage.crud.word_token import add_word_token
 from storage.models.imports import (
     PENDING_IMPORT_TARGET_KIND_LABELS,
@@ -238,6 +243,7 @@ def list_pending_imports() -> ResponseReturnValue:
     return render_template(
         "pending_imports/list.html",
         imports=imports,
+        context_sentence=read_pending_import_context_sentence,
         page=page,
         total_pages=total_pages,
         total=total,
@@ -466,12 +472,13 @@ def detail(pending_import_id: int) -> ResponseReturnValue:
     suggestion = suggest_target_kind(
         g.db,
         pending.english_word,
-        example_sentence=pending.example_sentence,
+        example_sentence=read_pending_import_context_sentence(pending),
         pos_type=pending.pos_type,
     )
     return render_template(
         "pending_imports/detail.html",
         item=pending,
+        context_sentence=read_pending_import_context_sentence(pending),
         synonym_candidates=synonym_candidates,
         has_strong_synonym_candidate=has_strong_synonym_candidate,
         target_kinds=PENDING_IMPORT_TARGET_KINDS,
@@ -500,11 +507,19 @@ def stage(pending_import_id: int) -> ResponseReturnValue:
     try:
         from wordfreq.translation.client import LinguisticClient
 
-        # Accept an updated example_sentence from the request and save it before querying
+        # Accept an updated example sentence from the request and save it
+        # before querying. It goes to the front of the staged list, which is
+        # where the context sentence is read from; a reviewer who supplies one
+        # is saying that is the sentence to judge the term by.
         body = request.get_json(silent=True) or {}
         example_sentence = body.get("example_sentence") or None
-        if example_sentence and example_sentence != pending.example_sentence:
-            pending.example_sentence = example_sentence
+        if example_sentence and example_sentence != read_pending_import_context_sentence(pending):
+            staged = [
+                sentence
+                for sentence in read_pending_import_example_sentences(pending)
+                if sentence != example_sentence
+            ]
+            pending.example_sentences = serialize_example_sentences([example_sentence, *staged])
             g.db.flush()
 
         client = LinguisticClient(config=data_source_config)
@@ -529,7 +544,8 @@ def stage(pending_import_id: int) -> ResponseReturnValue:
             )
 
         definitions_list, llm_success = client.query_definitions(
-            pending.english_word, example_sentence=pending.example_sentence
+            pending.english_word,
+            example_sentence=read_pending_import_context_sentence(pending),
         )
 
         if not llm_success or not definitions_list:
@@ -741,7 +757,7 @@ def api_list() -> ResponseReturnValue:
             "concept_type": item.concept_type,
             "pos_type": item.pos_type,
             "pos_subtype": item.pos_subtype,
-            "example_sentence": item.example_sentence,
+            "example_sentence": read_pending_import_context_sentence(item),
             "source": item.source,
             "frequency_rank": item.frequency_rank,
             "notes": item.notes,

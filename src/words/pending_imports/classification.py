@@ -41,6 +41,7 @@ from sqlalchemy.orm import Session
 
 from clients.types import Schema, SchemaProperty
 from storage.crud.concept import get_concept_by_slug
+from storage.crud.pending_import_senses import read_pending_import_context_sentence
 from storage.crud.name_entity import find_name
 from storage.models.concept import normalize_concept_slug
 from storage.models.imports import (
@@ -254,8 +255,9 @@ def build_classification_schema() -> Schema:
 def build_classification_prompt(pending_import: PendingImport) -> str:
     """Prompt asking an LLM which of the three kinds a term is."""
     context = ""
-    if pending_import.example_sentence:
-        context = f"\nExample sentence: {pending_import.example_sentence}"
+    staged_sentence = read_pending_import_context_sentence(pending_import)
+    if staged_sentence:
+        context = f"\nExample sentence: {staged_sentence}"
     return (
         "Classify this English term before it is added to a language-learning database.\n\n"
         f"Term: {pending_import.english_word}\n"
@@ -390,7 +392,7 @@ def classify_pending_import(
         suggestion = suggest_target_kind(
             session,
             pending_import.english_word,
-            example_sentence=pending_import.example_sentence,
+            example_sentence=read_pending_import_context_sentence(pending_import),
             pos_type=pending_import.pos_type,
         )
 

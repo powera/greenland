@@ -21,6 +21,7 @@ from sqlalchemy.orm import Session, sessionmaker
 from storage.backend.config import BackendType, DataSourceConfig
 from storage.crud.operation_log import PENDING_IMPORT_CREATE
 from storage.crud.pending_import_senses import (
+    read_pending_import_context_sentence,
     read_pending_import_example_sentences,
     read_pending_import_translations,
 )
@@ -935,9 +936,9 @@ def test_queued_sense_carries_translations_and_examples(
         "The dog guards the gate.",
         "He guarded the secret.",
     ]
-    # The first example doubles as the single-sentence review context that
-    # classification and the approval LLM call read.
-    assert pending.example_sentence == "The dog guards the gate."
+    # The first staged sentence is the review context that classification and
+    # the approval LLM call read; there is no separate column holding it.
+    assert read_pending_import_context_sentence(pending) == "The dog guards the gate."
 
 
 def test_queued_sense_without_examples_carries_none(
@@ -959,8 +960,8 @@ def test_queued_sense_without_examples_carries_none(
 
     pending = session.query(PendingImport).filter(PendingImport.english_word == "guard").one()
     assert pending.example_sentences is None
-    assert pending.example_sentence is None
     assert read_pending_import_example_sentences(pending) == []
+    assert read_pending_import_context_sentence(pending) is None
 
 
 def test_queueing_a_sense_is_written_to_the_operation_log(

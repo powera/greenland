@@ -119,8 +119,9 @@
                                         <td>{{ item.id }}</td>
                                         <td>
                                             <strong>{{ item.english_word }}</strong>
-                                            {% if item.example_sentence %}
-                                            <i class="bi bi-chat-quote text-info ms-1" title="{{ item.example_sentence }}"></i>
+                                            {% set item_sentence = context_sentence(item) %}
+                                            {% if item_sentence %}
+                                            <i class="bi bi-chat-quote text-info ms-1" title="{{ item_sentence }}"></i>
                                             {% endif %}
                                         </td>
                                         <td><small>{{ item.definition | truncate(50) }}</small></td>

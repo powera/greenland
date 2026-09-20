@@ -77,10 +77,10 @@
 
                     <dt class="col-sm-3">Example Sentence</dt>
                     <dd class="col-sm-9">
-                        <div id="exampleSentenceDisplay">{{ item.example_sentence or '—' }}</div>
+                        <div id="exampleSentenceDisplay">{{ context_sentence or '—' }}</div>
                         <textarea class="form-control form-control-sm mt-1" id="exampleSentenceInput"
                             rows="2" placeholder="e.g. The patient waited in the hospital ward."
-                            >{{ item.example_sentence or '' }}</textarea>
+                            >{{ context_sentence or '' }}</textarea>
                         <small class="text-muted">Sent to LLM for context when staging.</small>
                     </dd>
 

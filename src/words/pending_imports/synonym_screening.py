@@ -8,6 +8,7 @@ from sqlalchemy import func
 from sqlalchemy.orm import Session
 
 from clients.types import Schema, SchemaProperty
+from storage.crud.pending_import_senses import read_pending_import_context_sentence
 from storage.models.imports import PendingImport, PendingImportSynonymCandidate
 from storage.models.schema import Lemma
 from storage.translation_helpers import (
@@ -99,8 +100,9 @@ def build_synonym_screening_prompt(
 ) -> str:
     language_list = ", ".join(language_codes)
     context_sentence = ""
-    if pending_import.example_sentence:
-        context_sentence = f"\nExample sentence: {pending_import.example_sentence}"
+    staged_sentence = read_pending_import_context_sentence(pending_import)
+    if staged_sentence:
+        context_sentence = f"\nExample sentence: {staged_sentence}"
     pos_line = pending_import.pos_type or "unknown"
     subtype_line = pending_import.pos_subtype or "unknown"
     return (

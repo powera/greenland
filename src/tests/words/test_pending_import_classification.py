@@ -16,6 +16,10 @@ from sqlalchemy.orm import Session
 
 from storage.crud.concept import create_concept
 from storage.crud.name_entity import create_name
+from storage.crud.pending_import_senses import (
+    read_pending_import_context_sentence,
+    read_pending_import_example_sentences,
+)
 from storage.models.imports import (
     TARGET_KIND_CONCEPT,
     TARGET_KIND_LEMMA,
@@ -69,6 +73,50 @@ class ClassificationTestCase(unittest.TestCase):
             disambiguation_language="en",
             **kwargs,
         )
+
+
+class TestStagedSentenceStorage(ClassificationTestCase):
+    """One column holds the sentences; a single one is just the first of them."""
+
+    def test_a_single_sentence_is_stored_in_the_list(self) -> None:
+        pending = self.stage("ward", example_sentence="The patient waited in the ward.")
+        self.assertEqual(
+            read_pending_import_example_sentences(pending),
+            ["The patient waited in the ward."],
+        )
+        self.assertEqual(
+            read_pending_import_context_sentence(pending),
+            "The patient waited in the ward.",
+        )
+
+    def test_a_single_sentence_leads_the_list_it_is_passed_with(self) -> None:
+        # A caller naming one sentence means that one to be the context, so it
+        # goes in front of the rest rather than being appended to them.
+        pending = self.stage(
+            "ward",
+            example_sentence="The patient waited in the ward.",
+            example_sentences=["He warded off the blow."],
+        )
+        self.assertEqual(
+            read_pending_import_example_sentences(pending),
+            ["The patient waited in the ward.", "He warded off the blow."],
+        )
+
+    def test_a_sentence_passed_both_ways_is_stored_once(self) -> None:
+        pending = self.stage(
+            "ward",
+            example_sentence="The patient waited in the ward.",
+            example_sentences=["The patient waited in the ward."],
+        )
+        self.assertEqual(
+            read_pending_import_example_sentences(pending),
+            ["The patient waited in the ward."],
+        )
+
+    def test_no_sentence_leaves_the_column_null(self) -> None:
+        pending = self.stage("ward")
+        self.assertIsNone(pending.example_sentences)
+        self.assertIsNone(read_pending_import_context_sentence(pending))
 
 
 class TestProperNounShape(unittest.TestCase):

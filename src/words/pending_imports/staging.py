@@ -74,6 +74,7 @@ def create_pending_import(
     name_kind: Optional[str] = None,
     concept_type: Optional[str] = None,
     sense_prominence: Optional[str] = None,
+    queried_word: Optional[str] = None,
     translations: Optional[Mapping[str, str]] = None,
     example_sentences: Optional[Sequence[str]] = None,
     classify: bool = True,
@@ -101,7 +102,10 @@ def create_pending_import(
         frequency_rank: Corpus rank, for frequency-driven staging.
         notes: Free-text note.
         example_sentence: Sentence the term was seen in, used as context by the
-            approval step's LLM call and by classification.
+            approval step's LLM call and by classification. Stored in
+            ``example_sentences`` with any passed there -- there is no separate
+            single-sentence column -- so a caller with exactly one sentence can
+            pass either argument.
         target_kind: Force a kind instead of classifying. One of
             ``PENDING_IMPORT_TARGET_KINDS``.
         name_kind: For a name, one of ``NAME_KINDS``. Ignored for other kinds
@@ -147,6 +151,18 @@ def create_pending_import(
         else:
             resolved_kind = TARGET_KIND_LEMMA
 
+    # One column holds the sentences. A caller that knows only one passes
+    # ``example_sentence``; it goes in front of any passed as a list, because a
+    # caller naming a single sentence means that one to be the context.
+    merged_sentences: List[str] = []
+    if example_sentence and example_sentence.strip():
+        merged_sentences.append(example_sentence.strip())
+    for candidate in example_sentences or []:
+        if isinstance(candidate, str) and candidate.strip():
+            cleaned = candidate.strip()
+            if cleaned not in merged_sentences:
+                merged_sentences.append(cleaned)
+
     pending = PendingImport(
         english_word=english_word,
         definition=definition,
@@ -161,10 +177,10 @@ def create_pending_import(
         source=source,
         frequency_rank=frequency_rank,
         notes=notes,
-        example_sentence=example_sentence,
         sense_prominence=sense_prominence,
+        queried_word=queried_word,
         translations=serialize_translations(translations or {}),
-        example_sentences=serialize_example_sentences(example_sentences or []),
+        example_sentences=serialize_example_sentences(merged_sentences),
     )
     session.add(pending)
     session.flush()
