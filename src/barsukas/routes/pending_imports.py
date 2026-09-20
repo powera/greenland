@@ -759,6 +759,38 @@ def api_list() -> ResponseReturnValue:
     )
 
 
+@bp.route("/api/words")
+@mirrored_facade("/pending-imports/api/words", "GET")
+def api_words() -> ResponseReturnValue:
+    """JSON API: every queued english_word matching the filters, unpaginated.
+
+    The wordlist importers ask one question of this queue -- which words are
+    already waiting for review, so a run does not pay the LLM for them again --
+    and ``/api/list`` answers it far too expensively.  That view is built for
+    the review UI: it pages at fifty, and per row it counts synonym candidates
+    and tests for a strong one, so surveying a queue of N words costs N/50
+    requests and roughly 2N extra queries, all to read one column.  An importer
+    doing that on every run, with twenty scripts in a batch and a queue that
+    grows as they go, spends most of its wall clock here.
+
+    This returns the single column, in one request, with no per-row work.  It
+    takes the same filters as ``/api/list`` so a caller can narrow by
+    ``target_kind`` the way the importers do.
+    """
+    query = _build_filtered_query()
+    words = [
+        english_word
+        for (english_word,) in query.with_entities(PendingImport.english_word).all()
+        if english_word and english_word.strip()
+    ]
+    return jsonify(
+        {
+            "data": {"words": words},
+            "metadata": {"total": len(words)},
+        }
+    )
+
+
 @bp.route("/export.txt")
 def export_text() -> Response:
     """Export filtered pending imports as a tab-separated text file."""

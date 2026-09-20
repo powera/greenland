@@ -14,6 +14,13 @@ import requests
 from api.constants import BASE_URL, DEFAULT_TIMEOUT_SECONDS, USER_AGENT
 
 
+# One pooled session for the whole process.  These facades are called in loops
+# -- a wordlist import makes a request per word -- and a bare ``requests.get``
+# opens a fresh connection every time, so the handshake dominates a run against
+# a local server.  Nothing here is concurrent, so a single session is safe.
+_SESSION = requests.Session()
+
+
 class BarsukasAPIError(RuntimeError):
     """Raised when the Barsukas API returns a non-2xx response."""
 
@@ -44,7 +51,7 @@ def get_json(
     )
 
     url = (base_url.rstrip("/") if base_url else BASE_URL) + path
-    response = requests.get(
+    response = _SESSION.get(
         url,
         params=cleaned_params,
         timeout=timeout,
@@ -80,7 +87,7 @@ def post_json(
     cleaned_body = {key: value for key, value in body.items() if value is not None} if body else {}
 
     url = (base_url.rstrip("/") if base_url else BASE_URL) + path
-    response = requests.post(
+    response = _SESSION.post(
         url,
         json=cleaned_body,
         timeout=timeout,
@@ -116,7 +123,7 @@ def delete_json(
     cleaned_body = {key: value for key, value in body.items() if value is not None} if body else {}
 
     url = (base_url.rstrip("/") if base_url else BASE_URL) + path
-    response = requests.delete(
+    response = _SESSION.delete(
         url,
         json=cleaned_body,
         timeout=timeout,
@@ -148,7 +155,7 @@ def patch_json(
     cleaned_body = {key: value for key, value in body.items() if value is not None} if body else {}
 
     url = (base_url.rstrip("/") if base_url else BASE_URL) + path
-    response = requests.patch(
+    response = _SESSION.patch(
         url,
         json=cleaned_body,
         timeout=timeout,
