@@ -18,6 +18,12 @@ batches at 390 and 1060 are pulled out of those lists in the same change; the
 corpus put them there because encyclopedic prose about language is
 society-adjacent, which is a fact about the corpus and not about the word.
 
+Two entries are dual-use.  "Isolate" is a language isolate here and an ordinary
+verb elsewhere, and "articulation" is a place of articulation here and a joint
+-- or a clearly expressed idea -- elsewhere.  Both are kept for the same reason
+"transitive" is (below): add_word resolves senses server-side, so the unrelated
+senses do not collide.
+
 This script deliberately uses the public ``ROOT/api`` facade.  In particular,
 ``api.lemmas.add_word`` runs Barsukas' intelligent word workflow: the server's
 LLM identifies the senses and supplies their translations, then the server
@@ -65,6 +71,7 @@ WORDS: Sequence[str] = (
     "philology",
     "typology",
     "lexicography",
+    "linguist",
     # Sound structure.
     "phoneme",
     "allophone",
@@ -82,6 +89,11 @@ WORDS: Sequence[str] = (
     "prosody",
     "tone",
     "assimilation",
+    "phonetic",
+    "phonological",
+    "phonemic",
+    "voiceless",
+    "articulation",
     # Word structure.
     "morpheme",
     "affix",
@@ -95,6 +107,7 @@ WORDS: Sequence[str] = (
     "declension",
     "conjugation",
     "paradigm",
+    "lexicon",
     # Grammar and syntax.
     "ergative",
     "accusative",
@@ -112,6 +125,7 @@ WORDS: Sequence[str] = (
     "copula",
     "determiner",
     "modifier",
+    "grammatical",
     "agreement",
     "anaphora",
     "deixis",
@@ -137,6 +151,10 @@ WORDS: Sequence[str] = (
     "romanization",
     "grapheme",
     "ligature",
+    "braille",
+    "kanji",
+    "cuneiform",
+    "syllabic",
     # Language change and contact.
     "substrate",
     "creole",
@@ -151,6 +169,8 @@ WORDS: Sequence[str] = (
     "proto",
     "vernacular",
     "register",
+    "colloquial",
+    "isolate",
     "corpus",
 )
 
