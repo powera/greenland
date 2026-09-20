@@ -14,7 +14,11 @@ from storage.models.enums import (
     NumeralSubtype,
     VerbSubtype,
 )
-from storage.models.guid_prefixes import SUBTYPE_DEFS, SUBTYPE_GUID_PREFIXES
+from storage.models.guid_prefixes import (
+    SUBTYPE_DEFS,
+    SUBTYPE_GUID_PREFIXES,
+    subtype_groups,
+)
 from storage.models.schema import Lemma
 
 bp = Blueprint("categories", __name__, url_prefix="/categories")
@@ -50,121 +54,6 @@ def _subtype_descriptions() -> Dict[str, Dict[str, str]]:
 
 SUBTYPE_DESCRIPTIONS: Dict[str, Dict[str, str]] = _subtype_descriptions()
 
-# Groupings for noun subtypes (for better organization in the UI)
-NOUN_GROUPS = {
-    "People and Living Things": [
-        "occupation",
-        "family_relation",
-        "human",
-        "honorific",
-        "animal",
-        "body_part",
-        "disease_condition",
-        "plant",
-        "plant_part",
-    ],
-    "Food and Consumables": ["food", "beverage"],
-    "Physical Objects and Structures": [
-        "building_structure",
-        "building_part",
-        "furniture",
-        "small_movable_object",
-        "clothing_accessory",
-        "artwork_artifact",
-        "natural_feature",
-        "tool",
-        "electronic_device",
-        "appliance",
-        "weapon",
-        "vehicle",
-        "path_infrastructure",
-    ],
-    "Materials and Substances": [
-        "material_substance",
-        "chemical_compound",
-        "medication_remedy",
-    ],
-    "Abstract Concepts and Ideas": [
-        "concept_idea",
-        "communication_information",
-        "technology_digital",
-        "abstract_condition",
-        "social_institution",
-        "activity",
-        "symbolic_element",
-        "quality_attribute",
-        "mental_construct",
-        "knowledge_domain",
-        "quantitative_concept",
-        "emotion_feeling",
-        "shape",
-    ],
-    "Processes and Time": ["process_event", "time_period"],
-    "Groups and Collections": [
-        "group_people",
-        "animal_grouping_term",
-        "collection_things",
-    ],
-    "Named Entities": [
-        "personal_name",
-        "place_name",
-        "region",
-        "city",
-        "organization_name",
-    ],
-    "Other Categories": ["temporal_name", "nationality", "unit_of_measurement", "other"],
-}
-
-# Groupings for adjective subtypes
-ADJECTIVE_GROUPS = {
-    "Physical Properties": ["size", "color", "shape", "texture", "physical_property"],
-    "Personal and Emotional": ["personal_quality", "condition", "emotion"],
-    "Evaluative": ["quality", "aesthetic", "importance"],
-    "Origin and Material": ["origin", "location", "purpose", "material"],
-    "Quantity and Time": [
-        # definite_quantity removed: moved to numeral POS
-        "indefinite_quantity",
-        "duration",
-        "frequency",
-        "sequence",
-        "temporal_status",
-    ],
-    "Technical and Domain": [
-        "spatial_orientation",
-        "chemical_physical",
-        "biological_type",
-        "belief_cultural",
-        "mathematical",
-        "legal",
-    ],
-    "Other": ["other"],
-}
-
-# Groupings for adverb subtypes
-ADVERB_GROUPS = {
-    "Manner": ["style", "attitude"],
-    "Temporal": [
-        "specific_time",
-        "relative_time",
-        "duration",
-        "definite_frequency",
-        "indefinite_frequency",
-    ],
-    "Spatial": ["direction", "location", "distance"],
-    "Degree": ["intensity", "completeness", "approximation"],
-    "Other": ["other"],
-}
-
-# Groupings for verb subtypes
-VERB_GROUPS = {
-    "Physical Actions": ["physical_action", "creation_action", "destruction_action"],
-    "Mental and Emotional": ["mental_state", "emotional_state", "perception"],
-    "Communication and Possession": ["communication", "possession"],
-    "Existence and Change": ["existence", "development", "change"],
-    "Movement": ["directional_movement", "manner_movement"],
-    "Other": ["other"],
-}
-
 
 def get_subtype_counts(db_session: Any, pos_type: str) -> Dict[str, Dict[str, int]]:
     """Get the count of lemmas for each subtype within a POS type.
@@ -193,16 +82,21 @@ def get_subtype_counts(db_session: Any, pos_type: str) -> Dict[str, Dict[str, in
 
 def build_category_data(
     pos_type: str,
-    enum_class: Any,
-    groups: Dict[str, List[str]],
     counts: Dict[str, Dict[str, int]],
 ) -> List[Dict[str, Any]]:
-    """Build category data structure for template rendering."""
+    """Build category data structure for template rendering.
+
+    The groups come from ``subtype_groups``, so every live subtype of this POS
+    is rendered under its own heading. This used to walk a hand-written list of
+    group memberships kept in this module, which had drifted: three noun
+    subtypes -- legal_document, legal_concept and geographic_place -- were fully
+    defined, issuing GUIDs, and appeared nowhere on the page.
+    """
     guid_prefixes = SUBTYPE_GUID_PREFIXES.get(pos_type, {})
     descriptions = SUBTYPE_DESCRIPTIONS.get(pos_type, {})
 
     grouped_data = []
-    for group_name, subtypes in groups.items():
+    for group_name, subtypes in subtype_groups(pos_type).items():
         group_items = []
         for subtype in subtypes:
             # Handle the special case where enum value might differ from GUID key
@@ -237,68 +131,25 @@ def list_categories() -> ResponseReturnValue:
     def sum_total_words(counts: Dict[str, Dict[str, int]]) -> int:
         return sum(c["total"] for c in counts.values())
 
-    # Build data for each POS type
-    categories = {
-        "noun": {
-            "title": "Noun Subtypes",
-            "icon": "bi-box",
-            "total_subtypes": len(NounSubtype),
-            "total_words": sum_total_words(noun_counts),
-            "groups": build_category_data("noun", NounSubtype, NOUN_GROUPS, noun_counts),
-        },
-        "verb": {
-            "title": "Verb Subtypes",
-            "icon": "bi-lightning",
-            "total_subtypes": len(VerbSubtype),
-            "total_words": sum_total_words(verb_counts),
-            "groups": build_category_data("verb", VerbSubtype, VERB_GROUPS, verb_counts),
-        },
-        "adjective": {
-            "title": "Adjective Subtypes",
-            "icon": "bi-palette",
-            "total_subtypes": len(AdjectiveSubtype),
-            "total_words": sum_total_words(adjective_counts),
-            "groups": build_category_data(
-                "adjective", AdjectiveSubtype, ADJECTIVE_GROUPS, adjective_counts
-            ),
-        },
-        "adverb": {
-            "title": "Adverb Subtypes",
-            "icon": "bi-speedometer2",
-            "total_subtypes": len(AdverbSubtype),
-            "total_words": sum_total_words(adverb_counts),
-            "groups": build_category_data("adverb", AdverbSubtype, ADVERB_GROUPS, adverb_counts),
-        },
-        "numeral": {
-            "title": "Numeral Subtypes",
-            "icon": "bi-123",
-            "total_subtypes": len(NumeralSubtype),
-            "total_words": sum_total_words(numeral_counts),
-            "groups": [
-                {
-                    "group_name": "Numerals",
-                    "items": [
-                        {
-                            "name": subtype.value,
-                            "display_name": subtype.value.replace("_", " ").title(),
-                            "description": SUBTYPE_DESCRIPTIONS.get("numeral", {}).get(
-                                subtype.value, ""
-                            ),
-                            "guid_prefix": SUBTYPE_GUID_PREFIXES.get("numeral", {}).get(
-                                subtype.value, ""
-                            ),
-                            "count": numeral_counts.get(
-                                subtype.value, {"total": 0, "categorized": 0}
-                            )["total"],
-                            "categorized_count": numeral_counts.get(
-                                subtype.value, {"total": 0, "categorized": 0}
-                            )["categorized"],
-                        }
-                        for subtype in NumeralSubtype
-                    ],
-                }
-            ],
-        },
+    # Build data for each POS type. Every POS is built the same way: the
+    # groups and their membership come from the subtype table, so a POS needs
+    # no per-POS listing here.
+    titles = {
+        "noun": ("Noun Subtypes", "bi-box", NounSubtype, noun_counts),
+        "verb": ("Verb Subtypes", "bi-lightning", VerbSubtype, verb_counts),
+        "adjective": ("Adjective Subtypes", "bi-palette", AdjectiveSubtype, adjective_counts),
+        "adverb": ("Adverb Subtypes", "bi-speedometer2", AdverbSubtype, adverb_counts),
+        "numeral": ("Numeral Subtypes", "bi-123", NumeralSubtype, numeral_counts),
+    }
+    categories: Dict[str, Dict[str, Any]] = {
+        pos_type: {
+            "title": title,
+            "icon": icon,
+            "total_subtypes": len(enum_class),
+            "total_words": sum_total_words(counts),
+            "groups": build_category_data(pos_type, counts),
+        }
+        for pos_type, (title, icon, enum_class, counts) in titles.items()
     }
 
     # Calculate totals
