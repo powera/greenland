@@ -37,10 +37,12 @@ Removed by hand from the mechanical top 500:
   (``African-American`` is capitalized in 137 of 137 occurrences,
   ``Anglo-Saxon`` in 29 of 29).  They are a coherent group and probably want
   their own treatment rather than being scattered through a vocabulary level.
-* ``jean-jacques`` and ``notre-dame`` -- a forename and a place, picked up as
-  compounds only because a hyphen joins them.
-* ``al-din``, ``ad-din``, ``al-andalus``, ``al-qaeda`` -- Arabic name particles
-  and proper nouns.
+* ``jean-jacques``, ``jean-baptiste``, ``jean-paul``, ``jean-pierre``,
+  ``jean-luc``, ``jean-fran`` (a truncated "Jean-François") and ``notre-dame``
+  -- forenames and a place, picked up as compounds only because a hyphen joins
+  them.  ``kai-shek`` is the same case, the tail of a transliterated full name.
+* ``al-din``, ``ad-din``, ``al-andalus``, ``al-qaeda``, ``al-malik`` -- Arabic
+  name particles and proper nouns.
 * ``wiley-blackwell`` -- a publisher, from Wikipedia citations.
 * ``blu-ray`` and ``wi-fi`` -- brand names, capitalized in ordinary use.
 * ``to-day``, ``to-morrow``, ``to-night`` -- the 19th-century hyphenation of
@@ -169,7 +171,6 @@ WORDS: Sequence[str] = (
     "old-fashioned",  # 219 docs, 477 uses
     "high-level",  # 216 docs, 340 uses
     "long-time",  # 215 docs, 240 uses
-    "jean-baptiste",  # 214 docs, 291 uses
     "wide-ranging",  # 214 docs, 243 uses
     "two-dimensional",  # 212 docs, 333 uses
     "full-length",  # 211 docs, 274 uses
@@ -250,7 +251,6 @@ WORDS: Sequence[str] = (
     "proto-germanic",  # 133 docs, 255 uses
     "non-zero",  # 133 docs, 219 uses
     "first-class",  # 131 docs, 271 uses
-    "jean-paul",  # 131 docs, 211 uses
     "stand-alone",  # 131 docs, 161 uses
     "make-up",  # 130 docs, 185 uses
     "high-rise",  # 129 docs, 284 uses
@@ -300,7 +300,6 @@ WORDS: Sequence[str] = (
     "ever-increasing",  # 111 docs, 118 uses
     "one-to-one",  # 110 docs, 145 uses
     "long-established",  # 110 docs, 121 uses
-    "jean-pierre",  # 108 docs, 150 uses
     "state-sponsored",  # 108 docs, 134 uses
     "one-time",  # 108 docs, 122 uses
     "self-proclaimed",  # 108 docs, 118 uses
@@ -356,7 +355,6 @@ WORDS: Sequence[str] = (
     "high-frequency",  # 94 docs, 138 uses
     "government-owned",  # 94 docs, 121 uses
     "world-class",  # 94 docs, 104 uses
-    "jean-fran",  # 93 docs, 131 uses
     "post-colonial",  # 93 docs, 113 uses
     "seven-year",  # 93 docs, 107 uses
     "non-violent",  # 92 docs, 133 uses
@@ -459,7 +457,6 @@ WORDS: Sequence[str] = (
     "low-density",  # 73 docs, 91 uses
     "night-time",  # 73 docs, 88 uses
     "self-imposed",  # 73 docs, 76 uses
-    "kai-shek",  # 72 docs, 234 uses
     "third-person",  # 72 docs, 147 uses
     "word-final",  # 72 docs, 133 uses
     "free-living",  # 72 docs, 127 uses
@@ -553,7 +550,6 @@ WORDS: Sequence[str] = (
     "evidence-based",  # 63 docs, 128 uses
     "full-grown",  # 63 docs, 126 uses
     "take-off",  # 63 docs, 114 uses
-    "jean-luc",  # 63 docs, 103 uses
     "self-identified",  # 63 docs, 75 uses
     "re-establishing",  # 63 docs, 69 uses
     "full-blown",  # 63 docs, 68 uses
@@ -577,7 +573,6 @@ WORDS: Sequence[str] = (
     "anti-fascist",  # 61 docs, 81 uses
     "prentice-hall",  # 61 docs, 68 uses
     "number-one",  # 60 docs, 246 uses
-    "al-malik",  # 60 docs, 194 uses
     "role-playing",  # 60 docs, 170 uses
     "self-propelled",  # 60 docs, 131 uses
     "cease-fire",  # 60 docs, 107 uses
