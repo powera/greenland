@@ -47,7 +47,8 @@ intentionally excluded.
 #### Vilkas (Wolf)
 - **Animal**: Wolf
 - **Purpose**: Multi-language word forms checker - "watchful guardian of word database"
-- **Dependencies**: Voras (needs translations to generate forms)
+- **Dependencies**: Voras (needs translations to generate forms); Lape for English
+  verbs (needs stored past and past-participle principal parts)
 - **Outputs**: Derivative forms for words (conjugations, declensions, plural forms, etc.)
 - **Key Functions**:
   - Generate word forms for multiple languages
@@ -62,6 +63,7 @@ intentionally excluded.
 - **Key Functions**:
   - Generate Chinese measure words/classifiers
   - Determine grammatical gender (French, Spanish, German, Lithuanian, etc.)
+  - Generate and store English past and past-participle principal parts as one task
   - Extensible for other grammar fact types
 
 #### Šernas (Boar)
@@ -226,8 +228,8 @@ bootstrap_database.py
 ### Phase 2: Core Enrichment (mostly parallel)
 ```
 Bootstrapped database → Voras (Translations)
-  ├→ Vilkas (Word Forms)
-  ├→ Lape (Grammar Facts)
+  ├→ Lape (Grammar Facts) → Vilkas (English Verb Forms)
+  ├→ Vilkas (Other Word Forms)
   ├→ Šernas (Synonyms)
   └→ Buivolas (Discover Sentence Example Work)
 ```

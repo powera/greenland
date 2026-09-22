@@ -92,3 +92,25 @@ class TestEnglishMechanicalLlmForms(unittest.TestCase):
         self.assertEqual(forms["3p_past"], "taught")
         mock_query_forms.assert_not_called()
         mock_log_query.assert_called_once()
+
+    def test_sense_specific_facts_override_spelling_keyed_irregular_table(self) -> None:
+        lemma = SimpleNamespace(id=1, pos_type="verb", lemma_text="hang")
+        client = cast(Any, SimpleNamespace(default_model="fake-model"))
+
+        def get_fact(
+            _session: object, _lemma_id: int, _language_code: str, fact_type: str
+        ) -> str | None:
+            return {"past": "hanged", "past_participle": "hanged"}.get(fact_type)
+
+        with (
+            patch("langtools.en.llm_forms.get_grammar_fact_value", side_effect=get_fact),
+            patch("langtools.en.llm_forms.query_forms") as mock_query_forms,
+            patch("langtools.en.llm_forms.linguistic_db.log_query"),
+        ):
+            get_session = cast(Callable[[], Any], lambda: _FakeSession(lemma))
+            forms, ok = query_english_verb_forms(client, 1, get_session)
+
+        self.assertTrue(ok)
+        self.assertEqual(forms["1s_past"], "hanged")
+        self.assertEqual(forms["past_participle"], "hanged")
+        mock_query_forms.assert_not_called()

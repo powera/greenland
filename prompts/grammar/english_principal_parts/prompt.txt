@@ -1,0 +1,5 @@
+Generate the simple past and past participle for this English verb.
+
+Verb: {verb}
+Definition: {definition}
+Disambiguation: {disambiguation}

@@ -21,6 +21,12 @@ from words.grammar_fact_tasks import (
     verb_reflexivity,
     verb_transitivity,
 )
+from words.grammar_fact_tasks.english_principal_parts import (
+    ENGLISH_PRINCIPAL_PARTS_TASK,
+    PRINCIPAL_PART_FACT_TYPES,
+    generate_and_store_english_principal_parts,
+    principal_parts_coverage,
+)
 from storage.backend import create_session as create_backend_session
 from storage.backend.config import BackendType, DataSourceConfig
 from storage.config.grammar_fact_registry import legacy_supported_fact_types
@@ -129,6 +135,12 @@ class GrammarFactService:
 
     # Supported fact types and their required parameters.
     SUPPORTED_FACT_TYPES = legacy_supported_fact_types()
+    COMPOUND_FACT_TASKS = {
+        ENGLISH_PRINCIPAL_PARTS_TASK: {
+            "languages": ["en"],
+            "required_pos": ["verb"],
+        },
+    }
 
     # Grouped task presets mapping to multiple fact types
     TASK_PRESETS = {
@@ -138,7 +150,15 @@ class GrammarFactService:
         "fanciful-collectives": ["fanciful_collective"],
         "nouns": ["grammatical_gender", "countability", "animacy", "declension_class"],
         "verbs": ["verb_transitivity", "verb_reflexivity", "auxiliary_verb"],
+        "english-principal-parts": [ENGLISH_PRINCIPAL_PARTS_TASK],
     }
+
+    @classmethod
+    def get_fact_config(cls, fact_type: str) -> Dict[str, Any]:
+        """Return configuration for a scalar fact or compound fact task."""
+        if fact_type in cls.COMPOUND_FACT_TASKS:
+            return cls.COMPOUND_FACT_TASKS[fact_type]
+        return cls.SUPPORTED_FACT_TYPES[fact_type]
 
     def __init__(self, config: DataSourceConfig):
         """
@@ -337,6 +357,19 @@ class GrammarFactService:
         Returns:
             Dictionary with generation results
         """
+        if fact_type == ENGLISH_PRINCIPAL_PARTS_TASK and language_code != "en":
+            raise ValueError("english_principal_parts only supports language 'en'")
+        if language_code == "en" and (
+            fact_type == ENGLISH_PRINCIPAL_PARTS_TASK or fact_type in PRINCIPAL_PART_FACT_TYPES
+        ):
+            return self.generate_english_principal_parts_for_lemmas(
+                lemmas=lemmas,
+                limit=limit,
+                skip_existing=skip_existing,
+                min_confidence=min_confidence,
+                dry_run=dry_run,
+            )
+
         # Validate fact type
         if fact_type not in self.SUPPORTED_FACT_TYPES:
             raise ValueError(
@@ -488,3 +521,60 @@ class GrammarFactService:
         finally:
             if session:
                 session.close()
+
+    def generate_english_principal_parts_for_lemmas(
+        self,
+        *,
+        lemmas: Optional[List[Lemma]],
+        limit: Optional[int] = None,
+        skip_existing: bool = True,
+        min_confidence: float = 0.7,
+        dry_run: bool = False,
+    ) -> Dict[str, Any]:
+        """Generate the paired English verb principal parts for selected lemmas."""
+        selected = [lemma for lemma in (lemmas or []) if lemma.pos_type == "verb"]
+        session = self.get_session()
+        processed = 0
+        success = 0
+        failed = 0
+        skipped = 0
+        results: List[Dict[str, Any]] = []
+        try:
+            for selected_lemma in selected:
+                if limit is not None and processed >= limit:
+                    break
+                lemma = session.get(Lemma, selected_lemma.id)
+                if lemma is None:
+                    skipped += 1
+                    continue
+                if skip_existing and all(principal_parts_coverage(session, lemma).values()):
+                    skipped += 1
+                    continue
+                processed += 1
+                result = generate_and_store_english_principal_parts(
+                    self,
+                    session,
+                    lemma,
+                    min_confidence=min_confidence,
+                    skip_existing=skip_existing,
+                    dry_run=dry_run,
+                )
+                if result.get("error"):
+                    failed += 1
+                elif result.get("skipped"):
+                    skipped += 1
+                else:
+                    success += 1
+                    results.append(result)
+            return {
+                "fact_type": ENGLISH_PRINCIPAL_PARTS_TASK,
+                "language_code": "en",
+                "processed": processed,
+                "success": success,
+                "failed": failed,
+                "skipped": skipped,
+                "results": results,
+                "dry_run": dry_run,
+            }
+        finally:
+            session.close()

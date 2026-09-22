@@ -22,6 +22,7 @@ Noun facts:
   most animals have none, and no term is a valid result
 
 Verb facts:
+- english_principal_parts (English): Generate past and past participle together
 - verb_transitivity (English): Classify as transitive, intransitive, ditransitive, or ambitransitive
 - verb_reflexivity (French, Spanish, German, Lithuanian, Italian): Identify reflexive verbs
 - auxiliary_verb (French, German, Italian): Which auxiliary verb is used in compound tenses

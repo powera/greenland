@@ -318,7 +318,11 @@ def build_for_lemma_with_metadata(
         # stored past would get a wrong regular one, so require the facts.
         if not past or not past_participle:
             return None, {}
-        return expand_verb_forms(base_forms), {}
+        paradigm = expand_verb_forms(base_forms)
+        # The full conjugator exposes person-specific past keys, while this
+        # compact storage task keeps one representative simple-past slot.
+        paradigm["past"] = past
+        return paradigm, {}
 
     return None, {}
 
