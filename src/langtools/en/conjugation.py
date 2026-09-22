@@ -286,7 +286,21 @@ def expand_verb_forms(
 
     # Check for hard-coded irregular verbs first.
     if infinitive.lower() in IRREGULAR_CONJUGATIONS:
-        return dict(IRREGULAR_CONJUGATIONS[infinitive.lower()])
+        irregular_result = dict(IRREGULAR_CONJUGATIONS[infinitive.lower()])
+        # Stored principal parts are sense-specific and therefore outrank the
+        # spelling-keyed fallback table (hang/hanged for execution versus
+        # hang/hung for suspension). "Be" is the exception: one scalar past
+        # fact cannot encode its was/were person split, so retain that table.
+        if past and infinitive.lower() != "be":
+            for person in ("1s", "2s", "3s", "1p", "2p", "3p"):
+                irregular_result[f"{person}_past"] = past
+        if past_part:
+            irregular_result["past_participle"] = past_part
+        if third_sg:
+            irregular_result["3s_present"] = third_sg
+        if pres_part:
+            irregular_result["present_participle"] = pres_part
+        return irregular_result
 
     # Generate 3s_present and present_participle from the infinitive when
     # not explicitly provided.

@@ -19,13 +19,14 @@ in", not "may we drop it".
 The pair is orthogonal, and three of the four quadrants are occupied::
 
                      GENERATED=no                  GENERATED=yes
-    EXPORTED=yes     infinitive, plural, past,     grammatical_gender,
+    EXPORTED=yes     infinitive, plural,           grammatical_gender,
                      past_participle, comparative, countability, animacy,
                      superlative, feminine_form,   verb_transitivity,
                      number_type, gradability,     verb_reflexivity,
                      1s_*/3s_*/3p_* principal parts auxiliary_verb,
                                                    measure_words,
-                                                   fanciful_collective
+                                                   fanciful_collective,
+                                                   past
     EXPORTED=no      -- must stay empty --         declension_class
 
 The bottom-left quadrant has to stay empty, and the test enforces it: a fact
@@ -279,7 +280,8 @@ GRAMMAR_FACT_DEFINITIONS: Dict[str, GrammarFactDefinition] = {
         languages=("en",),
         required_pos=("verb",),
         display_label="Past",
-        description="English irregular simple past principal part",
+        description="Required English simple past principal part",
+        generatable=True,
     ),
     "past_participle": GrammarFactDefinition(
         fact_type="past_participle",
@@ -287,8 +289,8 @@ GRAMMAR_FACT_DEFINITIONS: Dict[str, GrammarFactDefinition] = {
         required_pos=("verb",),
         display_label="Past Participle",
         description=(
-            "Irregular or non-derivable past participle principal part; for Swedish, "
-            "stores the generator-required perfect-form principal part"
+            "Required English past participle principal part; for other languages, "
+            "stores an irregular or generator-required perfect-form principal part"
         ),
     ),
     "feminine_form": GrammarFactDefinition(
@@ -340,10 +342,13 @@ EXPORTED_FACT_TYPES: Tuple[str, ...] = (
     "1s_present",  # it
     "1s_past",  # it
     "1s_future",  # it
+    # English principal parts are generated once by Lape and then consumed by
+    # the mechanical form builder. They are stored for regular verbs too: the
+    # database, not a spelling guess, is the durable input to conjugation.
+    "past",
+    "past_participle",
     # Overrides. These exist *because* the mechanical rule is wrong here.
     "plural",  # irregular noun plural
-    "past",  # en irregular simple past
-    "past_participle",  # irregular participle
     "feminine_form",  # fr irregular feminine adjective
     "comparative",  # irregular comparative
     "superlative",  # irregular superlative

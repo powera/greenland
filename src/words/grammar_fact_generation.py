@@ -20,6 +20,11 @@ from storage.crud.grammar_fact import add_grammar_fact, get_grammar_fact_value
 from storage.crud.operation_log import log_operation
 from storage.models.schema import Lemma
 from storage.translation_helpers import get_translation
+from words.grammar_fact_tasks.english_principal_parts import (
+    ENGLISH_PRINCIPAL_PARTS_TASK,
+    PRINCIPAL_PART_FACT_TYPES,
+    generate_and_store_english_principal_parts,
+)
 
 logger = logging.getLogger(__name__)
 
@@ -290,6 +295,27 @@ def generate_grammar_fact_for_lemma(
     """
     if config is None:
         config = build_default_config()
+
+    if fact_type == ENGLISH_PRINCIPAL_PARTS_TASK and language_code != "en":
+        return {
+            "error": "english_principal_parts only supports language 'en'",
+            "lemma_id": lemma.id,
+            "fact_type": fact_type,
+            "language_code": language_code,
+        }
+    if language_code == "en" and (
+        fact_type == ENGLISH_PRINCIPAL_PARTS_TASK or fact_type in PRINCIPAL_PART_FACT_TYPES
+    ):
+        from words.grammar_facts import GrammarFactService
+
+        service = GrammarFactService(config=config)
+        return generate_and_store_english_principal_parts(
+            service,
+            session,
+            lemma,
+            min_confidence=min_confidence,
+            skip_existing=skip_existing,
+        )
 
     # Check if fact already exists
     if skip_existing:

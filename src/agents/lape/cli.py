@@ -25,6 +25,11 @@ from agents.common.common_args import (
     get_data_source_config,
 )
 from words.grammar_facts import GrammarFactService
+from words.grammar_fact_tasks.english_principal_parts import (
+    ENGLISH_PRINCIPAL_PARTS_TASK,
+    PRINCIPAL_PART_FACT_TYPES,
+    principal_parts_coverage,
+)
 from words.lemma_selection import get_lemmas_for_agent
 from workqueue.task_queue import TaskStatus, TaskType, enqueue_task, get_active_task
 from storage.models.schema import BarsukasTask
@@ -56,6 +61,9 @@ Examples:
 
   # Generate ornamental English animal collectives (a murder of crows)
   python lape.py --fact-type fanciful_collective --languages en --limit 10
+
+  # Generate English past and past participle together
+  python lape.py --task english-principal-parts --languages en --limit 10
 
   # Generate for a single lemma by GUID
   python lape.py --fact-type grammatical_gender --languages fr --guid N14_001
@@ -89,8 +97,9 @@ Supported fact types:
   one of the others writes data that ships, so a rerun is not free.
 
   Facts that ship but no agent generates (hand-curated overrides): irregular plural,
-  number_type, English past, past_participle, French feminine_form, comparative,
-  superlative, gradability, and the Lithuanian/Italian principal parts.
+  number_type, French feminine_form, comparative, superlative, gradability, and
+  the Lithuanian/Italian principal parts. English past and past_participle are
+  generated together by the english-principal-parts task.
 
 Task presets:
   - all: All fact types
@@ -99,6 +108,7 @@ Task presets:
   - fanciful-collectives: fanciful_collective only
   - nouns: grammatical_gender, countability, animacy, declension_class
   - verbs: verb_transitivity, verb_reflexivity, auxiliary_verb
+  - english-principal-parts: English past + past_participle in one model call
         """,
     )
 
@@ -195,7 +205,7 @@ def enqueue_grammar_fact_work(
 
     for language_code, fact_types in fact_types_by_language.items():
         for fact_type in fact_types:
-            fact_config = GrammarFactService.SUPPORTED_FACT_TYPES[fact_type]
+            fact_config = GrammarFactService.get_fact_config(fact_type)
             required_pos = fact_config["required_pos"]
 
             for lemma in lemmas:
@@ -298,13 +308,20 @@ def main() -> None:
     else:
         fact_types_to_run = GrammarFactService.TASK_PRESETS[args.task]
 
+    if ENGLISH_PRINCIPAL_PARTS_TASK in fact_types_to_run:
+        if args.pos_type not in (None, "verb"):
+            parser.error("english-principal-parts only applies to --pos-type verb")
+        # Apply the POS filter before the shared lemma selector applies --limit;
+        # otherwise a small batch can be consumed entirely by non-verbs.
+        args.pos_type = "verb"
+
     # Build fact_types_by_language map
     fact_types_by_language = {}
     for language_code in languages:
         applicable_fact_types = [
             fact_type
             for fact_type in fact_types_to_run
-            if language_code in GrammarFactService.SUPPORTED_FACT_TYPES[fact_type]["languages"]
+            if language_code in GrammarFactService.get_fact_config(fact_type)["languages"]
         ]
 
         if explicit_fact_type and not applicable_fact_types:
@@ -354,7 +371,7 @@ def main() -> None:
         try:
             for language_code, applicable_fact_types in fact_types_by_language.items():
                 for fact_type in applicable_fact_types:
-                    fact_config = GrammarFactService.SUPPORTED_FACT_TYPES[fact_type]
+                    fact_config = GrammarFactService.get_fact_config(fact_type)
                     required_pos = fact_config["required_pos"]
 
                     # Filter lemmas by POS type
@@ -363,6 +380,12 @@ def main() -> None:
                     # Count missing
                     missing_count = 0
                     for lemma in matching_lemmas:
+                        if fact_type == ENGLISH_PRINCIPAL_PARTS_TASK or fact_type in (
+                            PRINCIPAL_PART_FACT_TYPES
+                        ):
+                            if not all(principal_parts_coverage(session, lemma).values()):
+                                missing_count += 1
+                            continue
                         existing = get_grammar_fact_value(
                             session, lemma.id, language_code, fact_type
                         )

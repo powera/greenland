@@ -335,12 +335,12 @@ WORD_CAPABILITIES: Tuple[CapabilityDescriptor, ...] = (
     ),
     CapabilityDescriptor(
         task_type="words.grammar_facts",
-        summary="Generate one grammar fact for one lemma and language.",
+        summary="Generate a grammar fact or an atomic fact bundle for one lemma and language.",
         target_kind="lemma",
         required_payload=("lemma_id", "language_code", "fact_type"),
         optional_payload=("model",),
         writes=True,
-        produces=("a grammar fact in the requested language",),
+        produces=("one grammar fact, or a paired principal-parts bundle",),
         preconditions=("the lemma matches the grammar fact's part of speech",),
     ),
 )
