@@ -93,6 +93,10 @@ class ResolveOutputTokensTestCase(unittest.TestCase):
     def test_unknown_model_falls_back_to_the_default_ceiling(self) -> None:
         self.assertEqual(lib.ceiling_for_model("some-new-model"), lib.DEFAULT_OUTPUT_CEILING)
 
+    def test_gpt6_has_a_real_ceiling(self) -> None:
+        """gpt-6-* does not match the "gpt-5" key, so it needs its own entry."""
+        self.assertGreater(lib.ceiling_for_model("gpt-6-luna"), lib.DEFAULT_OUTPUT_CEILING)
+
     def test_default_pipeline_model_has_a_real_ceiling(self) -> None:
         """Catches a model rename quietly dropping the pipeline to the fallback."""
         from sentences.translate_and_decompose import DEFAULT_MODEL

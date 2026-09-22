@@ -36,21 +36,21 @@ F = TypeVar("F", bound=Callable[..., Any])
 def is_gpt5_nano_or_mini_model(model: str) -> bool:
     """Return whether the model is a GPT-5 cheap-tier (nano/mini-class) variant.
 
-    gpt-5.6-luna is mini-class on price and performance despite not carrying a
-    "-mini" suffix, so it is matched explicitly.
+    gpt-5.6-luna and gpt-6-luna are mini-class on price and performance despite
+    not carrying a "-mini" suffix, so they are matched explicitly.
     """
-    if model.startswith("gpt-5.6-luna"):
+    if model.startswith(("gpt-5.6-luna", "gpt-6-luna")):
         return True
     return model.startswith("gpt-5") and (model.endswith("-nano") or model.endswith("-mini"))
 
 
 # Valid reasoning effort values by model family.
-# gpt-5.4-* and gpt-5.6-luna support: "none", "low", "medium", "high"
+# gpt-5.4-*, gpt-5.6-luna and gpt-6-luna support: "none", "low", "medium", "high"
 # Other reasoning models (o1, o3, gpt-5.x non-5.4) support: "minimal", "low", "medium", "high"
 _GPT54_VALID_EFFORTS = frozenset(["none", "low", "medium", "high"])
 _DEFAULT_VALID_EFFORTS = frozenset(["minimal", "low", "medium", "high"])
 
-# gpt-5.6-luna additionally accepts "xhigh" and "max" at the API level, but this
+# The luna models additionally accept "xhigh" and "max" at the API level, but this
 # product deliberately does not use them: they are rejected rather than clamped
 # down to "high" so a caller asking for more reasoning fails loudly instead of
 # silently getting less than it requested.
@@ -59,13 +59,13 @@ _DISALLOWED_EFFORTS = frozenset(["xhigh", "max"])
 
 def _uses_gpt54_effort_scale(model: str) -> bool:
     """Return whether the model uses the gpt-5.4-style effort scale (supports "none")."""
-    return model.startswith("gpt-5.4") or model.startswith("gpt-5.6-luna")
+    return model.startswith(("gpt-5.4", "gpt-5.6-luna", "gpt-6-luna"))
 
 
 def reasoning_effort_for_model(model: str, requested_effort: str) -> Optional[str]:
     """Return the appropriate reasoning effort string for a model, or None to omit reasoning.
 
-    gpt-5.4-series and gpt-5.6-luna support "none" (disables reasoning), "low",
+    gpt-5.4-series and the luna models support "none" (disables reasoning), "low",
     "medium", "high"; "minimal" is mapped to "low" for them.
     Other models support "minimal", "low", "medium", "high".
     Returns None if effort is "none" for models without a "none" level
@@ -215,8 +215,8 @@ class OpenAIClient:
             logger.debug("Context: %s", context)
             logger.debug("JSON schema: %s", json_schema)
 
-        # gpt-5 models don't support custom temperature (only default value of 1)
-        is_gpt5_model = model.startswith("gpt-5")
+        # gpt-5 and gpt-6 models don't support custom temperature (only default value of 1)
+        is_gpt5_model = model.startswith(("gpt-5", "gpt-6"))
         is_gpt5_nano_or_mini = is_gpt5_nano_or_mini_model(model)
 
         token_limit = clients.lib.resolve_output_tokens(

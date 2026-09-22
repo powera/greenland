@@ -51,6 +51,14 @@ class ReasoningEffortTestCase(unittest.TestCase):
             with self.assertRaises(ValueError):
                 reasoning_effort_for_model("gpt-5.6-luna", effort)
 
+    def test_gpt6_luna_uses_luna_scale(self) -> None:
+        """gpt-6-luna shares 5.6-luna's scale: 'none' allowed, 'minimal' -> 'low'."""
+        self.assertEqual(reasoning_effort_for_model("gpt-6-luna", "none"), "none")
+        self.assertEqual(reasoning_effort_for_model("gpt-6-luna", "minimal"), "low")
+        for effort in ("xhigh", "max"):
+            with self.assertRaises(ValueError):
+                reasoning_effort_for_model("gpt-6-luna", effort)
+
     def test_xhigh_rejected_for_all_models(self) -> None:
         """The xhigh/max ban is product-wide, not Luna-specific."""
         with self.assertRaises(ValueError):
@@ -75,6 +83,10 @@ class IsGpt5NanoOrMiniTestCase(unittest.TestCase):
     def test_luna_is_cheap_tier(self) -> None:
         """gpt-5.6-luna is mini-class despite lacking a -mini suffix."""
         self.assertTrue(is_gpt5_nano_or_mini_model("gpt-5.6-luna"))
+
+    def test_gpt6_luna_is_cheap_tier(self) -> None:
+        """gpt-6-luna is matched despite not starting with "gpt-5"."""
+        self.assertTrue(is_gpt5_nano_or_mini_model("gpt-6-luna"))
 
     def test_gpt5_full(self) -> None:
         self.assertFalse(is_gpt5_nano_or_mini_model("gpt-5"))

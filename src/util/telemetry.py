@@ -28,6 +28,7 @@ class ModelTier(Enum):
     GPT_54_NANO = auto()  # gpt-5.4-nano models
     GPT_54_MINI = auto()  # gpt-5.4-mini models
     GPT_56_LUNA = auto()  # gpt-5.6-luna models
+    GPT_6_LUNA = auto()  # gpt-6-luna models
 
     # Anthropic models
     CLAUDE_HAIKU = auto()  # claude-3-5-haiku models
@@ -65,6 +66,8 @@ class CostConfig:
         ModelTier.GPT_54_MINI: {"input": 0.75, "output": 4.50},
         # Short-context rates; long-context is $2.00 in / $9.00 out.
         ModelTier.GPT_56_LUNA: {"input": 1.00, "output": 6.00},
+        # Short-context rates; over 272K input is 2x input and 1.5x output.
+        ModelTier.GPT_6_LUNA: {"input": 0.10, "output": 0.50},
     }
 
     # Anthropic costs per million tokens
@@ -138,6 +141,8 @@ class CostConfig:
             return ModelTier.GPT_41_MINI
         elif "gpt-4o" in model_lower:
             return ModelTier.GPT4
+        elif "gpt-6-luna" in model_lower:
+            return ModelTier.GPT_6_LUNA
         elif "gpt-5.6-luna" in model_lower:
             return ModelTier.GPT_56_LUNA
         elif "gpt-5.4-nano" in model_lower:
