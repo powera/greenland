@@ -99,7 +99,7 @@ WORDS: Sequence[str] = (
     "wifi",
     "wonderful",
     # Health
-    # YLE sense hint "chemist’s" -- the UK pharmacy, not the scientist.
+    # YLE prints "chemist('s)" -- the UK pharmacy, not the scientist.
     "chemist",
     "x-ray",
     # Numbers
