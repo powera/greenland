@@ -53,6 +53,7 @@ DEFAULT_BRIEF_TOKENS: int = 512
 # match them and each DO id shape needs its own entry.
 MODEL_OUTPUT_CEILINGS: Dict[str, int] = {
     "gpt-5": 32768,
+    "gpt-6": 32768,
     "gpt-4o": 16384,
     "claude": 16384,
     "gemini": 8192,
