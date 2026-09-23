@@ -60,13 +60,15 @@ from storage.utils.guid import generate_guid
 from wordfreq.translation.constants import MAJOR_POS_TYPES, VALID_POS_TYPES
 from wordfreq.translation.word_processing import determine_default_grammatical_form
 from words.add_word import (
-    TRANSLATION_LANGUAGES,
     _needs_subtype_review,
     _normalize_subtype,
-    _store_sense_examples,
-    _store_sense_translations,
     _validate_pos,
+)
+from words.lemma_creation import (
+    TRANSLATION_LANGUAGES,
     attach_english_base_form,
+    store_sense_examples,
+    store_sense_translations,
 )
 
 logger = logging.getLogger(__name__)
@@ -640,10 +642,10 @@ def add_sense(
         # A missing language is reported rather than fatal, as in add_term:
         # the sense is still worth having, and the gap is visible to the
         # translation coverage pass. A low-confidence one is left missing too.
-        stored = _store_sense_translations(
+        stored = store_sense_translations(
             session, new_lemma, confident_sense, source=source, model=config.model
         )
-        _store_sense_examples(session, new_lemma, sense, source=source)
+        store_sense_examples(session, new_lemma, sense, source=source)
         attach_english_base_form(session, new_lemma, sense, source=source)
         _add_abbreviation(session, new_lemma, abbreviation, source=source)
         if requested_tags:
