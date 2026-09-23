@@ -19,6 +19,8 @@
                             <label for="gen_tts_engine" class="form-label">TTS Engine <span class="text-danger">*</span></label>
                             <select class="form-select" id="gen_tts_engine" name="tts_engine" required>
                                 <option value="openai">OpenAI (paid, high quality)</option>
+                                <option value="gemini-3.8-flash-tts">Gemini 3.8 Flash TTS (paid, highest quality)</option>
+                                <option value="gemini-3.8-flash-lite-tts">Gemini 3.8 Flash-Lite TTS (paid, high volume)</option>
                                 <option value="espeak-ng">eSpeak-NG (free, synthetic)</option>
                                 <option value="polly">Amazon Polly (paid, neural)</option>
                                 <option value="azure">Azure Cognitive TTS (paid, neural)</option>
@@ -135,6 +137,7 @@ document.addEventListener('DOMContentLoaded', function() {
         pollyVoices: {{ polly_voices|tojson }},
         azureVoices: {{ azure_voices|tojson }},
         googleVoices: {{ google_voices|tojson }},
+        geminiVoices: {{ gemini_voices|tojson }},
         piperVoices: {},
         coquiVoices: {},
         qwen3Voices: {}

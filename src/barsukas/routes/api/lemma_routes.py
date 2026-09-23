@@ -16,6 +16,7 @@ from typing import Any, Dict, List, Optional, Tuple, Union
 from barsukas.config import Config
 from barsukas.routes._mirror import mirrored_facade
 from clients.audio.azure_tts import AzureVoice
+from clients.audio.gemini_tts import GEMINI_TTS_MODELS, GeminiTtsVoice
 from clients.audio.google_tts import GoogleTtsVoice
 from clients.audio.gpt_voices import GptVoice
 from clients.audio.polly_tts import PollyVoice
@@ -2160,6 +2161,15 @@ def list_audio_voices() -> ResponseReturnValue:
                 language_code,
                 getattr(google_voice, "gender", None),
             )
+        for gemini_model in GEMINI_TTS_MODELS:
+            for gemini_voice in GeminiTtsVoice.get_voices_for_language(language_code, gemini_model):
+                append_voice(
+                    gemini_voice.storage_name(gemini_model),
+                    f"{gemini_voice.voice_name} — {gemini_voice.description}",
+                    gemini_model,
+                    language_code,
+                    gemini_voice.gender,
+                )
 
     return _build_success_response(
         voice_entries, {"language": language_filter, "total": len(voice_entries)}

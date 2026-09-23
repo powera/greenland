@@ -49,6 +49,11 @@ from words.lemma_selection import (
 )
 from clients.audio import AudioFormat, AudioGenerationResult, Voice, generate_audio
 from clients.audio.azure_tts import AzureTTSClient, AzureVoice
+from clients.audio.gemini_tts import (
+    GEMINI_TTS_MODELS,
+    GeminiTTSClient,
+    GeminiTtsVoice,
+)
 from clients.audio.google_tts import GoogleTTSClient, GoogleTtsVoice
 from clients.audio.gpt_voices import (
     DEFAULT_GPT_VOICES,
@@ -956,6 +961,27 @@ class VieversysAgent:
                 language_code=language_code,
             )
 
+        elif self.tts_engine in GEMINI_TTS_MODELS:
+            client_gemini = GeminiTTSClient(debug=self.debug)
+            gemini_voice = GeminiTtsVoice.from_identifier(voice_name)
+            if not gemini_voice:
+                return AudioGenerationResult(
+                    audio_data=b"",
+                    text=text,
+                    voice=None,
+                    language_code=language_code,
+                    model=self.tts_engine,
+                    duration_ms=0,
+                    success=False,
+                    error=f"Unknown Gemini TTS voice: {voice_name}",
+                )
+            return client_gemini.generate_audio(
+                text=text,
+                voice=gemini_voice,
+                language_code=language_code,
+                model=self.tts_engine,
+            )
+
         else:
             return AudioGenerationResult(
                 audio_data=b"",
@@ -988,7 +1014,7 @@ class VieversysAgent:
             Dict with batch generation results
         """
         session = self.get_session()
-        use_cloud = self.tts_engine in ("polly", "azure", "google")
+        use_cloud = self.tts_engine in ("polly", "azure", "google", *GEMINI_TTS_MODELS)
 
         if not use_cloud:
             voices = voices or DEFAULT_GPT_VOICES.get(
@@ -1219,9 +1245,10 @@ def get_argument_parser() -> argparse.ArgumentParser:
     parser.add_argument("--output-dir", help="Output directory for generated audio")
     parser.add_argument(
         "--tts-engine",
-        choices=["openai", "polly", "azure", "google"],
+        choices=["openai", "polly", "azure", "google", *GEMINI_TTS_MODELS],
         default="openai",
-        help="TTS engine to use: openai (default), polly (Amazon Polly), azure (Azure Cognitive), google (Google Cloud TTS)",
+        help="TTS engine to use: openai (default), polly, azure, google, "
+        "gemini-3.8-flash-tts, or gemini-3.8-flash-lite-tts",
     )
     parser.add_argument(
         "--voices",
@@ -1278,6 +1305,11 @@ def _print_cloud_voices(engine: str) -> None:
             languages.setdefault(gv.language_code, []).append(
                 f"{gv.voice_name} ({gv.gender.upper()})"
             )
+    elif engine in GEMINI_TTS_MODELS:
+        for gemini_voice in GeminiTtsVoice:
+            languages.setdefault("multilingual", []).append(
+                f"{gemini_voice.storage_name(engine)} ({gemini_voice.gender.upper()})"
+            )
     else:
         return
 
@@ -1328,7 +1360,7 @@ def main() -> None:
     voices = None
     cloud_voice_names: Optional[List[str]] = None
 
-    if tts_engine in ("polly", "azure", "google"):
+    if tts_engine in ("polly", "azure", "google", *GEMINI_TTS_MODELS):
         # For cloud engines, voice names are passed as-is
         if args.voices:
             cloud_voice_names = args.voices
@@ -1344,6 +1376,11 @@ def main() -> None:
             elif tts_engine == "google":
                 defaults_g = GoogleTtsVoice.get_voices_for_language(lang)
                 cloud_voice_names = [v.name.lower() for v in defaults_g] if defaults_g else []
+            elif tts_engine in GEMINI_TTS_MODELS:
+                defaults_gemini = GeminiTtsVoice.get_voices_for_language(lang, tts_engine)
+                cloud_voice_names = [
+                    gemini_voice.storage_name(tts_engine) for gemini_voice in defaults_gemini[:2]
+                ]
 
             if not cloud_voice_names:
                 print(f"Error: No {tts_engine} voices available for language '{lang}'")

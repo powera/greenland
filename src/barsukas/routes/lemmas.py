@@ -14,6 +14,7 @@ from audioshoe.espeak.types import EspeakVoice
 from audioshoe.piper.types import PiperVoice
 from audioshoe.qwen.types import QwenVoice
 from clients.audio.azure_tts import AzureVoice
+from clients.audio.gemini_tts import GEMINI_TTS_MODELS, GeminiTtsVoice
 from clients.audio.google_tts import GoogleTtsVoice
 from clients.audio.polly_tts import PollyVoice
 from barsukas.helpers.elements import group_language_values
@@ -680,6 +681,9 @@ def _build_voice_options(language_names: Dict[str, str]) -> Dict[str, Any]:
     polly_voices: Dict[str, List[Dict[str, Any]]] = {}
     azure_voices: Dict[str, List[Dict[str, Any]]] = {}
     google_voices: Dict[str, List[Dict[str, Any]]] = {}
+    gemini_voices: Dict[str, Dict[str, List[Dict[str, Any]]]] = {
+        model: {} for model in GEMINI_TTS_MODELS
+    }
     for lang_code in language_names.keys():
         espeak_voices[lang_code] = [
             {"name": v.name, "gender": v.gender}
@@ -709,6 +713,15 @@ def _build_voice_options(language_names: Dict[str, str]) -> Dict[str, Any]:
             {"name": v.name, "ui_name": v.ui_name, "gender": v.gender}
             for v in GoogleTtsVoice.get_voices_for_language(lang_code)
         ]
+        for model in GEMINI_TTS_MODELS:
+            gemini_voices[model][lang_code] = [
+                {
+                    "name": gemini_voice.storage_name(model),
+                    "ui_name": f"{gemini_voice.voice_name} — {gemini_voice.description}",
+                    "gender": gemini_voice.gender,
+                }
+                for gemini_voice in GeminiTtsVoice.get_voices_for_language(lang_code, model)
+            ]
 
     return {
         "openai_voices": openai_voices,
@@ -719,6 +732,7 @@ def _build_voice_options(language_names: Dict[str, str]) -> Dict[str, Any]:
         "polly_voices": polly_voices,
         "azure_voices": azure_voices,
         "google_voices": google_voices,
+        "gemini_voices": gemini_voices,
     }
 
 
