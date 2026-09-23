@@ -3,12 +3,14 @@
 
 Supports multiple TTS backends:
 - OpenAI TTS (gpt-4o-mini-tts)
+- Gemini 3.8 TTS
 - Amazon Polly (Neural)
 - Azure Cognitive Services TTS
 - Google Cloud Text-to-Speech
 """
 
 from .azure_tts import AzureTTSClient, AzureVoice
+from clients.audio.gemini_tts import GeminiTTSClient, GeminiTtsVoice
 from .google_tts import GoogleTTSClient, GoogleTtsVoice
 from .openai_tts import OpenAITTSClient, generate_audio
 from .polly_tts import PollyTTSClient, PollyVoice
@@ -30,4 +32,6 @@ __all__ = [
     "AzureVoice",
     "GoogleTTSClient",
     "GoogleTtsVoice",
+    "GeminiTTSClient",
+    "GeminiTtsVoice",
 ]
