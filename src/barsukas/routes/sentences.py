@@ -16,6 +16,7 @@ from audioshoe.espeak.types import EspeakVoice
 from audioshoe.piper.types import PiperVoice
 from audioshoe.qwen.types import QwenVoice
 from clients.audio.azure_tts import AzureVoice
+from clients.audio.gemini_tts import GEMINI_TTS_MODELS, GeminiTtsVoice
 from clients.audio.google_tts import GoogleTtsVoice
 from clients.audio.polly_tts import PollyVoice
 from barsukas.helpers.elements import group_language_values
@@ -514,6 +515,20 @@ def view_sentence(sentence_id: int) -> Union[str, Response]:
             {"name": v.name, "ui_name": v.ui_name, "gender": v.gender} for v in google_voice_list
         ]
 
+    gemini_voices: dict[str, dict[str, list[dict[str, Any]]]] = {
+        model: {} for model in GEMINI_TTS_MODELS
+    }
+    for model in GEMINI_TTS_MODELS:
+        for lang_code in language_names.keys():
+            gemini_voices[model][lang_code] = [
+                {
+                    "name": gemini_voice.storage_name(model),
+                    "ui_name": f"{gemini_voice.voice_name} — {gemini_voice.description}",
+                    "gender": gemini_voice.gender,
+                }
+                for gemini_voice in GeminiTtsVoice.get_voices_for_language(lang_code, model)
+            ]
+
     return render_template(
         "sentences/view.html",
         sentence=sentence,
@@ -540,6 +555,7 @@ def view_sentence(sentence_id: int) -> Union[str, Response]:
         polly_voices=polly_voices,
         azure_voices=azure_voices,
         google_voices=google_voices,
+        gemini_voices=gemini_voices,
     )
 
 

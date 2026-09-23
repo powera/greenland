@@ -67,6 +67,37 @@ def test_generate_post_creates_audio_for_selected_lemmas(
     assert rows[0].status == "pending_review"
 
 
+def test_generate_post_dispatches_gemini_38_tts(
+    client: FlaskClient, app: Flask, db_path: str, tmp_path: Any
+) -> None:
+    """Gemini model-qualified voices reach the Gemini TTS client and review storage."""
+    app.config["AUDIO_BASE_DIR"] = str(tmp_path / "audio")
+    gemini_client = MagicMock()
+    gemini_client.generate_audio.side_effect = _fake_audio
+
+    with patch("agents.vieversys.GeminiTTSClient", return_value=gemini_client):
+        response = client.post(
+            "/audio/generate",
+            data={
+                "language": "fr",
+                "tts_engine": "gemini-3.8-flash-tts",
+                "voices": ["gemini-3.8-flash-tts-kore"],
+            },
+            follow_redirects=False,
+        )
+
+    assert response.status_code == 302
+    assert gemini_client.generate_audio.call_count == 1
+    call_kwargs = gemini_client.generate_audio.call_args.kwargs
+    assert call_kwargs["text"] == "manger"
+    assert call_kwargs["language_code"] == "fr"
+    assert call_kwargs["model"] == "gemini-3.8-flash-tts"
+
+    rows = _review_rows(db_path)
+    assert len(rows) == 1
+    assert rows[0].voice_name == "gemini-3.8-flash-tts-kore"
+
+
 def test_generate_post_reports_when_no_lemmas_match(
     client: FlaskClient, app: Flask, db_path: str, tmp_path: Any
 ) -> None:
