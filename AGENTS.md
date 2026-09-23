@@ -14,6 +14,13 @@ updir imports (e.g., "from ..common_args import").
 database; if it will be useful also write the stdout/stderr to temp files.
 * Before "risky" local database changes, make a copy of the SQLITE database.  Include the date
 and a 10-20char explanation of the task; ie. linguistics.sqlite.bak-20260101-add-sentences
+The database runs in WAL mode: committed writes sit in linguistics.sqlite-wal until a
+checkpoint, often for days, so a plain `cp` of linguistics.sqlite silently copies a stale
+snapshot.  Back up with `sqlite3 data/wordfreq/linguistics.sqlite ".backup <dest>"` (or
+`VACUUM INTO`), which reads through the WAL and is safe while other clients (Barsukas, an
+agent) have the database open.  Restoring is the reverse hazard: only copy a backup over
+linguistics.sqlite with every client stopped, and delete the -wal and -shm files at the
+same time, or the old WAL is replayed onto the restored file.
 * Tests are in src/tests. Any changes to src/clients or src/storage/crud require
 tests.  Changes to src/barsukas should not have tests unless requested by the user.
 * Before creating a Git commit, always run black and mypy on modified Python files to ensure
