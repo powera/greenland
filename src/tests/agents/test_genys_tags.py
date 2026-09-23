@@ -146,22 +146,10 @@ def test_approval_carries_tags_onto_the_lemma() -> None:
         session.commit()
         pending_id = pending.id
 
-        # process_word() is the LLM-backed lemma creation; stand in for it by
-        # inserting the lemma the real path would have produced.
-        def fake_process_word(*args: Any, **kwargs: Any) -> bool:
-            session.add(
-                Lemma(
-                    lemma_text="probate",
-                    definition_text="the judicial process of validating a will",
-                    pos_type="noun",
-                    pos_subtype="process_event",
-                )
-            )
-            session.flush()
-            return True
-
+        # The row is staged with its POS and subtype, so approval creates the
+        # lemma from the staged values; LinguisticClient is patched so that a
+        # regression into the LLM branch fails rather than calls out.
         with (
-            patch("wordfreq.translation.word_processing.process_word", fake_process_word),
             patch.object(staging, "LinguisticClient"),
             patch.object(staging, "has_active_strong_synonym_candidate", return_value=False),
         ):
