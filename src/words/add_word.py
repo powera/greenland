@@ -72,7 +72,13 @@ from wordfreq.translation.definitions import (
     SENSE_PROMINENCE_ORDER,
     select_senses_to_add,
 )
-from wordfreq.translation.word_processing import determine_default_grammatical_form
+from words.lemma_creation import (
+    EXAMPLE_SENTENCE_COLLECTION,
+    MAX_EXAMPLES_PER_SENSE,
+    TRANSLATION_LANGUAGES,
+    UNSET_DIFFICULTY_LEVEL,
+    create_sense_lemma,
+)
 
 logger = logging.getLogger(__name__)
 
@@ -83,10 +89,7 @@ logger = logging.getLogger(__name__)
 # afterwards is what keeps the two steps atomic: a separate patch call can fail
 # after the lemma is committed, stranding it at -1 where the existence guard
 # counts it as done and no later run revisits it.
-DIFFICULTY_LEVEL = -1
-# Languages the definitions call already returns per sense, stored as the lemma
-# is created so no second LLM call is needed for them.
-TRANSLATION_LANGUAGES: Tuple[str, ...] = DEFINITIONS_PROMPT_LANGUAGES
+DIFFICULTY_LEVEL = UNSET_DIFFICULTY_LEVEL
 # Language whose translation disambiguates a queued sense for the human
 # reviewer, matching what DRAMBLYS stages.
 REVIEW_DISAMBIGUATION_LANGUAGE = "lt"
@@ -129,20 +132,6 @@ _MAX_TIED_SENSES = 5
 # Sentinel key set on a sense dict to route it to the pending queue for a reason
 # other than its POS subtype. Not part of the LLM schema.
 _REVIEW_REASON_KEY = "_review_reason"
-
-# Collection tag for the example sentences the definitions call returns. These
-# are not teaching material: the model wrote them to illustrate one sense of one
-# word, nobody chose them for a curriculum, and they carry no translations. The
-# tag keeps them separable from sentences that were authored as lessons, so a
-# level rollup or an export can exclude them. They are stored with
-# ``minimum_level`` unset for the same reason -- a difficulty would imply they
-# had been placed in the curriculum.
-EXAMPLE_SENTENCE_COLLECTION = "llm_word_examples"
-
-# How many examples to keep per sense. The prompt asks for up to three and the
-# model generally returns one; the cap is here so a model that returns ten does
-# not quietly fill the sentence table.
-_MAX_EXAMPLES_PER_SENSE = 3
 
 # Prefix marking a pending row that was queued under a *different* term than the
 # word that produced it ("stand-in", queued while adding "double"). The queried
@@ -608,7 +597,7 @@ def _stage_for_review(
     }
     raw_examples = sense.get("examples")
     staged_examples = (
-        raw_examples[:_MAX_EXAMPLES_PER_SENSE] if isinstance(raw_examples, list) else []
+        raw_examples[:MAX_EXAMPLES_PER_SENSE] if isinstance(raw_examples, list) else []
     )
 
     pending = create_pending_import(
@@ -792,108 +781,6 @@ def _select_senses(
     capped, cap_dropped = _apply_pos_sense_cap(selected)
     deduped, collapsed = _drop_translation_duplicates(capped)
     return [dict(sense) for sense in deduped], dropped + cap_dropped + collapsed
-
-
-def _store_sense_examples(
-    session: Session,
-    lemma: Lemma,
-    sense: Dict[str, Any],
-    *,
-    source: str,
-) -> int:
-    """Store the LLM's example sentences for one sense. Returns how many were kept.
-
-    The definitions call already returns these -- the schema asks for them and
-    the prompt requests up to three per sense -- so they are paid for whether or
-    not they are stored. They were previously discarded.
-
-    English only, and deliberately: the model was asked to illustrate an English
-    sense, not to translate a sentence, so there is nothing to store for the
-    other languages and no second call is made to get one. A later pass can
-    translate these if they are wanted as teaching material.
-
-    The link back to the lemma is a ``SentenceWordHint`` rather than a
-    ``SentenceWord``: a hint records which lemma a sentence was built to
-    exercise, which is exactly what this is, while SentenceWord is the
-    authoritative per-position breakdown and would need a parse these raw
-    strings have not had.
-    """
-    raw_examples = sense.get("examples")
-    if not isinstance(raw_examples, list):
-        return 0
-
-    stored = 0
-    for raw_example in raw_examples:
-        if stored >= _MAX_EXAMPLES_PER_SENSE:
-            break
-        if not isinstance(raw_example, str):
-            continue
-        example_text = raw_example.strip()
-        if not example_text:
-            continue
-
-        sentence = add_sentence(
-            session,
-            source_filename=f"add_word:{lemma.lemma_text}",
-            notes=f"LLM example for {lemma.guid}: {lemma.definition_text[:80]}",
-            sentence_collection=EXAMPLE_SENTENCE_COLLECTION,
-            source=source,
-        )
-        add_sentence_translation(
-            session,
-            sentence,
-            "en",
-            example_text,
-            source=source,
-        )
-        session.add(
-            SentenceWordHint(
-                sentence_id=sentence.id,
-                lemma_id=lemma.id,
-                position=0,
-                # slot_name carries the POS, matching what the generators write.
-                slot_name=lemma.pos_type,
-                english_text=lemma.lemma_text,
-            )
-        )
-        stored += 1
-
-    return stored
-
-
-def _store_sense_translations(
-    session: Session, lemma: Lemma, sense: Dict[str, Any], *, source: str, model: Optional[str]
-) -> Dict[str, str]:
-    """Save the translations the definitions call already returned for this sense.
-
-    The definitions schema returns lt/es/es-419/fr/zh per sense, so they arrive with
-    the definition at no extra LLM cost, and each sense gets its own
-    translation. Field names map to language codes through translation_helpers,
-    per CLAUDE.md -- no local mapping.
-
-    Returns:
-        The language code -> translation text pairs actually stored.
-    """
-    by_lang_code = convert_llm_response_to_lang_codes(sense)
-    stored: Dict[str, str] = {}
-    for lang_code in TRANSLATION_LANGUAGES:
-        translation = (by_lang_code.get(lang_code) or "").strip()
-        if not translation:
-            continue
-        set_translation(session, lemma, lang_code, translation)
-        log_translation_change(
-            session=session,
-            source=source,
-            operation_type="translation",
-            lemma_id=lemma.id,
-            language_code=lang_code,
-            old_translation=None,
-            new_translation=translation,
-            guid=lemma.guid,
-            model=model,
-        )
-        stored[lang_code] = translation
-    return stored
 
 
 def _missing_sense_translations(sense: Dict[str, Any]) -> List[str]:
@@ -1106,7 +993,22 @@ def add_word(
                 continue
 
             try:
-                guid = generate_guid(session, pos_type, pos_subtype)
+                new_lemma, stored_translations = create_sense_lemma(
+                    session,
+                    normalized,
+                    sense,
+                    pos_type=pos_type,
+                    pos_subtype=pos_subtype,
+                    definition_text=definition_text,
+                    sense_prominence=prominence,
+                    difficulty_level=difficulty_level,
+                    source=source,
+                    model=client_model,
+                    # _lookup_frequency already resolved the POS-directed
+                    # lookup, so this is a store, not a second search.
+                    frequency_rank=frequency_rank,
+                    best_corpus_rank=best_corpus_rank,
+                )
             except ValueError as exc:
                 session.rollback()
                 return AddWordResult(
@@ -1120,89 +1022,13 @@ def add_word(
                 )
 
             sense_result = SenseResult(
-                guid=guid,
+                guid=new_lemma.guid or "",
                 pos_type=pos_type,
                 pos_subtype=pos_subtype,
                 definition_text=definition_text,
                 sense_prominence=prominence,
+                translations=stored_translations,
             )
-
-            new_lemma = Lemma(
-                lemma_text=normalized,
-                definition_text=definition_text,
-                pos_type=pos_type,
-                pos_subtype=pos_subtype,
-                guid=guid,
-                difficulty_level=difficulty_level,
-                confidence=0.0,
-                verified=False,
-                sense_prominence=prominence,
-            )
-            session.add(new_lemma)
-            session.flush()
-
-            log_translation_change(
-                session=session,
-                source=source,
-                operation_type="lemma_create",
-                lemma_id=new_lemma.id,
-                language_code="en",
-                old_translation=None,
-                new_translation=normalized,
-                guid=guid,
-                pos_type=pos_type,
-                pos_subtype=pos_subtype,
-                definition=definition_text,
-                sense_prominence=prominence,
-                model=client_model,
-                best_corpus_rank=best_corpus_rank,
-            )
-            sense_result.translations = _store_sense_translations(
-                session, new_lemma, sense, source=source, model=client_model
-            )
-            # The definitions call already returned example sentences for this
-            # sense; keep them rather than paying for them and dropping them.
-            _store_sense_examples(session, new_lemma, sense, source=source)
-
-            # A lemma's English text is stored on Lemma rather than in
-            # LemmaTranslation, but the token-frequency system reaches lemmas
-            # only through DerivativeForm/VariantForm attachments. Record the
-            # English base form immediately so this newly claimed token leaves
-            # the unlinked-token queue and its frequency can roll up to every
-            # created sense.
-            word_token = (
-                session.query(WordToken)
-                .filter(
-                    WordToken.token == normalized,
-                    WordToken.language_code == "en",
-                )
-                .first()
-            )
-            if word_token is None:
-                word_token = WordToken(token=normalized, language_code="en")
-                session.add(word_token)
-                session.flush()
-            add_derivative_form(
-                session,
-                new_lemma,
-                normalized,
-                "en",
-                determine_default_grammatical_form(normalized, pos_type, normalized),
-                word_token=word_token,
-                is_base_form=True,
-                ipa_pronunciation=(sense.get("ipa_spelling") or None),
-                phonetic_pronunciation=(sense.get("phonetic_spelling") or None),
-                source=source,
-            )
-
-            # Record the corpus rank on the lemma itself, not only in the
-            # operation log. This runs after the derivative form is attached
-            # because the rank is a property of the token the form just linked:
-            # a lemma reached through no DerivativeForm has nothing to roll up
-            # from, and downstream consumers read Lemma.frequency_rank rather
-            # than re-deriving it. _lookup_frequency already resolved the
-            # POS-directed lookup, so this is a store, not a second search.
-            new_lemma.frequency_rank = frequency_rank
 
             # Commit per sense: a multi-sense word is a series of small writes,
             # so a failure on a later sense does not discard the earlier ones.

@@ -31,10 +31,9 @@ from storage.models.schema import Sentence, SentenceWordHint
 from storage.models.imports import PendingImport
 from storage.models.variant_form import VARIANT_KIND_SPELLING, VariantForm
 from words import add_word as add_word_module
+from words.lemma_creation import EXAMPLE_SENTENCE_COLLECTION, MAX_EXAMPLES_PER_SENSE
 from words.add_word import (
     AddWordResult,
-    EXAMPLE_SENTENCE_COLLECTION,
-    _MAX_EXAMPLES_PER_SENSE,
     _apply_pos_sense_cap,
     _drop_translation_duplicates,
     _MAX_TIED_SENSES,
@@ -477,7 +476,7 @@ def test_add_word_caps_examples_per_sense(
 
     add_word(session, "dog", config=config)
 
-    assert session.query(Sentence).count() == _MAX_EXAMPLES_PER_SENSE
+    assert session.query(Sentence).count() == MAX_EXAMPLES_PER_SENSE
 
 
 def test_add_word_without_examples_stores_no_sentences(

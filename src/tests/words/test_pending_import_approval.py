@@ -2,8 +2,10 @@
 """Tests for resolving a pending import into the thing it actually is.
 
 Approval routes on ``target_kind``, and the two cheap routes -- name and
-concept -- are the ones covered here: they need no LLM client, which is exactly
-why they exist. The lemma route is left to the callers that can stub a model.
+concept -- are covered here: they need no LLM client, which is exactly why they
+exist. So is the lemma route for a row staged with its POS and subtype, which
+also makes no LLM call; the unstaged lemma route is left to callers that can
+stub a model.
 
 Deletion is covered hardest, because it is the part every path shares: a
 pending row that goes away without settling its sentence links or its legacy
@@ -35,9 +37,12 @@ from storage.models.schema import (
     Lemma,
     Sentence,
     SentenceWord,
+    SentenceWordHint,
 )
+from words.lemma_creation import UNSET_DIFFICULTY_LEVEL
 from words.pending_imports.approval import (
     approve_as_concept,
+    approve_as_lemma,
     approve_as_name,
     approve_pending_import,
     delete_pending_import,
@@ -199,6 +204,73 @@ class TestApprovingAConcept(ApprovalTestCase):
 
         self.assertIsNotNone(get_concept_by_slug(self.session, "Art_Deco"))
         self.assertEqual(unlinked_words(self.session, self.sentence.id), [])
+
+
+class TestApprovingAStagedLemma(ApprovalTestCase):
+    """A row staged with its POS and subtype becomes a lemma with no LLM call."""
+
+    def stage_world_sense(self, **kwargs: Any) -> PendingImport:
+        return self.stage(
+            "world",
+            link=False,
+            target_kind=TARGET_KIND_LEMMA,
+            definition="A particular area of human activity or knowledge.",
+            pos_type="noun",
+            pos_subtype="knowledge_domain",
+            translations={"lt": "sritis", "es": "mundo"},
+            example_sentences=["He entered the world of finance."],
+            **kwargs,
+        )
+
+    def test_a_new_sense_of_an_existing_word_is_created(self) -> None:
+        """The old path reported success, created nothing, and returned this lemma."""
+        existing = Lemma(
+            lemma_text="world",
+            definition_text="The earth and everything on it.",
+            pos_type="noun",
+            pos_subtype="geographic_place",
+            guid="N99_001",
+        )
+        self.session.add(existing)
+        self.session.commit()
+        pending = self.stage_world_sense()
+
+        result = approve_as_lemma(
+            self.session, pending, DataSourceConfig(), disambiguation="area of activity"
+        )
+
+        self.assertTrue(result["success"], result)
+        self.assertNotEqual(result["lemma_id"], existing.id)
+        created = self.session.get(Lemma, result["lemma_id"])
+        assert created is not None
+        self.assertEqual(created.lemma_text, "world")
+        self.assertEqual(created.pos_subtype, "knowledge_domain")
+        self.assertEqual(created.disambiguation, "area of activity")
+        self.assertEqual(created.difficulty_level, UNSET_DIFFICULTY_LEVEL)
+        self.assertEqual(self.session.query(PendingImport).count(), 0)
+
+    def test_the_staged_examples_are_attached(self) -> None:
+        pending = self.stage_world_sense()
+
+        result = approve_as_lemma(self.session, pending, DataSourceConfig())
+
+        hints = (
+            self.session.query(SentenceWordHint)
+            .filter(SentenceWordHint.lemma_id == result["lemma_id"])
+            .all()
+        )
+        self.assertEqual(len(hints), 1)
+
+    def test_an_unknown_subtype_leaves_the_row_queued(self) -> None:
+        pending = self.stage_world_sense()
+        pending.pos_subtype = "not_a_subtype"
+        self.session.commit()
+
+        result = approve_as_lemma(self.session, pending, DataSourceConfig())
+
+        self.assertFalse(result["success"])
+        self.assertEqual(self.session.query(Lemma).count(), 0)
+        self.assertEqual(self.session.query(PendingImport).count(), 1)
 
 
 class TestApprovalRouting(ApprovalTestCase):

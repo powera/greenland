@@ -4,7 +4,8 @@ Approval routes on ``PendingImport.target_kind``:
 
 * **lemma** -- the expensive path. Queries an LLM for full definitions
   (including the subtype the GUID is built from), skips senses that already
-  exist, and hands off to ``wordfreq.translation.word_processing``.
+  exist, and creates each new one through ``words.lemma_creation``, the same
+  writer ``add_word`` uses.
 * **name** -- no LLM call. A proper name needs a row in ``names`` and nothing
   else; its per-language renderings are generated later, by the same machinery
   that handles names the dialog generator invented.
@@ -49,10 +50,11 @@ from storage.models.imports import (
     WordExclusion,
 )
 from storage.models.name_entity import NAME_KINDS, normalize_name_text
-from storage.models.schema import Lemma
+from storage.models.schema import SENSE_PROMINENCE_COMMON, Lemma
 from storage.translation_helpers import LANG_CODE_TO_LLM_FIELD
 from util.logging_config import get_logger
 from words.emoji import attach_pending_emoji_to_lemma, release_pending_emoji
+from words.lemma_creation import UNSET_DIFFICULTY_LEVEL, create_sense_lemma
 from words.pending_imports.classification import DEFAULT_NAME_KIND
 from words.pending_imports.sentence_links import (
     release_legacy_hints,
@@ -254,12 +256,16 @@ def approve_as_lemma(
     data_source_config: DataSourceConfig,
     model: str = constants.DEFAULT_MODEL,
     debug: bool = False,
+    disambiguation: Optional[str] = None,
 ) -> Dict[str, Any]:
     """Convert a staged term into a full Lemma/DerivativeForm entry.
 
-    Queries the LLM for full definitions (including pos_subtype and
-    translations), checks for duplicate lemmas, then creates the lemma with a
-    proper GUID. Commits, since ``process_word`` writes through its own session.
+    A row staged with its POS and subtype is created from the staged values
+    with no LLM call; otherwise the LLM is queried for full definitions.
+    Senses that already exist are skipped, and each remaining one becomes a
+    lemma at the unset difficulty level, through the same
+    :func:`words.lemma_creation.create_sense_lemma` that ``add_word`` uses.
+    ``disambiguation`` is stored on every lemma created. Commits.
     """
     pending_import_id = int(pending.id)
     word = pending.english_word
@@ -275,10 +281,7 @@ def approve_as_lemma(
 
     logger.info(f"Approving word '{word}' (sense: {pending_definition[:60]}...)")
 
-    # Use LinguisticClient to get full definitions from the LLM, including
-    # pos_subtype (needed for GUID) and translations.
     client_config = data_source_config.with_model(model, debug=debug)
-    client = LinguisticClient(config=client_config)
 
     example_sentence: Optional[str] = read_pending_import_context_sentence(pending)
 
@@ -310,6 +313,9 @@ def approve_as_lemma(
                 staged_definition[llm_field] = translation
         definitions_list: List[Dict[str, Any]] = [staged_definition]
     else:
+        # Full definitions from the LLM, including pos_subtype (needed for the
+        # GUID) and translations.
+        client = LinguisticClient(config=client_config)
         definitions_list, llm_success = client.query_definitions(
             word, example_sentence=example_sentence
         )
@@ -363,61 +369,61 @@ def approve_as_lemma(
         logger.info(msg)
         return {"success": True, "word": word, "target_kind": TARGET_KIND_LEMMA, "message": msg}
 
+    # Promote the example sentences carried from staging. They were paid for by
+    # the staging call and had no lemma to attach to until now. They describe
+    # the staged sense, so they go on the first definition, and only when the
+    # LLM did not return examples of its own for it.
+    if pending_examples and not filtered_definitions[0].get("examples"):
+        filtered_definitions[0]["examples"] = pending_examples
+
+    # Created here rather than through word_processing.process_word: that is a
+    # token-level bulk importer that returns early, reporting success, for any
+    # word that already has forms -- so approving a second sense of an existing
+    # word created nothing, and the lookup that followed picked up an older
+    # lemma of the same word as if it were new.
+    created: List[Lemma] = []
     try:
-        from wordfreq.translation import word_processing
-
-        success = word_processing.process_word(
-            client.client,
-            word,
-            client.get_session,
-            refresh=False,
-            definitions_list=filtered_definitions,
-        )
+        for def_data in filtered_definitions:
+            pos_type = (def_data.get("pos") or "").lower()
+            pos_subtype = def_data.get("pos_subtype")
+            if not pos_type or not pos_subtype:
+                session.rollback()
+                return {
+                    "success": False,
+                    "word": word,
+                    "error": f"No POS type/subtype for a sense of '{word}'",
+                }
+            lemma, _ = create_sense_lemma(
+                session,
+                word,
+                def_data,
+                pos_type=pos_type,
+                pos_subtype=pos_subtype,
+                definition_text=def_data.get("definition") or pending_definition,
+                sense_prominence=def_data.get("sense_prominence") or SENSE_PROMINENCE_COMMON,
+                difficulty_level=UNSET_DIFFICULTY_LEVEL,
+                source="pending-import-approval",
+                model=client_config.model,
+                disambiguation=disambiguation,
+            )
+            created.append(lemma)
     except ValueError as e:
-        # Handle subtype validation errors
-        if "Unknown subtype" in str(e):
-            logger.error(f"Subtype validation error for '{word}': {e}")
-            logger.error("The LLM returned an invalid subtype. This word needs manual review.")
-            return {"success": False, "word": word, "error": f"Invalid subtype: {e}"}
-        raise
+        # GUID generation rejects a subtype it has no prefix for.
+        session.rollback()
+        logger.error(f"Subtype validation error for '{word}': {e}")
+        return {"success": False, "word": word, "error": f"Invalid subtype: {e}"}
 
-    if not success:
-        logger.error(f"Failed to import '{word}'")
-        return {"success": False, "word": word, "error": f"Failed to import '{word}'"}
-
-    # Look up the newly created lemma so callers can trigger follow-on tasks.
-    # Done before the delete so any sentence waiting on this pending import can
-    # be repointed at the lemma it just became.
-    new_lemma = (
-        session.query(Lemma).filter(Lemma.lemma_text == word).order_by(Lemma.id.desc()).first()
-    )
-    new_lemma_id: Optional[int] = new_lemma.id if new_lemma else None
-
+    # Any sentence waiting on this pending import is repointed at the lemma it
+    # just became; with several senses created, the first is the staged one.
+    new_lemma = created[0]
+    new_lemma_id: Optional[int] = new_lemma.id
     delete_pending_import(session, pending, lemma_id=new_lemma_id)
     session.commit()
 
     # Carry any tags staged on the pending import onto the new lemma, so
     # a corpus ingested with `genys --tags legal` needs no second pass.
-    if new_lemma is not None and pending_tags:
+    if pending_tags:
         add_tags(session, new_lemma, pending_tags, source="pending-import-approval")
-        session.commit()
-
-    # Promote the example sentences carried from staging. They were paid for by
-    # the staging call and had no lemma to attach to until now; _store_sense_examples
-    # is reused rather than reimplemented so a staged sense and a directly
-    # created one end up with the same SentenceWordHint shape.
-    if new_lemma is not None and pending_examples:
-        # Imported here, not at module scope: words.add_word imports
-        # words.pending_imports.staging, so a top-level import back into this
-        # package would close a cycle.
-        from words.add_word import _store_sense_examples
-
-        _store_sense_examples(
-            session,
-            new_lemma,
-            {"examples": pending_examples},
-            source="pending-import-approval",
-        )
         session.commit()
 
     logger.info(f"Successfully approved and imported '{word}' (lemma_id={new_lemma_id})")
@@ -437,6 +443,7 @@ def approve_pending_import(
     data_source_config: DataSourceConfig,
     model: str = constants.DEFAULT_MODEL,
     debug: bool = False,
+    disambiguation: Optional[str] = None,
 ) -> Dict[str, Any]:
     """
     Approve a pending import, creating whatever its ``target_kind`` says it is.
@@ -450,6 +457,7 @@ def approve_pending_import(
         data_source_config: Data source configuration for LinguisticClient
         model: LLM model to use for processing (lemma path only)
         debug: Debug flag
+        disambiguation: Disambiguation tag for the created lemma (lemma path only)
 
     Returns:
         Dictionary with approval results. ``target_kind`` names the path taken.
@@ -494,7 +502,14 @@ def approve_pending_import(
             session.commit()
             return result
 
-        return approve_as_lemma(session, pending, data_source_config, model=model, debug=debug)
+        return approve_as_lemma(
+            session,
+            pending,
+            data_source_config,
+            model=model,
+            debug=debug,
+            disambiguation=disambiguation,
+        )
 
     except Exception as e:
         logger.error(f"Error approving pending import: {e}")
