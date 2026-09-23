@@ -4,10 +4,14 @@ import argparse
 import json
 import logging
 from pathlib import Path
-from typing import Any, Dict
+from typing import Any, Dict, Iterable, List, Set
+
+from sqlalchemy import func, or_
+from sqlalchemy.orm import Session
 
 from agents.common.common_args import add_backend_args, add_common_args, get_data_source_config
 from storage.backend import create_session
+from storage.models.imports import PendingImport
 from storage.models.schema import ExternalLexemeAnnotation, Lemma, WordToken
 from storage.queries.lemma import filter_existing_english_words
 from util.stopwords import (
@@ -20,6 +24,42 @@ from util.stopwords import (
 )
 
 logger = logging.getLogger(__name__)
+
+
+def _pending_import_words(session: Session, words: Iterable[str]) -> Set[str]:
+    """Return candidate words already represented in the pending-import queue.
+
+    ``english_word`` is the proposed headword, while ``queried_word`` preserves
+    the original term when staging rewrote that headword.  Either one means the
+    candidate is already under review and should not be reported as newly
+    missing.
+    """
+    wanted = {word.strip().lower() for word in words if word.strip()}
+    if not wanted:
+        return set()
+
+    found: Set[str] = set()
+    wanted_list: List[str] = sorted(wanted)
+    for start in range(0, len(wanted_list), 500):
+        chunk = wanted_list[start : start + 500]
+        rows = (
+            session.query(PendingImport.english_word, PendingImport.queried_word)
+            .filter(
+                or_(
+                    func.lower(PendingImport.english_word).in_(chunk),
+                    func.lower(PendingImport.queried_word).in_(chunk),
+                )
+            )
+            .all()
+        )
+        for english_word, queried_word in rows:
+            for pending_word in (english_word, queried_word):
+                if pending_word is None:
+                    continue
+                normalized = pending_word.strip().lower()
+                if normalized in wanted:
+                    found.add(normalized)
+    return found
 
 
 def is_valid_frequency_candidate(word: str) -> bool:
@@ -72,8 +112,12 @@ def check_high_frequency_missing_words(
             [token.token for token in high_frequency_tokens],
             include_exclusions=True,
         )
+        pending_import_words = _pending_import_words(
+            session, (token.token for token in high_frequency_tokens)
+        )
 
         missing_words = []
+        pending_words = []
         for token in high_frequency_tokens:
             if token.token.lower() in existing_words:
                 continue
@@ -96,18 +140,22 @@ def check_high_frequency_missing_words(
                 }
                 for annotation in annotations
             ]
-            missing_words.append(
-                {
-                    "word": token.token,
-                    "overall_rank": token.frequency_rank,
-                    "corpus_frequencies": corpus_frequencies,
-                }
-            )
+            word_info = {
+                "word": token.token,
+                "overall_rank": token.frequency_rank,
+                "corpus_frequencies": corpus_frequencies,
+            }
+            if token.token.lower() in pending_import_words:
+                pending_words.append(word_info)
+            else:
+                missing_words.append(word_info)
 
         return {
             "total_checked": len(high_frequency_tokens),
             "missing_count": len(missing_words),
             "missing_words": missing_words,
+            "pending_count": len(pending_words),
+            "pending_words": pending_words,
             "existing_word_count": session.query(Lemma).count(),
         }
     except Exception as error:
@@ -117,6 +165,8 @@ def check_high_frequency_missing_words(
             "total_checked": 0,
             "missing_count": 0,
             "missing_words": [],
+            "pending_count": 0,
+            "pending_words": [],
         }
 
 
@@ -127,6 +177,7 @@ def print_report(results: Dict[str, Any], *, max_words: int = 200) -> None:
         return
     print(f"Frequency tokens checked: {results['total_checked']}")
     print(f"Missing words found: {results['missing_count']}")
+    print(f"Already pending review: {results.get('pending_count', 0)}")
     print(f"Existing words in database: {results.get('existing_word_count', 'N/A')}")
     for index, word_info in enumerate(results["missing_words"][:max_words], 1):
         print(f"{index}. {word_info['word']} (rank: {word_info['overall_rank']})")
