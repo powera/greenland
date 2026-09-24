@@ -12,7 +12,7 @@ Example request:
     {
         "guid": "N03_003",
         "lang_code": "en",
-        "model": "gpt-5.6-luna",
+        "model": "gpt-6-luna",
         "openai_api_key": "sk-..."
     }
 

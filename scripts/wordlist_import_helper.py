@@ -48,7 +48,7 @@ from api.batch_operations import pending_import_words
 from api.constants import BASE_URL
 from api.lemmas import add_term, add_word, words_exist
 
-DEFAULT_MODEL = "gpt-5.6-luna"
+DEFAULT_MODEL = "gpt-6-luna"
 
 # ``POST /v1/words/exists`` caps a single request's word list, so a survey of a
 # hundred-word list has to be split.  25 is well inside that cap and keeps one
