@@ -25,7 +25,7 @@ from typing import Dict, List, Optional, Set
 # These anchors are spread across the expanded general curriculum.
 TIER_1_LEVEL = 10  # Home country + immediate neighbors/cultural significance
 TIER_2_LEVEL = 18  # Major world powers + culturally relevant countries
-TIER_3_LEVEL = 30  # Remaining countries (lowest priority)
+TIER_3_LEVEL = 145  # Remaining countries (lowest priority); old L30 after the band renumbering
 
 # Exact stored region lemmas that are countries.  ``region`` also contains US
 # states and continents. States do not receive country-priority overrides;
@@ -97,7 +97,7 @@ CONTINENT_NAMES: Set[str] = {
 # COUNTRY PRIORITY CONFIGURATION BY TARGET LANGUAGE
 # =============================================================================
 # Each language defines which countries belong to which tier.
-# Countries not listed use the default level from the lemma.
+# Countries not listed use TIER_3_LEVEL.
 #
 # Key: target language code (the language being learned)
 # Value: dict mapping tier level -> list of country concept_labels
@@ -110,7 +110,7 @@ COUNTRY_PRIORITIES: Dict[str, Dict[int, List[str]]] = {
     # LITHUANIAN (lt) - Baltic focus, European neighbors
     # NOTE: English-speaking countries (England, America, Canada, Australia)
     # are always in Tier 1 since we target English speakers.
-    # Countries not listed here use the default level from the lemma (14).
+    # Countries not listed here use Tier 3.
     # -------------------------------------------------------------------------
     "lt": {
         TIER_1_LEVEL: [
@@ -135,7 +135,7 @@ COUNTRY_PRIORITIES: Dict[str, Dict[int, List[str]]] = {
             "Japan",
             "China",
         ],
-        # Tier 3: India, Brazil use default level (30)
+        # India, Brazil use Tier 3 (145)
         # Not relevant enough to prioritize for Lithuanian learners
     },
     # -------------------------------------------------------------------------
@@ -164,7 +164,7 @@ COUNTRY_PRIORITIES: Dict[str, Dict[int, List[str]]] = {
             "Italy",
             "Spain",
         ],
-        # Baltic countries, Nordic countries use default level (30)
+        # Baltic countries, Nordic countries use Tier 3 (145)
     },
     # -------------------------------------------------------------------------
     # FRENCH (fr) - European focus, Francophone world
@@ -188,7 +188,7 @@ COUNTRY_PRIORITIES: Dict[str, Dict[int, List[str]]] = {
             "Brazil",  # Ties
             "India",
         ],
-        # Nordic and Baltic countries use default level (30)
+        # Nordic and Baltic countries use Tier 3 (145)
     },
     # -------------------------------------------------------------------------
     # SPANISH (es) - European (Peninsular) context
@@ -216,7 +216,7 @@ COUNTRY_PRIORITIES: Dict[str, Dict[int, List[str]]] = {
             "Russia",
             "India",
         ],
-        # Nordic and Baltic countries use default level (30)
+        # Nordic and Baltic countries use Tier 3 (145)
     },
     # -------------------------------------------------------------------------
     # LATIN AMERICAN SPANISH (es-419) - Latin American context
@@ -242,7 +242,7 @@ COUNTRY_PRIORITIES: Dict[str, Dict[int, List[str]]] = {
             "China",  # Major trade partner
             "Japan",  # Economic ties
         ],
-        # European countries other than Spain use default level (30)
+        # European countries other than Spain use Tier 3 (145)
     },
     # -------------------------------------------------------------------------
     # GERMAN (de) - Central European focus
@@ -268,7 +268,7 @@ COUNTRY_PRIORITIES: Dict[str, Dict[int, List[str]]] = {
             "India",
             "Brazil",
         ],
-        # Baltic countries, Finland use default level (30)
+        # Baltic countries, Finland use Tier 3 (145)
     },
     # -------------------------------------------------------------------------
     # ITALIAN (it) - Mediterranean and European focus
@@ -292,7 +292,7 @@ COUNTRY_PRIORITIES: Dict[str, Dict[int, List[str]]] = {
             "Brazil",  # Italian diaspora
             "India",
         ],
-        # Nordic and Baltic countries use default level (30)
+        # Nordic and Baltic countries use Tier 3 (145)
     },
     # -------------------------------------------------------------------------
     # PORTUGUESE (pt) - Lusophone world, Brazilian focus
@@ -316,7 +316,7 @@ COUNTRY_PRIORITIES: Dict[str, Dict[int, List[str]]] = {
             "India",
             "Russia",
         ],
-        # Nordic and Baltic countries use default level (30)
+        # Nordic and Baltic countries use Tier 3 (145)
     },
     # -------------------------------------------------------------------------
     # DUTCH (nl) - European and colonial history focus
@@ -340,7 +340,7 @@ COUNTRY_PRIORITIES: Dict[str, Dict[int, List[str]]] = {
             "Brazil",
             "India",
         ],
-        # Nordic and Baltic countries use default level (30)
+        # Nordic and Baltic countries use Tier 3 (145)
     },
     # -------------------------------------------------------------------------
     # SWEDISH (sv) - Nordic and European focus
@@ -367,7 +367,7 @@ COUNTRY_PRIORITIES: Dict[str, Dict[int, List[str]]] = {
             "India",
             "Brazil",
         ],
-        # Baltic countries use default level (30)
+        # Baltic countries use Tier 3 (145)
     },
     # -------------------------------------------------------------------------
     # VIETNAMESE (vi) - Southeast Asian and French colonial ties
@@ -394,7 +394,7 @@ COUNTRY_PRIORITIES: Dict[str, Dict[int, List[str]]] = {
             "Brazil",
             "Poland",
         ],
-        # Nordic and Baltic countries use default level (30)
+        # Nordic and Baltic countries use Tier 3 (145)
     },
     # -------------------------------------------------------------------------
     # JAPANESE (ja) - East Asian focus
@@ -422,7 +422,7 @@ COUNTRY_PRIORITIES: Dict[str, Dict[int, List[str]]] = {
             "Spain",
             "Poland",
         ],
-        # Nordic and Baltic countries use default level (30)
+        # Nordic and Baltic countries use Tier 3 (145)
     },
     # -------------------------------------------------------------------------
     # KOREAN (ko) - East Asian focus
@@ -450,7 +450,7 @@ COUNTRY_PRIORITIES: Dict[str, Dict[int, List[str]]] = {
             "Spain",
             "Poland",
         ],
-        # Nordic and Baltic countries use default level (30)
+        # Nordic and Baltic countries use Tier 3 (145)
     },
     # -------------------------------------------------------------------------
     # SWAHILI (sw) - East African focus
@@ -477,7 +477,7 @@ COUNTRY_PRIORITIES: Dict[str, Dict[int, List[str]]] = {
             "Spain",
             "Poland",
         ],
-        # Nordic and Baltic countries use default level (30)
+        # Nordic and Baltic countries use Tier 3 (145)
     },
 }
 
