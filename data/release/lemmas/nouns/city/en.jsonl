@@ -5,7 +5,7 @@
 {"guid": "N46_005", "forms": [{"grammatical_form": "noun/en_singular", "text": "Rome", "is_base_form": true, "ipa": "/roʊm/", "phonetic": "ROH-m"}]}
 {"guid": "N46_006", "forms": [{"grammatical_form": "noun/en_singular", "text": "Madrid", "is_base_form": true, "ipa": "/mædˈrɪd/", "phonetic": "MAD-rid"}]}
 {"guid": "N46_007", "forms": [{"grammatical_form": "noun/en_singular", "text": "Moscow", "is_base_form": true, "ipa": "ˈmɒskəʊ", "phonetic": "MOH-skoh"}]}
-{"guid": "N46_008", "forms": [{"grammatical_form": "noun/en_singular", "text": "New York", "is_base_form": true, "ipa": "/nuː ˈjɔːrk/", "phonetic": "NOO-yohrk"}]}
+{"guid": "N46_008", "forms": [{"grammatical_form": "noun/en_singular", "text": "New York City", "is_base_form": true}]}
 {"guid": "N46_009", "forms": [{"grammatical_form": "noun/en_singular", "text": "Chicago", "is_base_form": true, "ipa": "/tʃɪˈkɑːɡoʊ/", "phonetic": "CHEE-kah-go"}]}
 {"guid": "N46_010", "forms": [{"grammatical_form": "noun/en_singular", "text": "Los Angeles", "is_base_form": true, "ipa": "/ˈloʊs æŋˈdʒɛləs/", "phonetic": "LOH-s ANG-jeh-luhs"}]}
 {"guid": "N46_011", "forms": [{"grammatical_form": "noun/en_singular", "text": "Tokyo", "is_base_form": true, "ipa": "/toʊˈki.oʊ/", "phonetic": "TOH-kee-oh"}]}
