@@ -38,11 +38,13 @@ class TestDatabaseSelection:
         assert "lemmas" not in printed
         assert "sentences" not in printed
 
-    def test_all_still_selects_every_element_and_the_database(self, capsys: Any) -> None:
+    def test_export_all_selects_every_element_but_not_the_database(self, capsys: Any) -> None:
+        """The dump writes data/working, which the release does not need."""
         assert cli.main(["export", "all", "--dry-run"]) == 0
         printed = capsys.readouterr().out
-        for expected in ("lemmas", "sentences", "phrases", "idioms", "database"):
+        for expected in ("lemmas", "sentences", "phrases", "idioms", "tombstones"):
             assert expected in printed
+        assert "would export database" not in printed
 
     def test_naming_elements_beside_database_keeps_both(self, capsys: Any) -> None:
         assert cli.main(["export", "idioms", "database", "--dry-run"]) == 0
@@ -68,7 +70,7 @@ class TestDatabaseOrdering:
 
     def test_export_leaves_the_database_last(self, capsys: Any) -> None:
         """On export the two write to different trees, so order is free."""
-        assert cli.main(["export", "all", "--dry-run"]) == 0
+        assert cli.main(["export", "idioms", "database", "--dry-run"]) == 0
         lines = [line for line in capsys.readouterr().out.splitlines() if line.startswith("would")]
         assert lines[-1] == "would export database", lines
 

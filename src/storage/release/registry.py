@@ -15,10 +15,11 @@ just a way to name what that module already does. (Compare
 ``docs/element_types_design.md``, which argues against a registry over the
 *models* -- a different layer, and one this does not touch.)
 
-**Not exhaustive over data/release.** Three subdirectories have no entry
-because no element module owns them: ``audio_reviews/``, ``operation_logs/``
-and ``verifications/`` are written only by the JSONL backend, and reach the
-CLI through the whole-database ``database`` pseudo-entity instead.
+**Not exhaustive over the JSONL backend.** Its ``audio_reviews/``,
+``operation_logs/`` and ``verifications/`` tables have no entry because no
+element module owns them; they are written only by the whole-database
+``database`` pseudo-entity, whose export goes to ``data/working``. Operation
+logs never belong in data/release: its git history is the log.
 """
 
 from dataclasses import dataclass

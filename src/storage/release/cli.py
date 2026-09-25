@@ -18,11 +18,13 @@ per-element ``--*-release-dir`` flags collapse into one ``--release-root``,
 since the subdirectory is a property of the element type and lives in the
 registry.
 
-``database`` is a pseudo-entity for the whole-database dump through the JSONL
+``database`` is a pseudo-entity for the whole-database path through the JSONL
 backend -- the old ``sqlite-to-jsonl``/``postgres-to-jsonl`` pair, plus the
 import that had no direction at all and so was unreachable from the command
-line. It is the path that carries the parts no element module owns
-(verifications, operation logs, audio reviews).
+line. Its export is a raw copy of every table, operation logs and audio
+reviews included, into ``--jsonl-dir`` (``data/working``), not data/release;
+``export all`` does not run it, so it has to be named. Its import rebuilds the
+SQLite file from data/release, and ``import all`` runs it first.
 """
 
 import argparse
@@ -174,8 +176,15 @@ def main(argv: Optional[List[str]] = None) -> int:
     args = parser.parse_args(argv)
     args.categories = parse_categories(parser, args.categories)
 
-    wants_database = DATABASE_ENTITY in args.entities or "all" in args.entities
     wants_every_element = "all" in args.entities
+    # On export "all" means the release tree only. The database dump writes a
+    # raw copy of every table to --jsonl-dir (data/working), which nothing in
+    # data/release reads, and took minutes where the release export takes
+    # seconds. On import the database load *is* the release tree read back, so
+    # "all" still runs it first.
+    wants_database = DATABASE_ENTITY in args.entities or (
+        wants_every_element and args.direction == "import"
+    )
     element_tokens = [token for token in args.entities if token != DATABASE_ENTITY]
     # "database" on its own means the whole-database dump and nothing else.
     # Passing an empty token list through as None would have meant "all", so
