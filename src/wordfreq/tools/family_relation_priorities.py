@@ -224,11 +224,20 @@ EXCLUDED_TERMS: Dict[str, Set[str]] = {
     # JAPANESE (ja) - Uses some age-distinguished terms
     # -------------------------------------------------------------------------
     "ja": {
-        # Japanese distinguishes older/younger siblings naturally
-        # but also has general terms, so only exclude age-distinguished
-        # Actually Japanese has both, so fewer exclusions
+        # Japanese has both age-distinguished siblings (兄/姉/弟/妹) and
+        # general terms, so it keeps both sets.
         "cousin (male)",
         "cousin (female)",
+        # Japanese does not mark a grandparent, aunt or uncle as maternal or
+        # paternal (伯父/叔父 split by the parent's age, not their side).
+        "maternal grandfather",
+        "paternal grandfather",
+        "maternal grandmother",
+        "paternal grandmother",
+        "maternal uncle",
+        "paternal uncle",
+        "maternal aunt",
+        "paternal aunt",
     },
     # -------------------------------------------------------------------------
     # SPANISH (es) - Romance language with gendered cousins
@@ -426,6 +435,11 @@ EXCLUDED_TERMS: Dict[str, Set[str]] = {
 # two varieties differ in vocabulary and country emphasis, not in which family
 # terms exist.  Aliased rather than copied so the two cannot drift apart.
 EXCLUDED_TERMS["es-419"] = EXCLUDED_TERMS["es"]
+# The other storage dialects likewise share their main variety's kinship
+# system. Without these they fell through to no configuration at all, so the
+# export applied no exclusions and taught maternal/paternal aunt in Brazil.
+EXCLUDED_TERMS["pt-br"] = EXCLUDED_TERMS["pt"]
+EXCLUDED_TERMS["zh-tw"] = EXCLUDED_TERMS["zh"]
 
 # Default exclusions for languages not explicitly configured
 DEFAULT_EXCLUDED_TERMS: Set[str] = {

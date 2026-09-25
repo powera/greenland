@@ -126,23 +126,45 @@ REPORTS: List[Dict[str, Any]] = [
     {
         "name": "curriculum_relevel",
         "display_name": "Curriculum Relevel",
-        "subtitle": "Analysis behind the level reassignment",
+        "subtitle": "Rebalance the core and named level bands",
         "description": (
-            "Analysis supporting the curriculum relevel that split the old 30 levels "
-            "into 65 smaller ones, so no level imposes 100+ new words at once."
+            "Proposes core levels of 30-40 words (2-3 subtypes, 1-5 matching verbs, "
+            "function words spread out) and one-topic named units. Writes a proposal "
+            "by default; --apply backs up the database and writes the levels."
         ),
         "icon": "bi-sort-numeric-down",
         "command": "PYTHONPATH=src python src/reports/curriculum_relevel.py --output-dir DIR",
-        "arguments": ["--output-dir DIR (required)", "--mode auto|rebuild|incremental"],
+        "arguments": [
+            "--output-dir DIR (required)",
+            "--bands core,named",
+            "--apply (writes changes)",
+        ],
+        "writes": True,
+    },
+    {
+        "name": "level_words",
+        "display_name": "Words at Each Level",
+        "subtitle": "Diffable listing of the curriculum",
+        "description": (
+            "Writes one text file listing every level's words, grouped by subtype, "
+            "for review and diffing. --mapping applies a curriculum_relevel proposal."
+        ),
+        "icon": "bi-list-ol",
+        "command": "PYTHONPATH=src python src/reports/level_words.py --output FILE",
+        "arguments": [
+            "--output FILE (required)",
+            "--mapping DIR/mapping.json",
+            "--bands core,named,topic",
+        ],
     },
     {
         "name": "curriculum_sense_fixes",
         "display_name": "Curriculum Sense Fixes",
-        "subtitle": "Word senses needing disambiguation review",
+        "subtitle": "One sense per headword in the core",
         "description": (
-            "Orders the senses of a shared English headword by stored prominence. "
-            "Previews the corrections by default; --apply writes them, so this one "
-            "is not read-only."
+            "Moves the lesser senses of a core headword to a named unit, keeping "
+            "noun/adjective pairs, and reports unclear cases. Previews by default; "
+            "--apply writes them, so this one is not read-only."
         ),
         "icon": "bi-signpost-split",
         "command": "PYTHONPATH=src python src/reports/curriculum_sense_fixes.py",

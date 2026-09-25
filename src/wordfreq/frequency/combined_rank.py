@@ -452,6 +452,29 @@ def _harmonic_mean(weighted_ranks: List[Tuple[float, int]]) -> Optional[int]:
     return int(round(total_weight / weighted_inv))
 
 
+def lemmas_without_corpus_evidence(session: Session, lemma_ids: List[int]) -> set[int]:
+    """The lemmas no enabled corpus ranks any form of.
+
+    Their ``frequency_rank`` is built from tier signals alone:
+    :func:`recalculate_lemma_rank` only adds a corpus's unknown rank once some
+    other corpus has a hit, so a word below every corpus cap (vodka, vaccine)
+    is scored by its CEFR/Basic English tier and can look common. A caller
+    that must read missing data as "uncommon" uses this to discount them.
+    """
+    exponents = {
+        corpus_name: get_corpus_zipf_exponent(session, corpus_name)
+        for corpus_name in _corpus_weights(session)
+    }
+    return {
+        lemma_id
+        for lemma_id in lemma_ids
+        if all(
+            get_lemma_corpus_rank(session, lemma_id, corpus_name, exponent) is None
+            for corpus_name, exponent in exponents.items()
+        )
+    }
+
+
 def recalculate_lemma_rank(
     session: Session,
     lemma_id: int,

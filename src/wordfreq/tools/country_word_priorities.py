@@ -245,6 +245,32 @@ COUNTRY_PRIORITIES: Dict[str, Dict[int, List[str]]] = {
         # European countries other than Spain use Tier 3 (145)
     },
     # -------------------------------------------------------------------------
+    # BRAZILIAN PORTUGUESE (pt-br) - Latin American context
+    # -------------------------------------------------------------------------
+    # es-419 with the two languages switched: Brazil leads where Mexico does
+    # there, and Portugal is the Tier 2 cultural origin in Spain's place. Keep
+    # any other change in sync with es-419.
+    "pt-br": {
+        TIER_1_LEVEL: [
+            "Brazil",  # Home country
+            "Argentina",  # Major regional power
+            "Chile",  # Major regional power
+            "United States",  # English-speaking (always Tier 1)
+            "England",  # English-speaking (always Tier 1)
+            "Canada",  # English-speaking (always Tier 1)
+            "Australia",  # English-speaking (always Tier 1)
+            "Mexico",  # Largest Spanish-speaking neighbor
+        ],
+        TIER_2_LEVEL: [
+            "Portugal",  # Cultural origin, not the home country here
+            "Peru",  # Regional
+            "Cuba",  # Regional
+            "China",  # Major trade partner
+            "Japan",  # Economic ties, largest diaspora outside Japan
+        ],
+        # European countries other than Portugal use Tier 3 (145)
+    },
+    # -------------------------------------------------------------------------
     # GERMAN (de) - Central European focus
     # -------------------------------------------------------------------------
     "de": {
@@ -480,6 +506,10 @@ COUNTRY_PRIORITIES: Dict[str, Dict[int, List[str]]] = {
         # Nordic and Baltic countries use Tier 3 (145)
     },
 }
+
+# Taiwan Mandarin takes Mandarin's country emphasis unchanged. Aliased rather
+# than copied so the two cannot drift apart.
+COUNTRY_PRIORITIES["zh-tw"] = COUNTRY_PRIORITIES["zh"]
 
 
 # =============================================================================
