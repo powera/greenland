@@ -29,3 +29,11 @@
 {"guid": "N35_093", "forms": [{"grammatical_form": "noun/en_singular", "text": "brother-in-law", "is_base_form": true}]}
 {"guid": "N35_094", "forms": [{"grammatical_form": "noun/en_singular", "text": "sister-in-law", "is_base_form": true}]}
 {"guid": "N35_100", "forms": [{"grammatical_form": "noun/en_plural", "text": "children", "is_base_form": false}]}
+{"guid": "N35_103", "forms": [{"grammatical_form": "noun/en_singular", "text": "relative", "is_base_form": true, "ipa": "/ˈrɛlətɪv/", "phonetic": "REL-uh-tiv"}]}
+{"guid": "N35_104", "forms": [{"grammatical_form": "noun/en_singular", "text": "half-brother", "is_base_form": true, "ipa": "/ˈhæfˌbrʌðər/", "phonetic": "HAF-BRUH-ther"}]}
+{"guid": "N35_105", "forms": [{"grammatical_form": "noun/en_singular", "text": "great-grandfather", "is_base_form": true, "ipa": "/ˌɡreɪt ˈɡrændˌfɑːðər/", "phonetic": "GRAYT-GRAND-fah-ther"}]}
+{"guid": "N35_106", "forms": [{"grammatical_form": "noun/en_singular", "text": "great-grandson", "is_base_form": true, "ipa": "/ˌɡreɪtˈɡrændˌsʌn/", "phonetic": "GRAYT-GRAND-sun"}]}
+{"guid": "N35_107", "forms": [{"grammatical_form": "noun/en_singular", "text": "half-sister", "is_base_form": true, "ipa": "/ˈhæfˌsɪstɚ/", "phonetic": "HAF-SIS-ter"}]}
+{"guid": "N35_108", "forms": [{"grammatical_form": "noun/en_singular", "text": "grandma", "is_base_form": true, "ipa": "/ˈɡrænˌmɑ/", "phonetic": "GRAND-mah"}]}
+{"guid": "N35_109", "forms": [{"grammatical_form": "noun/en_singular", "text": "grandpa", "is_base_form": true, "ipa": "/ˈɡrænˌpɑ/", "phonetic": "GRAND-paw"}]}
+{"guid": "N35_110", "forms": [{"grammatical_form": "noun/en_singular", "text": "surname", "is_base_form": true, "ipa": "/ˈsɝːˌneɪm/", "phonetic": "SUR-name"}]}

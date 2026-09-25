@@ -1,3 +1,26 @@
 {"guid": "N26_007", "forms": [{"grammatical_form": "noun/en_singular", "text": "study group", "is_base_form": true}]}
 {"guid": "N26_008", "forms": [{"grammatical_form": "noun/en_singular", "text": "middle class", "is_base_form": true}]}
 {"guid": "N26_009", "forms": [{"grammatical_form": "noun/en_singular", "text": "working class", "is_base_form": true}]}
+{"guid": "N26_010", "forms": [{"grammatical_form": "noun/en_singular", "text": "subgroup", "is_base_form": true, "ipa": "/ˈsʌbˌɡruːp/", "phonetic": "SUB-groop"}]}
+{"guid": "N26_011", "forms": [{"grammatical_form": "noun/en_singular", "text": "orchestra", "is_base_form": true, "ipa": "/ˈɔrkəstrə/", "phonetic": "OR-kuh-struh"}]}
+{"guid": "N26_012", "forms": [{"grammatical_form": "noun/en_singular", "text": "audience", "is_base_form": true, "ipa": "/ˈɔdiəns/", "phonetic": "AW-dee-uhns"}]}
+{"guid": "N26_013", "forms": [{"grammatical_form": "noun/en_singular", "text": "choir", "is_base_form": true, "ipa": "/ˈkwaɪər/", "phonetic": "KWIRE"}]}
+{"guid": "N26_014", "forms": [{"grammatical_form": "noun/en_singular", "text": "ally", "is_base_form": true, "ipa": "/ˈælaɪ/", "phonetic": "AL-eye"}]}
+{"guid": "N26_015", "forms": [{"grammatical_form": "noun/en_singular", "text": "clan", "is_base_form": true, "ipa": "/klæn/", "phonetic": "KLAN"}]}
+{"guid": "N26_016", "forms": [{"grammatical_form": "noun/en_singular", "text": "rival", "is_base_form": true, "ipa": "/ˈraɪvəl/", "phonetic": "RY-vuhl"}]}
+{"guid": "N26_017", "forms": [{"grammatical_form": "noun/en_singular", "text": "ethnicity", "is_base_form": true, "ipa": "/ɛθˈnɪsəti/", "phonetic": "eth-NISS-uh-tee"}]}
+{"guid": "N26_018", "forms": [{"grammatical_form": "noun/en_singular", "text": "jury", "is_base_form": true, "ipa": "/ˈdʒʊri/", "phonetic": "JOO-ree"}]}
+{"guid": "N26_019", "forms": [{"grammatical_form": "noun/en_singular", "text": "jury", "is_base_form": true, "ipa": "/ˈdʒʊri/", "phonetic": "JOO-ree"}]}
+{"guid": "N26_020", "forms": [{"grammatical_form": "noun/en_singular", "text": "jury", "is_base_form": true, "ipa": "/ˈdʒʊri/", "phonetic": "JOO-ree"}]}
+{"guid": "N26_021", "forms": [{"grammatical_form": "noun/en_singular", "text": "defense", "is_base_form": true, "ipa": "/dɪˈfɛns/", "phonetic": "duh-FENS"}]}
+{"guid": "N26_022", "forms": [{"grammatical_form": "noun/en_singular", "text": "defense", "is_base_form": true, "ipa": "/dɪˈfɛns/", "phonetic": "duh-FENS"}]}
+{"guid": "N26_023", "forms": [{"grammatical_form": "noun/en_singular", "text": "trio", "is_base_form": true, "ipa": "/ˈtriˌoʊ/", "phonetic": "TREE-oh"}]}
+{"guid": "N26_024", "forms": [{"grammatical_form": "noun/en_singular", "text": "trio", "is_base_form": true, "ipa": "/ˈtriˌoʊ/", "phonetic": "TREE-oh"}]}
+{"guid": "N26_025", "forms": [{"grammatical_form": "noun/en_singular", "text": "subfamily", "is_base_form": true, "ipa": "/ˈsʌbˌfæməli/", "phonetic": "SUB-fam-uh-lee"}]}
+{"guid": "N26_026", "forms": [{"grammatical_form": "noun/en_singular", "text": "faction", "is_base_form": true, "ipa": "/ˈfækʃən/", "phonetic": "FAK-shun"}]}
+{"guid": "N26_027", "forms": [{"grammatical_form": "noun/en_singular", "text": "community", "is_base_form": true, "ipa": "/kəˈmjuːnəti/", "phonetic": "kuh-MYOO-nuh-tee"}]}
+{"guid": "N26_028", "forms": [{"grammatical_form": "noun/en_singular", "text": "scum", "is_base_form": true, "ipa": "/skʌm/", "phonetic": "SKUM"}]}
+{"guid": "N26_029", "forms": [{"grammatical_form": "noun/en_singular", "text": "avant-garde", "is_base_form": true, "ipa": "/ˌævɑːnt ˈɡɑːrd/", "phonetic": "AH-vahnt-GARD"}]}
+{"guid": "N26_030", "forms": [{"grammatical_form": "noun/en_singular", "text": "non-muslims", "is_base_form": true, "ipa": "/ˌnɑnˈmʊzlɪmz/", "phonetic": "non-MOOZ-limz"}]}
+{"guid": "N26_031", "forms": [{"grammatical_form": "noun/en_singular", "text": "runner-up", "is_base_form": true, "ipa": "/ˌrʌnɚˈʌp/", "phonetic": "RUN-er-UP"}]}
+{"guid": "N26_032", "forms": [{"grammatical_form": "noun/en_singular", "text": "world", "is_base_form": true, "ipa": "/wɝld/", "phonetic": "WORLD"}]}

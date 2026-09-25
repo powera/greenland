@@ -35,3 +35,54 @@
 {"guid": "N36_085", "forms": [{"grammatical_form": "noun/en_singular", "text": "software engineer", "is_base_form": true}]}
 {"guid": "N36_086", "forms": [{"grammatical_form": "noun/en_singular", "text": "graphic designer", "is_base_form": true}]}
 {"guid": "N36_087", "forms": [{"grammatical_form": "noun/en_singular", "text": "movie star", "is_base_form": true}]}
+{"guid": "N36_088", "forms": [{"grammatical_form": "noun/en_singular", "text": "estimator", "is_base_form": true, "ipa": "/ˈɛstəˌmeɪtər/", "phonetic": "ES-tuh-may-ter"}]}
+{"guid": "N36_089", "forms": [{"grammatical_form": "noun/en_singular", "text": "mayor", "is_base_form": true, "ipa": "/ˈmeɪər/", "phonetic": "MAY-er"}]}
+{"guid": "N36_090", "forms": [{"grammatical_form": "noun/en_singular", "text": "president", "is_base_form": true, "ipa": "/ˈprɛzɪdənt/", "phonetic": "PREZ-uh-dent"}]}
+{"guid": "N36_091", "forms": [{"grammatical_form": "noun/en_singular", "text": "clown", "is_base_form": true, "ipa": "/klaʊn/", "phonetic": "KLOWN"}]}
+{"guid": "N36_092", "forms": [{"grammatical_form": "noun/en_singular", "text": "dancer", "is_base_form": true, "ipa": "/ˈdænsər/", "phonetic": "DAN-ser"}]}
+{"guid": "N36_093", "forms": [{"grammatical_form": "noun/en_singular", "text": "tenor", "is_base_form": true, "ipa": "/ˈtɛnɚ/", "phonetic": "TEN-er"}]}
+{"guid": "N36_094", "forms": [{"grammatical_form": "noun/en_singular", "text": "author", "is_base_form": true, "ipa": "/ˈɔθɚ/", "phonetic": "AW-thur"}]}
+{"guid": "N36_095", "forms": [{"grammatical_form": "noun/en_singular", "text": "critic", "is_base_form": true, "ipa": "/ˈkrɪtɪk/", "phonetic": "KRIT-ik"}]}
+{"guid": "N36_096", "forms": [{"grammatical_form": "noun/en_singular", "text": "director", "is_base_form": true, "ipa": "/dəˈrɛktɚ/", "phonetic": "duh-REK-ter"}]}
+{"guid": "N36_097", "forms": [{"grammatical_form": "noun/en_singular", "text": "marine", "is_base_form": true, "ipa": "/məˈrin/", "phonetic": "muh-REEN"}]}
+{"guid": "N36_098", "forms": [{"grammatical_form": "noun/en_singular", "text": "commander", "is_base_form": true, "ipa": "/kəˈmændɚ/", "phonetic": "kuh-MAN-der"}]}
+{"guid": "N36_099", "forms": [{"grammatical_form": "noun/en_singular", "text": "commander", "is_base_form": true, "ipa": "/kəˈmændɚ/", "phonetic": "kuh-MAN-der"}]}
+{"guid": "N36_100", "forms": [{"grammatical_form": "noun/en_singular", "text": "career", "is_base_form": true, "ipa": "/kəˈrɪr/", "phonetic": "kuh-REER"}]}
+{"guid": "N36_101", "forms": [{"grammatical_form": "noun/en_singular", "text": "assistant", "is_base_form": true, "ipa": "/əˈsɪstənt/", "phonetic": "uh-SIS-tunt"}]}
+{"guid": "N36_102", "forms": [{"grammatical_form": "noun/en_singular", "text": "inventor", "is_base_form": true, "ipa": "/ɪnˈvɛntər/", "phonetic": "in-VEN-ter"}]}
+{"guid": "N36_103", "forms": [{"grammatical_form": "noun/en_singular", "text": "philosopher", "is_base_form": true, "ipa": "/fəˈlɑːsəfər/", "phonetic": "fuh-LOS-uh-fer"}]}
+{"guid": "N36_104", "forms": [{"grammatical_form": "noun/en_singular", "text": "official", "is_base_form": true, "ipa": "/əˈfɪʃəl/", "phonetic": "uh-FISH-ul"}]}
+{"guid": "N36_105", "forms": [{"grammatical_form": "noun/en_singular", "text": "employer", "is_base_form": true, "ipa": "/ɪmˈplɔɪər/", "phonetic": "em-PLOY-er"}]}
+{"guid": "N36_106", "forms": [{"grammatical_form": "noun/en_singular", "text": "prosecutor", "is_base_form": true, "ipa": "/ˈprɑːsəˌkjuːtər/", "phonetic": "PROS-uh-kyoo-ter"}]}
+{"guid": "N36_107", "forms": [{"grammatical_form": "noun/en_singular", "text": "employee", "is_base_form": true, "ipa": "/ɪmˈplɔɪi/", "phonetic": "em-PLOY-ee"}]}
+{"guid": "N36_108", "forms": [{"grammatical_form": "noun/en_singular", "text": "officer", "is_base_form": true, "ipa": "/ˈɔːfəsər/", "phonetic": "AW-fuh-ser"}]}
+{"guid": "N36_109", "forms": [{"grammatical_form": "noun/en_singular", "text": "performer", "is_base_form": true, "ipa": "/pərˈfɔrmər/", "phonetic": "per-FOR-mer"}]}
+{"guid": "N36_110", "forms": [{"grammatical_form": "noun/en_singular", "text": "soprano", "is_base_form": true, "ipa": "/səˈprænoʊ/", "phonetic": "suh-PRAN-oh"}]}
+{"guid": "N36_111", "forms": [{"grammatical_form": "noun/en_singular", "text": "sculptor", "is_base_form": true, "ipa": "/ˈskʌlptər/", "phonetic": "SKULP-ter"}]}
+{"guid": "N36_112", "forms": [{"grammatical_form": "noun/en_singular", "text": "geographer", "is_base_form": true, "ipa": "/dʒiˈɑɡrəfər/", "phonetic": "jee-OG-ruh-fer"}]}
+{"guid": "N36_113", "forms": [{"grammatical_form": "noun/en_singular", "text": "exporter", "is_base_form": true, "ipa": "/ɪkˈspɔrtər/", "phonetic": "ek-SPOR-ter"}]}
+{"guid": "N36_114", "forms": [{"grammatical_form": "noun/en_singular", "text": "ambassador", "is_base_form": true, "ipa": "/æmˈbæsədɚ/", "phonetic": "am-BASS-uh-der"}]}
+{"guid": "N36_115", "forms": [{"grammatical_form": "noun/en_singular", "text": "samurai", "is_base_form": true, "ipa": "/ˈsæmʊˌraɪ/", "phonetic": "SAM-uh-rye"}]}
+{"guid": "N36_116", "forms": [{"grammatical_form": "noun/en_singular", "text": "chancellor", "is_base_form": true, "ipa": "/ˈtʃæn.sə.lɚ/", "phonetic": "CHAN-suh-ler"}]}
+{"guid": "N36_117", "forms": [{"grammatical_form": "noun/en_singular", "text": "masonry", "is_base_form": true, "ipa": "/ˈmeɪsənri/", "phonetic": "MAY-suhn-ree"}]}
+{"guid": "N36_118", "forms": [{"grammatical_form": "noun/en_singular", "text": "compiler", "is_base_form": true, "ipa": "/kəmˈpaɪlər/", "phonetic": "kum-PIE-ler"}]}
+{"guid": "N36_119", "forms": [{"grammatical_form": "noun/en_singular", "text": "commander-in-chief", "is_base_form": true, "ipa": "/kəˌmændər ɪn ˈtʃiːf/", "phonetic": "kuh-MAN-der-in-CHEEF"}]}
+{"guid": "N36_120", "forms": [{"grammatical_form": "noun/en_singular", "text": "vice-president", "is_base_form": true, "ipa": "/ˌvaɪs ˈprɛzɪdənt/", "phonetic": "VICE-PREZ-uh-dent"}]}
+{"guid": "N36_121", "forms": [{"grammatical_form": "noun/en_singular", "text": "vice-president", "is_base_form": true, "ipa": "/ˌvaɪs ˈprɛzɪdənt/", "phonetic": "VICE-PREZ-uh-dent"}]}
+{"guid": "N36_122", "forms": [{"grammatical_form": "noun/en_singular", "text": "secretary-general", "is_base_form": true, "ipa": "/ˌsɛkrəˈtɛri ˈdʒɛnərəl/", "phonetic": "SEK-ruh-TAIR-ee JEN-er-uhl"}]}
+{"guid": "N36_123", "forms": [{"grammatical_form": "noun/en_singular", "text": "secretary-general", "is_base_form": true, "ipa": "/ˌsɛkrəˈtɛri ˈdʒɛnərəl/", "phonetic": "SEK-ruh-TAIR-ee JEN-er-uhl"}]}
+{"guid": "N36_124", "forms": [{"grammatical_form": "noun/en_singular", "text": "singer-songwriter", "is_base_form": true, "ipa": "/ˈsɪŋər ˈsɔŋˌraɪtər/", "phonetic": "SING-er SONG-ry-ter"}]}
+{"guid": "N36_125", "forms": [{"grammatical_form": "noun/en_singular", "text": "editor-in-chief", "is_base_form": true, "ipa": "/ˈɛdətɚ ɪn ˈtʃiːf/", "phonetic": "ED-uh-ter-in-CHEEF"}]}
+{"guid": "N36_126", "forms": [{"grammatical_form": "noun/en_singular", "text": "co-star", "is_base_form": true, "ipa": "/ˈkoʊˌstɑr/", "phonetic": "KOH-star"}]}
+{"guid": "N36_127", "forms": [{"grammatical_form": "noun/en_singular", "text": "major-general", "is_base_form": true, "ipa": "/ˌmeɪdʒər ˈdʒɛnərəl/", "phonetic": "MAY-jer JEN-er-ul"}]}
+{"guid": "N36_128", "forms": [{"grammatical_form": "noun/en_singular", "text": "theologian", "is_base_form": true, "ipa": "/ˌθiːəˈloʊdʒən/", "phonetic": "thee-uh-LOH-jee-un"}]}
+{"guid": "N36_129", "forms": [{"grammatical_form": "noun/en_singular", "text": "anthropologist", "is_base_form": true, "ipa": "/ˌænθrəˈpɑlədʒɪst/", "phonetic": "an-thruh-POL-uh-jist"}]}
+{"guid": "N36_130", "forms": [{"grammatical_form": "noun/en_singular", "text": "sociologist", "is_base_form": true, "ipa": "/ˌsoʊsiˈɑlədʒɪst/", "phonetic": "soh-see-OL-uh-jist"}]}
+{"guid": "N36_131", "forms": [{"grammatical_form": "noun/en_singular", "text": "linguist", "is_base_form": true, "ipa": "/ˈlɪŋɡwɪst/", "phonetic": "LING-gwist"}]}
+{"guid": "N36_132", "forms": [{"grammatical_form": "noun/en_singular", "text": "pop star", "is_base_form": true, "ipa": "/ˈpɑp stɑr/", "phonetic": "POP-star"}]}
+{"guid": "N36_133", "forms": [{"grammatical_form": "noun/en_singular", "text": "businessman", "is_base_form": true, "ipa": "/ˈbɪznəsˌmæn/", "phonetic": "BIZ-nis-man"}]}
+{"guid": "N36_134", "forms": [{"grammatical_form": "noun/en_singular", "text": "businessman", "is_base_form": true, "ipa": "/ˈbɪznəsˌmæn/", "phonetic": "BIZ-nis-man"}]}
+{"guid": "N36_135", "forms": [{"grammatical_form": "noun/en_singular", "text": "chemist", "is_base_form": true, "ipa": "/ˈkɛmɪst/", "phonetic": "KEM-ist"}]}
+{"guid": "N36_136", "forms": [{"grammatical_form": "noun/en_singular", "text": "designer", "is_base_form": true, "ipa": "/dɪˈzaɪnɚ/", "phonetic": "duh-ZY-ner"}]}
+{"guid": "N36_137", "forms": [{"grammatical_form": "noun/en_singular", "text": "fire fighter", "is_base_form": true, "ipa": "/ˈfaɪər ˌfaɪtər/", "phonetic": "FIRE-FY-ter"}]}
+{"guid": "N36_138", "forms": [{"grammatical_form": "noun/en_singular", "text": "singer", "is_base_form": true, "ipa": "/ˈsɪŋər/", "phonetic": "SING-er"}]}

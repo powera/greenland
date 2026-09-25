@@ -1,3 +1,31 @@
 {"guid": "N18_001", "forms": [{"grammatical_form": "noun/en_singular", "text": "pi", "is_base_form": true, "ipa": "/paɪ/", "phonetic": "PI"}]}
 {"guid": "N18_004", "forms": [{"grammatical_form": "noun/en_singular", "text": "license plate", "is_base_form": true}]}
 {"guid": "N18_005", "forms": [{"grammatical_form": "noun/en_singular", "text": "gold medal", "is_base_form": true}]}
+{"guid": "N18_006", "forms": [{"grammatical_form": "noun/en_singular", "text": "graph", "is_base_form": true, "ipa": "/ɡræf/", "phonetic": "GRAF"}]}
+{"guid": "N18_007", "forms": [{"grammatical_form": "noun/en_singular", "text": "digit", "is_base_form": true, "ipa": "/ˈdɪdʒɪt/", "phonetic": "DIJ-it"}]}
+{"guid": "N18_008", "forms": [{"grammatical_form": "noun/en_singular", "text": "numeral", "is_base_form": true, "ipa": "/ˈnuːmərəl/", "phonetic": "NOO-muh-rul"}]}
+{"guid": "N18_009", "forms": [{"grammatical_form": "noun/en_singular", "text": "alpha", "is_base_form": true, "ipa": "/ˈælfə/", "phonetic": "AL-fuh"}]}
+{"guid": "N18_010", "forms": [{"grammatical_form": "noun/en_singular", "text": "reed", "is_base_form": true, "ipa": "/riːd/", "phonetic": "REED"}]}
+{"guid": "N18_011", "forms": [{"grammatical_form": "noun/en_singular", "text": "anthem", "is_base_form": true, "ipa": "/ˈænθəm/", "phonetic": "AN-thum"}]}
+{"guid": "N18_012", "forms": [{"grammatical_form": "noun/en_singular", "text": "motif", "is_base_form": true, "ipa": "/moʊˈtiːf/", "phonetic": "moh-TEEF"}]}
+{"guid": "N18_013", "forms": [{"grammatical_form": "noun/en_singular", "text": "vowel", "is_base_form": true, "ipa": "/ˈvaʊəl/", "phonetic": "VOW-uhl"}]}
+{"guid": "N18_014", "forms": [{"grammatical_form": "noun/en_singular", "text": "consonant", "is_base_form": true, "ipa": "/ˈkɑːnsənənt/", "phonetic": "KON-suh-nunt"}]}
+{"guid": "N18_015", "forms": [{"grammatical_form": "noun/en_singular", "text": "consonant", "is_base_form": true, "ipa": "/ˈkɑːnsənənt/", "phonetic": "KON-suh-nunt"}]}
+{"guid": "N18_016", "forms": [{"grammatical_form": "noun/en_singular", "text": "alphabet", "is_base_form": true, "ipa": "/ˈælfəˌbɛt/", "phonetic": "AL-fuh-bet"}]}
+{"guid": "N18_017", "forms": [{"grammatical_form": "noun/en_singular", "text": "comma", "is_base_form": true, "ipa": "/ˈkɑmə/", "phonetic": "KOM-uh"}]}
+{"guid": "N18_018", "forms": [{"grammatical_form": "noun/en_singular", "text": "apostrophe", "is_base_form": true, "ipa": "/əˈpɑstrəfi/", "phonetic": "uh-POS-truh-fee"}]}
+{"guid": "N18_019", "forms": [{"grammatical_form": "noun/en_singular", "text": "prefix", "is_base_form": true, "ipa": "/ˈpriːfɪks/", "phonetic": "PREE-fiks"}]}
+{"guid": "N18_020", "forms": [{"grammatical_form": "noun/en_singular", "text": "prefix", "is_base_form": true, "ipa": "/ˈpriːfɪks/", "phonetic": "PREE-fiks"}]}
+{"guid": "N18_021", "forms": [{"grammatical_form": "noun/en_singular", "text": "suffix", "is_base_form": true, "ipa": "/ˈsʌfɪks/", "phonetic": "SUF-iks"}]}
+{"guid": "N18_022", "forms": [{"grammatical_form": "noun/en_singular", "text": "epithet", "is_base_form": true, "ipa": "/ˈɛpəθɛt/", "phonetic": "EP-uh-thet"}]}
+{"guid": "N18_023", "forms": [{"grammatical_form": "noun/en_singular", "text": "diphthong", "is_base_form": true, "ipa": "/ˈdɪfθɔŋ/", "phonetic": "DIF-thong"}]}
+{"guid": "N18_024", "forms": [{"grammatical_form": "noun/en_singular", "text": "affix", "is_base_form": true, "ipa": "/ˈæfɪks/", "phonetic": "AF-iks"}]}
+{"guid": "N18_025", "forms": [{"grammatical_form": "noun/en_singular", "text": "infix", "is_base_form": true, "ipa": "/ˈɪnfɪks/", "phonetic": "IN-fiks"}]}
+{"guid": "N18_026", "forms": [{"grammatical_form": "noun/en_singular", "text": "anaphora", "is_base_form": true, "ipa": "/əˈnæfərə/", "phonetic": "uh-NAF-er-uh"}]}
+{"guid": "N18_027", "forms": [{"grammatical_form": "noun/en_singular", "text": "metonymy", "is_base_form": true, "ipa": "/məˈtɑːnəmi/", "phonetic": "meh-TAH-nuh-mee"}]}
+{"guid": "N18_028", "forms": [{"grammatical_form": "noun/en_singular", "text": "logogram", "is_base_form": true, "ipa": "/ˈlɑːɡəˌɡræm/", "phonetic": "LOG-uh-gram"}]}
+{"guid": "N18_029", "forms": [{"grammatical_form": "noun/en_singular", "text": "grapheme", "is_base_form": true, "ipa": "/ˈɡræfiːm/", "phonetic": "GRAF-eem"}]}
+{"guid": "N18_030", "forms": [{"grammatical_form": "noun/en_singular", "text": "ligature", "is_base_form": true, "ipa": "/ˈlɪɡətʃɚ/", "phonetic": "LIG-uh-cher"}]}
+{"guid": "N18_037", "forms": [{"grammatical_form": "noun/en_singular", "text": "goal", "is_base_form": true, "ipa": "/ɡoʊl/", "phonetic": "GOHL"}]}
+{"guid": "N18_038", "forms": [{"grammatical_form": "noun/en_singular", "text": "stripe", "is_base_form": true, "ipa": "/straɪp/", "phonetic": "STRYPE"}]}
+{"guid": "N18_039", "forms": [{"grammatical_form": "noun/en_singular", "text": "club", "is_base_form": true, "ipa": "/klʌb/", "phonetic": "KLUB"}]}

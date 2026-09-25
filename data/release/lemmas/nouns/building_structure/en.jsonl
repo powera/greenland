@@ -69,3 +69,30 @@
 {"guid": "N07_090", "forms": [{"grammatical_form": "noun/en_singular", "text": "movie theater", "is_base_form": true}]}
 {"guid": "N07_091", "forms": [{"grammatical_form": "noun/en_singular", "text": "concert hall", "is_base_form": true}]}
 {"guid": "N07_092", "forms": [{"grammatical_form": "noun/en_singular", "text": "nursing home", "is_base_form": true}]}
+{"guid": "N07_093", "forms": [{"grammatical_form": "noun/en_singular", "text": "stable", "is_base_form": true, "ipa": "/ˈsteɪbəl/", "phonetic": "STAY-bul"}]}
+{"guid": "N07_094", "forms": [{"grammatical_form": "noun/en_singular", "text": "laboratory", "is_base_form": true, "ipa": "/ˈlæbrəˌtɔri/", "phonetic": "LAB-ruh-tor-ee"}]}
+{"guid": "N07_095", "forms": [{"grammatical_form": "noun/en_singular", "text": "headquarters", "is_base_form": true, "ipa": "/ˈhɛdˌkwɔrtərz/", "phonetic": "HED-kwor-terz"}]}
+{"guid": "N07_096", "forms": [{"grammatical_form": "noun/en_singular", "text": "canal", "is_base_form": true, "ipa": "/kəˈnæl/", "phonetic": "kuh-NAL"}]}
+{"guid": "N07_097", "forms": [{"grammatical_form": "noun/en_singular", "text": "dome", "is_base_form": true, "ipa": "/doʊm/", "phonetic": "DOHM"}]}
+{"guid": "N07_098", "forms": [{"grammatical_form": "noun/en_singular", "text": "pavilion", "is_base_form": true, "ipa": "/pəˈvɪljən/", "phonetic": "puh-VIL-yun"}]}
+{"guid": "N07_099", "forms": [{"grammatical_form": "noun/en_singular", "text": "shaft", "is_base_form": true, "ipa": "/ʃæft/", "phonetic": "SHAFT"}]}
+{"guid": "N07_100", "forms": [{"grammatical_form": "noun/en_singular", "text": "dam", "is_base_form": true, "ipa": "/dæm/", "phonetic": "DAM"}]}
+{"guid": "N07_101", "forms": [{"grammatical_form": "noun/en_singular", "text": "arcade", "is_base_form": true, "ipa": "/ɑrˈkeɪd/", "phonetic": "ar-KAYD"}]}
+{"guid": "N07_102", "forms": [{"grammatical_form": "noun/en_singular", "text": "dairy", "is_base_form": true, "ipa": "/ˈdɛri/", "phonetic": "DAIR-ee"}]}
+{"guid": "N07_103", "forms": [{"grammatical_form": "noun/en_singular", "text": "burrow", "is_base_form": true, "ipa": "/ˈbɝːoʊ/", "phonetic": "BUR-oh"}]}
+{"guid": "N07_104", "forms": [{"grammatical_form": "noun/en_singular", "text": "masonry", "is_base_form": true, "ipa": "/ˈmeɪsənri/", "phonetic": "MAY-suhn-ree"}]}
+{"guid": "N07_105", "forms": [{"grammatical_form": "noun/en_singular", "text": "masonry", "is_base_form": true, "ipa": "/ˈmeɪsənri/", "phonetic": "MAY-suhn-ree"}]}
+{"guid": "N07_106", "forms": [{"grammatical_form": "noun/en_singular", "text": "plumbing", "is_base_form": true, "ipa": "/ˈplʌmɪŋ/", "phonetic": "PLUM-ing"}]}
+{"guid": "N07_107", "forms": [{"grammatical_form": "noun/en_singular", "text": "sewer", "is_base_form": true, "ipa": "/ˈsuːər/", "phonetic": "SOO-er"}]}
+{"guid": "N07_108", "forms": [{"grammatical_form": "noun/en_singular", "text": "basis", "is_base_form": true, "ipa": "/ˈbeɪsɪs/", "phonetic": "BAY-sis"}]}
+{"guid": "N07_109", "forms": [{"grammatical_form": "noun/en_singular", "text": "high-rise", "is_base_form": true, "ipa": "/ˈhaɪˌraɪz/", "phonetic": "HIGH-rise"}]}
+{"guid": "N07_110", "forms": [{"grammatical_form": "noun/en_singular", "text": "bookshop", "is_base_form": true, "ipa": "/ˈbʊkˌʃɑːp/", "phonetic": "BOOK-shop"}]}
+{"guid": "N07_111", "forms": [{"grammatical_form": "noun/en_singular", "text": "playground", "is_base_form": true, "ipa": "/ˈpleɪɡraʊnd/", "phonetic": "PLAY-ground"}]}
+{"guid": "N07_112", "forms": [{"grammatical_form": "noun/en_singular", "text": "cage", "is_base_form": true, "ipa": "/keɪdʒ/", "phonetic": "KAYJ"}]}
+{"guid": "N07_113", "forms": [{"grammatical_form": "noun/en_singular", "text": "cage", "is_base_form": true, "ipa": "/keɪdʒ/", "phonetic": "KAYJ"}]}
+{"guid": "N07_114", "forms": [{"grammatical_form": "noun/en_singular", "text": "café", "is_base_form": true, "ipa": "/kæˈfeɪ/", "phonetic": "ka-FAY"}]}
+{"guid": "N07_115", "forms": [{"grammatical_form": "noun/en_singular", "text": "sports centre", "is_base_form": true, "ipa": "/ˈspɔrts ˌsɛntər/", "phonetic": "SPORTS SEN-ter"}]}
+{"guid": "N07_116", "forms": [{"grammatical_form": "noun/en_singular", "text": "supermarket", "is_base_form": true, "ipa": "/ˈsuːpərˌmɑrkɪt/", "phonetic": "SOO-per-mar-kit"}]}
+{"guid": "N07_117", "forms": [{"grammatical_form": "noun/en_singular", "text": "elevator", "is_base_form": true, "ipa": "/ˈɛləveɪtɚ/", "phonetic": "EL-uh-vay-ter"}]}
+{"guid": "N07_118", "forms": [{"grammatical_form": "noun/en_singular", "text": "skyscraper", "is_base_form": true, "ipa": "/ˈskaɪˌskreɪpər/", "phonetic": "SKY-skrah-per"}]}
+{"guid": "N07_119", "forms": [{"grammatical_form": "noun/en_singular", "text": "platform", "is_base_form": true, "ipa": "/ˈplæt.fɔrm/", "phonetic": "PLAT-form"}]}

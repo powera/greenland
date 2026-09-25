@@ -1,2 +1,6 @@
 {"guid": "N31_001", "forms": [{"grammatical_form": "noun/en_singular", "text": "Coca-Cola", "is_base_form": true, "ipa": "/ˌkoʊ kə ˈkoʊlə/", "phonetic": "COH kə KOL-uh"}]}
 {"guid": "N31_002", "forms": [{"grammatical_form": "noun/en_singular", "text": "small business", "is_base_form": true}]}
+{"guid": "N31_003", "forms": [{"grammatical_form": "noun/en_singular", "text": "agency", "is_base_form": true, "ipa": "/ˈeɪdʒənsi/", "phonetic": "AY-juhn-see"}]}
+{"guid": "N31_004", "forms": [{"grammatical_form": "noun/en_singular", "text": "mcgraw-hill", "is_base_form": true, "ipa": "/məˈɡrɔː hɪl/", "phonetic": "muh-GRAW-hill"}]}
+{"guid": "N31_005", "forms": [{"grammatical_form": "noun/en_singular", "text": "start-up", "is_base_form": true, "ipa": "/ˈstɑrtˌʌp/", "phonetic": "START-up"}]}
+{"guid": "N31_006", "forms": [{"grammatical_form": "noun/en_singular", "text": "newspaper", "is_base_form": true, "ipa": "/ˈnuːzˌpeɪpər/", "phonetic": "NOOZ-pay-per"}]}

@@ -9,3 +9,30 @@
 {"guid": "N56_011", "forms": [{"grammatical_form": "noun/en_singular", "text": "national park", "is_base_form": true}]}
 {"guid": "N56_012", "forms": [{"grammatical_form": "noun/en_singular", "text": "north pole", "is_base_form": true}]}
 {"guid": "N56_013", "forms": [{"grammatical_form": "noun/en_singular", "text": "south pole", "is_base_form": true}]}
+{"guid": "N56_014", "forms": [{"grammatical_form": "noun/en_singular", "text": "subspace", "is_base_form": true, "ipa": "/ˈsʌbˌspeɪs/", "phonetic": "SUB-space"}]}
+{"guid": "N56_015", "forms": [{"grammatical_form": "noun/en_singular", "text": "downtown", "is_base_form": true, "ipa": "/ˈdaʊnˌtaʊn/", "phonetic": "DOWN-town"}]}
+{"guid": "N56_016", "forms": [{"grammatical_form": "noun/en_singular", "text": "border", "is_base_form": true, "ipa": "/ˈbɔr.dɚ/", "phonetic": "BOR-der"}]}
+{"guid": "N56_017", "forms": [{"grammatical_form": "noun/en_singular", "text": "territory", "is_base_form": true, "ipa": "/ˈtɛrəˌtɔri/", "phonetic": "TER-uh-tor-ee"}]}
+{"guid": "N56_018", "forms": [{"grammatical_form": "noun/en_singular", "text": "district", "is_base_form": true, "ipa": "/ˈdɪstrɪkt/", "phonetic": "DIS-trikt"}]}
+{"guid": "N56_019", "forms": [{"grammatical_form": "noun/en_singular", "text": "settlement", "is_base_form": true, "ipa": "/ˈsɛtəlmənt/", "phonetic": "SET-ul-munt"}]}
+{"guid": "N56_020", "forms": [{"grammatical_form": "noun/en_singular", "text": "outskirts", "is_base_form": true, "ipa": "/ˈaʊtˌskɝːts/", "phonetic": "OUT-skerts"}]}
+{"guid": "N56_021", "forms": [{"grammatical_form": "noun/en_singular", "text": "destination", "is_base_form": true, "ipa": "/ˌdɛstəˈneɪʃən/", "phonetic": "des-tuh-NAY-shun"}]}
+{"guid": "N56_022", "forms": [{"grammatical_form": "noun/en_singular", "text": "mainland", "is_base_form": true, "ipa": "/ˈmeɪnˌlænd/", "phonetic": "MAIN-land"}]}
+{"guid": "N56_023", "forms": [{"grammatical_form": "noun/en_singular", "text": "habitat", "is_base_form": true, "ipa": "/ˈhæbɪtæt/", "phonetic": "HAB-uh-tat"}]}
+{"guid": "N56_024", "forms": [{"grammatical_form": "noun/en_singular", "text": "tract", "is_base_form": true, "ipa": "/trækt/", "phonetic": "TRAKT"}]}
+{"guid": "N56_025", "forms": [{"grammatical_form": "noun/en_singular", "text": "steppe", "is_base_form": true, "ipa": "/stɛp/", "phonetic": "STEP"}]}
+{"guid": "N56_026", "forms": [{"grammatical_form": "noun/en_singular", "text": "suburb", "is_base_form": true, "ipa": "/ˈsʌbɝːb/", "phonetic": "SUH-burb"}]}
+{"guid": "N56_027", "forms": [{"grammatical_form": "noun/en_singular", "text": "ecoregion", "is_base_form": true, "ipa": "/ˈiːkoʊˌriːdʒən/", "phonetic": "EE-koh-REE-juhn"}]}
+{"guid": "N56_028", "forms": [{"grammatical_form": "noun/en_singular", "text": "slum", "is_base_form": true, "ipa": "/slʌm/", "phonetic": "SLUM"}]}
+{"guid": "N56_029", "forms": [{"grammatical_form": "noun/en_singular", "text": "landmass", "is_base_form": true, "ipa": "/ˈlændˌmæs/", "phonetic": "LAND-mass"}]}
+{"guid": "N56_030", "forms": [{"grammatical_form": "noun/en_singular", "text": "highland", "is_base_form": true, "ipa": "/ˈhaɪˌlænd/", "phonetic": "HIGH-land"}]}
+{"guid": "N56_031", "forms": [{"grammatical_form": "noun/en_singular", "text": "seaport", "is_base_form": true, "ipa": "/ˈsiːˌpɔrt/", "phonetic": "SEE-port"}]}
+{"guid": "N56_032", "forms": [{"grammatical_form": "noun/en_singular", "text": "excavation", "is_base_form": true, "ipa": "/ˌɛkskəˈveɪʃən/", "phonetic": "ek-skuh-VAY-shun"}]}
+{"guid": "N56_033", "forms": [{"grammatical_form": "noun/en_singular", "text": "city-state", "is_base_form": true, "ipa": "/ˈsɪtiˌsteɪt/", "phonetic": "SIT-ee-stayt"}]}
+{"guid": "N56_034", "forms": [{"grammatical_form": "noun/en_singular", "text": "underworld", "is_base_form": true, "ipa": "/ˈʌndɚˌwɝld/", "phonetic": "UN-der-world"}]}
+{"guid": "N56_035", "forms": [{"grammatical_form": "noun/en_singular", "text": "mercury", "is_base_form": true, "ipa": "/ˈmɝːkjəri/", "phonetic": "MUR-kyuh-ree"}]}
+{"guid": "N56_036", "forms": [{"grammatical_form": "noun/en_singular", "text": "city centre", "is_base_form": true, "ipa": "/ˈsɪti ˈsɛntər/", "phonetic": "SIH-tee SEN-ter"}]}
+{"guid": "N56_037", "forms": [{"grammatical_form": "noun/en_singular", "text": "town centre", "is_base_form": true, "ipa": "/ˌtaʊn ˈsɛntər/", "phonetic": "TOWN SEN-ter"}]}
+{"guid": "N56_038", "forms": [{"grammatical_form": "noun/en_singular", "text": "countryside", "is_base_form": true, "ipa": "/ˈkʌntriˌsaɪd/", "phonetic": "KUN-tree-side"}]}
+{"guid": "N56_039", "forms": [{"grammatical_form": "noun/en_singular", "text": "village", "is_base_form": true, "ipa": "/ˈvɪlɪdʒ/", "phonetic": "VIL-ij"}]}
+{"guid": "N56_040", "forms": [{"grammatical_form": "noun/en_singular", "text": "world", "is_base_form": true, "ipa": "/wɝld/", "phonetic": "WORLD"}]}

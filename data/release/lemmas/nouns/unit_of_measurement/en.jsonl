@@ -9,3 +9,14 @@
 {"guid": "N34_009", "forms": [{"grammatical_form": "noun/en_singular", "text": "degree", "is_base_form": true, "ipa": "dɪˈɡriː", "phonetic": "DEE-gruh"}]}
 {"guid": "N34_010", "forms": [{"grammatical_form": "noun/en_singular", "text": "celsius", "is_base_form": true, "ipa": "/ˈsɛlɪəs/", "phonetic": "SEL-ee-əs"}]}
 {"guid": "N34_011", "forms": [{"grammatical_form": "noun/en_singular", "text": "fahrenheit", "is_base_form": true, "ipa": "/ˈfɑːrɪntaɪn/", "phonetic": "FAR-in-tin"}]}
+{"guid": "N34_012", "forms": [{"grammatical_form": "noun/en_singular", "text": "ton", "is_base_form": true, "ipa": "/tʌn/", "phonetic": "TUN"}]}
+{"guid": "N34_013", "forms": [{"grammatical_form": "noun/en_singular", "text": "fee", "is_base_form": true, "ipa": "/fi/", "phonetic": "FEE"}]}
+{"guid": "N34_014", "forms": [{"grammatical_form": "noun/en_singular", "text": "tablespoon", "is_base_form": true, "ipa": "/ˈteɪbəlˌspuːn/", "phonetic": "TAY-bul-spoon"}]}
+{"guid": "N34_015", "forms": [{"grammatical_form": "noun/en_singular", "text": "teaspoonful", "is_base_form": true, "ipa": "/ˈtiˌspuːnfʊl/", "phonetic": "TEE-spoon-fool"}]}
+{"guid": "N34_016", "forms": [{"grammatical_form": "noun/en_singular", "text": "tablespoonful", "is_base_form": true, "ipa": "/ˈteɪbəlˌspuːnfʊl/", "phonetic": "TAY-bul-spoon-fool"}]}
+{"guid": "N34_017", "forms": [{"grammatical_form": "noun/en_singular", "text": "quart", "is_base_form": true, "ipa": "/kwɔrt/", "phonetic": "KWORT"}]}
+{"guid": "N34_018", "forms": [{"grammatical_form": "noun/en_singular", "text": "spoonful", "is_base_form": true, "ipa": "/ˈspuːnfʊl/", "phonetic": "SPOON-fuhl"}]}
+{"guid": "N34_019", "forms": [{"grammatical_form": "noun/en_singular", "text": "saltspoonful", "is_base_form": true, "ipa": "/ˈsɔltˌspuːnfəl/", "phonetic": "SAWLT-spoon-fuhl"}]}
+{"guid": "N34_020", "forms": [{"grammatical_form": "noun/en_singular", "text": "teacupful", "is_base_form": true, "ipa": "/ˈtiːˌkʌp.fʊl/", "phonetic": "TEE-kuhp-fuhl"}]}
+{"guid": "N34_021", "forms": [{"grammatical_form": "noun/en_singular", "text": "dessertspoonful", "is_base_form": true, "ipa": "/dɪˈzɝːtˌspuːnfʊl/", "phonetic": "dih-ZURT-spoon-fuhl"}]}
+{"guid": "N34_022", "forms": [{"grammatical_form": "noun/en_singular", "text": "gallon", "is_base_form": true, "ipa": "/ˈɡælən/", "phonetic": "GAL-un"}]}

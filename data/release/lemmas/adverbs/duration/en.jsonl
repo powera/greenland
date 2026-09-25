@@ -1,3 +1,5 @@
 {"guid": "D05_001", "forms": [{"grammatical_form": "adverb/en_positive", "text": "long", "is_base_form": true, "ipa": "/lɔːŋ/", "phonetic": "LONG"}, {"grammatical_form": "adverb/en_comparative", "text": "longer", "is_base_form": false}, {"grammatical_form": "adverb/en_superlative", "text": "longest", "is_base_form": false}]}
 {"guid": "D05_002", "forms": [{"grammatical_form": "adverb/en_positive", "text": "briefly", "is_base_form": true, "ipa": "/ˈbrif.li/", "phonetic": "BRIEF-lee"}]}
 {"guid": "D05_003", "forms": [{"grammatical_form": "adverb/en_positive", "text": "forever", "is_base_form": true, "ipa": "/ˈfɔːrəvɚ/", "phonetic": "FOH-ruh-VER"}]}
+{"guid": "D05_007", "forms": [{"grammatical_form": "adverb/en_positive", "text": "full-time", "is_base_form": true, "ipa": "/ˌfʊl ˈtaɪm/", "phonetic": "FULL-time"}]}
+{"guid": "D05_008", "forms": [{"grammatical_form": "adverb/en_positive", "text": "part-time", "is_base_form": true, "ipa": "/ˌpɑrtˈtaɪm/", "phonetic": "PART-time"}]}

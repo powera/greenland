@@ -50,3 +50,31 @@
 {"guid": "N03_074", "forms": [{"grammatical_form": "noun/en_singular", "text": "ring finger", "is_base_form": true}]}
 {"guid": "N03_075", "forms": [{"grammatical_form": "noun/en_singular", "text": "wisdom tooth", "is_base_form": true}]}
 {"guid": "N03_076", "forms": [{"grammatical_form": "noun/en_singular", "text": "vocal cords", "is_base_form": true}]}
+{"guid": "N03_077", "forms": [{"grammatical_form": "noun/en_singular", "text": "fin", "is_base_form": true, "ipa": "/fɪn/", "phonetic": "FIN"}]}
+{"guid": "N03_078", "forms": [{"grammatical_form": "noun/en_singular", "text": "cortex", "is_base_form": true, "ipa": "/ˈkɔrˌtɛks/", "phonetic": "KOR-teks"}]}
+{"guid": "N03_079", "forms": [{"grammatical_form": "noun/en_singular", "text": "sperm", "is_base_form": true, "ipa": "/spɝm/", "phonetic": "SPERM"}]}
+{"guid": "N03_080", "forms": [{"grammatical_form": "noun/en_singular", "text": "claw", "is_base_form": true, "ipa": "/klɔ/", "phonetic": "KLAW"}]}
+{"guid": "N03_081", "forms": [{"grammatical_form": "noun/en_singular", "text": "abdomen", "is_base_form": true, "ipa": "/ˈæbdəmən/", "phonetic": "AB-duh-men"}]}
+{"guid": "N03_082", "forms": [{"grammatical_form": "noun/en_singular", "text": "abdomen", "is_base_form": true, "ipa": "/ˈæbdəmən/", "phonetic": "AB-duh-men"}]}
+{"guid": "N03_083", "forms": [{"grammatical_form": "noun/en_singular", "text": "gland", "is_base_form": true, "ipa": "/ɡlænd/", "phonetic": "GLAND"}]}
+{"guid": "N03_084", "forms": [{"grammatical_form": "noun/en_singular", "text": "penis", "is_base_form": true, "ipa": "/ˈpiːnɪs/", "phonetic": "PEE-niss"}]}
+{"guid": "N03_085", "forms": [{"grammatical_form": "noun/en_singular", "text": "cartilage", "is_base_form": true, "ipa": "/ˈkɑrtəlɪdʒ/", "phonetic": "KAR-tuh-lij"}]}
+{"guid": "N03_086", "forms": [{"grammatical_form": "noun/en_singular", "text": "uterus", "is_base_form": true, "ipa": "/ˈjuːtərəs/", "phonetic": "YOO-tuh-rus"}]}
+{"guid": "N03_087", "forms": [{"grammatical_form": "noun/en_singular", "text": "ovary", "is_base_form": true, "ipa": "/ˈoʊvəri/", "phonetic": "OH-vuh-ree"}]}
+{"guid": "N03_088", "forms": [{"grammatical_form": "noun/en_singular", "text": "epidermis", "is_base_form": true, "ipa": "/ˌɛpəˈdɝmɪs/", "phonetic": "ep-uh-DER-mis"}]}
+{"guid": "N03_089", "forms": [{"grammatical_form": "noun/en_singular", "text": "artery", "is_base_form": true, "ipa": "/ˈɑrtəri/", "phonetic": "AR-tuh-ree"}]}
+{"guid": "N03_090", "forms": [{"grammatical_form": "noun/en_singular", "text": "thyroid", "is_base_form": true, "ipa": "/ˈθaɪrɔɪd/", "phonetic": "THY-royd"}]}
+{"guid": "N03_091", "forms": [{"grammatical_form": "noun/en_singular", "text": "thorax", "is_base_form": true, "ipa": "/ˈθɔːræks/", "phonetic": "THOR-aks"}]}
+{"guid": "N03_092", "forms": [{"grammatical_form": "noun/en_singular", "text": "vagina", "is_base_form": true, "ipa": "/vəˈdʒaɪnə/", "phonetic": "vuh-JY-nuh"}]}
+{"guid": "N03_093", "forms": [{"grammatical_form": "noun/en_singular", "text": "esophagus", "is_base_form": true, "ipa": "/ɪˈsɑːfəɡəs/", "phonetic": "ih-SOF-uh-gus"}]}
+{"guid": "N03_094", "forms": [{"grammatical_form": "noun/en_singular", "text": "placenta", "is_base_form": true, "ipa": "/pləˈsɛntə/", "phonetic": "pluh-SEN-tuh"}]}
+{"guid": "N03_095", "forms": [{"grammatical_form": "noun/en_singular", "text": "spleen", "is_base_form": true, "ipa": "/spliːn/", "phonetic": "SPLEEN"}]}
+{"guid": "N03_096", "forms": [{"grammatical_form": "noun/en_singular", "text": "pelvis", "is_base_form": true, "ipa": "/ˈpɛlvɪs/", "phonetic": "PEL-vis"}]}
+{"guid": "N03_097", "forms": [{"grammatical_form": "noun/en_singular", "text": "anus", "is_base_form": true, "ipa": "/ˈeɪnəs/", "phonetic": "AY-nus"}]}
+{"guid": "N03_098", "forms": [{"grammatical_form": "noun/en_singular", "text": "ligament", "is_base_form": true, "ipa": "/ˈlɪɡəmənt/", "phonetic": "LIG-uh-muhnt"}]}
+{"guid": "N03_099", "forms": [{"grammatical_form": "noun/en_singular", "text": "cuticle", "is_base_form": true, "ipa": "/ˈkjuːtɪkəl/", "phonetic": "KYOO-ti-kuhl"}]}
+{"guid": "N03_100", "forms": [{"grammatical_form": "noun/en_singular", "text": "tartar", "is_base_form": true, "ipa": "/ˈtɑrtər/", "phonetic": "TAR-ter"}]}
+{"guid": "N03_101", "forms": [{"grammatical_form": "noun/en_singular", "text": "loin", "is_base_form": true, "ipa": "/lɔɪn/", "phonetic": "LOYN"}]}
+{"guid": "N03_102", "forms": [{"grammatical_form": "noun/en_singular", "text": "circumcision", "is_base_form": true, "ipa": "/ˌsɝːkəmˈsɪʒən/", "phonetic": "sur-kum-SIZH-un"}]}
+{"guid": "N03_103", "forms": [{"grammatical_form": "noun/en_singular", "text": "shell", "is_base_form": true, "ipa": "/ʃɛl/", "phonetic": "SHEL"}]}
+{"guid": "N03_104", "forms": [{"grammatical_form": "noun/en_singular", "text": "beard", "is_base_form": true, "ipa": "/bɪrd/", "phonetic": "BEERD"}]}

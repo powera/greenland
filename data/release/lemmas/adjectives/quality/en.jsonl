@@ -85,3 +85,123 @@
 {"guid": "A05_197", "forms": [{"grammatical_form": "adjective/en_positive", "text": "fertile", "is_base_form": true}]}
 {"guid": "A05_216", "forms": [{"grammatical_form": "adjective/en_positive", "text": "solid", "is_base_form": true}]}
 {"guid": "A05_223", "forms": [{"grammatical_form": "adjective/en_positive", "text": "entire", "is_base_form": true, "ipa": "/ɪnˈtaɪɚ/", "phonetic": "en-TIRE"}]}
+{"guid": "A05_224", "forms": [{"grammatical_form": "adjective/en_positive", "text": "recursive", "is_base_form": true, "ipa": "/rɪˈkɝːsɪv/", "phonetic": "ree-KUR-siv"}]}
+{"guid": "A05_225", "forms": [{"grammatical_form": "adjective/en_positive", "text": "integrable", "is_base_form": true, "ipa": "/ˈɪntəɡreɪtəbəl/", "phonetic": "IN-ti-gray-tuh-bul"}]}
+{"guid": "A05_226", "forms": [{"grammatical_form": "adjective/en_positive", "text": "irreducible", "is_base_form": true, "ipa": "/ˌɪrɪˈdusəbəl/", "phonetic": "ir-ri-DOO-suh-bul"}]}
+{"guid": "A05_227", "forms": [{"grammatical_form": "adjective/en_positive", "text": "unbiased", "is_base_form": true, "ipa": "/ʌnˈbaɪəst/", "phonetic": "un-BY-ust"}]}
+{"guid": "A05_228", "forms": [{"grammatical_form": "adjective/en_positive", "text": "deterministic", "is_base_form": true, "ipa": "/dɪˌtɝməˈnɪstɪk/", "phonetic": "duh-ter-muh-NIS-tik"}]}
+{"guid": "A05_229", "forms": [{"grammatical_form": "adjective/en_positive", "text": "transitive", "is_base_form": true, "ipa": "/ˈtrænzətɪv/", "phonetic": "TRAN-zuh-tiv"}]}
+{"guid": "A05_230", "forms": [{"grammatical_form": "adjective/en_positive", "text": "provincial", "is_base_form": true, "ipa": "/prəˈvɪnʃəl/", "phonetic": "pruh-VIN-shul"}]}
+{"guid": "A05_231", "forms": [{"grammatical_form": "adjective/en_positive", "text": "musical", "is_base_form": true, "ipa": "/ˈmjuzɪkəl/", "phonetic": "MYOO-zi-kuhl"}]}
+{"guid": "A05_232", "forms": [{"grammatical_form": "adjective/en_positive", "text": "novel", "is_base_form": true, "ipa": "/ˈnɑvəl/", "phonetic": "NOV-ul"}]}
+{"guid": "A05_233", "forms": [{"grammatical_form": "adjective/en_positive", "text": "medicinal", "is_base_form": true, "ipa": "/məˈdɪsənəl/", "phonetic": "meh-DISS-uh-nuhl"}]}
+{"guid": "A05_234", "forms": [{"grammatical_form": "adjective/en_positive", "text": "supported", "is_base_form": true, "ipa": "/səˈpɔrtɪd/", "phonetic": "suh-PORT-id"}]}
+{"guid": "A05_235", "forms": [{"grammatical_form": "adjective/en_positive", "text": "ambitious", "is_base_form": true, "ipa": "/æmˈbɪʃəs/", "phonetic": "am-BISH-us"}]}
+{"guid": "A05_236", "forms": [{"grammatical_form": "adjective/en_positive", "text": "expensive", "is_base_form": true, "ipa": "/ɪkˈspɛnsɪv/", "phonetic": "ik-SPEN-siv"}]}
+{"guid": "A05_237", "forms": [{"grammatical_form": "adjective/en_positive", "text": "conventional", "is_base_form": true, "ipa": "/kənˈvɛnʃənəl/", "phonetic": "kun-VEN-shuh-nuhl"}]}
+{"guid": "A05_238", "forms": [{"grammatical_form": "adjective/en_positive", "text": "comparative", "is_base_form": true, "ipa": "/kəmˈpærətɪv/", "phonetic": "kuhm-PAR-uh-tiv"}]}
+{"guid": "A05_239", "forms": [{"grammatical_form": "adjective/en_positive", "text": "inclusive", "is_base_form": true, "ipa": "/ɪnˈkluːsɪv/", "phonetic": "in-KLOO-siv"}]}
+{"guid": "A05_240", "forms": [{"grammatical_form": "adjective/en_positive", "text": "associated", "is_base_form": true, "ipa": "/əˈsoʊsiˌeɪtɪd/", "phonetic": "uh-SOH-see-ay-tid"}]}
+{"guid": "A05_241", "forms": [{"grammatical_form": "adjective/en_positive", "text": "reasonable", "is_base_form": true, "ipa": "/ˈriːzənəbəl/", "phonetic": "REE-zuh-nuh-bul"}]}
+{"guid": "A05_242", "forms": [{"grammatical_form": "adjective/en_positive", "text": "unreasonable", "is_base_form": true, "ipa": "/ˌʌnˈriːzənəbəl/", "phonetic": "un-REE-zuh-nuh-bul"}]}
+{"guid": "A05_243", "forms": [{"grammatical_form": "adjective/en_positive", "text": "affirmative", "is_base_form": true, "ipa": "/əˈfɝːmətɪv/", "phonetic": "uh-FUR-muh-tiv"}]}
+{"guid": "A05_244", "forms": [{"grammatical_form": "adjective/en_positive", "text": "inadequate", "is_base_form": true, "ipa": "/ɪnˈædəkwət/", "phonetic": "in-AD-uh-kwut"}]}
+{"guid": "A05_245", "forms": [{"grammatical_form": "adjective/en_positive", "text": "unfair", "is_base_form": true, "ipa": "/ʌnˈfɛr/", "phonetic": "un-FAIR"}]}
+{"guid": "A05_246", "forms": [{"grammatical_form": "adjective/en_positive", "text": "adequate", "is_base_form": true, "ipa": "/ˈædɪkwət/", "phonetic": "AD-uh-kwit"}]}
+{"guid": "A05_247", "forms": [{"grammatical_form": "adjective/en_positive", "text": "plausible", "is_base_form": true, "ipa": "/ˈplɔzəbəl/", "phonetic": "PLAW-zuh-bul"}]}
+{"guid": "A05_248", "forms": [{"grammatical_form": "adjective/en_positive", "text": "applicable", "is_base_form": true, "ipa": "/əˈplɪkəbəl/", "phonetic": "uh-PLIK-uh-bul"}]}
+{"guid": "A05_249", "forms": [{"grammatical_form": "adjective/en_positive", "text": "rhythmic", "is_base_form": true, "ipa": "/ˈrɪðmɪk/", "phonetic": "RITH-mik"}]}
+{"guid": "A05_250", "forms": [{"grammatical_form": "adjective/en_positive", "text": "parasitic", "is_base_form": true, "ipa": "/ˌpærəˈsɪtɪk/", "phonetic": "pair-uh-SIT-ik"}]}
+{"guid": "A05_251", "forms": [{"grammatical_form": "adjective/en_positive", "text": "symbiotic", "is_base_form": true, "ipa": "/ˌsɪmbaɪˈɑtɪk/", "phonetic": "sim-by-OT-ik"}]}
+{"guid": "A05_252", "forms": [{"grammatical_form": "adjective/en_positive", "text": "programmable", "is_base_form": true, "ipa": "/ˈproʊɡræməbəl/", "phonetic": "PROH-gram-uh-bul"}]}
+{"guid": "A05_253", "forms": [{"grammatical_form": "adjective/en_positive", "text": "catalytic", "is_base_form": true, "ipa": "/ˌkætəˈlɪtɪk/", "phonetic": "kat-uh-LIT-ik"}]}
+{"guid": "A05_254", "forms": [{"grammatical_form": "adjective/en_positive", "text": "mitigating", "is_base_form": true, "ipa": "/ˈmɪtəˌɡeɪtɪŋ/", "phonetic": "MIT-uh-gay-ting"}]}
+{"guid": "A05_255", "forms": [{"grammatical_form": "adjective/en_positive", "text": "substantive", "is_base_form": true, "ipa": "/ˈsʌbstəntɪv/", "phonetic": "SUB-stuhn-tiv"}]}
+{"guid": "A05_256", "forms": [{"grammatical_form": "adjective/en_positive", "text": "substantive", "is_base_form": true, "ipa": "/ˈsʌbstəntɪv/", "phonetic": "SUB-stuhn-tiv"}]}
+{"guid": "A05_257", "forms": [{"grammatical_form": "adjective/en_positive", "text": "factual", "is_base_form": true, "ipa": "/ˈfæk.tʃu.əl/", "phonetic": "FAK-choo-uhl"}]}
+{"guid": "A05_258", "forms": [{"grammatical_form": "adjective/en_positive", "text": "punitive", "is_base_form": true, "ipa": "/ˈpjuːnətɪv/", "phonetic": "PYOO-nuh-tiv"}]}
+{"guid": "A05_259", "forms": [{"grammatical_form": "adjective/en_positive", "text": "equitable", "is_base_form": true, "ipa": "/ˈɛkwətəbəl/", "phonetic": "EK-wuh-tuh-buhl"}]}
+{"guid": "A05_260", "forms": [{"grammatical_form": "adjective/en_positive", "text": "disparate", "is_base_form": true, "ipa": "/ˈdɪspərət/", "phonetic": "DIS-puh-rut"}]}
+{"guid": "A05_261", "forms": [{"grammatical_form": "adjective/en_positive", "text": "ineffective", "is_base_form": true, "ipa": "/ˌɪnəˈfɛktɪv/", "phonetic": "in-uh-FEK-tiv"}]}
+{"guid": "A05_262", "forms": [{"grammatical_form": "adjective/en_positive", "text": "interpretive", "is_base_form": true, "ipa": "/ɪnˈtɝːprətɪv/", "phonetic": "in-TER-pruh-tiv"}]}
+{"guid": "A05_263", "forms": [{"grammatical_form": "adjective/en_positive", "text": "undue", "is_base_form": true, "ipa": "/ʌnˈdu/", "phonetic": "un-DOO"}]}
+{"guid": "A05_264", "forms": [{"grammatical_form": "adjective/en_positive", "text": "popular", "is_base_form": true, "ipa": "/ˈpɑpjələr/", "phonetic": "POP-yuh-ler"}]}
+{"guid": "A05_265", "forms": [{"grammatical_form": "adjective/en_positive", "text": "original", "is_base_form": true, "ipa": "/əˈrɪdʒənəl/", "phonetic": "uh-RIJ-uh-nuhl"}]}
+{"guid": "A05_266", "forms": [{"grammatical_form": "adjective/en_positive", "text": "standard", "is_base_form": true, "ipa": "/ˈstændɚd/", "phonetic": "STAN-derd"}]}
+{"guid": "A05_267", "forms": [{"grammatical_form": "adjective/en_positive", "text": "direct", "is_base_form": true, "ipa": "/dəˈrɛkt/", "phonetic": "duh-REKT"}]}
+{"guid": "A05_268", "forms": [{"grammatical_form": "adjective/en_positive", "text": "average", "is_base_form": true, "ipa": "/ˈævərɪdʒ/", "phonetic": "AV-er-ij"}]}
+{"guid": "A05_269", "forms": [{"grammatical_form": "adjective/en_positive", "text": "distinct", "is_base_form": true, "ipa": "/dɪˈstɪŋkt/", "phonetic": "dis-TINKT"}]}
+{"guid": "A05_270", "forms": [{"grammatical_form": "adjective/en_positive", "text": "specific", "is_base_form": true, "ipa": "/spəˈsɪfɪk/", "phonetic": "spuh-SIF-ik"}]}
+{"guid": "A05_271", "forms": [{"grammatical_form": "adjective/en_positive", "text": "scientific", "is_base_form": true, "ipa": "/ˌsaɪənˈtɪfɪk/", "phonetic": "sy-un-TIF-ik"}]}
+{"guid": "A05_272", "forms": [{"grammatical_form": "adjective/en_positive", "text": "scientific", "is_base_form": true, "ipa": "/ˌsaɪənˈtɪfɪk/", "phonetic": "sy-un-TIF-ik"}]}
+{"guid": "A05_273", "forms": [{"grammatical_form": "adjective/en_positive", "text": "ordinary", "is_base_form": true, "ipa": "/ˈɔrdəˌnɛri/", "phonetic": "OR-duh-nair-ee"}]}
+{"guid": "A05_274", "forms": [{"grammatical_form": "adjective/en_positive", "text": "commercial", "is_base_form": true, "ipa": "/kəˈmɝːʃəl/", "phonetic": "kuh-MER-shul"}]}
+{"guid": "A05_275", "forms": [{"grammatical_form": "adjective/en_positive", "text": "positive", "is_base_form": true, "ipa": "/ˈpɑzətɪv/", "phonetic": "POZ-uh-tiv"}]}
+{"guid": "A05_276", "forms": [{"grammatical_form": "adjective/en_positive", "text": "useful", "is_base_form": true, "ipa": "/ˈjuːsfəl/", "phonetic": "YOOS-ful"}]}
+{"guid": "A05_277", "forms": [{"grammatical_form": "adjective/en_positive", "text": "spiced", "is_base_form": true, "ipa": "/spaɪst/", "phonetic": "SPYST"}]}
+{"guid": "A05_278", "forms": [{"grammatical_form": "adjective/en_positive", "text": "spiced", "is_base_form": true, "ipa": "/spaɪst/", "phonetic": "SPYST"}]}
+{"guid": "A05_279", "forms": [{"grammatical_form": "adjective/en_positive", "text": "savory", "is_base_form": true, "ipa": "/ˈseɪvəri/", "phonetic": "SAY-vuh-ree"}]}
+{"guid": "A05_280", "forms": [{"grammatical_form": "adjective/en_positive", "text": "so-called", "is_base_form": true, "ipa": "/ˈsoʊˌkɔld/", "phonetic": "SOH-kawld"}]}
+{"guid": "A05_281", "forms": [{"grammatical_form": "adjective/en_positive", "text": "well-known", "is_base_form": true, "ipa": "/ˌwɛlˈnoʊn/", "phonetic": "WEL-NOHN"}]}
+{"guid": "A05_282", "forms": [{"grammatical_form": "adjective/en_positive", "text": "well-known", "is_base_form": true, "ipa": "/ˌwɛlˈnoʊn/", "phonetic": "WEL-NOHN"}]}
+{"guid": "A05_283", "forms": [{"grammatical_form": "adjective/en_positive", "text": "high-quality", "is_base_form": true, "ipa": "/ˌhaɪˈkwɑləti/", "phonetic": "HY-KWOL-uh-tee"}]}
+{"guid": "A05_284", "forms": [{"grammatical_form": "adjective/en_positive", "text": "non-fiction", "is_base_form": true, "ipa": "/ˌnɑnˈfɪkʃən/", "phonetic": "non-FIK-shun"}]}
+{"guid": "A05_285", "forms": [{"grammatical_form": "adjective/en_positive", "text": "well-developed", "is_base_form": true, "ipa": "/ˌwɛl dɪˈvɛləpt/", "phonetic": "WEL-di-VELOPT"}]}
+{"guid": "A05_286", "forms": [{"grammatical_form": "adjective/en_positive", "text": "best-selling", "is_base_form": true, "ipa": "/ˌbɛstˈsɛlɪŋ/", "phonetic": "best-SEL-ing"}]}
+{"guid": "A05_287", "forms": [{"grammatical_form": "adjective/en_positive", "text": "well-defined", "is_base_form": true, "ipa": "/ˌwɛl dɪˈfaɪnd/", "phonetic": "WEL-di-FYND"}]}
+{"guid": "A05_288", "forms": [{"grammatical_form": "adjective/en_positive", "text": "award-winning", "is_base_form": true, "ipa": "/əˈwɔrdˌwɪnɪŋ/", "phonetic": "uh-WORD-WIN-ing"}]}
+{"guid": "A05_289", "forms": [{"grammatical_form": "adjective/en_positive", "text": "socio-economic", "is_base_form": true, "ipa": "/ˌsoʊsi.oʊˌɛkəˈnɑmɪk/", "phonetic": "SOH-see-oh-ek-uh-NAH-mik"}]}
+{"guid": "A05_290", "forms": [{"grammatical_form": "adjective/en_positive", "text": "high-level", "is_base_form": true, "ipa": "/ˌhaɪ ˈlɛvəl/", "phonetic": "HIGH-LEV-uhl"}]}
+{"guid": "A05_291", "forms": [{"grammatical_form": "adjective/en_positive", "text": "high-level", "is_base_form": true, "ipa": "/ˌhaɪ ˈlɛvəl/", "phonetic": "HIGH-LEV-uhl"}]}
+{"guid": "A05_292", "forms": [{"grammatical_form": "adjective/en_positive", "text": "real-world", "is_base_form": true, "ipa": "/ˈriːl ˌwɝːld/", "phonetic": "REEL-WURLD"}]}
+{"guid": "A05_293", "forms": [{"grammatical_form": "adjective/en_positive", "text": "self-governing", "is_base_form": true, "ipa": "/ˌsɛlf ˈɡʌvərnɪŋ/", "phonetic": "self-GUV-er-ning"}]}
+{"guid": "A05_294", "forms": [{"grammatical_form": "adjective/en_positive", "text": "non-standard", "is_base_form": true, "ipa": "/ˌnɑnˈstændɚd/", "phonetic": "non-STAR-durd"}]}
+{"guid": "A05_295", "forms": [{"grammatical_form": "adjective/en_positive", "text": "middle-aged", "is_base_form": true, "ipa": "/ˌmɪdəlˈeɪdʒd/", "phonetic": "MID-uhl-AYJD"}]}
+{"guid": "A05_296", "forms": [{"grammatical_form": "adjective/en_positive", "text": "non-zero", "is_base_form": true, "ipa": "/ˌnɑnˈzɪroʊ/", "phonetic": "non-ZEER-oh"}]}
+{"guid": "A05_297", "forms": [{"grammatical_form": "adjective/en_positive", "text": "first-class", "is_base_form": true, "ipa": "/ˌfɝst ˈklæs/", "phonetic": "FURST-KLASS"}]}
+{"guid": "A05_298", "forms": [{"grammatical_form": "adjective/en_positive", "text": "in-depth", "is_base_form": true, "ipa": "/ˌɪn ˈdɛpθ/", "phonetic": "in-DEPTH"}]}
+{"guid": "A05_299", "forms": [{"grammatical_form": "adjective/en_positive", "text": "high-end", "is_base_form": true, "ipa": "/ˌhaɪ ˈɛnd/", "phonetic": "HIGH-end"}]}
+{"guid": "A05_300", "forms": [{"grammatical_form": "adjective/en_positive", "text": "first-hand", "is_base_form": true, "ipa": "/ˌfɝst ˈhænd/", "phonetic": "FURST-HAND"}]}
+{"guid": "A05_301", "forms": [{"grammatical_form": "adjective/en_positive", "text": "high-resolution", "is_base_form": true, "ipa": "/ˌhaɪ ˈrɛzəˌluːʃən/", "phonetic": "HY-rez-uh-LOO-shun"}]}
+{"guid": "A05_302", "forms": [{"grammatical_form": "adjective/en_positive", "text": "self-proclaimed", "is_base_form": true, "ipa": "/ˌsɛlf proʊˈkleɪmd/", "phonetic": "self-proh-KLĀMD"}]}
+{"guid": "A05_303", "forms": [{"grammatical_form": "adjective/en_positive", "text": "one-dimensional", "is_base_form": true, "ipa": "/ˌwʌn dəˈmɛnʃənəl/", "phonetic": "WUN-duh-MEN-shuh-nuhl"}]}
+{"guid": "A05_304", "forms": [{"grammatical_form": "adjective/en_positive", "text": "well-documented", "is_base_form": true, "ipa": "/ˌwɛl ˈdɑkjəˌmɛntɪd/", "phonetic": "WEL-DOK-yuh-men-tid"}]}
+{"guid": "A05_305", "forms": [{"grammatical_form": "adjective/en_positive", "text": "well-trained", "is_base_form": true, "ipa": "/ˌwɛl ˈtreɪnd/", "phonetic": "WEL-TRAYND"}]}
+{"guid": "A05_306", "forms": [{"grammatical_form": "adjective/en_positive", "text": "low-pressure", "is_base_form": true, "ipa": "/ˌloʊ ˈprɛʃɚ/", "phonetic": "LOH-PRESH-er"}]}
+{"guid": "A05_307", "forms": [{"grammatical_form": "adjective/en_positive", "text": "top-level", "is_base_form": true, "ipa": "/ˌtɑp ˈlɛvəl/", "phonetic": "TOP-lev-uhl"}]}
+{"guid": "A05_308", "forms": [{"grammatical_form": "adjective/en_positive", "text": "world-class", "is_base_form": true, "ipa": "/ˌwɝːld ˈklæs/", "phonetic": "WORLD-klass"}]}
+{"guid": "A05_309", "forms": [{"grammatical_form": "adjective/en_positive", "text": "highest-grossing", "is_base_form": true, "ipa": "/ˌhaɪəst ˈɡroʊsɪŋ/", "phonetic": "HIGH-ist GROW-sing"}]}
+{"guid": "A05_310", "forms": [{"grammatical_form": "adjective/en_positive", "text": "peer-reviewed", "is_base_form": true, "ipa": "/ˌpɪr rɪˈvjud/", "phonetic": "PEER-ree-VYOOD"}]}
+{"guid": "A05_311", "forms": [{"grammatical_form": "adjective/en_positive", "text": "better-known", "is_base_form": true, "ipa": "/ˌbɛtɚˈnoʊn/", "phonetic": "BET-er-NOHN"}]}
+{"guid": "A05_312", "forms": [{"grammatical_form": "adjective/en_positive", "text": "clear-cut", "is_base_form": true, "ipa": "/ˈklɪrˌkʌt/", "phonetic": "KLEER-kut"}]}
+{"guid": "A05_313", "forms": [{"grammatical_form": "adjective/en_positive", "text": "high-performance", "is_base_form": true, "ipa": "/ˌhaɪ pɚˈfɔrməns/", "phonetic": "HIGH-per-FOR-muhns"}]}
+{"guid": "A05_314", "forms": [{"grammatical_form": "adjective/en_positive", "text": "high-performance", "is_base_form": true, "ipa": "/ˌhaɪ pɚˈfɔrməns/", "phonetic": "HIGH-per-FOR-muhns"}]}
+{"guid": "A05_315", "forms": [{"grammatical_form": "adjective/en_positive", "text": "second-class", "is_base_form": true, "ipa": "/ˈsɛkənd ˌklæs/", "phonetic": "SEK-und-KLASS"}]}
+{"guid": "A05_316", "forms": [{"grammatical_form": "adjective/en_positive", "text": "record-breaking", "is_base_form": true, "ipa": "/ˈrɛkərdˌbreɪkɪŋ/", "phonetic": "REK-erd-BRAY-king"}]}
+{"guid": "A05_317", "forms": [{"grammatical_form": "adjective/en_positive", "text": "first-rate", "is_base_form": true, "ipa": "/ˌfɝst ˈreɪt/", "phonetic": "FURST-RAYT"}]}
+{"guid": "A05_318", "forms": [{"grammatical_form": "adjective/en_positive", "text": "like-minded", "is_base_form": true, "ipa": "/ˌlaɪkˈmaɪndɪd/", "phonetic": "LIKE-MYND-id"}]}
+{"guid": "A05_319", "forms": [{"grammatical_form": "adjective/en_positive", "text": "well-suited", "is_base_form": true, "ipa": "/ˌwɛlˈsuːtɪd/", "phonetic": "WEL-SOO-tid"}]}
+{"guid": "A05_320", "forms": [{"grammatical_form": "adjective/en_positive", "text": "state-of-the-art", "is_base_form": true, "ipa": "/ˌsteɪt əv ði ˈɑrt/", "phonetic": "STAYT-uhv-thee-ART"}]}
+{"guid": "A05_321", "forms": [{"grammatical_form": "adjective/en_positive", "text": "little-known", "is_base_form": true, "ipa": "/ˌlɪtəlˈnoʊn/", "phonetic": "LIT-ul-NOHN"}]}
+{"guid": "A05_322", "forms": [{"grammatical_form": "adjective/en_positive", "text": "higher-level", "is_base_form": true, "ipa": "/ˌhaɪɚ ˈlɛvəl/", "phonetic": "HY-er-LEV-ul"}]}
+{"guid": "A05_323", "forms": [{"grammatical_form": "adjective/en_positive", "text": "sought-after", "is_base_form": true, "ipa": "/ˌsɔtˈæftɚ/", "phonetic": "SAWT-AF-ter"}]}
+{"guid": "A05_324", "forms": [{"grammatical_form": "adjective/en_positive", "text": "higher-order", "is_base_form": true, "ipa": "/ˌhaɪɚ ˈɔrdɚ/", "phonetic": "HY-er-OR-der"}]}
+{"guid": "A05_325", "forms": [{"grammatical_form": "adjective/en_positive", "text": "all-powerful", "is_base_form": true, "ipa": "/ˌɔlˈpaʊərfəl/", "phonetic": "AWL-POW-er-fuhl"}]}
+{"guid": "A05_326", "forms": [{"grammatical_form": "adjective/en_positive", "text": "co-operative", "is_base_form": true, "ipa": "/koʊˈɑpərətɪv/", "phonetic": "koh-OP-uh-ruh-tiv"}]}
+{"guid": "A05_327", "forms": [{"grammatical_form": "adjective/en_positive", "text": "agreed-upon", "is_base_form": true, "ipa": "/əˈɡrid əˌpɑn/", "phonetic": "uh-GREED-uh-PON"}]}
+{"guid": "A05_328", "forms": [{"grammatical_form": "adjective/en_positive", "text": "well-received", "is_base_form": true, "ipa": "/ˌwɛl rɪˈsivd/", "phonetic": "WEL-ri-SEEVT"}]}
+{"guid": "A05_329", "forms": [{"grammatical_form": "adjective/en_positive", "text": "lesser-known", "is_base_form": true, "ipa": "/ˌlɛsɚˈnoʊn/", "phonetic": "LES-er-NONE"}]}
+{"guid": "A05_330", "forms": [{"grammatical_form": "adjective/en_positive", "text": "all-star", "is_base_form": true, "ipa": "/ˈɔlˌstɑr/", "phonetic": "AWL-star"}]}
+{"guid": "A05_331", "forms": [{"grammatical_form": "adjective/en_positive", "text": "evidence-based", "is_base_form": true, "ipa": "/ˈɛvɪdəns beɪst/", "phonetic": "EV-uh-dens-bayst"}]}
+{"guid": "A05_332", "forms": [{"grammatical_form": "adjective/en_positive", "text": "well-studied", "is_base_form": true, "ipa": "/ˌwɛl ˈstʌdid/", "phonetic": "WEL-STUH-deed"}]}
+{"guid": "A05_333", "forms": [{"grammatical_form": "adjective/en_positive", "text": "fine-grained", "is_base_form": true, "ipa": "/ˈfaɪnˌɡreɪnd/", "phonetic": "FINE-graynd"}]}
+{"guid": "A05_334", "forms": [{"grammatical_form": "adjective/en_positive", "text": "fluent", "is_base_form": true, "ipa": "/ˈfluːənt/", "phonetic": "FLOO-ent"}]}
+{"guid": "A05_335", "forms": [{"grammatical_form": "adjective/en_positive", "text": "accusative", "is_base_form": true, "ipa": "/əˈkjuːzətɪv/", "phonetic": "uh-KYOO-zuh-tiv"}]}
+{"guid": "A05_336", "forms": [{"grammatical_form": "adjective/en_positive", "text": "clever", "is_base_form": true, "ipa": "/ˈklɛvɚ/", "phonetic": "KLEV-er"}]}
+{"guid": "A05_337", "forms": [{"grammatical_form": "adjective/en_positive", "text": "weak", "is_base_form": true, "ipa": "/wiːk/", "phonetic": "WEEK"}]}
+{"guid": "A05_338", "forms": [{"grammatical_form": "adjective/en_positive", "text": "uniform", "is_base_form": true, "ipa": "/ˈjuːnəfɔrm/", "phonetic": "YOO-nuh-form"}]}
+{"guid": "A05_339", "forms": [{"grammatical_form": "adjective/en_positive", "text": "uniform", "is_base_form": true, "ipa": "/ˈjuːnəfɔrm/", "phonetic": "YOO-nuh-form"}]}
+{"guid": "A05_340", "forms": [{"grammatical_form": "adjective/en_positive", "text": "horrible", "is_base_form": true, "ipa": "/ˈhɔrəbəl/", "phonetic": "HOR-uh-bul"}]}
+{"guid": "A05_341", "forms": [{"grammatical_form": "adjective/en_positive", "text": "interesting", "is_base_form": true, "ipa": "/ˈɪntrəstɪŋ/", "phonetic": "IN-truh-sting"}]}
+{"guid": "A05_342", "forms": [{"grammatical_form": "adjective/en_positive", "text": "untidy", "is_base_form": true, "ipa": "/ʌnˈtaɪdi/", "phonetic": "un-TY-dee"}]}
+{"guid": "A05_343", "forms": [{"grammatical_form": "adjective/en_positive", "text": "unusual", "is_base_form": true, "ipa": "/ʌnˈjuːʒuəl/", "phonetic": "un-YOO-zhoo-uhl"}]}

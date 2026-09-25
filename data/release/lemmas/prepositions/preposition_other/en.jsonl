@@ -24,3 +24,8 @@
 {"guid": "R99_035", "forms": [{"grammatical_form": "preposition/base", "text": "after", "is_base_form": true, "ipa": "/ˈæftɚ/", "phonetic": "AF-ter"}]}
 {"guid": "R99_036", "forms": [{"grammatical_form": "preposition/base", "text": "before", "is_base_form": true, "ipa": "/bɪˈfɔr/", "phonetic": "bih-FOR"}]}
 {"guid": "R99_037", "forms": [{"grammatical_form": "preposition/base", "text": "except", "is_base_form": true, "ipa": "/ɪkˈsɛpt/", "phonetic": "ik-SEPT"}]}
+{"guid": "R99_038", "forms": [{"grammatical_form": "preposition/base", "text": "modulo", "is_base_form": true, "ipa": "/ˈmɑːdʒəloʊ/", "phonetic": "MOD-yuh-loh"}]}
+{"guid": "R99_039", "forms": [{"grammatical_form": "preposition/base", "text": "within", "is_base_form": true, "ipa": "/wɪˈðɪn/", "phonetic": "wi-THIN"}]}
+{"guid": "R99_040", "forms": [{"grammatical_form": "preposition/base", "text": "per", "is_base_form": true, "ipa": "/pɚ/", "phonetic": "PUR"}]}
+{"guid": "R99_041", "forms": [{"grammatical_form": "preposition/base", "text": "throughout", "is_base_form": true, "ipa": "/θruˈaʊt/", "phonetic": "throo-OUT"}]}
+{"guid": "R99_042", "forms": [{"grammatical_form": "preposition/base", "text": "half-past", "is_base_form": true, "ipa": "/ˌhæf ˈpæst/", "phonetic": "HAF-past"}]}

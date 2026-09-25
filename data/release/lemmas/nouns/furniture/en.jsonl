@@ -9,3 +9,7 @@
 {"guid": "N39_017", "forms": [{"grammatical_form": "noun/en_singular", "text": "bunk bed", "is_base_form": true}]}
 {"guid": "N39_018", "forms": [{"grammatical_form": "noun/en_singular", "text": "rocking chair", "is_base_form": true}]}
 {"guid": "N39_019", "forms": [{"grammatical_form": "noun/en_singular", "text": "ironing board", "is_base_form": true}]}
+{"guid": "N39_020", "forms": [{"grammatical_form": "noun/en_singular", "text": "throne", "is_base_form": true, "ipa": "/θroʊn/", "phonetic": "THROHN"}]}
+{"guid": "N39_021", "forms": [{"grammatical_form": "noun/en_singular", "text": "cupboard", "is_base_form": true, "ipa": "/ˈkʌbərd/", "phonetic": "KUP-bord"}]}
+{"guid": "N39_022", "forms": [{"grammatical_form": "noun/en_singular", "text": "rug", "is_base_form": true, "ipa": "/rʌɡ/", "phonetic": "RUG"}]}
+{"guid": "N39_023", "forms": [{"grammatical_form": "noun/en_singular", "text": "sofa", "is_base_form": true, "ipa": "/ˈsoʊfə/", "phonetic": "SOH-fuh"}]}

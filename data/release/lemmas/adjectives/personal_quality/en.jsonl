@@ -22,3 +22,20 @@
 {"guid": "A16_024", "forms": [{"grammatical_form": "adjective/en_positive", "text": "humble", "is_base_form": true}]}
 {"guid": "A16_025", "forms": [{"grammatical_form": "adjective/en_positive", "text": "stubborn", "is_base_form": true}]}
 {"guid": "A16_026", "forms": [{"grammatical_form": "adjective/en_comparative", "text": "more loyal", "is_base_form": false}, {"grammatical_form": "adjective/en_superlative", "text": "most loyal", "is_base_form": false}]}
+{"guid": "A16_030", "forms": [{"grammatical_form": "adjective/en_positive", "text": "musical", "is_base_form": true, "ipa": "/ˈmjuzɪkəl/", "phonetic": "MYOO-zi-kuhl"}]}
+{"guid": "A16_031", "forms": [{"grammatical_form": "adjective/en_positive", "text": "anonymous", "is_base_form": true, "ipa": "/əˈnɑnəməs/", "phonetic": "uh-NON-uh-mus"}]}
+{"guid": "A16_032", "forms": [{"grammatical_form": "adjective/en_positive", "text": "aggressive", "is_base_form": true, "ipa": "/əˈɡrɛsɪv/", "phonetic": "uh-GRES-iv"}]}
+{"guid": "A16_033", "forms": [{"grammatical_form": "adjective/en_positive", "text": "decisive", "is_base_form": true, "ipa": "/dɪˈsaɪsɪv/", "phonetic": "di-SY-siv"}]}
+{"guid": "A16_034", "forms": [{"grammatical_form": "adjective/en_positive", "text": "ambitious", "is_base_form": true, "ipa": "/æmˈbɪʃəs/", "phonetic": "am-BISH-us"}]}
+{"guid": "A16_035", "forms": [{"grammatical_form": "adjective/en_positive", "text": "liberal", "is_base_form": true, "ipa": "/ˈlɪbərəl/", "phonetic": "LIB-er-uhl"}]}
+{"guid": "A16_036", "forms": [{"grammatical_form": "adjective/en_positive", "text": "masculine", "is_base_form": true, "ipa": "/ˈmæskjəlɪn/", "phonetic": "MAS-kyuh-lin"}]}
+{"guid": "A16_037", "forms": [{"grammatical_form": "adjective/en_positive", "text": "personal", "is_base_form": true, "ipa": "/ˈpɝːsənəl/", "phonetic": "PUR-suh-nuhl"}]}
+{"guid": "A16_038", "forms": [{"grammatical_form": "adjective/en_positive", "text": "high-energy", "is_base_form": true, "ipa": "/ˌhaɪ ˈɛnɚdʒi/", "phonetic": "HY-en-er-jee"}]}
+{"guid": "A16_039", "forms": [{"grammatical_form": "adjective/en_positive", "text": "high-pressure", "is_base_form": true, "ipa": "/ˌhaɪˈprɛʃər/", "phonetic": "HY-PRESH-er"}]}
+{"guid": "A16_040", "forms": [{"grammatical_form": "adjective/en_positive", "text": "good-natured", "is_base_form": true, "ipa": "/ˌɡʊdˈneɪtʃərd/", "phonetic": "GOOD-NAY-cherd"}]}
+{"guid": "A16_041", "forms": [{"grammatical_form": "adjective/en_positive", "text": "hard-working", "is_base_form": true, "ipa": "/ˌhɑrd ˈwɝkɪŋ/", "phonetic": "HARD-WUR-king"}]}
+{"guid": "A16_042", "forms": [{"grammatical_form": "adjective/en_positive", "text": "silly", "is_base_form": true, "ipa": "/ˈsɪli/", "phonetic": "SIL-ee"}]}
+{"guid": "A16_043", "forms": [{"grammatical_form": "adjective/en_positive", "text": "clever", "is_base_form": true, "ipa": "/ˈklɛvɚ/", "phonetic": "KLEV-er"}]}
+{"guid": "A16_044", "forms": [{"grammatical_form": "adjective/en_positive", "text": "naughty", "is_base_form": true, "ipa": "/ˈnɔti/", "phonetic": "NAW-tee"}]}
+{"guid": "A16_045", "forms": [{"grammatical_form": "adjective/en_positive", "text": "unfriendly", "is_base_form": true, "ipa": "/ʌnˈfrɛndli/", "phonetic": "un-FREND-lee"}]}
+{"guid": "A16_046", "forms": [{"grammatical_form": "adjective/en_positive", "text": "unkind", "is_base_form": true, "ipa": "/ʌnˈkaɪnd/", "phonetic": "un-KIND"}]}

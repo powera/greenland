@@ -30,3 +30,17 @@
 {"guid": "N25_043", "forms": [{"grammatical_form": "noun/en_singular", "text": "middle age", "is_base_form": true}]}
 {"guid": "N25_044", "forms": [{"grammatical_form": "noun/en_singular", "text": "old age", "is_base_form": true}]}
 {"guid": "N25_045", "forms": [{"grammatical_form": "noun/en_singular", "text": "half time", "is_base_form": true}]}
+{"guid": "N25_046", "forms": [{"grammatical_form": "noun/en_singular", "text": "reign", "is_base_form": true, "ipa": "/reɪn/", "phonetic": "RAYN"}]}
+{"guid": "N25_047", "forms": [{"grammatical_form": "noun/en_singular", "text": "exile", "is_base_form": true, "ipa": "/ˈɛɡzaɪl/", "phonetic": "EKS-ile"}]}
+{"guid": "N25_048", "forms": [{"grammatical_form": "noun/en_singular", "text": "lifetime", "is_base_form": true, "ipa": "/ˈlaɪfˌtaɪm/", "phonetic": "LIFE-time"}]}
+{"guid": "N25_049", "forms": [{"grammatical_form": "noun/en_singular", "text": "prohibition", "is_base_form": true, "ipa": "/ˌproʊəˈbɪʃən/", "phonetic": "pro-uh-BISH-un"}]}
+{"guid": "N25_050", "forms": [{"grammatical_form": "noun/en_singular", "text": "chronology", "is_base_form": true, "ipa": "/krəˈnɑlədʒi/", "phonetic": "kruh-NAH-luh-jee"}]}
+{"guid": "N25_051", "forms": [{"grammatical_form": "noun/en_singular", "text": "equinox", "is_base_form": true, "ipa": "/ˈiːkwəˌnɑːks/", "phonetic": "EE-kwuh-noks"}]}
+{"guid": "N25_052", "forms": [{"grammatical_form": "noun/en_singular", "text": "half-hour", "is_base_form": true, "ipa": "/ˈhæfˌaʊər/", "phonetic": "HAF-ow-er"}]}
+{"guid": "N25_053", "forms": [{"grammatical_form": "noun/en_singular", "text": "half-century", "is_base_form": true, "ipa": "/ˈhæf ˈsɛn(t)ʃəri/", "phonetic": "HAF-SEN-chuh-ree"}]}
+{"guid": "N25_054", "forms": [{"grammatical_form": "noun/en_singular", "text": "night-time", "is_base_form": true, "ipa": "/ˈnaɪtˌtaɪm/", "phonetic": "NITE-time"}]}
+{"guid": "N25_055", "forms": [{"grammatical_form": "noun/en_singular", "text": "mid-september", "is_base_form": true, "ipa": "/ˌmɪd sɛpˈtɛmbɚ/", "phonetic": "mid-sep-TEM-ber"}]}
+{"guid": "N25_056", "forms": [{"grammatical_form": "noun/en_singular", "text": "birthday", "is_base_form": true, "ipa": "/ˈbɝːθdeɪ/", "phonetic": "BURTH-day"}]}
+{"guid": "N25_057", "forms": [{"grammatical_form": "noun/en_singular", "text": "holiday", "is_base_form": true, "ipa": "/ˈhɑləˌdeɪ/", "phonetic": "HOL-uh-day"}]}
+{"guid": "N25_058", "forms": [{"grammatical_form": "noun/en_singular", "text": "calendar", "is_base_form": true, "ipa": "/ˈkæləndɚ/", "phonetic": "KAL-un-der"}]}
+{"guid": "N25_059", "forms": [{"grammatical_form": "noun/en_singular", "text": "midday", "is_base_form": true, "ipa": "/ˌmɪdˈdeɪ/", "phonetic": "MID-day"}]}

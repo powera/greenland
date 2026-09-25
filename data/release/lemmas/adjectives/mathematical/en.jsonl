@@ -1,0 +1,59 @@
+{"guid": "A26_001", "forms": [{"grammatical_form": "adjective/en_positive", "text": "quadratic", "is_base_form": true, "ipa": "/kwɑˈdrætɪk/", "phonetic": "kwuh-DRAT-ik"}]}
+{"guid": "A26_002", "forms": [{"grammatical_form": "adjective/en_positive", "text": "exponential", "is_base_form": true, "ipa": "/ˌɛkspoʊˈnɛnʃəl/", "phonetic": "ek-spoh-NEN-shul"}]}
+{"guid": "A26_003", "forms": [{"grammatical_form": "adjective/en_positive", "text": "algebraic", "is_base_form": true, "ipa": "/ˌæl.dʒəˈbreɪ.ɪk/", "phonetic": "al-juh-BRAY-ik"}]}
+{"guid": "A26_004", "forms": [{"grammatical_form": "adjective/en_positive", "text": "trigonometric", "is_base_form": true, "ipa": "/ˌtrɪɡənəˈmɛtrɪk/", "phonetic": "trig-uh-nuh-MET-rik"}]}
+{"guid": "A26_005", "forms": [{"grammatical_form": "adjective/en_positive", "text": "associative", "is_base_form": true, "ipa": "/əˈsoʊʃiətɪv/", "phonetic": "uh-SOH-see-uh-tiv"}]}
+{"guid": "A26_006", "forms": [{"grammatical_form": "adjective/en_positive", "text": "factorial", "is_base_form": true, "ipa": "/fækˈtɔriəl/", "phonetic": "fak-TOR-ee-uhl"}]}
+{"guid": "A26_007", "forms": [{"grammatical_form": "adjective/en_positive", "text": "fractal", "is_base_form": true, "ipa": "/ˈfræk.təl/", "phonetic": "FRAK-tuhl"}]}
+{"guid": "A26_008", "forms": [{"grammatical_form": "adjective/en_positive", "text": "topological", "is_base_form": true, "ipa": "/ˌtɑːpəˈlɑːdʒɪkəl/", "phonetic": "top-uh-LOJ-uh-kul"}]}
+{"guid": "A26_009", "forms": [{"grammatical_form": "adjective/en_positive", "text": "commutative", "is_base_form": true, "ipa": "/kəˈmjuːtətɪv/", "phonetic": "kuh-MYOO-tuh-tiv"}]}
+{"guid": "A26_010", "forms": [{"grammatical_form": "adjective/en_positive", "text": "abelian", "is_base_form": true, "ipa": "/əˈbiːliən/", "phonetic": "uh-BEE-lee-un"}]}
+{"guid": "A26_011", "forms": [{"grammatical_form": "adjective/en_positive", "text": "holomorphic", "is_base_form": true, "ipa": "/ˌhɑːləˈmɔrfɪk/", "phonetic": "hol-uh-MOR-fik"}]}
+{"guid": "A26_012", "forms": [{"grammatical_form": "adjective/en_positive", "text": "projective", "is_base_form": true, "ipa": "/prəˈdʒɛktɪv/", "phonetic": "pruh-JEK-tiv"}]}
+{"guid": "A26_013", "forms": [{"grammatical_form": "adjective/en_positive", "text": "differentiable", "is_base_form": true, "ipa": "/ˌdɪfəˈrɛnʃəbəl/", "phonetic": "dif-uh-REN-shuh-bul"}]}
+{"guid": "A26_014", "forms": [{"grammatical_form": "adjective/en_positive", "text": "affine", "is_base_form": true, "ipa": "/əˈfaɪn/", "phonetic": "uh-FINE"}]}
+{"guid": "A26_015", "forms": [{"grammatical_form": "adjective/en_positive", "text": "isomorphic", "is_base_form": true, "ipa": "/ˌaɪsoʊˈmɔrfɪk/", "phonetic": "eye-soh-MOR-fik"}]}
+{"guid": "A26_016", "forms": [{"grammatical_form": "adjective/en_positive", "text": "computable", "is_base_form": true, "ipa": "/kəmˈpjuːtəbəl/", "phonetic": "kuhm-PYOO-tuh-buhl"}]}
+{"guid": "A26_017", "forms": [{"grammatical_form": "adjective/en_positive", "text": "stochastic", "is_base_form": true, "ipa": "/stəˈkæstɪk/", "phonetic": "stuh-KAS-tik"}]}
+{"guid": "A26_018", "forms": [{"grammatical_form": "adjective/en_positive", "text": "binomial", "is_base_form": true, "ipa": "/baɪˈnoʊmiəl/", "phonetic": "bye-NOH-mee-ul"}]}
+{"guid": "A26_019", "forms": [{"grammatical_form": "adjective/en_positive", "text": "conic", "is_base_form": true, "ipa": "/ˈkɑːnɪk/", "phonetic": "KON-ik"}]}
+{"guid": "A26_020", "forms": [{"grammatical_form": "adjective/en_positive", "text": "multiplicative", "is_base_form": true, "ipa": "/ˈmʌltəˌplɪkətɪv/", "phonetic": "MUL-tuh-PLIK-uh-tiv"}]}
+{"guid": "A26_021", "forms": [{"grammatical_form": "adjective/en_positive", "text": "multiplicative", "is_base_form": true, "ipa": "/ˈmʌltəˌplɪkətɪv/", "phonetic": "MUL-tuh-PLIK-uh-tiv"}]}
+{"guid": "A26_022", "forms": [{"grammatical_form": "adjective/en_positive", "text": "combinatorial", "is_base_form": true, "ipa": "/ˌkɑːmbɪnəˈtɔːriəl/", "phonetic": "kom-buh-nuh-TOR-ee-ul"}]}
+{"guid": "A26_023", "forms": [{"grammatical_form": "adjective/en_positive", "text": "countable", "is_base_form": true, "ipa": "/ˈkaʊntəbəl/", "phonetic": "KOWN-tuh-bul"}]}
+{"guid": "A26_024", "forms": [{"grammatical_form": "adjective/en_positive", "text": "integrable", "is_base_form": true, "ipa": "/ˈɪntəɡreɪtəbəl/", "phonetic": "IN-ti-gray-tuh-bul"}]}
+{"guid": "A26_025", "forms": [{"grammatical_form": "adjective/en_positive", "text": "distributive", "is_base_form": true, "ipa": "/dɪˈstrɪbjətɪv/", "phonetic": "dih-STRIB-yuh-tiv"}]}
+{"guid": "A26_026", "forms": [{"grammatical_form": "adjective/en_positive", "text": "asymptotic", "is_base_form": true, "ipa": "/ˌæsɪmˈtɑtɪk/", "phonetic": "AS-im-TOT-ik"}]}
+{"guid": "A26_027", "forms": [{"grammatical_form": "adjective/en_positive", "text": "irreducible", "is_base_form": true, "ipa": "/ˌɪrɪˈdusəbəl/", "phonetic": "ir-ri-DOO-suh-bul"}]}
+{"guid": "A26_028", "forms": [{"grammatical_form": "adjective/en_positive", "text": "parametric", "is_base_form": true, "ipa": "/ˌpærəˈmɛtrɪk/", "phonetic": "par-uh-MET-rik"}]}
+{"guid": "A26_029", "forms": [{"grammatical_form": "adjective/en_positive", "text": "invertible", "is_base_form": true, "ipa": "/ɪnˈvɝːtəbəl/", "phonetic": "in-VUR-tuh-bul"}]}
+{"guid": "A26_030", "forms": [{"grammatical_form": "adjective/en_positive", "text": "noncommutative", "is_base_form": true, "ipa": "/ˌnɑnˌkɑmjəˈtʌtɪv/", "phonetic": "NON-kuh-MYOO-tuh-tiv"}]}
+{"guid": "A26_031", "forms": [{"grammatical_form": "adjective/en_positive", "text": "simplicial", "is_base_form": true, "ipa": "/sɪmˈplɪʃiəl/", "phonetic": "sim-PLISH-ee-ul"}]}
+{"guid": "A26_032", "forms": [{"grammatical_form": "adjective/en_positive", "text": "unbiased", "is_base_form": true, "ipa": "/ʌnˈbaɪəst/", "phonetic": "un-BY-ust"}]}
+{"guid": "A26_033", "forms": [{"grammatical_form": "adjective/en_positive", "text": "deterministic", "is_base_form": true, "ipa": "/dɪˌtɝməˈnɪstɪk/", "phonetic": "duh-ter-muh-NIS-tik"}]}
+{"guid": "A26_034", "forms": [{"grammatical_form": "adjective/en_positive", "text": "transitive", "is_base_form": true, "ipa": "/ˈtrænzətɪv/", "phonetic": "TRAN-zuh-tiv"}]}
+{"guid": "A26_035", "forms": [{"grammatical_form": "adjective/en_positive", "text": "homeomorphic", "is_base_form": true, "ipa": "/ˌhoʊmi.oʊˈmɔrfɪk/", "phonetic": "HOH-mee-oh-MOR-fik"}]}
+{"guid": "A26_036", "forms": [{"grammatical_form": "adjective/en_positive", "text": "bijective", "is_base_form": true, "ipa": "/baɪˈdʒɛktɪv/", "phonetic": "bye-JEK-tiv"}]}
+{"guid": "A26_037", "forms": [{"grammatical_form": "adjective/en_positive", "text": "probabilistic", "is_base_form": true, "ipa": "/ˌprɑːbəˈlɪstɪk/", "phonetic": "prob-uh-buh-LIS-tik"}]}
+{"guid": "A26_038", "forms": [{"grammatical_form": "adjective/en_positive", "text": "disjoint", "is_base_form": true, "ipa": "/dɪˈdʒɔɪnt/", "phonetic": "dis-JOINT"}]}
+{"guid": "A26_039", "forms": [{"grammatical_form": "adjective/en_positive", "text": "injective", "is_base_form": true, "ipa": "/ɪnˈdʒɛktɪv/", "phonetic": "in-JEK-tiv"}]}
+{"guid": "A26_040", "forms": [{"grammatical_form": "adjective/en_positive", "text": "multivariate", "is_base_form": true, "ipa": "/ˌmʌltiˈvɛriət/", "phonetic": "mul-tee-VAIR-ee-it"}]}
+{"guid": "A26_041", "forms": [{"grammatical_form": "adjective/en_positive", "text": "angular", "is_base_form": true, "ipa": "/ˈæŋɡjələr/", "phonetic": "ANG-gyuh-ler"}]}
+{"guid": "A26_042", "forms": [{"grammatical_form": "adjective/en_positive", "text": "graduated", "is_base_form": true, "ipa": "/ˈɡrædʒuˌeɪtɪd/", "phonetic": "GRA-joo-ay-tid"}]}
+{"guid": "A26_043", "forms": [{"grammatical_form": "adjective/en_positive", "text": "verbal", "is_base_form": true, "ipa": "/ˈvɝːbəl/", "phonetic": "VER-bul"}]}
+{"guid": "A26_044", "forms": [{"grammatical_form": "adjective/en_positive", "text": "inclusive", "is_base_form": true, "ipa": "/ɪnˈkluːsɪv/", "phonetic": "in-KLOO-siv"}]}
+{"guid": "A26_045", "forms": [{"grammatical_form": "adjective/en_positive", "text": "dynamical", "is_base_form": true, "ipa": "/daɪˈnæmɪkəl/", "phonetic": "dy-NA-mi-kuhl"}]}
+{"guid": "A26_046", "forms": [{"grammatical_form": "adjective/en_positive", "text": "chromatic", "is_base_form": true, "ipa": "/kroʊˈmætɪk/", "phonetic": "kroh-MAT-ik"}]}
+{"guid": "A26_047", "forms": [{"grammatical_form": "adjective/en_positive", "text": "well-defined", "is_base_form": true, "ipa": "/ˌwɛl dɪˈfaɪnd/", "phonetic": "WEL-di-FYND"}]}
+{"guid": "A26_048", "forms": [{"grammatical_form": "adjective/en_positive", "text": "two-dimensional", "is_base_form": true, "ipa": "/ˌtuːdəˈmɛnʃənəl/", "phonetic": "TOO-di-MEN-shuh-nuhl"}]}
+{"guid": "A26_049", "forms": [{"grammatical_form": "adjective/en_positive", "text": "non-zero", "is_base_form": true, "ipa": "/ˌnɑnˈzɪroʊ/", "phonetic": "non-ZEER-oh"}]}
+{"guid": "A26_050", "forms": [{"grammatical_form": "adjective/en_positive", "text": "one-dimensional", "is_base_form": true, "ipa": "/ˌwʌn dəˈmɛnʃənəl/", "phonetic": "WUN-duh-MEN-shuh-nuhl"}]}
+{"guid": "A26_051", "forms": [{"grammatical_form": "adjective/en_positive", "text": "high-frequency", "is_base_form": true, "ipa": "/ˌhaɪ ˈfrikwənsi/", "phonetic": "HIGH-FREE-kwuhn-see"}]}
+{"guid": "A26_052", "forms": [{"grammatical_form": "adjective/en_positive", "text": "second-order", "is_base_form": true, "ipa": "/ˈsɛkənd ˌɔrdər/", "phonetic": "SEK-und-OR-der"}]}
+{"guid": "A26_053", "forms": [{"grammatical_form": "adjective/en_positive", "text": "non-negative", "is_base_form": true, "ipa": "/ˌnɑnˈnɛɡətɪv/", "phonetic": "non-NEG-uh-tiv"}]}
+{"guid": "A26_054", "forms": [{"grammatical_form": "adjective/en_positive", "text": "low-frequency", "is_base_form": true, "ipa": "/ˌloʊ ˈfriːkwənsi/", "phonetic": "LOH-FREE-kwun-see"}]}
+{"guid": "A26_055", "forms": [{"grammatical_form": "adjective/en_positive", "text": "plural", "is_base_form": true, "ipa": "/ˈplʊrəl/", "phonetic": "PLOOR-uhl"}]}
+{"guid": "A26_056", "forms": [{"grammatical_form": "adjective/en_positive", "text": "singular", "is_base_form": true, "ipa": "/ˈsɪŋɡjələr/", "phonetic": "SING-yuh-ler"}]}
+{"guid": "A26_057", "forms": [{"grammatical_form": "adjective/en_positive", "text": "nominative", "is_base_form": true, "ipa": "/ˈnɑmənətɪv/", "phonetic": "NOM-uh-nuh-tiv"}]}
+{"guid": "A26_058", "forms": [{"grammatical_form": "adjective/en_positive", "text": "dative", "is_base_form": true, "ipa": "/ˈdeɪtɪv/", "phonetic": "DAY-tiv"}]}
+{"guid": "A26_059", "forms": [{"grammatical_form": "adjective/en_positive", "text": "ablative", "is_base_form": true, "ipa": "/ˈæblətɪv/", "phonetic": "AB-luh-tiv"}]}

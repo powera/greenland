@@ -4,3 +4,18 @@
 {"guid": "A01_004", "forms": [{"grammatical_form": "adjective/en_positive", "text": "tiny", "is_base_form": true, "ipa": "/ˈtaɪni/", "phonetic": "TYE-nee"}]}
 {"guid": "A01_005", "forms": [{"grammatical_form": "adjective/en_positive", "text": "huge", "is_base_form": true, "ipa": "hʌdʒ", "phonetic": "HOO-j"}]}
 {"guid": "A01_006", "forms": [{"grammatical_form": "adjective/en_positive", "text": "medium", "is_base_form": true}]}
+{"guid": "A01_010", "forms": [{"grammatical_form": "adjective/en_positive", "text": "maximal", "is_base_form": true, "ipa": "/ˈmæksəməl/", "phonetic": "MAK-suh-mul"}]}
+{"guid": "A01_011", "forms": [{"grammatical_form": "adjective/en_positive", "text": "infinitesimal", "is_base_form": true, "ipa": "/ˌɪnfɪnɪˈtɛsəməl/", "phonetic": "in-fi-ni-TESS-uh-mul"}]}
+{"guid": "A01_012", "forms": [{"grammatical_form": "adjective/en_positive", "text": "dwarf", "is_base_form": true, "ipa": "/dwɔrf/", "phonetic": "DWORF"}]}
+{"guid": "A01_013", "forms": [{"grammatical_form": "adjective/en_positive", "text": "enlarged", "is_base_form": true, "ipa": "/ɪnˈlɑrdʒd/", "phonetic": "en-LARJD"}]}
+{"guid": "A01_014", "forms": [{"grammatical_form": "adjective/en_positive", "text": "elongated", "is_base_form": true, "ipa": "/ˈiːlɔŋˌɡeɪtɪd/", "phonetic": "EE-long-gay-tid"}]}
+{"guid": "A01_015", "forms": [{"grammatical_form": "adjective/en_positive", "text": "large-scale", "is_base_form": true, "ipa": "/ˌlɑrdʒ ˈskeɪl/", "phonetic": "LARJ-SKAYL"}]}
+{"guid": "A01_016", "forms": [{"grammatical_form": "adjective/en_positive", "text": "small-scale", "is_base_form": true, "ipa": "/ˈsmɔl skeɪl/", "phonetic": "SMALL-SKAYL"}]}
+{"guid": "A01_017", "forms": [{"grammatical_form": "adjective/en_positive", "text": "small-scale", "is_base_form": true, "ipa": "/ˈsmɔl skeɪl/", "phonetic": "SMALL-SKAYL"}]}
+{"guid": "A01_018", "forms": [{"grammatical_form": "adjective/en_positive", "text": "full-scale", "is_base_form": true, "ipa": "/ˈfʊl skeɪl/", "phonetic": "FULL-skayl"}]}
+{"guid": "A01_019", "forms": [{"grammatical_form": "adjective/en_positive", "text": "second-largest", "is_base_form": true, "ipa": "/ˌsɛkənd ˈlɑrdʒəst/", "phonetic": "SEK-und LAR-jist"}]}
+{"guid": "A01_020", "forms": [{"grammatical_form": "adjective/en_positive", "text": "medium-sized", "is_base_form": true, "ipa": "/ˈmiːdiəmˌsaɪzd/", "phonetic": "MEE-dee-um-SYZD"}]}
+{"guid": "A01_021", "forms": [{"grammatical_form": "adjective/en_positive", "text": "full-length", "is_base_form": true, "ipa": "/ˌfʊl ˈleŋθ/", "phonetic": "FULL-length"}]}
+{"guid": "A01_022", "forms": [{"grammatical_form": "adjective/en_positive", "text": "high-rise", "is_base_form": true, "ipa": "/ˈhaɪˌraɪz/", "phonetic": "HIGH-rise"}]}
+{"guid": "A01_023", "forms": [{"grammatical_form": "adjective/en_positive", "text": "life-size", "is_base_form": true, "ipa": "/ˈlaɪfˌsaɪz/", "phonetic": "LIFE-size"}]}
+{"guid": "A01_024", "forms": [{"grammatical_form": "adjective/en_positive", "text": "full-size", "is_base_form": true, "ipa": "/ˈfʊlˌsaɪz/", "phonetic": "FOOL-size"}]}

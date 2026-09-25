@@ -66,3 +66,62 @@
 {"guid": "A18_070", "forms": [{"grammatical_form": "adjective/en_positive", "text": "dirty", "is_base_form": true, "ipa": "/dɜrti/", "phonetic": "DUR-ti"}]}
 {"guid": "A18_071", "forms": [{"grammatical_form": "adjective/en_positive", "text": "rough", "is_base_form": true, "ipa": "/rʌf/", "phonetic": "ROOF"}]}
 {"guid": "A18_080", "forms": [{"grammatical_form": "adjective/en_positive", "text": "wooden", "is_base_form": true}]}
+{"guid": "A18_084", "forms": [{"grammatical_form": "adjective/en_positive", "text": "invertible", "is_base_form": true, "ipa": "/ɪnˈvɝːtəbəl/", "phonetic": "in-VUR-tuh-bul"}]}
+{"guid": "A18_085", "forms": [{"grammatical_form": "adjective/en_positive", "text": "gravitational", "is_base_form": true, "ipa": "/ˌɡrævəˈteɪʃənəl/", "phonetic": "grav-uh-TAY-shuh-nuhl"}]}
+{"guid": "A18_086", "forms": [{"grammatical_form": "adjective/en_positive", "text": "atmospheric", "is_base_form": true, "ipa": "/ˌæt.məˈsfɪr.ɪk/", "phonetic": "at-muh-SFEER-ik"}]}
+{"guid": "A18_087", "forms": [{"grammatical_form": "adjective/en_positive", "text": "magnetic", "is_base_form": true, "ipa": "/mæɡˈnɛtɪk/", "phonetic": "mag-NET-ik"}]}
+{"guid": "A18_088", "forms": [{"grammatical_form": "adjective/en_positive", "text": "metallic", "is_base_form": true, "ipa": "/məˈtælɪk/", "phonetic": "muh-TAL-ik"}]}
+{"guid": "A18_089", "forms": [{"grammatical_form": "adjective/en_positive", "text": "angular", "is_base_form": true, "ipa": "/ˈæŋɡjələr/", "phonetic": "ANG-gyuh-ler"}]}
+{"guid": "A18_090", "forms": [{"grammatical_form": "adjective/en_positive", "text": "kinetic", "is_base_form": true, "ipa": "/kɪˈnɛtɪk/", "phonetic": "kuh-NET-ik"}]}
+{"guid": "A18_091", "forms": [{"grammatical_form": "adjective/en_positive", "text": "bony", "is_base_form": true, "ipa": "/ˈboʊni/", "phonetic": "BOH-nee"}]}
+{"guid": "A18_092", "forms": [{"grammatical_form": "adjective/en_positive", "text": "bony", "is_base_form": true, "ipa": "/ˈboʊni/", "phonetic": "BOH-nee"}]}
+{"guid": "A18_093", "forms": [{"grammatical_form": "adjective/en_positive", "text": "edible", "is_base_form": true, "ipa": "/ˈɛdəbəl/", "phonetic": "ED-uh-bul"}]}
+{"guid": "A18_094", "forms": [{"grammatical_form": "adjective/en_positive", "text": "muscular", "is_base_form": true, "ipa": "/ˈmʌskjələr/", "phonetic": "MUS-kyuh-ler"}]}
+{"guid": "A18_095", "forms": [{"grammatical_form": "adjective/en_positive", "text": "tailed", "is_base_form": true, "ipa": "/teɪld/", "phonetic": "TAYLD"}]}
+{"guid": "A18_096", "forms": [{"grammatical_form": "adjective/en_positive", "text": "supported", "is_base_form": true, "ipa": "/səˈpɔrtɪd/", "phonetic": "suh-PORT-id"}]}
+{"guid": "A18_097", "forms": [{"grammatical_form": "adjective/en_positive", "text": "powered", "is_base_form": true, "ipa": "/ˈpaʊərd/", "phonetic": "POW-erd"}]}
+{"guid": "A18_098", "forms": [{"grammatical_form": "adjective/en_positive", "text": "stored", "is_base_form": true, "ipa": "/stɔrd/", "phonetic": "STORD"}]}
+{"guid": "A18_099", "forms": [{"grammatical_form": "adjective/en_positive", "text": "coated", "is_base_form": true, "ipa": "/ˈkoʊtɪd/", "phonetic": "KOH-tid"}]}
+{"guid": "A18_100", "forms": [{"grammatical_form": "adjective/en_positive", "text": "stringed", "is_base_form": true, "ipa": "/strɪŋd/", "phonetic": "STRINGD"}]}
+{"guid": "A18_101", "forms": [{"grammatical_form": "adjective/en_positive", "text": "fleshy", "is_base_form": true, "ipa": "/ˈflɛʃi/", "phonetic": "FLESH-ee"}]}
+{"guid": "A18_102", "forms": [{"grammatical_form": "adjective/en_positive", "text": "fibrous", "is_base_form": true, "ipa": "/ˈfaɪbrəs/", "phonetic": "FY-brus"}]}
+{"guid": "A18_103", "forms": [{"grammatical_form": "adjective/en_positive", "text": "horned", "is_base_form": true, "ipa": "/hɔrnd/", "phonetic": "HORN'D"}]}
+{"guid": "A18_104", "forms": [{"grammatical_form": "adjective/en_positive", "text": "portable", "is_base_form": true, "ipa": "/ˈpɔrtəbəl/", "phonetic": "POR-tuh-bul"}]}
+{"guid": "A18_105", "forms": [{"grammatical_form": "adjective/en_positive", "text": "hydraulic", "is_base_form": true, "ipa": "/haɪˈdrɔlɪk/", "phonetic": "hy-DRAW-lik"}]}
+{"guid": "A18_106", "forms": [{"grammatical_form": "adjective/en_positive", "text": "hydraulic", "is_base_form": true, "ipa": "/haɪˈdrɔlɪk/", "phonetic": "hy-DRAW-lik"}]}
+{"guid": "A18_107", "forms": [{"grammatical_form": "adjective/en_positive", "text": "rotary", "is_base_form": true, "ipa": "/ˈroʊtəri/", "phonetic": "ROH-tuh-ree"}]}
+{"guid": "A18_108", "forms": [{"grammatical_form": "adjective/en_positive", "text": "projectile", "is_base_form": true, "ipa": "/prəˈdʒɛktəl/", "phonetic": "pruh-JEK-tuhl"}]}
+{"guid": "A18_109", "forms": [{"grammatical_form": "adjective/en_positive", "text": "abrasive", "is_base_form": true, "ipa": "/əˈbreɪsɪv/", "phonetic": "uh-BRAY-siv"}]}
+{"guid": "A18_110", "forms": [{"grammatical_form": "adjective/en_positive", "text": "aerodynamic", "is_base_form": true, "ipa": "/ˌɛroʊdaɪˈnæmɪk/", "phonetic": "air-oh-dy-NAM-ik"}]}
+{"guid": "A18_111", "forms": [{"grammatical_form": "adjective/en_positive", "text": "disposable", "is_base_form": true, "ipa": "/dɪˈspoʊzəbəl/", "phonetic": "dih-SPOH-zuh-bul"}]}
+{"guid": "A18_112", "forms": [{"grammatical_form": "adjective/en_positive", "text": "armoured", "is_base_form": true, "ipa": "/ˈɑrmərd/", "phonetic": "AR-murd"}]}
+{"guid": "A18_113", "forms": [{"grammatical_form": "adjective/en_positive", "text": "inertial", "is_base_form": true, "ipa": "/ɪnˈɝːʃəl/", "phonetic": "in-ER-shul"}]}
+{"guid": "A18_114", "forms": [{"grammatical_form": "adjective/en_positive", "text": "refractive", "is_base_form": true, "ipa": "/rɪˈfræktɪv/", "phonetic": "ree-FRAK-tiv"}]}
+{"guid": "A18_115", "forms": [{"grammatical_form": "adjective/en_positive", "text": "pure", "is_base_form": true, "ipa": "/pjʊr/", "phonetic": "PYOOR"}]}
+{"guid": "A18_116", "forms": [{"grammatical_form": "adjective/en_positive", "text": "shredded", "is_base_form": true, "ipa": "/ˈʃrɛdɪd/", "phonetic": "SHRED-id"}]}
+{"guid": "A18_117", "forms": [{"grammatical_form": "adjective/en_positive", "text": "heaping", "is_base_form": true, "ipa": "/ˈhiːpɪŋ/", "phonetic": "HEE-ping"}]}
+{"guid": "A18_118", "forms": [{"grammatical_form": "adjective/en_positive", "text": "lukewarm", "is_base_form": true, "ipa": "/ˌluːkˈwɔrm/", "phonetic": "LOOK-worm"}]}
+{"guid": "A18_119", "forms": [{"grammatical_form": "adjective/en_positive", "text": "long-distance", "is_base_form": true, "ipa": "/ˌlɔŋˈdɪstəns/", "phonetic": "LONG-DIS-tuns"}]}
+{"guid": "A18_120", "forms": [{"grammatical_form": "adjective/en_positive", "text": "high-speed", "is_base_form": true, "ipa": "/ˌhaɪ ˈspiːd/", "phonetic": "HY-speed"}]}
+{"guid": "A18_121", "forms": [{"grammatical_form": "adjective/en_positive", "text": "well-developed", "is_base_form": true, "ipa": "/ˌwɛl dɪˈvɛləpt/", "phonetic": "WEL-di-VELOPT"}]}
+{"guid": "A18_122", "forms": [{"grammatical_form": "adjective/en_positive", "text": "high-energy", "is_base_form": true, "ipa": "/ˌhaɪ ˈɛnɚdʒi/", "phonetic": "HY-en-er-jee"}]}
+{"guid": "A18_123", "forms": [{"grammatical_form": "adjective/en_positive", "text": "high-pressure", "is_base_form": true, "ipa": "/ˌhaɪˈprɛʃər/", "phonetic": "HY-PRESH-er"}]}
+{"guid": "A18_124", "forms": [{"grammatical_form": "adjective/en_positive", "text": "high-pressure", "is_base_form": true, "ipa": "/ˌhaɪˈprɛʃər/", "phonetic": "HY-PRESH-er"}]}
+{"guid": "A18_125", "forms": [{"grammatical_form": "adjective/en_positive", "text": "open-ended", "is_base_form": true, "ipa": "/ˌoʊpənˈɛndɪd/", "phonetic": "OH-pun-EN-did"}]}
+{"guid": "A18_126", "forms": [{"grammatical_form": "adjective/en_positive", "text": "high-density", "is_base_form": true, "ipa": "/ˌhaɪ ˈdɛnsəti/", "phonetic": "HIGH-DEN-si-tee"}]}
+{"guid": "A18_127", "forms": [{"grammatical_form": "adjective/en_positive", "text": "low-pressure", "is_base_form": true, "ipa": "/ˌloʊ ˈprɛʃɚ/", "phonetic": "LOH-PRESH-er"}]}
+{"guid": "A18_128", "forms": [{"grammatical_form": "adjective/en_positive", "text": "high-altitude", "is_base_form": true, "ipa": "/ˌhaɪ ˈæl.təˌtuːd/", "phonetic": "HY-AL-ti-tood"}]}
+{"guid": "A18_129", "forms": [{"grammatical_form": "adjective/en_positive", "text": "right-handed", "is_base_form": true, "ipa": "/ˌraɪtˈhændɪd/", "phonetic": "RYT-HAN-did"}]}
+{"guid": "A18_130", "forms": [{"grammatical_form": "adjective/en_positive", "text": "low-density", "is_base_form": true, "ipa": "/ˌloʊ ˈdɛnsəti/", "phonetic": "LOH-DEN-si-tee"}]}
+{"guid": "A18_131", "forms": [{"grammatical_form": "adjective/en_positive", "text": "able-bodied", "is_base_form": true, "ipa": "/ˌeɪbəlˈbɑdid/", "phonetic": "AY-buhl-BAH-deed"}]}
+{"guid": "A18_132", "forms": [{"grammatical_form": "adjective/en_positive", "text": "high-pitched", "is_base_form": true, "ipa": "/ˌhaɪˈpɪtʃt/", "phonetic": "HY-picht"}]}
+{"guid": "A18_133", "forms": [{"grammatical_form": "adjective/en_positive", "text": "deep-water", "is_base_form": true, "ipa": "/ˌdiːp ˈwɔtɚ/", "phonetic": "DEEP-WAW-ter"}]}
+{"guid": "A18_134", "forms": [{"grammatical_form": "adjective/en_positive", "text": "self-propelled", "is_base_form": true, "ipa": "/ˌsɛlf prəˈpɛld/", "phonetic": "self-proh-PELD"}]}
+{"guid": "A18_135", "forms": [{"grammatical_form": "adjective/en_positive", "text": "light-emitting", "is_base_form": true, "ipa": "/ˈlaɪt ɪˌmɪtɪŋ/", "phonetic": "LYTE-ee-MIT-ing"}]}
+{"guid": "A18_136", "forms": [{"grammatical_form": "adjective/en_positive", "text": "hand-to-hand", "is_base_form": true, "ipa": "/ˌhænd.təˈhænd/", "phonetic": "HAND-tuh-HAND"}]}
+{"guid": "A18_137", "forms": [{"grammatical_form": "adjective/en_positive", "text": "weak", "is_base_form": true, "ipa": "/wiːk/", "phonetic": "WEEK"}]}
+{"guid": "A18_138", "forms": [{"grammatical_form": "adjective/en_positive", "text": "cloudy", "is_base_form": true, "ipa": "/ˈklaʊdi/", "phonetic": "KLOW-dee"}]}
+{"guid": "A18_139", "forms": [{"grammatical_form": "adjective/en_positive", "text": "sunny", "is_base_form": true, "ipa": "/ˈsʌni/", "phonetic": "SUN-ee"}]}
+{"guid": "A18_140", "forms": [{"grammatical_form": "adjective/en_positive", "text": "windy", "is_base_form": true, "ipa": "/ˈwɪndi/", "phonetic": "WIN-dee"}]}
+{"guid": "A18_141", "forms": [{"grammatical_form": "adjective/en_positive", "text": "furry", "is_base_form": true, "ipa": "/ˈfɝi/", "phonetic": "FUR-ee"}]}
+{"guid": "A18_142", "forms": [{"grammatical_form": "adjective/en_positive", "text": "express", "is_base_form": true, "ipa": "/ɪkˈsprɛs/", "phonetic": "ik-SPRESS"}]}

@@ -23,3 +23,12 @@
 {"guid": "N47_032", "forms": [{"grammatical_form": "noun/en_singular", "text": "front door", "is_base_form": true}]}
 {"guid": "N47_033", "forms": [{"grammatical_form": "noun/en_singular", "text": "back door", "is_base_form": true}]}
 {"guid": "N47_034", "forms": [{"grammatical_form": "noun/en_singular", "text": "power outlet", "is_base_form": true}]}
+{"guid": "N47_035", "forms": [{"grammatical_form": "noun/en_singular", "text": "lining", "is_base_form": true, "ipa": "/ˈlaɪnɪŋ/", "phonetic": "LY-ning"}]}
+{"guid": "N47_036", "forms": [{"grammatical_form": "noun/en_singular", "text": "exit", "is_base_form": true, "ipa": "/ˈɛɡzɪt/", "phonetic": "EG-zit"}]}
+{"guid": "N47_037", "forms": [{"grammatical_form": "noun/en_singular", "text": "nave", "is_base_form": true, "ipa": "/neɪv/", "phonetic": "NAYV"}]}
+{"guid": "N47_038", "forms": [{"grammatical_form": "noun/en_singular", "text": "ballroom", "is_base_form": true, "ipa": "/ˈbɔlˌrum/", "phonetic": "BALL-room"}]}
+{"guid": "N47_039", "forms": [{"grammatical_form": "noun/en_singular", "text": "slot", "is_base_form": true, "ipa": "/slɑt/", "phonetic": "SLOT"}]}
+{"guid": "N47_040", "forms": [{"grammatical_form": "noun/en_singular", "text": "subsection", "is_base_form": true, "ipa": "/ˈsʌbˌsɛkʃən/", "phonetic": "SUB-sek-shun"}]}
+{"guid": "N47_041", "forms": [{"grammatical_form": "noun/en_singular", "text": "molding", "is_base_form": true, "ipa": "/ˈmoʊldɪŋ/", "phonetic": "MOHL-ding"}]}
+{"guid": "N47_042", "forms": [{"grammatical_form": "noun/en_singular", "text": "classroom", "is_base_form": true, "ipa": "/ˈklæsˌrum/", "phonetic": "KLASS-room"}]}
+{"guid": "N47_043", "forms": [{"grammatical_form": "noun/en_singular", "text": "entrance", "is_base_form": true, "ipa": "/ˈɛntrəns/", "phonetic": "EN-truhns"}]}

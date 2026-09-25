@@ -29,3 +29,10 @@
 {"guid": "N23_030", "forms": [{"grammatical_form": "noun/en_singular", "text": "shock", "is_base_form": true, "ipa": "/ʃɔk/", "phonetic": "SHOCK"}]}
 {"guid": "N23_031", "forms": [{"grammatical_form": "noun/en_singular", "text": "love", "is_base_form": true, "ipa": "/ˈlʌv/", "phonetic": "LOOV"}]}
 {"guid": "N23_032", "forms": [{"grammatical_form": "noun/en_singular", "text": "hate", "is_base_form": true, "ipa": "/ˈheɪt/", "phonetic": "HAIt"}]}
+{"guid": "N23_038", "forms": [{"grammatical_form": "noun/en_singular", "text": "loyalty", "is_base_form": true, "ipa": "/ˈlɔɪəlti/", "phonetic": "LOY-uhl-tee"}]}
+{"guid": "N23_039", "forms": [{"grammatical_form": "noun/en_singular", "text": "relief", "is_base_form": true, "ipa": "/rɪˈlif/", "phonetic": "rih-LEEF"}]}
+{"guid": "N23_040", "forms": [{"grammatical_form": "noun/en_singular", "text": "self-respect", "is_base_form": true, "ipa": "/ˌsɛlf rɪˈspɛkt/", "phonetic": "self-ri-SPEKT"}]}
+{"guid": "N23_041", "forms": [{"grammatical_form": "noun/en_singular", "text": "stress", "is_base_form": true, "ipa": "/strɛs/", "phonetic": "STRESS"}]}
+{"guid": "N23_042", "forms": [{"grammatical_form": "noun/en_singular", "text": "empathy", "is_base_form": true, "ipa": "/ˈɛmpəθi/", "phonetic": "EM-puh-thee"}]}
+{"guid": "N23_043", "forms": [{"grammatical_form": "noun/en_singular", "text": "veneration", "is_base_form": true, "ipa": "/ˌvɛnəˈreɪʃən/", "phonetic": "ven-uh-RAY-shun"}]}
+{"guid": "N23_044", "forms": [{"grammatical_form": "noun/en_singular", "text": "fun", "is_base_form": true, "ipa": "/fʌn/", "phonetic": "FUN"}]}

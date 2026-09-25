@@ -36,3 +36,10 @@
 {"guid": "D07_036", "forms": [{"grammatical_form": "adverb/en_positive", "text": "nearby", "is_base_form": true}]}
 {"guid": "D07_037", "forms": [{"grammatical_form": "adverb/en_positive", "text": "online", "is_base_form": true}]}
 {"guid": "D07_038", "forms": [{"grammatical_form": "adverb/en_positive", "text": "upstairs", "is_base_form": true}]}
+{"guid": "D07_039", "forms": [{"grammatical_form": "adverb/en_positive", "text": "geographically", "is_base_form": true, "ipa": "/ˌdʒiəˈɡræfɪkli/", "phonetic": "jee-uh-GRAF-ih-klee"}]}
+{"guid": "D07_040", "forms": [{"grammatical_form": "adverb/en_positive", "text": "constitutionally", "is_base_form": true, "ipa": "/ˌkɑnstəˈtuʃənəli/", "phonetic": "kon-stuh-TOO-shuh-nuh-lee"}]}
+{"guid": "D07_041", "forms": [{"grammatical_form": "adverb/en_positive", "text": "closely", "is_base_form": true, "ipa": "/ˈkloʊsli/", "phonetic": "KLOHS-lee"}]}
+{"guid": "D07_042", "forms": [{"grammatical_form": "adverb/en_positive", "text": "on-line", "is_base_form": true, "ipa": "/ˌɑnˈlaɪn/", "phonetic": "ON-line"}]}
+{"guid": "D07_043", "forms": [{"grammatical_form": "adverb/en_positive", "text": "on-site", "is_base_form": true, "ipa": "/ˈɑnˌsaɪt/", "phonetic": "ON-site"}]}
+{"guid": "D07_044", "forms": [{"grammatical_form": "adverb/en_positive", "text": "on-screen", "is_base_form": true, "ipa": "/ˌɑnˈskrin/", "phonetic": "on-SCREEN"}]}
+{"guid": "D07_045", "forms": [{"grammatical_form": "adverb/en_positive", "text": "downstairs", "is_base_form": true, "ipa": "/ˌdaʊnˈstɛrz/", "phonetic": "DOWN-stairz"}]}

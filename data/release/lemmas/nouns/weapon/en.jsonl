@@ -3,3 +3,11 @@
 {"guid": "N44_003", "forms": [{"grammatical_form": "noun/en_singular", "text": "weapon", "is_base_form": true, "ipa": "/ˈwɛpən/", "phonetic": "WEP-uhn"}]}
 {"guid": "N44_004", "forms": [{"grammatical_form": "noun/en_singular", "text": "gun", "is_base_form": true, "ipa": "/ɡʌn/", "phonetic": "GUN"}]}
 {"guid": "N44_005", "forms": [{"grammatical_form": "noun/en_singular", "text": "staff", "is_base_form": true, "ipa": "/stɑːf/", "phonetic": "STAF"}]}
+{"guid": "N44_018", "forms": [{"grammatical_form": "noun/en_singular", "text": "ammunition", "is_base_form": true, "ipa": "/ˌæmjəˈnɪʃən/", "phonetic": "am-yoo-NISH-un"}]}
+{"guid": "N44_019", "forms": [{"grammatical_form": "noun/en_singular", "text": "torpedo", "is_base_form": true, "ipa": "/tɔrˈpiːdoʊ/", "phonetic": "tor-PEE-doh"}]}
+{"guid": "N44_020", "forms": [{"grammatical_form": "noun/en_singular", "text": "projectile", "is_base_form": true, "ipa": "/prəˈdʒɛktəl/", "phonetic": "pruh-JEK-tuhl"}]}
+{"guid": "N44_021", "forms": [{"grammatical_form": "noun/en_singular", "text": "bayonet", "is_base_form": true, "ipa": "/ˈbeɪənɛt/", "phonetic": "BAY-uh-net"}]}
+{"guid": "N44_022", "forms": [{"grammatical_form": "noun/en_singular", "text": "grenade", "is_base_form": true, "ipa": "/ɡrəˈneɪd/", "phonetic": "gruh-NADE"}]}
+{"guid": "N44_023", "forms": [{"grammatical_form": "noun/en_singular", "text": "crossbow", "is_base_form": true, "ipa": "/ˈkrɔsˌboʊ/", "phonetic": "KROSS-bow"}]}
+{"guid": "N44_024", "forms": [{"grammatical_form": "noun/en_singular", "text": "club", "is_base_form": true, "ipa": "/klʌb/", "phonetic": "KLUB"}]}
+{"guid": "N44_025", "forms": [{"grammatical_form": "noun/en_singular", "text": "magazine", "is_base_form": true, "ipa": "/ˈmæɡəziːn/", "phonetic": "MAG-uh-zeen"}]}

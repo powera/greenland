@@ -11,3 +11,16 @@
 {"guid": "N37_011", "forms": [{"grammatical_form": "noun/en_singular", "text": "hexagon", "is_base_form": true, "ipa": "/ˈhɛks.əɡən/", "phonetic": "HEX-suh-guh-n"}]}
 {"guid": "N37_012", "forms": [{"grammatical_form": "noun/en_singular", "text": "pentagon", "is_base_form": true, "ipa": "ˌpɛnˈtɒɡɒn", "phonetic": "PENT-uh-gone"}]}
 {"guid": "N37_013", "forms": [{"grammatical_form": "noun/en_singular", "text": "octagon", "is_base_form": true, "ipa": "/ˈɑːktəɡɒn/", "phonetic": "AHK-tuh-ghahn"}]}
+{"guid": "N37_019", "forms": [{"grammatical_form": "noun/en_singular", "text": "tangent", "is_base_form": true, "ipa": "/ˈtændʒənt/", "phonetic": "TAN-jent"}]}
+{"guid": "N37_020", "forms": [{"grammatical_form": "noun/en_singular", "text": "quadrilateral", "is_base_form": true, "ipa": "/ˌkwɑdrəˈlætərəl/", "phonetic": "kwah-druh-LAT-er-uhl"}]}
+{"guid": "N37_021", "forms": [{"grammatical_form": "noun/en_singular", "text": "polygon", "is_base_form": true, "ipa": "/ˈpɑːlɪɡɑːn/", "phonetic": "POL-ih-gahn"}]}
+{"guid": "N37_022", "forms": [{"grammatical_form": "noun/en_singular", "text": "parabola", "is_base_form": true, "ipa": "/pəˈræbələ/", "phonetic": "puh-RAB-uh-luh"}]}
+{"guid": "N37_023", "forms": [{"grammatical_form": "noun/en_singular", "text": "parallelogram", "is_base_form": true, "ipa": "/ˌpærəˈlɛləˌɡræm/", "phonetic": "par-uh-LEL-uh-gram"}]}
+{"guid": "N37_024", "forms": [{"grammatical_form": "noun/en_singular", "text": "hypotenuse", "is_base_form": true, "ipa": "/haɪˈpɑːtənˌuːs/", "phonetic": "hy-POT-uh-noos"}]}
+{"guid": "N37_025", "forms": [{"grammatical_form": "noun/en_singular", "text": "polyhedron", "is_base_form": true, "ipa": "/ˌpɑliˈhiːdrən/", "phonetic": "pol-ee-HEE-drun"}]}
+{"guid": "N37_026", "forms": [{"grammatical_form": "noun/en_singular", "text": "torus", "is_base_form": true, "ipa": "/ˈtɔrəs/", "phonetic": "TOR-us"}]}
+{"guid": "N37_027", "forms": [{"grammatical_form": "noun/en_singular", "text": "sector", "is_base_form": true, "ipa": "/ˈsɛktɚ/", "phonetic": "SEK-ter"}]}
+{"guid": "N37_028", "forms": [{"grammatical_form": "noun/en_singular", "text": "centre", "is_base_form": true, "ipa": "/ˈsɛntər/", "phonetic": "SEN-ter"}]}
+{"guid": "N37_029", "forms": [{"grammatical_form": "noun/en_singular", "text": "coil", "is_base_form": true, "ipa": "/kɔɪl/", "phonetic": "KOYL"}]}
+{"guid": "N37_030", "forms": [{"grammatical_form": "noun/en_singular", "text": "cross-section", "is_base_form": true, "ipa": "/ˈkrɔs ˌsɛkʃən/", "phonetic": "KROSS-SEK-shun"}]}
+{"guid": "N37_031", "forms": [{"grammatical_form": "noun/en_singular", "text": "outline", "is_base_form": true, "ipa": "/ˈaʊtˌlaɪn/", "phonetic": "OUT-line"}]}

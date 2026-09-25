@@ -26,3 +26,56 @@
 {"guid": "N54_032", "forms": [{"grammatical_form": "noun/en_singular", "text": "sales tax", "is_base_form": true}]}
 {"guid": "N54_033", "forms": [{"grammatical_form": "noun/en_singular", "text": "sick leave", "is_base_form": true}]}
 {"guid": "N54_034", "forms": [{"grammatical_form": "noun/en_singular", "text": "world record", "is_base_form": true}]}
+{"guid": "N54_035", "forms": [{"grammatical_form": "noun/en_singular", "text": "computability", "is_base_form": true, "ipa": "/kəmˌpjuːtəˈbɪləti/", "phonetic": "kum-pyoo-tuh-BIL-uh-tee"}]}
+{"guid": "N54_036", "forms": [{"grammatical_form": "noun/en_singular", "text": "incompleteness", "is_base_form": true, "ipa": "/ˌɪnkəmˈpliːtnəs/", "phonetic": "in-com-PLETE-ness"}]}
+{"guid": "N54_037", "forms": [{"grammatical_form": "noun/en_singular", "text": "duality", "is_base_form": true, "ipa": "/duˈælɪti/", "phonetic": "doo-AL-uh-tee"}]}
+{"guid": "N54_038", "forms": [{"grammatical_form": "noun/en_singular", "text": "phase", "is_base_form": true, "ipa": "/feɪz/", "phonetic": "FAYZ"}]}
+{"guid": "N54_039", "forms": [{"grammatical_form": "noun/en_singular", "text": "equilibrium", "is_base_form": true, "ipa": "/ˌiːkwəˈlɪbriəm/", "phonetic": "ee-kwuh-LIB-ree-um"}]}
+{"guid": "N54_040", "forms": [{"grammatical_form": "noun/en_singular", "text": "independence", "is_base_form": true, "ipa": "/ˌɪndɪˈpɛndəns/", "phonetic": "in-duh-PEN-dunts"}]}
+{"guid": "N54_041", "forms": [{"grammatical_form": "noun/en_singular", "text": "maturity", "is_base_form": true, "ipa": "/məˈtʃʊrəti/", "phonetic": "muh-TOOR-uh-tee"}]}
+{"guid": "N54_042", "forms": [{"grammatical_form": "noun/en_singular", "text": "captivity", "is_base_form": true, "ipa": "/kæpˈtɪvəti/", "phonetic": "kap-TIV-uh-tee"}]}
+{"guid": "N54_043", "forms": [{"grammatical_form": "noun/en_singular", "text": "captivity", "is_base_form": true, "ipa": "/kæpˈtɪvəti/", "phonetic": "kap-TIV-uh-tee"}]}
+{"guid": "N54_044", "forms": [{"grammatical_form": "noun/en_singular", "text": "exile", "is_base_form": true, "ipa": "/ˈɛɡzaɪl/", "phonetic": "EKS-ile"}]}
+{"guid": "N54_045", "forms": [{"grammatical_form": "noun/en_singular", "text": "opposition", "is_base_form": true, "ipa": "/ˌɑpəˈzɪʃən/", "phonetic": "op-uh-ZISH-un"}]}
+{"guid": "N54_046", "forms": [{"grammatical_form": "noun/en_singular", "text": "hazard", "is_base_form": true, "ipa": "/ˈhæzərd/", "phonetic": "HAZ-erd"}]}
+{"guid": "N54_047", "forms": [{"grammatical_form": "noun/en_singular", "text": "flux", "is_base_form": true, "ipa": "/flʌks/", "phonetic": "FLUKS"}]}
+{"guid": "N54_048", "forms": [{"grammatical_form": "noun/en_singular", "text": "ethics", "is_base_form": true, "ipa": "/ˈɛθɪks/", "phonetic": "ETH-iks"}]}
+{"guid": "N54_049", "forms": [{"grammatical_form": "noun/en_singular", "text": "reality", "is_base_form": true, "ipa": "/riˈæləti/", "phonetic": "ree-AL-uh-tee"}]}
+{"guid": "N54_050", "forms": [{"grammatical_form": "noun/en_singular", "text": "prevalence", "is_base_form": true, "ipa": "/ˈprɛvələns/", "phonetic": "PREV-uh-lens"}]}
+{"guid": "N54_051", "forms": [{"grammatical_form": "noun/en_singular", "text": "divinity", "is_base_form": true, "ipa": "/dɪˈvɪnəti/", "phonetic": "duh-VIN-uh-tee"}]}
+{"guid": "N54_052", "forms": [{"grammatical_form": "noun/en_singular", "text": "security", "is_base_form": true, "ipa": "/sɪˈkjʊrəti/", "phonetic": "sih-KYOOR-uh-tee"}]}
+{"guid": "N54_053", "forms": [{"grammatical_form": "noun/en_singular", "text": "penalty", "is_base_form": true, "ipa": "/ˈpɛnəlti/", "phonetic": "PEN-ul-tee"}]}
+{"guid": "N54_054", "forms": [{"grammatical_form": "noun/en_singular", "text": "violation", "is_base_form": true, "ipa": "/ˌvaɪəˈleɪʃən/", "phonetic": "vy-uh-LAY-shun"}]}
+{"guid": "N54_055", "forms": [{"grammatical_form": "noun/en_singular", "text": "reliance", "is_base_form": true, "ipa": "/rɪˈlaɪəns/", "phonetic": "ri-LY-uhns"}]}
+{"guid": "N54_056", "forms": [{"grammatical_form": "noun/en_singular", "text": "regulation", "is_base_form": true, "ipa": "/ˌrɛɡjəˈleɪʃən/", "phonetic": "reg-yuh-LAY-shun"}]}
+{"guid": "N54_057", "forms": [{"grammatical_form": "noun/en_singular", "text": "imprisonment", "is_base_form": true, "ipa": "/ɪmˈprɪzənmənt/", "phonetic": "im-PRIZ-un-munt"}]}
+{"guid": "N54_058", "forms": [{"grammatical_form": "noun/en_singular", "text": "confinement", "is_base_form": true, "ipa": "/kənˈfaɪnmənt/", "phonetic": "kun-FINE-ment"}]}
+{"guid": "N54_059", "forms": [{"grammatical_form": "noun/en_singular", "text": "burden", "is_base_form": true, "ipa": "/ˈbɝdən/", "phonetic": "BUR-dun"}]}
+{"guid": "N54_060", "forms": [{"grammatical_form": "noun/en_singular", "text": "obligation", "is_base_form": true, "ipa": "/ˌɑːbləˈɡeɪʃən/", "phonetic": "ob-lih-GAY-shun"}]}
+{"guid": "N54_061", "forms": [{"grammatical_form": "noun/en_singular", "text": "employment", "is_base_form": true, "ipa": "/ɪmˈplɔɪmənt/", "phonetic": "em-PLOY-ment"}]}
+{"guid": "N54_062", "forms": [{"grammatical_form": "noun/en_singular", "text": "exhaustion", "is_base_form": true, "ipa": "/ɪɡˈzɔːʃən/", "phonetic": "ig-ZAW-stchun"}]}
+{"guid": "N54_063", "forms": [{"grammatical_form": "noun/en_singular", "text": "failure", "is_base_form": true, "ipa": "/ˈfeɪljər/", "phonetic": "FAIL-yer"}]}
+{"guid": "N54_064", "forms": [{"grammatical_form": "noun/en_singular", "text": "defense", "is_base_form": true, "ipa": "/dɪˈfɛns/", "phonetic": "duh-FENS"}]}
+{"guid": "N54_065", "forms": [{"grammatical_form": "noun/en_singular", "text": "privacy", "is_base_form": true, "ipa": "/ˈpraɪvəsi/", "phonetic": "PRY-vuh-see"}]}
+{"guid": "N54_066", "forms": [{"grammatical_form": "noun/en_singular", "text": "domination", "is_base_form": true, "ipa": "/ˌdɑməˈneɪʃən/", "phonetic": "dom-uh-NAY-shun"}]}
+{"guid": "N54_067", "forms": [{"grammatical_form": "noun/en_singular", "text": "durability", "is_base_form": true, "ipa": "/ˌdʊrəˈbɪləti/", "phonetic": "dur-uh-BIL-uh-tee"}]}
+{"guid": "N54_068", "forms": [{"grammatical_form": "noun/en_singular", "text": "inertia", "is_base_form": true, "ipa": "/ɪˈnɝːʃə/", "phonetic": "in-UR-shuh"}]}
+{"guid": "N54_069", "forms": [{"grammatical_form": "noun/en_singular", "text": "limitation", "is_base_form": true, "ipa": "/ˌlɪməˈteɪʃən/", "phonetic": "lim-uh-TAY-shun"}]}
+{"guid": "N54_070", "forms": [{"grammatical_form": "noun/en_singular", "text": "harassment", "is_base_form": true, "ipa": "/həˈræsmənt/", "phonetic": "huh-RASS-ment"}]}
+{"guid": "N54_071", "forms": [{"grammatical_form": "noun/en_singular", "text": "eligibility", "is_base_form": true, "ipa": "/ˌɛlɪdʒəˈbɪləti/", "phonetic": "el-ih-juh-BIL-uh-tee"}]}
+{"guid": "N54_072", "forms": [{"grammatical_form": "noun/en_singular", "text": "forfeiture", "is_base_form": true, "ipa": "/ˈfɔr.fɪ.tʃɚ/", "phonetic": "FOR-fi-cher"}]}
+{"guid": "N54_073", "forms": [{"grammatical_form": "noun/en_singular", "text": "impairment", "is_base_form": true, "ipa": "/ɪmˈpɛrmənt/", "phonetic": "im-PAIR-ment"}]}
+{"guid": "N54_074", "forms": [{"grammatical_form": "noun/en_singular", "text": "entitlement", "is_base_form": true, "ipa": "/ɪnˈtaɪtəlmənt/", "phonetic": "en-TY-tuhl-ment"}]}
+{"guid": "N54_075", "forms": [{"grammatical_form": "noun/en_singular", "text": "disagreement", "is_base_form": true, "ipa": "/ˌdɪsəˈɡriːmənt/", "phonetic": "dis-uh-GREE-munt"}]}
+{"guid": "N54_076", "forms": [{"grammatical_form": "noun/en_singular", "text": "misconduct", "is_base_form": true, "ipa": "/ˌmɪsˈkɑːndʌkt/", "phonetic": "mis-KON-dukt"}]}
+{"guid": "N54_077", "forms": [{"grammatical_form": "noun/en_singular", "text": "deprivation", "is_base_form": true, "ipa": "/ˌdɛprəˈveɪʃən/", "phonetic": "deh-pruh-VAY-shun"}]}
+{"guid": "N54_080", "forms": [{"grammatical_form": "noun/en_singular", "text": "activity", "is_base_form": true, "ipa": "/ækˈtɪvəti/", "phonetic": "ak-TIV-uh-tee"}]}
+{"guid": "N54_081", "forms": [{"grammatical_form": "noun/en_singular", "text": "lack", "is_base_form": true, "ipa": "/læk/", "phonetic": "LAK"}]}
+{"guid": "N54_082", "forms": [{"grammatical_form": "noun/en_singular", "text": "self-interest", "is_base_form": true, "ipa": "/ˌsɛlfˈɪntrəst/", "phonetic": "self-IN-ter-est"}]}
+{"guid": "N54_083", "forms": [{"grammatical_form": "noun/en_singular", "text": "self-sufficiency", "is_base_form": true, "ipa": "/ˌsɛlf səˈfɪʃənsi/", "phonetic": "self-suh-FISH-un-see"}]}
+{"guid": "N54_084", "forms": [{"grammatical_form": "noun/en_singular", "text": "self-governance", "is_base_form": true, "ipa": "/ˌsɛlfˈɡʌvɚnəns/", "phonetic": "self-GUV-er-nuns"}]}
+{"guid": "N54_085", "forms": [{"grammatical_form": "noun/en_singular", "text": "self-sacrifice", "is_base_form": true, "ipa": "/ˌsɛlfˈsæk rə faɪs/", "phonetic": "self-SAK-ruh-fाइस"}]}
+{"guid": "N54_086", "forms": [{"grammatical_form": "noun/en_singular", "text": "afterlife", "is_base_form": true, "ipa": "/ˈæftərˌlaɪf/", "phonetic": "AF-ter-life"}]}
+{"guid": "N54_087", "forms": [{"grammatical_form": "noun/en_singular", "text": "spirituality", "is_base_form": true, "ipa": "/ˌspɪrɪtʃuˈæləti/", "phonetic": "spir-i-choo-AL-i-tee"}]}
+{"guid": "N54_088", "forms": [{"grammatical_form": "noun/en_singular", "text": "celibacy", "is_base_form": true, "ipa": "/ˈsɛləbəsi/", "phonetic": "SEL-uh-buh-see"}]}
+{"guid": "N54_090", "forms": [{"grammatical_form": "noun/en_singular", "text": "caution", "is_base_form": true, "ipa": "/ˈkɔʃən/", "phonetic": "KAW-shun"}]}
