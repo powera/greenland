@@ -29,14 +29,14 @@ from typing import Any, Dict, Iterable, List, Optional, Sequence, Tuple
 from sqlalchemy.orm import Session
 
 from agents.common.common_args import add_backend_args, add_common_args, get_data_source_config
+from reports.curriculum_bands import UNRANKED_SENTINEL
 from storage.backend import create_session
 from storage.models.schema import Lemma, LemmaDifficultyOverride
 
-# Ranks at or above this value are the "unranked" sentinel the frequency
-# rollup assigns when a lemma has no usable corpus evidence (mostly multiword
-# entries). They carry no signal about obscurity, so the obscure check skips
-# them rather than reporting every multiword phrase in the curriculum.
-UNRANKED_SENTINEL = 9783
+# Ranks at or above UNRANKED_SENTINEL are what the frequency rollup assigns
+# when a lemma has no usable corpus evidence (mostly multiword entries). They
+# carry no signal about obscurity, so the obscure check skips them rather than
+# reporting every multiword phrase in the curriculum.
 
 # Verbs that must exist before a learner can build a sentence out of the
 # nouns they already know. A content verb taught far ahead of these is

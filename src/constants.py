@@ -37,7 +37,8 @@ RELEASE_DIR = os.path.join(PROJECT_ROOT, "data", "release")
 
 # Curriculum bounds, in three bands with deliberate gaps between them:
 #
-#   1-20        the curated general core, taught in order
+#   1-30        the curated general core, taught in order; the rebalancer
+#               fills it from 1 and uses only as many levels as it needs
 #   100-499     "named" units, each a single pos_subtype (Animals 3, Body
 #               Parts, Appliances 2)
 #   1000-1299   topic-specific extensions, outside the general course
@@ -53,7 +54,7 @@ RELEASE_DIR = os.path.join(PROJECT_ROOT, "data", "release")
 #
 # ``-1`` is the intentional exclusion sentinel, not a level.
 MIN_DIFFICULTY_LEVEL: int = 1
-CORE_DIFFICULTY_LEVEL_MAX: int = 20
+CORE_DIFFICULTY_LEVEL_MAX: int = 30
 NAMED_DIFFICULTY_LEVEL_MIN: int = 100
 GENERAL_DIFFICULTY_LEVEL_MAX: int = 499
 TOPIC_DIFFICULTY_LEVEL_MIN: int = 1000

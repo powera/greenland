@@ -329,8 +329,8 @@ def generate_family_relations(
                         if needs_update:
                             existing.lemma_text = variant.lemma_text
                             existing.definition_text = variant.definition
-                            if variant.difficulty_level is not None:
-                                existing.difficulty_level = variant.difficulty_level
+                            if variant.curriculum_level is not None:
+                                existing.difficulty_level = variant.curriculum_level
                             if variant.notes:
                                 existing.notes = variant.notes
                             stats["updated"] += 1
@@ -350,7 +350,7 @@ def generate_family_relations(
                             definition_text=variant.definition,
                             pos_type="noun",
                             pos_subtype="family_relation",
-                            difficulty_level=variant.difficulty_level,
+                            difficulty_level=variant.curriculum_level,
                             tags=(
                                 json.dumps(variant.tags)
                                 if variant.tags
