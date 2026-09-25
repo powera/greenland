@@ -8,3 +8,12 @@
 {"guid": "A02_008", "forms": [{"grammatical_form": "adjective/en_positive", "text": "gray", "is_base_form": true, "ipa": "/ɡreɪ/", "phonetic": "GRAY"}], "variants": [{"kind": "spelling", "key": "grey", "forms": [{"grammatical_form": "adjective/en_positive", "text": "grey", "is_base_form": true}]}]}
 {"guid": "A02_009", "forms": [{"grammatical_form": "adjective/en_positive", "text": "orange", "is_base_form": true}]}
 {"guid": "A02_010", "forms": [{"grammatical_form": "adjective/en_positive", "text": "purple", "is_base_form": true}]}
+{"guid": "A02_012", "forms": [{"grammatical_form": "adjective/en_positive", "text": "spotted", "is_base_form": true, "ipa": "/ˈspɑtɪd/", "phonetic": "SPOT-id"}]}
+{"guid": "A02_013", "forms": [{"grammatical_form": "adjective/en_positive", "text": "striped", "is_base_form": true, "ipa": "/straɪpt/", "phonetic": "STRYPD"}]}
+{"guid": "A02_014", "forms": [{"grammatical_form": "adjective/en_positive", "text": "chromatic", "is_base_form": true, "ipa": "/kroʊˈmætɪk/", "phonetic": "kroh-MAT-ik"}]}
+{"guid": "A02_015", "forms": [{"grammatical_form": "adjective/en_positive", "text": "terracotta", "is_base_form": true, "ipa": "/ˌtɛrəˈkɑtə/", "phonetic": "ter-uh-KOT-uh"}]}
+{"guid": "A02_016", "forms": [{"grammatical_form": "adjective/en_positive", "text": "black-and-white", "is_base_form": true, "ipa": "/ˌblæk ən ˈwaɪt/", "phonetic": "black-and-WHITE"}]}
+{"guid": "A02_017", "forms": [{"grammatical_form": "adjective/en_positive", "text": "reddish-brown", "is_base_form": true, "ipa": "/ˈrɛdɪʃ ˈbraʊn/", "phonetic": "RED-ish-BROWN"}]}
+{"guid": "A02_018", "forms": [{"grammatical_form": "adjective/en_positive", "text": "white-tailed", "is_base_form": true, "ipa": "/ˈwaɪtˌteɪld/", "phonetic": "WYTE-tayld"}]}
+{"guid": "A02_019", "forms": [{"grammatical_form": "adjective/en_positive", "text": "blue-green", "is_base_form": true, "ipa": "/ˌbluːˈɡriːn/", "phonetic": "BLOO-green"}]}
+{"guid": "A02_020", "forms": [{"grammatical_form": "adjective/en_positive", "text": "blond", "is_base_form": true, "ipa": "/blɑnd/", "phonetic": "BLOND"}]}

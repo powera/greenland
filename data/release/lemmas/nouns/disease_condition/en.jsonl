@@ -13,3 +13,14 @@
 {"guid": "N04_019", "forms": [{"grammatical_form": "noun/en_singular", "text": "runny nose", "is_base_form": true}]}
 {"guid": "N04_020", "forms": [{"grammatical_form": "noun/en_singular", "text": "food poisoning", "is_base_form": true}]}
 {"guid": "N04_021", "forms": [{"grammatical_form": "noun/en_singular", "text": "broken bone", "is_base_form": true}]}
+{"guid": "N04_022", "forms": [{"grammatical_form": "noun/en_singular", "text": "spectrum", "is_base_form": true, "ipa": "/ˈspɛktrəm/", "phonetic": "SPEK-trum"}]}
+{"guid": "N04_023", "forms": [{"grammatical_form": "noun/en_singular", "text": "stiffness", "is_base_form": true, "ipa": "/ˈstɪfnəs/", "phonetic": "STIF-nis"}]}
+{"guid": "N04_024", "forms": [{"grammatical_form": "noun/en_singular", "text": "virus", "is_base_form": true, "ipa": "/ˈvaɪrəs/", "phonetic": "VY-rus"}]}
+{"guid": "N04_025", "forms": [{"grammatical_form": "noun/en_singular", "text": "immunity", "is_base_form": true, "ipa": "/ɪˈmjuːnəti/", "phonetic": "ih-MYOO-nuh-tee"}]}
+{"guid": "N04_026", "forms": [{"grammatical_form": "noun/en_singular", "text": "abortion", "is_base_form": true, "ipa": "/əˈbɔrʃən/", "phonetic": "uh-BOR-shun"}]}
+{"guid": "N04_027", "forms": [{"grammatical_form": "noun/en_singular", "text": "seizure", "is_base_form": true, "ipa": "/ˈsiːʒər/", "phonetic": "SEE-zhur"}]}
+{"guid": "N04_028", "forms": [{"grammatical_form": "noun/en_singular", "text": "impairment", "is_base_form": true, "ipa": "/ɪmˈpɛrmənt/", "phonetic": "im-PAIR-ment"}]}
+{"guid": "N04_029", "forms": [{"grammatical_form": "noun/en_singular", "text": "scald", "is_base_form": true, "ipa": "/skɔld/", "phonetic": "SKAWLD"}]}
+{"guid": "N04_030", "forms": [{"grammatical_form": "noun/en_singular", "text": "ill-health", "is_base_form": true, "ipa": "/ˌɪl ˈhɛlθ/", "phonetic": "IL-helth"}]}
+{"guid": "N04_031", "forms": [{"grammatical_form": "noun/en_singular", "text": "earache", "is_base_form": true, "ipa": "/ˈɪrˌeɪk/", "phonetic": "EER-ayk"}]}
+{"guid": "N04_032", "forms": [{"grammatical_form": "noun/en_singular", "text": "toothache", "is_base_form": true, "ipa": "/ˈtuːθeɪk/", "phonetic": "TOOTH-ayk"}]}

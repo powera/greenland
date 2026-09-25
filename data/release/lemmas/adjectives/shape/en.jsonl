@@ -14,3 +14,12 @@
 {"guid": "A03_014", "forms": [{"grammatical_form": "adjective/en_positive", "text": "straight", "is_base_form": true, "ipa": "/streɪt/", "phonetic": "STRAHT"}]}
 {"guid": "A03_015", "forms": [{"grammatical_form": "adjective/en_positive", "text": "shaped", "is_base_form": true, "ipa": "/ʃeɪpt/", "phonetic": "SHAYPT"}]}
 {"guid": "A03_017", "forms": [{"grammatical_form": "adjective/en_positive", "text": "hollow", "is_base_form": true}]}
+{"guid": "A03_019", "forms": [{"grammatical_form": "adjective/en_positive", "text": "quadrilateral", "is_base_form": true, "ipa": "/ˌkwɑdrəˈlætərəl/", "phonetic": "kwah-druh-LAT-er-uhl"}]}
+{"guid": "A03_020", "forms": [{"grammatical_form": "adjective/en_positive", "text": "conic", "is_base_form": true, "ipa": "/ˈkɑːnɪk/", "phonetic": "KON-ik"}]}
+{"guid": "A03_021", "forms": [{"grammatical_form": "adjective/en_positive", "text": "angular", "is_base_form": true, "ipa": "/ˈæŋɡjələr/", "phonetic": "ANG-gyuh-ler"}]}
+{"guid": "A03_022", "forms": [{"grammatical_form": "adjective/en_positive", "text": "elliptical", "is_base_form": true, "ipa": "/ɪˈlɪptɪkəl/", "phonetic": "ih-LIP-ti-kul"}]}
+{"guid": "A03_023", "forms": [{"grammatical_form": "adjective/en_positive", "text": "amorphous", "is_base_form": true, "ipa": "/əˈmɔrfəs/", "phonetic": "uh-MOR-fus"}]}
+{"guid": "A03_024", "forms": [{"grammatical_form": "adjective/en_positive", "text": "three-dimensional", "is_base_form": true, "ipa": "/ˌθriː dəˈmɛnʃənəl/", "phonetic": "THREE-duh-MEN-shuh-nuhl"}]}
+{"guid": "A03_025", "forms": [{"grammatical_form": "adjective/en_positive", "text": "well-defined", "is_base_form": true, "ipa": "/ˌwɛl dɪˈfaɪnd/", "phonetic": "WEL-di-FYND"}]}
+{"guid": "A03_026", "forms": [{"grammatical_form": "adjective/en_positive", "text": "u-shaped", "is_base_form": true, "ipa": "/ˈjuːˌʃeɪpt/", "phonetic": "YOO-shaypt"}]}
+{"guid": "A03_027", "forms": [{"grammatical_form": "adjective/en_positive", "text": "curly", "is_base_form": true, "ipa": "/ˈkɝli/", "phonetic": "KUR-lee"}]}

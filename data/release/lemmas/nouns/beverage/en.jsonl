@@ -13,3 +13,6 @@
 {"guid": "N42_026", "forms": [{"grammatical_form": "noun/en_singular", "text": "mineral water", "is_base_form": true}]}
 {"guid": "N42_027", "forms": [{"grammatical_form": "noun/en_singular", "text": "sparkling water", "is_base_form": true}]}
 {"guid": "N42_028", "forms": [{"grammatical_form": "noun/en_singular", "text": "tap water", "is_base_form": true}]}
+{"guid": "N42_029", "forms": [{"grammatical_form": "noun/en_singular", "text": "gin", "is_base_form": true, "ipa": "/dʒɪn/", "phonetic": "JIN"}]}
+{"guid": "N42_030", "forms": [{"grammatical_form": "noun/en_singular", "text": "sherry", "is_base_form": true, "ipa": "/ˈʃɛri/", "phonetic": "SHER-ee"}]}
+{"guid": "N42_031", "forms": [{"grammatical_form": "noun/en_singular", "text": "milkshake", "is_base_form": true, "ipa": "/ˈmɪlkˌʃeɪk/", "phonetic": "MILK-shayk"}]}

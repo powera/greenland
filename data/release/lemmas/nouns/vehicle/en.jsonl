@@ -20,3 +20,20 @@
 {"guid": "N40_033", "forms": [{"grammatical_form": "noun/en_singular", "text": "cruise ship", "is_base_form": true}]}
 {"guid": "N40_034", "forms": [{"grammatical_form": "noun/en_singular", "text": "space shuttle", "is_base_form": true}]}
 {"guid": "N40_035", "forms": [{"grammatical_form": "noun/en_singular", "text": "hot air balloon", "is_base_form": true}]}
+{"guid": "N40_036", "forms": [{"grammatical_form": "noun/en_singular", "text": "aircraft", "is_base_form": true, "ipa": "/ˈɛrˌkræft/", "phonetic": "AIR-kraft"}]}
+{"guid": "N40_037", "forms": [{"grammatical_form": "noun/en_singular", "text": "tank", "is_base_form": true, "ipa": "/tæŋk/", "phonetic": "TANGK"}]}
+{"guid": "N40_038", "forms": [{"grammatical_form": "noun/en_singular", "text": "vehicle", "is_base_form": true, "ipa": "/ˈviːəkəl/", "phonetic": "VEE-uh-kul"}]}
+{"guid": "N40_039", "forms": [{"grammatical_form": "noun/en_singular", "text": "jet", "is_base_form": true, "ipa": "/dʒɛt/", "phonetic": "JET"}]}
+{"guid": "N40_040", "forms": [{"grammatical_form": "noun/en_singular", "text": "turbine", "is_base_form": true, "ipa": "/ˈtɝːbaɪn/", "phonetic": "TUR-bine"}]}
+{"guid": "N40_041", "forms": [{"grammatical_form": "noun/en_singular", "text": "axle", "is_base_form": true, "ipa": "/ˈæk.səl/", "phonetic": "AK-suhl"}]}
+{"guid": "N40_042", "forms": [{"grammatical_form": "noun/en_singular", "text": "payload", "is_base_form": true, "ipa": "/ˈpeɪˌloʊd/", "phonetic": "PAY-load"}]}
+{"guid": "N40_043", "forms": [{"grammatical_form": "noun/en_singular", "text": "shuttle", "is_base_form": true, "ipa": "/ˈʃʌtəl/", "phonetic": "SHUT-ul"}]}
+{"guid": "N40_044", "forms": [{"grammatical_form": "noun/en_singular", "text": "wheelchair", "is_base_form": true, "ipa": "/ˈwiːlˌtʃer/", "phonetic": "WEEL-chair"}]}
+{"guid": "N40_045", "forms": [{"grammatical_form": "noun/en_singular", "text": "propeller", "is_base_form": true, "ipa": "/prəˈpɛlər/", "phonetic": "pruh-PEL-er"}]}
+{"guid": "N40_046", "forms": [{"grammatical_form": "noun/en_singular", "text": "battleship", "is_base_form": true, "ipa": "/ˈbætəlˌʃɪp/", "phonetic": "BAT-ul-ship"}]}
+{"guid": "N40_047", "forms": [{"grammatical_form": "noun/en_singular", "text": "skateboard", "is_base_form": true, "ipa": "/ˈskeɪtˌbɔrd/", "phonetic": "SKAYT-bord"}]}
+{"guid": "N40_048", "forms": [{"grammatical_form": "noun/en_singular", "text": "balloon", "is_base_form": true, "ipa": "/bəˈlun/", "phonetic": "buh-LOON"}]}
+{"guid": "N40_049", "forms": [{"grammatical_form": "noun/en_singular", "text": "fire engine", "is_base_form": true, "ipa": "/ˈfaɪɚ ˌɛndʒɪn/", "phonetic": "FIRE EN-jin"}]}
+{"guid": "N40_050", "forms": [{"grammatical_form": "noun/en_singular", "text": "snowboard", "is_base_form": true, "ipa": "/ˈsnoʊˌbɔrd/", "phonetic": "SNOW-bord"}]}
+{"guid": "N40_051", "forms": [{"grammatical_form": "noun/en_singular", "text": "rocket", "is_base_form": true, "ipa": "/ˈrɑkɪt/", "phonetic": "ROK-it"}]}
+{"guid": "N40_052", "forms": [{"grammatical_form": "noun/en_singular", "text": "spaceship", "is_base_form": true, "ipa": "/ˈspeɪsˌʃɪp/", "phonetic": "SPACE-ship"}]}

@@ -26,3 +26,83 @@
 {"guid": "N41_057", "forms": [{"grammatical_form": "noun/en_singular", "text": "ice skating", "is_base_form": true}]}
 {"guid": "N41_058", "forms": [{"grammatical_form": "noun/en_singular", "text": "board game", "is_base_form": true}]}
 {"guid": "N41_059", "forms": [{"grammatical_form": "noun/en_singular", "text": "card game", "is_base_form": true}]}
+{"guid": "N41_060", "forms": [{"grammatical_form": "noun/en_singular", "text": "coordination", "is_base_form": true, "ipa": "/koʊˌɔrdəˈneɪʃən/", "phonetic": "koh-or-duh-NAY-shun"}]}
+{"guid": "N41_061", "forms": [{"grammatical_form": "noun/en_singular", "text": "binding", "is_base_form": true, "ipa": "/ˈbaɪndɪŋ/", "phonetic": "BYN-ding"}]}
+{"guid": "N41_062", "forms": [{"grammatical_form": "noun/en_singular", "text": "football", "is_base_form": true, "ipa": "/ˈfʊtˌbɔl/", "phonetic": "FOOT-bawl"}]}
+{"guid": "N41_063", "forms": [{"grammatical_form": "noun/en_singular", "text": "trading", "is_base_form": true, "ipa": "/ˈtreɪdɪŋ/", "phonetic": "TRAY-ding"}]}
+{"guid": "N41_064", "forms": [{"grammatical_form": "noun/en_singular", "text": "shipping", "is_base_form": true, "ipa": "/ˈʃɪpɪŋ/", "phonetic": "SHIP-ing"}]}
+{"guid": "N41_065", "forms": [{"grammatical_form": "noun/en_singular", "text": "dance", "is_base_form": true, "ipa": "/dæns/", "phonetic": "DANS"}]}
+{"guid": "N41_066", "forms": [{"grammatical_form": "noun/en_singular", "text": "dance", "is_base_form": true, "ipa": "/dæns/", "phonetic": "DANS"}]}
+{"guid": "N41_067", "forms": [{"grammatical_form": "noun/en_singular", "text": "comedy", "is_base_form": true, "ipa": "/ˈkɑːmədi/", "phonetic": "KOM-uh-dee"}]}
+{"guid": "N41_068", "forms": [{"grammatical_form": "noun/en_singular", "text": "ballet", "is_base_form": true, "ipa": "/bæˈleɪ/", "phonetic": "ba-LAY"}]}
+{"guid": "N41_069", "forms": [{"grammatical_form": "noun/en_singular", "text": "performance", "is_base_form": true, "ipa": "/pərˈfɔrməns/", "phonetic": "per-FOR-muns"}]}
+{"guid": "N41_070", "forms": [{"grammatical_form": "noun/en_singular", "text": "waltz", "is_base_form": true, "ipa": "/wɔlts/", "phonetic": "WAWLTS"}]}
+{"guid": "N41_071", "forms": [{"grammatical_form": "noun/en_singular", "text": "diet", "is_base_form": true, "ipa": "/ˈdaɪət/", "phonetic": "DYE-et"}]}
+{"guid": "N41_072", "forms": [{"grammatical_form": "noun/en_singular", "text": "diet", "is_base_form": true, "ipa": "/ˈdaɪət/", "phonetic": "DYE-et"}]}
+{"guid": "N41_073", "forms": [{"grammatical_form": "noun/en_singular", "text": "mating", "is_base_form": true, "ipa": "/ˈmeɪtɪŋ/", "phonetic": "MAY-ting"}]}
+{"guid": "N41_074", "forms": [{"grammatical_form": "noun/en_singular", "text": "chewing", "is_base_form": true, "ipa": "/ˈtʃuɪŋ/", "phonetic": "CHOO-ing"}]}
+{"guid": "N41_075", "forms": [{"grammatical_form": "noun/en_singular", "text": "campaign", "is_base_form": true, "ipa": "/kæmˈpeɪn/", "phonetic": "kam-PAYN"}]}
+{"guid": "N41_076", "forms": [{"grammatical_form": "noun/en_singular", "text": "expedition", "is_base_form": true, "ipa": "/ˌɛkspəˈdɪʃən/", "phonetic": "ek-spuh-DISH-un"}]}
+{"guid": "N41_077", "forms": [{"grammatical_form": "noun/en_singular", "text": "tour", "is_base_form": true, "ipa": "/tʊr/", "phonetic": "TOOR"}]}
+{"guid": "N41_078", "forms": [{"grammatical_form": "noun/en_singular", "text": "session", "is_base_form": true, "ipa": "/ˈsɛʃən/", "phonetic": "SESH-un"}]}
+{"guid": "N41_079", "forms": [{"grammatical_form": "noun/en_singular", "text": "parking", "is_base_form": true, "ipa": "/ˈpɑrkɪŋ/", "phonetic": "PAR-king"}]}
+{"guid": "N41_080", "forms": [{"grammatical_form": "noun/en_singular", "text": "sport", "is_base_form": true, "ipa": "/spɔrt/", "phonetic": "SPORT"}]}
+{"guid": "N41_081", "forms": [{"grammatical_form": "noun/en_singular", "text": "storage", "is_base_form": true, "ipa": "/ˈstɔrɪdʒ/", "phonetic": "STOR-ij"}]}
+{"guid": "N41_082", "forms": [{"grammatical_form": "noun/en_singular", "text": "consumption", "is_base_form": true, "ipa": "/kənˈsʌmpʃən/", "phonetic": "kun-SUMP-shun"}]}
+{"guid": "N41_083", "forms": [{"grammatical_form": "noun/en_singular", "text": "prostitution", "is_base_form": true, "ipa": "/ˌprɑːstəˈtuːʃən/", "phonetic": "pros-tuh-TOO-shun"}]}
+{"guid": "N41_084", "forms": [{"grammatical_form": "noun/en_singular", "text": "racing", "is_base_form": true, "ipa": "/ˈreɪsɪŋ/", "phonetic": "RAY-sing"}]}
+{"guid": "N41_085", "forms": [{"grammatical_form": "noun/en_singular", "text": "weaving", "is_base_form": true, "ipa": "/ˈwiːvɪŋ/", "phonetic": "WEE-ving"}]}
+{"guid": "N41_086", "forms": [{"grammatical_form": "noun/en_singular", "text": "polo", "is_base_form": true, "ipa": "/ˈpoʊloʊ/", "phonetic": "POH-loh"}]}
+{"guid": "N41_087", "forms": [{"grammatical_form": "noun/en_singular", "text": "gaming", "is_base_form": true, "ipa": "/ˈɡeɪmɪŋ/", "phonetic": "GAY-ming"}]}
+{"guid": "N41_088", "forms": [{"grammatical_form": "noun/en_singular", "text": "manufacturing", "is_base_form": true, "ipa": "/ˌmænjuˈfæktʃərɪŋ/", "phonetic": "man-yoo-FAK-chuh-ring"}]}
+{"guid": "N41_089", "forms": [{"grammatical_form": "noun/en_singular", "text": "parenting", "is_base_form": true, "ipa": "/ˈpɛrəntɪŋ/", "phonetic": "PAIR-uhn-ting"}]}
+{"guid": "N41_090", "forms": [{"grammatical_form": "noun/en_singular", "text": "ritual", "is_base_form": true, "ipa": "/ˈrɪtʃuəl/", "phonetic": "RICH-oo-uhl"}]}
+{"guid": "N41_091", "forms": [{"grammatical_form": "noun/en_singular", "text": "worship", "is_base_form": true, "ipa": "/ˈwɝːʃɪp/", "phonetic": "WUR-ship"}]}
+{"guid": "N41_092", "forms": [{"grammatical_form": "noun/en_singular", "text": "fasting", "is_base_form": true, "ipa": "/ˈfæstɪŋ/", "phonetic": "FAST-ing"}]}
+{"guid": "N41_093", "forms": [{"grammatical_form": "noun/en_singular", "text": "provision", "is_base_form": true, "ipa": "/prəˈvɪʒən/", "phonetic": "pruh-VIZH-un"}]}
+{"guid": "N41_094", "forms": [{"grammatical_form": "noun/en_singular", "text": "ballot", "is_base_form": true, "ipa": "/ˈbælət/", "phonetic": "BAL-uht"}]}
+{"guid": "N41_095", "forms": [{"grammatical_form": "noun/en_singular", "text": "commerce", "is_base_form": true, "ipa": "/ˈkɑːmɝːs/", "phonetic": "KAH-mers"}]}
+{"guid": "N41_096", "forms": [{"grammatical_form": "noun/en_singular", "text": "refusal", "is_base_form": true, "ipa": "/rɪˈfjuːzəl/", "phonetic": "rih-FYOO-zul"}]}
+{"guid": "N41_097", "forms": [{"grammatical_form": "noun/en_singular", "text": "tuning", "is_base_form": true, "ipa": "/ˈtuːnɪŋ/", "phonetic": "TOO-ning"}]}
+{"guid": "N41_098", "forms": [{"grammatical_form": "noun/en_singular", "text": "tuning", "is_base_form": true, "ipa": "/ˈtuːnɪŋ/", "phonetic": "TOO-ning"}]}
+{"guid": "N41_099", "forms": [{"grammatical_form": "noun/en_singular", "text": "tuning", "is_base_form": true, "ipa": "/ˈtuːnɪŋ/", "phonetic": "TOO-ning"}]}
+{"guid": "N41_100", "forms": [{"grammatical_form": "noun/en_singular", "text": "samba", "is_base_form": true, "ipa": "/ˈsæmbə/", "phonetic": "SAM-buh"}]}
+{"guid": "N41_101", "forms": [{"grammatical_form": "noun/en_singular", "text": "tango", "is_base_form": true, "ipa": "/ˈtæŋɡoʊ/", "phonetic": "TANG-go"}]}
+{"guid": "N41_102", "forms": [{"grammatical_form": "noun/en_singular", "text": "counterpoint", "is_base_form": true, "ipa": "/ˈkaʊntərˌpɔɪnt/", "phonetic": "KOWN-ter-point"}]}
+{"guid": "N41_103", "forms": [{"grammatical_form": "noun/en_singular", "text": "salsa", "is_base_form": true, "ipa": "/ˈsɑlsə/", "phonetic": "SAHL-suh"}]}
+{"guid": "N41_104", "forms": [{"grammatical_form": "noun/en_singular", "text": "mime", "is_base_form": true, "ipa": "/maɪm/", "phonetic": "MYME"}]}
+{"guid": "N41_105", "forms": [{"grammatical_form": "noun/en_singular", "text": "storytelling", "is_base_form": true, "ipa": "/ˈstɔriˌtɛlɪŋ/", "phonetic": "STOR-ee-tel-ing"}]}
+{"guid": "N41_106", "forms": [{"grammatical_form": "noun/en_singular", "text": "predation", "is_base_form": true, "ipa": "/prɪˈdeɪʃən/", "phonetic": "pruh-DAY-shun"}]}
+{"guid": "N41_107", "forms": [{"grammatical_form": "noun/en_singular", "text": "foraging", "is_base_form": true, "ipa": "/ˈfɔrɪdʒɪŋ/", "phonetic": "FOR-uh-jing"}]}
+{"guid": "N41_108", "forms": [{"grammatical_form": "noun/en_singular", "text": "spaceflight", "is_base_form": true, "ipa": "/ˈspeɪsˌflaɪt/", "phonetic": "SPACE-flite"}]}
+{"guid": "N41_109", "forms": [{"grammatical_form": "noun/en_singular", "text": "plumbing", "is_base_form": true, "ipa": "/ˈplʌmɪŋ/", "phonetic": "PLUM-ing"}]}
+{"guid": "N41_110", "forms": [{"grammatical_form": "noun/en_singular", "text": "networking", "is_base_form": true, "ipa": "/ˈnɛtˌwɝkɪŋ/", "phonetic": "NET-wur-king"}]}
+{"guid": "N41_111", "forms": [{"grammatical_form": "noun/en_singular", "text": "masturbation", "is_base_form": true, "ipa": "/ˌmæstərˈbeɪʃən/", "phonetic": "mas-ter-BAY-shun"}]}
+{"guid": "N41_112", "forms": [{"grammatical_form": "noun/en_singular", "text": "bonding", "is_base_form": true, "ipa": "/ˈbɑndɪŋ/", "phonetic": "BON-ding"}]}
+{"guid": "N41_113", "forms": [{"grammatical_form": "noun/en_singular", "text": "filing", "is_base_form": true, "ipa": "/ˈfaɪlɪŋ/", "phonetic": "FY-ling"}]}
+{"guid": "N41_114", "forms": [{"grammatical_form": "noun/en_singular", "text": "bargaining", "is_base_form": true, "ipa": "/ˈbɑrɡənɪŋ/", "phonetic": "BAR-guh-ning"}]}
+{"guid": "N41_115", "forms": [{"grammatical_form": "noun/en_singular", "text": "method", "is_base_form": true, "ipa": "/ˈmɛθəd/", "phonetic": "METH-ud"}]}
+{"guid": "N41_116", "forms": [{"grammatical_form": "noun/en_singular", "text": "activity", "is_base_form": true, "ipa": "/ækˈtɪvəti/", "phonetic": "ak-TIV-uh-tee"}]}
+{"guid": "N41_117", "forms": [{"grammatical_form": "noun/en_singular", "text": "seasoning", "is_base_form": true, "ipa": "/ˈsiːzənɪŋ/", "phonetic": "SEE-zuh-ning"}]}
+{"guid": "N41_118", "forms": [{"grammatical_form": "noun/en_singular", "text": "cookery", "is_base_form": true, "ipa": "/ˈkʊkəri/", "phonetic": "KOOK-uh-ree"}]}
+{"guid": "N41_119", "forms": [{"grammatical_form": "noun/en_singular", "text": "skim", "is_base_form": true, "ipa": "/skɪm/", "phonetic": "SKIM"}]}
+{"guid": "N41_120", "forms": [{"grammatical_form": "noun/en_singular", "text": "co-operation", "is_base_form": true, "ipa": "/koʊˌɑpəˈreɪʃən/", "phonetic": "koh-op-uh-RAY-shun"}]}
+{"guid": "N41_121", "forms": [{"grammatical_form": "noun/en_singular", "text": "self-defense", "is_base_form": true, "ipa": "/ˌsɛlf dɪˈfɛns/", "phonetic": "self-di-FENS"}]}
+{"guid": "N41_122", "forms": [{"grammatical_form": "noun/en_singular", "text": "problem-solving", "is_base_form": true, "ipa": "/ˈprɑbləm ˌsɑlvɪŋ/", "phonetic": "PROB-lum-SOL-ving"}]}
+{"guid": "N41_123", "forms": [{"grammatical_form": "noun/en_singular", "text": "self-help", "is_base_form": true, "ipa": "/ˌsɛlfˈhɛlp/", "phonetic": "self-HELP"}]}
+{"guid": "N41_124", "forms": [{"grammatical_form": "noun/en_singular", "text": "role-playing", "is_base_form": true, "ipa": "/ˈroʊlˌpleɪɪŋ/", "phonetic": "ROHL-play-ing"}]}
+{"guid": "N41_125", "forms": [{"grammatical_form": "noun/en_singular", "text": "spelling", "is_base_form": true, "ipa": "/ˈspɛlɪŋ/", "phonetic": "SPEL-ing"}]}
+{"guid": "N41_126", "forms": [{"grammatical_form": "noun/en_singular", "text": "baptism", "is_base_form": true, "ipa": "/ˈbæptɪzəm/", "phonetic": "BAP-tiz-um"}]}
+{"guid": "N41_127", "forms": [{"grammatical_form": "noun/en_singular", "text": "activism", "is_base_form": true, "ipa": "/ˈæktəˌvɪzəm/", "phonetic": "AK-tuh-viz-um"}]}
+{"guid": "N41_128", "forms": [{"grammatical_form": "noun/en_singular", "text": "activism", "is_base_form": true, "ipa": "/ˈæktəˌvɪzəm/", "phonetic": "AK-tuh-viz-um"}]}
+{"guid": "N41_129", "forms": [{"grammatical_form": "noun/en_singular", "text": "cannibalism", "is_base_form": true, "ipa": "/ˈkænəbəlɪzəm/", "phonetic": "KAN-uh-buh-liz-um"}]}
+{"guid": "N41_130", "forms": [{"grammatical_form": "noun/en_singular", "text": "smuggling", "is_base_form": true, "ipa": "/ˈsmʌɡlɪŋ/", "phonetic": "SMUG-ling"}]}
+{"guid": "N41_131", "forms": [{"grammatical_form": "noun/en_singular", "text": "hobby", "is_base_form": true, "ipa": "/ˈhɑbi/", "phonetic": "HOB-ee"}]}
+{"guid": "N41_132", "forms": [{"grammatical_form": "noun/en_singular", "text": "goal", "is_base_form": true, "ipa": "/ɡoʊl/", "phonetic": "GOHL"}]}
+{"guid": "N41_133", "forms": [{"grammatical_form": "noun/en_singular", "text": "roller skating", "is_base_form": true, "ipa": "/ˈroʊlər ˌskeɪtɪŋ/", "phonetic": "ROH-ler SKAY-ting"}]}
+{"guid": "N41_134", "forms": [{"grammatical_form": "noun/en_singular", "text": "shower", "is_base_form": true, "ipa": "/ˈʃaʊər/", "phonetic": "SHOW-er"}]}
+{"guid": "N41_135", "forms": [{"grammatical_form": "noun/en_singular", "text": "adventure", "is_base_form": true, "ipa": "/ədˈvɛntʃər/", "phonetic": "ad-VEN-cher"}]}
+{"guid": "N41_136", "forms": [{"grammatical_form": "noun/en_singular", "text": "search", "is_base_form": true, "ipa": "/sɝtʃ/", "phonetic": "SURCH"}]}
+{"guid": "N41_137", "forms": [{"grammatical_form": "noun/en_singular", "text": "pop music", "is_base_form": true, "ipa": "/ˈpɑp ˌmjuzɪk/", "phonetic": "POP MYOO-zik"}]}
+{"guid": "N41_138", "forms": [{"grammatical_form": "noun/en_singular", "text": "quiz", "is_base_form": true, "ipa": "/kwɪz/", "phonetic": "KWIZ"}]}
+{"guid": "N41_139", "forms": [{"grammatical_form": "noun/en_singular", "text": "snowboarding", "is_base_form": true, "ipa": "/ˈsnoʊˌbɔrdɪŋ/", "phonetic": "SNOH-bor-ding"}]}

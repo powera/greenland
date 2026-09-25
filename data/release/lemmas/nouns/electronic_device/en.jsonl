@@ -8,3 +8,26 @@
 {"guid": "N57_025", "forms": [{"grammatical_form": "noun/en_singular", "text": "laptop computer", "is_base_form": true}]}
 {"guid": "N57_026", "forms": [{"grammatical_form": "noun/en_singular", "text": "desktop computer", "is_base_form": true}]}
 {"guid": "N57_027", "forms": [{"grammatical_form": "noun/en_singular", "text": "touch screen", "is_base_form": true}]}
+{"guid": "N57_028", "forms": [{"grammatical_form": "noun/en_singular", "text": "switch", "is_base_form": true, "ipa": "/swɪtʃ/", "phonetic": "SWITCH"}]}
+{"guid": "N57_029", "forms": [{"grammatical_form": "noun/en_singular", "text": "device", "is_base_form": true, "ipa": "/dɪˈvaɪs/", "phonetic": "duh-VICE"}]}
+{"guid": "N57_030", "forms": [{"grammatical_form": "noun/en_singular", "text": "cable", "is_base_form": true, "ipa": "/ˈkeɪbəl/", "phonetic": "KAY-bul"}]}
+{"guid": "N57_031", "forms": [{"grammatical_form": "noun/en_singular", "text": "oboe", "is_base_form": true, "ipa": "/ˈoʊboʊ/", "phonetic": "OH-boh"}]}
+{"guid": "N57_032", "forms": [{"grammatical_form": "noun/en_singular", "text": "synthesizer", "is_base_form": true, "ipa": "/ˈsɪnθəˌsaɪzɚ/", "phonetic": "SIN-thuh-sy-zer"}]}
+{"guid": "N57_033", "forms": [{"grammatical_form": "noun/en_singular", "text": "transistor", "is_base_form": true, "ipa": "/trænˈzɪstɚ/", "phonetic": "tran-ZIS-ter"}]}
+{"guid": "N57_034", "forms": [{"grammatical_form": "noun/en_singular", "text": "sensor", "is_base_form": true, "ipa": "/ˈsɛnsər/", "phonetic": "SEN-ser"}]}
+{"guid": "N57_035", "forms": [{"grammatical_form": "noun/en_singular", "text": "robot", "is_base_form": true, "ipa": "/ˈroʊbɑːt/", "phonetic": "ROH-bot"}]}
+{"guid": "N57_036", "forms": [{"grammatical_form": "noun/en_singular", "text": "iphone", "is_base_form": true, "ipa": "/ˈaɪfoʊn/", "phonetic": "EYE-fohn"}]}
+{"guid": "N57_037", "forms": [{"grammatical_form": "noun/en_singular", "text": "pixel", "is_base_form": true, "ipa": "/ˈpɪksəl/", "phonetic": "PIK-sel"}]}
+{"guid": "N57_038", "forms": [{"grammatical_form": "noun/en_singular", "text": "diode", "is_base_form": true, "ipa": "/ˈdaɪoʊd/", "phonetic": "DYE-ode"}]}
+{"guid": "N57_039", "forms": [{"grammatical_form": "noun/en_singular", "text": "transformer", "is_base_form": true, "ipa": "/trænsˈfɔrmər/", "phonetic": "trans-FOR-mer"}]}
+{"guid": "N57_040", "forms": [{"grammatical_form": "noun/en_singular", "text": "amplifier", "is_base_form": true, "ipa": "/ˈæmpləˌfaɪər/", "phonetic": "AM-pluh-fy-er"}]}
+{"guid": "N57_041", "forms": [{"grammatical_form": "noun/en_singular", "text": "transmitter", "is_base_form": true, "ipa": "/trænzˈmɪtər/", "phonetic": "trans-MIT-er"}]}
+{"guid": "N57_042", "forms": [{"grammatical_form": "noun/en_singular", "text": "capacitor", "is_base_form": true, "ipa": "/kəˈpæsətɚ/", "phonetic": "kuh-PASS-uh-ter"}]}
+{"guid": "N57_043", "forms": [{"grammatical_form": "noun/en_singular", "text": "connector", "is_base_form": true, "ipa": "/kəˈnɛktɚ/", "phonetic": "kuh-NEK-ter"}]}
+{"guid": "N57_044", "forms": [{"grammatical_form": "noun/en_singular", "text": "plug", "is_base_form": true, "ipa": "/plʌɡ/", "phonetic": "PLUG"}]}
+{"guid": "N57_045", "forms": [{"grammatical_form": "noun/en_singular", "text": "scanner", "is_base_form": true, "ipa": "/ˈskænər/", "phonetic": "SKAN-er"}]}
+{"guid": "N57_046", "forms": [{"grammatical_form": "noun/en_singular", "text": "smartphone", "is_base_form": true, "ipa": "/ˈsmɑrtˌfoʊn/", "phonetic": "SMART-fohn"}]}
+{"guid": "N57_047", "forms": [{"grammatical_form": "noun/en_singular", "text": "reactor", "is_base_form": true, "ipa": "/riˈæktɚ/", "phonetic": "ree-AK-ter"}]}
+{"guid": "N57_048", "forms": [{"grammatical_form": "noun/en_singular", "text": "cd-rom", "is_base_form": true, "ipa": "/ˌsiːˌdiːˈrɑːm/", "phonetic": "SEE-dee ROM"}]}
+{"guid": "N57_049", "forms": [{"grammatical_form": "noun/en_singular", "text": "keyboard", "is_base_form": true, "ipa": "/ˈkiˌbɔrd/", "phonetic": "KEE-bord"}]}
+{"guid": "N57_050", "forms": [{"grammatical_form": "noun/en_singular", "text": "DVD", "is_base_form": true, "ipa": "/ˌdiː viː ˈdiː/", "phonetic": "DEE-vee-DEE"}]}

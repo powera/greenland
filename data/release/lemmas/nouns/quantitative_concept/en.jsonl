@@ -32,3 +32,48 @@
 {"guid": "N22_046", "forms": [{"grammatical_form": "noun/en_singular", "text": "interest rate", "is_base_form": true}]}
 {"guid": "N22_047", "forms": [{"grammatical_form": "noun/en_singular", "text": "exchange rate", "is_base_form": true}]}
 {"guid": "N22_048", "forms": [{"grammatical_form": "noun/en_singular", "text": "minimum wage", "is_base_form": true}]}
+{"guid": "N22_049", "forms": [{"grammatical_form": "noun/en_singular", "text": "multiplication", "is_base_form": true, "ipa": "/ˌmʌltəpləˈkeɪʃən/", "phonetic": "mul-tuh-pluh-KAY-shun"}]}
+{"guid": "N22_050", "forms": [{"grammatical_form": "noun/en_singular", "text": "decimal", "is_base_form": true, "ipa": "/ˈdɛsəməl/", "phonetic": "DESS-uh-mul"}]}
+{"guid": "N22_051", "forms": [{"grammatical_form": "noun/en_singular", "text": "tangent", "is_base_form": true, "ipa": "/ˈtændʒənt/", "phonetic": "TAN-jent"}]}
+{"guid": "N22_052", "forms": [{"grammatical_form": "noun/en_singular", "text": "quotient", "is_base_form": true, "ipa": "/ˈkwoʊʃənt/", "phonetic": "KWOH-shunt"}]}
+{"guid": "N22_053", "forms": [{"grammatical_form": "noun/en_singular", "text": "infinity", "is_base_form": true, "ipa": "/ɪnˈfɪnəti/", "phonetic": "in-FIN-uh-tee"}]}
+{"guid": "N22_054", "forms": [{"grammatical_form": "noun/en_singular", "text": "infinity", "is_base_form": true, "ipa": "/ɪnˈfɪnəti/", "phonetic": "in-FIN-uh-tee"}]}
+{"guid": "N22_055", "forms": [{"grammatical_form": "noun/en_singular", "text": "logarithm", "is_base_form": true, "ipa": "/ˈlɔːɡəˌrɪðəm/", "phonetic": "LOG-uh-rith-um"}]}
+{"guid": "N22_056", "forms": [{"grammatical_form": "noun/en_singular", "text": "subtraction", "is_base_form": true, "ipa": "/səbˈtrækʃən/", "phonetic": "sub-TRAK-shun"}]}
+{"guid": "N22_057", "forms": [{"grammatical_form": "noun/en_singular", "text": "exponent", "is_base_form": true, "ipa": "/ɪkˈspoʊnənt/", "phonetic": "ik-SPOH-nent"}]}
+{"guid": "N22_058", "forms": [{"grammatical_form": "noun/en_singular", "text": "factorial", "is_base_form": true, "ipa": "/fækˈtɔriəl/", "phonetic": "fak-TOR-ee-uhl"}]}
+{"guid": "N22_059", "forms": [{"grammatical_form": "noun/en_singular", "text": "permutation", "is_base_form": true, "ipa": "/ˌpɝːmjəˈteɪʃən/", "phonetic": "pur-myoo-TAY-shun"}]}
+{"guid": "N22_060", "forms": [{"grammatical_form": "noun/en_singular", "text": "exponentiation", "is_base_form": true, "ipa": "/ˌɛkspoʊnənʃiˈeɪʃən/", "phonetic": "ek-spoh-nen-shee-AY-shun"}]}
+{"guid": "N22_061", "forms": [{"grammatical_form": "noun/en_singular", "text": "divisor", "is_base_form": true, "ipa": "/dɪˈvaɪzɚ/", "phonetic": "duh-VY-zur"}]}
+{"guid": "N22_062", "forms": [{"grammatical_form": "noun/en_singular", "text": "infinitesimal", "is_base_form": true, "ipa": "/ˌɪnfɪnɪˈtɛsəməl/", "phonetic": "in-fi-ni-TESS-uh-mul"}]}
+{"guid": "N22_063", "forms": [{"grammatical_form": "noun/en_singular", "text": "cardinality", "is_base_form": true, "ipa": "/ˌkɑrdəˈnæləti/", "phonetic": "kar-duh-NAL-uh-tee"}]}
+{"guid": "N22_064", "forms": [{"grammatical_form": "noun/en_singular", "text": "eigenvalue", "is_base_form": true, "ipa": "/ˈaɪɡənˌvælju/", "phonetic": "EYE-gun-val-yoo"}]}
+{"guid": "N22_065", "forms": [{"grammatical_form": "noun/en_singular", "text": "covariance", "is_base_form": true, "ipa": "/ˈkoʊˌvɛriəns/", "phonetic": "koh-VAIR-ee-uhns"}]}
+{"guid": "N22_066", "forms": [{"grammatical_form": "noun/en_singular", "text": "antiderivative", "is_base_form": true, "ipa": "/ˌænti dɪˈrɪvətɪv/", "phonetic": "AN-tee-duh-RIV-uh-tiv"}]}
+{"guid": "N22_067", "forms": [{"grammatical_form": "noun/en_singular", "text": "codomain", "is_base_form": true, "ipa": "/ˈkoʊdəmeɪn/", "phonetic": "KOH-duh-mayn"}]}
+{"guid": "N22_068", "forms": [{"grammatical_form": "noun/en_singular", "text": "quantum", "is_base_form": true, "ipa": "/ˈkwɑntəm/", "phonetic": "KWON-tum"}]}
+{"guid": "N22_069", "forms": [{"grammatical_form": "noun/en_singular", "text": "magnitude", "is_base_form": true, "ipa": "/ˈmæɡnətuːd/", "phonetic": "MAG-nuh-tood"}]}
+{"guid": "N22_070", "forms": [{"grammatical_form": "noun/en_singular", "text": "velocity", "is_base_form": true, "ipa": "/vəˈlɑsəti/", "phonetic": "vuh-LOSS-uh-tee"}]}
+{"guid": "N22_071", "forms": [{"grammatical_form": "noun/en_singular", "text": "measurement", "is_base_form": true, "ipa": "/ˈmɛʒɚmənt/", "phonetic": "MEZH-er-ment"}]}
+{"guid": "N22_072", "forms": [{"grammatical_form": "noun/en_singular", "text": "frequency", "is_base_form": true, "ipa": "/ˈfriːkwənsi/", "phonetic": "FREE-kwen-see"}]}
+{"guid": "N22_073", "forms": [{"grammatical_form": "noun/en_singular", "text": "frequency", "is_base_form": true, "ipa": "/ˈfriːkwənsi/", "phonetic": "FREE-kwen-see"}]}
+{"guid": "N22_074", "forms": [{"grammatical_form": "noun/en_singular", "text": "efficiency", "is_base_form": true, "ipa": "/ɪˈfɪʃənsi/", "phonetic": "ih-FISH-un-see"}]}
+{"guid": "N22_075", "forms": [{"grammatical_form": "noun/en_singular", "text": "prevalence", "is_base_form": true, "ipa": "/ˈprɛvələns/", "phonetic": "PREV-uh-lens"}]}
+{"guid": "N22_076", "forms": [{"grammatical_form": "noun/en_singular", "text": "octave", "is_base_form": true, "ipa": "/ˈɑk.tɪv/", "phonetic": "OK-tiv"}]}
+{"guid": "N22_077", "forms": [{"grammatical_form": "noun/en_singular", "text": "albedo", "is_base_form": true, "ipa": "/ælˈbiːdoʊ/", "phonetic": "al-BEE-doh"}]}
+{"guid": "N22_078", "forms": [{"grammatical_form": "noun/en_singular", "text": "plurality", "is_base_form": true, "ipa": "/pləˈræləti/", "phonetic": "pluh-RA-luh-tee"}]}
+{"guid": "N22_079", "forms": [{"grammatical_form": "noun/en_singular", "text": "reimbursement", "is_base_form": true, "ipa": "/ˌriːɪmˈbɝːsmənt/", "phonetic": "ree-im-BURS-munt"}]}
+{"guid": "N22_080", "forms": [{"grammatical_form": "noun/en_singular", "text": "difference", "is_base_form": true, "ipa": "/ˈdɪfərəns/", "phonetic": "DIF-er-ens"}]}
+{"guid": "N22_081", "forms": [{"grammatical_form": "noun/en_singular", "text": "total", "is_base_form": true, "ipa": "/ˈtoʊtəl/", "phonetic": "TOH-tuhl"}]}
+{"guid": "N22_082", "forms": [{"grammatical_form": "noun/en_singular", "text": "average", "is_base_form": true, "ipa": "/ˈævərɪdʒ/", "phonetic": "AV-er-ij"}]}
+{"guid": "N22_083", "forms": [{"grammatical_form": "noun/en_singular", "text": "average", "is_base_form": true, "ipa": "/ˈævərɪdʒ/", "phonetic": "AV-er-ij"}]}
+{"guid": "N22_084", "forms": [{"grammatical_form": "noun/en_singular", "text": "product", "is_base_form": true, "ipa": "/ˈprɑːdʌkt/", "phonetic": "PROD-ukt"}]}
+{"guid": "N22_085", "forms": [{"grammatical_form": "noun/en_singular", "text": "majority", "is_base_form": true, "ipa": "/məˈdʒɔrəti/", "phonetic": "muh-JOR-uh-tee"}]}
+{"guid": "N22_086", "forms": [{"grammatical_form": "noun/en_singular", "text": "majority", "is_base_form": true, "ipa": "/məˈdʒɔrəti/", "phonetic": "muh-JOR-uh-tee"}]}
+{"guid": "N22_087", "forms": [{"grammatical_form": "noun/en_singular", "text": "cost", "is_base_form": true, "ipa": "/kɔst/", "phonetic": "KAWST"}]}
+{"guid": "N22_088", "forms": [{"grammatical_form": "noun/en_singular", "text": "content", "is_base_form": true, "ipa": "/ˈkɑn.tɛnt/", "phonetic": "KON-tent"}]}
+{"guid": "N22_089", "forms": [{"grammatical_form": "noun/en_singular", "text": "height", "is_base_form": true, "ipa": "/haɪt/", "phonetic": "HYTE"}]}
+{"guid": "N22_090", "forms": [{"grammatical_form": "noun/en_singular", "text": "extent", "is_base_form": true, "ipa": "/ɪkˈstɛnt/", "phonetic": "ik-STENT"}]}
+{"guid": "N22_091", "forms": [{"grammatical_form": "noun/en_singular", "text": "cupful", "is_base_form": true, "ipa": "/ˈkʌpfʊl/", "phonetic": "KUP-fool"}]}
+{"guid": "N22_092", "forms": [{"grammatical_form": "noun/en_singular", "text": "score", "is_base_form": true, "ipa": "/skɔr/", "phonetic": "SKOR"}]}
+{"guid": "N22_093", "forms": [{"grammatical_form": "noun/en_singular", "text": "demand", "is_base_form": true, "ipa": "/dɪˈmænd/", "phonetic": "dih-MAND"}]}

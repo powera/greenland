@@ -21,3 +21,9 @@
 {"guid": "N45_022", "forms": [{"grammatical_form": "noun/en_singular", "text": "Thailand", "is_base_form": true}]}
 {"guid": "N45_023", "forms": [{"grammatical_form": "noun/en_singular", "text": "Vietnam", "is_base_form": true}]}
 {"guid": "N45_025", "forms": [{"grammatical_form": "noun/en_singular", "text": "Egypt", "is_base_form": true}]}
+{"guid": "N45_106", "forms": [{"grammatical_form": "noun/en_singular", "text": "province", "is_base_form": true, "ipa": "/ˈprɑː.vɪns/", "phonetic": "PROV-ins"}]}
+{"guid": "N45_107", "forms": [{"grammatical_form": "noun/en_singular", "text": "kingdom", "is_base_form": true, "ipa": "/ˈkɪŋdəm/", "phonetic": "KING-duhm"}]}
+{"guid": "N45_108", "forms": [{"grammatical_form": "noun/en_singular", "text": "prefecture", "is_base_form": true, "ipa": "/ˈprɛfɪktʃər/", "phonetic": "PREF-ek-cher"}]}
+{"guid": "N45_109", "forms": [{"grammatical_form": "noun/en_singular", "text": "protectorate", "is_base_form": true, "ipa": "/prəˈtɛktərət/", "phonetic": "pro-TEK-tuh-rut"}]}
+{"guid": "N45_110", "forms": [{"grammatical_form": "noun/en_singular", "text": "region", "is_base_form": true, "ipa": "/ˈriːdʒən/", "phonetic": "REE-juhn"}]}
+{"guid": "N45_111", "forms": [{"grammatical_form": "noun/en_singular", "text": "austria-hungary", "is_base_form": true, "ipa": "/ˌɔːstriə ˈhʌŋɡəri/", "phonetic": "AW-stree-uh HUNG-uh-ree"}]}

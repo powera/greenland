@@ -19,3 +19,46 @@
 {"guid": "N12_085", "forms": [{"grammatical_form": "noun/en_singular", "text": "fire extinguisher", "is_base_form": true}]}
 {"guid": "N12_086", "forms": [{"grammatical_form": "noun/en_singular", "text": "steering wheel", "is_base_form": true}]}
 {"guid": "N12_087", "forms": [{"grammatical_form": "noun/en_singular", "text": "musical instrument", "is_base_form": true}]}
+{"guid": "N12_088", "forms": [{"grammatical_form": "noun/en_singular", "text": "mechanism", "is_base_form": true, "ipa": "/ˈmɛkəˌnɪzəm/", "phonetic": "MEK-uh-niz-um"}]}
+{"guid": "N12_089", "forms": [{"grammatical_form": "noun/en_singular", "text": "trumpet", "is_base_form": true, "ipa": "/ˈtrʌmpɪt/", "phonetic": "TRUM-pit"}]}
+{"guid": "N12_090", "forms": [{"grammatical_form": "noun/en_singular", "text": "violin", "is_base_form": true, "ipa": "/ˌvaɪəˈlɪn/", "phonetic": "vy-uh-LIN"}]}
+{"guid": "N12_091", "forms": [{"grammatical_form": "noun/en_singular", "text": "fin", "is_base_form": true, "ipa": "/fɪn/", "phonetic": "FIN"}]}
+{"guid": "N12_092", "forms": [{"grammatical_form": "noun/en_singular", "text": "ruler", "is_base_form": true, "ipa": "/ˈruːlər/", "phonetic": "ROO-ler"}]}
+{"guid": "N12_093", "forms": [{"grammatical_form": "noun/en_singular", "text": "file", "is_base_form": true, "ipa": "/faɪl/", "phonetic": "FILE"}]}
+{"guid": "N12_094", "forms": [{"grammatical_form": "noun/en_singular", "text": "cable", "is_base_form": true, "ipa": "/ˈkeɪbəl/", "phonetic": "KAY-bul"}]}
+{"guid": "N12_095", "forms": [{"grammatical_form": "noun/en_singular", "text": "shaft", "is_base_form": true, "ipa": "/ʃæft/", "phonetic": "SHAFT"}]}
+{"guid": "N12_096", "forms": [{"grammatical_form": "noun/en_singular", "text": "shaft", "is_base_form": true, "ipa": "/ʃæft/", "phonetic": "SHAFT"}]}
+{"guid": "N12_097", "forms": [{"grammatical_form": "noun/en_singular", "text": "lever", "is_base_form": true, "ipa": "/ˈlɛvər/", "phonetic": "LEE-ver"}]}
+{"guid": "N12_098", "forms": [{"grammatical_form": "noun/en_singular", "text": "plough", "is_base_form": true, "ipa": "/plaʊ/", "phonetic": "PLOW"}]}
+{"guid": "N12_099", "forms": [{"grammatical_form": "noun/en_singular", "text": "flute", "is_base_form": true, "ipa": "/flut/", "phonetic": "FLOOT"}]}
+{"guid": "N12_100", "forms": [{"grammatical_form": "noun/en_singular", "text": "flute", "is_base_form": true, "ipa": "/flut/", "phonetic": "FLOOT"}]}
+{"guid": "N12_101", "forms": [{"grammatical_form": "noun/en_singular", "text": "viola", "is_base_form": true, "ipa": "/viˈoʊlə/", "phonetic": "vee-OH-luh"}]}
+{"guid": "N12_102", "forms": [{"grammatical_form": "noun/en_singular", "text": "clarinet", "is_base_form": true, "ipa": "/ˌklærəˈnɛt/", "phonetic": "kla-ri-NET"}]}
+{"guid": "N12_103", "forms": [{"grammatical_form": "noun/en_singular", "text": "harpsichord", "is_base_form": true, "ipa": "/ˈhɑrpəsɪˌkɔrd/", "phonetic": "HAR-puh-kord"}]}
+{"guid": "N12_104", "forms": [{"grammatical_form": "noun/en_singular", "text": "saxophone", "is_base_form": true, "ipa": "/ˈsæksəfoʊn/", "phonetic": "SAK-suh-fohn"}]}
+{"guid": "N12_105", "forms": [{"grammatical_form": "noun/en_singular", "text": "trombone", "is_base_form": true, "ipa": "/trɑmˈboʊn/", "phonetic": "trom-BOHN"}]}
+{"guid": "N12_106", "forms": [{"grammatical_form": "noun/en_singular", "text": "tuba", "is_base_form": true, "ipa": "/ˈtuːbə/", "phonetic": "TOO-buh"}]}
+{"guid": "N12_107", "forms": [{"grammatical_form": "noun/en_singular", "text": "mandolin", "is_base_form": true, "ipa": "/ˌmændəˈlɪn/", "phonetic": "MAN-duh-lin"}]}
+{"guid": "N12_108", "forms": [{"grammatical_form": "noun/en_singular", "text": "bassoon", "is_base_form": true, "ipa": "/bəˈsun/", "phonetic": "buh-SOON"}]}
+{"guid": "N12_109", "forms": [{"grammatical_form": "noun/en_singular", "text": "harmonica", "is_base_form": true, "ipa": "/hɑrˈmɑnɪkə/", "phonetic": "har-MON-uh-kuh"}]}
+{"guid": "N12_110", "forms": [{"grammatical_form": "noun/en_singular", "text": "recorder", "is_base_form": true, "ipa": "/rɪˈkɔrdər/", "phonetic": "ri-KOR-der"}]}
+{"guid": "N12_111", "forms": [{"grammatical_form": "noun/en_singular", "text": "pedal", "is_base_form": true, "ipa": "/ˈpɛdəl/", "phonetic": "PED-uhl"}]}
+{"guid": "N12_112", "forms": [{"grammatical_form": "noun/en_singular", "text": "woodwind", "is_base_form": true, "ipa": "/ˈwʊdˌwɪnd/", "phonetic": "WOOD-wind"}]}
+{"guid": "N12_113", "forms": [{"grammatical_form": "noun/en_singular", "text": "gear", "is_base_form": true, "ipa": "/ɡɪr/", "phonetic": "GEER"}]}
+{"guid": "N12_114", "forms": [{"grammatical_form": "noun/en_singular", "text": "axle", "is_base_form": true, "ipa": "/ˈæk.səl/", "phonetic": "AK-suhl"}]}
+{"guid": "N12_115", "forms": [{"grammatical_form": "noun/en_singular", "text": "roller", "is_base_form": true, "ipa": "/ˈroʊlər/", "phonetic": "ROH-ler"}]}
+{"guid": "N12_116", "forms": [{"grammatical_form": "noun/en_singular", "text": "piston", "is_base_form": true, "ipa": "/ˈpɪstən/", "phonetic": "PIS-tun"}]}
+{"guid": "N12_117", "forms": [{"grammatical_form": "noun/en_singular", "text": "wedge", "is_base_form": true, "ipa": "/wɛdʒ/", "phonetic": "WEJ"}]}
+{"guid": "N12_118", "forms": [{"grammatical_form": "noun/en_singular", "text": "nozzle", "is_base_form": true, "ipa": "/ˈnɑzəl/", "phonetic": "NOZ-uhl"}]}
+{"guid": "N12_119", "forms": [{"grammatical_form": "noun/en_singular", "text": "sling", "is_base_form": true, "ipa": "/slɪŋ/", "phonetic": "SLING"}]}
+{"guid": "N12_120", "forms": [{"grammatical_form": "noun/en_singular", "text": "parachute", "is_base_form": true, "ipa": "/ˈpɛrəˌʃut/", "phonetic": "PAIR-uh-shoot"}]}
+{"guid": "N12_121", "forms": [{"grammatical_form": "noun/en_singular", "text": "chisel", "is_base_form": true, "ipa": "/ˈtʃɪzəl/", "phonetic": "CHIZ-ul"}]}
+{"guid": "N12_122", "forms": [{"grammatical_form": "noun/en_singular", "text": "clamp", "is_base_form": true, "ipa": "/klæmp/", "phonetic": "KLAMP"}]}
+{"guid": "N12_123", "forms": [{"grammatical_form": "noun/en_singular", "text": "sieve", "is_base_form": true, "ipa": "/sɪv/", "phonetic": "SIV"}]}
+{"guid": "N12_124", "forms": [{"grammatical_form": "noun/en_singular", "text": "scoop", "is_base_form": true, "ipa": "/skup/", "phonetic": "SKOOP"}]}
+{"guid": "N12_125", "forms": [{"grammatical_form": "noun/en_singular", "text": "utensil", "is_base_form": true, "ipa": "/juːˈtɛnsəl/", "phonetic": "yoo-TEN-sil"}]}
+{"guid": "N12_126", "forms": [{"grammatical_form": "noun/en_singular", "text": "modifier", "is_base_form": true, "ipa": "/ˈmɑdəˌfaɪər/", "phonetic": "MOD-uh-fy-er"}]}
+{"guid": "N12_127", "forms": [{"grammatical_form": "noun/en_singular", "text": "ligature", "is_base_form": true, "ipa": "/ˈlɪɡətʃɚ/", "phonetic": "LIG-uh-cher"}]}
+{"guid": "N12_128", "forms": [{"grammatical_form": "noun/en_singular", "text": "tennis racket", "is_base_form": true, "ipa": "/ˈtɛnɪs ˈrækət/", "phonetic": "TEN-is RAK-it"}]}
+{"guid": "N12_129", "forms": [{"grammatical_form": "noun/en_singular", "text": "skate", "is_base_form": true, "ipa": "/skeɪt/", "phonetic": "SKAYT"}]}
+{"guid": "N12_130", "forms": [{"grammatical_form": "noun/en_singular", "text": "ski", "is_base_form": true, "ipa": "/ski/", "phonetic": "SKEE"}]}

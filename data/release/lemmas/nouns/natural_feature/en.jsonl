@@ -53,3 +53,31 @@
 {"guid": "N11_074", "forms": [{"grammatical_form": "noun/en_singular", "text": "hot spring", "is_base_form": true}]}
 {"guid": "N11_075", "forms": [{"grammatical_form": "noun/en_singular", "text": "shooting star", "is_base_form": true}]}
 {"guid": "N11_076", "forms": [{"grammatical_form": "noun/en_singular", "text": "solar system", "is_base_form": true}]}
+{"guid": "N11_077", "forms": [{"grammatical_form": "noun/en_singular", "text": "atmosphere", "is_base_form": true, "ipa": "/ˈætməsfɪr/", "phonetic": "AT-muh-sfeer"}]}
+{"guid": "N11_078", "forms": [{"grammatical_form": "noun/en_singular", "text": "phase", "is_base_form": true, "ipa": "/feɪz/", "phonetic": "FAYZ"}]}
+{"guid": "N11_079", "forms": [{"grammatical_form": "noun/en_singular", "text": "cyclone", "is_base_form": true, "ipa": "/ˈsaɪkloʊn/", "phonetic": "SY-klone"}]}
+{"guid": "N11_080", "forms": [{"grammatical_form": "noun/en_singular", "text": "mantle", "is_base_form": true, "ipa": "/ˈmæntəl/", "phonetic": "MAN-tuhl"}]}
+{"guid": "N11_081", "forms": [{"grammatical_form": "noun/en_singular", "text": "halo", "is_base_form": true, "ipa": "/ˈheɪloʊ/", "phonetic": "HAY-loh"}]}
+{"guid": "N11_082", "forms": [{"grammatical_form": "noun/en_singular", "text": "spectrum", "is_base_form": true, "ipa": "/ˈspɛktrəm/", "phonetic": "SPEK-trum"}]}
+{"guid": "N11_083", "forms": [{"grammatical_form": "noun/en_singular", "text": "rainbow", "is_base_form": true, "ipa": "/ˈreɪnboʊ/", "phonetic": "RAYN-boh"}]}
+{"guid": "N11_084", "forms": [{"grammatical_form": "noun/en_singular", "text": "climate", "is_base_form": true, "ipa": "/ˈklaɪmət/", "phonetic": "KLY-mit"}]}
+{"guid": "N11_085", "forms": [{"grammatical_form": "noun/en_singular", "text": "summit", "is_base_form": true, "ipa": "/ˈsʌmɪt/", "phonetic": "SUM-it"}]}
+{"guid": "N11_086", "forms": [{"grammatical_form": "noun/en_singular", "text": "landscape", "is_base_form": true, "ipa": "/ˈlændˌskeɪp/", "phonetic": "LAND-skape"}]}
+{"guid": "N11_087", "forms": [{"grammatical_form": "noun/en_singular", "text": "fossil", "is_base_form": true, "ipa": "/ˈfɑsəl/", "phonetic": "FOS-uhl"}]}
+{"guid": "N11_088", "forms": [{"grammatical_form": "noun/en_singular", "text": "woodland", "is_base_form": true, "ipa": "/ˈwʊdˌlænd/", "phonetic": "WOOD-land"}]}
+{"guid": "N11_089", "forms": [{"grammatical_form": "noun/en_singular", "text": "runoff", "is_base_form": true, "ipa": "/ˈrʌnˌɔf/", "phonetic": "RUN-off"}]}
+{"guid": "N11_090", "forms": [{"grammatical_form": "noun/en_singular", "text": "strait", "is_base_form": true, "ipa": "/streɪt/", "phonetic": "STRAYT"}]}
+{"guid": "N11_091", "forms": [{"grammatical_form": "noun/en_singular", "text": "coastline", "is_base_form": true, "ipa": "/ˈkoʊstˌlaɪn/", "phonetic": "KOHST-line"}]}
+{"guid": "N11_092", "forms": [{"grammatical_form": "noun/en_singular", "text": "tributary", "is_base_form": true, "ipa": "/ˈtrɪbjəˌtɛri/", "phonetic": "TRIB-yoo-ter-ee"}]}
+{"guid": "N11_093", "forms": [{"grammatical_form": "noun/en_singular", "text": "confluence", "is_base_form": true, "ipa": "/ˈkɑnfluəns/", "phonetic": "KON-floo-ents"}]}
+{"guid": "N11_094", "forms": [{"grammatical_form": "noun/en_singular", "text": "snowfall", "is_base_form": true, "ipa": "/ˈsnoʊˌfɔl/", "phonetic": "SNOH-fawl"}]}
+{"guid": "N11_095", "forms": [{"grammatical_form": "noun/en_singular", "text": "shoreline", "is_base_form": true, "ipa": "/ˈʃɔrˌlaɪn/", "phonetic": "SHOR-line"}]}
+{"guid": "N11_096", "forms": [{"grammatical_form": "noun/en_singular", "text": "galaxy", "is_base_form": true, "ipa": "/ˈɡæləksi/", "phonetic": "GAL-uk-see"}]}
+{"guid": "N11_097", "forms": [{"grammatical_form": "noun/en_singular", "text": "supernova", "is_base_form": true, "ipa": "/ˌsuːpərˈnoʊvə/", "phonetic": "SOO-per-NOH-vuh"}]}
+{"guid": "N11_098", "forms": [{"grammatical_form": "noun/en_singular", "text": "supernova", "is_base_form": true, "ipa": "/ˌsuːpərˈnoʊvə/", "phonetic": "SOO-per-NOH-vuh"}]}
+{"guid": "N11_099", "forms": [{"grammatical_form": "noun/en_singular", "text": "magma", "is_base_form": true, "ipa": "/ˈmæɡmə/", "phonetic": "MAG-muh"}]}
+{"guid": "N11_100", "forms": [{"grammatical_form": "noun/en_singular", "text": "asteroid", "is_base_form": true, "ipa": "/ˈæs.tə.rɔɪd/", "phonetic": "AS-tuh-royd"}]}
+{"guid": "N11_101", "forms": [{"grammatical_form": "noun/en_singular", "text": "lithosphere", "is_base_form": true, "ipa": "/ˈlɪθəsfɪr/", "phonetic": "LITH-uh-sfeer"}]}
+{"guid": "N11_102", "forms": [{"grammatical_form": "noun/en_singular", "text": "vortex", "is_base_form": true, "ipa": "/ˈvɔr.tɛks/", "phonetic": "VOR-teks"}]}
+{"guid": "N11_103", "forms": [{"grammatical_form": "noun/en_singular", "text": "jungle", "is_base_form": true, "ipa": "/ˈdʒʌŋɡəl/", "phonetic": "JUNG-gul"}]}
+{"guid": "N11_104", "forms": [{"grammatical_form": "noun/en_singular", "text": "channel", "is_base_form": true, "ipa": "/ˈtʃænəl/", "phonetic": "CHAN-uhl"}]}

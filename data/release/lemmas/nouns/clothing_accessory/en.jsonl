@@ -39,3 +39,10 @@
 {"guid": "N09_045", "forms": [{"grammatical_form": "noun/en_singular", "text": "bathing suit", "is_base_form": true}]}
 {"guid": "N09_046", "forms": [{"grammatical_form": "noun/en_singular", "text": "baseball cap", "is_base_form": true}]}
 {"guid": "N09_047", "forms": [{"grammatical_form": "noun/en_singular", "text": "wedding ring", "is_base_form": true}]}
+{"guid": "N09_048", "forms": [{"grammatical_form": "noun/en_singular", "text": "sprig", "is_base_form": true, "ipa": "/sprɪɡ/", "phonetic": "SPRIG"}]}
+{"guid": "N09_049", "forms": [{"grammatical_form": "noun/en_singular", "text": "clothes", "is_base_form": true, "ipa": "/kloʊðz/", "phonetic": "KLOHZ"}]}
+{"guid": "N09_050", "forms": [{"grammatical_form": "noun/en_singular", "text": "swimsuit", "is_base_form": true, "ipa": "/ˈswɪmˌsut/", "phonetic": "SWIM-soot"}]}
+{"guid": "N09_051", "forms": [{"grammatical_form": "noun/en_singular", "text": "pair", "is_base_form": true, "ipa": "/pɛr/", "phonetic": "PAIR"}]}
+{"guid": "N09_052", "forms": [{"grammatical_form": "noun/en_singular", "text": "costume", "is_base_form": true, "ipa": "/ˈkɑːstuːm/", "phonetic": "KOS-toom"}]}
+{"guid": "N09_053", "forms": [{"grammatical_form": "noun/en_singular", "text": "sunglasses", "is_base_form": true, "ipa": "/ˈsʌnˌɡlæsɪz/", "phonetic": "SUN-glass-iz"}]}
+{"guid": "N09_054", "forms": [{"grammatical_form": "noun/en_singular", "text": "uniform", "is_base_form": true, "ipa": "/ˈjuːnəfɔrm/", "phonetic": "YOO-nuh-form"}]}

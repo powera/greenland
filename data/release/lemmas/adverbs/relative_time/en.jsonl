@@ -14,3 +14,5 @@
 {"guid": "D04_019", "forms": [{"grammatical_form": "adverb/en_positive", "text": "afterward", "is_base_form": true}]}
 {"guid": "D04_020", "forms": [{"grammatical_form": "adverb/en_positive", "text": "beforehand", "is_base_form": true}]}
 {"guid": "D04_021", "forms": [{"grammatical_form": "adverb/en_positive", "text": "after", "is_base_form": true, "ipa": "/ˈæftɚ/", "phonetic": "AF-ter"}]}
+{"guid": "D04_022", "forms": [{"grammatical_form": "adverb/en_positive", "text": "eventually", "is_base_form": true, "ipa": "/ɪˈvɛntʃuəli/", "phonetic": "ih-VEN-choo-uh-lee"}]}
+{"guid": "D04_023", "forms": [{"grammatical_form": "adverb/en_positive", "text": "further", "is_base_form": true, "ipa": "/ˈfɝːðɚ/", "phonetic": "FUR-ther"}]}

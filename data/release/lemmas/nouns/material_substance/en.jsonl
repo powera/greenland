@@ -32,3 +32,31 @@
 {"guid": "N14_064", "forms": [{"grammatical_form": "noun/en_singular", "text": "dish soap", "is_base_form": true}]}
 {"guid": "N14_065", "forms": [{"grammatical_form": "noun/en_singular", "text": "fossil fuel", "is_base_form": true}]}
 {"guid": "N14_066", "forms": [{"grammatical_form": "noun/en_singular", "text": "renewable energy", "is_base_form": true}]}
+{"guid": "N14_067", "forms": [{"grammatical_form": "noun/en_singular", "text": "particle", "is_base_form": true, "ipa": "/ˈpɑrtɪkəl/", "phonetic": "PAR-ti-kuhl"}]}
+{"guid": "N14_068", "forms": [{"grammatical_form": "noun/en_singular", "text": "crystal", "is_base_form": true, "ipa": "/ˈkrɪstəl/", "phonetic": "KRIS-tuhl"}]}
+{"guid": "N14_069", "forms": [{"grammatical_form": "noun/en_singular", "text": "fluid", "is_base_form": true, "ipa": "/ˈfluɪd/", "phonetic": "FLOO-id"}]}
+{"guid": "N14_070", "forms": [{"grammatical_form": "noun/en_singular", "text": "vapor", "is_base_form": true, "ipa": "/ˈveɪpɚ/", "phonetic": "VAY-per"}]}
+{"guid": "N14_071", "forms": [{"grammatical_form": "noun/en_singular", "text": "crust", "is_base_form": true, "ipa": "/krʌst/", "phonetic": "KRUST"}]}
+{"guid": "N14_072", "forms": [{"grammatical_form": "noun/en_singular", "text": "mineral", "is_base_form": true, "ipa": "/ˈmɪnərəl/", "phonetic": "MIN-uh-rul"}]}
+{"guid": "N14_073", "forms": [{"grammatical_form": "noun/en_singular", "text": "film", "is_base_form": true, "ipa": "/fɪlm/", "phonetic": "FILM"}]}
+{"guid": "N14_074", "forms": [{"grammatical_form": "noun/en_singular", "text": "fibre", "is_base_form": true, "ipa": "/ˈfaɪbər/", "phonetic": "FY-ber"}]}
+{"guid": "N14_075", "forms": [{"grammatical_form": "noun/en_singular", "text": "fuel", "is_base_form": true, "ipa": "/ˈfjuəl/", "phonetic": "FYOO-uhl"}]}
+{"guid": "N14_076", "forms": [{"grammatical_form": "noun/en_singular", "text": "currency", "is_base_form": true, "ipa": "/ˈkɝːənsi/", "phonetic": "KUR-uhn-see"}]}
+{"guid": "N14_077", "forms": [{"grammatical_form": "noun/en_singular", "text": "terracotta", "is_base_form": true, "ipa": "/ˌtɛrəˈkɑtə/", "phonetic": "ter-uh-KOT-uh"}]}
+{"guid": "N14_078", "forms": [{"grammatical_form": "noun/en_singular", "text": "silt", "is_base_form": true, "ipa": "/sɪlt/", "phonetic": "SILT"}]}
+{"guid": "N14_079", "forms": [{"grammatical_form": "noun/en_singular", "text": "latex", "is_base_form": true, "ipa": "/ˈleɪtɛks/", "phonetic": "LAY-teks"}]}
+{"guid": "N14_080", "forms": [{"grammatical_form": "noun/en_singular", "text": "wastewater", "is_base_form": true, "ipa": "/ˈweɪstˌwɔtər/", "phonetic": "WAYST-waw-ter"}]}
+{"guid": "N14_081", "forms": [{"grammatical_form": "noun/en_singular", "text": "adhesive", "is_base_form": true, "ipa": "/ədˈhisɪv/", "phonetic": "ad-HEE-siv"}]}
+{"guid": "N14_082", "forms": [{"grammatical_form": "noun/en_singular", "text": "solder", "is_base_form": true, "ipa": "/ˈsɑdər/", "phonetic": "SAH-der"}]}
+{"guid": "N14_083", "forms": [{"grammatical_form": "noun/en_singular", "text": "polyester", "is_base_form": true, "ipa": "/ˌpɑːliˈɛstɚ/", "phonetic": "pol-ee-ES-ter"}]}
+{"guid": "N14_084", "forms": [{"grammatical_form": "noun/en_singular", "text": "mesh", "is_base_form": true, "ipa": "/mɛʃ/", "phonetic": "MESH"}]}
+{"guid": "N14_085", "forms": [{"grammatical_form": "noun/en_singular", "text": "shale", "is_base_form": true, "ipa": "/ʃeɪl/", "phonetic": "SHAYL"}]}
+{"guid": "N14_086", "forms": [{"grammatical_form": "noun/en_singular", "text": "seawater", "is_base_form": true, "ipa": "/ˈsiːˌwɔtər/", "phonetic": "SEE-waw-ter"}]}
+{"guid": "N14_087", "forms": [{"grammatical_form": "noun/en_singular", "text": "gas", "is_base_form": true, "ipa": "/ɡæs/", "phonetic": "GAS"}]}
+{"guid": "N14_088", "forms": [{"grammatical_form": "noun/en_singular", "text": "web", "is_base_form": true, "ipa": "/wɛb/", "phonetic": "WEB"}]}
+{"guid": "N14_089", "forms": [{"grammatical_form": "noun/en_singular", "text": "gelatine", "is_base_form": true, "ipa": "/ˈdʒɛlətən/", "phonetic": "JEL-uh-teen"}]}
+{"guid": "N14_090", "forms": [{"grammatical_form": "noun/en_singular", "text": "mush", "is_base_form": true, "ipa": "/mʌʃ/", "phonetic": "MUSH"}]}
+{"guid": "N14_091", "forms": [{"grammatical_form": "noun/en_singular", "text": "scum", "is_base_form": true, "ipa": "/skʌm/", "phonetic": "SKUM"}]}
+{"guid": "N14_092", "forms": [{"grammatical_form": "noun/en_singular", "text": "zinc", "is_base_form": true, "ipa": "/zɪŋk/", "phonetic": "ZINGK"}]}
+{"guid": "N14_093", "forms": [{"grammatical_form": "noun/en_singular", "text": "glue", "is_base_form": true, "ipa": "/ɡluː/", "phonetic": "GLOO"}]}
+{"guid": "N14_094", "forms": [{"grammatical_form": "noun/en_singular", "text": "newspaper", "is_base_form": true, "ipa": "/ˈnuːzˌpeɪpər/", "phonetic": "NOOZ-pay-per"}]}

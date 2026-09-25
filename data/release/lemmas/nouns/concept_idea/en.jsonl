@@ -60,3 +60,39 @@
 {"guid": "N17_298", "forms": [{"grammatical_form": "noun/en_singular", "text": "human right", "is_base_form": true}]}
 {"guid": "N17_299", "forms": [{"grammatical_form": "noun/en_singular", "text": "free speech", "is_base_form": true}]}
 {"guid": "N17_300", "forms": [{"grammatical_form": "noun/en_singular", "text": "public opinion", "is_base_form": true}]}
+{"guid": "N17_301", "forms": [{"grammatical_form": "noun/en_singular", "text": "axiom", "is_base_form": true, "ipa": "/ˈæk.si.əm/", "phonetic": "AK-see-um"}]}
+{"guid": "N17_302", "forms": [{"grammatical_form": "noun/en_singular", "text": "fractal", "is_base_form": true, "ipa": "/ˈfræk.təl/", "phonetic": "FRAK-tuhl"}]}
+{"guid": "N17_303", "forms": [{"grammatical_form": "noun/en_singular", "text": "bond", "is_base_form": true, "ipa": "/bɑnd/", "phonetic": "BOND"}]}
+{"guid": "N17_304", "forms": [{"grammatical_form": "noun/en_singular", "text": "synthesis", "is_base_form": true, "ipa": "/ˈsɪnθəsɪs/", "phonetic": "SIN-thuh-sis"}]}
+{"guid": "N17_305", "forms": [{"grammatical_form": "noun/en_singular", "text": "phenomena", "is_base_form": true, "ipa": "/fəˈnɑmənə/", "phonetic": "fuh-NOM-uh-nuh"}]}
+{"guid": "N17_306", "forms": [{"grammatical_form": "noun/en_singular", "text": "theme", "is_base_form": true, "ipa": "/θiːm/", "phonetic": "THEEM"}]}
+{"guid": "N17_307", "forms": [{"grammatical_form": "noun/en_singular", "text": "version", "is_base_form": true, "ipa": "/ˈvɝːʒən/", "phonetic": "VUR-zhun"}]}
+{"guid": "N17_308", "forms": [{"grammatical_form": "noun/en_singular", "text": "allegiance", "is_base_form": true, "ipa": "/əˈliːdʒəns/", "phonetic": "uh-LEE-juns"}]}
+{"guid": "N17_309", "forms": [{"grammatical_form": "noun/en_singular", "text": "myth", "is_base_form": true, "ipa": "/mɪθ/", "phonetic": "MITH"}]}
+{"guid": "N17_310", "forms": [{"grammatical_form": "noun/en_singular", "text": "supernatural", "is_base_form": true, "ipa": "/ˌsuːpərˈnætʃərəl/", "phonetic": "SOO-per-NACH-er-uhl"}]}
+{"guid": "N17_311", "forms": [{"grammatical_form": "noun/en_singular", "text": "concept", "is_base_form": true, "ipa": "/ˈkɑnˌsɛpt/", "phonetic": "KON-sept"}]}
+{"guid": "N17_312", "forms": [{"grammatical_form": "noun/en_singular", "text": "requirement", "is_base_form": true, "ipa": "/rɪˈkwaɪɚmənt/", "phonetic": "ree-KWYR-ment"}]}
+{"guid": "N17_313", "forms": [{"grammatical_form": "noun/en_singular", "text": "scheme", "is_base_form": true, "ipa": "/skiːm/", "phonetic": "SKEEM"}]}
+{"guid": "N17_314", "forms": [{"grammatical_form": "noun/en_singular", "text": "justification", "is_base_form": true, "ipa": "/ˌdʒʌstəfəˈkeɪʃən/", "phonetic": "jus-tuh-fi-KAY-shun"}]}
+{"guid": "N17_315", "forms": [{"grammatical_form": "noun/en_singular", "text": "proposition", "is_base_form": true, "ipa": "/ˌprɑpəˈzɪʃən/", "phonetic": "prop-uh-ZISH-un"}]}
+{"guid": "N17_316", "forms": [{"grammatical_form": "noun/en_singular", "text": "consent", "is_base_form": true, "ipa": "/kənˈsɛnt/", "phonetic": "kun-SENT"}]}
+{"guid": "N17_317", "forms": [{"grammatical_form": "noun/en_singular", "text": "rationale", "is_base_form": true, "ipa": "/ˌræʃəˈnæl/", "phonetic": "rash-uh-NAL"}]}
+{"guid": "N17_318", "forms": [{"grammatical_form": "noun/en_singular", "text": "standard", "is_base_form": true, "ipa": "/ˈstændɚd/", "phonetic": "STAN-derd"}]}
+{"guid": "N17_319", "forms": [{"grammatical_form": "noun/en_singular", "text": "instance", "is_base_form": true, "ipa": "/ˈɪnstəns/", "phonetic": "IN-stuhns"}]}
+{"guid": "N17_320", "forms": [{"grammatical_form": "noun/en_singular", "text": "basis", "is_base_form": true, "ipa": "/ˈbeɪsɪs/", "phonetic": "BAY-sis"}]}
+{"guid": "N17_321", "forms": [{"grammatical_form": "noun/en_singular", "text": "origin", "is_base_form": true, "ipa": "/ˈɔrədʒɪn/", "phonetic": "OR-uh-jin"}]}
+{"guid": "N17_322", "forms": [{"grammatical_form": "noun/en_singular", "text": "element", "is_base_form": true, "ipa": "/ˈɛləmənt/", "phonetic": "EL-uh-munt"}]}
+{"guid": "N17_323", "forms": [{"grammatical_form": "noun/en_singular", "text": "trade-off", "is_base_form": true, "ipa": "/ˈtreɪdˌɔf/", "phonetic": "TRAYD-awf"}]}
+{"guid": "N17_324", "forms": [{"grammatical_form": "noun/en_singular", "text": "tense", "is_base_form": true, "ipa": "/tɛns/", "phonetic": "TENS"}]}
+{"guid": "N17_325", "forms": [{"grammatical_form": "noun/en_singular", "text": "singular", "is_base_form": true, "ipa": "/ˈsɪŋɡjələr/", "phonetic": "SING-yuh-ler"}]}
+{"guid": "N17_326", "forms": [{"grammatical_form": "noun/en_singular", "text": "gender", "is_base_form": true, "ipa": "/ˈdʒɛndɚ/", "phonetic": "JEN-der"}]}
+{"guid": "N17_327", "forms": [{"grammatical_form": "noun/en_singular", "text": "definition", "is_base_form": true, "ipa": "/ˌdɛfəˈnɪʃən/", "phonetic": "def-uh-NISH-un"}]}
+{"guid": "N17_328", "forms": [{"grammatical_form": "noun/en_singular", "text": "synonym", "is_base_form": true, "ipa": "/ˈsɪnənɪm/", "phonetic": "SIN-uh-nim"}]}
+{"guid": "N17_329", "forms": [{"grammatical_form": "noun/en_singular", "text": "monism", "is_base_form": true, "ipa": "/ˈmɑːnɪzəm/", "phonetic": "MON-iz-um"}]}
+{"guid": "N17_330", "forms": [{"grammatical_form": "noun/en_singular", "text": "causality", "is_base_form": true, "ipa": "/kɔːˈzælət̬i/", "phonetic": "kaw-ZAL-uh-tee"}]}
+{"guid": "N17_331", "forms": [{"grammatical_form": "noun/en_singular", "text": "fallacy", "is_base_form": true, "ipa": "/ˈfæləsi/", "phonetic": "FAL-uh-see"}]}
+{"guid": "N17_332", "forms": [{"grammatical_form": "noun/en_singular", "text": "clitic", "is_base_form": true, "ipa": "/ˈklɪtɪk/", "phonetic": "KLI-tik"}]}
+{"guid": "N17_333", "forms": [{"grammatical_form": "noun/en_singular", "text": "paradigm", "is_base_form": true, "ipa": "/ˈpærəˌdaɪm/", "phonetic": "PAIR-uh-dाइम"}]}
+{"guid": "N17_334", "forms": [{"grammatical_form": "noun/en_singular", "text": "vocative", "is_base_form": true, "ipa": "/ˈvɑkətɪv/", "phonetic": "VOK-uh-tiv"}]}
+{"guid": "N17_335", "forms": [{"grammatical_form": "noun/en_singular", "text": "aspect", "is_base_form": true, "ipa": "/ˈæsˌpɛkt/", "phonetic": "AS-pekt"}]}
+{"guid": "N17_339", "forms": [{"grammatical_form": "noun/en_singular", "text": "goal", "is_base_form": true, "ipa": "/ɡoʊl/", "phonetic": "GOHL"}]}

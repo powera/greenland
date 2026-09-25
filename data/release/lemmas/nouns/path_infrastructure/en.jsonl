@@ -8,3 +8,10 @@
 {"guid": "N13_016", "forms": [{"grammatical_form": "noun/en_singular", "text": "back yard", "is_base_form": true}]}
 {"guid": "N13_017", "forms": [{"grammatical_form": "noun/en_singular", "text": "traffic light", "is_base_form": true}]}
 {"guid": "N13_018", "forms": [{"grammatical_form": "noun/en_singular", "text": "bus stop", "is_base_form": true}]}
+{"guid": "N13_019", "forms": [{"grammatical_form": "noun/en_singular", "text": "pathway", "is_base_form": true, "ipa": "/ˈpæθˌweɪ/", "phonetic": "PATH-way"}]}
+{"guid": "N13_020", "forms": [{"grammatical_form": "noun/en_singular", "text": "railway", "is_base_form": true, "ipa": "/ˈreɪlˌweɪ/", "phonetic": "RAYL-way"}]}
+{"guid": "N13_021", "forms": [{"grammatical_form": "noun/en_singular", "text": "waterway", "is_base_form": true, "ipa": "/ˈwɔtərˌweɪ/", "phonetic": "WAW-ter-way"}]}
+{"guid": "N13_022", "forms": [{"grammatical_form": "noun/en_singular", "text": "access", "is_base_form": true, "ipa": "/ˈækˌsɛs/", "phonetic": "AK-sess"}]}
+{"guid": "N13_023", "forms": [{"grammatical_form": "noun/en_singular", "text": "pipeline", "is_base_form": true, "ipa": "/ˈpaɪpˌlaɪn/", "phonetic": "PIPE-line"}]}
+{"guid": "N13_024", "forms": [{"grammatical_form": "noun/en_singular", "text": "motorway", "is_base_form": true, "ipa": "/ˈmoʊtɚˌweɪ/", "phonetic": "MOH-ter-way"}]}
+{"guid": "N13_025", "forms": [{"grammatical_form": "noun/en_singular", "text": "car park", "is_base_form": true, "ipa": "/ˈkɑr ˌpɑrk/", "phonetic": "KAR-park"}]}

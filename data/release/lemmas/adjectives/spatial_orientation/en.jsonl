@@ -1,0 +1,33 @@
+{"guid": "A21_001", "forms": [{"grammatical_form": "adjective/en_positive", "text": "diagonal", "is_base_form": true, "ipa": "/daɪˈæɡənəl/", "phonetic": "dy-AG-uh-nul"}]}
+{"guid": "A21_002", "forms": [{"grammatical_form": "adjective/en_positive", "text": "orthogonal", "is_base_form": true, "ipa": "/ɔrˈθɑɡənəl/", "phonetic": "or-THOG-uh-nuhl"}]}
+{"guid": "A21_003", "forms": [{"grammatical_form": "adjective/en_positive", "text": "polar", "is_base_form": true, "ipa": "/ˈpoʊlər/", "phonetic": "POH-ler"}]}
+{"guid": "A21_004", "forms": [{"grammatical_form": "adjective/en_positive", "text": "orbital", "is_base_form": true, "ipa": "/ˈɔrbɪtəl/", "phonetic": "OR-bi-tuhl"}]}
+{"guid": "A21_005", "forms": [{"grammatical_form": "adjective/en_positive", "text": "mounted", "is_base_form": true, "ipa": "/ˈmaʊntɪd/", "phonetic": "MOWN-tid"}]}
+{"guid": "A21_006", "forms": [{"grammatical_form": "adjective/en_positive", "text": "basal", "is_base_form": true, "ipa": "/ˈbeɪsəl/", "phonetic": "BAY-suhl"}]}
+{"guid": "A21_007", "forms": [{"grammatical_form": "adjective/en_positive", "text": "dorsal", "is_base_form": true, "ipa": "/ˈdɔrsəl/", "phonetic": "DOR-suhl"}]}
+{"guid": "A21_008", "forms": [{"grammatical_form": "adjective/en_positive", "text": "dorsal", "is_base_form": true, "ipa": "/ˈdɔrsəl/", "phonetic": "DOR-suhl"}]}
+{"guid": "A21_009", "forms": [{"grammatical_form": "adjective/en_positive", "text": "anterior", "is_base_form": true, "ipa": "/ænˈtɪriɚ/", "phonetic": "an-TEER-ee-er"}]}
+{"guid": "A21_010", "forms": [{"grammatical_form": "adjective/en_positive", "text": "caudal", "is_base_form": true, "ipa": "/ˈkɔdəl/", "phonetic": "KAW-dul"}]}
+{"guid": "A21_011", "forms": [{"grammatical_form": "adjective/en_positive", "text": "apical", "is_base_form": true, "ipa": "/ˈeɪpɪkəl/", "phonetic": "AY-pi-kuhl"}]}
+{"guid": "A21_012", "forms": [{"grammatical_form": "adjective/en_positive", "text": "peripheral", "is_base_form": true, "ipa": "/pəˈrɪfərəl/", "phonetic": "puh-RIF-uh-rul"}]}
+{"guid": "A21_013", "forms": [{"grammatical_form": "adjective/en_positive", "text": "southernmost", "is_base_form": true, "ipa": "/ˈsʌðərnmoʊst/", "phonetic": "SUH-thern-mohst"}]}
+{"guid": "A21_014", "forms": [{"grammatical_form": "adjective/en_positive", "text": "northernmost", "is_base_form": true, "ipa": "/ˈnɔrðərnˌmoʊst/", "phonetic": "NOR-thern-mohst"}]}
+{"guid": "A21_015", "forms": [{"grammatical_form": "adjective/en_positive", "text": "easternmost", "is_base_form": true, "ipa": "/ˈiːstɚnmoʊst/", "phonetic": "EE-stern-mohst"}]}
+{"guid": "A21_016", "forms": [{"grammatical_form": "adjective/en_positive", "text": "hilly", "is_base_form": true, "ipa": "/ˈhɪli/", "phonetic": "HIL-ee"}]}
+{"guid": "A21_017", "forms": [{"grammatical_form": "adjective/en_positive", "text": "westernmost", "is_base_form": true, "ipa": "/ˈwɛstɚmoʊst/", "phonetic": "WEST-ern-most"}]}
+{"guid": "A21_018", "forms": [{"grammatical_form": "adjective/en_positive", "text": "interstellar", "is_base_form": true, "ipa": "/ˌɪntɚˈstɛlər/", "phonetic": "in-ter-STEL-er"}]}
+{"guid": "A21_019", "forms": [{"grammatical_form": "adjective/en_positive", "text": "upper", "is_base_form": true, "ipa": "/ˈʌpər/", "phonetic": "UP-er"}]}
+{"guid": "A21_020", "forms": [{"grammatical_form": "adjective/en_positive", "text": "two-dimensional", "is_base_form": true, "ipa": "/ˌtuːdəˈmɛnʃənəl/", "phonetic": "TOO-di-MEN-shuh-nuhl"}]}
+{"guid": "A21_021", "forms": [{"grammatical_form": "adjective/en_positive", "text": "right-hand", "is_base_form": true, "ipa": "/ˈraɪtˌhænd/", "phonetic": "RIGHT-hand"}]}
+{"guid": "A21_022", "forms": [{"grammatical_form": "adjective/en_positive", "text": "left-hand", "is_base_form": true, "ipa": "/ˌlɛft ˈhænd/", "phonetic": "LEFT-hand"}]}
+{"guid": "A21_023", "forms": [{"grammatical_form": "adjective/en_positive", "text": "one-sided", "is_base_form": true, "ipa": "/ˌwʌnˈsaɪdɪd/", "phonetic": "WUN-SY-did"}]}
+{"guid": "A21_024", "forms": [{"grammatical_form": "adjective/en_positive", "text": "east-west", "is_base_form": true, "ipa": "/ˈist ˈwɛst/", "phonetic": "EEST-WEST"}]}
+{"guid": "A21_025", "forms": [{"grammatical_form": "adjective/en_positive", "text": "top-level", "is_base_form": true, "ipa": "/ˌtɑp ˈlɛvəl/", "phonetic": "TOP-lev-uhl"}]}
+{"guid": "A21_026", "forms": [{"grammatical_form": "adjective/en_positive", "text": "north-south", "is_base_form": true, "ipa": "/ˌnɔrθ ˈsaʊθ/", "phonetic": "NORTH-SOUTH"}]}
+{"guid": "A21_027", "forms": [{"grammatical_form": "adjective/en_positive", "text": "north-south", "is_base_form": true, "ipa": "/ˌnɔrθ ˈsaʊθ/", "phonetic": "NORTH-SOUTH"}]}
+{"guid": "A21_028", "forms": [{"grammatical_form": "adjective/en_positive", "text": "free-standing", "is_base_form": true, "ipa": "/ˌfriː ˈstændɪŋ/", "phonetic": "FREE-STAN-ding"}]}
+{"guid": "A21_029", "forms": [{"grammatical_form": "adjective/en_positive", "text": "cross-sectional", "is_base_form": true, "ipa": "/ˌkrɔːsˈsɛkʃənəl/", "phonetic": "KROSS-SEK-shuh-nuhl"}]}
+{"guid": "A21_030", "forms": [{"grammatical_form": "adjective/en_positive", "text": "word-final", "is_base_form": true, "ipa": "/ˌwɝːdˈfaɪnəl/", "phonetic": "WORD-FY-nuhl"}]}
+{"guid": "A21_031", "forms": [{"grammatical_form": "adjective/en_positive", "text": "counter-clockwise", "is_base_form": true, "ipa": "/ˌkaʊntɚˈklaɪz/", "phonetic": "KOWN-ter-KLYZE"}]}
+{"guid": "A21_032", "forms": [{"grammatical_form": "adjective/en_positive", "text": "hierarchical", "is_base_form": true, "ipa": "/ˌhaɪəˈrɑrkɪkəl/", "phonetic": "hy-uh-RAHR-ki-kul"}]}
+{"guid": "A21_033", "forms": [{"grammatical_form": "adjective/en_positive", "text": "locative", "is_base_form": true, "ipa": "/ˈlɑkətɪv/", "phonetic": "LOK-uh-tiv"}]}

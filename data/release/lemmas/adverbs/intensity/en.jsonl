@@ -5,3 +5,6 @@
 {"guid": "D09_005", "forms": [{"grammatical_form": "adverb/en_positive", "text": "too", "is_base_form": true, "ipa": "/tuː/", "phonetic": "TOO"}]}
 {"guid": "D09_006", "forms": [{"grammatical_form": "adverb/en_positive", "text": "much", "is_base_form": true, "ipa": "/mʌtʃ/", "phonetic": "MUTCH"}]}
 {"guid": "D09_010", "forms": [{"grammatical_form": "adverb/en_positive", "text": "somewhat", "is_base_form": true, "ipa": "/ˈsʌmˌwʌt/", "phonetic": "SUM-wut"}]}
+{"guid": "D09_011", "forms": [{"grammatical_form": "adverb/en_positive", "text": "further", "is_base_form": true, "ipa": "/ˈfɝːðɚ/", "phonetic": "FUR-ther"}]}
+{"guid": "D09_012", "forms": [{"grammatical_form": "adverb/en_positive", "text": "particularly", "is_base_form": true, "ipa": "/pɚˈtɪkjələrli/", "phonetic": "puh-TIK-yuh-ler-lee"}]}
+{"guid": "D09_013", "forms": [{"grammatical_form": "adverb/en_positive", "text": "highly", "is_base_form": true, "ipa": "/ˈhaɪli/", "phonetic": "HY-lee"}]}

@@ -9,3 +9,15 @@
 {"guid": "N38_010", "forms": [{"grammatical_form": "noun/en_singular", "text": "petal", "is_base_form": true, "ipa": "/ˈpɛtəl/", "phonetic": "PEH-tuhl"}]}
 {"guid": "N38_012", "forms": [{"grammatical_form": "noun/en_singular", "text": "bud", "is_base_form": true, "ipa": "/bʌd/", "phonetic": "BUD"}]}
 {"guid": "N38_013", "forms": [{"grammatical_form": "noun/en_singular", "text": "flower", "is_base_form": true, "ipa": "/ˈflaʊ.ər/", "phonetic": "FLAW-ər"}]}
+{"guid": "N38_015", "forms": [{"grammatical_form": "noun/en_singular", "text": "soil", "is_base_form": true, "ipa": "/sɔɪl/", "phonetic": "SOYL"}]}
+{"guid": "N38_016", "forms": [{"grammatical_form": "noun/en_singular", "text": "ovary", "is_base_form": true, "ipa": "/ˈoʊvəri/", "phonetic": "OH-vuh-ree"}]}
+{"guid": "N38_017", "forms": [{"grammatical_form": "noun/en_singular", "text": "cambium", "is_base_form": true, "ipa": "/ˈkæmbiəm/", "phonetic": "KAM-bee-um"}]}
+{"guid": "N38_018", "forms": [{"grammatical_form": "noun/en_singular", "text": "phloem", "is_base_form": true, "ipa": "/ˈfloʊəm/", "phonetic": "FLOH-em"}]}
+{"guid": "N38_019", "forms": [{"grammatical_form": "noun/en_singular", "text": "meristem", "is_base_form": true, "ipa": "/ˈmɛrɪstɛm/", "phonetic": "MER-uh-stem"}]}
+{"guid": "N38_020", "forms": [{"grammatical_form": "noun/en_singular", "text": "nutmeg", "is_base_form": true, "ipa": "/ˈnʌtˌmɛɡ/", "phonetic": "NUT-meg"}]}
+{"guid": "N38_021", "forms": [{"grammatical_form": "noun/en_singular", "text": "tarragon", "is_base_form": true, "ipa": "/ˈtɛrəɡɑn/", "phonetic": "TAIR-uh-gon"}]}
+{"guid": "N38_022", "forms": [{"grammatical_form": "noun/en_singular", "text": "horseradish", "is_base_form": true, "ipa": "/ˈhɔrsˌrædɪʃ/", "phonetic": "HORSS-rad-ish"}]}
+{"guid": "N38_023", "forms": [{"grammatical_form": "noun/en_singular", "text": "clove", "is_base_form": true, "ipa": "/kloʊv/", "phonetic": "KLOHV"}]}
+{"guid": "N38_024", "forms": [{"grammatical_form": "noun/en_singular", "text": "clove", "is_base_form": true, "ipa": "/kloʊv/", "phonetic": "KLOHV"}]}
+{"guid": "N38_025", "forms": [{"grammatical_form": "noun/en_singular", "text": "sprig", "is_base_form": true, "ipa": "/sprɪɡ/", "phonetic": "SPRIG"}]}
+{"guid": "N38_026", "forms": [{"grammatical_form": "noun/en_singular", "text": "xylem", "is_base_form": true, "ipa": "/ˈzaɪləm/", "phonetic": "ZY-lem"}]}

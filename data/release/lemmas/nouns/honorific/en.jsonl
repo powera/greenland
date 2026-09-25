@@ -9,3 +9,10 @@
 {"guid": "N48_009", "forms": [{"grammatical_form": "noun/en_singular", "text": "madam", "is_base_form": true, "ipa": "/ˈmædəm/", "phonetic": "MA-dəm"}]}
 {"guid": "N48_010", "forms": [{"grammatical_form": "noun/en_singular", "text": "master", "is_base_form": true, "ipa": "/ˈmæstər/", "phonetic": "MAHS-tur"}]}
 {"guid": "N48_011", "forms": [{"grammatical_form": "noun/en_singular", "text": "Prof.", "is_base_form": true}]}
+{"guid": "N48_012", "forms": [{"grammatical_form": "noun/en_singular", "text": "president", "is_base_form": true, "ipa": "/ˈprɛzɪdənt/", "phonetic": "PREZ-uh-dent"}]}
+{"guid": "N48_013", "forms": [{"grammatical_form": "noun/en_singular", "text": "emperor", "is_base_form": true, "ipa": "/ˈɛmpərər/", "phonetic": "EM-per-er"}]}
+{"guid": "N48_014", "forms": [{"grammatical_form": "noun/en_singular", "text": "title", "is_base_form": true, "ipa": "/ˈtaɪtəl/", "phonetic": "TY-tuhl"}]}
+{"guid": "N48_015", "forms": [{"grammatical_form": "noun/en_singular", "text": "regent", "is_base_form": true, "ipa": "/ˈriːdʒənt/", "phonetic": "REE-junt"}]}
+{"guid": "N48_016", "forms": [{"grammatical_form": "noun/en_singular", "text": "sultan", "is_base_form": true, "ipa": "/ˈsʌltən/", "phonetic": "SUL-tun"}]}
+{"guid": "N48_017", "forms": [{"grammatical_form": "noun/en_singular", "text": "caliph", "is_base_form": true, "ipa": "/ˈkeɪlɪf/", "phonetic": "KAY-lif"}]}
+{"guid": "N48_018", "forms": [{"grammatical_form": "noun/en_singular", "text": "governor-general", "is_base_form": true, "ipa": "/ˌɡʌvərnər ˈdʒɛnərəl/", "phonetic": "GUH-ver-ner JEN-er-uhl"}]}

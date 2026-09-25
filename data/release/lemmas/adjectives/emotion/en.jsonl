@@ -20,3 +20,18 @@
 {"guid": "A19_021", "forms": [{"grammatical_form": "adjective/en_positive", "text": "bored", "is_base_form": true, "ipa": "/bɔːrd/", "phonetic": "BOR-uh-d"}]}
 {"guid": "A19_022", "forms": [{"grammatical_form": "adjective/en_positive", "text": "cheerful", "is_base_form": true, "ipa": "/ˈtʃɛər.fʊl/", "phonetic": "CHAIR-fuhl"}]}
 {"guid": "A19_025", "forms": [{"grammatical_form": "adjective/en_positive", "text": "joyful", "is_base_form": true, "ipa": "/ˈdʒɔɪ.fəl/", "phonetic": "JOY-fəl"}]}
+{"guid": "A19_029", "forms": [{"grammatical_form": "adjective/en_positive", "text": "inspired", "is_base_form": true, "ipa": "/ɪnˈspaɪɚd/", "phonetic": "in-SPYERD"}]}
+{"guid": "A19_030", "forms": [{"grammatical_form": "adjective/en_positive", "text": "dramatic", "is_base_form": true, "ipa": "/drəˈmætɪk/", "phonetic": "duh-MAT-ik"}]}
+{"guid": "A19_031", "forms": [{"grammatical_form": "adjective/en_positive", "text": "aggressive", "is_base_form": true, "ipa": "/əˈɡrɛsɪv/", "phonetic": "uh-GRES-iv"}]}
+{"guid": "A19_032", "forms": [{"grammatical_form": "adjective/en_positive", "text": "heterosexual", "is_base_form": true, "ipa": "/ˌhɛt̬əroʊˈsɛkʃuəl/", "phonetic": "het-uh-roh-SEK-shoo-uhl"}]}
+{"guid": "A19_033", "forms": [{"grammatical_form": "adjective/en_positive", "text": "bisexual", "is_base_form": true, "ipa": "/baɪˈsɛkʃuəl/", "phonetic": "bye-SEK-shoo-uhl"}]}
+{"guid": "A19_034", "forms": [{"grammatical_form": "adjective/en_positive", "text": "self-conscious", "is_base_form": true, "ipa": "/ˌsɛlfˈkɑnʃəs/", "phonetic": "self-KON-shus"}]}
+{"guid": "A19_035", "forms": [{"grammatical_form": "adjective/en_positive", "text": "low-energy", "is_base_form": true, "ipa": "/ˌloʊ ˈɛnɚdʒi/", "phonetic": "LOH-EN-er-jee"}]}
+{"guid": "A19_036", "forms": [{"grammatical_form": "adjective/en_positive", "text": "light-hearted", "is_base_form": true, "ipa": "/ˌlaɪtˈhɑrtɪd/", "phonetic": "LYTE-HAR-tid"}]}
+{"guid": "A19_037", "forms": [{"grammatical_form": "adjective/en_positive", "text": "tense", "is_base_form": true, "ipa": "/tɛns/", "phonetic": "TENS"}]}
+{"guid": "A19_038", "forms": [{"grammatical_form": "adjective/en_positive", "text": "scary", "is_base_form": true, "ipa": "/ˈskɛri/", "phonetic": "SKAIR-ee"}]}
+{"guid": "A19_039", "forms": [{"grammatical_form": "adjective/en_positive", "text": "silly", "is_base_form": true, "ipa": "/ˈsɪli/", "phonetic": "SIL-ee"}]}
+{"guid": "A19_040", "forms": [{"grammatical_form": "adjective/en_positive", "text": "exciting", "is_base_form": true, "ipa": "/ɪkˈsaɪtɪŋ/", "phonetic": "ik-SY-ting"}]}
+{"guid": "A19_041", "forms": [{"grammatical_form": "adjective/en_positive", "text": "frightening", "is_base_form": true, "ipa": "/ˈfraɪtənɪŋ/", "phonetic": "FRY-tuh-ning"}]}
+{"guid": "A19_042", "forms": [{"grammatical_form": "adjective/en_positive", "text": "pleased", "is_base_form": true, "ipa": "/plizd/", "phonetic": "PLEEZD"}]}
+{"guid": "A19_043", "forms": [{"grammatical_form": "adjective/en_positive", "text": "unhappy", "is_base_form": true, "ipa": "/ʌnˈhæpi/", "phonetic": "un-HAP-ee"}]}

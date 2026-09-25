@@ -6,3 +6,61 @@
 {"guid": "A20_010", "variants": [{"kind": "spelling", "key": "north-western", "forms": [{"grammatical_form": "adjective/en_base", "text": "north-western", "is_base_form": true}]}]}
 {"guid": "A20_011", "variants": [{"kind": "spelling", "key": "south-eastern", "forms": [{"grammatical_form": "adjective/en_base", "text": "south-eastern", "is_base_form": true}]}]}
 {"guid": "A20_012", "variants": [{"kind": "spelling", "key": "south-western", "forms": [{"grammatical_form": "adjective/en_base", "text": "south-western", "is_base_form": true}]}]}
+{"guid": "A20_013", "forms": [{"grammatical_form": "adjective/en_positive", "text": "atmospheric", "is_base_form": true, "ipa": "/ˌæt.məˈsfɪr.ɪk/", "phonetic": "at-muh-SFEER-ik"}]}
+{"guid": "A20_014", "forms": [{"grammatical_form": "adjective/en_positive", "text": "cosmic", "is_base_form": true, "ipa": "/ˈkɑzmɪk/", "phonetic": "KAHZ-mik"}]}
+{"guid": "A20_015", "forms": [{"grammatical_form": "adjective/en_positive", "text": "polar", "is_base_form": true, "ipa": "/ˈpoʊlər/", "phonetic": "POH-ler"}]}
+{"guid": "A20_016", "forms": [{"grammatical_form": "adjective/en_positive", "text": "orbital", "is_base_form": true, "ipa": "/ˈɔrbɪtəl/", "phonetic": "OR-bi-tuhl"}]}
+{"guid": "A20_017", "forms": [{"grammatical_form": "adjective/en_positive", "text": "metropolitan", "is_base_form": true, "ipa": "/ˌmɛtrəˈpɑlɪtən/", "phonetic": "met-ruh-POL-uh-tun"}]}
+{"guid": "A20_018", "forms": [{"grammatical_form": "adjective/en_positive", "text": "located", "is_base_form": true, "ipa": "/ˈloʊkeɪtɪd/", "phonetic": "LOH-kay-tid"}]}
+{"guid": "A20_019", "forms": [{"grammatical_form": "adjective/en_positive", "text": "urban", "is_base_form": true, "ipa": "/ˈɝːbən/", "phonetic": "UR-bun"}]}
+{"guid": "A20_020", "forms": [{"grammatical_form": "adjective/en_positive", "text": "provincial", "is_base_form": true, "ipa": "/prəˈvɪnʃəl/", "phonetic": "pruh-VIN-shul"}]}
+{"guid": "A20_021", "forms": [{"grammatical_form": "adjective/en_positive", "text": "rural", "is_base_form": true, "ipa": "/ˈrʊrəl/", "phonetic": "ROOR-uhl"}]}
+{"guid": "A20_022", "forms": [{"grammatical_form": "adjective/en_positive", "text": "rural", "is_base_form": true, "ipa": "/ˈrʊrəl/", "phonetic": "ROOR-uhl"}]}
+{"guid": "A20_023", "forms": [{"grammatical_form": "adjective/en_positive", "text": "situated", "is_base_form": true, "ipa": "/ˈsɪtʃuˌeɪtɪd/", "phonetic": "SIT-oo-ay-tid"}]}
+{"guid": "A20_024", "forms": [{"grammatical_form": "adjective/en_positive", "text": "inland", "is_base_form": true, "ipa": "/ˈɪnˌlænd/", "phonetic": "IN-land"}]}
+{"guid": "A20_025", "forms": [{"grammatical_form": "adjective/en_positive", "text": "regional", "is_base_form": true, "ipa": "/ˈriːdʒənəl/", "phonetic": "REE-juh-nul"}]}
+{"guid": "A20_026", "forms": [{"grammatical_form": "adjective/en_positive", "text": "regional", "is_base_form": true, "ipa": "/ˈriːdʒənəl/", "phonetic": "REE-juh-nul"}]}
+{"guid": "A20_027", "forms": [{"grammatical_form": "adjective/en_positive", "text": "coastal", "is_base_form": true, "ipa": "/ˈkoʊstəl/", "phonetic": "KOH-stuhl"}]}
+{"guid": "A20_028", "forms": [{"grammatical_form": "adjective/en_positive", "text": "coastal", "is_base_form": true, "ipa": "/ˈkoʊstəl/", "phonetic": "KOH-stuhl"}]}
+{"guid": "A20_029", "forms": [{"grammatical_form": "adjective/en_positive", "text": "mainland", "is_base_form": true, "ipa": "/ˈmeɪnˌlænd/", "phonetic": "MAIN-land"}]}
+{"guid": "A20_030", "forms": [{"grammatical_form": "adjective/en_positive", "text": "marine", "is_base_form": true, "ipa": "/məˈrin/", "phonetic": "muh-REEN"}]}
+{"guid": "A20_031", "forms": [{"grammatical_form": "adjective/en_positive", "text": "tropical", "is_base_form": true, "ipa": "/ˈtrɑpɪkəl/", "phonetic": "TROP-i-kul"}]}
+{"guid": "A20_032", "forms": [{"grammatical_form": "adjective/en_positive", "text": "woodland", "is_base_form": true, "ipa": "/ˈwʊdˌlænd/", "phonetic": "WOOD-land"}]}
+{"guid": "A20_033", "forms": [{"grammatical_form": "adjective/en_positive", "text": "outdoor", "is_base_form": true, "ipa": "/ˈaʊtˌdɔr/", "phonetic": "OUT-dor"}]}
+{"guid": "A20_034", "forms": [{"grammatical_form": "adjective/en_positive", "text": "ventral", "is_base_form": true, "ipa": "/ˈvɛntrəl/", "phonetic": "VEN-truhl"}]}
+{"guid": "A20_035", "forms": [{"grammatical_form": "adjective/en_positive", "text": "pelvic", "is_base_form": true, "ipa": "/ˈpɛlvɪk/", "phonetic": "PEL-vik"}]}
+{"guid": "A20_036", "forms": [{"grammatical_form": "adjective/en_positive", "text": "thoracic", "is_base_form": true, "ipa": "/θəˈræsɪk/", "phonetic": "thuh-RAS-ik"}]}
+{"guid": "A20_037", "forms": [{"grammatical_form": "adjective/en_positive", "text": "arboreal", "is_base_form": true, "ipa": "/ɑrˈbɔriəl/", "phonetic": "ar-BOR-ee-uhl"}]}
+{"guid": "A20_038", "forms": [{"grammatical_form": "adjective/en_positive", "text": "tributary", "is_base_form": true, "ipa": "/ˈtrɪbjəˌtɛri/", "phonetic": "TRIB-yoo-ter-ee"}]}
+{"guid": "A20_039", "forms": [{"grammatical_form": "adjective/en_positive", "text": "suburban", "is_base_form": true, "ipa": "/səˈbɝːbən/", "phonetic": "suh-BUR-bun"}]}
+{"guid": "A20_040", "forms": [{"grammatical_form": "adjective/en_positive", "text": "offshore", "is_base_form": true, "ipa": "/ˈɔfˌʃɔr/", "phonetic": "AWF-shor"}]}
+{"guid": "A20_041", "forms": [{"grammatical_form": "adjective/en_positive", "text": "upstream", "is_base_form": true, "ipa": "/ˈʌpˌstriːm/", "phonetic": "UP-streem"}]}
+{"guid": "A20_042", "forms": [{"grammatical_form": "adjective/en_positive", "text": "landlocked", "is_base_form": true, "ipa": "/ˈlændˌlɑkt/", "phonetic": "LAND-lokt"}]}
+{"guid": "A20_043", "forms": [{"grammatical_form": "adjective/en_positive", "text": "montane", "is_base_form": true, "ipa": "/ˈmɑn.teɪn/", "phonetic": "MON-tayn"}]}
+{"guid": "A20_044", "forms": [{"grammatical_form": "adjective/en_positive", "text": "highland", "is_base_form": true, "ipa": "/ˈhaɪˌlænd/", "phonetic": "HIGH-land"}]}
+{"guid": "A20_045", "forms": [{"grammatical_form": "adjective/en_positive", "text": "interstate", "is_base_form": true, "ipa": "/ˌɪntərˈsteɪt/", "phonetic": "IN-ter-state"}]}
+{"guid": "A20_046", "forms": [{"grammatical_form": "adjective/en_positive", "text": "jurisdictional", "is_base_form": true, "ipa": "/ˌdʒʊrɪsˈdɪkʃənəl/", "phonetic": "joor-iss-DIK-shuh-nuhl"}]}
+{"guid": "A20_047", "forms": [{"grammatical_form": "adjective/en_positive", "text": "local", "is_base_form": true, "ipa": "/ˈloʊkəl/", "phonetic": "LOH-kul"}]}
+{"guid": "A20_048", "forms": [{"grammatical_form": "adjective/en_positive", "text": "upper", "is_base_form": true, "ipa": "/ˈʌpər/", "phonetic": "UP-er"}]}
+{"guid": "A20_049", "forms": [{"grammatical_form": "adjective/en_positive", "text": "low-lying", "is_base_form": true, "ipa": "/ˌloʊˈlaɪɪŋ/", "phonetic": "LOH-LY-ing"}]}
+{"guid": "A20_050", "forms": [{"grammatical_form": "adjective/en_positive", "text": "low-lying", "is_base_form": true, "ipa": "/ˌloʊˈlaɪɪŋ/", "phonetic": "LOH-LY-ing"}]}
+{"guid": "A20_051", "forms": [{"grammatical_form": "adjective/en_positive", "text": "land-based", "is_base_form": true, "ipa": "/ˈlændˌbeɪst/", "phonetic": "LAND-bayst"}]}
+{"guid": "A20_052", "forms": [{"grammatical_form": "adjective/en_positive", "text": "south-central", "is_base_form": true, "ipa": "/ˌsaʊθ ˈsɛntrəl/", "phonetic": "SOUTH-SEN-truhl"}]}
+{"guid": "A20_053", "forms": [{"grammatical_form": "adjective/en_positive", "text": "built-up", "is_base_form": true, "ipa": "/ˌbɪlt ˈʌp/", "phonetic": "BILT-UP"}]}
+{"guid": "A20_054", "forms": [{"grammatical_form": "adjective/en_positive", "text": "north-central", "is_base_form": true, "ipa": "/ˌnɔrθ ˈsɛntrəl/", "phonetic": "NORTH-SEN-truhl"}]}
+{"guid": "A20_055", "forms": [{"grammatical_form": "adjective/en_positive", "text": "deep-sea", "is_base_form": true, "ipa": "/ˈdiːp ˌsiː/", "phonetic": "DEEP-see"}]}
+{"guid": "A20_056", "forms": [{"grammatical_form": "adjective/en_positive", "text": "cross-border", "is_base_form": true, "ipa": "/ˌkrɔs ˈbɔrdɚ/", "phonetic": "KROSS-BOR-der"}]}
+{"guid": "A20_057", "forms": [{"grammatical_form": "adjective/en_positive", "text": "east-west", "is_base_form": true, "ipa": "/ˈist ˈwɛst/", "phonetic": "EEST-WEST"}]}
+{"guid": "A20_058", "forms": [{"grammatical_form": "adjective/en_positive", "text": "high-altitude", "is_base_form": true, "ipa": "/ˌhaɪ ˈæl.təˌtuːd/", "phonetic": "HY-AL-ti-tood"}]}
+{"guid": "A20_059", "forms": [{"grammatical_form": "adjective/en_positive", "text": "on-site", "is_base_form": true, "ipa": "/ˈɑnˌsaɪt/", "phonetic": "ON-site"}]}
+{"guid": "A20_060", "forms": [{"grammatical_form": "adjective/en_positive", "text": "in-house", "is_base_form": true, "ipa": "/ˌɪn ˈhaʊs/", "phonetic": "in-HOWS"}]}
+{"guid": "A20_061", "forms": [{"grammatical_form": "adjective/en_positive", "text": "ground-based", "is_base_form": true, "ipa": "/ˈɡraʊndˌbeɪst/", "phonetic": "GROUND-bayst"}]}
+{"guid": "A20_062", "forms": [{"grammatical_form": "adjective/en_positive", "text": "low-density", "is_base_form": true, "ipa": "/ˌloʊ ˈdɛnsəti/", "phonetic": "LOH-DEN-si-tee"}]}
+{"guid": "A20_063", "forms": [{"grammatical_form": "adjective/en_positive", "text": "on-screen", "is_base_form": true, "ipa": "/ˌɑnˈskrin/", "phonetic": "on-SCREEN"}]}
+{"guid": "A20_064", "forms": [{"grammatical_form": "adjective/en_positive", "text": "mid-ocean", "is_base_form": true, "ipa": "/ˌmɪdˈoʊʃən/", "phonetic": "mid-OH-shun"}]}
+{"guid": "A20_065", "forms": [{"grammatical_form": "adjective/en_positive", "text": "far-off", "is_base_form": true, "ipa": "/ˌfɑr ˈɔf/", "phonetic": "FAR-off"}]}
+{"guid": "A20_066", "forms": [{"grammatical_form": "adjective/en_positive", "text": "above-ground", "is_base_form": true, "ipa": "/əˈbʌv ˌɡraʊnd/", "phonetic": "uh-BUV-grownd"}]}
+{"guid": "A20_067", "forms": [{"grammatical_form": "adjective/en_positive", "text": "london-based", "is_base_form": true, "ipa": "/ˈlʌndən beɪst/", "phonetic": "LUN-dun-bayst"}]}
+{"guid": "A20_068", "forms": [{"grammatical_form": "adjective/en_positive", "text": "inner-city", "is_base_form": true, "ipa": "/ˌɪnɚˈsɪti/", "phonetic": "IN-er-SIT-ee"}]}
+{"guid": "A20_069", "forms": [{"grammatical_form": "adjective/en_positive", "text": "west-central", "is_base_form": true, "ipa": "/ˌwɛstˈsɛntrəl/", "phonetic": "WEST-SEN-truhl"}]}
+{"guid": "A20_070", "forms": [{"grammatical_form": "adjective/en_positive", "text": "downstairs", "is_base_form": true, "ipa": "/ˌdaʊnˈstɛrz/", "phonetic": "DOWN-stairz"}]}

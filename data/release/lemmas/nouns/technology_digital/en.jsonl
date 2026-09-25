@@ -10,3 +10,22 @@
 {"guid": "N52_014", "forms": [{"grammatical_form": "noun/en_singular", "text": "search engine", "is_base_form": true}]}
 {"guid": "N52_015", "forms": [{"grammatical_form": "noun/en_singular", "text": "operating system", "is_base_form": true}]}
 {"guid": "N52_016", "forms": [{"grammatical_form": "noun/en_singular", "text": "social network", "is_base_form": true}]}
+{"guid": "N52_017", "forms": [{"grammatical_form": "noun/en_singular", "text": "topology", "is_base_form": true, "ipa": "/təˈpɑlədʒi/", "phonetic": "tuh-POL-uh-jee"}]}
+{"guid": "N52_018", "forms": [{"grammatical_form": "noun/en_singular", "text": "successor", "is_base_form": true, "ipa": "/səkˈsɛsər/", "phonetic": "suk-SESS-er"}]}
+{"guid": "N52_019", "forms": [{"grammatical_form": "noun/en_singular", "text": "circuit", "is_base_form": true, "ipa": "/ˈsɝːkɪt/", "phonetic": "SUR-kit"}]}
+{"guid": "N52_020", "forms": [{"grammatical_form": "noun/en_singular", "text": "file", "is_base_form": true, "ipa": "/faɪl/", "phonetic": "FILE"}]}
+{"guid": "N52_021", "forms": [{"grammatical_form": "noun/en_singular", "text": "technology", "is_base_form": true, "ipa": "/tɛkˈnɑlədʒi/", "phonetic": "tek-NOL-uh-jee"}]}
+{"guid": "N52_022", "forms": [{"grammatical_form": "noun/en_singular", "text": "archives", "is_base_form": true, "ipa": "/ˈɑrkaɪvz/", "phonetic": "AR-kives"}]}
+{"guid": "N52_023", "forms": [{"grammatical_form": "noun/en_singular", "text": "gear", "is_base_form": true, "ipa": "/ɡɪr/", "phonetic": "GEER"}]}
+{"guid": "N52_024", "forms": [{"grammatical_form": "noun/en_singular", "text": "rotor", "is_base_form": true, "ipa": "/ˈroʊtər/", "phonetic": "ROH-ter"}]}
+{"guid": "N52_025", "forms": [{"grammatical_form": "noun/en_singular", "text": "browser", "is_base_form": true, "ipa": "/ˈbraʊzɚ/", "phonetic": "BROW-zer"}]}
+{"guid": "N52_026", "forms": [{"grammatical_form": "noun/en_singular", "text": "encryption", "is_base_form": true, "ipa": "/ɪnˈkrɪpʃən/", "phonetic": "en-KRIP-shun"}]}
+{"guid": "N52_027", "forms": [{"grammatical_form": "noun/en_singular", "text": "bandwidth", "is_base_form": true, "ipa": "/ˈbændˌwɪθ/", "phonetic": "BAND-width"}]}
+{"guid": "N52_028", "forms": [{"grammatical_form": "noun/en_singular", "text": "automation", "is_base_form": true, "ipa": "/ˌɔtəˈmeɪʃən/", "phonetic": "aw-tuh-MAY-shun"}]}
+{"guid": "N52_029", "forms": [{"grammatical_form": "noun/en_singular", "text": "authentication", "is_base_form": true, "ipa": "/ɔˌθɛntəˈkeɪʃən/", "phonetic": "aw-then-tuh-KAY-shun"}]}
+{"guid": "N52_030", "forms": [{"grammatical_form": "noun/en_singular", "text": "wiring", "is_base_form": true, "ipa": "/ˈwaɪərɪŋ/", "phonetic": "WYE-ur-ing"}]}
+{"guid": "N52_031", "forms": [{"grammatical_form": "noun/en_singular", "text": "compiler", "is_base_form": true, "ipa": "/kəmˈpaɪlər/", "phonetic": "kum-PIE-ler"}]}
+{"guid": "N52_032", "forms": [{"grammatical_form": "noun/en_singular", "text": "latex", "is_base_form": true, "ipa": "/ˈleɪtɛk/", "phonetic": "LAY-tek"}]}
+{"guid": "N52_033", "forms": [{"grammatical_form": "noun/en_singular", "text": "desktop", "is_base_form": true, "ipa": "/ˈdɛskˌtɑp/", "phonetic": "DESK-top"}]}
+{"guid": "N52_034", "forms": [{"grammatical_form": "noun/en_singular", "text": "waveguide", "is_base_form": true, "ipa": "/ˈweɪvˌɡaɪd/", "phonetic": "WAVE-guide"}]}
+{"guid": "N52_035", "forms": [{"grammatical_form": "noun/en_singular", "text": "e-book", "is_base_form": true, "ipa": "/ˈiːˌbʊk/", "phonetic": "EE-book"}]}

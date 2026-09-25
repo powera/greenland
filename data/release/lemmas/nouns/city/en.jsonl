@@ -37,3 +37,7 @@
 {"guid": "N46_041", "forms": [{"grammatical_form": "noun/en_singular", "text": "Nairobi", "is_base_form": true}]}
 {"guid": "N46_043", "forms": [{"grammatical_form": "noun/en_singular", "text": "Dubai", "is_base_form": true}]}
 {"guid": "N46_044", "forms": [{"grammatical_form": "noun/en_singular", "text": "Melbourne", "is_base_form": true}]}
+{"guid": "N46_045", "forms": [{"grammatical_form": "noun/en_singular", "text": "metropolis", "is_base_form": true, "ipa": "/məˈtrɑːpəlɪs/", "phonetic": "muh-TROP-uh-lis"}]}
+{"guid": "N46_046", "forms": [{"grammatical_form": "noun/en_singular", "text": "borough", "is_base_form": true, "ipa": "/ˈbɝoʊ/", "phonetic": "BUR-oh"}]}
+{"guid": "N46_047", "forms": [{"grammatical_form": "noun/en_singular", "text": "borough", "is_base_form": true, "ipa": "/ˈbɝoʊ/", "phonetic": "BUR-oh"}]}
+{"guid": "N46_048", "forms": [{"grammatical_form": "noun/en_singular", "text": "capital", "is_base_form": true, "ipa": "/ˈkæpɪtəl/", "phonetic": "KAP-uh-tul"}]}
