@@ -61,11 +61,13 @@ from words.emoji import emoji_values
 # Configure logging
 logger = logging.getLogger(__name__)
 
+# zh exports the core and the named units (everything below the topic band);
+# the others still stop at the core.
 LANGUAGE_EXPORT_MAX_LEVELS: Dict[str, int] = {
     "lt": 64,
     "es": 30,
     "fr": 30,
-    "zh": 30,
+    "zh": constants.TOPIC_DIFFICULTY_LEVEL_MIN - 1,
 }
 DEFAULT_EXPORT_MAX_LEVEL = 10
 
@@ -1059,13 +1061,35 @@ class WirewordExporter:
         return derivative_phrases
 
     def _get_level_ranges(self) -> List[Tuple[int, int]]:
-        """Return level ranges for splitting word files (e.g. [(1,5), (6,10), …])."""
+        """Return level ranges for splitting word files (e.g. [(1,5), (6,10), …]).
+
+        Ranges restart at the named band, so each file there is one five-level
+        block (100-104, 105-109, …) rather than straddling two of them.
+        """
         max_level = self._get_max_export_level()
+        band_starts = [(1, min(max_level, constants.NAMED_DIFFICULTY_LEVEL_MIN - 1))]
+        if max_level >= constants.NAMED_DIFFICULTY_LEVEL_MIN:
+            band_starts.append((constants.NAMED_DIFFICULTY_LEVEL_MIN, max_level))
         ranges: List[Tuple[int, int]] = []
-        for start in range(1, max_level + 1, LEVEL_RANGE_SIZE):
-            end = min(start + LEVEL_RANGE_SIZE - 1, max_level)
-            ranges.append((start, end))
+        for band_min, band_max in band_starts:
+            for start in range(band_min, band_max + 1, LEVEL_RANGE_SIZE):
+                end = min(start + LEVEL_RANGE_SIZE - 1, band_max)
+                ranges.append((start, end))
         return ranges
+
+    @staticmethod
+    def _remove_stale_level_files(wireword_dir: str, keep: set[str]) -> List[str]:
+        """Delete ``wireword_levels_*.json`` files in *wireword_dir* not named in *keep*."""
+        removed: List[str] = []
+        for filename in sorted(os.listdir(wireword_dir)):
+            if not (filename.startswith("wireword_levels_") and filename.endswith(".json")):
+                continue
+            if filename in keep:
+                continue
+            os.remove(os.path.join(wireword_dir, filename))
+            removed.append(filename)
+            logger.info(f"🗑️  Removed stale level file {filename}")
+        return removed
 
     def _write_combined_wireword_file(
         self,
@@ -1195,6 +1219,7 @@ class WirewordExporter:
 
         # Split into level-range files
         level_ranges = self._get_level_ranges()
+        written_level_files: set[str] = set()
         for start, end in level_ranges:
             range_words = [w for w in all_words if start <= w.get("level", 0) <= end]
             if not range_words:
@@ -1202,10 +1227,15 @@ class WirewordExporter:
             filename = f"wireword_levels_{start}_{end}.json"
             filepath = os.path.join(wireword_dir, filename)
             self._write_combined_wireword_file(filepath, range_words)
+            written_level_files.add(filename)
             results["files_created"].append(filepath)
             logger.info(
                 f"✅ Wrote {len(range_words)} entries to {filename} " f"(levels {start}-{end})"
             )
+
+        # The manifest lists every level file in the directory, so a range left
+        # empty by a relevel would otherwise ship its previous export.
+        self._remove_stale_level_files(wireword_dir, written_level_files)
 
         # Convert sets to sorted lists for JSON serialization
         results["levels_exported"] = sorted(list(results["levels_exported"]))
