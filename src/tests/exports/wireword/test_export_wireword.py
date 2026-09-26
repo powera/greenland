@@ -1,3 +1,6 @@
+from pathlib import Path
+
+import constants
 from storage.backend.config import BackendType, DataSourceConfig
 from exports.wireword.export_wireword import LANGUAGE_EXPORT_MAX_LEVELS, WirewordExporter
 
@@ -7,8 +10,44 @@ def test_language_export_max_levels_cover_full_curricula() -> None:
         "lt": 64,
         "es": 30,
         "fr": 30,
-        "zh": 30,
+        "zh": constants.TOPIC_DIFFICULTY_LEVEL_MIN - 1,
     }
+
+
+def test_level_ranges_for_zh_stop_below_topic_band() -> None:
+    exporter = WirewordExporter(
+        config=DataSourceConfig(backend_type=BackendType.SQLITE),
+        language="zh",
+    )
+
+    ranges = exporter._get_level_ranges()
+
+    assert ranges[0] == (1, 5)
+    assert (96, 99) in ranges
+    assert (100, 104) in ranges
+    assert (105, 109) in ranges
+    assert ranges[-1] == (995, 999)
+
+
+def test_remove_stale_level_files_keeps_written_and_other_files(tmp_path: Path) -> None:
+    for name in (
+        "wireword_levels_1_5.json",
+        "wireword_levels_21_25.json",
+        "wireword_manifest_v2.json",
+        "wireword_sentences.json",
+    ):
+        (tmp_path / name).write_text("[]", encoding="utf-8")
+
+    removed = WirewordExporter._remove_stale_level_files(
+        str(tmp_path), {"wireword_levels_1_5.json"}
+    )
+
+    assert removed == ["wireword_levels_21_25.json"]
+    assert sorted(p.name for p in tmp_path.iterdir()) == [
+        "wireword_levels_1_5.json",
+        "wireword_manifest_v2.json",
+        "wireword_sentences.json",
+    ]
 
 
 def test_format_missing_verb_translation_warning_preview_and_count() -> None:
