@@ -78,6 +78,33 @@ LEVEL_RANGE_SIZE = 5
 # units are sparse single-topic levels, so five-level files there are small.
 NAMED_LEVEL_RANGE_SIZE = 25
 
+# Levels per verb decoy pool from the named band up.  Verbs are too sparse to
+# pool per level file, and all core verbs share one pool.
+NAMED_VERB_POOL_SIZE = 100
+
+
+def decoy_pool_name(level: int, is_verb: bool) -> str:
+    """Return the WireWord ``corpus`` for a word: its pool of decoy answers.
+
+    The apps draw a question's wrong answers from words sharing its ``corpus``
+    (and fall back to any word), so a pool should be words of similar level,
+    roughly 100-200 of them.  Non-verbs pool by level file (1-5, …, 100-124,
+    …); verbs pool apart, since a noun is an easy wrong answer to a verb.
+    Topic-specific decoys are a separate choice and do not belong here.
+    """
+    named_min = constants.NAMED_DIFFICULTY_LEVEL_MIN
+    if is_verb:
+        if level < named_min:
+            return "Core Verbs"
+        start = named_min + (level - named_min) // NAMED_VERB_POOL_SIZE * NAMED_VERB_POOL_SIZE
+        return f"Verbs {start}-{start + NAMED_VERB_POOL_SIZE - 1}"
+    if level < named_min:
+        start = (level - 1) // LEVEL_RANGE_SIZE * LEVEL_RANGE_SIZE + 1
+        return f"Levels {start}-{start + LEVEL_RANGE_SIZE - 1}"
+    start = named_min + (level - named_min) // NAMED_LEVEL_RANGE_SIZE * NAMED_LEVEL_RANGE_SIZE
+    return f"Levels {start}-{start + NAMED_LEVEL_RANGE_SIZE - 1}"
+
+
 # Floor for a grammatical form card, when the lemma's own level is lower.
 # Comparison is a later concept than the plain declension of a word, and it
 # reads oddly to be asked for "raudonesnis" before "raudonas" is settled, so
@@ -409,88 +436,6 @@ class WirewordExporter:
 
         return export_data
 
-    def _calculate_corpus_assignments(
-        self, export_data: List[Dict[str, Any]]
-    ) -> Dict[Tuple[int, str], str]:
-        """
-        Calculate corpus assignments based on levels and group overflow logic.
-
-        Args:
-            export_data: List of export entries
-
-        Returns:
-            Dictionary mapping (level, subtype) tuples to corpus names
-        """
-        # Group data by subtype to track when groups appear across levels
-        groups_by_level: Dict[int, set] = {}
-        for entry in export_data:
-            level = entry["trakaido_level"]
-            subtype = entry["subtype"]
-
-            if level not in groups_by_level:
-                groups_by_level[level] = set()
-            groups_by_level[level].add(subtype)
-
-        # Track which groups have been assigned to which WORDS level
-        group_assignments: Dict[str, str] = {}  # group_name -> WORDS level
-        corpus_assignments = {}  # (level, subtype) -> corpus name
-
-        # Define the level ranges for each WORDS corpus
-        words_ranges = {
-            "WORDS1": range(1, 4),  # Levels 1-3
-            "WORDS2": range(4, 7),  # Levels 4-6
-            "WORDS3": range(7, 11),  # Levels 7-10
-            "WORDS4": range(11, 15),  # Levels 11-14
-            "WORDS5": range(15, 21),  # Levels 15-20 (overflow)
-        }
-
-        # Process each level in order
-        for level in sorted(groups_by_level.keys()):
-            # Determine base WORDS level for this difficulty level
-            base_words_level = None
-            for words_name, level_range in words_ranges.items():
-                if level in level_range:
-                    base_words_level = words_name
-                    break
-
-            if base_words_level is None:
-                # Level is outside normal ranges, assign to Trakaido
-                for subtype in groups_by_level[level]:
-                    corpus_assignments[(level, subtype)] = "Trakaido"
-                continue
-
-            # Process each subtype in this level
-            for subtype in groups_by_level[level]:
-                if subtype in group_assignments:
-                    # Group has already been assigned, kick to next WORDS level
-                    current_words_level = group_assignments[subtype]
-                    words_levels = list(words_ranges.keys())
-                    current_index = words_levels.index(current_words_level)
-
-                    if current_index + 1 < len(words_levels):
-                        # Assign to next WORDS level
-                        next_words_level = words_levels[current_index + 1]
-                        group_assignments[subtype] = next_words_level
-                        corpus_assignments[(level, subtype)] = next_words_level
-                        logger.debug(
-                            f"Group '{subtype}' at level {level} kicked from {current_words_level} to {next_words_level}"
-                        )
-                    else:
-                        # No more WORDS levels available, assign to Trakaido
-                        corpus_assignments[(level, subtype)] = "Trakaido"
-                        logger.debug(
-                            f"Group '{subtype}' at level {level} assigned to Trakaido (overflow)"
-                        )
-                else:
-                    # First time seeing this group, assign to base WORDS level
-                    group_assignments[subtype] = base_words_level
-                    corpus_assignments[(level, subtype)] = base_words_level
-                    logger.debug(
-                        f"Group '{subtype}' at level {level} assigned to {base_words_level}"
-                    )
-
-        return corpus_assignments
-
     def _get_audio_hashes(
         self, session: Any, guid: str, language: str, grammatical_form: Optional[str] = None
     ) -> Optional[Dict[str, str]]:
@@ -577,9 +522,6 @@ class WirewordExporter:
             if not export_data:
                 logger.warning("No data found matching the specified criteria")
                 return False, None
-
-            # Calculate corpus assignments based on levels and groups
-            corpus_assignments = self._calculate_corpus_assignments(export_data)
 
             # OPTIMIZATION: Bulk fetch all related data in a few queries instead of N per entry
             lemma_ids = [entry["_lemma_id"] for entry in export_data]
@@ -800,10 +742,6 @@ class WirewordExporter:
                         if variant_text not in target_alternatives:
                             target_alternatives.append(variant_text)
 
-                # Get corpus assignment for this entry
-                corpus_key = (entry["trakaido_level"], entry["subtype"])
-                assigned_corpus = corpus_assignments.get(corpus_key, "Trakaido")
-
                 # Create WireWord object
                 wireword: Dict[str, Any] = {
                     "guid": entry["GUID"],
@@ -838,7 +776,7 @@ class WirewordExporter:
                         wireword["cognate_reason_codes"] = list(noun_cognate_result.reasons)
                 wireword.update(
                     {
-                        "corpus": assigned_corpus,
+                        "corpus": decoy_pool_name(entry["trakaido_level"], is_verb=False),
                         "group": resolve_group_label(
                             entry["subtype"], self.source_language, session
                         ),
@@ -1625,7 +1563,7 @@ class WirewordExporter:
                         wireword["cognate_reason_codes"] = list(verb_cognate_result.reasons)
                 wireword.update(
                     {
-                        "corpus": "VERBS",
+                        "corpus": decoy_pool_name(effective_lemma_level, is_verb=True),
                         "group": resolve_group_label(
                             lemma.pos_subtype or "action", self.source_language, session
                         ),
