@@ -24,9 +24,22 @@ def test_level_ranges_for_zh_stop_below_topic_band() -> None:
 
     assert ranges[0] == (1, 5)
     assert (96, 99) in ranges
-    assert (100, 104) in ranges
-    assert (105, 109) in ranges
-    assert ranges[-1] == (995, 999)
+    assert (100, 124) in ranges
+    assert (125, 149) in ranges
+    assert ranges[-1] == (975, 999)
+
+
+def test_level_ranges_for_lt_stay_five_wide() -> None:
+    exporter = WirewordExporter(
+        config=DataSourceConfig(backend_type=BackendType.SQLITE),
+        language="lt",
+    )
+
+    ranges = exporter._get_level_ranges()
+
+    assert ranges[0] == (1, 5)
+    assert ranges[-1] == (61, 64)
+    assert all(end - start < 5 for start, end in ranges)
 
 
 def test_remove_stale_level_files_keeps_written_and_other_files(tmp_path: Path) -> None:
