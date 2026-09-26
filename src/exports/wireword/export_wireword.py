@@ -74,6 +74,10 @@ DEFAULT_EXPORT_MAX_LEVEL = 10
 # Number of difficulty levels per split file (e.g. levels 1-5, 6-10, …)
 LEVEL_RANGE_SIZE = 5
 
+# Levels per split file from the named band up (100-124, 125-149, …).  Named
+# units are sparse single-topic levels, so five-level files there are small.
+NAMED_LEVEL_RANGE_SIZE = 25
+
 # Floor for a grammatical form card, when the lemma's own level is lower.
 # Comparison is a later concept than the plain declension of a word, and it
 # reads oddly to be asked for "raudonesnis" before "raudonas" is settled, so
@@ -1063,17 +1067,18 @@ class WirewordExporter:
     def _get_level_ranges(self) -> List[Tuple[int, int]]:
         """Return level ranges for splitting word files (e.g. [(1,5), (6,10), …]).
 
-        Ranges restart at the named band, so each file there is one five-level
-        block (100-104, 105-109, …) rather than straddling two of them.
+        Below the named band each file covers LEVEL_RANGE_SIZE levels; from the
+        named band up, ranges restart at its first level and cover
+        NAMED_LEVEL_RANGE_SIZE levels each (100-124, 125-149, …).
         """
         max_level = self._get_max_export_level()
-        band_starts = [(1, min(max_level, constants.NAMED_DIFFICULTY_LEVEL_MIN - 1))]
+        bands = [(1, min(max_level, constants.NAMED_DIFFICULTY_LEVEL_MIN - 1), LEVEL_RANGE_SIZE)]
         if max_level >= constants.NAMED_DIFFICULTY_LEVEL_MIN:
-            band_starts.append((constants.NAMED_DIFFICULTY_LEVEL_MIN, max_level))
+            bands.append((constants.NAMED_DIFFICULTY_LEVEL_MIN, max_level, NAMED_LEVEL_RANGE_SIZE))
         ranges: List[Tuple[int, int]] = []
-        for band_min, band_max in band_starts:
-            for start in range(band_min, band_max + 1, LEVEL_RANGE_SIZE):
-                end = min(start + LEVEL_RANGE_SIZE - 1, band_max)
+        for band_min, band_max, range_size in bands:
+            for start in range(band_min, band_max + 1, range_size):
+                end = min(start + range_size - 1, band_max)
                 ranges.append((start, end))
         return ranges
 
