@@ -2,7 +2,11 @@ from pathlib import Path
 
 import constants
 from storage.backend.config import BackendType, DataSourceConfig
-from exports.wireword.export_wireword import LANGUAGE_EXPORT_MAX_LEVELS, WirewordExporter
+from exports.wireword.export_wireword import (
+    LANGUAGE_EXPORT_MAX_LEVELS,
+    WirewordExporter,
+    decoy_pool_name,
+)
 
 
 def test_language_export_max_levels_cover_full_curricula() -> None:
@@ -40,6 +44,33 @@ def test_level_ranges_for_lt_stay_five_wide() -> None:
     assert ranges[0] == (1, 5)
     assert ranges[-1] == (61, 64)
     assert all(end - start < 5 for start, end in ranges)
+
+
+def test_decoy_pool_name_follows_level_files_for_non_verbs() -> None:
+    assert decoy_pool_name(1, is_verb=False) == "Levels 1-5"
+    assert decoy_pool_name(5, is_verb=False) == "Levels 1-5"
+    assert decoy_pool_name(6, is_verb=False) == "Levels 6-10"
+    assert decoy_pool_name(20, is_verb=False) == "Levels 16-20"
+    assert decoy_pool_name(100, is_verb=False) == "Levels 100-124"
+    assert decoy_pool_name(124, is_verb=False) == "Levels 100-124"
+    assert decoy_pool_name(125, is_verb=False) == "Levels 125-149"
+    assert decoy_pool_name(499, is_verb=False) == "Levels 475-499"
+
+
+def test_decoy_pool_name_pools_verbs_apart() -> None:
+    assert decoy_pool_name(1, is_verb=True) == "Core Verbs"
+    assert decoy_pool_name(20, is_verb=True) == "Core Verbs"
+    assert decoy_pool_name(100, is_verb=True) == "Verbs 100-199"
+    assert decoy_pool_name(199, is_verb=True) == "Verbs 100-199"
+    assert decoy_pool_name(200, is_verb=True) == "Verbs 200-299"
+
+
+def test_decoy_pool_names_never_look_like_sentence_corpora() -> None:
+    # The web app treats any corpus containing "sentence" as sentences.
+    names = {
+        decoy_pool_name(level, is_verb) for level in range(1, 1000) for is_verb in (True, False)
+    }
+    assert not any("sentence" in name.lower() for name in names)
 
 
 def test_remove_stale_level_files_keeps_written_and_other_files(tmp_path: Path) -> None:
