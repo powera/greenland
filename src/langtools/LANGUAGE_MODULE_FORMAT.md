@@ -67,7 +67,13 @@ def is_function_word(word: str, language_code: str) -> bool: ...
 
 # src/langtools/tokenizer.py
 
-def tokenize(text: str, language_code: str) -> List[str]: ...
+def tokenize(text: str, language_code: str) -> List[str]: ...  # legacy argument order
+def normalize_token(token: str) -> str: ...
+def split_contractions(language_code: str, token: str) -> List[str]: ...
+def candidate_lemmas(language_code: str, token: str) -> List[str]: ...
+def supports_lemma_candidates(language_code: str) -> bool: ...
+def lemma_lookup_keys(language_code: str, token: str) -> List[str]: ...
+def surface_matches_lemma(language_code: str, surface: str, lemma: str) -> bool: ...
 ```
 
 Notes:
@@ -190,13 +196,45 @@ Expected optional callable for pronoun stripping compatibility:
 
 ### `tokenizer.py` (optional)
 
-Expected callable:
+Every callable is optional; the dispatcher loads
+`langtools.<base_language>.tokenizer` by convention (dialects use their base:
+`es-419` -> `es`, `zh-tw` -> `zh`) and checks for each hook separately.
 
 ```python
 def tokenize(text: str) -> List[str]: ...
+def split_contractions(token: str) -> List[str]: ...
+def candidate_lemmas(token: str) -> List[str]: ...
 ```
 
-- Language-local tokenization behavior when shared tokenization is insufficient.
+- `tokenize`: language-local tokenization when whitespace splitting is
+  insufficient (`zh` uses jieba).  Absent -> whitespace splitting.
+- `split_contractions`: expand a fused or elided token into its words
+  (`fr` "du" -> ["de", "le"], "l'homme" -> ["le", "homme"]; `it` "della" ->
+  ["di", "la"]; `de` "zum" -> ["zu", "dem"]).  Receives a normalized token that
+  may keep a trailing elision apostrophe; returns `[token]` when nothing
+  applies.  Absent -> no splitting.
+- `candidate_lemmas`: rule-based reverse morphology -- the dictionary forms an
+  inflected token could come from, most plausible first (`es` "canciones" ->
+  "canción", `lt` "namuose" -> "namas", `fr` "lève" -> "lever", "se lever").
+  Receives a normalized (NFC, lowercase, apostrophe-folded) token.  Absent ->
+  no candidates.
+
+`candidate_lemmas` contract details:
+
+- Candidates **over-generate** by design.  They are lookup keys to check
+  against stored lemma/derivative-form text, never answers on their own; a rule
+  that yields the real lemma plus two non-words is correct.
+- Return lemma *shapes as stored*: reflexive verbs in the language's stored
+  form (`es` "quedarse", `it` "svegliarsi", `pt` "levantar-se", `fr` "se
+  lever" / "s'asseoir", `de` "sich erinnern", `nl` "zich vergissen", `lt`
+  "-tis"), and lowercase throughout (German nouns are compared
+  case-insensitively).
+- Irregular forms belong in a small inverted paradigm table inside the module
+  (`suffix_rules.invert_paradigms`); stored `DerivativeForm` rows remain the
+  primary source for irregulars.
+- Shared helpers (`CandidateList`, `strip_suffixes`, `expand_endings`,
+  `invert_paradigms`, `replace_last`, `strip_accents`) live in
+  `src/langtools/suffix_rules.py`.
 
 ### `letters.py` (optional)
 
@@ -245,7 +283,7 @@ consistent where implemented:
 3. verb conjugation
 4. grammatical-form generation/query
 5. prompt direction notes
-6. tokenization/splitting hooks
+6. tokenization/splitting and lemma-matching hooks
 7. script/romanization conversion helpers
 8. registry-based LLM form adapters
 

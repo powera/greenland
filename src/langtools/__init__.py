@@ -53,4 +53,6 @@ Shared modules:
 - langtools.collation: Latin-alphabet sort-key generation
 - langtools.dialect_overrides: Dialect variant registry (zh-tw, es-419, pt-br, etc.)
 - langtools.directions: Language-specific prompt direction note dispatcher
+- langtools.tokenizer: Tokenization and surface-token -> lemma matching dispatcher
+- langtools.suffix_rules: Shared suffix-rule engine for lemma candidates
 """

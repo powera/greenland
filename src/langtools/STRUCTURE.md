@@ -56,7 +56,15 @@ capabilities. Current target categories:
 4. **Verb conjugation** (deterministic or assisted)
 5. **General grammatical forms** (noun/adjective/etc form generation)
 6. **Prompt direction notes** (`directions`)
-7. **Tokenization helpers** (`tokenizer` where language-specific behavior matters)
+7. **Tokenization and lemma matching** (`tokenizer` dispatcher + per-language
+   `tokenizer.py` hooks: `tokenize`, `split_contractions`, `candidate_lemmas`).
+   Callers matching sentence tokens against stored lemmas should use
+   `lemma_lookup_keys(language, token)` / `surface_matches_lemma(language,
+   surface, lemma)` rather than exact string comparison; inflected forms rarely
+   equal the stored lemma in `lt`, the Romance languages, `de`, `nl` or `sv`.
+   Implemented for the tier 1/2 languages (`lt`, `zh`, `fr`, `es`, `de`, `it`,
+   `nl`, `pt`, `sv`); other languages get whitespace tokenization and exact
+   matching only.
 8. **Script/romanization helpers** (CJK-focused converters/readings)
 9. **LLM form-query integration** (registry-based form slots + query adapters)
 
