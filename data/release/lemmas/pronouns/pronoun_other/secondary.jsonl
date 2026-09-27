@@ -1,18 +1,18 @@
-{"guid": "P99_001", "translations": {"ro": "cine", "pl": "kto", "th": "ใคร", "ta": "யார்", "kn": "ಯಾರು", "uk": "хто", "bn": "কে", "hi": "कौन", "bs": "ko"}}
-{"guid": "P99_002", "translations": {"ro": "ce", "pl": "co", "th": "อะไร", "ta": "என்ன", "kn": "ಏನು", "uk": "що", "bn": "কি", "hi": "क्या", "bs": "šta"}}
-{"guid": "P99_003", "translations": {"ro": "unde", "pl": "gdzie", "th": "ที่ไหน", "ta": "எங்கு", "kn": "ಎಲ್ಲಿ", "uk": "де", "bn": "কোথায়", "hi": "कहाँ", "bs": "gdje"}}
-{"guid": "P99_004", "translations": {"ro": "când", "pl": "kiedy", "th": "เมื่อไร", "ta": "எப்போது", "kn": "ಎಂದರೆ", "uk": "коли", "bn": "কখন", "hi": "कब", "bs": "kada"}}
-{"guid": "P99_005", "translations": {"ro": "de ce", "pl": "dlaczego", "th": "ทำไม", "ta": "ஏன்", "kn": "ಏಕೆ", "uk": "чому", "bn": "কেন", "hi": "क्यों", "bs": "zašto"}}
-{"guid": "P99_006", "translations": {"ro": "cum", "pl": "jak", "th": "อย่างไร", "ta": "எப்படி", "kn": "ಹೇಗೆ", "uk": "як", "bn": "কীভাবে", "hi": "कैसे", "bs": "kako"}}
-{"guid": "P99_007", "translations": {"ro": "care", "pl": "który", "th": "ซึ่ง", "ta": "எது", "kn": "ಯಾವ", "uk": "який", "bn": "কোনটি", "hi": "कौनसा", "bs": "koji"}}
-{"guid": "P99_008", "translations": {"ro": "al cărui", "pl": "czyj", "th": "ของใคร", "ta": "யாருடைய", "kn": "ಯ whose", "uk": "чиїй", "bn": "কার", "hi": "किसका", "bs": "čiji"}}
-{"guid": "P99_009", "translations": {"ro": "cât", "pl": "ile", "th": "กี่", "ta": "எவ்வளவு", "kn": "ಎಷ್ಟು", "uk": "скільки", "bn": "কত", "hi": "कितने", "bs": "koliko"}}
-{"guid": "P99_010", "translations": {"ro": "pe cine", "pl": "kogo", "th": "ใคร", "ta": "யாரை", "kn": "ಯಾರ್", "uk": "кого", "bn": "কে", "hi": "किसे", "bs": "koga"}}
-{"guid": "P99_011", "translations": {"ro": "cineva", "pl": "ktoś", "th": "ใครบางคน", "ta": "யாரோ", "kn": "ಯಾರೋ", "uk": "хтось", "bn": "কোনো একজন", "hi": "कोई", "bs": "neko"}}
-{"guid": "P99_012", "translations": {"ro": "oricine", "pl": "ktokolwiek", "th": "ใครก็ได้", "ta": "யாராவது", "kn": "ಯಾರು", "uk": "хтось", "bn": "যে কেউ", "hi": "कोई", "bs": "bilo ko"}}
-{"guid": "P99_013", "translations": {"ro": "toată lumea", "pl": "wszyscy", "th": "ทุกคน", "ta": "எல்லாரும்", "kn": "ಎಲ್ಲಾರು", "uk": "усі", "bn": "সবাই", "hi": "सब", "bs": "svi"}}
-{"guid": "P99_014", "translations": {"ro": "nimeni", "pl": "nikt", "th": "ไม่มีใคร", "ta": "யாருமில்லை", "kn": "ಯಾರೂ", "uk": "ніхто", "bn": "কেউই নয়", "hi": "कोई नहीं", "bs": "niko"}}
-{"guid": "P99_015", "translations": {"ro": "ceva", "pl": "coś", "th": "บางอย่าง", "ta": "எதோ", "kn": "ಏನಾದೋ", "uk": "щось", "bn": "কিছু", "hi": "कुछ", "bs": "nešto"}}
-{"guid": "P99_016", "translations": {"ro": "nimic", "pl": "nic", "th": "ไม่มีอะไร", "ta": "எதுமில்லை", "kn": "ಯಾವುದೂ", "uk": "нічого", "bn": "কিছুই", "hi": "कुछ भी नहीं", "bs": "ništa"}}
-{"guid": "P99_017", "translations": {"ro": "totul", "pl": "wszystko", "th": "ทุกอย่าง", "ta": "எல்லாம்", "kn": "ಎಲ್ಲವೂ", "uk": "усе", "bn": "সবকিছু", "hi": "सबकुछ", "bs": "sve"}}
-{"guid": "P99_018", "translations": {"ro": "nimeni", "pl": "nikt", "th": "ไม่มีใคร", "ta": "யாருமே இல்லை", "kn": "ಯಾರೂ", "uk": "ніхто", "bn": "কেউই নয়", "hi": "कोई नहीं", "bs": "nijedan"}}
+{"guid": "P99_001", "translations": {"ro": "cine", "pl": "kto", "th": "ใคร", "ms": "siapa", "ta": "யார்", "kn": "ಯಾರು", "uk": "хто", "bn": "কে", "hi": "कौन", "tr": "kim", "bs": "ko"}}
+{"guid": "P99_002", "translations": {"ro": "ce", "pl": "co", "th": "อะไร", "ms": "apa", "ta": "என்ன", "kn": "ಏನು", "uk": "що", "bn": "কি", "hi": "क्या", "tr": "ne", "bs": "šta"}}
+{"guid": "P99_003", "translations": {"ro": "unde", "pl": "gdzie", "th": "ที่ไหน", "ms": "di mana", "ta": "எங்கு", "kn": "ಎಲ್ಲಿ", "uk": "де", "bn": "কোথায়", "hi": "कहाँ", "tr": "nerede", "bs": "gdje"}}
+{"guid": "P99_004", "translations": {"ro": "când", "pl": "kiedy", "th": "เมื่อไร", "ms": "bila", "ta": "எப்போது", "kn": "ಎಂದರೆ", "uk": "коли", "bn": "কখন", "hi": "कब", "tr": "ne zaman", "bs": "kada"}}
+{"guid": "P99_005", "translations": {"ro": "de ce", "pl": "dlaczego", "th": "ทำไม", "ms": "mengapa", "ta": "ஏன்", "kn": "ಏಕೆ", "uk": "чому", "bn": "কেন", "hi": "क्यों", "tr": "neden", "bs": "zašto"}}
+{"guid": "P99_006", "translations": {"ro": "cum", "pl": "jak", "th": "อย่างไร", "ms": "bagaimana", "ta": "எப்படி", "kn": "ಹೇಗೆ", "uk": "як", "bn": "কীভাবে", "hi": "कैसे", "tr": "nasıl", "bs": "kako"}}
+{"guid": "P99_007", "translations": {"ro": "care", "pl": "który", "th": "ซึ่ง", "ms": "yang mana", "ta": "எது", "kn": "ಯಾವ", "uk": "який", "bn": "কোনটি", "hi": "कौनसा", "tr": "hangi", "bs": "koji"}}
+{"guid": "P99_008", "translations": {"ro": "al cărui", "pl": "czyj", "th": "ของใคร", "ms": "siapa punya", "ta": "யாருடைய", "kn": "ಯ whose", "uk": "чиїй", "bn": "কার", "hi": "किसका", "tr": "kimin", "bs": "čiji"}}
+{"guid": "P99_009", "translations": {"ro": "cât", "pl": "ile", "th": "กี่", "ms": "berapa", "ta": "எவ்வளவு", "kn": "ಎಷ್ಟು", "uk": "скільки", "bn": "কত", "hi": "कितने", "tr": "kaç", "bs": "koliko"}}
+{"guid": "P99_010", "translations": {"ro": "pe cine", "pl": "kogo", "th": "ใคร", "ms": "siapa", "ta": "யாரை", "kn": "ಯಾರ್", "uk": "кого", "bn": "কে", "hi": "किसे", "tr": "kimi", "bs": "koga"}}
+{"guid": "P99_011", "translations": {"ro": "cineva", "pl": "ktoś", "th": "ใครบางคน", "ms": "seseorang", "ta": "யாரோ", "kn": "ಯಾರೋ", "uk": "хтось", "bn": "কোনো একজন", "hi": "कोई", "tr": "birisi", "bs": "neko"}}
+{"guid": "P99_012", "translations": {"ro": "oricine", "pl": "ktokolwiek", "th": "ใครก็ได้", "ms": "sesiapa", "ta": "யாராவது", "kn": "ಯಾರು", "uk": "хтось", "bn": "যে কেউ", "hi": "कोई", "tr": "herhangi biri", "bs": "bilo ko"}}
+{"guid": "P99_013", "translations": {"ro": "toată lumea", "pl": "wszyscy", "th": "ทุกคน", "ms": "semua orang", "ta": "எல்லாரும்", "kn": "ಎಲ್ಲಾರು", "uk": "усі", "bn": "সবাই", "hi": "सब", "tr": "herkes", "bs": "svi"}}
+{"guid": "P99_014", "translations": {"ro": "nimeni", "pl": "nikt", "th": "ไม่มีใคร", "ms": "tiada siapa", "ta": "யாருமில்லை", "kn": "ಯಾರೂ", "uk": "ніхто", "bn": "কেউই নয়", "hi": "कोई नहीं", "tr": "hiç kimse", "bs": "niko"}}
+{"guid": "P99_015", "translations": {"ro": "ceva", "pl": "coś", "th": "บางอย่าง", "ms": "sesuatu", "ta": "எதோ", "kn": "ಏನಾದೋ", "uk": "щось", "bn": "কিছু", "hi": "कुछ", "tr": "bir şey", "bs": "nešto"}}
+{"guid": "P99_016", "translations": {"ro": "nimic", "pl": "nic", "th": "ไม่มีอะไร", "ms": "tiada apa-apa", "ta": "எதுமில்லை", "kn": "ಯಾವುದೂ", "uk": "нічого", "bn": "কিছুই", "hi": "कुछ भी नहीं", "tr": "hiçbir şey", "bs": "ništa"}}
+{"guid": "P99_017", "translations": {"ro": "totul", "pl": "wszystko", "th": "ทุกอย่าง", "ms": "segala-galanya", "ta": "எல்லாம்", "kn": "ಎಲ್ಲವೂ", "uk": "усе", "bn": "সবকিছু", "hi": "सबकुछ", "tr": "her şey", "bs": "sve"}}
+{"guid": "P99_018", "translations": {"ro": "nimeni", "pl": "nikt", "th": "ไม่มีใคร", "ms": "tiada", "ta": "யாருமே இல்லை", "kn": "ಯಾರೂ", "uk": "ніхто", "bn": "কেউই নয়", "hi": "कोई नहीं", "tr": "hiçbiri", "bs": "nijedan"}}

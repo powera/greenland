@@ -1,1 +1,2 @@
-{"guid": "D12_001", "translations": {"ro": "zilnic", "pl": "codziennie", "th": "ทุกวัน", "ta": "தினமும்", "kn": "ಪ್ರತಿದಿನ", "uk": "щодня", "bn": "প্রতিদিন", "hi": "रोज़ाना"}}
+{"guid": "D12_001", "translations": {"ro": "zilnic", "pl": "codziennie", "th": "ทุกวัน", "ms": "setiap hari", "ta": "தினமும்", "kn": "ಪ್ರತಿದಿನ", "uk": "щодня", "bn": "প্রতিদিন", "hi": "रोज़ाना", "tr": "her gün"}}
+{"guid": "D12_002", "translations": {"ms": "kerap", "hi": "अक्सर", "tr": "sıklıkla"}}

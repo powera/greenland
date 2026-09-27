@@ -1,6 +1,8 @@
-{"guid": "D05_001", "translations": {"ro": "multă vreme", "pl": "długo", "th": "นาน", "ta": "நீண்டநேரமாக", "kn": "ದೀರ್ಘವಾಗಿ", "uk": "довго", "bn": "দীর্ঘসময়", "hi": "लंबे समय"}}
-{"guid": "D05_002", "translations": {"ro": "pe scurt", "pl": "krótko", "th": "โดยย่อ", "ta": "சுருக்கமாக", "kn": "ಸಂಕ್ಷಿಪ్తವಾಗಿ", "uk": "коротко", "bn": "সংক্ষিপ্তভাবে", "hi": "संक्षेप में"}}
-{"guid": "D05_003", "translations": {"ro": "pentru totdeauna", "pl": "na zawsze", "th": "ตลอดไป", "ta": "எப்பொழுதும்", "kn": "ಶಾಶ್ವತವಾಗಿ", "uk": "назавжди", "bn": "চিরদিন", "hi": "हमेशा"}}
-{"guid": "D05_004", "translations": {"ro": "temporar", "pl": "tymczasowo", "th": "ชั่วคราว", "ta": "தற்காலிகமாக", "kn": "ತಾತ್ಕಾಲಿಕವಾಗಿ", "uk": "тимчасово", "bn": "অস্থায়ীভাবে", "hi": "अस्थायी रूप से"}}
-{"guid": "D05_005", "translations": {"ro": "permanent", "pl": "trwale", "th": "ถาวร", "ta": "நிலையாக", "kn": "ಶಾಶ್ವತವಾಗಿ", "uk": "назавжди", "bn": "চিরস্থায়ীভাবে", "hi": "स्थायी रूप से"}}
-{"guid": "D05_006", "translations": {"ro": "clipă", "pl": "chwilowo", "th": "ชั่วครู่", "ta": "குறுகியநேரமாக", "kn": "क्षणಕಾಲ", "uk": "мить", "bn": "ক্ষণিকভাবে", "hi": "क्षणिक"}}
+{"guid": "D05_001", "translations": {"ro": "multă vreme", "pl": "długo", "th": "นาน", "ms": "lama", "ta": "நீண்டநேரமாக", "kn": "ದೀರ್ಘವಾಗಿ", "uk": "довго", "bn": "দীর্ঘসময়", "hi": "लंबे समय", "tr": "uzun süre"}}
+{"guid": "D05_002", "translations": {"ro": "pe scurt", "pl": "krótko", "th": "โดยย่อ", "ms": "sebentar", "ta": "சுருக்கமாக", "kn": "ಸಂಕ್ಷಿಪ్తವಾಗಿ", "uk": "коротко", "bn": "সংক্ষিপ্তভাবে", "hi": "संक्षेप में", "tr": "kısa süreliğine"}}
+{"guid": "D05_003", "translations": {"ro": "pentru totdeauna", "pl": "na zawsze", "th": "ตลอดไป", "ms": "selama-lamanya", "ta": "எப்பொழுதும்", "kn": "ಶಾಶ್ವತವಾಗಿ", "uk": "назавжди", "bn": "চিরদিন", "hi": "हमेशा", "tr": "sonsuza dek"}}
+{"guid": "D05_004", "translations": {"ro": "temporar", "pl": "tymczasowo", "th": "ชั่วคราว", "ms": "buat sementara waktu", "ta": "தற்காலிகமாக", "kn": "ತಾತ್ಕಾಲಿಕವಾಗಿ", "uk": "тимчасово", "bn": "অস্থায়ীভাবে", "hi": "अस्थायी रूप से", "tr": "geçici olarak"}}
+{"guid": "D05_005", "translations": {"ro": "permanent", "pl": "trwale", "th": "ถาวร", "ms": "secara kekal", "ta": "நிலையாக", "kn": "ಶಾಶ್ವತವಾಗಿ", "uk": "назавжди", "bn": "চিরস্থায়ীভাবে", "hi": "स्थायी रूप से", "tr": "kalıcı olarak"}}
+{"guid": "D05_006", "translations": {"ro": "clipă", "pl": "chwilowo", "th": "ชั่วครู่", "ms": "sebentar", "ta": "குறுகியநேரமாக", "kn": "क्षणಕಾಲ", "uk": "мить", "bn": "ক্ষণিকভাবে", "hi": "क्षणिक", "tr": "kısa bir süre"}}
+{"guid": "D05_007", "translations": {"ms": "sepenuh masa", "hi": "पूर्णकालिक", "tr": "tam zamanlı"}}
+{"guid": "D05_008", "translations": {"ms": "secara sambilan", "hi": "अंशकालिक रूप से", "tr": "yarı zamanlı"}}

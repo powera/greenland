@@ -1,38 +1,45 @@
-{"guid": "D07_001", "translations": {"ro": "acum", "pl": "teraz", "th": "ตอนนี้", "ta": "இப்பொழுது", "kn": "ಇಗೋಂದೆ", "uk": "зараз", "bn": "এখন", "hi": "अब", "bs": "sada"}}
-{"guid": "D07_002", "translations": {"ro": "întotdeauna", "pl": "zawsze", "th": "เสมอ", "ta": "எப்பொழுதும்", "kn": "ಎಲ್ಲೆಲ್ಲಾ", "uk": "завжди", "bn": "সবসময়", "hi": "हमेशा", "bs": "uvijek"}}
-{"guid": "D07_003", "translations": {"ro": "niciodată", "pl": "nigdy", "th": "ไม่เคย", "ta": "ஒருபோதும்", "kn": "ಎಲ್ಲಾ ಸಾರಿ ಇಲ್ಲ", "uk": "ніколи", "bn": "কখনও", "hi": "कभी नहीं", "bs": "nikad"}}
-{"guid": "D07_004", "translations": {"ro": "adesea", "pl": "często", "th": "บ่อย", "ta": "அகின்றபோது", "kn": "ಅಕಸದಾಗಿ", "uk": "часто", "bn": "প্রায়ই", "hi": "अक्सर", "bs": "često"}}
-{"guid": "D07_005", "translations": {"ro": "uneori", "pl": "czasami", "th": "บางครั้ง", "ta": "சிலசமயங்களில்", "kn": "ಕೆಲವೊಮ್ಮೆ", "uk": "іноді", "bn": "কখনও কখনও", "hi": "कभी-कभी", "bs": "ponekad"}}
-{"guid": "D07_006", "translations": {"ro": "aici", "pl": "tutaj", "th": "ที่นี่", "ta": "இங்கே", "kn": "ಇಲ್ಲಿ", "uk": "тут", "bn": "এখানে", "hi": "यहाँ", "bs": "ovdje"}}
-{"guid": "D07_007", "translations": {"ro": "acolo", "pl": "tam", "th": "ที่นั่น", "ta": "அங்கே", "kn": "ಅಲ್ಲಿ", "uk": "там", "bn": "ওখানে", "hi": "वहाँ", "bs": "tamo"}}
-{"guid": "D07_008", "translations": {"ro": "peste tot", "pl": "wszędzie", "th": "ทุกที่", "ta": "எல்லாம் இடங்களில்", "kn": "ಎಲ್ಲೆಡೆ", "uk": "усюди", "bn": "সব জায়গায়", "hi": "हर जगह", "bs": "svuda"}}
-{"guid": "D07_009", "translations": {"ro": "nicăieri", "pl": "nigdzie", "th": "ไม่ที่ไหน", "ta": "எங்கிலும் இல்லை", "kn": "ಎಲ್ಲೀನವಿಲ್ಲ", "uk": "ніде", "bn": "কোথাওই না", "hi": "कहीं नहीं", "bs": "nigdje"}}
-{"guid": "D07_010", "translations": {"ro": "deja", "pl": "już", "th": "แล้ว", "ta": "இன்னும் முன்பு", "kn": "ಇದರ ಮೊದಲು", "uk": "вже", "bn": "ইতিপূর্বে", "hi": "पहले ही", "bs": "već"}}
-{"guid": "D07_011", "translations": {"ro": "curând", "pl": "wkrótce", "th": "เร็วๆนี้", "ta": "விரைவில்", "kn": "ಶೀಘ್ರವೇ", "uk": "незабаром", "bn": "শীঘ্রই", "hi": "जल्दी", "bs": "uskoro"}}
-{"guid": "D07_012", "translations": {"ro": "recent", "pl": "niedawno", "th": "เมื่อเร็วๆนี้", "ta": "சமீபத்தில்", "kn": "ಇತ್ತೀಚೆಗೆ", "uk": "недавно", "bn": "সম্প্রতি", "hi": "हाल ही में", "bs": "nedavno"}}
-{"guid": "D07_013", "translations": {"ro": "departe", "pl": "daleko", "th": "ไกล", "ta": "தூரமாக", "kn": "ದೂರಕ್ಕೆ", "uk": "далеко", "bn": "দূরে", "hi": "दूर"}}
-{"guid": "D07_014", "translations": {"ro": "departe", "pl": "daleko", "th": "ไกล", "ta": "தூரமாக", "kn": "ದೂರ", "uk": "далеко", "bn": "দূরে", "hi": "दूर"}}
-{"guid": "D07_015", "translations": {"ro": "aproape", "pl": "blisko", "th": "ใกล้", "ta": "அருகில்", "kn": "ಹತ್ತಿರ", "uk": "поруч", "bn": "নিকটেই", "hi": "पास"}}
-{"guid": "D07_016", "translations": {"ro": "în jur", "pl": "wokół", "th": "รอบๆ", "ta": "சுற்றிலும்", "kn": "ಸುತ್ತಲು", "uk": "навколо", "bn": "চারে", "hi": "गृहگرد"}}
-{"guid": "D07_017", "translations": {"ro": "înainte", "pl": "naprzód", "th": "ข้างหน้า", "ta": "முன்னிட்டு", "kn": "ಮುಂದೆ", "uk": "уперед", "bn": "সামনে", "hi": "आगे"}}
-{"guid": "D07_018", "translations": {"ro": "înainte", "pl": "naprzód", "th": "ข้างหน้า", "ta": "முன்னிலையில்", "kn": "ಮುಂದೆ", "uk": "попереду", "bn": "সামনে", "hi": "आगे"}}
-{"guid": "D07_019", "translations": {"ro": "departe", "pl": "daleko", "th": "ไกล", "ta": "தூரமாக", "kn": "ದೂರವಾಗಿ", "uk": "далеко", "bn": "দূরে", "hi": "दूर"}}
-{"guid": "D07_020", "translations": {"ro": "direct", "pl": "bezpośrednio", "th": "โดยตรง", "ta": "நேரடியாக", "kn": "ನೇರವಾಗಿ", "uk": "безпосередньо", "bn": "সরাসরি", "hi": "प्रत्यक्ष रूप से"}}
-{"guid": "D07_021", "translations": {"ro": "peste tot", "pl": "gdziekolwiek", "th": "ที่ใดก็ได้", "ta": "எந்தயிடத்திலும்", "kn": "ಯಾವುದಾದರು ಸ್ಥಳದಲ್ಲಿ", "uk": "будь-де", "bn": "কোথাও", "hi": "कहीं भी"}}
-{"guid": "D07_022", "translations": {"ro": "deoparte", "pl": "na_bok", "th": "ข้าง", "ta": "பக்கத்தில்", "kn": "ಬದಿಗೆ", "uk": "поряд", "bn": "পাশে", "hi": "बगल में"}}
-{"guid": "D07_023", "translations": {"ro": "înainte", "pl": "naprzód", "th": "ไปข้างหน้า", "ta": "முன்நிகழ்", "kn": "ಮುಂದೆ", "uk": "уперед", "bn": "আগে", "hi": "आगे"}}
-{"guid": "D07_024", "translations": {"ro": "departe", "pl": "osobno", "th": "ห่างกัน", "ta": "தொலைவில்", "kn": "ದೂರವಾಗಿ", "uk": "окремо", "bn": "দূরে", "hi": "अलग"}}
-{"guid": "D07_025", "translations": {"ro": "afară", "pl": "na zewnątrz", "th": "ข้างนอก", "ta": "வெளியில்", "kn": "ಬೆಹಗಡೆ (ಬೆಹುದೆ)", "uk": "назовні", "bn": "বাইরে", "hi": "बाहर"}}
-{"guid": "D07_026", "translations": {"ro": "în sus", "pl": "do góry", "th": "ขึ้น", "ta": "மேல்", "kn": "ಮೇಲೆ", "uk": "угору", "bn": "উপর", "hi": "ऊपर"}}
-{"guid": "D07_027", "translations": {"ro": "jos", "pl": "w dół", "th": "ลง", "ta": "கீழே", "kn": "ಕೆಳಗೆ", "uk": "вниз", "bn": "নীচে", "hi": "नीचे"}}
-{"guid": "D07_028", "translations": {"ro": "în jur", "pl": "wokół", "th": "รอบๆ", "ta": "சுற்றிலும்", "kn": "ಸುತ್ತಲೂ", "uk": "навколо", "bn": "চতুর্পাশে", "hi": "आस پاس"}}
-{"guid": "D07_029", "translations": {"ro": "de-a lungul", "pl": "wzdłuż", "th": "ตาม", "ta": "பக்கமாக", "kn": "ಬದಿಗೆ", "uk": "уздовж", "bn": "পাশে", "hi": "के साथ"}}
-{"guid": "D07_030", "translations": {"ro": "dedesubt", "pl": "poniżej", "th": "ด้านล่าง", "ta": "கீழே", "kn": "ಕೆಳಗೆ", "uk": "нижче", "bn": "নীচে", "hi": "नीचे"}}
-{"guid": "D07_031", "translations": {"ro": "înăuntru", "pl": "wewnątrz", "th": "ข้างใน", "ta": "உள்ளே", "kn": "ಹೊರಕ್ಕೆ ಒಳಗೆ?", "uk": "всередині", "bn": "ভিতরে", "hi": "अंदर"}}
-{"guid": "D07_032", "translations": {"ro": "afară", "pl": "na zewnątrz", "th": "ข้างนอก", "ta": "வெளி", "kn": "ಹೊರಗೆ", "uk": "зовні", "bn": "বাইরে", "hi": "बाहर"}}
-{"guid": "D07_033", "translations": {"ro": "deasupra", "pl": "nadgłową", "th": "เหนือศีรษะ", "ta": "மேலே", "kn": "ಮೇಲ್ಭಾಗದಲ್ಲಿ", "uk": "надголово", "bn": "উপরেই", "hi": "ऊपर"}}
-{"guid": "D07_034", "translations": {"ro": "undeva", "pl": "gdzieś", "th": "ที่ไหนสักแห่ง", "ta": "எங்கேயோ", "kn": "ಎಲ್ಲಿದ್ದರೂ", "uk": "деінде", "bn": "কোথাও", "hi": "कहीं"}}
-{"guid": "D07_035", "translations": {"ro": "departe", "pl": "daleko", "th": "ห่าง", "ta": "அகன்று", "kn": "ತೆಗೆಯಿರಿ", "uk": "геть", "bn": "অপস্খলিত", "hi": "दूर"}}
-{"guid": "D07_036", "translations": {"ro": "aproape", "pl": "w pobliżu", "th": "ใกล้ๆ", "ta": "அருகில்", "kn": "ಹತ್ತಿರ", "uk": "поруч", "bn": "নিকটে", "hi": "पास"}}
-{"guid": "D07_037", "translations": {"ro": "online", "pl": "online", "th": "ออนไลน์", "ta": "ஆன்லைனில்", "kn": "ಆನ್ಲೈನ್", "uk": "онлайн", "bn": "অনলাইনে", "hi": "ऑनलाइन"}}
-{"guid": "D07_038", "translations": {"ro": "sus", "pl": "na górze", "th": "ชั้นบน", "ta": "மேலே", "kn": "ಮೇಲಿದ್ದನ್ನು", "uk": "нагорі", "bn": "উপর দিয়ে", "hi": "ऊपर"}}
+{"guid": "D07_001", "translations": {"ro": "acum", "pl": "teraz", "th": "ตอนนี้", "ms": "sekarang", "ta": "இப்பொழுது", "kn": "ಇಗೋಂದೆ", "uk": "зараз", "bn": "এখন", "hi": "अब", "tr": "şimdi", "bs": "sada"}}
+{"guid": "D07_002", "translations": {"ro": "întotdeauna", "pl": "zawsze", "th": "เสมอ", "ms": "selalu", "ta": "எப்பொழுதும்", "kn": "ಎಲ್ಲೆಲ್ಲಾ", "uk": "завжди", "bn": "সবসময়", "hi": "हमेशा", "tr": "her zaman", "bs": "uvijek"}}
+{"guid": "D07_003", "translations": {"ro": "niciodată", "pl": "nigdy", "th": "ไม่เคย", "ms": "tidak pernah", "ta": "ஒருபோதும்", "kn": "ಎಲ್ಲಾ ಸಾರಿ ಇಲ್ಲ", "uk": "ніколи", "bn": "কখনও", "hi": "कभी नहीं", "tr": "asla", "bs": "nikad"}}
+{"guid": "D07_004", "translations": {"ro": "adesea", "pl": "często", "th": "บ่อย", "ms": "sering", "ta": "அகின்றபோது", "kn": "ಅಕಸದಾಗಿ", "uk": "часто", "bn": "প্রায়ই", "hi": "अक्सर", "tr": "sık sık", "bs": "često"}}
+{"guid": "D07_005", "translations": {"ro": "uneori", "pl": "czasami", "th": "บางครั้ง", "ms": "kadang-kadang", "ta": "சிலசமயங்களில்", "kn": "ಕೆಲವೊಮ್ಮೆ", "uk": "іноді", "bn": "কখনও কখনও", "hi": "कभी-कभी", "tr": "bazen", "bs": "ponekad"}}
+{"guid": "D07_006", "translations": {"ro": "aici", "pl": "tutaj", "th": "ที่นี่", "ms": "di sini", "ta": "இங்கே", "kn": "ಇಲ್ಲಿ", "uk": "тут", "bn": "এখানে", "hi": "यहाँ", "tr": "burada", "bs": "ovdje"}}
+{"guid": "D07_007", "translations": {"ro": "acolo", "pl": "tam", "th": "ที่นั่น", "ms": "di sana", "ta": "அங்கே", "kn": "ಅಲ್ಲಿ", "uk": "там", "bn": "ওখানে", "hi": "वहाँ", "tr": "orada", "bs": "tamo"}}
+{"guid": "D07_008", "translations": {"ro": "peste tot", "pl": "wszędzie", "th": "ทุกที่", "ms": "di mana-mana", "ta": "எல்லாம் இடங்களில்", "kn": "ಎಲ್ಲೆಡೆ", "uk": "усюди", "bn": "সব জায়গায়", "hi": "हर जगह", "tr": "her yerde", "bs": "svuda"}}
+{"guid": "D07_009", "translations": {"ro": "nicăieri", "pl": "nigdzie", "th": "ไม่ที่ไหน", "ms": "di mana-mana pun tidak", "ta": "எங்கிலும் இல்லை", "kn": "ಎಲ್ಲೀನವಿಲ್ಲ", "uk": "ніде", "bn": "কোথাওই না", "hi": "कहीं नहीं", "tr": "hiçbir yerde", "bs": "nigdje"}}
+{"guid": "D07_010", "translations": {"ro": "deja", "pl": "już", "th": "แล้ว", "ms": "sudah", "ta": "இன்னும் முன்பு", "kn": "ಇದರ ಮೊದಲು", "uk": "вже", "bn": "ইতিপূর্বে", "hi": "पहले ही", "tr": "zaten", "bs": "već"}}
+{"guid": "D07_011", "translations": {"ro": "curând", "pl": "wkrótce", "th": "เร็วๆนี้", "ms": "tidak lama lagi", "ta": "விரைவில்", "kn": "ಶೀಘ್ರವೇ", "uk": "незабаром", "bn": "শীঘ্রই", "hi": "जल्दी", "tr": "yakında", "bs": "uskoro"}}
+{"guid": "D07_012", "translations": {"ro": "recent", "pl": "niedawno", "th": "เมื่อเร็วๆนี้", "ms": "baru-baru ini", "ta": "சமீபத்தில்", "kn": "ಇತ್ತೀಚೆಗೆ", "uk": "недавно", "bn": "সম্প্রতি", "hi": "हाल ही में", "tr": "yakın zamanda", "bs": "nedavno"}}
+{"guid": "D07_013", "translations": {"ro": "departe", "pl": "daleko", "th": "ไกล", "ms": "jauh", "ta": "தூரமாக", "kn": "ದೂರಕ್ಕೆ", "uk": "далеко", "bn": "দূরে", "hi": "दूर", "tr": "uzakta"}}
+{"guid": "D07_014", "translations": {"ro": "departe", "pl": "daleko", "th": "ไกล", "ms": "jauh", "ta": "தூரமாக", "kn": "ದೂರ", "uk": "далеко", "bn": "দূরে", "hi": "दूर", "tr": "uzakta"}}
+{"guid": "D07_015", "translations": {"ro": "aproape", "pl": "blisko", "th": "ใกล้", "ms": "berdekatan", "ta": "அருகில்", "kn": "ಹತ್ತಿರ", "uk": "поруч", "bn": "নিকটেই", "hi": "पास", "tr": "yakında"}}
+{"guid": "D07_016", "translations": {"ro": "în jur", "pl": "wokół", "th": "รอบๆ", "ms": "berkeliling", "ta": "சுற்றிலும்", "kn": "ಸುತ್ತಲು", "uk": "навколо", "bn": "চারে", "hi": "गृहگرد", "tr": "etrafta"}}
+{"guid": "D07_017", "translations": {"ro": "înainte", "pl": "naprzód", "th": "ข้างหน้า", "ms": "ke hadapan", "ta": "முன்னிட்டு", "kn": "ಮುಂದೆ", "uk": "уперед", "bn": "সামনে", "hi": "आगे", "tr": "ileri"}}
+{"guid": "D07_018", "translations": {"ro": "înainte", "pl": "naprzód", "th": "ข้างหน้า", "ms": "di hadapan", "ta": "முன்னிலையில்", "kn": "ಮುಂದೆ", "uk": "попереду", "bn": "সামনে", "hi": "आगे", "tr": "ileride"}}
+{"guid": "D07_019", "translations": {"ro": "departe", "pl": "daleko", "th": "ไกล", "ms": "jauh", "ta": "தூரமாக", "kn": "ದೂರವಾಗಿ", "uk": "далеко", "bn": "দূরে", "hi": "दूर", "tr": "uzakta"}}
+{"guid": "D07_020", "translations": {"ro": "direct", "pl": "bezpośrednio", "th": "โดยตรง", "ms": "terus", "ta": "நேரடியாக", "kn": "ನೇರವಾಗಿ", "uk": "безпосередньо", "bn": "সরাসরি", "hi": "प्रत्यक्ष रूप से", "tr": "doğrudan"}}
+{"guid": "D07_021", "translations": {"ro": "peste tot", "pl": "gdziekolwiek", "th": "ที่ใดก็ได้", "ms": "di mana-mana", "ta": "எந்தயிடத்திலும்", "kn": "ಯಾವುದಾದರು ಸ್ಥಳದಲ್ಲಿ", "uk": "будь-де", "bn": "কোথাও", "hi": "कहीं भी", "tr": "herhangi bir yerde"}}
+{"guid": "D07_022", "translations": {"ro": "deoparte", "pl": "na_bok", "th": "ข้าง", "ms": "ke tepi", "ta": "பக்கத்தில்", "kn": "ಬದಿಗೆ", "uk": "поряд", "bn": "পাশে", "hi": "बगल में", "tr": "bir yana"}}
+{"guid": "D07_023", "translations": {"ro": "înainte", "pl": "naprzód", "th": "ไปข้างหน้า", "ms": "ke hadapan", "ta": "முன்நிகழ்", "kn": "ಮುಂದೆ", "uk": "уперед", "bn": "আগে", "hi": "आगे", "tr": "ileri"}}
+{"guid": "D07_024", "translations": {"ro": "departe", "pl": "osobno", "th": "ห่างกัน", "ms": "berjauhan", "ta": "தொலைவில்", "kn": "ದೂರವಾಗಿ", "uk": "окремо", "bn": "দূরে", "hi": "अलग", "tr": "ayrı"}}
+{"guid": "D07_025", "translations": {"ro": "afară", "pl": "na zewnątrz", "th": "ข้างนอก", "ms": "di luar", "ta": "வெளியில்", "kn": "ಬೆಹಗಡೆ (ಬೆಹುದೆ)", "uk": "назовні", "bn": "বাইরে", "hi": "बाहर", "tr": "dışarıda"}}
+{"guid": "D07_026", "translations": {"ro": "în sus", "pl": "do góry", "th": "ขึ้น", "ms": "ke atas", "ta": "மேல்", "kn": "ಮೇಲೆ", "uk": "угору", "bn": "উপর", "hi": "ऊपर", "tr": "yukarı"}}
+{"guid": "D07_027", "translations": {"ro": "jos", "pl": "w dół", "th": "ลง", "ms": "ke bawah", "ta": "கீழே", "kn": "ಕೆಳಗೆ", "uk": "вниз", "bn": "নীচে", "hi": "नीचे", "tr": "aşağı"}}
+{"guid": "D07_028", "translations": {"ro": "în jur", "pl": "wokół", "th": "รอบๆ", "ms": "di sekeliling", "ta": "சுற்றிலும்", "kn": "ಸುತ್ತಲೂ", "uk": "навколо", "bn": "চতুর্পাশে", "hi": "आस پاس", "tr": "etrafta"}}
+{"guid": "D07_029", "translations": {"ro": "de-a lungul", "pl": "wzdłuż", "th": "ตาม", "ms": "sepanjang", "ta": "பக்கமாக", "kn": "ಬದಿಗೆ", "uk": "уздовж", "bn": "পাশে", "hi": "के साथ", "tr": "boyunca"}}
+{"guid": "D07_030", "translations": {"ro": "dedesubt", "pl": "poniżej", "th": "ด้านล่าง", "ms": "di bawah", "ta": "கீழே", "kn": "ಕೆಳಗೆ", "uk": "нижче", "bn": "নীচে", "hi": "नीचे", "tr": "aşağıda"}}
+{"guid": "D07_031", "translations": {"ro": "înăuntru", "pl": "wewnątrz", "th": "ข้างใน", "ms": "di dalam", "ta": "உள்ளே", "kn": "ಹೊರಕ್ಕೆ ಒಳಗೆ?", "uk": "всередині", "bn": "ভিতরে", "hi": "अंदर", "tr": "içeride"}}
+{"guid": "D07_032", "translations": {"ro": "afară", "pl": "na zewnątrz", "th": "ข้างนอก", "ms": "di luar", "ta": "வெளி", "kn": "ಹೊರಗೆ", "uk": "зовні", "bn": "বাইরে", "hi": "बाहर", "tr": "dışarıda"}}
+{"guid": "D07_033", "translations": {"ro": "deasupra", "pl": "nadgłową", "th": "เหนือศีรษะ", "ms": "di atas", "ta": "மேலே", "kn": "ಮೇಲ್ಭಾಗದಲ್ಲಿ", "uk": "надголово", "bn": "উপরেই", "hi": "ऊपर", "tr": "yukarıda"}}
+{"guid": "D07_034", "translations": {"ro": "undeva", "pl": "gdzieś", "th": "ที่ไหนสักแห่ง", "ms": "di suatu tempat", "ta": "எங்கேயோ", "kn": "ಎಲ್ಲಿದ್ದರೂ", "uk": "деінде", "bn": "কোথাও", "hi": "कहीं", "tr": "bir yerde"}}
+{"guid": "D07_035", "translations": {"ro": "departe", "pl": "daleko", "th": "ห่าง", "ms": "jauh", "ta": "அகன்று", "kn": "ತೆಗೆಯಿರಿ", "uk": "геть", "bn": "অপস্খলিত", "hi": "दूर", "tr": "uzakta"}}
+{"guid": "D07_036", "translations": {"ro": "aproape", "pl": "w pobliżu", "th": "ใกล้ๆ", "ms": "berdekatan", "ta": "அருகில்", "kn": "ಹತ್ತಿರ", "uk": "поруч", "bn": "নিকটে", "hi": "पास", "tr": "yakında"}}
+{"guid": "D07_037", "translations": {"ro": "online", "pl": "online", "th": "ออนไลน์", "ms": "dalam talian", "ta": "ஆன்லைனில்", "kn": "ಆನ್ಲೈನ್", "uk": "онлайн", "bn": "অনলাইনে", "hi": "ऑनलाइन", "tr": "çevrimiçi"}}
+{"guid": "D07_038", "translations": {"ro": "sus", "pl": "na górze", "th": "ชั้นบน", "ms": "di tingkat atas", "ta": "மேலே", "kn": "ಮೇಲಿದ್ದನ್ನು", "uk": "нагорі", "bn": "উপর দিয়ে", "hi": "ऊपर", "tr": "üst katta"}}
+{"guid": "D07_039", "translations": {"ms": "secara geografi", "hi": "भौगोलिक रूप से", "tr": "coğrafi olarak"}}
+{"guid": "D07_040", "translations": {"ms": "dari segi perlembagaan", "hi": "संवैधानिक रूप से", "tr": "anayasal olarak"}}
+{"guid": "D07_041", "translations": {"ms": "dekat", "hi": "पास", "tr": "yakında"}}
+{"guid": "D07_042", "translations": {"ms": "dalam talian", "hi": "ऑनलाइन", "tr": "çevrimiçi"}}
+{"guid": "D07_043", "translations": {"ms": "di lokasi", "hi": "स्थल पर", "tr": "yerinde"}}
+{"guid": "D07_044", "translations": {"ms": "di layar", "hi": "पर्दे पर", "tr": "ekranda"}}
+{"guid": "D07_045", "translations": {"ms": "di tingkat bawah", "hi": "नीचे", "tr": "alt katta"}}

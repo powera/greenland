@@ -1,7 +1,18 @@
-{"guid": "A15_011", "translations": {"ro": "ultimul", "pl": "ostatni", "th": "สุดท้าย", "ta": "கடைசி", "kn": "ಕೊನೆಯ", "uk": "останній", "bn": "শেষ", "hi": "अंतिम", "bs": "posljednji"}}
-{"guid": "A15_012", "translations": {"ro": "final", "pl": "końcowy", "th": "สุดท้าย", "ta": "இறுதி", "kn": "ಅಂತಿಮ", "uk": "остаточний", "bn": "চূড়ান্ত", "hi": "अंतिम", "bs": "konačan"}}
-{"guid": "A15_013", "translations": {"ro": "următor", "pl": "następny", "th": "ถัดไป", "ta": "அடுத்த", "kn": "ಮುಂದಿನ", "uk": "наступний", "bn": "পরবর্তী", "hi": "अगला"}}
-{"guid": "A15_014", "translations": {"ro": "anterior", "pl": "poprzedni", "th": "ก่อนหน้า", "ta": "முந்தைய", "kn": "ಹಿಂದಿನ", "uk": "попередній", "bn": "পূর্ববর্তী", "hi": "पूर्व"}}
-{"guid": "A15_015", "translations": {"ro": "următor", "pl": "następujący", "th": "ต่อไปนี้", "ta": "தொடர்ந்து வரும்", "kn": "ಕೆಳಗಿನ", "uk": "наступний", "bn": "পরবর্তী", "hi": "अगला"}}
-{"guid": "A15_017", "translations": {"ro": "mijlociu", "pl": "środkowy", "th": "กลาง", "ta": "நடு", "kn": "ಮಧ್ಯದ", "uk": "середній", "bn": "মধ্যবর্তী", "hi": "मध्य"}}
-{"guid": "A15_018", "translations": {"ro": "din față", "pl": "przedni", "th": "หน้า", "ta": "முன்", "kn": "ಮುಂದಿನ", "uk": "передній", "bn": "সামনের", "hi": "सामने का"}}
+{"guid": "A15_011", "translations": {"ro": "ultimul", "pl": "ostatni", "th": "สุดท้าย", "ms": "terakhir", "ta": "கடைசி", "kn": "ಕೊನೆಯ", "uk": "останній", "bn": "শেষ", "hi": "अंतिम", "tr": "son", "bs": "posljednji"}}
+{"guid": "A15_012", "translations": {"ro": "final", "pl": "końcowy", "th": "สุดท้าย", "ms": "terakhir", "ta": "இறுதி", "kn": "ಅಂತಿಮ", "uk": "остаточний", "bn": "চূড়ান্ত", "hi": "अंतिम", "tr": "son", "bs": "konačan"}}
+{"guid": "A15_013", "translations": {"ro": "următor", "pl": "następny", "th": "ถัดไป", "ms": "seterusnya", "ta": "அடுத்த", "kn": "ಮುಂದಿನ", "uk": "наступний", "bn": "পরবর্তী", "hi": "अगला", "tr": "sonraki"}}
+{"guid": "A15_014", "translations": {"ro": "anterior", "pl": "poprzedni", "th": "ก่อนหน้า", "ms": "sebelumnya", "ta": "முந்தைய", "kn": "ಹಿಂದಿನ", "uk": "попередній", "bn": "পূর্ববর্তী", "hi": "पूर्व", "tr": "önceki"}}
+{"guid": "A15_015", "translations": {"ro": "următor", "pl": "następujący", "th": "ต่อไปนี้", "ms": "berikut", "ta": "தொடர்ந்து வரும்", "kn": "ಕೆಳಗಿನ", "uk": "наступний", "bn": "পরবর্তী", "hi": "अगला", "tr": "sonraki"}}
+{"guid": "A15_017", "translations": {"ro": "mijlociu", "pl": "środkowy", "th": "กลาง", "ms": "tengah", "ta": "நடு", "kn": "ಮಧ್ಯದ", "uk": "середній", "bn": "মধ্যবর্তী", "hi": "मध्य", "tr": "orta"}}
+{"guid": "A15_018", "translations": {"ro": "din față", "pl": "przedni", "th": "หน้า", "ms": "hadapan", "ta": "முன்", "kn": "ಮುಂದಿನ", "uk": "передній", "bn": "সামনের", "hi": "सामने का", "tr": "ön"}}
+{"guid": "A15_019", "translations": {"ms": "yang kedua", "hi": "बाद वाला", "tr": "ikincisi"}}
+{"guid": "A15_020", "translations": {"ms": "ketiga terbesar", "hi": "तीसरा सबसे बड़ा", "tr": "üçüncü en büyük"}}
+{"guid": "A15_021", "translations": {"ms": "kedua tertinggi", "hi": "दूसरा सबसे ऊँचा", "tr": "ikinci en yüksek"}}
+{"guid": "A15_022", "translations": {"ms": "kedua terbesar", "hi": "दूसरा सबसे बड़ा", "tr": "ikinci en büyük"}}
+{"guid": "A15_023", "translations": {"ms": "keempat terbesar", "hi": "चौथा सबसे बड़ा", "tr": "dördüncü en büyük"}}
+{"guid": "A15_024", "translations": {"ms": "dua bahagian", "hi": "दो भागों वाला", "tr": "iki bölümlü"}}
+{"guid": "A15_025", "translations": {"ms": "kelima terbesar", "hi": "पाँचवाँ सबसे बड़ा", "tr": "beşinci en büyük"}}
+{"guid": "A15_026", "translations": {"ms": "kedua", "hi": "दूसरा", "tr": "ikinci"}}
+{"guid": "A15_027", "translations": {"ms": "tertinggi", "hi": "सर्वोच्च पद वाला", "tr": "en yüksek rütbeli"}}
+{"guid": "A15_028", "translations": {"ms": "ketiga tertinggi", "hi": "तीसरा सबसे", "tr": "üçüncü en"}}
+{"guid": "A15_029", "translations": {"ms": "ketiga tertinggi", "hi": "तीसरा सबसे ऊँचा", "tr": "üçüncü en yüksek"}}

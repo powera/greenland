@@ -1,12 +1,29 @@
-{"guid": "V02_001", "translations": {"ro": "produce", "pl": "produkcować", "th": "ผลิต", "ta": "உற்பத்தி செய்தல்", "kn": "ಉತ್ಪಾದಿಸು", "uk": "виробляти", "bn": "উৎপাদন করা", "hi": "उत्पादन करना", "bs": "praviti"}}
-{"guid": "V02_002", "translations": {"ro": "construi", "pl": "budować", "th": "สร้าง", "ta": "உருவாக்க", "kn": "ನಿರ್ಮಿಸಲು", "uk": "будувати", "bn": "নির্মাণ করা", "hi": "निर्माण करना", "bs": "izgraditi"}}
-{"guid": "V02_003", "translations": {"ro": "crea", "pl": "tworzyć", "th": "สร้าง", "ta": "சர்படுத்து", "kn": "ಸೃಷ್ಟಿಸು", "uk": "створити", "bn": "সৃষ্টि করা", "hi": "सृजित करना", "bs": "stvarati"}}
-{"guid": "V02_004", "translations": {"ro": "scrie", "pl": "pisać", "th": "เขียน", "ta": "எழுத", "kn": "ಬರೆಯಲು", "uk": "писати", "bn": "লেখা", "hi": "लिखना"}}
-{"guid": "V02_005", "translations": {"ro": "proiecta", "pl": "projektować", "th": "ออกแบบ", "ta": "வடிவமைத்தல்", "kn": "ರಚನೆ ಮಾಡು", "uk": "проектувати", "bn": "নকশা করা", "hi": "डिज़ाइन करना", "bs": "dizajnirati"}}
-{"guid": "V02_006", "translations": {"ro": "compune", "pl": "komponować", "th": "แต่ง", "ta": "உருவாக்கு", "kn": "ಸೃಷ್ಟಿಸು", "uk": "складати", "bn": "রচনা করা", "hi": "रचना करना", "bs": "komponovati"}}
-{"guid": "V02_007", "translations": {"ro": "inventa", "pl": "wynaleźć", "th": "ประดิษฐ์", "ta": "கண்டுபிடி", "kn": "ಆವಿಷ್ಕರಿಸು", "uk": "винайти", "bn": "আবিষ্কার করা", "hi": "आविष्कार करना", "bs": "izumiti"}}
-{"guid": "V02_008", "translations": {"ro": "produce", "pl": "produkować", "th": "ผลิต", "ta": "உற்பத்தி செய்ய", "kn": "ಉತ್ಪಾದಿಸು", "uk": "виробляти", "bn": "উৎপাদন করা", "hi": "उत्पादित करना", "bs": "proizvoditi"}}
-{"guid": "V02_009", "translations": {"ro": "picta", "pl": "malować", "th": "ทาสี", "ta": "படித்திரைவர்ணம் செய்வது", "kn": "ಚಿತ್ರವಿರುವುದು", "uk": "фарбувати", "bn": "রাঙানো", "hi": "रंगना"}}
-{"guid": "V02_010", "translations": {"ro": "confecționa", "pl": "rękodzielić", "th": "ประดิษฐ์", "ta": "கைவினை செய்ய", "kn": "ಕಲಾಮಾಡು", "uk": "виготовляти", "bn": "শিল্পকর্ম করা", "hi": "हस्तशिल्प करना", "bs": "izraditi"}}
-{"guid": "V02_011", "translations": {"ro": "genera", "pl": "generować", "th": "สร้าง", "ta": "உருவாக்கு", "kn": "ಸೃಷ್ಟಿ ಮಾಡು", "uk": "генерувати", "bn": "উৎপাদন করা", "hi": "उत्पन्न करना", "bs": "generirati"}}
-{"guid": "V02_012", "translations": {"ro": "înființa", "pl": "ustanowić", "th": "ก่อตั้ง", "ta": "உருவாக்கு", "kn": "ಸ್ಥಾಪಿಸು", "uk": "заснувати", "bn": "স্থাপন করা", "hi": "स्थापित करना", "bs": "osnovati"}}
+{"guid": "V02_001", "translations": {"ro": "produce", "pl": "produkcować", "th": "ผลิต", "ms": "menghasilkan", "ta": "உற்பத்தி செய்தல்", "kn": "ಉತ್ಪಾದಿಸು", "uk": "виробляти", "bn": "উৎপাদন করা", "hi": "उत्पादन करना", "tr": "üretmek", "bs": "praviti"}}
+{"guid": "V02_002", "translations": {"ro": "construi", "pl": "budować", "th": "สร้าง", "ms": "membina", "ta": "உருவாக்க", "kn": "ನಿರ್ಮಿಸಲು", "uk": "будувати", "bn": "নির্মাণ করা", "hi": "निर्माण करना", "tr": "inşa etmek", "bs": "izgraditi"}}
+{"guid": "V02_003", "translations": {"ro": "crea", "pl": "tworzyć", "th": "สร้าง", "ms": "mencipta", "ta": "சர்படுத்து", "kn": "ಸೃಷ್ಟಿಸು", "uk": "створити", "bn": "সৃষ্টि করা", "hi": "सृजित करना", "tr": "yaratmak", "bs": "stvarati"}}
+{"guid": "V02_004", "translations": {"ro": "scrie", "pl": "pisać", "th": "เขียน", "ms": "menulis", "ta": "எழுத", "kn": "ಬರೆಯಲು", "uk": "писати", "bn": "লেখা", "hi": "लिखना", "tr": "yazmak"}}
+{"guid": "V02_005", "translations": {"ro": "proiecta", "pl": "projektować", "th": "ออกแบบ", "ms": "mereka bentuk", "ta": "வடிவமைத்தல்", "kn": "ರಚನೆ ಮಾಡು", "uk": "проектувати", "bn": "নকশা করা", "hi": "डिज़ाइन करना", "tr": "tasarlamak", "bs": "dizajnirati"}}
+{"guid": "V02_006", "translations": {"ro": "compune", "pl": "komponować", "th": "แต่ง", "ms": "menggubah", "ta": "உருவாக்கு", "kn": "ಸೃಷ್ಟಿಸು", "uk": "складати", "bn": "রচনা করা", "hi": "रचना करना", "tr": "bestelemek", "bs": "komponovati"}}
+{"guid": "V02_007", "translations": {"ro": "inventa", "pl": "wynaleźć", "th": "ประดิษฐ์", "ms": "mencipta", "ta": "கண்டுபிடி", "kn": "ಆವಿಷ್ಕರಿಸು", "uk": "винайти", "bn": "আবিষ্কার করা", "hi": "आविष्कार करना", "tr": "icat etmek", "bs": "izumiti"}}
+{"guid": "V02_008", "translations": {"ro": "produce", "pl": "produkować", "th": "ผลิต", "ms": "menghasilkan", "ta": "உற்பத்தி செய்ய", "kn": "ಉತ್ಪಾದಿಸು", "uk": "виробляти", "bn": "উৎপাদন করা", "hi": "उत्पादित करना", "tr": "üretmek", "bs": "proizvoditi"}}
+{"guid": "V02_009", "translations": {"ro": "picta", "pl": "malować", "th": "ทาสี", "ms": "melukis", "ta": "படித்திரைவர்ணம் செய்வது", "kn": "ಚಿತ್ರವಿರುವುದು", "uk": "фарбувати", "bn": "রাঙানো", "hi": "रंगना", "tr": "resim yapmak"}}
+{"guid": "V02_010", "translations": {"ro": "confecționa", "pl": "rękodzielić", "th": "ประดิษฐ์", "ms": "menghasilkan dengan tangan", "ta": "கைவினை செய்ய", "kn": "ಕಲಾಮಾಡು", "uk": "виготовляти", "bn": "শিল্পকর্ম করা", "hi": "हस्तशिल्प करना", "tr": "el emeğiyle yapmak", "bs": "izraditi"}}
+{"guid": "V02_011", "translations": {"ro": "genera", "pl": "generować", "th": "สร้าง", "ms": "menghasilkan", "ta": "உருவாக்கு", "kn": "ಸೃಷ್ಟಿ ಮಾಡು", "uk": "генерувати", "bn": "উৎপাদন করা", "hi": "उत्पन्न करना", "tr": "üretmek", "bs": "generirati"}}
+{"guid": "V02_012", "translations": {"ro": "înființa", "pl": "ustanowić", "th": "ก่อตั้ง", "ms": "menubuhkan", "ta": "உருவாக்கு", "kn": "ಸ್ಥಾಪಿಸು", "uk": "заснувати", "bn": "স্থাপন করা", "hi": "स्थापित करना", "tr": "kurmak", "bs": "osnovati"}}
+{"guid": "V02_013", "translations": {"ms": "menggambarkan dalam graf", "hi": "आलेख में दर्शाना", "tr": "grafikle göstermek"}}
+{"guid": "V02_014", "translations": {"ms": "membentuk", "hi": "बनाना", "tr": "oluşturmak"}}
+{"guid": "V02_015", "translations": {"ms": "mereka bentuk landskap", "hi": "भूदृश्य का विकास करना", "tr": "peyzaj düzenlemek"}}
+{"guid": "V02_016", "translations": {"ms": "mematenkan", "hi": "पेटेंट कराना", "tr": "patent almak"}}
+{"guid": "V02_017", "translations": {"ms": "mempersendakan", "hi": "व्यंग्यात्मक नकल करना", "tr": "parodilemek"}}
+{"guid": "V02_018", "translations": {"ms": "menggali lubang", "hi": "बिल खोदना", "tr": "yuva kazmak"}}
+{"guid": "V02_019", "translations": {"ms": "memateri", "hi": "टाँका लगाना", "tr": "lehimlemek"}}
+{"guid": "V02_020", "translations": {"ms": "menjahit", "hi": "सिलाई करना", "tr": "terzilik yapmak"}}
+{"guid": "V02_021", "translations": {"ms": "mengarah", "hi": "निर्देशन करना", "tr": "yönetmek"}}
+{"guid": "V02_022", "translations": {"ms": "membakar", "hi": "सेंकना", "tr": "fırında pişirmek"}}
+{"guid": "V02_023", "translations": {"ms": "menghias", "hi": "सजाना", "tr": "süslemek"}}
+{"guid": "V02_024", "translations": {"ms": "menulis bersama", "hi": "सह-लेखन करना", "tr": "ortak yazmak"}}
+{"guid": "V02_025", "translations": {"ms": "menambahkan awalan", "hi": "उपसर्ग जोड़ना", "tr": "önek eklemek"}}
+{"guid": "V02_026", "translations": {"ms": "menambahkan akhiran", "hi": "प्रत्यय जोड़ना", "tr": "son ek getirmek"}}
+{"guid": "V02_027", "translations": {"ms": "menjaringkan gol", "hi": "गोल करना", "tr": "gol atmak"}}
+{"guid": "V02_028", "translations": {"ms": "mengilustrasikan", "hi": "चित्रों से सजाना", "tr": "resimlemek"}}
+{"guid": "V02_029", "translations": {"ms": "mensintesis", "hi": "संश्लेषित करना", "tr": "sentezlemek"}}

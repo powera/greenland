@@ -1,25 +1,90 @@
-{"guid": "N54_001", "translations": {"ro": "pace", "pl": "pokój", "th": "สันติภาพ", "ta": "சாந்தி", "kn": "ಶಾಂತಿ", "uk": "мир", "bn": "শান্তি", "hi": "शांति"}}
-{"guid": "N54_002", "translations": {"ro": "noroc", "pl": "szczęście", "th": "โชค", "ta": "வாழ்க்கைப் பரிசு", "kn": "ಸೌಭಾಗ್ಯ", "uk": "вдача", "bn": "সাফল্য", "hi": "भाग्य"}}
-{"guid": "N54_003", "translations": {"ro": "odihnă", "pl": "odpoczynek", "th": "การพักผ่อน", "ta": "ஓய்வு", "kn": "ವಿರಾಮ", "uk": "відпочинок", "bn": "বিরতি", "hi": "आराम"}}
-{"guid": "N54_004", "translations": {"ro": "umbră", "pl": "cień", "th": "เงา", "ta": "நிழல்", "kn": "ನಿಸ್ತುಲ", "uk": "тінь", "bn": "ছায়া", "hi": "छाया"}}
-{"guid": "N54_005", "translations": {"ro": "liniște", "pl": "cisza", "th": "ความเงียบ", "ta": "மௌனம்", "kn": "ಮೌನ", "uk": "тиша", "bn": "নীরবতা", "hi": "निशब्दता"}}
-{"guid": "N54_006", "translations": {"ro": "întuneric", "pl": "ciemność", "th": "ความมืด", "ta": "இருண்டமை", "kn": "ಕತ್ತಲ", "uk": "темрява", "bn": "অন্ধকার", "hi": "अँधेरा"}}
-{"guid": "N54_007", "translations": {"ro": "spațiu", "pl": "przestrzeń", "th": "พื้นที่", "ta": "இடம்", "kn": "ಸ್ಥಳ", "uk": "простір", "bn": "স্থান", "hi": "अवಕಾಶ"}}
-{"guid": "N54_008", "translations": {"ro": "rău", "pl": "zło", "th": "ความชั่ว", "ta": "தீமை", "kn": "ದುಷ್ಟತೆ", "uk": "зло", "bn": "অপকর্ম", "hi": "बुराई"}}
-{"guid": "N54_009", "translations": {"ro": "şansă", "pl": "możliwość", "th": "โอกาส", "ta": "வாய்ப்பு", "kn": "ಅವಕಾಶ", "uk": "можливість", "bn": "সম্ভাবনা", "hi": "संभावना"}}
-{"guid": "N54_010", "translations": {"ro": "problemă", "pl": "kłopot", "th": "ปัญหา", "ta": "பிரச்னை", "kn": "ಸಮಸ್ಯೆ", "uk": "проблема", "bn": "সমস্যা", "hi": "समस्या"}}
-{"guid": "N54_011", "translations": {"ro": "pericol", "pl": "niebezpieczeństwo", "th": "อันตราย", "ta": "அபாயம்", "kn": "ಅಪಾಯ", "uk": "небезпека", "bn": "বিপদ", "hi": "खतरा"}}
-{"guid": "N54_012", "translations": {"ro": "prăpastie", "pl": "zagłada", "th": "หายนะ", "ta": "உபாயம்", "kn": "ವಿನಾಶ", "uk": "упадок", "bn": "অপচয়", "hi": "विनाश"}}
-{"guid": "N54_013", "translations": {"ro": "vremea", "pl": "pogoda", "th": "สภาพอากาศ", "ta": "வானிலை", "kn": "ಹವಾಮಾನ", "uk": "погода", "bn": "আবহাওয়া", "hi": "मौसम"}}
-{"guid": "N54_014", "translations": {"ro": "risc", "pl": "ryzyko", "th": "ความเสี่ยง", "ta": "ஆபத்து", "kn": "ರಿಸ್ಕ್", "uk": "ризик", "bn": "ঝুঁকি", "hi": "जोखिम"}}
-{"guid": "N54_015", "translations": {"ro": "pericol", "pl": "niebezpieczeństwo", "th": "อันตราย", "ta": "அபாயம்", "kn": "ಅಪಾಯ", "uk": "небезпека", "bn": "বিপদ", "hi": "खतरा"}}
-{"guid": "N54_016", "translations": {"ro": "prezență", "pl": "obecność", "th": "การปรากฏตัว", "ta": "உள்ளதன்மை", "kn": "ಉপಸ್ಥಿತಿ", "uk": "присутність", "bn": "উপস্থিতি", "hi": "उपस्थिति"}}
-{"guid": "N54_017", "translations": {"ro": "pierdere", "pl": "strata", "th": "การสูญเสีย", "ta": "இழப்பு", "kn": "ನಷ್ಟ", "uk": "втрата", "bn": "নোকসান", "hi": "हानि"}}
-{"guid": "N54_018", "translations": {"ro": "soartă", "pl": "los", "th": "โชคชะตา", "ta": "வீடு", "kn": "ದೈವದೃಷ್ಟಿ", "uk": "доля", "bn": "ভাগ্য", "hi": "भाग्य"}}
-{"guid": "N54_019", "translations": {"ro": "libertate", "pl": "wolność", "th": "เสรีภาพ", "ta": "சுதந்திரம்", "kn": "ಸ್ವಾತಂತ್ರ್ಯ", "uk": "свобода", "bn": "স্বাধীনতা", "hi": "स्वतंत्रता"}}
-{"guid": "N54_020", "translations": {"ro": "sărăcie", "pl": "ubóstwo", "th": "ความยากจน", "ta": "நரைகுறைவு", "kn": "ಕರುಡುತನ", "uk": "бідність", "bn": "দারিদ্র্য", "hi": "गरीबी"}}
-{"guid": "N54_021", "translations": {"ro": "haos", "pl": "chaos", "th": "ความโกลาหล", "ta": "கொசுமை", "kn": "ಅವ್ಯವಸ್ಥೆ", "uk": "хаос", "bn": "অব্যবস্থা", "hi": "अराजकता"}}
-{"guid": "N54_022", "translations": {"ro": "siguranță", "pl": "bezpieczeństwo", "th": "ความปลอดภัย", "ta": "பாதுகாப்பு", "kn": "ಸುರಕ್ಷತೆ", "uk": "безпека", "bn": "নিরাপত্তা", "hi": "सुरक्षा"}}
-{"guid": "N54_023", "translations": {"ro": "frumusețe", "pl": "piękno", "th": "ความงาม", "ta": "அழகு", "kn": "ಸುಂದರತೆ", "uk": "красa", "bn": "সৌন্দর্য", "hi": "सुंदरता"}}
-{"guid": "N54_024", "translations": {"ro": "sănătate", "pl": "zdrowie", "th": "สุขภาพ", "ta": "ஆரோக்கியம்", "kn": "ಆರೋಗ್ಯ", "uk": "здоров'я", "bn": "স্বাস্থ্য", "hi": "स्वास्थ्य"}}
-{"guid": "N54_025", "translations": {"ro": "audieri", "pl": "posiedzenie", "th": "การพิจารณาคดี", "ta": "கேட்புக்கூட்டம்", "kn": "ಶಿಕೇಟ್ (ಶುಭ್ರ)", "uk": "слухання", "bn": "শোনা", "hi": "सुनवाई"}}
+{"guid": "N54_001", "translations": {"ro": "pace", "pl": "pokój", "th": "สันติภาพ", "ms": "keamanan", "ta": "சாந்தி", "kn": "ಶಾಂತಿ", "uk": "мир", "bn": "শান্তি", "hi": "शांति", "tr": "barış"}}
+{"guid": "N54_002", "translations": {"ro": "noroc", "pl": "szczęście", "th": "โชค", "ms": "nasib", "ta": "வாழ்க்கைப் பரிசு", "kn": "ಸೌಭಾಗ್ಯ", "uk": "вдача", "bn": "সাফল্য", "hi": "भाग्य", "tr": "şans"}}
+{"guid": "N54_003", "translations": {"ro": "odihnă", "pl": "odpoczynek", "th": "การพักผ่อน", "ms": "rehat", "ta": "ஓய்வு", "kn": "ವಿರಾಮ", "uk": "відпочинок", "bn": "বিরতি", "hi": "आराम", "tr": "dinlenme"}}
+{"guid": "N54_004", "translations": {"ro": "umbră", "pl": "cień", "th": "เงา", "ms": "bayang-bayang", "ta": "நிழல்", "kn": "ನಿಸ್ತುಲ", "uk": "тінь", "bn": "ছায়া", "hi": "छाया", "tr": "gölge"}}
+{"guid": "N54_005", "translations": {"ro": "liniște", "pl": "cisza", "th": "ความเงียบ", "ms": "kesunyian", "ta": "மௌனம்", "kn": "ಮೌನ", "uk": "тиша", "bn": "নীরবতা", "hi": "निशब्दता", "tr": "sessizlik"}}
+{"guid": "N54_006", "translations": {"ro": "întuneric", "pl": "ciemność", "th": "ความมืด", "ms": "kegelapan", "ta": "இருண்டமை", "kn": "ಕತ್ತಲ", "uk": "темрява", "bn": "অন্ধকার", "hi": "अँधेरा", "tr": "karanlık"}}
+{"guid": "N54_007", "translations": {"ro": "spațiu", "pl": "przestrzeń", "th": "พื้นที่", "ms": "ruang", "ta": "இடம்", "kn": "ಸ್ಥಳ", "uk": "простір", "bn": "স্থান", "hi": "अवಕಾಶ", "tr": "alan"}}
+{"guid": "N54_008", "translations": {"ro": "rău", "pl": "zło", "th": "ความชั่ว", "ms": "kejahatan", "ta": "தீமை", "kn": "ದುಷ್ಟತೆ", "uk": "зло", "bn": "অপকর্ম", "hi": "बुराई", "tr": "kötülük"}}
+{"guid": "N54_009", "translations": {"ro": "şansă", "pl": "możliwość", "th": "โอกาส", "ms": "kemungkinan", "ta": "வாய்ப்பு", "kn": "ಅವಕಾಶ", "uk": "можливість", "bn": "সম্ভাবনা", "hi": "संभावना", "tr": "olasılık"}}
+{"guid": "N54_010", "translations": {"ro": "problemă", "pl": "kłopot", "th": "ปัญหา", "ms": "masalah", "ta": "பிரச்னை", "kn": "ಸಮಸ್ಯೆ", "uk": "проблема", "bn": "সমস্যা", "hi": "समस्या", "tr": "sorun"}}
+{"guid": "N54_011", "translations": {"ro": "pericol", "pl": "niebezpieczeństwo", "th": "อันตราย", "ms": "bahaya", "ta": "அபாயம்", "kn": "ಅಪಾಯ", "uk": "небезпека", "bn": "বিপদ", "hi": "खतरा", "tr": "tehlike"}}
+{"guid": "N54_012", "translations": {"ro": "prăpastie", "pl": "zagłada", "th": "หายนะ", "ms": "kebinasaan", "ta": "உபாயம்", "kn": "ವಿನಾಶ", "uk": "упадок", "bn": "অপচয়", "hi": "विनाश", "tr": "felaket"}}
+{"guid": "N54_013", "translations": {"ro": "vremea", "pl": "pogoda", "th": "สภาพอากาศ", "ms": "cuaca", "ta": "வானிலை", "kn": "ಹವಾಮಾನ", "uk": "погода", "bn": "আবহাওয়া", "hi": "मौसम", "tr": "hava durumu"}}
+{"guid": "N54_014", "translations": {"ro": "risc", "pl": "ryzyko", "th": "ความเสี่ยง", "ms": "risiko", "ta": "ஆபத்து", "kn": "ರಿಸ್ಕ್", "uk": "ризик", "bn": "ঝুঁকি", "hi": "जोखिम", "tr": "risk"}}
+{"guid": "N54_015", "translations": {"ro": "pericol", "pl": "niebezpieczeństwo", "th": "อันตราย", "ms": "bahaya", "ta": "அபாயம்", "kn": "ಅಪಾಯ", "uk": "небезпека", "bn": "বিপদ", "hi": "खतरा", "tr": "tehlike"}}
+{"guid": "N54_016", "translations": {"ro": "prezență", "pl": "obecność", "th": "การปรากฏตัว", "ms": "kehadiran", "ta": "உள்ளதன்மை", "kn": "ಉপಸ್ಥಿತಿ", "uk": "присутність", "bn": "উপস্থিতি", "hi": "उपस्थिति", "tr": "bulunma"}}
+{"guid": "N54_017", "translations": {"ro": "pierdere", "pl": "strata", "th": "การสูญเสีย", "ms": "kehilangan", "ta": "இழப்பு", "kn": "ನಷ್ಟ", "uk": "втрата", "bn": "নোকসান", "hi": "हानि", "tr": "kayıp"}}
+{"guid": "N54_018", "translations": {"ro": "soartă", "pl": "los", "th": "โชคชะตา", "ms": "takdir", "ta": "வீடு", "kn": "ದೈವದೃಷ್ಟಿ", "uk": "доля", "bn": "ভাগ্য", "hi": "भाग्य", "tr": "kader"}}
+{"guid": "N54_019", "translations": {"ro": "libertate", "pl": "wolność", "th": "เสรีภาพ", "ms": "kebebasan", "ta": "சுதந்திரம்", "kn": "ಸ್ವಾತಂತ್ರ್ಯ", "uk": "свобода", "bn": "স্বাধীনতা", "hi": "स्वतंत्रता", "tr": "özgürlük"}}
+{"guid": "N54_020", "translations": {"ro": "sărăcie", "pl": "ubóstwo", "th": "ความยากจน", "ms": "kemiskinan", "ta": "நரைகுறைவு", "kn": "ಕರುಡುತನ", "uk": "бідність", "bn": "দারিদ্র্য", "hi": "गरीबी", "tr": "yoksulluk"}}
+{"guid": "N54_021", "translations": {"ro": "haos", "pl": "chaos", "th": "ความโกลาหล", "ms": "kekacauan", "ta": "கொசுமை", "kn": "ಅವ್ಯವಸ್ಥೆ", "uk": "хаос", "bn": "অব্যবস্থা", "hi": "अराजकता", "tr": "kaos"}}
+{"guid": "N54_022", "translations": {"ro": "siguranță", "pl": "bezpieczeństwo", "th": "ความปลอดภัย", "ms": "keselamatan", "ta": "பாதுகாப்பு", "kn": "ಸುರಕ್ಷತೆ", "uk": "безпека", "bn": "নিরাপত্তা", "hi": "सुरक्षा", "tr": "güvenlik"}}
+{"guid": "N54_023", "translations": {"ro": "frumusețe", "pl": "piękno", "th": "ความงาม", "ms": "keindahan", "ta": "அழகு", "kn": "ಸುಂದರತೆ", "uk": "красa", "bn": "সৌন্দর্য", "hi": "सुंदरता", "tr": "güzellik"}}
+{"guid": "N54_024", "translations": {"ro": "sănătate", "pl": "zdrowie", "th": "สุขภาพ", "ms": "kesihatan", "ta": "ஆரோக்கியம்", "kn": "ಆರೋಗ್ಯ", "uk": "здоров'я", "bn": "স্বাস্থ্য", "hi": "स्वास्थ्य", "tr": "sağlık"}}
+{"guid": "N54_025", "translations": {"ro": "audieri", "pl": "posiedzenie", "th": "การพิจารณาคดี", "ms": "perbicaraan", "ta": "கேட்புக்கூட்டம்", "kn": "ಶಿಕೇಟ್ (ಶುಭ್ರ)", "uk": "слухання", "bn": "শোনা", "hi": "सुनवाई", "tr": "duruşma"}}
+{"guid": "N54_026", "translations": {"ms": "pinjaman pelajar", "hi": "छात्र ऋण", "tr": "öğrenci kredisi"}}
+{"guid": "N54_027", "translations": {"ms": "tekanan darah", "hi": "रक्तचाप", "tr": "kan basıncı"}}
+{"guid": "N54_028", "translations": {"ms": "kumpulan darah", "hi": "रक्त समूह", "tr": "kan grubu"}}
+{"guid": "N54_029", "translations": {"ms": "akaun bank", "hi": "बैंक खाता", "tr": "banka hesabı"}}
+{"guid": "N54_030", "translations": {"ms": "akaun simpanan", "hi": "बचत खाता", "tr": "tasarruf hesabı"}}
+{"guid": "N54_031", "translations": {"ms": "cukai pendapatan", "hi": "आयकर", "tr": "gelir vergisi"}}
+{"guid": "N54_032", "translations": {"ms": "cukai jualan", "hi": "बिक्री कर", "tr": "satış vergisi"}}
+{"guid": "N54_033", "translations": {"ms": "cuti sakit", "hi": "बीमारी की छुट्टी", "tr": "hastalık izni"}}
+{"guid": "N54_034", "translations": {"ms": "rekod dunia", "hi": "विश्व रिकॉर्ड", "tr": "dünya rekoru"}}
+{"guid": "N54_035", "translations": {"ms": "kebolehkiraan", "hi": "गणनीयता", "tr": "hesaplanabilirlik"}}
+{"guid": "N54_036", "translations": {"ms": "ketidaklengkapan", "hi": "अपूर्णता", "tr": "eksiklik"}}
+{"guid": "N54_037", "translations": {"ms": "kedualan", "hi": "द्वैत", "tr": "ikilik"}}
+{"guid": "N54_038", "translations": {"ms": "fasa", "hi": "अवस्था", "tr": "evre"}}
+{"guid": "N54_039", "translations": {"ms": "keseimbangan", "hi": "संतुलन", "tr": "denge"}}
+{"guid": "N54_040", "translations": {"ms": "kemerdekaan", "hi": "स्वतंत्रता", "tr": "bağımsızlık"}}
+{"guid": "N54_041", "translations": {"ms": "kematangan", "hi": "परिपक्वता", "tr": "olgunluk"}}
+{"guid": "N54_042", "translations": {"ms": "penawanan", "hi": "कैद", "tr": "esaret"}}
+{"guid": "N54_043", "translations": {"ms": "kurungan", "hi": "कैद", "tr": "esaret"}}
+{"guid": "N54_044", "translations": {"ms": "buangan", "hi": "निर्वासन", "tr": "sürgün"}}
+{"guid": "N54_045", "translations": {"ms": "penentangan", "hi": "विरोध", "tr": "karşı koyma"}}
+{"guid": "N54_046", "translations": {"ms": "bahaya", "hi": "खतरा", "tr": "tehlike"}}
+{"guid": "N54_047", "translations": {"ms": "perubahan", "hi": "बदलाव", "tr": "değişim"}}
+{"guid": "N54_048", "translations": {"ms": "etika", "hi": "नैतिकता", "tr": "etik"}}
+{"guid": "N54_049", "translations": {"ms": "realiti", "hi": "वास्तविकता", "tr": "gerçeklik"}}
+{"guid": "N54_050", "translations": {"ms": "kelaziman", "hi": "व्यापकता", "tr": "yaygınlık"}}
+{"guid": "N54_051", "translations": {"ms": "ketuhanan", "hi": "दिव्यता", "tr": "tanrısallık"}}
+{"guid": "N54_052", "translations": {"ms": "keselamatan", "hi": "सुरक्षा", "tr": "güvenlik"}}
+{"guid": "N54_053", "translations": {"ms": "denda", "hi": "दंड", "tr": "ceza"}}
+{"guid": "N54_054", "translations": {"ms": "pelanggaran", "hi": "उल्लंघन", "tr": "ihlal"}}
+{"guid": "N54_055", "translations": {"ms": "kebergantungan", "hi": "निर्भरता", "tr": "bağımlılık"}}
+{"guid": "N54_056", "translations": {"ms": "pengawalseliaan", "hi": "विनियमन", "tr": "düzenleme"}}
+{"guid": "N54_057", "translations": {"ms": "pemenjaraan", "hi": "कैद", "tr": "hapis"}}
+{"guid": "N54_058", "translations": {"ms": "penahanan", "hi": "नज़रबंदी", "tr": "alıkonulma"}}
+{"guid": "N54_059", "translations": {"ms": "beban", "hi": "बोझ", "tr": "yük"}}
+{"guid": "N54_060", "translations": {"ms": "kewajipan", "hi": "दायित्व", "tr": "yükümlülük"}}
+{"guid": "N54_061", "translations": {"ms": "pekerjaan", "hi": "रोज़गार", "tr": "istihdam"}}
+{"guid": "N54_062", "translations": {"ms": "keletihan melampau", "hi": "थकावट", "tr": "bitkinlik"}}
+{"guid": "N54_063", "translations": {"ms": "kegagalan", "hi": "विफलता", "tr": "başarısızlık"}}
+{"guid": "N54_064", "translations": {"ms": "pertahanan", "hi": "रक्षा", "tr": "savunma"}}
+{"guid": "N54_065", "translations": {"ms": "privasi", "hi": "निजता", "tr": "mahremiyet"}}
+{"guid": "N54_066", "translations": {"ms": "penguasaan", "hi": "वर्चस्व", "tr": "tahakküm"}}
+{"guid": "N54_067", "translations": {"ms": "ketahanan", "hi": "दीर्घकालिकता", "tr": "kalıcılık"}}
+{"guid": "N54_068", "translations": {"ms": "inersia", "hi": "जड़ता", "tr": "eylemsizlik"}}
+{"guid": "N54_069", "translations": {"ms": "batasan", "hi": "सीमा", "tr": "sınırlama"}}
+{"guid": "N54_070", "translations": {"ms": "gangguan", "hi": "उत्पीड़न", "tr": "taciz"}}
+{"guid": "N54_071", "translations": {"ms": "kelayakan", "hi": "पात्रता", "tr": "uygunluk"}}
+{"guid": "N54_072", "translations": {"ms": "pelucuthakan", "hi": "ज़ब्ती", "tr": "müsadere"}}
+{"guid": "N54_073", "translations": {"ms": "kemerosotan", "hi": "कमी", "tr": "azalma"}}
+{"guid": "N54_074", "translations": {"ms": "hak", "hi": "अधिकार", "tr": "hak sahibi olma"}}
+{"guid": "N54_075", "translations": {"ms": "perselisihan", "hi": "असहमति", "tr": "anlaşmazlık"}}
+{"guid": "N54_076", "translations": {"ms": "salah laku", "hi": "कदाचार", "tr": "usulsüzlük"}}
+{"guid": "N54_077", "translations": {"ms": "kekurangan", "hi": "वंचना", "tr": "yoksunluk"}}
+{"guid": "N54_078", "translations": {"ms": "keadaan tidak lagi memerlukan keputusan", "hi": "विवाद का निरर्थक हो जाना", "tr": "uyuşmazlığın konusuz kalması"}}
+{"guid": "N54_079", "translations": {"ms": "kematangan untuk dibicarakan", "hi": "न्यायिक निर्णय के लिए तैयार होना", "tr": "karara bağlanmaya hazır olma"}}
+{"guid": "N54_080", "translations": {"ms": "keaktifan", "hi": "सक्रियता", "tr": "faaliyet"}}
+{"guid": "N54_081", "translations": {"ms": "kekurangan", "hi": "कमी", "tr": "eksiklik"}}
+{"guid": "N54_082", "translations": {"ms": "kepentingan diri", "hi": "स्वार्थ", "tr": "çıkarcılık"}}
+{"guid": "N54_083", "translations": {"ms": "berdikari", "hi": "आत्मनिर्भरता", "tr": "kendi kendine yeterlilik"}}
+{"guid": "N54_084", "translations": {"ms": "pemerintahan sendiri", "hi": "आत्मशासन", "tr": "öz yönetim"}}
+{"guid": "N54_085", "translations": {"ms": "pengorbanan diri", "hi": "आत्म-त्याग", "tr": "özveri"}}
+{"guid": "N54_086", "translations": {"ms": "kehidupan selepas kematian", "hi": "परलोक", "tr": "ahiret"}}
+{"guid": "N54_087", "translations": {"ms": "kerohanian", "hi": "आध्यात्मिकता", "tr": "maneviyat"}}
+{"guid": "N54_088", "translations": {"ms": "selibat", "hi": "ब्रह्मचर्य", "tr": "bekârlık"}}
+{"guid": "N54_089", "translations": {"ms": "nirwana", "hi": "निर्वाण", "tr": "nirvana"}}
+{"guid": "N54_090", "translations": {"ms": "berwaspada", "hi": "सावधानी", "tr": "dikkat"}}

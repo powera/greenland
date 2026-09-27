@@ -1,62 +1,93 @@
-{"guid": "N14_001", "translations": {"ro": "lemn", "pl": "drewno", "th": "ไม้", "ta": "மரம்", "kn": "ಕাঠ", "uk": "дерево", "bn": "কাঠ", "hi": "लकड़ी", "bs": "drvo"}}
-{"guid": "N14_002", "translations": {"ro": "metal", "pl": "metal", "th": "โลหะ", "ta": "உலோகம்", "kn": "ಧಾತು", "uk": "метал", "bn": "ধাতু", "hi": "धातु", "bs": "metal"}}
-{"guid": "N14_003", "translations": {"ro": "fier", "pl": "żelazo", "th": "เหล็ก", "ta": "இரும்பு", "kn": "ಇಸ್ಪಾತಿ", "uk": "залізо", "bn": "লোহার", "hi": "लोहा", "bs": "željezo"}}
-{"guid": "N14_004", "translations": {"ro": "oțel", "pl": "stal", "th": "เหล็กกล้า", "ta": "இஸ்பातம்", "kn": "ಲೋಹ", "uk": "сталь", "bn": "ইস্পাত", "hi": "इस्पात", "bs": "čelik"}}
-{"guid": "N14_005", "translations": {"ro": "aluminiu", "pl": "aluminium", "th": "อะลูมิเนียม", "ta": "அலுமினியம்", "kn": "ಅಲ್ಯೂಮಿನಿಯಂ", "uk": "алюміній", "bn": "অ্যালুমিনিয়াম", "hi": "अल्यूमीनियम", "bs": "aluminij"}}
-{"guid": "N14_006", "translations": {"ro": "cupru", "pl": "miedź", "th": "ทองแดง", "ta": "தாமிரம்", "kn": "ತಾಮ್ರ", "uk": "мідь", "bn": "তামা", "hi": "तांबा", "bs": "bakar"}}
-{"guid": "N14_007", "translations": {"ro": "aur", "pl": "złoto", "th": "ทอง", "ta": "பொன்", "kn": "ಬಂಗಾರ", "uk": "золото", "bn": "সোনা", "hi": "सोना", "bs": "zlato"}}
-{"guid": "N14_008", "translations": {"ro": "argint", "pl": "srebro", "th": "เงิน", "ta": "வெள்ளி", "kn": "ಬಂಗಾರದಿಲ್ಲದೆ ಪ್ರಸಿದ್ಧವಾಗಿ ಬೆಳ್ಳಿ", "uk": "срібло", "bn": "রূপা", "hi": "चाँदी", "bs": "srebro"}}
-{"guid": "N14_009", "translations": {"ro": "plastic", "pl": "plastik", "th": "พลาสติก", "ta": "பிளாஸ்டிக்", "kn": "ಪ್ಲಾಸ್ಟಿಕ್", "uk": "пластик", "bn": "প্লাস্টিক", "hi": "प्लास्टिक", "bs": "plastika"}}
-{"guid": "N14_010", "translations": {"ro": "cauciuc", "pl": "guma", "th": "ยาง", "ta": "ரப்பர்", "kn": "ರಬ್ಬರ್", "uk": "ґума", "bn": "রাবার", "hi": "रबर", "bs": "guma"}}
-{"guid": "N14_011", "translations": {"ro": "sticlă", "pl": "szkło", "th": "แก้ว", "ta": "கண்ணாடி", "kn": "ಕಪ್ಪು ಸಿನೆಮಾ", "uk": "скло", "bn": "কাঁচ", "hi": "काँच", "bs": "staklo"}}
-{"guid": "N14_012", "translations": {"ro": "carton", "pl": "karton", "th": "กระดาษแข็ง", "ta": "கார்ட்போர்டு", "kn": "ಕಾರ್ಡ್‌ಬೋರ್ಡ್", "uk": "картон", "bn": "কার্ডবোর্ড", "hi": "कार्डबोर्ड", "bs": "karton"}}
-{"guid": "N14_013", "translations": {"ro": "țesătură", "pl": "tkanina", "th": "ผ้า", "ta": "துணி", "kn": "ದಾರಿದ್ರ್ಯ", "uk": "тканина", "bn": "বস্ত্র", "hi": "कपड़ा", "bs": "tkanina"}}
-{"guid": "N14_014", "translations": {"ro": "bumbac", "pl": "bawełna", "th": "ฝ้าย", "ta": "பருத்தி", "kn": "ಹತ್ತಿ", "uk": "бавовна", "bn": "কটন", "hi": "कपास", "bs": "pamuk"}}
-{"guid": "N14_015", "translations": {"ro": "lână", "pl": "wełna", "th": "ขนแกะ", "ta": "புரு", "kn": "ಹುನುರ್", "uk": "вовна", "bn": "ऊन", "hi": "ऊन", "bs": "vuna"}}
-{"guid": "N14_016", "translations": {"ro": "mătase", "pl": "jedwab", "th": "ไหม", "ta": "பட்டில்", "kn": "ರೇಷ್ಮೆ", "uk": "шовк", "bn": "রেশম", "hi": "रेशम", "bs": "svila"}}
-{"guid": "N14_017", "translations": {"ro": "piele", "pl": "skóra", "th": "หนัง", "ta": "தோல்", "kn": "ಚರ್ಮ", "uk": "шкіра", "bn": "চর্ম", "hi": "चमड़ा", "bs": "koža"}}
-{"guid": "N14_018", "translations": {"ro": "piatră", "pl": "kamień", "th": "หิน", "ta": "கல்", "kn": "ರಬ್ಬಣ್", "uk": "камінь", "bn": "পাথর", "hi": "पत्थर", "bs": "kamen"}}
-{"guid": "N14_019", "translations": {"ro": "marmură", "pl": "marmur", "th": "หินอ่อน", "ta": "மாமரம்", "kn": "ಮಾರ್ಬಲ್", "uk": "мармур", "bn": "মার্বেল", "hi": "मार्बल", "bs": "mramor"}}
-{"guid": "N14_020", "translations": {"ro": "beton", "pl": "beton", "th": "คอนกรีต", "ta": "கான்கிரீட்", "kn": "ಕಾಂಕ್ರಿಟ್", "uk": "бетон", "bn": "কংক্রিট", "hi": "कंक्रीट", "bs": "beton"}}
-{"guid": "N14_021", "translations": {"ro": "cărămidă", "pl": "cegła", "th": "อิฐ", "ta": "இட்டு", "kn": "ಇಟ್ಟಿಗೆ", "uk": "цегла", "bn": "ইট", "hi": "ईंट", "bs": "cigla"}}
-{"guid": "N14_022", "translations": {"ro": "ceramică", "pl": "ceramika", "th": "เซรามิก", "ta": "செராமிக்", "kn": "ಪೊರ್ಚಲೈನ್", "uk": "кераміка", "bn": "সেরামিক", "hi": "सिरेमिक", "bs": "keramika"}}
-{"guid": "N14_023", "translations": {"ro": "argilă", "pl": "glina", "th": "ดินเหนียว", "ta": "மண்", "kn": "ಮಣ್ಣು", "uk": "глина", "bn": "মাটি", "hi": "मिट्टी", "bs": "glina"}}
-{"guid": "N14_024", "translations": {"ro": "nisip", "pl": "piasek", "th": "ทราย", "ta": "மணல்", "kn": "ಮಣಿಸರ", "uk": "пісок", "bn": "বালু", "hi": "रेत", "bs": "pijesak"}}
-{"guid": "N14_025", "translations": {"ro": "aer", "pl": "powietrze", "th": "อากาศ", "ta": "காற்று", "kn": "ಗಾಳಿ", "uk": "повітря", "bn": "বায়ু", "hi": "हवा", "bs": "zrak"}}
-{"guid": "N14_026", "translations": {"ro": "praf", "pl": "kurz", "th": "ฝุ่น", "ta": "பூசி", "kn": "ದೂಳು", "uk": "пил", "bn": "ধুলো", "hi": "धूल"}}
-{"guid": "N14_027", "translations": {"ro": "fum", "pl": "dym", "th": "ควัน", "ta": "புகை", "kn": "ಹೂಗು", "uk": "дим", "bn": "ধোঁয়া", "hi": "धुआँ"}}
-{"guid": "N14_028", "translations": {"ro": "staniu", "pl": "cyna", "th": "ดีบุก", "ta": "தाँப்", "kn": "ಟಿನ್", "uk": "олово", "bn": "অলৌহ", "hi": "टिन"}}
-{"guid": "N14_029", "translations": {"ro": "fir", "pl": "drut", "th": "ลวด", "ta": "கயிறு", "kn": "ತಂತಿ", "uk": "дріт", "bn": "তার", "hi": "तार"}}
-{"guid": "N14_030", "translations": {"ro": "otrava", "pl": "trucizna", "th": "ยาพิษ", "ta": "விஷம்", "kn": "ವಿಷ", "uk": "отрута", "bn": "বিষ", "hi": "विष"}}
-{"guid": "N14_031", "translations": {"ro": "scândură", "pl": "deska", "th": "แผ่นไม้", "ta": "பட்டை", "kn": "ಬೋರ್ಡ್", "uk": "дошка", "bn": "তক্তা", "hi": "फलक"}}
-{"guid": "N14_032", "translations": {"ro": "plumb", "pl": "ołów", "th": "ตะกั่ว", "ta": "சீசா", "kn": "ಸೀಸಾ", "uk": "свинець", "bn": "সীসা", "hi": "सीसा"}}
-{"guid": "N14_034", "translations": {"ro": "ciment", "pl": "cement", "th": "ปูนซีเมนต์", "ta": "சிமெண்டு", "kn": "ಸಿಮೆಂಟ್", "uk": "цемент", "bn": "সিমেন্ট", "hi": "सीमेंट"}}
-{"guid": "N14_035", "translations": {"ro": "ceară", "pl": "wosk", "th": "ขี้ผึ้ง", "ta": "மேய்", "kn": "ಮೋಮು", "uk": "віск", "bn": "মোম", "hi": "मوم"}}
-{"guid": "N14_036", "translations": {"ro": "bronz", "pl": "brąz", "th": "บรอนซ์", "ta": "புரிந்துகொள்ளவும்", "kn": "ಕಂಚು", "uk": "бронза", "bn": "কাঁচা/ব্রোঞ্জ", "hi": "कांस्य"}}
-{"guid": "N14_037", "translations": {"ro": "cărbune", "pl": "węgiel", "th": "ถ่านหิน", "ta": "குமிழ்", "kn": "ಕೋಳಿ", "uk": "вугілля", "bn": "কয়লা", "hi": "कोयला"}}
-{"guid": "N14_038", "translations": {"ro": "cărbune de lemn", "pl": "węgiel drzewny", "th": "ถ่านไม้", "ta": "மரக் குக்கூறு", "kn": "ಕಲ್ಲುಕೋಳಿ", "uk": "древне вугілля", "bn": "কাঠকয়লা", "hi": "लकड़ी का कोयला"}}
-{"guid": "N14_039", "translations": {"ro": "cretă", "pl": "kreda", "th": "ชอล์ก", "ta": "சாக்கு", "kn": "ಚಾಕ್", "uk": "крейт", "bn": "চক", "hi": "सफ़ेद_चूना"}}
-{"guid": "N14_040", "translations": {"ro": "spumă", "pl": "piana", "th": "โฟม", "ta": "ஃபோம்", "kn": "ಫೋಮ್", "uk": "піна", "bn": "ফোম", "hi": "फोम"}}
-{"guid": "N14_041", "translations": {"ro": "vopsea", "pl": "barwnik", "th": "สีย้อม", "ta": "வண்ணப்பது", "kn": "ರಂಗಿನದ್ರವ್ಯ", "uk": "фарба", "bn": "রঙ", "hi": "रंग"}}
-{"guid": "N14_042", "translations": {"ro": "cerneală", "pl": "atrament", "th": "หมึก", "ta": "மசேது", "kn": "ಮಸುಕ", "uk": "чорнило", "bn": "সোয়াব", "hi": "स्याही"}}
-{"guid": "N14_043", "translations": {"ro": "gudron", "pl": "smoła", "th": "ยางมะตอย", "ta": "தார்", "kn": "ಕೇಳು", "uk": "смола", "bn": "ডীটল", "hi": "कट्टर"}}
-{"guid": "N14_044", "translations": {"ro": "tencuială", "pl": "tynk", "th": "ปูนฉาบ", "ta": "மெழுகு", "kn": "ಪುಟಿಗ", "uk": "штукатурка", "bn": "পাটালি", "hi": "प्लास्टर"}}
-{"guid": "N14_045", "translations": {"ro": "granitul", "pl": "granity", "th": "แกรนิต", "ta": "கிரானைட்", "kn": "ಗ್ರಾನೈಟ್", "uk": "граніт", "bn": "গ্রানাইট", "hi": "ग्रेनাইট"}}
-{"guid": "N14_046", "translations": {"ro": "calcar", "pl": "wapień", "th": "หินปูน", "ta": "இளந்தட்டு", "kn": "ನೀರಕಲ್ಲು", "uk": "вапняк", "bn": "চুনাপাথর", "hi": "चूनापत्थर"}}
-{"guid": "N14_047", "translations": {"ro": "fibră de sticlă", "pl": "fiberglass", "th": "ไฟเบอร์กลาส", "ta": "ஃபைபர்கிளாஸ்", "kn": "ಫೈಬರ್ಗ್ಲಾಸ್", "uk": "склопластик", "bn": "ফাইবারগ্লাস", "hi": "फाइबरग्लास"}}
-{"guid": "N14_048", "translations": {"ro": "nilon", "pl": "nylon", "th": "ไนลอน", "ta": "நைலான்", "kn": "ನೈಲಾನ್", "uk": "нейлон", "bn": "নাইলন", "hi": "नाइलॉन"}}
-{"guid": "N14_049", "translations": {"ro": "alamă", "pl": "mosiądz", "th": "ทองเหลือง", "ta": "பிளாஸ்ட்", "kn": "ಕಂಚು", "uk": "латунь", "bn": "পিতল", "hi": "पीतल"}}
-{"guid": "N14_050", "translations": {"ro": "asfalt", "pl": "asfalt", "th": "ยางมะตอย", "ta": "அஸ்பால்ட்", "kn": "ಅಸ್ಫಾಲ್ಟ್", "uk": "асфальт", "bn": "অ্যাসফাল্ট", "hi": "अस्फाल्ट"}}
-{"guid": "N14_051", "translations": {"ro": "fir", "pl": "nici", "th": "ด้าย", "ta": "நூல்", "kn": "ಉಳುಮೆ", "uk": "нитка", "bn": "সূতা", "hi": "सूता"}}
-{"guid": "N14_052", "translations": {"ro": "gunoi", "pl": "śmieci", "th": "ขยะ", "ta": "அழுக்குப்பகுதி", "kn": "ಕುಡಿಹೋಗುವ ವಸ್ತು", "uk": "сміття", "bn": "আবর্জনা", "hi": "कचरा"}}
-{"guid": "N14_053", "translations": {"ro": "marfă", "pl": "ładunek", "th": "สินค้า", "ta": "சுமை", "kn": "ಸಮಾನು", "uk": "вантаж", "bn": "পণ্য", "hi": "कार्गो"}}
-{"guid": "N14_054", "translations": {"ro": "vopsea", "pl": "farba", "th": "สีน้ำ", "ta": "வர்ணம்", "kn": "ಬಣ್ಣ", "uk": "фарба", "bn": "রং", "hi": "रंग"}}
-{"guid": "N14_055", "translations": {"ro": "ulei", "pl": "olej", "th": "น้ำมัน", "ta": "எண்ணெய்", "kn": "ಎಣ್ಣೆ", "uk": "нафта", "bn": "তেল", "hi": "तेल", "bs": "ulje"}}
-{"guid": "N14_056", "translations": {"ro": "grăsime", "pl": "tłuszcz", "th": "ไขมัน", "ta": "கொழுப்பு", "kn": "ನ್ಯೂನತೆ", "uk": "жир", "bn": "চর্বি", "hi": "चर्बी"}}
-{"guid": "N14_057", "translations": {"ro": "chimical", "pl": "chemikal", "th": "เคมีภัณฑ์", "ta": "ரசாயனம்", "kn": "ರಾಸಾಯನಿಕ", "uk": "хімікат", "bn": "রসায়নিক", "hi": "रसायनिक"}}
-{"guid": "N14_058", "translations": {"ro": "jeleu", "pl": "żelatyna", "th": "เยลลี่", "ta": "ஜெல்லி", "kn": "ಜೆಲ್ಲೀ", "uk": "желе", "bn": "জেলি", "hi": "जेली"}}
-{"guid": "N14_059", "translations": {"ro": "lichid", "pl": "ciecz", "th": "ของเหลว", "ta": "திரவம்", "kn": "ದ್ರವ", "uk": "рідина", "bn": "তরল", "hi": "द्रव"}}
-{"guid": "N14_060", "translations": {"ro": "pastă", "pl": "pasta", "th": "เนื้อกาว", "ta": "பேஸ்ட்", "kn": "ಅಂಟಿಸಲು ಚಿಕಿತ್ಸೆಯಲ್ಲಿರುವ ಪেস্ট್", "uk": "паста", "bn": "পেস্ট", "hi": "पेस्ट"}}
-{"guid": "N14_061", "translations": {"ro": "pudră", "pl": "proszek", "th": "ผง", "ta": "பொடியை", "kn": "ಮಂಡು", "uk": "порошок", "bn": "গুঁড়ো", "hi": "पाउडर"}}
-{"guid": "N14_062", "translations": {"ro": "polish", "pl": "pasta polerska", "th": "น้ำยาเงา", "ta": "முருங்கு திரவு", "kn": "ಮಜ್ಜಿಗ", "uk": "полірувальний засіб", "bn": "পলিশ", "hi": "पॉलिश"}}
-{"guid": "N14_063", "translations": {"ro": "abur", "pl": "para", "th": "ไอน้ำ", "ta": "ஆவா", "kn": "ವಾಪು", "uk": "пара", "bn": "বাষ্প", "hi": "भाप"}}
+{"guid": "N14_001", "translations": {"ro": "lemn", "pl": "drewno", "th": "ไม้", "ms": "kayu", "ta": "மரம்", "kn": "ಕাঠ", "uk": "дерево", "bn": "কাঠ", "hi": "लकड़ी", "tr": "odun", "bs": "drvo"}}
+{"guid": "N14_002", "translations": {"ro": "metal", "pl": "metal", "th": "โลหะ", "ms": "logam", "ta": "உலோகம்", "kn": "ಧಾತು", "uk": "метал", "bn": "ধাতু", "hi": "धातु", "tr": "metal", "bs": "metal"}}
+{"guid": "N14_003", "translations": {"ro": "fier", "pl": "żelazo", "th": "เหล็ก", "ms": "besi", "ta": "இரும்பு", "kn": "ಇಸ್ಪಾತಿ", "uk": "залізо", "bn": "লোহার", "hi": "लोहा", "tr": "demir", "bs": "željezo"}}
+{"guid": "N14_004", "translations": {"ro": "oțel", "pl": "stal", "th": "เหล็กกล้า", "ms": "keluli", "ta": "இஸ்பातம்", "kn": "ಲೋಹ", "uk": "сталь", "bn": "ইস্পাত", "hi": "इस्पात", "tr": "çelik", "bs": "čelik"}}
+{"guid": "N14_005", "translations": {"ro": "aluminiu", "pl": "aluminium", "th": "อะลูมิเนียม", "ms": "aluminium", "ta": "அலுமினியம்", "kn": "ಅಲ್ಯೂಮಿನಿಯಂ", "uk": "алюміній", "bn": "অ্যালুমিনিয়াম", "hi": "अल्यूमीनियम", "tr": "alüminyum", "bs": "aluminij"}}
+{"guid": "N14_006", "translations": {"ro": "cupru", "pl": "miedź", "th": "ทองแดง", "ms": "kuprum", "ta": "தாமிரம்", "kn": "ತಾಮ್ರ", "uk": "мідь", "bn": "তামা", "hi": "तांबा", "tr": "bakır", "bs": "bakar"}}
+{"guid": "N14_007", "translations": {"ro": "aur", "pl": "złoto", "th": "ทอง", "ms": "emas", "ta": "பொன்", "kn": "ಬಂಗಾರ", "uk": "золото", "bn": "সোনা", "hi": "सोना", "tr": "altın", "bs": "zlato"}}
+{"guid": "N14_008", "translations": {"ro": "argint", "pl": "srebro", "th": "เงิน", "ms": "perak", "ta": "வெள்ளி", "kn": "ಬಂಗಾರದಿಲ್ಲದೆ ಪ್ರಸಿದ್ಧವಾಗಿ ಬೆಳ್ಳಿ", "uk": "срібло", "bn": "রূপা", "hi": "चाँदी", "tr": "gümüş", "bs": "srebro"}}
+{"guid": "N14_009", "translations": {"ro": "plastic", "pl": "plastik", "th": "พลาสติก", "ms": "plastik", "ta": "பிளாஸ்டிக்", "kn": "ಪ್ಲಾಸ್ಟಿಕ್", "uk": "пластик", "bn": "প্লাস্টিক", "hi": "प्लास्टिक", "tr": "plastik", "bs": "plastika"}}
+{"guid": "N14_010", "translations": {"ro": "cauciuc", "pl": "guma", "th": "ยาง", "ms": "getah", "ta": "ரப்பர்", "kn": "ರಬ್ಬರ್", "uk": "ґума", "bn": "রাবার", "hi": "रबर", "tr": "kauçuk", "bs": "guma"}}
+{"guid": "N14_011", "translations": {"ro": "sticlă", "pl": "szkło", "th": "แก้ว", "ms": "kaca", "ta": "கண்ணாடி", "kn": "ಕಪ್ಪು ಸಿನೆಮಾ", "uk": "скло", "bn": "কাঁচ", "hi": "काँच", "tr": "cam", "bs": "staklo"}}
+{"guid": "N14_012", "translations": {"ro": "carton", "pl": "karton", "th": "กระดาษแข็ง", "ms": "kadbod", "ta": "கார்ட்போர்டு", "kn": "ಕಾರ್ಡ್‌ಬೋರ್ಡ್", "uk": "картон", "bn": "কার্ডবোর্ড", "hi": "कार्डबोर्ड", "tr": "karton", "bs": "karton"}}
+{"guid": "N14_013", "translations": {"ro": "țesătură", "pl": "tkanina", "th": "ผ้า", "ms": "kain", "ta": "துணி", "kn": "ದಾರಿದ್ರ್ಯ", "uk": "тканина", "bn": "বস্ত্র", "hi": "कपड़ा", "tr": "kumaş", "bs": "tkanina"}}
+{"guid": "N14_014", "translations": {"ro": "bumbac", "pl": "bawełna", "th": "ฝ้าย", "ms": "kapas", "ta": "பருத்தி", "kn": "ಹತ್ತಿ", "uk": "бавовна", "bn": "কটন", "hi": "कपास", "tr": "pamuk", "bs": "pamuk"}}
+{"guid": "N14_015", "translations": {"ro": "lână", "pl": "wełna", "th": "ขนแกะ", "ms": "bulu biri-biri", "ta": "புரு", "kn": "ಹುನುರ್", "uk": "вовна", "bn": "ऊन", "hi": "ऊन", "tr": "yün", "bs": "vuna"}}
+{"guid": "N14_016", "translations": {"ro": "mătase", "pl": "jedwab", "th": "ไหม", "ms": "sutera", "ta": "பட்டில்", "kn": "ರೇಷ್ಮೆ", "uk": "шовк", "bn": "রেশম", "hi": "रेशम", "tr": "ipek", "bs": "svila"}}
+{"guid": "N14_017", "translations": {"ro": "piele", "pl": "skóra", "th": "หนัง", "ms": "kulit", "ta": "தோல்", "kn": "ಚರ್ಮ", "uk": "шкіра", "bn": "চর্ম", "hi": "चमड़ा", "tr": "deri", "bs": "koža"}}
+{"guid": "N14_018", "translations": {"ro": "piatră", "pl": "kamień", "th": "หิน", "ms": "batu", "ta": "கல்", "kn": "ರಬ್ಬಣ್", "uk": "камінь", "bn": "পাথর", "hi": "पत्थर", "tr": "taş", "bs": "kamen"}}
+{"guid": "N14_019", "translations": {"ro": "marmură", "pl": "marmur", "th": "หินอ่อน", "ms": "marmar", "ta": "மாமரம்", "kn": "ಮಾರ್ಬಲ್", "uk": "мармур", "bn": "মার্বেল", "hi": "मार्बल", "tr": "mermer", "bs": "mramor"}}
+{"guid": "N14_020", "translations": {"ro": "beton", "pl": "beton", "th": "คอนกรีต", "ms": "konkrit", "ta": "கான்கிரீட்", "kn": "ಕಾಂಕ್ರಿಟ್", "uk": "бетон", "bn": "কংক্রিট", "hi": "कंक्रीट", "tr": "beton", "bs": "beton"}}
+{"guid": "N14_021", "translations": {"ro": "cărămidă", "pl": "cegła", "th": "อิฐ", "ms": "batu bata", "ta": "இட்டு", "kn": "ಇಟ್ಟಿಗೆ", "uk": "цегла", "bn": "ইট", "hi": "ईंट", "tr": "tuğla", "bs": "cigla"}}
+{"guid": "N14_022", "translations": {"ro": "ceramică", "pl": "ceramika", "th": "เซรามิก", "ms": "seramik", "ta": "செராமிக்", "kn": "ಪೊರ್ಚಲೈನ್", "uk": "кераміка", "bn": "সেরামিক", "hi": "सिरेमिक", "tr": "seramik", "bs": "keramika"}}
+{"guid": "N14_023", "translations": {"ro": "argilă", "pl": "glina", "th": "ดินเหนียว", "ms": "tanah liat", "ta": "மண்", "kn": "ಮಣ್ಣು", "uk": "глина", "bn": "মাটি", "hi": "मिट्टी", "tr": "kil", "bs": "glina"}}
+{"guid": "N14_024", "translations": {"ro": "nisip", "pl": "piasek", "th": "ทราย", "ms": "pasir", "ta": "மணல்", "kn": "ಮಣಿಸರ", "uk": "пісок", "bn": "বালু", "hi": "रेत", "tr": "kum", "bs": "pijesak"}}
+{"guid": "N14_025", "translations": {"ro": "aer", "pl": "powietrze", "th": "อากาศ", "ms": "udara", "ta": "காற்று", "kn": "ಗಾಳಿ", "uk": "повітря", "bn": "বায়ু", "hi": "हवा", "tr": "hava", "bs": "zrak"}}
+{"guid": "N14_026", "translations": {"ro": "praf", "pl": "kurz", "th": "ฝุ่น", "ms": "debu", "ta": "பூசி", "kn": "ದೂಳು", "uk": "пил", "bn": "ধুলো", "hi": "धूल", "tr": "toz"}}
+{"guid": "N14_027", "translations": {"ro": "fum", "pl": "dym", "th": "ควัน", "ms": "asap", "ta": "புகை", "kn": "ಹೂಗು", "uk": "дим", "bn": "ধোঁয়া", "hi": "धुआँ", "tr": "duman"}}
+{"guid": "N14_028", "translations": {"ro": "staniu", "pl": "cyna", "th": "ดีบุก", "ms": "timah", "ta": "தाँப்", "kn": "ಟಿನ್", "uk": "олово", "bn": "অলৌহ", "hi": "टिन", "tr": "kalay"}}
+{"guid": "N14_029", "translations": {"ro": "fir", "pl": "drut", "th": "ลวด", "ms": "wayar", "ta": "கயிறு", "kn": "ತಂತಿ", "uk": "дріт", "bn": "তার", "hi": "तार", "tr": "tel"}}
+{"guid": "N14_030", "translations": {"ro": "otrava", "pl": "trucizna", "th": "ยาพิษ", "ms": "racun", "ta": "விஷம்", "kn": "ವಿಷ", "uk": "отрута", "bn": "বিষ", "hi": "विष", "tr": "zehir"}}
+{"guid": "N14_031", "translations": {"ro": "scândură", "pl": "deska", "th": "แผ่นไม้", "ms": "papan", "ta": "பட்டை", "kn": "ಬೋರ್ಡ್", "uk": "дошка", "bn": "তক্তা", "hi": "फलक", "tr": "tahta"}}
+{"guid": "N14_032", "translations": {"ro": "plumb", "pl": "ołów", "th": "ตะกั่ว", "ms": "plumbum", "ta": "சீசா", "kn": "ಸೀಸಾ", "uk": "свинець", "bn": "সীসা", "hi": "सीसा", "tr": "kurşun"}}
+{"guid": "N14_034", "translations": {"ro": "ciment", "pl": "cement", "th": "ปูนซีเมนต์", "ms": "simen", "ta": "சிமெண்டு", "kn": "ಸಿಮೆಂಟ್", "uk": "цемент", "bn": "সিমেন্ট", "hi": "सीमेंट", "tr": "çimento"}}
+{"guid": "N14_035", "translations": {"ro": "ceară", "pl": "wosk", "th": "ขี้ผึ้ง", "ms": "lilin", "ta": "மேய்", "kn": "ಮೋಮು", "uk": "віск", "bn": "মোম", "hi": "मوم", "tr": "balmumu"}}
+{"guid": "N14_036", "translations": {"ro": "bronz", "pl": "brąz", "th": "บรอนซ์", "ms": "gangsa", "ta": "புரிந்துகொள்ளவும்", "kn": "ಕಂಚು", "uk": "бронза", "bn": "কাঁচা/ব্রোঞ্জ", "hi": "कांस्य", "tr": "bronz"}}
+{"guid": "N14_037", "translations": {"ro": "cărbune", "pl": "węgiel", "th": "ถ่านหิน", "ms": "arang batu", "ta": "குமிழ்", "kn": "ಕೋಳಿ", "uk": "вугілля", "bn": "কয়লা", "hi": "कोयला", "tr": "kömür"}}
+{"guid": "N14_038", "translations": {"ro": "cărbune de lemn", "pl": "węgiel drzewny", "th": "ถ่านไม้", "ms": "arang kayu", "ta": "மரக் குக்கூறு", "kn": "ಕಲ್ಲುಕೋಳಿ", "uk": "древне вугілля", "bn": "কাঠকয়লা", "hi": "लकड़ी का कोयला", "tr": "odun kömürü"}}
+{"guid": "N14_039", "translations": {"ro": "cretă", "pl": "kreda", "th": "ชอล์ก", "ms": "kapur", "ta": "சாக்கு", "kn": "ಚಾಕ್", "uk": "крейт", "bn": "চক", "hi": "सफ़ेद_चूना", "tr": "tebeşir"}}
+{"guid": "N14_040", "translations": {"ro": "spumă", "pl": "piana", "th": "โฟม", "ms": "busa", "ta": "ஃபோம்", "kn": "ಫೋಮ್", "uk": "піна", "bn": "ফোম", "hi": "फोम", "tr": "köpük"}}
+{"guid": "N14_041", "translations": {"ro": "vopsea", "pl": "barwnik", "th": "สีย้อม", "ms": "pewarna", "ta": "வண்ணப்பது", "kn": "ರಂಗಿನದ್ರವ್ಯ", "uk": "фарба", "bn": "রঙ", "hi": "रंग", "tr": "boya"}}
+{"guid": "N14_042", "translations": {"ro": "cerneală", "pl": "atrament", "th": "หมึก", "ms": "dakwat", "ta": "மசேது", "kn": "ಮಸುಕ", "uk": "чорнило", "bn": "সোয়াব", "hi": "स्याही", "tr": "mürekkep"}}
+{"guid": "N14_043", "translations": {"ro": "gudron", "pl": "smoła", "th": "ยางมะตอย", "ms": "tar", "ta": "தார்", "kn": "ಕೇಳು", "uk": "смола", "bn": "ডীটল", "hi": "कट्टर", "tr": "katran"}}
+{"guid": "N14_044", "translations": {"ro": "tencuială", "pl": "tynk", "th": "ปูนฉาบ", "ms": "plaster", "ta": "மெழுகு", "kn": "ಪುಟಿಗ", "uk": "штукатурка", "bn": "পাটালি", "hi": "प्लास्टर", "tr": "sıva"}}
+{"guid": "N14_045", "translations": {"ro": "granitul", "pl": "granity", "th": "แกรนิต", "ms": "granit", "ta": "கிரானைட்", "kn": "ಗ್ರಾನೈಟ್", "uk": "граніт", "bn": "গ্রানাইট", "hi": "ग्रेनাইট", "tr": "granit"}}
+{"guid": "N14_046", "translations": {"ro": "calcar", "pl": "wapień", "th": "หินปูน", "ms": "batu kapur", "ta": "இளந்தட்டு", "kn": "ನೀರಕಲ್ಲು", "uk": "вапняк", "bn": "চুনাপাথর", "hi": "चूनापत्थर", "tr": "kireç taşı"}}
+{"guid": "N14_047", "translations": {"ro": "fibră de sticlă", "pl": "fiberglass", "th": "ไฟเบอร์กลาส", "ms": "gentian kaca", "ta": "ஃபைபர்கிளாஸ்", "kn": "ಫೈಬರ್ಗ್ಲಾಸ್", "uk": "склопластик", "bn": "ফাইবারগ্লাস", "hi": "फाइबरग्लास", "tr": "cam elyafı"}}
+{"guid": "N14_048", "translations": {"ro": "nilon", "pl": "nylon", "th": "ไนลอน", "ms": "nilon", "ta": "நைலான்", "kn": "ನೈಲಾನ್", "uk": "нейлон", "bn": "নাইলন", "hi": "नाइलॉन", "tr": "naylon"}}
+{"guid": "N14_049", "translations": {"ro": "alamă", "pl": "mosiądz", "th": "ทองเหลือง", "ms": "loyang", "ta": "பிளாஸ்ட்", "kn": "ಕಂಚು", "uk": "латунь", "bn": "পিতল", "hi": "पीतल", "tr": "pirinç"}}
+{"guid": "N14_050", "translations": {"ro": "asfalt", "pl": "asfalt", "th": "ยางมะตอย", "ms": "asfalt", "ta": "அஸ்பால்ட்", "kn": "ಅಸ್ಫಾಲ್ಟ್", "uk": "асфальт", "bn": "অ্যাসফাল্ট", "hi": "अस्फाल्ट", "tr": "asfalt"}}
+{"guid": "N14_051", "translations": {"ro": "fir", "pl": "nici", "th": "ด้าย", "ms": "benang", "ta": "நூல்", "kn": "ಉಳುಮೆ", "uk": "нитка", "bn": "সূতা", "hi": "सूता", "tr": "iplik"}}
+{"guid": "N14_052", "translations": {"ro": "gunoi", "pl": "śmieci", "th": "ขยะ", "ms": "sampah", "ta": "அழுக்குப்பகுதி", "kn": "ಕುಡಿಹೋಗುವ ವಸ್ತು", "uk": "сміття", "bn": "আবর্জনা", "hi": "कचरा", "tr": "çöp"}}
+{"guid": "N14_053", "translations": {"ro": "marfă", "pl": "ładunek", "th": "สินค้า", "ms": "kargo", "ta": "சுமை", "kn": "ಸಮಾನು", "uk": "вантаж", "bn": "পণ্য", "hi": "कार्गो", "tr": "yük"}}
+{"guid": "N14_054", "translations": {"ro": "vopsea", "pl": "farba", "th": "สีน้ำ", "ms": "cat", "ta": "வர்ணம்", "kn": "ಬಣ್ಣ", "uk": "фарба", "bn": "রং", "hi": "रंग", "tr": "boya"}}
+{"guid": "N14_055", "translations": {"ro": "ulei", "pl": "olej", "th": "น้ำมัน", "ms": "minyak", "ta": "எண்ணெய்", "kn": "ಎಣ್ಣೆ", "uk": "нафта", "bn": "তেল", "hi": "तेल", "tr": "yağ", "bs": "ulje"}}
+{"guid": "N14_056", "translations": {"ro": "grăsime", "pl": "tłuszcz", "th": "ไขมัน", "ms": "lemak", "ta": "கொழுப்பு", "kn": "ನ್ಯೂನತೆ", "uk": "жир", "bn": "চর্বি", "hi": "चर्बी", "tr": "yağ"}}
+{"guid": "N14_057", "translations": {"ro": "chimical", "pl": "chemikal", "th": "เคมีภัณฑ์", "ms": "bahan kimia", "ta": "ரசாயனம்", "kn": "ರಾಸಾಯನಿಕ", "uk": "хімікат", "bn": "রসায়নিক", "hi": "रसायनिक", "tr": "kimyasal madde"}}
+{"guid": "N14_058", "translations": {"ro": "jeleu", "pl": "żelatyna", "th": "เยลลี่", "ms": "jeli", "ta": "ஜெல்லி", "kn": "ಜೆಲ್ಲೀ", "uk": "желе", "bn": "জেলি", "hi": "जेली", "tr": "jöle"}}
+{"guid": "N14_059", "translations": {"ro": "lichid", "pl": "ciecz", "th": "ของเหลว", "ms": "cecair", "ta": "திரவம்", "kn": "ದ್ರವ", "uk": "рідина", "bn": "তরল", "hi": "द्रव", "tr": "sıvı"}}
+{"guid": "N14_060", "translations": {"ro": "pastă", "pl": "pasta", "th": "เนื้อกาว", "ms": "pes", "ta": "பேஸ்ட்", "kn": "ಅಂಟಿಸಲು ಚಿಕಿತ್ಸೆಯಲ್ಲಿರುವ ಪেস্ট್", "uk": "паста", "bn": "পেস্ট", "hi": "पेस्ट", "tr": "macun"}}
+{"guid": "N14_061", "translations": {"ro": "pudră", "pl": "proszek", "th": "ผง", "ms": "serbuk", "ta": "பொடியை", "kn": "ಮಂಡು", "uk": "порошок", "bn": "গুঁড়ো", "hi": "पाउडर", "tr": "toz"}}
+{"guid": "N14_062", "translations": {"ro": "polish", "pl": "pasta polerska", "th": "น้ำยาเงา", "ms": "bahan penggilap", "ta": "முருங்கு திரவு", "kn": "ಮಜ್ಜಿಗ", "uk": "полірувальний засіб", "bn": "পলিশ", "hi": "पॉलिश", "tr": "cila"}}
+{"guid": "N14_063", "translations": {"ro": "abur", "pl": "para", "th": "ไอน้ำ", "ms": "wap", "ta": "ஆவா", "kn": "ವಾಪು", "uk": "пара", "bn": "বাষ্প", "hi": "भाप", "tr": "buhar"}}
+{"guid": "N14_064", "translations": {"ms": "cecair pencuci pinggan", "hi": "बर्तन धोने का डिटर्जेंट", "tr": "bulaşık deterjanı"}}
+{"guid": "N14_065", "translations": {"ms": "bahan api fosil", "hi": "जीवाश्म ईंधन", "tr": "fosil yakıt"}}
+{"guid": "N14_066", "translations": {"ms": "tenaga boleh baharu", "hi": "नवीकरणीय ऊर्जा", "tr": "yenilenebilir enerji"}}
+{"guid": "N14_067", "translations": {"ms": "zarah", "hi": "कण", "tr": "parçacık"}}
+{"guid": "N14_068", "translations": {"ms": "kristal", "hi": "क्रिस्टल", "tr": "kristal"}}
+{"guid": "N14_069", "translations": {"ms": "bendalir", "hi": "तरल पदार्थ", "tr": "akışkan"}}
+{"guid": "N14_070", "translations": {"ms": "wap", "hi": "वाष्प", "tr": "buhar"}}
+{"guid": "N14_071", "translations": {"ms": "kerak", "hi": "पपड़ी", "tr": "kabuk"}}
+{"guid": "N14_072", "translations": {"ms": "mineral", "hi": "खनिज", "tr": "mineral"}}
+{"guid": "N14_073", "translations": {"ms": "filem nipis", "hi": "पतली परत", "tr": "ince tabaka"}}
+{"guid": "N14_074", "translations": {"ms": "gentian", "hi": "रेशा", "tr": "lif"}}
+{"guid": "N14_075", "translations": {"ms": "bahan api", "hi": "ईंधन", "tr": "yakıt"}}
+{"guid": "N14_076", "translations": {"ms": "mata wang", "hi": "मुद्रा", "tr": "para birimi"}}
+{"guid": "N14_077", "translations": {"ms": "terakota", "hi": "पकी हुई मिट्टी", "tr": "pişmiş toprak"}}
+{"guid": "N14_078", "translations": {"ms": "kelodak", "hi": "गाद", "tr": "mil"}}
+{"guid": "N14_079", "translations": {"ms": "lateks", "hi": "लेटेक्स", "tr": "lateks"}}
+{"guid": "N14_080", "translations": {"ms": "air sisa", "hi": "अपशिष्ट जल", "tr": "atık su"}}
+{"guid": "N14_081", "translations": {"ms": "pelekat", "hi": "चिपकाने वाला पदार्थ", "tr": "yapıştırıcı"}}
+{"guid": "N14_082", "translations": {"ms": "pateri", "hi": "मिलाप धातु", "tr": "lehim"}}
+{"guid": "N14_083", "translations": {"ms": "poliester", "hi": "पॉलिएस्टर", "tr": "polyester"}}
+{"guid": "N14_084", "translations": {"ms": "jaring", "hi": "जाली", "tr": "ağ"}}
+{"guid": "N14_085", "translations": {"ms": "syal", "hi": "शेल", "tr": "şeyl"}}
+{"guid": "N14_086", "translations": {"ms": "air laut", "hi": "समुद्री जल", "tr": "deniz suyu"}}
+{"guid": "N14_087", "translations": {"ms": "gas", "hi": "गैस", "tr": "gaz"}}
+{"guid": "N14_088", "translations": {"ms": "selaput", "hi": "झिल्ली", "tr": "zar"}}
+{"guid": "N14_089", "translations": {"ms": "gelatin", "hi": "जिलेटिन", "tr": "jelatin"}}
+{"guid": "N14_090", "translations": {"ms": "bubur", "hi": "लुगदी", "tr": "lapa"}}
+{"guid": "N14_091", "translations": {"ms": "buih kotor", "hi": "मैल की परत", "tr": "süprüntü"}}
+{"guid": "N14_092", "translations": {"ms": "zink", "hi": "जस्ता", "tr": "çinko"}}
+{"guid": "N14_093", "translations": {"ms": "gam", "hi": "गोंद", "tr": "tutkal"}}
+{"guid": "N14_094", "translations": {"ms": "kertas surat khabar", "hi": "अख़बार का कागज़", "tr": "gazete kâğıdı"}}

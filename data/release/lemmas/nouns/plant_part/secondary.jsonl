@@ -1,14 +1,26 @@
-{"guid": "N38_001", "translations": {"ro": "frunză", "pl": "liść", "th": "ใบ", "ta": "இலை", "kn": "ಇಲೆ", "uk": "лист", "bn": "পাতা", "hi": "पत्ता", "bs": "list"}}
-{"guid": "N38_002", "translations": {"ro": "rădăcină", "pl": "korzeń", "th": "ราก", "ta": "வேர்", "kn": "ಮೂಲ", "uk": "корінь", "bn": "মূল", "hi": "मूल"}}
-{"guid": "N38_003", "translations": {"ro": "ramură", "pl": "gałąź", "th": "กิ่ง", "ta": "கிளை", "kn": "ಕೊಂಬೆ", "uk": "гілка", "bn": "শাখা", "hi": "शाखा", "bs": "grana"}}
-{"guid": "N38_004", "translations": {"ro": "sămânță", "pl": "nasiono", "th": "เมล็ด", "ta": "முதல்", "kn": "ಬೀಜ", "uk": "насінина", "bn": "বীজ", "hi": "बीज"}}
-{"guid": "N38_005", "translations": {"ro": "fruct", "pl": "owoc", "th": "ผลไม้", "ta": "பழம்", "kn": "ಹಣ್ಣು", "uk": "плід", "bn": "ফল", "hi": "फल"}}
-{"guid": "N38_006", "translations": {"ro": "coroană", "pl": "kora", "th": "เปลือกไม้", "ta": "துமுண்டு", "kn": "ಚರ್ಮ", "uk": "кора", "bn": "ছাল", "hi": "छाल", "bs": "kora"}}
-{"guid": "N38_007", "translations": {"ro": "polen", "pl": "pyłek", "th": "เกสร", "ta": "தூசி", "kn": "ಪಶುಲತಾ (Note: Kannada common word is 'ಹುಲ್ಲು ಧೂಳು' but lemma 'ಪುಲೆನ್' is 'ಪುಲೆನ್' not appropriate)", "uk": "пилок", "bn": "পরাগ", "hi": "पराग", "bs": "pelud"}}
-{"guid": "N38_008", "translations": {"ro": "trunchi", "pl": "pień", "th": "ลำต้น", "ta": "தண்டு", "kn": "ತಣತೆ", "uk": "стовбур", "bn": "তনু", "hi": "तना", "bs": "deblo"}}
-{"guid": "N38_009", "translations": {"ro": "tulpină", "pl": "łodyga", "th": "ลำต้น", "ta": "தண்டு", "kn": "ಹಸುರುಮುರು", "uk": "стебло", "bn": "তান্ডুল", "hi": "तना", "bs": "stabljika"}}
-{"guid": "N38_010", "translations": {"ro": "petală", "pl": "płatek", "th": "กลีบดอก", "ta": "மலர்பேர்", "kn": "ಪುಷ್ಪಪತ್ರ", "uk": "пелюстка", "bn": "পাপড়ি", "hi": "पंखुड़ी", "bs": "latica"}}
-{"guid": "N38_011", "translations": {"ro": "țăpina", "pl": "cierń", "th": "หนาม", "ta": "முனைநீர்", "kn": "ಕೆಂಬು", "uk": "колючка", "bn": "কাঁটা", "hi": "काँटा", "bs": "trn"}}
-{"guid": "N38_012", "translations": {"ro": "mugur", "pl": "pąk", "th": "ตา", "ta": "முக்காய்", "kn": "ಗುಡ್ಡು", "uk": "брунька", "bn": "কুঁড়ি", "hi": "कुँ—or कृ: unclear", "bs": "pupoljak"}}
-{"guid": "N38_013", "translations": {"ro": "floare", "pl": "kwiat", "th": "ดอกไม้", "ta": "பூ", "kn": "ಪुष್ಪ", "uk": "квітка", "bn": "ফুল", "hi": "फूल", "bs": "cvijet"}}
-{"guid": "N38_014", "translations": {"ro": "lamă de iarbă", "pl": "źdźbło", "th": "ใบหญ้า", "ta": "இலை", "kn": "ಊದು", "uk": "листина", "bn": "তৃণপত্র", "hi": "घास की पत्ती"}}
+{"guid": "N38_001", "translations": {"ro": "frunză", "pl": "liść", "th": "ใบ", "ms": "daun", "ta": "இலை", "kn": "ಇಲೆ", "uk": "лист", "bn": "পাতা", "hi": "पत्ता", "tr": "yaprak", "bs": "list"}}
+{"guid": "N38_002", "translations": {"ro": "rădăcină", "pl": "korzeń", "th": "ราก", "ms": "akar", "ta": "வேர்", "kn": "ಮೂಲ", "uk": "корінь", "bn": "মূল", "hi": "मूल", "tr": "kök"}}
+{"guid": "N38_003", "translations": {"ro": "ramură", "pl": "gałąź", "th": "กิ่ง", "ms": "cabang", "ta": "கிளை", "kn": "ಕೊಂಬೆ", "uk": "гілка", "bn": "শাখা", "hi": "शाखा", "tr": "dal", "bs": "grana"}}
+{"guid": "N38_004", "translations": {"ro": "sămânță", "pl": "nasiono", "th": "เมล็ด", "ms": "biji benih", "ta": "முதல்", "kn": "ಬೀಜ", "uk": "насінина", "bn": "বীজ", "hi": "बीज", "tr": "tohum"}}
+{"guid": "N38_005", "translations": {"ro": "fruct", "pl": "owoc", "th": "ผลไม้", "ms": "buah", "ta": "பழம்", "kn": "ಹಣ್ಣು", "uk": "плід", "bn": "ফল", "hi": "फल", "tr": "meyve"}}
+{"guid": "N38_006", "translations": {"ro": "coroană", "pl": "kora", "th": "เปลือกไม้", "ms": "kulit kayu", "ta": "துமுண்டு", "kn": "ಚರ್ಮ", "uk": "кора", "bn": "ছাল", "hi": "छाल", "tr": "kabuk", "bs": "kora"}}
+{"guid": "N38_007", "translations": {"ro": "polen", "pl": "pyłek", "th": "เกสร", "ms": "debunga", "ta": "தூசி", "kn": "ಪಶುಲತಾ (Note: Kannada common word is 'ಹುಲ್ಲು ಧೂಳು' but lemma 'ಪುಲೆನ್' is 'ಪುಲೆನ್' not appropriate)", "uk": "пилок", "bn": "পরাগ", "hi": "पराग", "tr": "polen", "bs": "pelud"}}
+{"guid": "N38_008", "translations": {"ro": "trunchi", "pl": "pień", "th": "ลำต้น", "ms": "batang pokok", "ta": "தண்டு", "kn": "ತಣತೆ", "uk": "стовбур", "bn": "তনু", "hi": "तना", "tr": "ağaç gövdesi", "bs": "deblo"}}
+{"guid": "N38_009", "translations": {"ro": "tulpină", "pl": "łodyga", "th": "ลำต้น", "ms": "batang", "ta": "தண்டு", "kn": "ಹಸುರುಮುರು", "uk": "стебло", "bn": "তান্ডুল", "hi": "तना", "tr": "gövde", "bs": "stabljika"}}
+{"guid": "N38_010", "translations": {"ro": "petală", "pl": "płatek", "th": "กลีบดอก", "ms": "kelopak bunga", "ta": "மலர்பேர்", "kn": "ಪುಷ್ಪಪತ್ರ", "uk": "пелюстка", "bn": "পাপড়ি", "hi": "पंखुड़ी", "tr": "taç yaprağı", "bs": "latica"}}
+{"guid": "N38_011", "translations": {"ro": "țăpina", "pl": "cierń", "th": "หนาม", "ms": "duri", "ta": "முனைநீர்", "kn": "ಕೆಂಬು", "uk": "колючка", "bn": "কাঁটা", "hi": "काँटा", "tr": "diken", "bs": "trn"}}
+{"guid": "N38_012", "translations": {"ro": "mugur", "pl": "pąk", "th": "ตา", "ms": "tunas", "ta": "முக்காய்", "kn": "ಗುಡ್ಡು", "uk": "брунька", "bn": "কুঁড়ি", "hi": "कुँ—or कृ: unclear", "tr": "tomurcuk", "bs": "pupoljak"}}
+{"guid": "N38_013", "translations": {"ro": "floare", "pl": "kwiat", "th": "ดอกไม้", "ms": "bunga", "ta": "பூ", "kn": "ಪुष್ಪ", "uk": "квітка", "bn": "ফুল", "hi": "फूल", "tr": "çiçek", "bs": "cvijet"}}
+{"guid": "N38_014", "translations": {"ro": "lamă de iarbă", "pl": "źdźbło", "th": "ใบหญ้า", "ms": "helaian rumput", "ta": "இலை", "kn": "ಊದು", "uk": "листина", "bn": "তৃণপত্র", "hi": "घास की पत्ती", "tr": "yaprakçık"}}
+{"guid": "N38_015", "translations": {"ms": "tanah", "hi": "मिट्टी", "tr": "toprak"}}
+{"guid": "N38_016", "translations": {"ms": "ovari", "hi": "अंडाशय", "tr": "yumurtalık"}}
+{"guid": "N38_017", "translations": {"ms": "kambium", "hi": "कैम्बियम", "tr": "kambiyum"}}
+{"guid": "N38_018", "translations": {"ms": "floem", "hi": "फ्लोएम", "tr": "floem"}}
+{"guid": "N38_019", "translations": {"ms": "meristem", "hi": "विभज्योतक", "tr": "meristem"}}
+{"guid": "N38_020", "translations": {"ms": "buah pala", "hi": "जायफल", "tr": "muskat cevizi"}}
+{"guid": "N38_021", "translations": {"ms": "daun tarragon", "hi": "तारगोन की पत्ती", "tr": "tarhun yaprağı"}}
+{"guid": "N38_022", "translations": {"ms": "lobak pedas", "hi": "सहिजन", "tr": "yaban turpu"}}
+{"guid": "N38_023", "translations": {"ms": "cengkih", "hi": "लौंग", "tr": "karanfil"}}
+{"guid": "N38_024", "translations": {"ms": "ulas bawang putih", "hi": "कली", "tr": "diş"}}
+{"guid": "N38_025", "translations": {"ms": "ranting kecil", "hi": "टहनी", "tr": "filiz"}}
+{"guid": "N38_026", "translations": {"ms": "xilem", "hi": "जाइलम", "tr": "ksilem"}}

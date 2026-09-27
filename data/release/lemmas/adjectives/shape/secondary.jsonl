@@ -1,18 +1,27 @@
-{"guid": "A03_001", "translations": {"ro": "circular", "pl": "okrągły", "th": "กลม", "ta": "வட்டமான", "kn": "ವೃತ್ತಾಕಾರದ", "uk": "круглий", "bn": "বৃত্তাকার", "hi": "गोल", "bs": "okrugao"}}
-{"guid": "A03_002", "translations": {"ro": "pătrat", "pl": "kwadratowy", "th": "สี่เหลี่ยมจัตุรัส", "ta": "சதுரமான", "kn": "ಚೌಕಾಕಾರದ", "uk": "квадратний", "bn": "বর্গাকার", "hi": "वर्गाकार", "bs": "kvadratan"}}
-{"guid": "A03_003", "translations": {"ro": "dreptunghiular", "pl": "prostokątny", "th": "สี่เหลี่ยมผืนผ้า", "ta": "செவ்வகமான", "kn": "ಆಯತಾಕಾರದ", "uk": "прямокутний", "bn": "আয়তাকার", "hi": "आयताकार", "bs": "pravokutan"}}
-{"guid": "A03_004", "translations": {"ro": "triunghiular", "pl": "trójkątny", "th": "สามเหลี่ยม", "ta": "முக்கோணமான", "kn": "ತ್ರಿಕೋನಾಕಾರದ", "uk": "трикутний", "bn": "ত্রিকোণী", "hi": "त्रिकोणीय", "bs": "trokutan"}}
-{"guid": "A03_005", "translations": {"ro": "oval", "pl": "owalny", "th": "รูปไข่", "ta": "நீள்வட்டமான", "kn": "ಅಂಡಾಕಾರದ", "uk": "овальний", "bn": "আন্ড яй?", "hi": "अंडाकार", "bs": "ovalan"}}
-{"guid": "A03_006", "translations": {"ro": "cubic", "pl": "sześcienny", "th": "ลูกบาศก์", "ta": "கன சதுரமான", "kn": "ಘನಾಕಾರದ", "uk": "кубічний", "bn": "ঘনাকৃতি", "hi": "घनाकार", "bs": "kubski"}}
-{"guid": "A03_007", "translations": {"ro": "sferic", "pl": "kulisty", "th": "ทรงกลม", "ta": "கோளமான", "kn": "ಗೋಳಾಕಾರದ", "uk": "сферичний", "bn": "বৃত্তাকার", "hi": "गोलीय", "bs": "sferičan"}}
-{"guid": "A03_008", "translations": {"ro": "cilindric", "pl": "cylindryczny", "th": "ทรงกระบอก", "ta": "உருளை வடிவமான", "kn": "ಸಿಲಿಂಡರಾಕಾರದ", "uk": "циліндричний", "bn": "সিলিন্ড্রিকাল", "hi": "सिलिण्ड्रीय", "bs": "cilindričan"}}
-{"guid": "A03_009", "translations": {"ro": "conic", "pl": "stożkowy", "th": "รูปกรวย", "ta": "கூம்பு வடிவமான", "kn": "ಶಂಕುವಿನಾಕಾರದ", "uk": "конічний", "bn": "শঙ্কুভ-shaped", "hi": "शंकुाकार", "bs": "koničan"}}
-{"guid": "A03_010", "translations": {"ro": "piramidal", "pl": "piramidalny", "th": "รูปพีระมิด", "ta": "கூம்பகமான", "kn": "ಪಿರಮಿಡ್ ಆಕಾರದ", "uk": "пірамідальний", "bn": "পিরামিডাকার", "hi": "पिरामिडाकार", "bs": "piramidalan"}}
-{"guid": "A03_011", "translations": {"ro": "hexagonal", "pl": "sześciokątny", "th": "หกเหลี่ยม", "ta": "அறுகோணமான", "kn": "ಷಡ್ಭುಜಾಕಾರದ", "uk": "шестикутний", "bn": "ষাঁড়ভুজী", "hi": "षट्भुजी", "bs": "šesterokutan"}}
-{"guid": "A03_012", "translations": {"ro": "pentagonal", "pl": "pięciokątny", "th": "ห้าเหลี่ยม", "ta": "ஐங்கோணமான", "kn": "ಪಂಚಭುಜಾಕಾರದ", "uk": "п'ятикутний", "bn": "পঞ্চকোণীয়", "hi": "पंचकोणीय", "bs": "peterougaon"}}
-{"guid": "A03_013", "translations": {"ro": "octogonal", "pl": "ośmiokątny", "th": "แปดเหลี่ยม", "ta": "எண்கோணமான", "kn": "ಅಷ್ಟಭುಜಾಕಾರದ", "uk": "восьмикутний", "bn": "অষ্টকোণী", "hi": "अष्टभुजी", "bs": "osmerokutan"}}
-{"guid": "A03_014", "translations": {"ro": "drept", "pl": "prosty", "th": "ตรง", "ta": "நேரான", "kn": "ನೇರವಾದ", "uk": "прямий", "bn": "সোজা", "hi": "सीधा", "bs": "ravan"}}
-{"guid": "A03_015", "translations": {"ro": "modelat", "pl": "ukształtowany", "th": "เป็นรูปทรง", "ta": "வடிவமான", "kn": "ಆಕಾರದ", "uk": "форма́вий", "bn": "আকৃতিগত", "hi": "आकृतिगत"}}
-{"guid": "A03_016", "translations": {"ro": "curbat", "pl": "zakrzywiony", "th": "โค้ง", "ta": "வளைந்த", "kn": "ಬಾಗಿದ", "uk": "вигнутий", "bn": "বাঁকা", "hi": "मोड़युक्त", "bs": "zakrivljen"}}
-{"guid": "A03_017", "translations": {"ro": "gol", "pl": "pusty", "th": "กลวง", "ta": "உள்ளீடற்ற", "kn": "ಟೊಳ್ಳಾದ", "uk": "порожнистий", "bn": "গহ্বরপূর্ণ", "hi": "खोलापन", "bs": "šuplji"}}
-{"guid": "A03_018", "translations": {"ro": "spiralat", "pl": "spiralny", "th": "เกลียว", "ta": "சுருள் வடிவமான", "kn": "ಸುರುಳಿಯಾಕಾರದ", "bs": "spiralan"}}
+{"guid": "A03_001", "translations": {"ro": "circular", "pl": "okrągły", "th": "กลม", "ms": "bulat", "ta": "வட்டமான", "kn": "ವೃತ್ತಾಕಾರದ", "uk": "круглий", "bn": "বৃত্তাকার", "hi": "गोल", "tr": "yuvarlak", "bs": "okrugao"}}
+{"guid": "A03_002", "translations": {"ro": "pătrat", "pl": "kwadratowy", "th": "สี่เหลี่ยมจัตุรัส", "ms": "berbentuk segi empat sama", "ta": "சதுரமான", "kn": "ಚೌಕಾಕಾರದ", "uk": "квадратний", "bn": "বর্গাকার", "hi": "वर्गाकार", "tr": "kare", "bs": "kvadratan"}}
+{"guid": "A03_003", "translations": {"ro": "dreptunghiular", "pl": "prostokątny", "th": "สี่เหลี่ยมผืนผ้า", "ms": "berbentuk segi empat tepat", "ta": "செவ்வகமான", "kn": "ಆಯತಾಕಾರದ", "uk": "прямокутний", "bn": "আয়তাকার", "hi": "आयताकार", "tr": "dikdörtgen", "bs": "pravokutan"}}
+{"guid": "A03_004", "translations": {"ro": "triunghiular", "pl": "trójkątny", "th": "สามเหลี่ยม", "ms": "berbentuk segi tiga", "ta": "முக்கோணமான", "kn": "ತ್ರಿಕೋನಾಕಾರದ", "uk": "трикутний", "bn": "ত্রিকোণী", "hi": "त्रिकोणीय", "tr": "üçgen", "bs": "trokutan"}}
+{"guid": "A03_005", "translations": {"ro": "oval", "pl": "owalny", "th": "รูปไข่", "ms": "bujur", "ta": "நீள்வட்டமான", "kn": "ಅಂಡಾಕಾರದ", "uk": "овальний", "bn": "আন্ড яй?", "hi": "अंडाकार", "tr": "oval", "bs": "ovalan"}}
+{"guid": "A03_006", "translations": {"ro": "cubic", "pl": "sześcienny", "th": "ลูกบาศก์", "ms": "berbentuk kubus", "ta": "கன சதுரமான", "kn": "ಘನಾಕಾರದ", "uk": "кубічний", "bn": "ঘনাকৃতি", "hi": "घनाकार", "tr": "kübik", "bs": "kubski"}}
+{"guid": "A03_007", "translations": {"ro": "sferic", "pl": "kulisty", "th": "ทรงกลม", "ms": "berbentuk sfera", "ta": "கோளமான", "kn": "ಗೋಳಾಕಾರದ", "uk": "сферичний", "bn": "বৃত্তাকার", "hi": "गोलीय", "tr": "küresel", "bs": "sferičan"}}
+{"guid": "A03_008", "translations": {"ro": "cilindric", "pl": "cylindryczny", "th": "ทรงกระบอก", "ms": "berbentuk silinder", "ta": "உருளை வடிவமான", "kn": "ಸಿಲಿಂಡರಾಕಾರದ", "uk": "циліндричний", "bn": "সিলিন্ড্রিকাল", "hi": "सिलिण्ड्रीय", "tr": "silindirik", "bs": "cilindričan"}}
+{"guid": "A03_009", "translations": {"ro": "conic", "pl": "stożkowy", "th": "รูปกรวย", "ms": "berbentuk kon", "ta": "கூம்பு வடிவமான", "kn": "ಶಂಕುವಿನಾಕಾರದ", "uk": "конічний", "bn": "শঙ্কুভ-shaped", "hi": "शंकुाकार", "tr": "konik", "bs": "koničan"}}
+{"guid": "A03_010", "translations": {"ro": "piramidal", "pl": "piramidalny", "th": "รูปพีระมิด", "ms": "berbentuk piramid", "ta": "கூம்பகமான", "kn": "ಪಿರಮಿಡ್ ಆಕಾರದ", "uk": "пірамідальний", "bn": "পিরামিডাকার", "hi": "पिरामिडाकार", "tr": "piramit şeklinde", "bs": "piramidalan"}}
+{"guid": "A03_011", "translations": {"ro": "hexagonal", "pl": "sześciokątny", "th": "หกเหลี่ยม", "ms": "heksagon", "ta": "அறுகோணமான", "kn": "ಷಡ್ಭುಜಾಕಾರದ", "uk": "шестикутний", "bn": "ষাঁড়ভুজী", "hi": "षट्भुजी", "tr": "altıgen", "bs": "šesterokutan"}}
+{"guid": "A03_012", "translations": {"ro": "pentagonal", "pl": "pięciokątny", "th": "ห้าเหลี่ยม", "ms": "berbentuk pentagon", "ta": "ஐங்கோணமான", "kn": "ಪಂಚಭುಜಾಕಾರದ", "uk": "п'ятикутний", "bn": "পঞ্চকোণীয়", "hi": "पंचकोणीय", "tr": "beşgen", "bs": "peterougaon"}}
+{"guid": "A03_013", "translations": {"ro": "octogonal", "pl": "ośmiokątny", "th": "แปดเหลี่ยม", "ms": "segi lapan", "ta": "எண்கோணமான", "kn": "ಅಷ್ಟಭುಜಾಕಾರದ", "uk": "восьмикутний", "bn": "অষ্টকোণী", "hi": "अष्टभुजी", "tr": "sekizgen", "bs": "osmerokutan"}}
+{"guid": "A03_014", "translations": {"ro": "drept", "pl": "prosty", "th": "ตรง", "ms": "lurus", "ta": "நேரான", "kn": "ನೇರವಾದ", "uk": "прямий", "bn": "সোজা", "hi": "सीधा", "tr": "düz", "bs": "ravan"}}
+{"guid": "A03_015", "translations": {"ro": "modelat", "pl": "ukształtowany", "th": "เป็นรูปทรง", "ms": "berbentuk", "ta": "வடிவமான", "kn": "ಆಕಾರದ", "uk": "форма́вий", "bn": "আকৃতিগত", "hi": "आकृतिगत", "tr": "şekilli"}}
+{"guid": "A03_016", "translations": {"ro": "curbat", "pl": "zakrzywiony", "th": "โค้ง", "ms": "melengkung", "ta": "வளைந்த", "kn": "ಬಾಗಿದ", "uk": "вигнутий", "bn": "বাঁকা", "hi": "मोड़युक्त", "tr": "eğri", "bs": "zakrivljen"}}
+{"guid": "A03_017", "translations": {"ro": "gol", "pl": "pusty", "th": "กลวง", "ms": "berongga", "ta": "உள்ளீடற்ற", "kn": "ಟೊಳ್ಳಾದ", "uk": "порожнистий", "bn": "গহ্বরপূর্ণ", "hi": "खोलापन", "tr": "içi boş", "bs": "šuplji"}}
+{"guid": "A03_018", "translations": {"ro": "spiralat", "pl": "spiralny", "th": "เกลียว", "ms": "berbentuk spiral", "ta": "சுருள் வடிவமான", "kn": "ಸುರುಳಿಯಾಕಾರದ", "hi": "सर्पिलाकार", "tr": "sarmal", "bs": "spiralan"}}
+{"guid": "A03_019", "translations": {"ms": "berbentuk empat sisi", "hi": "चतुर्भुजीय", "tr": "dörtgen"}}
+{"guid": "A03_020", "translations": {"ms": "berbentuk kon", "hi": "शंक्वाकार", "tr": "konik"}}
+{"guid": "A03_021", "translations": {"ms": "bersudut", "hi": "कोणीय", "tr": "köşeli"}}
+{"guid": "A03_022", "translations": {"ms": "elips", "hi": "दीर्घवृत्ताकार", "tr": "eliptik"}}
+{"guid": "A03_023", "translations": {"ms": "amorfus", "hi": "आकारहीन", "tr": "şekilsiz"}}
+{"guid": "A03_024", "translations": {"ms": "tiga dimensi", "hi": "त्रि-आयामी", "tr": "üç boyutlu"}}
+{"guid": "A03_025", "translations": {"ms": "berbentuk jelas", "hi": "स्पष्ट रूपरेखा वाला", "tr": "belirgin hatlara sahip"}}
+{"guid": "A03_026", "translations": {"ms": "berbentuk U", "hi": "यू-आकार का", "tr": "U şeklinde"}}
+{"guid": "A03_027", "translations": {"ms": "berlingkar", "hi": "घुमावदार", "tr": "kıvrımlı"}}

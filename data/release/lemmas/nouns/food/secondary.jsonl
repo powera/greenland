@@ -1,116 +1,182 @@
-{"guid": "N06_001", "translations": {"ro": "pâine", "pl": "chleb", "th": "ขนมปัง", "ta": "ரொட்டி", "kn": "ಬ್ರೆಡ್", "uk": "хліб", "bn": "রুটি", "hi": "रोटी", "el": "ψωμί", "bs": "hljeb"}}
-{"guid": "N06_007", "translations": {"ro": "carne", "pl": "mięso", "th": "เนื้อ", "ta": "இறைச்சி", "kn": "ಮಾಂಸ", "uk": "м’ясо", "bn": "মাংস", "hi": "मांस", "el": "κρέας", "bs": "meso"}}
-{"guid": "N06_008", "translations": {"ro": "pește", "pl": "ryba", "th": "ปลา", "ta": "மீன்", "kn": "ಮೀನು", "uk": "риба", "bn": "মাছ", "hi": "मछली", "bs": "riba"}}
-{"guid": "N06_009", "translations": {"ro": "ou", "pl": "jajko", "th": "ไข่", "ta": "முட்டை", "kn": "ಮೊಟ್ಟೆ", "uk": "яйце", "bn": "ডিম", "hi": "अंडा", "bs": "jaje"}}
-{"guid": "N06_010", "translations": {"ro": "brânză", "pl": "ser", "th": "ชีส", "ta": "பாலாடைக்கட்டி", "kn": "ಚೀಸ್", "uk": "сир", "bn": "চিজ", "hi": "पनीर", "bs": "sir"}}
-{"guid": "N06_011", "translations": {"ro": "unt", "pl": "masło", "th": "เนย", "ta": "வெண்ணெய்", "kn": "ಬೆಣ್ಣೆ", "uk": "масло", "bn": "মাখন", "hi": "मक्खन", "bs": "maslac"}}
-{"guid": "N06_012", "translations": {"ro": "zahăr", "pl": "cukier", "th": "น้ำตาล", "ta": "சர்க்கரை", "kn": "ಸಕ್ಕರೆ", "uk": "цукор", "bn": "চিনি", "hi": "चीनी", "el": "ζάχαρη", "bs": "šećer"}}
-{"guid": "N06_013", "translations": {"ro": "sare", "pl": "sól", "th": "เกลือ", "ta": "உப்பு", "kn": "ಉಪ್ಪು", "uk": "сіль", "bn": "লবণ", "hi": "नमक", "el": "αλάτι", "bs": "so"}}
-{"guid": "N06_014", "translations": {"ro": "cartof", "pl": "ziemniak", "th": "มันฝรั่ง", "ta": "உருளைக்கிழங்கு", "kn": "ಆಲೂಗಡ್ಡೆ", "uk": "картопля", "bn": "আলু", "hi": "आलू", "el": "πατάτα", "bs": "krompir"}}
-{"guid": "N06_015", "translations": {"ro": "măr", "pl": "jabłko", "th": "แอปเปิ้ล", "ta": "ஆப்பிள்", "kn": "ಸೇಬು", "uk": "яблуко", "bn": "আপেল", "hi": "सेब", "el": "μήλο", "bs": "jabuka"}}
-{"guid": "N06_016", "translations": {"ro": "banană", "pl": "banan", "th": "กล้วย", "ta": "வாழைப்பழம்", "kn": "ಬಾಳೆಹಣ್ಣು", "uk": "банан", "bn": "কলা", "hi": "केला", "el": "μπανάνα", "bs": "banana"}}
-{"guid": "N06_017", "translations": {"ro": "portocală", "pl": "pomarańcza", "th": "ส้ม", "ta": "ஆரஞ்சு", "kn": "ಕಿತ್ತಳೆ", "uk": "апельсин", "bn": "কমলা", "hi": "संतरा", "bs": "naranča"}}
-{"guid": "N06_018", "translations": {"ro": "roșie", "pl": "pomidor", "th": "มะเขือเทศ", "ta": "தக்காளி", "kn": "ಟೊಮೆಟೊ", "uk": "помідор", "bn": "টমেটো", "hi": "टमाटर", "el": "ντομάτα", "bs": "paradajz"}}
-{"guid": "N06_019", "translations": {"ro": "ceapă", "pl": "cebula", "th": "หัวหอม", "ta": "வெங்காயம்", "kn": "ಈರುಳ್ಳಿ", "uk": "цибуля", "bn": "পেঁয়াজ", "hi": "प्याज़", "bs": "luk"}}
-{"guid": "N06_020", "translations": {"ro": "orez", "pl": "ryż", "th": "ข้าว", "ta": "அரிசி", "kn": "ಅಕ್ಕಿ", "uk": "рис", "bn": "চাল", "hi": "चावल", "el": "ρύζι", "bs": "riža"}}
-{"guid": "N06_021", "translations": {"ro": "supă", "pl": "zupa", "th": "ซุป", "ta": "சூப்", "kn": "ಸೂಪ್", "uk": "суп", "bn": "সুপ", "hi": "सूप", "el": "σούπα", "bs": "supa"}}
-{"guid": "N06_022", "translations": {"ro": "tort", "pl": "ciasto", "th": "เค้ก", "ta": "கேக்", "kn": "ಕೇಕ್", "uk": "торт", "bn": "কেক", "hi": "केक", "bs": "torta"}}
-{"guid": "N06_023", "translations": {"ro": "ciocolată", "pl": "czekolada", "th": "ช็อกโกแลต", "ta": "சாக்லேட்", "kn": "ಚಾಕೊಲೇಟ್", "uk": "шоколад", "bn": "চকলেট", "hi": "चॉकलेट", "bs": "čokolada"}}
-{"guid": "N06_024", "translations": {"ro": "paste", "pl": "makaron", "th": "พาสต้า", "ta": "பாஸ்தா", "kn": "ಪಾಸ್ತಾ", "uk": "паста", "bn": "পাস্তা", "hi": "पास्ता", "bs": "tjestenina"}}
-{"guid": "N06_026", "translations": {"ro": "pizza", "pl": "pizza", "th": "พิซซ่า", "ta": "பீட்சா", "kn": "ಪಿಜ್ಜಾ", "uk": "піца", "bn": "পিজ্জা", "hi": "पिज़्ज़ा", "bs": "pizza"}}
-{"guid": "N06_027", "translations": {"ro": "sandviș", "pl": "kanapka", "th": "แซนด์วิช", "ta": "சாண்ட்விச்", "kn": "ಸ್ಯಾಂಡ್‌ವಿಚ್", "uk": "сендвіч", "bn": "স্যান্ডউইচ", "hi": "सैंडविच", "bs": "sendvič"}}
-{"guid": "N06_028", "translations": {"ro": "salată", "pl": "sałatka", "th": "สลัด", "ta": "சாலட்", "kn": "ಸಲಾಡ್", "uk": "салат", "bn": "সালাদ", "hi": "सलाद", "bs": "salata"}}
-{"guid": "N06_029", "translations": {"ro": "iaurt", "pl": "jogurt", "th": "โยเกิร์ต", "ta": "தயிர்", "kn": "ಮೊಸರು", "uk": "йогурт", "bn": "দই", "hi": "दही", "bs": "jogurt"}}
-{"guid": "N06_030", "translations": {"ro": "miere", "pl": "miód", "th": "น้ำผึ้ง", "ta": "தேன்", "kn": "ಜೇನುತುಪ್ಪ", "uk": "мед", "bn": "মধু", "hi": "शहद", "bs": "med"}}
-{"guid": "N06_031", "translations": {"ro": "gem", "pl": "dżem", "th": "แยม", "ta": "ஜாம்", "kn": "ಜಾಮ್", "uk": "варення", "bn": "জ্যাম", "hi": "जैम", "bs": "pekmez"}}
-{"guid": "N06_032", "translations": {"ro": "castravete murat", "pl": "korniszon", "th": "ผักดอง", "ta": "ஊறுகாய்", "kn": "ಉಪ್ಪಿನಕಾಯಿ", "uk": "маринований огірок", "bn": "অ্যাচার/আচার (অ্যাচার is less common in Bengali script?)", "hi": "अचार वाला खीरा", "bs": "kiseli krastavac"}}
-{"guid": "N06_033", "translations": {"ro": "muștar", "pl": "musztarda", "th": "มัสตาร์ด", "ta": "கடுகு", "kn": "ಸಾಸಿವೆ", "uk": "гірчиця", "bn": "সরিষা", "hi": "सरसों", "bs": "senf"}}
-{"guid": "N06_034", "translations": {"ro": "ketchup", "pl": "keczup", "th": "ซอสมะเขือเทศ", "ta": "கெட்சப்", "kn": "ಕೆಚಪ್", "uk": "кетчуп", "bn": "কেচাপ", "hi": "केचাপ"}}
-{"guid": "N06_035", "translations": {"ro": "maioneză", "pl": "majonez", "th": "มายองเนส", "ta": "மயோனைஸ்", "kn": "ಮಯೋನೈಸ್", "uk": "майонез", "bn": "ময়োনেস", "hi": "मायोनज़"}}
-{"guid": "N06_036", "translations": {"ro": "oțet", "pl": "ocet", "th": "น้ำส้มสายชู", "ta": "வினிகர்", "kn": "ವಿನೆಗರ್", "uk": "оцет", "bn": "সিরকা", "hi": "सिरका"}}
-{"guid": "N06_037", "translations": {"ro": "ulei de gătit", "pl": "olej do gotowania", "th": "น้ำมันปรุงอาหาร", "ta": "சமையல் எண்ணெய்", "kn": "ಅಡುಗೆ ಎಣ್ಣೆ", "uk": "рослинна олія", "bn": "রান্নার তেল", "hi": "खान-पान का तेल", "bs": "ulje za kuhanje"}}
-{"guid": "N06_038", "translations": {"ro": "făină", "pl": "mąka", "th": "แป้ง", "ta": "மாவு", "kn": "ಹಿಟ್ಟು", "uk": "борошно", "bn": "ময়দা", "hi": "आटा", "bs": "brašno"}}
-{"guid": "N06_039", "translations": {"ro": "porumb", "pl": "kukurydza", "th": "ข้าวโพด", "ta": "மக்காச்சோளம்", "kn": "ಮೆಕ್ಕೆ ಜೋಳ", "uk": "кукурудза", "bn": "ভুট্টা", "hi": "मकई", "bs": "kukuruz"}}
-{"guid": "N06_040", "translations": {"ro": "fasole", "pl": "fasola", "th": "ถั่ว", "ta": "பீன்ஸ்", "kn": "ಅವರೆಕಾಯಿ", "uk": "квасоля", "bn": "শিম", "hi": "राजमा", "bs": "grah"}}
-{"guid": "N06_041", "translations": {"ro": "mazăre", "pl": "groszek", "th": "ถั่วลันเตา", "ta": "பட்டாணி", "kn": "ಬಟಾಣಿ", "uk": "горох", "bn": "মটর", "hi": "मटर", "bs": "grašak"}}
-{"guid": "N06_042", "translations": {"ro": "lămâie", "pl": "cytryna", "th": "มะนาว", "ta": "எலுமிச்சை", "kn": "ನಿಂಬೆ", "uk": "лимон", "bn": "লেবু", "hi": "नींबू", "bs": "limun"}}
-{"guid": "N06_043", "translations": {"ro": "limetă", "pl": "limonka", "th": "มะนาว", "ta": "எலுமிச்சம்பழம்", "kn": "ಲಿಂಬೆ", "uk": "лайм", "bn": "লেবু", "hi": "लाइम", "bs": "limeta"}}
-{"guid": "N06_044", "translations": {"ro": "strugure", "pl": "winogrono", "th": "องุ่น", "ta": "திராட்சை", "kn": "ದ್ರಾಕ್ಷಿ", "uk": "виноград", "bn": "আঙ্গুর", "hi": "अंगूर", "bs": "grožđe"}}
-{"guid": "N06_045", "translations": {"ro": "căpșună", "pl": "truskawka", "th": "สตรอว์เบอร์รี", "ta": "ஸ்ட்ராபெரி", "kn": "ಸ್ಟ್ರಾಬೆರಿ", "uk": "полуниця", "bn": "স্ট্রবেরি", "hi": "स्ट्रॉबेरी"}}
-{"guid": "N06_046", "translations": {"ro": "afină", "pl": "borówka", "th": "บลูเบอร์รี", "ta": "ப்ளூபெரி", "kn": "ಬ್ಲೂಬೆರಿ", "uk": "шовковиця", "bn": "ব্লুবেরি", "hi": "ब्लूबेरी", "bs": "borovnica"}}
-{"guid": "N06_047", "translations": {"ro": "zmeură", "pl": "malina", "th": "ราสป์เบอร์รี", "ta": "ராஸ்பெரி", "kn": "ರಾಸ್ಪ್‌ಬೆರಿ", "uk": "малина", "bn": "রaspberry", "hi": "रसभरी", "bs": "malina"}}
-{"guid": "N06_048", "translations": {"ro": "cireașă", "pl": "wiśnia", "th": "เชอร์รี", "ta": "செர்ரி", "kn": "ಚೆರ್ರಿ", "uk": "вишня", "bn": "চেরি", "hi": "चेरी"}}
-{"guid": "N06_049", "translations": {"ro": "piersică", "pl": "brzoskwinia", "th": "ลูกพีช", "ta": "பீச்", "kn": "ಪೀಚ್", "uk": "персик", "bn": "আড়ুব", "hi": "आड़ू", "bs": "breskva"}}
-{"guid": "N06_050", "translations": {"ro": "pară", "pl": "gruszka", "th": "ลูกแพร์", "ta": "பேரிக்காய்", "kn": "ಪೇರಲ", "uk": "груша", "bn": "নাশপতি", "hi": "नाशपाती", "bs": "kruška"}}
-{"guid": "N06_051", "translations": {"ro": "pepene verde", "pl": "arbuz", "th": "แตงโม", "ta": "தர்பூசணி", "kn": "ಕಲ್ಲಂಗಡಿ", "uk": "кавун", "bn": "তরমুজ", "hi": "तरबूज़", "bs": "lubenica"}}
-{"guid": "N06_052", "translations": {"ro": "pepene galben", "pl": "melon", "th": "เมลอน", "ta": "முலாம்பழம்", "kn": "ಕರಬೂಜ", "uk": "диня/кавун", "bn": "খরবুজ/তরমুজ", "hi": "खरबूजा/तरबूज", "bs": "dinja"}}
-{"guid": "N06_053", "translations": {"ro": "ananas", "pl": "ananas", "th": "สับปะรด", "ta": "அன்னாசி", "kn": "ಅನಾನಸ್", "uk": "ананас", "bn": "আনারস", "hi": "अनानास", "bs": "ananas"}}
-{"guid": "N06_054", "translations": {"ro": "mango", "pl": "mango", "th": "มะม่วง", "ta": "மாம்பழம்", "kn": "ಮಾವಿನಹಣ್ಣು", "uk": "манго", "bn": "আন্ডা আম", "hi": "आम", "bs": "mango"}}
-{"guid": "N06_055", "translations": {"ro": "nucă de cocos", "pl": "kokos", "th": "มะพร้าว", "ta": "தேங்காய்", "kn": "ತೆಂಗಿನಕಾಯಿ", "uk": "кокос", "bn": "নারিকেল", "hi": "नारियल", "bs": "kokos"}}
-{"guid": "N06_056", "translations": {"ro": "nucă", "pl": "orzech włoski", "th": "วอลนัท", "ta": "வால்நட்", "kn": "ಅಕ್ರೋಡ್", "uk": "волоський горіх", "bn": "আখরোট", "hi": "अखरोट", "bs": "orah"}}
-{"guid": "N06_057", "translations": {"ro": "migdală", "pl": "migdał", "th": "อัลมอนด์", "ta": "பாதாம்", "kn": "ಬಾದಾಮಿ", "uk": "мигдаль", "bn": "বাদাম", "hi": "बादाम"}}
-{"guid": "N06_058", "translations": {"ro": "arahidă", "pl": "orzeszek ziemny", "th": "ถั่วลิสง", "ta": "வேர்க்கடலை", "kn": "ಕಡಲೆಕಾಯಿ", "uk": "арахіс", "bn": "বাদামি", "hi": "मूँगफली", "bs": "kikiriki"}}
-{"guid": "N06_059", "translations": {"ro": "ciupercă", "pl": "grzyb", "th": "เห็ด", "ta": "காளான்", "kn": "ಅಣಬೆ", "uk": "гриб", "bn": "কোঁকড়া", "hi": "कुरकटा", "bs": "gljiva"}}
-{"guid": "N06_060", "translations": {"ro": "usturoi", "pl": "czosnek", "th": "กระเทียม", "ta": "பூண்டு", "kn": "ಬೆಳ್ಳುಳ್ಳಿ", "uk": "часник", "bn": "রসুন", "hi": "लहसुन", "bs": "češnjak"}}
-{"guid": "N06_061", "translations": {"ro": "varză", "pl": "kapusta", "th": "กะหล่ำปลี", "ta": "முட்டைக்கோஸ்", "kn": "ಎಲೆಕೋಸು", "uk": "капуста", "bn": "পাতাঁশাক", "hi": "पत्ता गोभी"}}
-{"guid": "N06_062", "translations": {"ro": "lăptucă", "pl": "sałata", "th": "ผักกาดหอม", "ta": "கீரை", "kn": "ಲೆಟ್ಯೂಸ್", "uk": "салат", "bn": "লেটুস", "hi": "लेट्यूस", "bs": "zelena salata"}}
-{"guid": "N06_063", "translations": {"ro": "spanac", "pl": "szpinak", "th": "ผักขม", "ta": "கீரை", "kn": "ಪಾಲಕ್", "uk": "шпинат", "bn": "পালং", "hi": "पालक", "bs": "špinat"}}
-{"guid": "N06_064", "translations": {"ro": "broccoli", "pl": "brokuł", "th": "บรอกโคลี", "ta": "ப்ரோக்கோலி", "kn": "ಬ್ರೊಕೊಲಿ", "uk": "броколі", "bn": "ব্রোকলি", "hi": "ब्रोकली", "bs": "brokula"}}
-{"guid": "N06_065", "translations": {"ro": "conopidă", "pl": "kalafior", "th": "กะหล่ำดอก", "ta": "காலிஃபிளவர்", "kn": "ಹೂಕೋಸು", "uk": "цвітна капуста", "bn": "ফুলকপি", "hi": "फूलगोभी", "bs": "karfiol"}}
-{"guid": "N06_066", "translations": {"ro": "piper", "pl": "pieprz", "th": "พริกไทย", "ta": "மிளகு", "kn": "ಮೆಣಸು", "uk": "перець", "bn": "গোলমরিচ", "hi": "काली मिर्च", "bs": "papar"}}
-{"guid": "N06_067", "translations": {"ro": "castravete", "pl": "ogórek", "th": "แตงกวา", "ta": "வெள்ளரிக்காய்", "kn": "ಸೌತೆಕಾಯಿ", "uk": "огірок", "bn": "শশা", "hi": "खीरा"}}
-{"guid": "N06_068", "translations": {"ro": "țelină", "pl": "seler", "th": "ขึ้นฉ่าย", "ta": "செலரி", "kn": "ಸೆಲರಿ", "uk": "селера", "bn": "কাঁচাগাজর", "hi": "अजवाइन-पाती"}}
-{"guid": "N06_069", "translations": {"ro": "ridiche", "pl": "rzodkiewka", "th": "หัวผักกาด", "ta": "முள்ளங்கி", "kn": "ಮೂಲಂಗಿ", "uk": "редис", "bn": "মূলা", "hi": "मूली", "bs": "rotkvica"}}
-{"guid": "N06_070", "translations": {"ro": "sfeclă", "pl": "burak", "th": "บีทรูท", "ta": "பீட்ரூட்", "kn": "ಬೀಟ್ರೂಟ್", "uk": "буряк", "bn": "বোড়বেট", "hi": "चुकन्दर", "bs": "cikla"}}
-{"guid": "N06_071", "translations": {"ro": "nap", "pl": "rzepa", "th": "หัวผักกาดหัว", "ta": "டர்னிப்", "kn": "ಟರ್ನಿಪ್", "uk": "брюква", "bn": "শালগম", "hi": "शलगम", "bs": "repa"}}
-{"guid": "N06_072", "translations": {"ro": "cârnați", "pl": "kiełbasa", "th": "ไส้กรอก", "ta": "தொத்திறைச்சி", "kn": "ಸಾಸೇಜ್", "uk": "ковбаса", "bn": "সসেজ", "hi": "सॉसेज", "bs": "kobasica"}}
-{"guid": "N06_073", "translations": {"ro": "șuncă", "pl": "szynka", "th": "แฮม", "ta": "ஹாம்", "kn": "ಹ್ಯಾಮ್", "uk": "бекон", "bn": "হ্যাম", "hi": "हैम", "bs": "šunka"}}
-{"guid": "N06_074", "translations": {"ro": "bacon", "pl": "bekon", "th": "เบคอน", "ta": "பேகன்", "kn": "ಬೇಕನ್", "uk": "бекон", "bn": "বেকন", "hi": "बेकन"}}
-{"guid": "N06_075", "translations": {"ro": "carne de pui", "pl": "mięso z kurczaka", "th": "เนื้อไก่", "ta": "கோழி இறைச்சி", "kn": "ಕೋಳಿ ಮಾಂಸ", "uk": "курятина", "bn": "কোঁচি মাংস", "hi": "मुर्गी का मांस", "bs": "pileće meso"}}
-{"guid": "N06_076", "translations": {"ro": "carne de vită", "pl": "wołowina", "th": "เนื้อวัว", "ta": "மாட்டிறைச்சி", "kn": "ಗೋಮಾಂಸ", "uk": "яловичина", "bn": "গরুর মাংস", "hi": "गौमांस", "bs": "govedina"}}
-{"guid": "N06_077", "translations": {"ro": "carne de porc", "pl": "wieprzowina", "th": "เนื้อหมู", "ta": "பன்றி இறைச்சி", "kn": "ಹಂದಿ ಮಾಂಸ", "uk": "свинина", "bn": "শূকরমাংস", "hi": "सूअर का मांस"}}
-{"guid": "N06_078", "translations": {"ro": "carne de miel", "pl": "jagnięcina", "th": "เนื้อแกะ", "ta": "ஆட்டிறைச்சி", "kn": "ಕುರಿ ಮಾಂಸ", "uk": "ягнятина", "bn": "ভেড়ার মাংস", "hi": "भेड़ का मांस", "bs": "janjeće meso"}}
-{"guid": "N06_079", "translations": {"ro": "somon", "pl": "łosoś", "th": "ปลาแซลมอน", "ta": "சால்மன்", "kn": "ಸಾಲ್ಮನ್", "uk": "лосось", "bn": "স্যালমন", "hi": "सालमन", "bs": "losos"}}
-{"guid": "N06_080", "translations": {"ro": "ton", "pl": "tuńczyk", "th": "ปลาทูน่า", "ta": "சூரை மீன்", "kn": "ಟ್ಯೂನ", "uk": "тунець", "bn": "টুনা", "hi": "टूना", "bs": "tuna"}}
-{"guid": "N06_081", "translations": {"ro": "crevete", "pl": "krewetka", "th": "กุ้ง", "ta": "இறால்", "kn": "ಸೀಗಡಿ", "uk": "креветка", "bn": "চিংড়ি", "hi": "झींगा", "bs": "škamp"}}
-{"guid": "N06_082", "translations": {"ro": "crab", "pl": "krab", "th": "ปู", "ta": "நண்டு", "kn": "ಏಡಿ", "uk": "краб", "bn": "কাঁকড়া", "hi": "केकड़ा", "bs": "rak"}}
-{"guid": "N06_083", "translations": {"ro": "homar", "pl": "homar", "th": "กุ้งมังกร", "ta": "நெடுஞ்சுறா", "kn": "ಲಾಬ್ಸ್ಟರ್", "uk": "омар", "bn": "লবস্টার", "hi": "लोब्स्टर", "bs": "jastog"}}
-{"guid": "N06_084", "translations": {"ro": "morcov", "pl": "marchew", "th": "แครอท", "ta": "கேரட்", "kn": "ಗಜ್ಜರಿ", "uk": "морква", "bn": "গাজর", "hi": "गाजर", "bs": "mrkva"}}
-{"guid": "N06_085", "translations": {"ro": "banchet", "pl": "bankiet", "th": "งานเลี้ยง", "ta": "விருந்து", "kn": "ಔತಣಕೂಟ", "uk": "бенкет", "bn": "ভোজ", "hi": "भोज", "bs": "gozba"}}
-{"guid": "N06_086", "translations": {"ro": "mic dejun", "pl": "śniadanie", "th": "อาหารเช้า", "ta": "காலை உணவு", "kn": "ಉಪಾಹಾರ", "uk": "сніданок", "bn": "নাশতা", "hi": "नाश्ता", "bs": "doručak"}}
-{"guid": "N06_087", "translations": {"ro": "prânz", "pl": "obiad", "th": "อาหารกลางวัน", "ta": "மதிய உணவு", "kn": "ಮಧ್ಯಾಹ್ನದ ಊಟ", "uk": "обід", "bn": "দুপুরের খাবার", "hi": "दोपहर का भोजन", "bs": "ručak"}}
-{"guid": "N06_088", "translations": {"ro": "cină", "pl": "kolacja", "th": "อาหารเย็น", "ta": "இரவு உணவு", "kn": "ರಾತ್ರಿ ಊಟ", "uk": "вечеря", "bn": "রাতের খাবার", "hi": "रात का खाना", "bs": "večera"}}
-{"guid": "N06_091", "translations": {"ro": "smântână", "pl": "śmietana", "th": "ครีมเปรี้ยว", "ta": "புளிப்புக் கிரீம்", "kn": "ಹುಳಿ ಕ್ರೀಮ್", "uk": "сметана", "bn": "খাস্তার ক্রীম", "hi": "खट्टा क्रीम", "bs": "kiselo vrhnje"}}
-{"guid": "N06_092", "translations": {"ro": "mâncare", "pl": "jedzenie", "th": "อาหาร", "ta": "உணவு", "kn": "ಆಹಾರ", "uk": "їжа", "bn": "খাদ্য", "hi": "खाद्य", "el": "τροφή", "bs": "hrana"}}
-{"guid": "N06_093", "translations": {"ro": "ardei gras", "pl": "papryka", "th": "พริกหวาน", "ta": "குடை மிளகாய்", "kn": "ದೊಡ್ಡ ಮೆಣಸಿನಕಾಯಿ", "uk": "солодкий перець", "bn": "বেল পেপার", "hi": "शिमला मिर्च"}}
-{"guid": "N06_094", "translations": {"ro": "produse proaspete", "pl": "produkty świeże", "th": "ผลิตผลสด", "ta": "புதிய விளைபொருள்", "kn": "ತಾಜಾ ಉತ್ಪನ್ನ", "uk": "фрукти та овочі", "bn": "ফল-মূল", "hi": "फल और सब्ज़ियाँ"}}
-{"guid": "N06_095", "translations": {"ro": "clătită", "pl": "naleśnik", "th": "แพนเค้ก", "ta": "தோசை", "kn": "ಪ್ಯಾನ್‌ಕೇಕ್", "uk": "млинець", "bn": "প্যানকেক", "hi": "पैनकेक", "bs": "palačinka"}}
-{"guid": "N06_096", "translations": {"ro": "gustare", "pl": "przekąska", "th": "ขนม", "ta": "சிற்றுண்டி", "kn": "ತಿಂಡಿ", "uk": "перекуска", "bn": "স্ন্যাকস", "hi": "नाश्ता", "bs": "užina"}}
-{"guid": "N06_097", "translations": {"ro": "resturile", "pl": "resztki", "th": "อาหารเหลือ", "ta": "மிச்சம்", "kn": "ಉಳಿದ ಆಹಾರ", "uk": "залишок їжі", "bn": "অবশিষ্ট খাবার", "hi": "बचा हुआ खाना"}}
-{"guid": "N06_098", "translations": {"ro": "alimente", "pl": "zakupy spożywcze", "th": "ของชำ", "ta": "மளிகைப் பொருட்கள்", "kn": "ದಿನಸಿ", "uk": "продукти", "bn": "মুদিখানা", "hi": "किराना", "bs": "namirnice"}}
-{"guid": "N06_099", "translations": {"ro": "masă", "pl": "posiłek", "th": "มื้ออาหาร", "ta": "உணவு", "kn": "ಊಟ", "uk": "страва", "bn": "ভোজ", "hi": "भोजन", "bs": "obrok"}}
-{"guid": "N06_100", "translations": {"ro": "fel de mâncare", "pl": "danie", "th": "คอร์ส", "ta": "கோர்ஸ்", "kn": "ಕೋರ್ಸ್", "uk": "стравa", "bn": "কোর্স/কোর্স/পানীয়?", "hi": "पकवान"}}
-{"guid": "N06_101", "translations": {"ro": "curmală", "pl": "daktyl", "th": "อินทผลัม", "ta": "பேரீச்சை", "kn": "ಖರ್ಜೂರ", "uk": "фінік", "bn": "খেজুর", "hi": "खجूर"}}
-{"guid": "N06_102", "translations": {"ro": "supă de bază", "pl": "bulion", "th": "น้ำสต๊อก", "ta": "குழம்புத் தண்ணீர்", "kn": "ಸಾರು", "uk": "бульйон", "bn": "শরবত", "hi": "शोरबा"}}
-{"guid": "N06_103", "translations": {"ro": "chiflă", "pl": "bułka", "th": "ขนมปังก้อนกลม", "ta": "ரொட்டி உருண்டை", "kn": "ರೋಲ್", "uk": "булочка", "bn": "রোল", "hi": "रोल"}}
-{"guid": "N06_104", "translations": {"bs": "sladoled"}}
-{"guid": "N06_105", "translations": {"bs": "šlag"}}
-{"guid": "N06_107", "translations": {"bs": "maslinovo ulje"}}
-{"guid": "N06_108", "translations": {"bs": "sojin umak"}}
-{"guid": "N06_110", "translations": {"bs": "pomfrit"}}
-{"guid": "N06_111", "translations": {"bs": "pire od krompira"}}
-{"guid": "N06_112", "translations": {"bs": "mahuna"}}
-{"guid": "N06_113", "translations": {"bs": "slatki krompir"}}
-{"guid": "N06_115", "translations": {"bs": "soda bikarbona"}}
-{"guid": "N06_117", "translations": {"bs": "javorov sirup"}}
-{"guid": "N06_118", "translations": {"bs": "žvakaća guma"}}
-{"guid": "N06_119", "translations": {"bs": "kremasti sir"}}
-{"guid": "N06_121", "translations": {"bs": "bjelance"}}
-{"guid": "N06_122", "translations": {"bs": "žumance"}}
-{"guid": "N06_123", "translations": {"bs": "voćna salata"}}
-{"guid": "N06_124", "translations": {"bs": "preliv za salatu"}}
-{"guid": "N06_125", "translations": {"bs": "sos od paradajza"}}
-{"guid": "N06_127", "translations": {"bs": "brza hrana"}}
-{"guid": "N06_128", "translations": {"bs": "nezdrava hrana"}}
-{"guid": "N06_130", "translations": {"bs": "smeđi šećer"}}
-{"guid": "N06_131", "translations": {"bs": "lovorov list"}}
+{"guid": "N06_001", "translations": {"ro": "pâine", "pl": "chleb", "th": "ขนมปัง", "ms": "roti", "ta": "ரொட்டி", "kn": "ಬ್ರೆಡ್", "uk": "хліб", "bn": "রুটি", "hi": "रोटी", "tr": "ekmek", "el": "ψωμί", "bs": "hljeb"}}
+{"guid": "N06_007", "translations": {"ro": "carne", "pl": "mięso", "th": "เนื้อ", "ms": "daging", "ta": "இறைச்சி", "kn": "ಮಾಂಸ", "uk": "м’ясо", "bn": "মাংস", "hi": "मांस", "tr": "et", "el": "κρέας", "bs": "meso"}}
+{"guid": "N06_008", "translations": {"ro": "pește", "pl": "ryba", "th": "ปลา", "ms": "ikan", "ta": "மீன்", "kn": "ಮೀನು", "uk": "риба", "bn": "মাছ", "hi": "मछली", "tr": "balık", "bs": "riba"}}
+{"guid": "N06_009", "translations": {"ro": "ou", "pl": "jajko", "th": "ไข่", "ms": "telur", "ta": "முட்டை", "kn": "ಮೊಟ್ಟೆ", "uk": "яйце", "bn": "ডিম", "hi": "अंडा", "tr": "yumurta", "bs": "jaje"}}
+{"guid": "N06_010", "translations": {"ro": "brânză", "pl": "ser", "th": "ชีส", "ms": "keju", "ta": "பாலாடைக்கட்டி", "kn": "ಚೀಸ್", "uk": "сир", "bn": "চিজ", "hi": "पनीर", "tr": "peynir", "bs": "sir"}}
+{"guid": "N06_011", "translations": {"ro": "unt", "pl": "masło", "th": "เนย", "ms": "mentega", "ta": "வெண்ணெய்", "kn": "ಬೆಣ್ಣೆ", "uk": "масло", "bn": "মাখন", "hi": "मक्खन", "tr": "tereyağı", "bs": "maslac"}}
+{"guid": "N06_012", "translations": {"ro": "zahăr", "pl": "cukier", "th": "น้ำตาล", "ms": "gula", "ta": "சர்க்கரை", "kn": "ಸಕ್ಕರೆ", "uk": "цукор", "bn": "চিনি", "hi": "चीनी", "tr": "şeker", "el": "ζάχαρη", "bs": "šećer"}}
+{"guid": "N06_013", "translations": {"ro": "sare", "pl": "sól", "th": "เกลือ", "ms": "garam", "ta": "உப்பு", "kn": "ಉಪ್ಪು", "uk": "сіль", "bn": "লবণ", "hi": "नमक", "tr": "tuz", "el": "αλάτι", "bs": "so"}}
+{"guid": "N06_014", "translations": {"ro": "cartof", "pl": "ziemniak", "th": "มันฝรั่ง", "ms": "kentang", "ta": "உருளைக்கிழங்கு", "kn": "ಆಲೂಗಡ್ಡೆ", "uk": "картопля", "bn": "আলু", "hi": "आलू", "tr": "patates", "el": "πατάτα", "bs": "krompir"}}
+{"guid": "N06_015", "translations": {"ro": "măr", "pl": "jabłko", "th": "แอปเปิ้ล", "ms": "epal", "ta": "ஆப்பிள்", "kn": "ಸೇಬು", "uk": "яблуко", "bn": "আপেল", "hi": "सेब", "tr": "elma", "el": "μήλο", "bs": "jabuka"}}
+{"guid": "N06_016", "translations": {"ro": "banană", "pl": "banan", "th": "กล้วย", "ms": "pisang", "ta": "வாழைப்பழம்", "kn": "ಬಾಳೆಹಣ್ಣು", "uk": "банан", "bn": "কলা", "hi": "केला", "tr": "muz", "el": "μπανάνα", "bs": "banana"}}
+{"guid": "N06_017", "translations": {"ro": "portocală", "pl": "pomarańcza", "th": "ส้ม", "ms": "oren", "ta": "ஆரஞ்சு", "kn": "ಕಿತ್ತಳೆ", "uk": "апельсин", "bn": "কমলা", "hi": "संतरा", "tr": "portakal", "bs": "naranča"}}
+{"guid": "N06_018", "translations": {"ro": "roșie", "pl": "pomidor", "th": "มะเขือเทศ", "ms": "tomato", "ta": "தக்காளி", "kn": "ಟೊಮೆಟೊ", "uk": "помідор", "bn": "টমেটো", "hi": "टमाटर", "tr": "domates", "el": "ντομάτα", "bs": "paradajz"}}
+{"guid": "N06_019", "translations": {"ro": "ceapă", "pl": "cebula", "th": "หัวหอม", "ms": "bawang", "ta": "வெங்காயம்", "kn": "ಈರುಳ್ಳಿ", "uk": "цибуля", "bn": "পেঁয়াজ", "hi": "प्याज़", "tr": "soğan", "bs": "luk"}}
+{"guid": "N06_020", "translations": {"ro": "orez", "pl": "ryż", "th": "ข้าว", "ms": "beras", "ta": "அரிசி", "kn": "ಅಕ್ಕಿ", "uk": "рис", "bn": "চাল", "hi": "चावल", "tr": "pirinç", "el": "ρύζι", "bs": "riža"}}
+{"guid": "N06_021", "translations": {"ro": "supă", "pl": "zupa", "th": "ซุป", "ms": "sup", "ta": "சூப்", "kn": "ಸೂಪ್", "uk": "суп", "bn": "সুপ", "hi": "सूप", "tr": "çorba", "el": "σούπα", "bs": "supa"}}
+{"guid": "N06_022", "translations": {"ro": "tort", "pl": "ciasto", "th": "เค้ก", "ms": "kek", "ta": "கேக்", "kn": "ಕೇಕ್", "uk": "торт", "bn": "কেক", "hi": "केक", "tr": "pasta", "bs": "torta"}}
+{"guid": "N06_023", "translations": {"ro": "ciocolată", "pl": "czekolada", "th": "ช็อกโกแลต", "ms": "coklat", "ta": "சாக்லேட்", "kn": "ಚಾಕೊಲೇಟ್", "uk": "шоколад", "bn": "চকলেট", "hi": "चॉकलेट", "tr": "çikolata", "bs": "čokolada"}}
+{"guid": "N06_024", "translations": {"ro": "paste", "pl": "makaron", "th": "พาสต้า", "ms": "pasta", "ta": "பாஸ்தா", "kn": "ಪಾಸ್ತಾ", "uk": "паста", "bn": "পাস্তা", "hi": "पास्ता", "tr": "makarna", "bs": "tjestenina"}}
+{"guid": "N06_026", "translations": {"ro": "pizza", "pl": "pizza", "th": "พิซซ่า", "ms": "piza", "ta": "பீட்சா", "kn": "ಪಿಜ್ಜಾ", "uk": "піца", "bn": "পিজ্জা", "hi": "पिज़्ज़ा", "tr": "pizza", "bs": "pizza"}}
+{"guid": "N06_027", "translations": {"ro": "sandviș", "pl": "kanapka", "th": "แซนด์วิช", "ms": "sandwic", "ta": "சாண்ட்விச்", "kn": "ಸ್ಯಾಂಡ್‌ವಿಚ್", "uk": "сендвіч", "bn": "স্যান্ডউইচ", "hi": "सैंडविच", "tr": "sandviç", "bs": "sendvič"}}
+{"guid": "N06_028", "translations": {"ro": "salată", "pl": "sałatka", "th": "สลัด", "ms": "salad", "ta": "சாலட்", "kn": "ಸಲಾಡ್", "uk": "салат", "bn": "সালাদ", "hi": "सलाद", "tr": "salata", "bs": "salata"}}
+{"guid": "N06_029", "translations": {"ro": "iaurt", "pl": "jogurt", "th": "โยเกิร์ต", "ms": "yogurt", "ta": "தயிர்", "kn": "ಮೊಸರು", "uk": "йогурт", "bn": "দই", "hi": "दही", "tr": "yoğurt", "bs": "jogurt"}}
+{"guid": "N06_030", "translations": {"ro": "miere", "pl": "miód", "th": "น้ำผึ้ง", "ms": "madu", "ta": "தேன்", "kn": "ಜೇನುತುಪ್ಪ", "uk": "мед", "bn": "মধু", "hi": "शहद", "tr": "bal", "bs": "med"}}
+{"guid": "N06_031", "translations": {"ro": "gem", "pl": "dżem", "th": "แยม", "ms": "jem", "ta": "ஜாம்", "kn": "ಜಾಮ್", "uk": "варення", "bn": "জ্যাম", "hi": "जैम", "tr": "reçel", "bs": "pekmez"}}
+{"guid": "N06_032", "translations": {"ro": "castravete murat", "pl": "korniszon", "th": "ผักดอง", "ms": "timun jeruk", "ta": "ஊறுகாய்", "kn": "ಉಪ್ಪಿನಕಾಯಿ", "uk": "маринований огірок", "bn": "অ্যাচার/আচার (অ্যাচার is less common in Bengali script?)", "hi": "अचार वाला खीरा", "tr": "salatalık turşusu", "bs": "kiseli krastavac"}}
+{"guid": "N06_033", "translations": {"ro": "muștar", "pl": "musztarda", "th": "มัสตาร์ด", "ms": "mustard", "ta": "கடுகு", "kn": "ಸಾಸಿವೆ", "uk": "гірчиця", "bn": "সরিষা", "hi": "सरसों", "tr": "hardal", "bs": "senf"}}
+{"guid": "N06_034", "translations": {"ro": "ketchup", "pl": "keczup", "th": "ซอสมะเขือเทศ", "ms": "sos tomato", "ta": "கெட்சப்", "kn": "ಕೆಚಪ್", "uk": "кетчуп", "bn": "কেচাপ", "hi": "केचাপ", "tr": "ketçap"}}
+{"guid": "N06_035", "translations": {"ro": "maioneză", "pl": "majonez", "th": "มายองเนส", "ms": "mayones", "ta": "மயோனைஸ்", "kn": "ಮಯೋನೈಸ್", "uk": "майонез", "bn": "ময়োনেস", "hi": "मायोनज़", "tr": "mayonez"}}
+{"guid": "N06_036", "translations": {"ro": "oțet", "pl": "ocet", "th": "น้ำส้มสายชู", "ms": "cuka", "ta": "வினிகர்", "kn": "ವಿನೆಗರ್", "uk": "оцет", "bn": "সিরকা", "hi": "सिरका", "tr": "sirke"}}
+{"guid": "N06_037", "translations": {"ro": "ulei de gătit", "pl": "olej do gotowania", "th": "น้ำมันปรุงอาหาร", "ms": "minyak masak", "ta": "சமையல் எண்ணெய்", "kn": "ಅಡುಗೆ ಎಣ್ಣೆ", "uk": "рослинна олія", "bn": "রান্নার তেল", "hi": "खान-पान का तेल", "tr": "yemeklik yağ", "bs": "ulje za kuhanje"}}
+{"guid": "N06_038", "translations": {"ro": "făină", "pl": "mąka", "th": "แป้ง", "ms": "tepung", "ta": "மாவு", "kn": "ಹಿಟ್ಟು", "uk": "борошно", "bn": "ময়দা", "hi": "आटा", "tr": "un", "bs": "brašno"}}
+{"guid": "N06_039", "translations": {"ro": "porumb", "pl": "kukurydza", "th": "ข้าวโพด", "ms": "jagung", "ta": "மக்காச்சோளம்", "kn": "ಮೆಕ್ಕೆ ಜೋಳ", "uk": "кукурудза", "bn": "ভুট্টা", "hi": "मकई", "tr": "mısır", "bs": "kukuruz"}}
+{"guid": "N06_040", "translations": {"ro": "fasole", "pl": "fasola", "th": "ถั่ว", "ms": "kacang", "ta": "பீன்ஸ்", "kn": "ಅವರೆಕಾಯಿ", "uk": "квасоля", "bn": "শিম", "hi": "राजमा", "tr": "fasulye", "bs": "grah"}}
+{"guid": "N06_041", "translations": {"ro": "mazăre", "pl": "groszek", "th": "ถั่วลันเตา", "ms": "kacang pea", "ta": "பட்டாணி", "kn": "ಬಟಾಣಿ", "uk": "горох", "bn": "মটর", "hi": "मटर", "tr": "bezelye", "bs": "grašak"}}
+{"guid": "N06_042", "translations": {"ro": "lămâie", "pl": "cytryna", "th": "มะนาว", "ms": "lemon", "ta": "எலுமிச்சை", "kn": "ನಿಂಬೆ", "uk": "лимон", "bn": "লেবু", "hi": "नींबू", "tr": "limon", "bs": "limun"}}
+{"guid": "N06_043", "translations": {"ro": "limetă", "pl": "limonka", "th": "มะนาว", "ms": "limau nipis", "ta": "எலுமிச்சம்பழம்", "kn": "ಲಿಂಬೆ", "uk": "лайм", "bn": "লেবু", "hi": "लाइम", "tr": "misket limonu", "bs": "limeta"}}
+{"guid": "N06_044", "translations": {"ro": "strugure", "pl": "winogrono", "th": "องุ่น", "ms": "anggur", "ta": "திராட்சை", "kn": "ದ್ರಾಕ್ಷಿ", "uk": "виноград", "bn": "আঙ্গুর", "hi": "अंगूर", "tr": "üzüm", "bs": "grožđe"}}
+{"guid": "N06_045", "translations": {"ro": "căpșună", "pl": "truskawka", "th": "สตรอว์เบอร์รี", "ms": "strawberi", "ta": "ஸ்ட்ராபெரி", "kn": "ಸ್ಟ್ರಾಬೆರಿ", "uk": "полуниця", "bn": "স্ট্রবেরি", "hi": "स्ट्रॉबेरी", "tr": "çilek"}}
+{"guid": "N06_046", "translations": {"ro": "afină", "pl": "borówka", "th": "บลูเบอร์รี", "ms": "beri biru", "ta": "ப்ளூபெரி", "kn": "ಬ್ಲೂಬೆರಿ", "uk": "шовковиця", "bn": "ব্লুবেরি", "hi": "ब्लूबेरी", "tr": "yaban mersini", "bs": "borovnica"}}
+{"guid": "N06_047", "translations": {"ro": "zmeură", "pl": "malina", "th": "ราสป์เบอร์รี", "ms": "rasberi", "ta": "ராஸ்பெரி", "kn": "ರಾಸ್ಪ್‌ಬೆರಿ", "uk": "малина", "bn": "রaspberry", "hi": "रसभरी", "tr": "ahududu", "bs": "malina"}}
+{"guid": "N06_048", "translations": {"ro": "cireașă", "pl": "wiśnia", "th": "เชอร์รี", "ms": "ceri", "ta": "செர்ரி", "kn": "ಚೆರ್ರಿ", "uk": "вишня", "bn": "চেরি", "hi": "चेरी", "tr": "kiraz"}}
+{"guid": "N06_049", "translations": {"ro": "piersică", "pl": "brzoskwinia", "th": "ลูกพีช", "ms": "pic", "ta": "பீச்", "kn": "ಪೀಚ್", "uk": "персик", "bn": "আড়ুব", "hi": "आड़ू", "tr": "şeftali", "bs": "breskva"}}
+{"guid": "N06_050", "translations": {"ro": "pară", "pl": "gruszka", "th": "ลูกแพร์", "ms": "pir", "ta": "பேரிக்காய்", "kn": "ಪೇರಲ", "uk": "груша", "bn": "নাশপতি", "hi": "नाशपाती", "tr": "armut", "bs": "kruška"}}
+{"guid": "N06_051", "translations": {"ro": "pepene verde", "pl": "arbuz", "th": "แตงโม", "ms": "tembikai", "ta": "தர்பூசணி", "kn": "ಕಲ್ಲಂಗಡಿ", "uk": "кавун", "bn": "তরমুজ", "hi": "तरबूज़", "tr": "karpuz", "bs": "lubenica"}}
+{"guid": "N06_052", "translations": {"ro": "pepene galben", "pl": "melon", "th": "เมลอน", "ms": "tembikai", "ta": "முலாம்பழம்", "kn": "ಕರಬೂಜ", "uk": "диня/кавун", "bn": "খরবুজ/তরমুজ", "hi": "खरबूजा/तरबूज", "tr": "kavun", "bs": "dinja"}}
+{"guid": "N06_053", "translations": {"ro": "ananas", "pl": "ananas", "th": "สับปะรด", "ms": "nanas", "ta": "அன்னாசி", "kn": "ಅನಾನಸ್", "uk": "ананас", "bn": "আনারস", "hi": "अनानास", "tr": "ananas", "bs": "ananas"}}
+{"guid": "N06_054", "translations": {"ro": "mango", "pl": "mango", "th": "มะม่วง", "ms": "mangga", "ta": "மாம்பழம்", "kn": "ಮಾವಿನಹಣ್ಣು", "uk": "манго", "bn": "আন্ডা আম", "hi": "आम", "tr": "mango", "bs": "mango"}}
+{"guid": "N06_055", "translations": {"ro": "nucă de cocos", "pl": "kokos", "th": "มะพร้าว", "ms": "kelapa", "ta": "தேங்காய்", "kn": "ತೆಂಗಿನಕಾಯಿ", "uk": "кокос", "bn": "নারিকেল", "hi": "नारियल", "tr": "hindistan cevizi", "bs": "kokos"}}
+{"guid": "N06_056", "translations": {"ro": "nucă", "pl": "orzech włoski", "th": "วอลนัท", "ms": "kacang walnut", "ta": "வால்நட்", "kn": "ಅಕ್ರೋಡ್", "uk": "волоський горіх", "bn": "আখরোট", "hi": "अखरोट", "tr": "ceviz", "bs": "orah"}}
+{"guid": "N06_057", "translations": {"ro": "migdală", "pl": "migdał", "th": "อัลมอนด์", "ms": "badam", "ta": "பாதாம்", "kn": "ಬಾದಾಮಿ", "uk": "мигдаль", "bn": "বাদাম", "hi": "बादाम", "tr": "badem"}}
+{"guid": "N06_058", "translations": {"ro": "arahidă", "pl": "orzeszek ziemny", "th": "ถั่วลิสง", "ms": "kacang tanah", "ta": "வேர்க்கடலை", "kn": "ಕಡಲೆಕಾಯಿ", "uk": "арахіс", "bn": "বাদামি", "hi": "मूँगफली", "tr": "yer fıstığı", "bs": "kikiriki"}}
+{"guid": "N06_059", "translations": {"ro": "ciupercă", "pl": "grzyb", "th": "เห็ด", "ms": "cendawan", "ta": "காளான்", "kn": "ಅಣಬೆ", "uk": "гриб", "bn": "কোঁকড়া", "hi": "कुरकटा", "tr": "mantar", "bs": "gljiva"}}
+{"guid": "N06_060", "translations": {"ro": "usturoi", "pl": "czosnek", "th": "กระเทียม", "ms": "bawang putih", "ta": "பூண்டு", "kn": "ಬೆಳ್ಳುಳ್ಳಿ", "uk": "часник", "bn": "রসুন", "hi": "लहसुन", "tr": "sarımsak", "bs": "češnjak"}}
+{"guid": "N06_061", "translations": {"ro": "varză", "pl": "kapusta", "th": "กะหล่ำปลี", "ms": "kubis", "ta": "முட்டைக்கோஸ்", "kn": "ಎಲೆಕೋಸು", "uk": "капуста", "bn": "পাতাঁশাক", "hi": "पत्ता गोभी", "tr": "lahana"}}
+{"guid": "N06_062", "translations": {"ro": "lăptucă", "pl": "sałata", "th": "ผักกาดหอม", "ms": "salad", "ta": "கீரை", "kn": "ಲೆಟ್ಯೂಸ್", "uk": "салат", "bn": "লেটুস", "hi": "लेट्यूस", "tr": "marul", "bs": "zelena salata"}}
+{"guid": "N06_063", "translations": {"ro": "spanac", "pl": "szpinak", "th": "ผักขม", "ms": "bayam", "ta": "கீரை", "kn": "ಪಾಲಕ್", "uk": "шпинат", "bn": "পালং", "hi": "पालक", "tr": "ıspanak", "bs": "špinat"}}
+{"guid": "N06_064", "translations": {"ro": "broccoli", "pl": "brokuł", "th": "บรอกโคลี", "ms": "brokoli", "ta": "ப்ரோக்கோலி", "kn": "ಬ್ರೊಕೊಲಿ", "uk": "броколі", "bn": "ব্রোকলি", "hi": "ब्रोकली", "tr": "brokoli", "bs": "brokula"}}
+{"guid": "N06_065", "translations": {"ro": "conopidă", "pl": "kalafior", "th": "กะหล่ำดอก", "ms": "kubis bunga", "ta": "காலிஃபிளவர்", "kn": "ಹೂಕೋಸು", "uk": "цвітна капуста", "bn": "ফুলকপি", "hi": "फूलगोभी", "tr": "karnabahar", "bs": "karfiol"}}
+{"guid": "N06_066", "translations": {"ro": "piper", "pl": "pieprz", "th": "พริกไทย", "ms": "lada", "ta": "மிளகு", "kn": "ಮೆಣಸು", "uk": "перець", "bn": "গোলমরিচ", "hi": "काली मिर्च", "tr": "karabiber", "bs": "papar"}}
+{"guid": "N06_067", "translations": {"ro": "castravete", "pl": "ogórek", "th": "แตงกวา", "ms": "timun", "ta": "வெள்ளரிக்காய்", "kn": "ಸೌತೆಕಾಯಿ", "uk": "огірок", "bn": "শশা", "hi": "खीरा", "tr": "salatalık"}}
+{"guid": "N06_068", "translations": {"ro": "țelină", "pl": "seler", "th": "ขึ้นฉ่าย", "ms": "saderi", "ta": "செலரி", "kn": "ಸೆಲರಿ", "uk": "селера", "bn": "কাঁচাগাজর", "hi": "अजवाइन-पाती", "tr": "kereviz"}}
+{"guid": "N06_069", "translations": {"ro": "ridiche", "pl": "rzodkiewka", "th": "หัวผักกาด", "ms": "lobak merah kecil", "ta": "முள்ளங்கி", "kn": "ಮೂಲಂಗಿ", "uk": "редис", "bn": "মূলা", "hi": "मूली", "tr": "turp", "bs": "rotkvica"}}
+{"guid": "N06_070", "translations": {"ro": "sfeclă", "pl": "burak", "th": "บีทรูท", "ms": "ubi bit", "ta": "பீட்ரூட்", "kn": "ಬೀಟ್ರೂಟ್", "uk": "буряк", "bn": "বোড়বেট", "hi": "चुकन्दर", "tr": "pancar", "bs": "cikla"}}
+{"guid": "N06_071", "translations": {"ro": "nap", "pl": "rzepa", "th": "หัวผักกาดหัว", "ms": "lobak turnip", "ta": "டர்னிப்", "kn": "ಟರ್ನಿಪ್", "uk": "брюква", "bn": "শালগম", "hi": "शलगम", "tr": "şalgam", "bs": "repa"}}
+{"guid": "N06_072", "translations": {"ro": "cârnați", "pl": "kiełbasa", "th": "ไส้กรอก", "ms": "sosej", "ta": "தொத்திறைச்சி", "kn": "ಸಾಸೇಜ್", "uk": "ковбаса", "bn": "সসেজ", "hi": "सॉसेज", "tr": "sosis", "bs": "kobasica"}}
+{"guid": "N06_073", "translations": {"ro": "șuncă", "pl": "szynka", "th": "แฮม", "ms": "ham", "ta": "ஹாம்", "kn": "ಹ್ಯಾಮ್", "uk": "бекон", "bn": "হ্যাম", "hi": "हैम", "tr": "jambon", "bs": "šunka"}}
+{"guid": "N06_074", "translations": {"ro": "bacon", "pl": "bekon", "th": "เบคอน", "ms": "daging bakon", "ta": "பேகன்", "kn": "ಬೇಕನ್", "uk": "бекон", "bn": "বেকন", "hi": "बेकन", "tr": "pastırma"}}
+{"guid": "N06_075", "translations": {"ro": "carne de pui", "pl": "mięso z kurczaka", "th": "เนื้อไก่", "ms": "daging ayam", "ta": "கோழி இறைச்சி", "kn": "ಕೋಳಿ ಮಾಂಸ", "uk": "курятина", "bn": "কোঁচি মাংস", "hi": "मुर्गी का मांस", "tr": "tavuk eti", "bs": "pileće meso"}}
+{"guid": "N06_076", "translations": {"ro": "carne de vită", "pl": "wołowina", "th": "เนื้อวัว", "ms": "daging lembu", "ta": "மாட்டிறைச்சி", "kn": "ಗೋಮಾಂಸ", "uk": "яловичина", "bn": "গরুর মাংস", "hi": "गौमांस", "tr": "sığır eti", "bs": "govedina"}}
+{"guid": "N06_077", "translations": {"ro": "carne de porc", "pl": "wieprzowina", "th": "เนื้อหมู", "ms": "daging babi", "ta": "பன்றி இறைச்சி", "kn": "ಹಂದಿ ಮಾಂಸ", "uk": "свинина", "bn": "শূকরমাংস", "hi": "सूअर का मांस", "tr": "domuz eti"}}
+{"guid": "N06_078", "translations": {"ro": "carne de miel", "pl": "jagnięcina", "th": "เนื้อแกะ", "ms": "daging kambing biri-biri", "ta": "ஆட்டிறைச்சி", "kn": "ಕುರಿ ಮಾಂಸ", "uk": "ягнятина", "bn": "ভেড়ার মাংস", "hi": "भेड़ का मांस", "tr": "kuzu eti", "bs": "janjeće meso"}}
+{"guid": "N06_079", "translations": {"ro": "somon", "pl": "łosoś", "th": "ปลาแซลมอน", "ms": "ikan salmon", "ta": "சால்மன்", "kn": "ಸಾಲ್ಮನ್", "uk": "лосось", "bn": "স্যালমন", "hi": "सालमन", "tr": "somon", "bs": "losos"}}
+{"guid": "N06_080", "translations": {"ro": "ton", "pl": "tuńczyk", "th": "ปลาทูน่า", "ms": "ikan tuna", "ta": "சூரை மீன்", "kn": "ಟ್ಯೂನ", "uk": "тунець", "bn": "টুনা", "hi": "टूना", "tr": "ton balığı", "bs": "tuna"}}
+{"guid": "N06_081", "translations": {"ro": "crevete", "pl": "krewetka", "th": "กุ้ง", "ms": "udang", "ta": "இறால்", "kn": "ಸೀಗಡಿ", "uk": "креветка", "bn": "চিংড়ি", "hi": "झींगा", "tr": "karides", "bs": "škamp"}}
+{"guid": "N06_082", "translations": {"ro": "crab", "pl": "krab", "th": "ปู", "ms": "ketam", "ta": "நண்டு", "kn": "ಏಡಿ", "uk": "краб", "bn": "কাঁকড়া", "hi": "केकड़ा", "tr": "yengeç", "bs": "rak"}}
+{"guid": "N06_083", "translations": {"ro": "homar", "pl": "homar", "th": "กุ้งมังกร", "ms": "udang kara", "ta": "நெடுஞ்சுறா", "kn": "ಲಾಬ್ಸ್ಟರ್", "uk": "омар", "bn": "লবস্টার", "hi": "लोब्स्टर", "tr": "ıstakoz", "bs": "jastog"}}
+{"guid": "N06_084", "translations": {"ro": "morcov", "pl": "marchew", "th": "แครอท", "ms": "lobak merah", "ta": "கேரட்", "kn": "ಗಜ್ಜರಿ", "uk": "морква", "bn": "গাজর", "hi": "गाजर", "tr": "havuç", "bs": "mrkva"}}
+{"guid": "N06_085", "translations": {"ro": "banchet", "pl": "bankiet", "th": "งานเลี้ยง", "ms": "jamuan", "ta": "விருந்து", "kn": "ಔತಣಕೂಟ", "uk": "бенкет", "bn": "ভোজ", "hi": "भोज", "tr": "ziyafet", "bs": "gozba"}}
+{"guid": "N06_086", "translations": {"ro": "mic dejun", "pl": "śniadanie", "th": "อาหารเช้า", "ms": "sarapan", "ta": "காலை உணவு", "kn": "ಉಪಾಹಾರ", "uk": "сніданок", "bn": "নাশতা", "hi": "नाश्ता", "tr": "kahvaltı", "bs": "doručak"}}
+{"guid": "N06_087", "translations": {"ro": "prânz", "pl": "obiad", "th": "อาหารกลางวัน", "ms": "makan tengah hari", "ta": "மதிய உணவு", "kn": "ಮಧ್ಯಾಹ್ನದ ಊಟ", "uk": "обід", "bn": "দুপুরের খাবার", "hi": "दोपहर का भोजन", "tr": "öğle yemeği", "bs": "ručak"}}
+{"guid": "N06_088", "translations": {"ro": "cină", "pl": "kolacja", "th": "อาหารเย็น", "ms": "makan malam", "ta": "இரவு உணவு", "kn": "ರಾತ್ರಿ ಊಟ", "uk": "вечеря", "bn": "রাতের খাবার", "hi": "रात का खाना", "tr": "akşam yemeği", "bs": "večera"}}
+{"guid": "N06_091", "translations": {"ro": "smântână", "pl": "śmietana", "th": "ครีมเปรี้ยว", "ms": "krim masam", "ta": "புளிப்புக் கிரீம்", "kn": "ಹುಳಿ ಕ್ರೀಮ್", "uk": "сметана", "bn": "খাস্তার ক্রীম", "hi": "खट्टा क्रीम", "tr": "ekşi krema", "bs": "kiselo vrhnje"}}
+{"guid": "N06_092", "translations": {"ro": "mâncare", "pl": "jedzenie", "th": "อาหาร", "ms": "makanan", "ta": "உணவு", "kn": "ಆಹಾರ", "uk": "їжа", "bn": "খাদ্য", "hi": "खाद्य", "tr": "yiyecek", "el": "τροφή", "bs": "hrana"}}
+{"guid": "N06_093", "translations": {"ro": "ardei gras", "pl": "papryka", "th": "พริกหวาน", "ms": "lada benggala", "ta": "குடை மிளகாய்", "kn": "ದೊಡ್ಡ ಮೆಣಸಿನಕಾಯಿ", "uk": "солодкий перець", "bn": "বেল পেপার", "hi": "शिमला मिर्च", "tr": "dolmalık biber"}}
+{"guid": "N06_094", "translations": {"ro": "produse proaspete", "pl": "produkty świeże", "th": "ผลิตผลสด", "ms": "buah-buahan dan sayur-sayuran", "ta": "புதிய விளைபொருள்", "kn": "ತಾಜಾ ಉತ್ಪನ್ನ", "uk": "фрукти та овочі", "bn": "ফল-মূল", "hi": "फल और सब्ज़ियाँ", "tr": "meyve ve sebze"}}
+{"guid": "N06_095", "translations": {"ro": "clătită", "pl": "naleśnik", "th": "แพนเค้ก", "ms": "lempeng", "ta": "தோசை", "kn": "ಪ್ಯಾನ್‌ಕೇಕ್", "uk": "млинець", "bn": "প্যানকেক", "hi": "पैनकेक", "tr": "krep", "bs": "palačinka"}}
+{"guid": "N06_096", "translations": {"ro": "gustare", "pl": "przekąska", "th": "ขนม", "ms": "snek", "ta": "சிற்றுண்டி", "kn": "ತಿಂಡಿ", "uk": "перекуска", "bn": "স্ন্যাকস", "hi": "नाश्ता", "tr": "atıştırmalık", "bs": "užina"}}
+{"guid": "N06_097", "translations": {"ro": "resturile", "pl": "resztki", "th": "อาหารเหลือ", "ms": "makanan lebihan", "ta": "மிச்சம்", "kn": "ಉಳಿದ ಆಹಾರ", "uk": "залишок їжі", "bn": "অবশিষ্ট খাবার", "hi": "बचा हुआ खाना", "tr": "artık yemek"}}
+{"guid": "N06_098", "translations": {"ro": "alimente", "pl": "zakupy spożywcze", "th": "ของชำ", "ms": "barangan runcit", "ta": "மளிகைப் பொருட்கள்", "kn": "ದಿನಸಿ", "uk": "продукти", "bn": "মুদিখানা", "hi": "किराना", "tr": "gıda maddeleri", "bs": "namirnice"}}
+{"guid": "N06_099", "translations": {"ro": "masă", "pl": "posiłek", "th": "มื้ออาหาร", "ms": "hidangan", "ta": "உணவு", "kn": "ಊಟ", "uk": "страва", "bn": "ভোজ", "hi": "भोजन", "tr": "öğün", "bs": "obrok"}}
+{"guid": "N06_100", "translations": {"ro": "fel de mâncare", "pl": "danie", "th": "คอร์ส", "ms": "hidangan", "ta": "கோர்ஸ்", "kn": "ಕೋರ್ಸ್", "uk": "стравa", "bn": "কোর্স/কোর্স/পানীয়?", "hi": "पकवान", "tr": "yemek"}}
+{"guid": "N06_101", "translations": {"ro": "curmală", "pl": "daktyl", "th": "อินทผลัม", "ms": "kurma", "ta": "பேரீச்சை", "kn": "ಖರ್ಜೂರ", "uk": "фінік", "bn": "খেজুর", "hi": "खجूर", "tr": "hurma"}}
+{"guid": "N06_102", "translations": {"ro": "supă de bază", "pl": "bulion", "th": "น้ำสต๊อก", "ms": "stok", "ta": "குழம்புத் தண்ணீர்", "kn": "ಸಾರು", "uk": "бульйон", "bn": "শরবত", "hi": "शोरबा", "tr": "et suyu"}}
+{"guid": "N06_103", "translations": {"ro": "chiflă", "pl": "bułka", "th": "ขนมปังก้อนกลม", "ms": "roti bun", "ta": "ரொட்டி உருண்டை", "kn": "ರೋಲ್", "uk": "булочка", "bn": "রোল", "hi": "रोल", "tr": "küçük ekmek"}}
+{"guid": "N06_104", "translations": {"ms": "ais krim", "hi": "आइसक्रीम", "tr": "dondurma", "bs": "sladoled"}}
+{"guid": "N06_105", "translations": {"ms": "krim putar", "hi": "फेंटी हुई क्रीम", "tr": "krem şanti", "bs": "šlag"}}
+{"guid": "N06_106", "translations": {"ms": "mentega kacang", "hi": "मूंगफली का मक्खन", "tr": "fıstık ezmesi"}}
+{"guid": "N06_107", "translations": {"ms": "minyak zaitun", "hi": "जैतून का तेल", "tr": "zeytinyağı", "bs": "maslinovo ulje"}}
+{"guid": "N06_108", "translations": {"ms": "kicap soya", "hi": "सोया सॉस", "tr": "soya sosu", "bs": "sojin umak"}}
+{"guid": "N06_109", "translations": {"ms": "sosej roti", "hi": "हॉट डॉग", "tr": "hot dog"}}
+{"guid": "N06_110", "translations": {"ms": "kentang goreng", "hi": "फ्रेंच फ्राइज़", "tr": "patates kızartması", "bs": "pomfrit"}}
+{"guid": "N06_111", "translations": {"ms": "kentang lenyek", "hi": "आलू का भरता", "tr": "patates püresi", "bs": "pire od krompira"}}
+{"guid": "N06_112", "translations": {"ms": "kacang buncis", "hi": "हरी फलियाँ", "tr": "taze fasulye", "bs": "mahuna"}}
+{"guid": "N06_113", "translations": {"ms": "ubi keledek", "hi": "शकरकंद", "tr": "tatlı patates", "bs": "slatki krompir"}}
+{"guid": "N06_114", "translations": {"ms": "bawang daun", "hi": "हरा प्याज़", "tr": "taze soğan"}}
+{"guid": "N06_115", "translations": {"ms": "soda penaik", "hi": "खाने का सोडा", "tr": "karbonat", "bs": "soda bikarbona"}}
+{"guid": "N06_116", "translations": {"ms": "serbuk penaik", "hi": "बेकिंग पाउडर", "tr": "kabartma tozu"}}
+{"guid": "N06_117", "translations": {"ms": "sirap maple", "hi": "मेपल सिरप", "tr": "akçaağaç şurubu", "bs": "javorov sirup"}}
+{"guid": "N06_118", "translations": {"ms": "gula-gula getah", "hi": "च्यूइंग गम", "tr": "sakız", "bs": "žvakaća guma"}}
+{"guid": "N06_119", "translations": {"ms": "keju krim", "hi": "क्रीम चीज़", "tr": "krem peynir", "bs": "kremasti sir"}}
+{"guid": "N06_120", "translations": {"ms": "daging lembu kisar", "hi": "कीमा बनाया हुआ गोमांस", "tr": "kıyma"}}
+{"guid": "N06_121", "translations": {"ms": "putih telur", "hi": "अंडे का सफ़ेद भाग", "tr": "yumurta akı", "bs": "bjelance"}}
+{"guid": "N06_122", "translations": {"ms": "kuning telur", "hi": "अंडे की जर्दी", "tr": "yumurta sarısı", "bs": "žumance"}}
+{"guid": "N06_123", "translations": {"ms": "salad buah", "hi": "फलों का सलाद", "tr": "meyve salatası", "bs": "voćna salata"}}
+{"guid": "N06_124", "translations": {"ms": "sos salad", "hi": "सलाद की ड्रेसिंग", "tr": "salata sosu", "bs": "preliv za salatu"}}
+{"guid": "N06_125", "translations": {"ms": "sos tomato", "hi": "टमाटर की चटनी", "tr": "domates sosu", "bs": "sos od paradajza"}}
+{"guid": "N06_126", "translations": {"ms": "sos cili", "hi": "तीखी चटनी", "tr": "acı sos"}}
+{"guid": "N06_127", "translations": {"ms": "makanan segera", "hi": "फास्ट फूड", "tr": "fast food", "bs": "brza hrana"}}
+{"guid": "N06_128", "translations": {"ms": "makanan ringan tidak berkhasiat", "hi": "जंक फ़ूड", "tr": "abur cubur", "bs": "nezdrava hrana"}}
+{"guid": "N06_129", "translations": {"ms": "garam laut", "hi": "समुद्री नमक", "tr": "deniz tuzu"}}
+{"guid": "N06_130", "translations": {"ms": "gula perang", "hi": "ब्राउन शुगर", "tr": "esmer şeker", "bs": "smeđi šećer"}}
+{"guid": "N06_131", "translations": {"ms": "daun salam", "hi": "तेज पत्ता", "tr": "defne yaprağı", "bs": "lovorov list"}}
+{"guid": "N06_132", "translations": {"ms": "kerak", "hi": "पपड़ी", "tr": "kabuk"}}
+{"guid": "N06_133", "translations": {"ms": "beri murbei", "hi": "शहतूत", "tr": "dut"}}
+{"guid": "N06_134", "translations": {"ms": "umpan", "hi": "चारा", "tr": "yem"}}
+{"guid": "N06_135", "translations": {"ms": "sos salsa", "hi": "साल्सा सॉस", "tr": "salsa sosu"}}
+{"guid": "N06_136", "translations": {"ms": "nektar", "hi": "मकरंद", "tr": "nektar"}}
+{"guid": "N06_137", "translations": {"ms": "tauhu", "hi": "टोफू", "tr": "soya peyniri"}}
+{"guid": "N06_138", "translations": {"ms": "vanila", "hi": "वैनिला", "tr": "vanilya"}}
+{"guid": "N06_139", "translations": {"ms": "buah pala", "hi": "जायफल", "tr": "muskat"}}
+{"guid": "N06_140", "translations": {"ms": "paprika", "hi": "लाल मिर्च पाउडर", "tr": "toz kırmızı biber"}}
+{"guid": "N06_141", "translations": {"ms": "hiasan makanan", "hi": "सजावट", "tr": "garnitür"}}
+{"guid": "N06_142", "translations": {"ms": "kastard", "hi": "कस्टर्ड", "tr": "krem karamel"}}
+{"guid": "N06_143", "translations": {"ms": "makaroni", "hi": "मैकरोनी", "tr": "makarna"}}
+{"guid": "N06_144", "translations": {"ms": "molases", "hi": "शीरा", "tr": "melas"}}
+{"guid": "N06_145", "translations": {"ms": "kuah daging", "hi": "मांस की ग्रेवी", "tr": "et sosu"}}
+{"guid": "N06_146", "translations": {"ms": "daging anak lembu", "hi": "बछड़े का मांस", "tr": "dana eti"}}
+{"guid": "N06_147", "translations": {"ms": "lemak penaik", "hi": "बेकिंग शॉर्टनिंग", "tr": "hamur işi yağı"}}
+{"guid": "N06_148", "translations": {"ms": "lenyek", "hi": "भरता", "tr": "püre"}}
+{"guid": "N06_149", "translations": {"ms": "telur dadar", "hi": "आमलेट", "tr": "omlet"}}
+{"guid": "N06_150", "translations": {"ms": "tepung jagung", "hi": "मकई का स्टार्च", "tr": "mısır nişastası"}}
+{"guid": "N06_151", "translations": {"ms": "bahan perisa", "hi": "स्वादवर्धक पदार्थ", "tr": "aroma verici"}}
+{"guid": "N06_152", "translations": {"ms": "perasa", "hi": "मसाला", "tr": "baharat"}}
+{"guid": "N06_153", "translations": {"ms": "stik", "hi": "स्टेक", "tr": "biftek"}}
+{"guid": "N06_154", "translations": {"ms": "stik", "hi": "स्टेक", "tr": "biftek"}}
+{"guid": "N06_155", "translations": {"ms": "aising", "hi": "केक की मीठी परत", "tr": "şekerleme kaplaması"}}
+{"guid": "N06_156", "translations": {"ms": "biskut kraker", "hi": "क्रैकर", "tr": "kraker"}}
+{"guid": "N06_157", "translations": {"ms": "sup", "hi": "शोरबा", "tr": "et suyu"}}
+{"guid": "N06_158", "translations": {"ms": "mufin", "hi": "मफिन", "tr": "muffin"}}
+{"guid": "N06_159", "translations": {"ms": "jeli daging", "hi": "मांसाहारी जेली", "tr": "jöle"}}
+{"guid": "N06_160", "translations": {"ms": "sitron", "hi": "बिजौरा नींबू", "tr": "ağaç kavunu"}}
+{"guid": "N06_161", "translations": {"ms": "lada Jamaica", "hi": "कबाबचीनी", "tr": "yenibahar"}}
+{"guid": "N06_162", "translations": {"ms": "ubi kayu", "hi": "टैपिओका", "tr": "tapyoka"}}
+{"guid": "N06_163", "translations": {"ms": "thyme", "hi": "अजवायन के फूल", "tr": "kekik"}}
+{"guid": "N06_164", "translations": {"ms": "lemak keras di sekitar buah pinggang", "hi": "गुर्दे के आसपास की कठोर चर्बी", "tr": "böbrek yağı"}}
+{"guid": "N06_165", "translations": {"ms": "jagung nixtamal", "hi": "निक्स्टमलाइज़्ड मक्का", "tr": "nixtamalize mısır"}}
+{"guid": "N06_166", "translations": {"ms": "campuran mentega dan tepung", "hi": "रू", "tr": "un ve yağ karışımı"}}
+{"guid": "N06_167", "translations": {"ms": "inti", "hi": "भरावन", "tr": "iç harcı"}}
+{"guid": "N06_168", "translations": {"ms": "meringue", "hi": "मेरिंग", "tr": "mereng"}}
+{"guid": "N06_169", "translations": {"ms": "pai tart", "hi": "टार्ट", "tr": "tart"}}
+{"guid": "N06_170", "translations": {"ms": "bubur oat", "hi": "दलिया", "tr": "yulaf lapası"}}
+{"guid": "N06_171", "translations": {"ms": "tepung jagung", "hi": "मक्के का आटा", "tr": "mısır unu"}}
+{"guid": "N06_172", "translations": {"ms": "aising kek", "hi": "केक की आइसिंग", "tr": "pasta kreması"}}
+{"guid": "N06_173", "translations": {"ms": "gula-gula karamel", "hi": "कारमेल कैंडी", "tr": "karamel"}}
+{"guid": "N06_174", "translations": {"ms": "limau gedang", "hi": "चकोतरा", "tr": "greyfurt"}}
+{"guid": "N06_175", "translations": {"ms": "jem oren", "hi": "संतरे का मुरब्बा", "tr": "portakal marmeladı"}}
+{"guid": "N06_176", "translations": {"ms": "adunan daging cincang berperisa", "hi": "मसालेदार कीमा मिश्रण", "tr": "baharatlı kıyma harcı"}}
+{"guid": "N06_177", "translations": {"ms": "isi tanpa tulang", "hi": "फ़िले", "tr": "fileto"}}
+{"guid": "N06_178", "translations": {"ms": "sos tomato", "hi": "टमाटर सॉस", "tr": "ketçap"}}
+{"guid": "N06_179", "translations": {"ms": "kacang pecan", "hi": "पेकान", "tr": "pekan cevizi"}}
+{"guid": "N06_180", "translations": {"ms": "spageti", "hi": "स्पेगेटी", "tr": "spagetti"}}
+{"guid": "N06_181", "translations": {"ms": "fondan", "hi": "फोंडेंट", "tr": "şeker hamuru"}}
+{"guid": "N06_182", "translations": {"ms": "fondan", "hi": "फोंडेंट", "tr": "fondan"}}
+{"guid": "N06_183", "translations": {"ms": "wafel", "hi": "वॉफल", "tr": "waffle"}}
+{"guid": "N06_184", "translations": {"ms": "burger", "hi": "बर्गर", "tr": "hamburger köftesi"}}
+{"guid": "N06_185", "translations": {"ms": "gula-gula", "hi": "मिठाई", "tr": "şekerleme"}}
+{"guid": "N06_186", "translations": {"ms": "pai", "hi": "पाई", "tr": "turta"}}
+{"guid": "N06_187", "translations": {"ms": "sos", "hi": "सॉस", "tr": "sos"}}
+{"guid": "N06_188", "translations": {"ms": "sayur", "hi": "सब्ज़ी", "tr": "sebze"}}
+{"guid": "N06_189", "translations": {"ms": "biskut", "hi": "बिस्कुट", "tr": "bisküvi"}}
+{"guid": "N06_190", "translations": {"ms": "biskut", "hi": "कुकी", "tr": "kurabiye"}}

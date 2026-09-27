@@ -1,101 +1,149 @@
-{"guid": "V01_001", "translations": {"ro": "mânca", "pl": "jeść", "th": "กิน", "ta": "சாப்பிடு", "kn": "ತಿನ್ನು", "uk": "їсти", "bn": "খাওয়া", "hi": "کھانا", "bs": "jesti"}}
-{"guid": "V01_002", "translations": {"ro": "beau", "pl": "pić", "th": "ดื่ม", "ta": "சாப்பிடு", "kn": "ಕುಡಿಯು", "uk": "пити", "bn": "পান করা", "hi": "पीना", "bs": "piti"}}
-{"guid": "V01_003", "translations": {"ro": "dormi", "pl": "spać", "th": "นอนหลับ", "ta": "உறங்குதல்", "kn": "ನಿದ್ರಿಸು", "uk": "спати", "bn": "ঘুমানো", "hi": "सोना", "bs": "spavati"}}
-{"guid": "V01_004", "translations": {"ro": "trezi", "pl": "budzić", "th": "ตื่น", "ta": "தெரிந்து விழி", "kn": "ಏಳಲು", "uk": "прокидатися", "bn": "জাগা", "hi": "जगना"}}
-{"guid": "V01_005", "translations": {"ro": "respira", "pl": "oddychać", "th": "หายใจ", "ta": "சுவாசிப்பது", "kn": "ಉಸಿರಾಯಿ/ಉಸಿರೆಟ್ಟು", "uk": "дихати", "bn": "শ্বাস নেওয়া", "hi": "साँस लेना"}}
-{"guid": "V01_006", "translations": {"ro": "juca", "pl": "grać", "th": "เล่น", "ta": "விளையாடு", "kn": "ಆಟವಾಡು", "uk": "грати", "bn": "খেলা", "hi": "खेलना", "bs": "igrati se"}}
-{"guid": "V01_007", "translations": {"ro": "lucra", "pl": "pracować", "th": "ทำงาน", "ta": "வேலை செய்வது", "kn": "ಕೆಲಸ ಮಾಡು", "uk": "працювати", "bn": "কাজ করা", "hi": "काम करना", "bs": "raditi"}}
-{"guid": "V01_008", "translations": {"ro": "primi", "pl": "otrzymać", "th": "ได้รับ", "ta": "பெற", "kn": "ಸಿಕ್ಕು", "uk": "отримати", "bn": "পাওয়া", "hi": "प्राप्त करना", "bs": "dobiti"}}
-{"guid": "V01_009", "translations": {"ro": "găsi", "pl": "znaleźć", "th": "ค้นพบ", "ta": "கண்டுபிடிக்க", "kn": "ಏರಿಕೊಳ್ಳು", "uk": "знайти", "bn": "পাওয়া", "hi": "पाना", "bs": "naći"}}
-{"guid": "V01_010", "translations": {"ro": "pune", "pl": "położyć", "th": "วาง", "ta": "வைத்தல்", "kn": "ವைத்து", "uk": "покласти", "bn": "বেশ রাখা", "hi": "रखना", "bs": "staviti"}}
-{"guid": "V01_011", "translations": {"ro": "păstra", "pl": "trzymać", "th": "เก็บ", "ta": "நேர்த்துக் கொள்வது", "kn": "ಹಿಡಿಯಲು", "uk": "тримати", "bn": "রাখা", "hi": "रखना", "bs": "zadržati"}}
-{"guid": "V01_012", "translations": {"ro": "folosi", "pl": "używać", "th": "ใช้", "ta": "பயன்படுத்த", "kn": "ಬಳಸಲು", "uk": "використовувати", "bn": "ব্যবহার করা", "hi": "उपयोग करना", "bs": "koristiti"}}
-{"guid": "V01_013", "translations": {"ro": "ajuta", "pl": "pomóc", "th": "ช่วยเหลือ", "ta": "உதவுதல்", "kn": "ಸಹಾಯ ಮಾಡು", "uk": "допомогти", "bn": "সাহায্য করা", "hi": "मदद करना", "bs": "pomoći"}}
-{"guid": "V01_014", "translations": {"ro": "deschide", "pl": "otworzyć", "th": "เปิด", "ta": "திறக்க", "kn": "ತೆರೆಯಲು", "uk": "відкрити", "bn": "খোলা", "hi": "खोलना", "bs": "otvoriti"}}
-{"guid": "V01_015", "translations": {"ro": "închide", "pl": "zamknąć", "th": "ปิด", "ta": "மூட", "kn": "ಮುಚ್ಚಲು", "uk": "закрити", "bn": "বন্ধ করা", "hi": "बंद करना", "bs": "zatvoriti"}}
-{"guid": "V01_016", "translations": {"ro": "opri", "pl": "zatrzymać się", "th": "หยุด", "ta": "நிறுத்து", "kn": "ನಿಂತು", "uk": "зупинятися", "bn": "থামা", "hi": "रुकना"}}
-{"guid": "V01_017", "translations": {"ro": "încerca", "pl": "próbować", "th": "พยายาม", "ta": "முயற்சிக்க", "kn": "ಪ್ರಯತ್ನಿಸು", "uk": "намагатися", "bn": "চেষ্টা করা", "hi": "प्रयत्न करना"}}
-{"guid": "V01_018", "translations": {"ro": "ține", "pl": "trzymać", "th": "ถือ", "ta": "பிடி", "kn": "ಬಿಡಕೊಳ್ಳು", "uk": "тримати", "bn": "ধারণ করা", "hi": "पकड़ना", "bs": "držati"}}
-{"guid": "V01_019", "translations": {"ro": "prinde", "pl": "złapać", "th": "จับ", "ta": "பிடிக்க", "kn": "ಹಿಡಿಯಲು", "uk": "спіймати", "bn": "ধরতে", "hi": "पकड़ना"}}
-{"guid": "V01_020", "translations": {"ro": "arunca", "pl": "rzucać", "th": "ขว้าง", "ta": "எறிதல்", "kn": "ಹಿಡಿಯುವ", "uk": "кидати", "bn": "ছোঁড়া", "hi": "फेंकना"}}
-{"guid": "V01_021", "translations": {"ro": "trage", "pl": "ciągnąć", "th": "ดึง", "ta": "இழுக்கு", "kn": "ಒಳೆದಿಡಲು", "uk": "тягнути", "bn": "টানা", "hi": "खींचना"}}
-{"guid": "V01_022", "translations": {"ro": "împinge", "pl": "pchać", "th": "ผลัก", "ta": "தள்ளு", "kn": "ತಳ್ಳು", "uk": "штовхати", "bn": "তাড়া", "hi": "धक्का देना"}}
-{"guid": "V01_023", "translations": {"ro": "ridica", "pl": "podnosić", "th": "ยก", "ta": "எழுப்பு", "kn": "ಎತ್ತನು", "uk": "піднімати", "bn": "উঠানো", "hi": "उठाना"}}
-{"guid": "V01_024", "translations": {"ro": "lăsa să cadă", "pl": "upuścić", "th": "ปล่อยให้ตก", "ta": "விடு", "kn": "ಹೊರಡಲು", "uk": "кинути", "bn": "তলা পড়া", "hi": "छोड़ना"}}
-{"guid": "V01_025", "translations": {"ro": "transporta", "pl": "nieść", "th": "ขน", "ta": "ஏற்றிச் செல்லுதல்", "kn": "ತಂದಿರಿಸುವುದು", "uk": "нести", "bn": "বহন করা", "hi": "ले जाना", "bs": "nositi"}}
-{"guid": "V01_026", "translations": {"ro": "atinge", "pl": "dotykać", "th": "แตะ", "ta": "தோழுதல்", "kn": "ಸ್ಪರ್ಶಿಸು", "uk": "торкатися", "bn": "স্পর্শ করা", "hi": "छूना"}}
-{"guid": "V01_027", "translations": {"ro": "lovì", "pl": "uderzyć", "th": "ตี", "ta": "அடி தகு", "kn": "ಎರೆಯು", "uk": "вдарити", "bn": "ঘাত করা", "hi": "मारना"}}
-{"guid": "V01_028", "translations": {"ro": "tăia", "pl": "ciąć", "th": "ตัด", "ta": "ஒருத்து", "kn": "ಕತ್ತು", "uk": "різати", "bn": "কাটা", "hi": "काटना", "bs": "rezati"}}
-{"guid": "V01_030", "translations": {"ro": "arde", "pl": "palić", "th": "เผา", "ta": "கழுகுதல்", "kn": "ದಹಿಸುವುದು", "uk": "горіти", "bn": "দাহ করা", "hi": "जलना"}}
-{"guid": "V01_031", "translations": {"ro": "purta", "pl": "nosić", "th": "สวมใส่", "ta": "அணிக", "kn": "ಧರಿಸು", "uk": "носити", "bn": "পরিধান করা", "hi": "पहनना", "bs": "nositi"}}
-{"guid": "V01_032", "translations": {"ro": "a ședea", "pl": "siadać", "th": "นั่ง", "ta": "இருக்க", "kn": "ಕುಳಿತಿರಳಲು", "uk": "сидіти", "bn": "বসা", "hi": "बैठना", "bs": "sjediti"}}
-{"guid": "V01_033", "translations": {"ro": "sta", "pl": "stać", "th": "ยืน", "ta": "நிற்க", "kn": "ನಿಂತಿರು", "uk": "стояти", "bn": "টাকা", "hi": "खड़ा होना", "bs": "stajati"}}
-{"guid": "V01_034", "translations": {"ro": "culca", "pl": "leżeć", "th": "นอน", "ta": "பட்டு தங்கு", "kn": "ಬಿದ್ದು ಬೀಳಲು", "uk": "лежати", "bn": "শুতে", "hi": "लेटना"}}
-{"guid": "V01_035", "translations": {"ro": "îndoi", "pl": "zginać", "th": "งอ", "ta": "வங்கிக்கொள்ள தொடங்கு", "kn": "ವಂಗು (ವಂಗಿಸು)", "uk": "нагнути", "bn": "বাঁকানো", "hi": "मोड़ना"}}
-{"guid": "V01_036", "translations": {"ro": "scutura", "pl": "trząść", "th": "เขย่า", "ta": "குலுக்குது", "kn": "ಪ್ರಚಲಿಸುವುದು", "uk": "струснути", "bn": "ঝাঁকান", "hi": "झटकना"}}
-{"guid": "V01_037", "translations": {"ro": "ascunde", "pl": "ukryć", "th": "ซ่อน", "ta": "மறைத்து வைக்க", "kn": "ಮರೆಸಲು", "uk": "ховати", "bn": "লুকোনো", "hi": "छिपाना"}}
-{"guid": "V01_038", "translations": {"ro": "arăta", "pl": "pokazać", "th": "แสดง", "ta": "காட்டு", "kn": "ತೋರಿಸು", "uk": "показувати", "bn": "দেখানো", "hi": "दिखाना"}}
-{"guid": "V01_039", "translations": {"ro": "acoperi", "pl": "przykryć", "th": "คลุม", "ta": "மூடம்/மூடுதல் (மூடுதல் is infinitive)", "kn": "ಮೇಲೆ/ಮೇರಲು (ಮೇರಲು is infinitive)", "uk": "накрити", "bn": "ঢেকে দেওয়া", "hi": "ढकना"}}
-{"guid": "V01_040", "translations": {"ro": "atârna", "pl": "wieszać", "th": "แขวน", "ta": "தொங்க வது", "kn": "ಮುಗ್ಗಿಸಲು", "uk": "висіти", "bn": "ঝুলানো", "hi": "लटकाना"}}
-{"guid": "V01_041", "translations": {"ro": "a aștepta", "pl": "czekać", "th": "รอ", "ta": "காத்திருக்க", "kn": "ನಿರೀಕ್ಷಿಸಲು", "uk": "чекати", "bn": "অপেক্ষা করা", "hi": "प्रतिक्षा करना"}}
-{"guid": "V01_042", "translations": {"ro": "întâlni", "pl": "spotkać", "th": "พบกัน", "ta": "சேர்வது", "kn": "ಸಾಮರಸ್ಯವಾಗು", "uk": "зустрітися", "bn": "মিলিত হওয়া", "hi": "मिलना"}}
-{"guid": "V01_043", "translations": {"ro": "alătura‑se", "pl": "połączyć się", "th": "เข้าร่วม", "ta": "சேர வேண்டும்", "kn": "ಸೇರಲು", "uk": "приєднатися", "bn": "জোড়া লাগানো", "hi": "जुड़ना"}}
-{"guid": "V01_044", "translations": {"ro": "potrivi", "pl": "pasować", "th": "พอดี", "ta": "சரி வரு", "kn": "ಸರಿ ಹೊಕ್ಕು", "uk": "пасувати", "bn": "ফিট করা", "hi": "फिट होना"}}
-{"guid": "V01_045", "translations": {"ro": "pierde", "pl": "zgubić", "th": "ทำหาย", "ta": "திரும்புபோடுதல்", "kn": "ನಷ್ಟವಾಗಲು", "uk": "загубити", "bn": "হারানো", "hi": "खो देना", "bs": "izgubiti"}}
-{"guid": "V01_046", "translations": {"ro": "câștiga", "pl": "wygrać", "th": "ชนะ", "ta": "வெற்றி பெறு", "kn": "ಜಯించು", "uk": "перемогти", "bn": "জয় করা", "hi": "जीतना"}}
-{"guid": "V01_047", "translations": {"ro": "economisi", "pl": "oszczędzać", "th": "ออม", "ta": "சேமிக்க", "kn": "ಉಳಿತಾಯಮಾಡಲು", "uk": "зберегти", "bn": "সংরক্ষণ করা", "hi": "बचाना"}}
-{"guid": "V01_048", "translations": {"ro": "răni", "pl": "boleć", "th": "เจ็บ", "ta": "வலிக்க", "kn": "ನೋವು تجربه?", "uk": "боліти", "bn": "পোড়া", "hi": "दर्द करना"}}
-{"guid": "V01_049", "translations": {"ro": "muri", "pl": "umrzeć", "th": "ตาย", "ta": "மரணம்", "kn": "ಮರڻ", "uk": "померти", "bn": "মরা", "hi": "मरना", "bs": "umrijeti"}}
-{"guid": "V01_050", "translations": {"ro": "ucide", "pl": "zabić", "th": "ฆ่า", "ta": "கொலை செய்", "kn": "ಹೊರಾಕಿಲೆ", "uk": "вбити", "bn": "হত্যা করা", "hi": "मार डालना"}}
-{"guid": "V01_051", "translations": {"ro": "lupta", "pl": "walczyć", "th": "ต่อสู้", "ta": "தர сель", "kn": "ಸಂಗ್ರಹಿಸಿಕೊಳ್ಳು", "uk": "боротися", "bn": "লড়াই করা", "hi": "लड़ना"}}
-{"guid": "V01_052", "translations": {"ro": "arăta", "pl": "wskazywać", "th": "ชี้", "ta": "காட்டுதல்", "kn": "ದರ್ಶಿಸುವುದು", "uk": "показувати", "bn": "ইঙ্গিত করা", "hi": "इशारा करना"}}
-{"guid": "V01_053", "translations": {"ro": "răspândi", "pl": "rozprzestrzeniać", "th": "แพร่กระจาย", "ta": "பரப்புதல்", "kn": "ವಿಸ್ರೂತುಮಾಡು", "uk": "поширювати", "bn": "প্রসারিত করা", "hi": "व्याप्त करना"}}
-{"guid": "V01_054", "translations": {"ro": "aluneca", "pl": "poślizgnąć się", "th": "ลื่น", "ta": "பாய்ச்செலுத்து", "kn": "ಜಾರಿ ಹೋಗು", "uk": "підсковзнутись", "bn": "পাদেরা", "hi": "फिसलना"}}
-{"guid": "V01_055", "translations": {"ro": "adăuga", "pl": "dodać", "th": "เติม", "ta": "சேர்க்க", "kn": "ಸೇರಿಸು", "uk": "додавати", "bn": "যোজন করা", "hi": "जोड़ना", "bs": "dodati"}}
-{"guid": "V01_056", "translations": {"ro": "împușca", "pl": "strzelać", "th": "ยิง", "ta": "விஷம் ஏடாமை வெளியேற்று", "kn": "ಗોળೆ ಹಾರಿಸು", "uk": "стріляти", "bn": "ছোড়া", "hi": "गोलियाँ चलाना"}}
-{"guid": "V01_057", "translations": {"ro": "desena", "pl": "rysować", "th": "วาด", "ta": "வரைய", "kn": "ಚಿತ್ರಣ ಎಳೆದುಕೊ", "uk": "малювати", "bn": "চিত্রাঙ্কন করা", "hi": "चित्र बनाना", "bs": "crtati"}}
-{"guid": "V01_058", "translations": {"ro": "a alege", "pl": "wybierać", "th": "เลือก", "ta": "தேர்வுசெய்தல்", "kn": "ఎంపಿಕಲ್", "uk": "вибирати", "bn": "পছন্দ করা", "hi": "चुनना"}}
-{"guid": "V01_060", "translations": {"ro": "spăla", "pl": "myć", "th": "ล้าง", "ta": "குளுத்து", "kn": "ಕಡಕು (Alternative: ತೊಳೆಯು)", "uk": "мити", "bn": "ধোওয়া", "hi": "धोना"}}
-{"guid": "V01_061", "translations": {"ro": "găti", "pl": "gotować", "th": "ปรุงอาหาร", "ta": "சமையல் செய்", "kn": "ಪಾಕ ಮಾಡು", "uk": "готувати", "bn": "রান্না করা", "hi": "पकाना", "bs": "kuhati"}}
-{"guid": "V01_062", "translations": {"ro": "curăța", "pl": "czyścić", "th": "ทำความสะอาด", "ta": "சுத்தம் செய்தல்", "kn": "ಸುತ್ತು ಕಾಗು (Note: correct Kannada infinitive: 'ತೇಲಿಸುವ'?)", "uk": "очищати", "bn": "পরিষ্কার করা", "hi": "साफ़ करना"}}
-{"guid": "V01_063", "translations": {"ro": "lovit cu piciorul", "pl": "kopnąć", "th": "เตะ", "ta": "க kick செய்", "kn": "ಕಿಕ್ ಮಾಡು", "uk": "пхати", "bn": "কিক করা", "hi": "लकड़मारना"}}
-{"guid": "V01_064", "translations": {"ro": "bate", "pl": "bić", "th": "ตี", "ta": "அடி(தல்)", "kn": "ತಟ್ಟುವುದು", "uk": "бити", "bn": "পিটানো", "hi": "पीटना"}}
-{"guid": "V01_065", "translations": {"ro": "bloca", "pl": "blokować", "th": "ปิดกั้น", "ta": "தடைசெய்", "kn": "ಅಡೆತಡೆಯು", "uk": "перешкоджати", "bn": "বন্ধ করা", "hi": "रोकना"}}
-{"guid": "V01_066", "translations": {"ro": "fierbe", "pl": "gotować", "th": "เดือด", "ta": "குதிக்கவைக்/குடித்தல்", "kn": "ಕುದಿಯಲು", "uk": "кипіти", "bn": "ফোটানো", "hi": "उबालना", "bs": "kuhati"}}
-{"guid": "V01_067", "translations": {"ro": "peria", "pl": "szczotkować", "th": "แปรง", "ta": "தூரிகை செய்தல்", "kn": "ದೊಪ್ಪಿಸಲು", "uk": "чистити", "bn": "ব্রাশ করা", "hi": "ब्रश करना"}}
-{"guid": "V01_068", "translations": {"ro": "sculpta", "pl": "rzeźbić", "th": "แกะสลัก", "ta": "உறிஞ்சுதல்", "kn": "ಕತ್ತೆಯುವುದು", "uk": "вирізати", "bn": "কাড়াকাটা", "hi": "उत्कीर्ण करना"}}
-{"guid": "V01_069", "translations": {"ro": "colecta", "pl": "zbierać", "th": "เก็บรวบรวม", "ta": "சேர்த்து கொள்", "kn": "ಕಲೆಯಿಸು", "uk": "збирати", "bn": "সংগ্রহ করা", "hi": "एकत्र करना"}}
-{"guid": "V01_070", "translations": {"ro": "hrăni", "pl": "karmić", "th": "ป้อนอาหาร", "ta": "ஊட்டுதல்", "kn": "ಖಾದ್ಯ ನೀಡು", "uk": "годувати", "bn": "খাওয়ানো", "hi": "खिलाना"}}
-{"guid": "V01_071", "translations": {"ro": "umple", "pl": "napełnić", "th": "เติม", "ta": "நிறப்பிக்க", "kn": "ನೂರಗೊಳಿಸು", "uk": "заповнити", "bn": "ভরতি করা", "hi": "भरना"}}
-{"guid": "V01_072", "translations": {"ro": "repara", "pl": "naprawić", "th": "ซ่อมแซม", "ta": "கலாம்செய்", "kn": "ಮರಳುಕೊಳ್ಳು", "uk": "ремонтувати", "bn": "মেরামত করা", "hi": "मरम्मत करना"}}
-{"guid": "V01_073", "translations": {"ro": "tensiona", "pl": "napiąć", "th": "หดตัว", "ta": "சეჭறிவிடு", "kn": "ವಂಕಿಸು", "uk": "згинати", "bn": "সংকোচ করো", "hi": "संकुचित करना"}}
-{"guid": "V01_074", "translations": {"ro": "întoarce", "pl": "przewrócić", "th": "พลิก", "ta": "திருப்புதல்", "kn": "ಪರೆವನು", "uk": "перевернути", "bn": "উল্টে দেওয়া", "hi": "उलटना"}}
-{"guid": "V01_075", "translations": {"ro": "îndoi", "pl": "złożyć", "th": "พับ", "ta": "மடிக்க", "kn": "ಮುರೆಯಲು", "uk": "складати", "bn": "ভাঁজ করা", "hi": "मोड़ना"}}
-{"guid": "V01_076", "translations": {"ro": "încărca", "pl": "załadować", "th": "บรรทุก", "ta": "ஏற்றம் செய்வது / ஏற்றிக்கொள்ளு (ஏற்றுதல்)", "kn": "ಮಾಲುಗಳನ್ನು ತುಂಬಲು / ಲೋಡ್‌ಮಾಡು (ಲೋಡ್‌ಮಾಡು)", "uk": "завантажити", "bn": "লোড করা", "hi": "लोड करना"}}
-{"guid": "V01_077", "translations": {"ro": "masaža", "pl": "masować", "th": "นวด", "ta": "மசாஜ் செய்", "kn": "ಮಸಾಜ್ ಮಾಡು", "uk": "масажувати", "bn": "মালিশ করা", "hi": "मालिश करना"}}
-{"guid": "V01_078", "translations": {"ro": "cuiața", "pl": "obierać", "th": "ปอก", "ta": "தரகு", "kn": "ಚೀಲಿಸು", "uk": "чистити", "bn": "খোসা ছাড়ানো", "hi": "छिलना"}}
-{"guid": "V01_079", "translations": {"ro": "planta", "pl": "sadzić", "th": "ปลูก", "ta": "மூடி நடு", "kn": "ನಣಿರು", "uk": "садити", "bn": "রোপণ করা", "hi": "रोपण करना"}}
-{"guid": "V01_080", "translations": {"ro": "presa (note: 'a presa' is incorrect?)", "pl": "naciskać", "th": "กด", "ta": "அடுத்துக்குத்து", "kn": "ಒತ್ತು", "uk": "натискати", "bn": "চেপে ধরা", "hi": "दबाना"}}
-{"guid": "V01_081", "translations": {"ro": "repara", "pl": "naprawiać", "th": "ซ่อมแซม", "ta": "மறுசீரமைத்தல்", "kn": "ಮರಗೊಂದಿಸು", "uk": "ремонтувати", "bn": "মেরামত করা", "hi": "मरम्मत करना"}}
-{"guid": "V01_082", "translations": {"ro": "rula", "pl": "toczyć się", "th": "กลิ้ง", "ta": "சுழன்று நகருதல்", "kn": "Roll ಗೆ = գլ...oops", "uk": "котитися", "bn": "ঘুরে চলা", "hi": "लुढ़कना", "bs": "kotrljati se"}}
-{"guid": "V01_083", "translations": {"ro": "freca", "pl": "wcierać", "th": "ถู", "ta": "கசியல்", "kn": "ಮಚಲು", "uk": "натирати", "bn": "মুছা", "hi": "रगड़ना"}}
-{"guid": "V01_084", "translations": {"ro": "răzui", "pl": "zeskrobać", "th": "ขูด", "ta": "சுருட்டு", "kn": "ಕುಚ್ಚು", "uk": "зішкрібати", "bn": "ঘষা", "hi": "खरोंचना"}}
-{"guid": "V01_085", "translations": {"ro": "ascuți", "pl": "ostrzyć", "th": "ลับ", "ta": "கூர்மைப்படுத்த", "kn": "ತೀಕ್ಷ್ಣಗೊಳಿಸಲು", "uk": "загострити", "bn": "তিক্ষণ করা", "hi": "पारखी करना"}}
-{"guid": "V01_086", "translations": {"ro": "sări", "pl": "skakać", "th": "กระโดดเบาๆ", "ta": "தாய்தல்", "kn": "ಏತಿಹೋಗು", "uk": "стри́бати", "bn": "উড়ে-লাফানো", "hi": "कूदना"}}
-{"guid": "V01_087", "translations": {"ro": "vărsa", "pl": "rozlać", "th": "หก", "ta": "கழற்தல்", "kn": "ಸುಳಿವು", "uk": "розлити", "bn": "ঝরে পড়া", "hi": "छिड़कना"}}
-{"guid": "V01_088", "translations": {"ro": "a stivui", "pl": "układać", "th": "กอง", "ta": "சிதறకుండా அணர்", "kn": "ಸಮೂಹಗೊಳಿಸು", "uk": "укладати", "bn": "থেঁতলো করা", "hi": "ढेर करना"}}
-{"guid": "V01_089", "translations": {"ro": "amesteca", "pl": "mieszać", "th": "คน", "ta": "கலக்க", "kn": "ಓಲೆಮಾಡು", "uk": "перемішувати", "bn": "নাড়ানো", "hi": "हिलाना"}}
-{"guid": "V01_090", "translations": {"ro": "lipi", "pl": "przykleić", "th": "ติดกาว/ติด", "ta": "ஒடுக்கவ்/ஒட்டவ்", "kn": "ಒಟ್ಟಿಸಲು", "uk": "приклеїти", "bn": "লেগোয়া", "hi": "चिपकाना"}}
-{"guid": "V01_091", "translations": {"ro": "lovirea degetului", "pl": "uderzyć palec", "th": "สะดุดนิ้วเท้า", "ta": "முட்டிக்கொடுத்தல்", "kn": "ಹಿಂದುದುять", "uk": "вдаритися", "bn": "থেঁতলে যেতেঃ", "hi": "उंगली ठोकर खाना"}}
-{"guid": "V01_092", "translations": {"ro": "lipi cu bandă adezivă", "pl": "przykleić taśmą", "th": "ติดเทป", "ta": "டேப் செய்ய", "kn": "ಟೇಪ್‌ ಮಾಡು", "uk": "склеювати", "bn": "টেপ করা", "hi": "टेप करना"}}
-{"guid": "V01_093", "translations": {"ro": "lega", "pl": "wiązać", "th": "ผูก", "ta": "பெறாம்பிடி", "kn": "ಬಂಧಿಸುವುದು", "uk": "звʼязувати", "bn": "বাঁধা", "hi": "बाँधना"}}
-{"guid": "V01_094", "translations": {"ro": "răsuci", "pl": "skręcić", "th": "บิด", "ta": "மடிக்க", "kn": "ತಿರುಗಿಸು", "uk": "скрутити", "bn": "ঘুরানো", "hi": "मोड़ना"}}
-{"guid": "V01_095", "translations": {"ro": "saluta", "pl": "machać", "th": "โบกมือ", "ta": "கைகூடுதல்", "kn": "ಹಾಯ್ ಮಾಡುವುದ", "uk": "махати", "bn": "হাত নাড়া", "hi": "हाथ लहराना"}}
-{"guid": "V01_096", "translations": {"ro": "șterge", "pl": "wytrzeć", "th": "เช็ด", "ta": "துடை", "kn": "ತೊಳೆದು ಹಾಕು", "uk": "витирати", "bn": "মুছা", "hi": "पोंछना"}}
-{"guid": "V01_097", "translations": {"ro": "împacheta", "pl": "owijać", "th": "ห่อ", "ta": "மூடிச் சுமதி", "kn": "ಸುಟ್ಟು ಹಾಕು", "uk": "загортати", "bn": "মুড়া", "hi": "लपेटना"}}
-{"guid": "V01_098", "translations": {"ro": "servi", "pl": "służyć", "th": "รับใช้", "ta": "சேவை செய்", "kn": "ಸೇವೆ ಮಾಡು", "uk": "служити", "bn": "পরিসেবা করা", "hi": "सेवा करना", "bs": "služiti"}}
-{"guid": "V01_099", "translations": {"ro": "acționa", "pl": "działać", "th": "กระทำ", "ta": "செயல்பட", "kn": "ನಡೆಯು", "uk": "діяти", "bn": "করা", "hi": "करना"}}
-{"guid": "V01_100", "translations": {"ro": "a pune", "pl": "kłaść", "th": "วาง", "ta": "வைக்க", "kn": "ಹಾಕು", "uk": "класти", "bn": "রাখা", "hi": "रखना"}}
-{"guid": "V01_101", "translations": {"ro": "învinge", "pl": "pokonać", "th": "เอาชนะ", "ta": "வென்றடைதல்", "kn": "ಜಗಳಿಸುವುದು", "uk": "перемогти", "bn": "পরাজিত করা", "hi": "हराना"}}
-{"guid": "V01_102", "translations": {"ro": "rata", "pl": "spudłować", "th": "พลาด", "ta": "தாக்கப்பிடிக்காமை", "kn": "ತಲಿದಾರದೊಳಗೆಸ್ಪರ್ಶಮಾಡದಿರುವ", "uk": "промахнутися", "bn": "বৈচিত্র্যহীন", "hi": "चूकना", "bs": "promašiti"}}
-{"guid": "V01_103", "translations": {"bs": "nastaviti"}}
+{"guid": "V01_001", "translations": {"ro": "mânca", "pl": "jeść", "th": "กิน", "ms": "makan", "ta": "சாப்பிடு", "kn": "ತಿನ್ನು", "uk": "їсти", "bn": "খাওয়া", "hi": "کھانا", "tr": "yemek", "bs": "jesti"}}
+{"guid": "V01_002", "translations": {"ro": "beau", "pl": "pić", "th": "ดื่ม", "ms": "minum", "ta": "சாப்பிடு", "kn": "ಕುಡಿಯು", "uk": "пити", "bn": "পান করা", "hi": "पीना", "tr": "içmek", "bs": "piti"}}
+{"guid": "V01_003", "translations": {"ro": "dormi", "pl": "spać", "th": "นอนหลับ", "ms": "tidur", "ta": "உறங்குதல்", "kn": "ನಿದ್ರಿಸು", "uk": "спати", "bn": "ঘুমানো", "hi": "सोना", "tr": "uyumak", "bs": "spavati"}}
+{"guid": "V01_004", "translations": {"ro": "trezi", "pl": "budzić", "th": "ตื่น", "ms": "terjaga", "ta": "தெரிந்து விழி", "kn": "ಏಳಲು", "uk": "прокидатися", "bn": "জাগা", "hi": "जगना", "tr": "uyanmak"}}
+{"guid": "V01_005", "translations": {"ro": "respira", "pl": "oddychać", "th": "หายใจ", "ms": "bernafas", "ta": "சுவாசிப்பது", "kn": "ಉಸಿರಾಯಿ/ಉಸಿರೆಟ್ಟು", "uk": "дихати", "bn": "শ্বাস নেওয়া", "hi": "साँस लेना", "tr": "nefes almak"}}
+{"guid": "V01_006", "translations": {"ro": "juca", "pl": "grać", "th": "เล่น", "ms": "bermain", "ta": "விளையாடு", "kn": "ಆಟವಾಡು", "uk": "грати", "bn": "খেলা", "hi": "खेलना", "tr": "oynamak", "bs": "igrati se"}}
+{"guid": "V01_007", "translations": {"ro": "lucra", "pl": "pracować", "th": "ทำงาน", "ms": "bekerja", "ta": "வேலை செய்வது", "kn": "ಕೆಲಸ ಮಾಡು", "uk": "працювати", "bn": "কাজ করা", "hi": "काम करना", "tr": "çalışmak", "bs": "raditi"}}
+{"guid": "V01_008", "translations": {"ro": "primi", "pl": "otrzymać", "th": "ได้รับ", "ms": "mendapat", "ta": "பெற", "kn": "ಸಿಕ್ಕು", "uk": "отримати", "bn": "পাওয়া", "hi": "प्राप्त करना", "tr": "almak", "bs": "dobiti"}}
+{"guid": "V01_009", "translations": {"ro": "găsi", "pl": "znaleźć", "th": "ค้นพบ", "ms": "menemui", "ta": "கண்டுபிடிக்க", "kn": "ಏರಿಕೊಳ್ಳು", "uk": "знайти", "bn": "পাওয়া", "hi": "पाना", "tr": "bulmak", "bs": "naći"}}
+{"guid": "V01_010", "translations": {"ro": "pune", "pl": "położyć", "th": "วาง", "ms": "meletakkan", "ta": "வைத்தல்", "kn": "ವைத்து", "uk": "покласти", "bn": "বেশ রাখা", "hi": "रखना", "tr": "koymak", "bs": "staviti"}}
+{"guid": "V01_011", "translations": {"ro": "păstra", "pl": "trzymać", "th": "เก็บ", "ms": "menyimpan", "ta": "நேர்த்துக் கொள்வது", "kn": "ಹಿಡಿಯಲು", "uk": "тримати", "bn": "রাখা", "hi": "रखना", "tr": "tutmak", "bs": "zadržati"}}
+{"guid": "V01_012", "translations": {"ro": "folosi", "pl": "używać", "th": "ใช้", "ms": "menggunakan", "ta": "பயன்படுத்த", "kn": "ಬಳಸಲು", "uk": "використовувати", "bn": "ব্যবহার করা", "hi": "उपयोग करना", "tr": "kullanmak", "bs": "koristiti"}}
+{"guid": "V01_013", "translations": {"ro": "ajuta", "pl": "pomóc", "th": "ช่วยเหลือ", "ms": "membantu", "ta": "உதவுதல்", "kn": "ಸಹಾಯ ಮಾಡು", "uk": "допомогти", "bn": "সাহায্য করা", "hi": "मदद करना", "tr": "yardım etmek", "bs": "pomoći"}}
+{"guid": "V01_014", "translations": {"ro": "deschide", "pl": "otworzyć", "th": "เปิด", "ms": "membuka", "ta": "திறக்க", "kn": "ತೆರೆಯಲು", "uk": "відкрити", "bn": "খোলা", "hi": "खोलना", "tr": "açmak", "bs": "otvoriti"}}
+{"guid": "V01_015", "translations": {"ro": "închide", "pl": "zamknąć", "th": "ปิด", "ms": "menutup", "ta": "மூட", "kn": "ಮುಚ್ಚಲು", "uk": "закрити", "bn": "বন্ধ করা", "hi": "बंद करना", "tr": "kapatmak", "bs": "zatvoriti"}}
+{"guid": "V01_016", "translations": {"ro": "opri", "pl": "zatrzymać się", "th": "หยุด", "ms": "berhenti", "ta": "நிறுத்து", "kn": "ನಿಂತು", "uk": "зупинятися", "bn": "থামা", "hi": "रुकना", "tr": "durmak"}}
+{"guid": "V01_017", "translations": {"ro": "încerca", "pl": "próbować", "th": "พยายาม", "ms": "mencuba", "ta": "முயற்சிக்க", "kn": "ಪ್ರಯತ್ನಿಸು", "uk": "намагатися", "bn": "চেষ্টা করা", "hi": "प्रयत्न करना", "tr": "denemek"}}
+{"guid": "V01_018", "translations": {"ro": "ține", "pl": "trzymać", "th": "ถือ", "ms": "memegang", "ta": "பிடி", "kn": "ಬಿಡಕೊಳ್ಳು", "uk": "тримати", "bn": "ধারণ করা", "hi": "पकड़ना", "tr": "tutmak", "bs": "držati"}}
+{"guid": "V01_019", "translations": {"ro": "prinde", "pl": "złapać", "th": "จับ", "ms": "menangkap", "ta": "பிடிக்க", "kn": "ಹಿಡಿಯಲು", "uk": "спіймати", "bn": "ধরতে", "hi": "पकड़ना", "tr": "yakalamak"}}
+{"guid": "V01_020", "translations": {"ro": "arunca", "pl": "rzucać", "th": "ขว้าง", "ms": "membaling", "ta": "எறிதல்", "kn": "ಹಿಡಿಯುವ", "uk": "кидати", "bn": "ছোঁড়া", "hi": "फेंकना", "tr": "atmak"}}
+{"guid": "V01_021", "translations": {"ro": "trage", "pl": "ciągnąć", "th": "ดึง", "ms": "menarik", "ta": "இழுக்கு", "kn": "ಒಳೆದಿಡಲು", "uk": "тягнути", "bn": "টানা", "hi": "खींचना", "tr": "çekmek"}}
+{"guid": "V01_022", "translations": {"ro": "împinge", "pl": "pchać", "th": "ผลัก", "ms": "menolak", "ta": "தள்ளு", "kn": "ತಳ್ಳು", "uk": "штовхати", "bn": "তাড়া", "hi": "धक्का देना", "tr": "itmek"}}
+{"guid": "V01_023", "translations": {"ro": "ridica", "pl": "podnosić", "th": "ยก", "ms": "mengangkat", "ta": "எழுப்பு", "kn": "ಎತ್ತನು", "uk": "піднімати", "bn": "উঠানো", "hi": "उठाना", "tr": "kaldırmak"}}
+{"guid": "V01_024", "translations": {"ro": "lăsa să cadă", "pl": "upuścić", "th": "ปล่อยให้ตก", "ms": "menjatuhkan", "ta": "விடு", "kn": "ಹೊರಡಲು", "uk": "кинути", "bn": "তলা পড়া", "hi": "छोड़ना", "tr": "düşürmek"}}
+{"guid": "V01_025", "translations": {"ro": "transporta", "pl": "nieść", "th": "ขน", "ms": "membawa", "ta": "ஏற்றிச் செல்லுதல்", "kn": "ತಂದಿರಿಸುವುದು", "uk": "нести", "bn": "বহন করা", "hi": "ले जाना", "tr": "taşımak", "bs": "nositi"}}
+{"guid": "V01_026", "translations": {"ro": "atinge", "pl": "dotykać", "th": "แตะ", "ms": "menyentuh", "ta": "தோழுதல்", "kn": "ಸ್ಪರ್ಶಿಸು", "uk": "торкатися", "bn": "স্পর্শ করা", "hi": "छूना", "tr": "dokunmak"}}
+{"guid": "V01_027", "translations": {"ro": "lovì", "pl": "uderzyć", "th": "ตี", "ms": "memukul", "ta": "அடி தகு", "kn": "ಎರೆಯು", "uk": "вдарити", "bn": "ঘাত করা", "hi": "मारना", "tr": "vurmak"}}
+{"guid": "V01_028", "translations": {"ro": "tăia", "pl": "ciąć", "th": "ตัด", "ms": "memotong", "ta": "ஒருத்து", "kn": "ಕತ್ತು", "uk": "різати", "bn": "কাটা", "hi": "काटना", "tr": "kesmek", "bs": "rezati"}}
+{"guid": "V01_030", "translations": {"ro": "arde", "pl": "palić", "th": "เผา", "ms": "terbakar", "ta": "கழுகுதல்", "kn": "ದಹಿಸುವುದು", "uk": "горіти", "bn": "দাহ করা", "hi": "जलना", "tr": "yanmak"}}
+{"guid": "V01_031", "translations": {"ro": "purta", "pl": "nosić", "th": "สวมใส่", "ms": "memakai", "ta": "அணிக", "kn": "ಧರಿಸು", "uk": "носити", "bn": "পরিধান করা", "hi": "पहनना", "tr": "giymek", "bs": "nositi"}}
+{"guid": "V01_032", "translations": {"ro": "a ședea", "pl": "siadać", "th": "นั่ง", "ms": "duduk", "ta": "இருக்க", "kn": "ಕುಳಿತಿರಳಲು", "uk": "сидіти", "bn": "বসা", "hi": "बैठना", "tr": "oturmak", "bs": "sjediti"}}
+{"guid": "V01_033", "translations": {"ro": "sta", "pl": "stać", "th": "ยืน", "ms": "berdiri", "ta": "நிற்க", "kn": "ನಿಂತಿರು", "uk": "стояти", "bn": "টাকা", "hi": "खड़ा होना", "tr": "ayakta durmak", "bs": "stajati"}}
+{"guid": "V01_034", "translations": {"ro": "culca", "pl": "leżeć", "th": "นอน", "ms": "berbaring", "ta": "பட்டு தங்கு", "kn": "ಬಿದ್ದು ಬೀಳಲು", "uk": "лежати", "bn": "শুতে", "hi": "लेटना", "tr": "yatmak"}}
+{"guid": "V01_035", "translations": {"ro": "îndoi", "pl": "zginać", "th": "งอ", "ms": "membengkokkan", "ta": "வங்கிக்கொள்ள தொடங்கு", "kn": "ವಂಗು (ವಂಗಿಸು)", "uk": "нагнути", "bn": "বাঁকানো", "hi": "मोड़ना", "tr": "bükmek"}}
+{"guid": "V01_036", "translations": {"ro": "scutura", "pl": "trząść", "th": "เขย่า", "ms": "menggoncang", "ta": "குலுக்குது", "kn": "ಪ್ರಚಲಿಸುವುದು", "uk": "струснути", "bn": "ঝাঁকান", "hi": "झटकना", "tr": "sallamak"}}
+{"guid": "V01_037", "translations": {"ro": "ascunde", "pl": "ukryć", "th": "ซ่อน", "ms": "menyembunyikan", "ta": "மறைத்து வைக்க", "kn": "ಮರೆಸಲು", "uk": "ховати", "bn": "লুকোনো", "hi": "छिपाना", "tr": "gizlemek"}}
+{"guid": "V01_038", "translations": {"ro": "arăta", "pl": "pokazać", "th": "แสดง", "ms": "menunjukkan", "ta": "காட்டு", "kn": "ತೋರಿಸು", "uk": "показувати", "bn": "দেখানো", "hi": "दिखाना", "tr": "göstermek"}}
+{"guid": "V01_039", "translations": {"ro": "acoperi", "pl": "przykryć", "th": "คลุม", "ms": "menutup", "ta": "மூடம்/மூடுதல் (மூடுதல் is infinitive)", "kn": "ಮೇಲೆ/ಮೇರಲು (ಮೇರಲು is infinitive)", "uk": "накрити", "bn": "ঢেকে দেওয়া", "hi": "ढकना", "tr": "örtmek"}}
+{"guid": "V01_040", "translations": {"ro": "atârna", "pl": "wieszać", "th": "แขวน", "ms": "menggantung", "ta": "தொங்க வது", "kn": "ಮುಗ್ಗಿಸಲು", "uk": "висіти", "bn": "ঝুলানো", "hi": "लटकाना", "tr": "asmak"}}
+{"guid": "V01_041", "translations": {"ro": "a aștepta", "pl": "czekać", "th": "รอ", "ms": "menunggu", "ta": "காத்திருக்க", "kn": "ನಿರೀಕ್ಷಿಸಲು", "uk": "чекати", "bn": "অপেক্ষা করা", "hi": "प्रतिक्षा करना", "tr": "beklemek"}}
+{"guid": "V01_042", "translations": {"ro": "întâlni", "pl": "spotkać", "th": "พบกัน", "ms": "bertemu", "ta": "சேர்வது", "kn": "ಸಾಮರಸ್ಯವಾಗು", "uk": "зустрітися", "bn": "মিলিত হওয়া", "hi": "मिलना", "tr": "karşılaşmak"}}
+{"guid": "V01_043", "translations": {"ro": "alătura‑se", "pl": "połączyć się", "th": "เข้าร่วม", "ms": "menyertai", "ta": "சேர வேண்டும்", "kn": "ಸೇರಲು", "uk": "приєднатися", "bn": "জোড়া লাগানো", "hi": "जुड़ना", "tr": "katılmak"}}
+{"guid": "V01_044", "translations": {"ro": "potrivi", "pl": "pasować", "th": "พอดี", "ms": "muat", "ta": "சரி வரு", "kn": "ಸರಿ ಹೊಕ್ಕು", "uk": "пасувати", "bn": "ফিট করা", "hi": "फिट होना", "tr": "uymak"}}
+{"guid": "V01_045", "translations": {"ro": "pierde", "pl": "zgubić", "th": "ทำหาย", "ms": "kehilangan", "ta": "திரும்புபோடுதல்", "kn": "ನಷ್ಟವಾಗಲು", "uk": "загубити", "bn": "হারানো", "hi": "खो देना", "tr": "kaybetmek", "bs": "izgubiti"}}
+{"guid": "V01_046", "translations": {"ro": "câștiga", "pl": "wygrać", "th": "ชนะ", "ms": "menang", "ta": "வெற்றி பெறு", "kn": "ಜಯించು", "uk": "перемогти", "bn": "জয় করা", "hi": "जीतना", "tr": "kazanmak"}}
+{"guid": "V01_047", "translations": {"ro": "economisi", "pl": "oszczędzać", "th": "ออม", "ms": "menyimpan", "ta": "சேமிக்க", "kn": "ಉಳಿತಾಯಮಾಡಲು", "uk": "зберегти", "bn": "সংরক্ষণ করা", "hi": "बचाना", "tr": "saklamak"}}
+{"guid": "V01_048", "translations": {"ro": "răni", "pl": "boleć", "th": "เจ็บ", "ms": "menyakitkan", "ta": "வலிக்க", "kn": "ನೋವು تجربه?", "uk": "боліти", "bn": "পোড়া", "hi": "दर्द करना", "tr": "acımak"}}
+{"guid": "V01_049", "translations": {"ro": "muri", "pl": "umrzeć", "th": "ตาย", "ms": "mati", "ta": "மரணம்", "kn": "ಮರڻ", "uk": "померти", "bn": "মরা", "hi": "मरना", "tr": "ölmek", "bs": "umrijeti"}}
+{"guid": "V01_050", "translations": {"ro": "ucide", "pl": "zabić", "th": "ฆ่า", "ms": "membunuh", "ta": "கொலை செய்", "kn": "ಹೊರಾಕಿಲೆ", "uk": "вбити", "bn": "হত্যা করা", "hi": "मार डालना", "tr": "öldürmek"}}
+{"guid": "V01_051", "translations": {"ro": "lupta", "pl": "walczyć", "th": "ต่อสู้", "ms": "bergaduh", "ta": "தர сель", "kn": "ಸಂಗ್ರಹಿಸಿಕೊಳ್ಳು", "uk": "боротися", "bn": "লড়াই করা", "hi": "लड़ना", "tr": "dövüşmek"}}
+{"guid": "V01_052", "translations": {"ro": "arăta", "pl": "wskazywać", "th": "ชี้", "ms": "menunjuk", "ta": "காட்டுதல்", "kn": "ದರ್ಶಿಸುವುದು", "uk": "показувати", "bn": "ইঙ্গিত করা", "hi": "इशारा करना", "tr": "işaret etmek"}}
+{"guid": "V01_053", "translations": {"ro": "răspândi", "pl": "rozprzestrzeniać", "th": "แพร่กระจาย", "ms": "merebak", "ta": "பரப்புதல்", "kn": "ವಿಸ್ರೂತುಮಾಡು", "uk": "поширювати", "bn": "প্রসারিত করা", "hi": "व्याप्त करना", "tr": "yayılmak"}}
+{"guid": "V01_054", "translations": {"ro": "aluneca", "pl": "poślizgnąć się", "th": "ลื่น", "ms": "tergelincir", "ta": "பாய்ச்செலுத்து", "kn": "ಜಾರಿ ಹೋಗು", "uk": "підсковзнутись", "bn": "পাদেরা", "hi": "फिसलना", "tr": "kaymak"}}
+{"guid": "V01_055", "translations": {"ro": "adăuga", "pl": "dodać", "th": "เติม", "ms": "menambahkan", "ta": "சேர்க்க", "kn": "ಸೇರಿಸು", "uk": "додавати", "bn": "যোজন করা", "hi": "जोड़ना", "tr": "eklemek", "bs": "dodati"}}
+{"guid": "V01_056", "translations": {"ro": "împușca", "pl": "strzelać", "th": "ยิง", "ms": "menembak", "ta": "விஷம் ஏடாமை வெளியேற்று", "kn": "ಗોળೆ ಹಾರಿಸು", "uk": "стріляти", "bn": "ছোড়া", "hi": "गोलियाँ चलाना", "tr": "ateş etmek"}}
+{"guid": "V01_057", "translations": {"ro": "desena", "pl": "rysować", "th": "วาด", "ms": "melukis", "ta": "வரைய", "kn": "ಚಿತ್ರಣ ಎಳೆದುಕೊ", "uk": "малювати", "bn": "চিত্রাঙ্কন করা", "hi": "चित्र बनाना", "tr": "çizmek", "bs": "crtati"}}
+{"guid": "V01_058", "translations": {"ro": "a alege", "pl": "wybierać", "th": "เลือก", "ms": "memilih", "ta": "தேர்வுசெய்தல்", "kn": "ఎంపಿಕಲ್", "uk": "вибирати", "bn": "পছন্দ করা", "hi": "चुनना", "tr": "seçmek"}}
+{"guid": "V01_060", "translations": {"ro": "spăla", "pl": "myć", "th": "ล้าง", "ms": "mencuci", "ta": "குளுத்து", "kn": "ಕಡಕು (Alternative: ತೊಳೆಯು)", "uk": "мити", "bn": "ধোওয়া", "hi": "धोना", "tr": "yıkamak"}}
+{"guid": "V01_061", "translations": {"ro": "găti", "pl": "gotować", "th": "ปรุงอาหาร", "ms": "memasak", "ta": "சமையல் செய்", "kn": "ಪಾಕ ಮಾಡು", "uk": "готувати", "bn": "রান্না করা", "hi": "पकाना", "tr": "pişirmek", "bs": "kuhati"}}
+{"guid": "V01_062", "translations": {"ro": "curăța", "pl": "czyścić", "th": "ทำความสะอาด", "ms": "membersihkan", "ta": "சுத்தம் செய்தல்", "kn": "ಸುತ್ತು ಕಾಗು (Note: correct Kannada infinitive: 'ತೇಲಿಸುವ'?)", "uk": "очищати", "bn": "পরিষ্কার করা", "hi": "साफ़ करना", "tr": "temizlemek"}}
+{"guid": "V01_063", "translations": {"ro": "lovit cu piciorul", "pl": "kopnąć", "th": "เตะ", "ms": "menendang", "ta": "க kick செய்", "kn": "ಕಿಕ್ ಮಾಡು", "uk": "пхати", "bn": "কিক করা", "hi": "लकड़मारना", "tr": "tekmelemek"}}
+{"guid": "V01_064", "translations": {"ro": "bate", "pl": "bić", "th": "ตี", "ms": "memukul", "ta": "அடி(தல்)", "kn": "ತಟ್ಟುವುದು", "uk": "бити", "bn": "পিটানো", "hi": "पीटना", "tr": "dövmek"}}
+{"guid": "V01_065", "translations": {"ro": "bloca", "pl": "blokować", "th": "ปิดกั้น", "ms": "menghalang", "ta": "தடைசெய்", "kn": "ಅಡೆತಡೆಯು", "uk": "перешкоджати", "bn": "বন্ধ করা", "hi": "रोकना", "tr": "engellemek"}}
+{"guid": "V01_066", "translations": {"ro": "fierbe", "pl": "gotować", "th": "เดือด", "ms": "mendidih", "ta": "குதிக்கவைக்/குடித்தல்", "kn": "ಕುದಿಯಲು", "uk": "кипіти", "bn": "ফোটানো", "hi": "उबालना", "tr": "kaynamak", "bs": "kuhati"}}
+{"guid": "V01_067", "translations": {"ro": "peria", "pl": "szczotkować", "th": "แปรง", "ms": "memberus", "ta": "தூரிகை செய்தல்", "kn": "ದೊಪ್ಪಿಸಲು", "uk": "чистити", "bn": "ব্রাশ করা", "hi": "ब्रश करना", "tr": "fırçalamak"}}
+{"guid": "V01_068", "translations": {"ro": "sculpta", "pl": "rzeźbić", "th": "แกะสลัก", "ms": "mengukir", "ta": "உறிஞ்சுதல்", "kn": "ಕತ್ತೆಯುವುದು", "uk": "вирізати", "bn": "কাড়াকাটা", "hi": "उत्कीर्ण करना", "tr": "oymak"}}
+{"guid": "V01_069", "translations": {"ro": "colecta", "pl": "zbierać", "th": "เก็บรวบรวม", "ms": "mengumpulkan", "ta": "சேர்த்து கொள்", "kn": "ಕಲೆಯಿಸು", "uk": "збирати", "bn": "সংগ্রহ করা", "hi": "एकत्र करना", "tr": "toplamak"}}
+{"guid": "V01_070", "translations": {"ro": "hrăni", "pl": "karmić", "th": "ป้อนอาหาร", "ms": "memberi makan", "ta": "ஊட்டுதல்", "kn": "ಖಾದ್ಯ ನೀಡು", "uk": "годувати", "bn": "খাওয়ানো", "hi": "खिलाना", "tr": "beslemek"}}
+{"guid": "V01_071", "translations": {"ro": "umple", "pl": "napełnić", "th": "เติม", "ms": "mengisi", "ta": "நிறப்பிக்க", "kn": "ನೂರಗೊಳಿಸು", "uk": "заповнити", "bn": "ভরতি করা", "hi": "भरना", "tr": "doldurmak"}}
+{"guid": "V01_072", "translations": {"ro": "repara", "pl": "naprawić", "th": "ซ่อมแซม", "ms": "membaiki", "ta": "கலாம்செய்", "kn": "ಮರಳುಕೊಳ್ಳು", "uk": "ремонтувати", "bn": "মেরামত করা", "hi": "मरम्मत करना", "tr": "onarmak"}}
+{"guid": "V01_073", "translations": {"ro": "tensiona", "pl": "napiąć", "th": "หดตัว", "ms": "menegangkan", "ta": "சეჭறிவிடு", "kn": "ವಂಕಿಸು", "uk": "згинати", "bn": "সংকোচ করো", "hi": "संकुचित करना", "tr": "kasmak"}}
+{"guid": "V01_074", "translations": {"ro": "întoarce", "pl": "przewrócić", "th": "พลิก", "ms": "membalikkan", "ta": "திருப்புதல்", "kn": "ಪರೆವನು", "uk": "перевернути", "bn": "উল্টে দেওয়া", "hi": "उलटना", "tr": "ters çevirmek"}}
+{"guid": "V01_075", "translations": {"ro": "îndoi", "pl": "złożyć", "th": "พับ", "ms": "melipat", "ta": "மடிக்க", "kn": "ಮುರೆಯಲು", "uk": "складати", "bn": "ভাঁজ করা", "hi": "मोड़ना", "tr": "katlamak"}}
+{"guid": "V01_076", "translations": {"ro": "încărca", "pl": "załadować", "th": "บรรทุก", "ms": "memuatkan", "ta": "ஏற்றம் செய்வது / ஏற்றிக்கொள்ளு (ஏற்றுதல்)", "kn": "ಮಾಲುಗಳನ್ನು ತುಂಬಲು / ಲೋಡ್‌ಮಾಡು (ಲೋಡ್‌ಮಾಡು)", "uk": "завантажити", "bn": "লোড করা", "hi": "लोड करना", "tr": "yüklemek"}}
+{"guid": "V01_077", "translations": {"ro": "masaža", "pl": "masować", "th": "นวด", "ms": "mengurut", "ta": "மசாஜ் செய்", "kn": "ಮಸಾಜ್ ಮಾಡು", "uk": "масажувати", "bn": "মালিশ করা", "hi": "मालिश करना", "tr": "masaj yapmak"}}
+{"guid": "V01_078", "translations": {"ro": "cuiața", "pl": "obierać", "th": "ปอก", "ms": "mengupas", "ta": "தரகு", "kn": "ಚೀಲಿಸು", "uk": "чистити", "bn": "খোসা ছাড়ানো", "hi": "छिलना", "tr": "soymak"}}
+{"guid": "V01_079", "translations": {"ro": "planta", "pl": "sadzić", "th": "ปลูก", "ms": "menanam", "ta": "மூடி நடு", "kn": "ನಣಿರು", "uk": "садити", "bn": "রোপণ করা", "hi": "रोपण करना", "tr": "dikmek"}}
+{"guid": "V01_080", "translations": {"ro": "presa (note: 'a presa' is incorrect?)", "pl": "naciskać", "th": "กด", "ms": "menekan", "ta": "அடுத்துக்குத்து", "kn": "ಒತ್ತು", "uk": "натискати", "bn": "চেপে ধরা", "hi": "दबाना", "tr": "bastırmak"}}
+{"guid": "V01_081", "translations": {"ro": "repara", "pl": "naprawiać", "th": "ซ่อมแซม", "ms": "membaiki", "ta": "மறுசீரமைத்தல்", "kn": "ಮರಗೊಂದಿಸು", "uk": "ремонтувати", "bn": "মেরামত করা", "hi": "मरम्मत करना", "tr": "onarmak"}}
+{"guid": "V01_082", "translations": {"ro": "rula", "pl": "toczyć się", "th": "กลิ้ง", "ms": "bergolek", "ta": "சுழன்று நகருதல்", "kn": "Roll ಗೆ = գլ...oops", "uk": "котитися", "bn": "ঘুরে চলা", "hi": "लुढ़कना", "tr": "yuvarlanmak", "bs": "kotrljati se"}}
+{"guid": "V01_083", "translations": {"ro": "freca", "pl": "wcierać", "th": "ถู", "ms": "menggosok", "ta": "கசியல்", "kn": "ಮಚಲು", "uk": "натирати", "bn": "মুছা", "hi": "रगड़ना", "tr": "ovmak"}}
+{"guid": "V01_084", "translations": {"ro": "răzui", "pl": "zeskrobać", "th": "ขูด", "ms": "mengikis", "ta": "சுருட்டு", "kn": "ಕುಚ್ಚು", "uk": "зішкрібати", "bn": "ঘষা", "hi": "खरोंचना", "tr": "kazımak"}}
+{"guid": "V01_085", "translations": {"ro": "ascuți", "pl": "ostrzyć", "th": "ลับ", "ms": "mengasah", "ta": "கூர்மைப்படுத்த", "kn": "ತೀಕ್ಷ್ಣಗೊಳಿಸಲು", "uk": "загострити", "bn": "তিক্ষণ করা", "hi": "पारखी करना", "tr": "bilemek"}}
+{"guid": "V01_086", "translations": {"ro": "sări", "pl": "skakać", "th": "กระโดดเบาๆ", "ms": "melompat-lompat", "ta": "தாய்தல்", "kn": "ಏತಿಹೋಗು", "uk": "стри́бати", "bn": "উড়ে-লাফানো", "hi": "कूदना", "tr": "seke seke yürümek"}}
+{"guid": "V01_087", "translations": {"ro": "vărsa", "pl": "rozlać", "th": "หก", "ms": "menumpahkan", "ta": "கழற்தல்", "kn": "ಸುಳಿವು", "uk": "розлити", "bn": "ঝরে পড়া", "hi": "छिड़कना", "tr": "dökmek"}}
+{"guid": "V01_088", "translations": {"ro": "a stivui", "pl": "układać", "th": "กอง", "ms": "menyusun bertindih", "ta": "சிதறకుండా அணர்", "kn": "ಸಮೂಹಗೊಳಿಸು", "uk": "укладати", "bn": "থেঁতলো করা", "hi": "ढेर करना", "tr": "üst üste yığmak"}}
+{"guid": "V01_089", "translations": {"ro": "amesteca", "pl": "mieszać", "th": "คน", "ms": "mengacau", "ta": "கலக்க", "kn": "ಓಲೆಮಾಡು", "uk": "перемішувати", "bn": "নাড়ানো", "hi": "हिलाना", "tr": "karıştırmak"}}
+{"guid": "V01_090", "translations": {"ro": "lipi", "pl": "przykleić", "th": "ติดกาว/ติด", "ms": "melekatkan", "ta": "ஒடுக்கவ்/ஒட்டவ்", "kn": "ಒಟ್ಟಿಸಲು", "uk": "приклеїти", "bn": "লেগোয়া", "hi": "चिपकाना", "tr": "yapıştırmak"}}
+{"guid": "V01_091", "translations": {"ro": "lovirea degetului", "pl": "uderzyć palec", "th": "สะดุดนิ้วเท้า", "ms": "terhantuk jari kaki", "ta": "முட்டிக்கொடுத்தல்", "kn": "ಹಿಂದುದುять", "uk": "вдаритися", "bn": "থেঁতলে যেতেঃ", "hi": "उंगली ठोकर खाना", "tr": "ayak parmağını çarpmak"}}
+{"guid": "V01_092", "translations": {"ro": "lipi cu bandă adezivă", "pl": "przykleić taśmą", "th": "ติดเทป", "ms": "melekatkan dengan pita pelekat", "ta": "டேப் செய்ய", "kn": "ಟೇಪ್‌ ಮಾಡು", "uk": "склеювати", "bn": "টেপ করা", "hi": "टेप करना", "tr": "bantı yapıştırmak"}}
+{"guid": "V01_093", "translations": {"ro": "lega", "pl": "wiązać", "th": "ผูก", "ms": "mengikat", "ta": "பெறாம்பிடி", "kn": "ಬಂಧಿಸುವುದು", "uk": "звʼязувати", "bn": "বাঁধা", "hi": "बाँधना", "tr": "bağlamak"}}
+{"guid": "V01_094", "translations": {"ro": "răsuci", "pl": "skręcić", "th": "บิด", "ms": "memulas", "ta": "மடிக்க", "kn": "ತಿರುಗಿಸು", "uk": "скрутити", "bn": "ঘুরানো", "hi": "मोड़ना", "tr": "bükmek"}}
+{"guid": "V01_095", "translations": {"ro": "saluta", "pl": "machać", "th": "โบกมือ", "ms": "melambai", "ta": "கைகூடுதல்", "kn": "ಹಾಯ್ ಮಾಡುವುದ", "uk": "махати", "bn": "হাত নাড়া", "hi": "हाथ लहराना", "tr": "el sallamak"}}
+{"guid": "V01_096", "translations": {"ro": "șterge", "pl": "wytrzeć", "th": "เช็ด", "ms": "mengelap", "ta": "துடை", "kn": "ತೊಳೆದು ಹಾಕು", "uk": "витирати", "bn": "মুছা", "hi": "पोंछना", "tr": "silmek"}}
+{"guid": "V01_097", "translations": {"ro": "împacheta", "pl": "owijać", "th": "ห่อ", "ms": "membungkus", "ta": "மூடிச் சுமதி", "kn": "ಸುಟ್ಟು ಹಾಕು", "uk": "загортати", "bn": "মুড়া", "hi": "लपेटना", "tr": "sarmak"}}
+{"guid": "V01_098", "translations": {"ro": "servi", "pl": "służyć", "th": "รับใช้", "ms": "berkhidmat", "ta": "சேவை செய்", "kn": "ಸೇವೆ ಮಾಡು", "uk": "служити", "bn": "পরিসেবা করা", "hi": "सेवा करना", "tr": "hizmet etmek", "bs": "služiti"}}
+{"guid": "V01_099", "translations": {"ro": "acționa", "pl": "działać", "th": "กระทำ", "ms": "bertindak", "ta": "செயல்பட", "kn": "ನಡೆಯು", "uk": "діяти", "bn": "করা", "hi": "करना", "tr": "davranmak"}}
+{"guid": "V01_100", "translations": {"ro": "a pune", "pl": "kłaść", "th": "วาง", "ms": "meletakkan", "ta": "வைக்க", "kn": "ಹಾಕು", "uk": "класти", "bn": "রাখা", "hi": "रखना", "tr": "koymak"}}
+{"guid": "V01_101", "translations": {"ro": "învinge", "pl": "pokonać", "th": "เอาชนะ", "ms": "mengalahkan", "ta": "வென்றடைதல்", "kn": "ಜಗಳಿಸುವುದು", "uk": "перемогти", "bn": "পরাজিত করা", "hi": "हराना", "tr": "yenmek"}}
+{"guid": "V01_102", "translations": {"ro": "rata", "pl": "spudłować", "th": "พลาด", "ms": "tersasar", "ta": "தாக்கப்பிடிக்காமை", "kn": "ತಲಿದಾರದೊಳಗೆಸ್ಪರ್ಶಮಾಡದಿರುವ", "uk": "промахнутися", "bn": "বৈচিত্র্যহীন", "hi": "चूकना", "tr": "ıskalamak", "bs": "promašiti"}}
+{"guid": "V01_103", "translations": {"ms": "meneruskan", "hi": "जारी रखना", "tr": "devam etmek", "bs": "nastaviti"}}
+{"guid": "V01_104", "translations": {"ms": "menaburkan", "hi": "बिखेरना", "tr": "saçmak"}}
+{"guid": "V01_105", "translations": {"ms": "memukul gendang", "hi": "ढोल बजाना", "tr": "davul çalmak"}}
+{"guid": "V01_106", "translations": {"ms": "berdiet", "hi": "परहेज़ करना", "tr": "diyet yapmak"}}
+{"guid": "V01_107", "translations": {"ms": "memasang umpan", "hi": "चारा लगाना", "tr": "yem takmak"}}
+{"guid": "V01_108", "translations": {"ms": "membajak", "hi": "हल चलाना", "tr": "sürmek"}}
+{"guid": "V01_109", "translations": {"ms": "memerangi", "hi": "लड़ना", "tr": "mücadele etmek"}}
+{"guid": "V01_110", "translations": {"ms": "membebani", "hi": "लादना", "tr": "yüklemek"}}
+{"guid": "V01_111", "translations": {"ms": "menguatkuasakan", "hi": "लागू करवाना", "tr": "uygulamak"}}
+{"guid": "V01_112", "translations": {"ms": "menangkap", "hi": "गिरफ़्तार करना", "tr": "tutuklamak"}}
+{"guid": "V01_113", "translations": {"ms": "mengayuh", "hi": "पैडल चलाना", "tr": "pedal çevirmek"}}
+{"guid": "V01_114", "translations": {"ms": "mendangkalkan", "hi": "गाद से भर देना", "tr": "alüvyonla doldurmak"}}
+{"guid": "V01_115", "translations": {"ms": "memahat", "hi": "छेनी से तराशना", "tr": "keskiyle yontmak"}}
+{"guid": "V01_116", "translations": {"ms": "mengapit", "hi": "कसकर जकड़ना", "tr": "kelepçelemek"}}
+{"guid": "V01_117", "translations": {"ms": "mendiskriminasi", "hi": "भेदभाव करना", "tr": "ayrımcılık yapmak"}}
+{"guid": "V01_118", "translations": {"ms": "mengeluarkan", "hi": "हटाना", "tr": "kaldırmak"}}
+{"guid": "V01_119", "translations": {"ms": "membakar", "hi": "बेक करना", "tr": "fırında pişirmek"}}
+{"guid": "V01_120", "translations": {"ms": "menjemur", "hi": "तपाना", "tr": "kavurmak"}}
+{"guid": "V01_121", "translations": {"ms": "mengayak", "hi": "छानना", "tr": "elemek"}}
+{"guid": "V01_122", "translations": {"ms": "mengayak", "hi": "छानना", "tr": "elemek"}}
+{"guid": "V01_123", "translations": {"ms": "mereneh", "hi": "धीमी आँच पर पकाना", "tr": "kısık ateşte pişirmek"}}
+{"guid": "V01_124", "translations": {"ms": "merendam", "hi": "भिगोना", "tr": "ıslatmak"}}
+{"guid": "V01_125", "translations": {"ms": "lenyekkan", "hi": "मसलना", "tr": "ezmek"}}
+{"guid": "V01_126", "translations": {"ms": "menguli", "hi": "गूँधना", "tr": "yoğurmak"}}
+{"guid": "V01_127", "translations": {"ms": "membilas", "hi": "खंगालना", "tr": "durulamak"}}
+{"guid": "V01_128", "translations": {"ms": "mengupas", "hi": "छीलना", "tr": "soymak"}}
+{"guid": "V01_129", "translations": {"ms": "melembapkan", "hi": "नम करना", "tr": "nemlendirmek"}}
+{"guid": "V01_130", "translations": {"ms": "menyiram", "hi": "ऊपर से तरल डालना", "tr": "üzerine sıvı gezdirmek"}}
+{"guid": "V01_131", "translations": {"ms": "menjahit jelujur", "hi": "कच्ची सिलाई करना", "tr": "teğellemek"}}
+{"guid": "V01_132", "translations": {"ms": "melecur", "hi": "झुलसाना", "tr": "haşlamak"}}
+{"guid": "V01_133", "translations": {"ms": "memanaskan hingga hampir mendidih", "hi": "उबाल आने से ठीक पहले तक गर्म करना", "tr": "kaynama noktasının hemen altına kadar ısıtmak"}}
+{"guid": "V01_134", "translations": {"ms": "mencincang halus", "hi": "बारीक़ काटना", "tr": "ince ince doğramak"}}
+{"guid": "V01_135", "translations": {"ms": "menyenduk lapisan atas", "hi": "ऊपरी परत हटाना", "tr": "kaymağını almak"}}
+{"guid": "V01_136", "translations": {"ms": "memanaskan semula", "hi": "दोबारा गरम करना", "tr": "yeniden ısıtmak"}}
+{"guid": "V01_137", "translations": {"ms": "memerap", "hi": "मैरीनेट करना", "tr": "marine etmek"}}
+{"guid": "V01_138", "translations": {"ms": "mencedok", "hi": "उलीचना", "tr": "kepçeyle almak"}}
+{"guid": "V01_139", "translations": {"ms": "memanggang", "hi": "भूनना", "tr": "ızgarada pişirmek"}}
+{"guid": "V01_140", "translations": {"ms": "mematuk", "hi": "चोंच मारना", "tr": "gagalamak"}}
+{"guid": "V01_141", "translations": {"ms": "memfilet", "hi": "फ़िलेट बनाना", "tr": "fileto çıkarmak"}}
+{"guid": "V01_142", "translations": {"ms": "bekerjasama", "hi": "सहयोग करना", "tr": "iş birliği yapmak"}}
+{"guid": "V01_143", "translations": {"ms": "mengasingkan", "hi": "अलग करना", "tr": "izole etmek"}}
+{"guid": "V01_144", "translations": {"ms": "bertepuk tangan", "hi": "ताली बजाना", "tr": "alkışlamak"}}
+{"guid": "V01_145", "translations": {"ms": "mengalamatkan", "hi": "पता लिखना", "tr": "adreslemek"}}
+{"guid": "V01_146", "translations": {"ms": "mandi di bawah pancuran", "hi": "नहाना", "tr": "duş almak"}}
+{"guid": "V01_147", "translations": {"ms": "mencampur", "hi": "मिलाना", "tr": "karıştırmak"}}
+{"guid": "V01_148", "translations": {"ms": "menghabiskan masa", "hi": "समय बिताना", "tr": "vakit geçirmek"}}
+{"guid": "V01_149", "translations": {"ms": "mengayun", "hi": "झुलाना", "tr": "sallamak"}}
+{"guid": "V01_150", "translations": {"ms": "melindungi", "hi": "बचाना", "tr": "korumak"}}
+{"guid": "V01_151", "translations": {"ms": "menyingkap", "hi": "उघाड़ना", "tr": "örtüsünü kaldırmak"}}

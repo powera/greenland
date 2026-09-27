@@ -1,3 +1,39 @@
-{"guid": "N18_001", "translations": {"ro": "pi", "pl": "pi", "th": "ไพ", "ta": "பை", "kn": "ಪೈ", "uk": "пі", "bn": "পাই", "hi": "पाई"}}
-{"guid": "N18_002", "translations": {"ro": "pică", "pl": "pik", "th": "โพดำ", "ta": "ஸ்பேட்", "kn": "ಸ್ಪೇಡ್", "uk": "піка", "bn": "স্পেড", "hi": "स्पेड"}}
-{"guid": "N18_003", "translations": {"ro": "culoare", "pl": "kolor", "th": "สี", "ta": "வண்ணம்", "kn": "ಬಣ್ಣ", "uk": "масть", "bn": "রং", "hi": "रंग"}}
+{"guid": "N18_001", "translations": {"ro": "pi", "pl": "pi", "th": "ไพ", "ms": "pi", "ta": "பை", "kn": "ಪೈ", "uk": "пі", "bn": "পাই", "hi": "पाई", "tr": "pi"}}
+{"guid": "N18_002", "translations": {"ro": "pică", "pl": "pik", "th": "โพดำ", "ms": "daun sekop", "ta": "ஸ்பேட்", "kn": "ಸ್ಪೇಡ್", "uk": "піка", "bn": "স্পেড", "hi": "स्पेड", "tr": "maça"}}
+{"guid": "N18_003", "translations": {"ro": "culoare", "pl": "kolor", "th": "สี", "ms": "jenis daun terup", "ta": "வண்ணம்", "kn": "ಬಣ್ಣ", "uk": "масть", "bn": "রং", "hi": "रंग", "tr": "kart takımı"}}
+{"guid": "N18_004", "translations": {"ms": "plat nombor", "hi": "नंबर प्लेट", "tr": "plaka"}}
+{"guid": "N18_005", "translations": {"ms": "pingat emas", "hi": "स्वर्ण पदक", "tr": "altın madalya"}}
+{"guid": "N18_006", "translations": {"ms": "graf", "hi": "ग्राफ", "tr": "çizge"}}
+{"guid": "N18_007", "translations": {"ms": "digit", "hi": "अंक", "tr": "rakam"}}
+{"guid": "N18_008", "translations": {"ms": "angka", "hi": "अंक", "tr": "sayı adı"}}
+{"guid": "N18_009", "translations": {"ms": "alfa", "hi": "अल्फा", "tr": "alfa"}}
+{"guid": "N18_010", "translations": {"ms": "lidah alat muzik", "hi": "रीड", "tr": "kamış"}}
+{"guid": "N18_011", "translations": {"ms": "lagu kebangsaan", "hi": "गान", "tr": "marş"}}
+{"guid": "N18_012", "translations": {"ms": "motif", "hi": "प्रतीकात्मक रूपांकन", "tr": "motif"}}
+{"guid": "N18_013", "translations": {"ms": "huruf vokal", "hi": "स्वर अक्षर", "tr": "ünlü harf"}}
+{"guid": "N18_014", "translations": {"ms": "konsonan", "hi": "व्यंजन", "tr": "ünsüz"}}
+{"guid": "N18_015", "translations": {"ms": "huruf konsonan", "hi": "व्यंजन अक्षर", "tr": "ünsüz harf"}}
+{"guid": "N18_016", "translations": {"ms": "abjad", "hi": "वर्णमाला", "tr": "alfabe"}}
+{"guid": "N18_017", "translations": {"ms": "koma", "hi": "अल्पविराम", "tr": "virgül"}}
+{"guid": "N18_018", "translations": {"ms": "apostrof", "hi": "अपोस्ट्रॉफ़", "tr": "kesme işareti"}}
+{"guid": "N18_019", "translations": {"ms": "awalan", "hi": "उपसर्ग", "tr": "önek"}}
+{"guid": "N18_020", "translations": {"ms": "awalan", "hi": "उपसर्ग", "tr": "ön ek"}}
+{"guid": "N18_021", "translations": {"ms": "akhiran", "hi": "प्रत्यय", "tr": "sonek"}}
+{"guid": "N18_022", "translations": {"ms": "julukan", "hi": "विशेषण", "tr": "lakap"}}
+{"guid": "N18_023", "translations": {"ms": "lambang diftong", "hi": "द्विस्वर का लिखित चिह्न", "tr": "difton gösterimi"}}
+{"guid": "N18_024", "translations": {"ms": "imbuhan", "hi": "उपसर्ग या प्रत्यय", "tr": "ek"}}
+{"guid": "N18_025", "translations": {"ms": "infiks", "hi": "अंतःसर्ग", "tr": "iç ek"}}
+{"guid": "N18_026", "translations": {"ms": "anafora", "hi": "अनाफ़ोरा", "tr": "anafora"}}
+{"guid": "N18_027", "translations": {"ms": "metonimia", "hi": "लक्षणा", "tr": "ad aktarması"}}
+{"guid": "N18_028", "translations": {"ms": "logogram", "hi": "लोगोग्राम", "tr": "logogram"}}
+{"guid": "N18_029", "translations": {"ms": "grafem", "hi": "ग्राफ़ीम", "tr": "grafem"}}
+{"guid": "N18_030", "translations": {"ms": "ligatur", "hi": "संयुक्ताक्षर", "tr": "ligatür"}}
+{"guid": "N18_031", "translations": {"ms": "sistem tulisan suku kata", "hi": "अक्षरमाला", "tr": "hece yazısı"}}
+{"guid": "N18_032", "translations": {"ms": "abjad", "hi": "व्यंजनमाला", "tr": "ebced"}}
+{"guid": "N18_033", "translations": {"ms": "abugida", "hi": "अबुगिडा", "tr": "abugida"}}
+{"guid": "N18_034", "translations": {"ms": "tulisan Braille", "hi": "ब्रेल लिपि", "tr": "Braille alfabesi"}}
+{"guid": "N18_035", "translations": {"ms": "kanji", "hi": "कांजी", "tr": "kanji"}}
+{"guid": "N18_036", "translations": {"ms": "tulisan kuneiform", "hi": "कीलाक्षर", "tr": "çivi yazısı"}}
+{"guid": "N18_037", "translations": {"ms": "gol", "hi": "गोलपोस्ट", "tr": "kale"}}
+{"guid": "N18_038", "translations": {"ms": "jalur", "hi": "धारी", "tr": "şerit"}}
+{"guid": "N18_039", "translations": {"ms": "keriting", "hi": "चिड़ी", "tr": "sinek"}}

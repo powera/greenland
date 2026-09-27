@@ -1,22 +1,78 @@
-{"guid": "N55_001", "translations": {"ro": "guvern", "pl": "rząd", "th": "รัฐบาล", "ta": "அரசு", "kn": "ಸರ್ಕಾರ", "uk": "уряд", "bn": "সরকার", "hi": "सरकार"}}
-{"guid": "N55_002", "translations": {"ro": "lege", "pl": "prawo", "th": "กฎหมาย", "ta": "சட்டம்", "kn": "ಕಾನೂನು", "uk": "закон", "bn": "আইন", "hi": "क़ानून"}}
-{"guid": "N55_003", "translations": {"ro": "societate", "pl": "społeczeństwo", "th": "สังคม", "ta": "சமூகம்", "kn": "ಸಮಾಜ", "uk": "суспільство", "bn": "সমাজ", "hi": "समाज"}}
-{"guid": "N55_004", "translations": {"ro": "public", "pl": "publiczność", "th": "สาธารณชน", "ta": "பொது", "kn": "ಪ್ರಧಾನಜನರು", "uk": "публіка", "bn": "সাধারণজন", "hi": "सार्वजन"}}
-{"guid": "N55_009", "translations": {"ro": "afacere", "pl": "biznes", "th": "ธุรกิจ", "ta": "வர்த்தகம்", "kn": "ವ್ಯವಹಾರ", "uk": "бізнес", "bn": "ব্যবসা", "hi": "व्यवसाय"}}
-{"guid": "N55_010", "translations": {"ro": "companie", "pl": "firma", "th": "บริษัท", "ta": "கம்பெனி", "kn": "ಕಂಪನಿ", "uk": "компанія", "bn": "কোম্পানি", "hi": "कंपनी"}}
-{"guid": "N55_011", "translations": {"ro": "serviciu", "pl": "usługa", "th": "บริการ", "ta": "சேவை", "kn": "ಸೇವೆ", "uk": "послуга", "bn": "সেবা", "hi": "सेवा"}}
-{"guid": "N55_012", "translations": {"ro": "comerț", "pl": "handel", "th": "การค้า", "ta": "வர்த்தகம்", "kn": "ವ್ಯಾಪಾರ", "uk": "торгівля", "bn": "বাণিজ্য", "hi": "व्यापार"}}
-{"guid": "N55_013", "translations": {"ro": "armată", "pl": "siły zbrojne", "th": "กองทัพ", "ta": "படை", "kn": "ಸೈನ್ಯ", "uk": "збройні сили", "bn": "সেনাবাহিনী", "hi": "सैन्य"}}
-{"guid": "N55_014", "translations": {"ro": "armată", "pl": "armia", "th": "กองทัพ", "ta": "சீரண்", "kn": "ಸೈನ್ಯ", "uk": "армія", "bn": "সেনাবাহিনী", "hi": "सेना"}}
-{"guid": "N55_015", "translations": {"ro": "marină", "pl": "marynarka wojenna", "th": "กองทัพเรือ", "ta": "கடல் படை", "kn": "ಸಮುದ್ರ ಸೇನೆ", "uk": "військово-морський флот", "bn": "নৌবাহিনী", "hi": "नौसेना"}}
-{"guid": "N55_016", "translations": {"ro": "consiliu", "pl": "rada", "th": "สภา", "ta": "குறிப்பு", "kn": "ಸಮಿತಿ", "uk": "рада", "bn": "কাউন্সিল", "hi": "परिषद्"}}
-{"guid": "N55_017", "translations": {"ro": "mulțime", "pl": "tłum", "th": "ฝูงชน", "ta": "குழு", "kn": "ಜನತೆಗೆ", "uk": "натовп", "bn": "জনতা", "hi": "भीड़"}}
-{"guid": "N55_018", "translations": {"ro": "flotă", "pl": "flota", "th": "กองเรือ", "ta": "கப்பல்படை", "kn": "ನೌಕಾಪಡೆಯ", "uk": "флот", "bn": "জাহাজবাহিনী", "hi": "बेड़े"}}
-{"guid": "N55_019", "translations": {"ro": "poliție", "pl": "policja", "th": "ตำรวจ", "ta": "போலீஸ்", "kn": "ಪೊಲೀಸ್", "uk": "поліція", "bn": "পুলিশ", "hi": "पुलिस"}}
-{"guid": "N55_020", "translations": {"ro": "curte", "pl": "sąd", "th": "ศาล", "ta": "நீதிமன்றம்", "kn": "ನ್ಯಾಯಾಲಯ", "uk": "суд", "bn": "আদালত", "hi": "अदालत"}}
-{"guid": "N55_021", "translations": {"ro": "parlament", "pl": "parlament", "th": "รัฐสภา", "ta": "பாராளுமன்றம்", "kn": "ಸಂಸದೆ", "uk": "парламент", "bn": "পার্লামেন্ট", "hi": "संसद"}}
-{"guid": "N55_022", "translations": {"ro": "imperiu", "pl": "imperium", "th": "จักรวรรดิ", "ta": "அரசியலாசை", "kn": "ಸಾಮ್ರಾಜ್ಯ", "uk": "імперія", "bn": "সম্রাজ্য", "hi": "सम्राज्य"}}
-{"guid": "N55_023", "translations": {"ro": "religie", "pl": "religia", "th": "ศาสนา", "ta": "மதம்", "kn": "ಧರ್ಮ", "uk": "релігія", "bn": "ধর্ম", "hi": "धर्म"}}
-{"guid": "N55_024", "translations": {"ro": "comitet", "pl": "komitet", "th": "คณะกรรมการ", "ta": "கமிட்டி", "kn": "ಕಮಿಟೀ", "uk": "комітет", "bn": "কমিটি", "hi": "समिति"}}
-{"guid": "N55_025", "translations": {"ro": "naţiune", "pl": "naród", "th": "ชาติ", "ta": "தேசியம்", "kn": "ರಾಷ್ಟ್ರ", "uk": "нація", "bn": "জাতি", "hi": "राष्ट्र"}}
-{"guid": "N55_026", "translations": {"ro": "impozit", "pl": "podatek", "th": "ภาษี", "ta": "வரி", "kn": "ಕರ (kara)", "uk": "податок", "bn": "কর", "hi": "कर"}}
+{"guid": "N55_001", "translations": {"ro": "guvern", "pl": "rząd", "th": "รัฐบาล", "ms": "kerajaan", "ta": "அரசு", "kn": "ಸರ್ಕಾರ", "uk": "уряд", "bn": "সরকার", "hi": "सरकार", "tr": "hükümet"}}
+{"guid": "N55_002", "translations": {"ro": "lege", "pl": "prawo", "th": "กฎหมาย", "ms": "undang-undang", "ta": "சட்டம்", "kn": "ಕಾನೂನು", "uk": "закон", "bn": "আইন", "hi": "क़ानून", "tr": "hukuk"}}
+{"guid": "N55_003", "translations": {"ro": "societate", "pl": "społeczeństwo", "th": "สังคม", "ms": "masyarakat", "ta": "சமூகம்", "kn": "ಸಮಾಜ", "uk": "суспільство", "bn": "সমাজ", "hi": "समाज", "tr": "toplum"}}
+{"guid": "N55_004", "translations": {"ro": "public", "pl": "publiczność", "th": "สาธารณชน", "ms": "orang ramai", "ta": "பொது", "kn": "ಪ್ರಧಾನಜನರು", "uk": "публіка", "bn": "সাধারণজন", "hi": "सार्वजन", "tr": "kamu"}}
+{"guid": "N55_009", "translations": {"ro": "afacere", "pl": "biznes", "th": "ธุรกิจ", "ms": "perniagaan", "ta": "வர்த்தகம்", "kn": "ವ್ಯವಹಾರ", "uk": "бізнес", "bn": "ব্যবসা", "hi": "व्यवसाय", "tr": "işletme"}}
+{"guid": "N55_010", "translations": {"ro": "companie", "pl": "firma", "th": "บริษัท", "ms": "syarikat", "ta": "கம்பெனி", "kn": "ಕಂಪನಿ", "uk": "компанія", "bn": "কোম্পানি", "hi": "कंपनी", "tr": "şirket"}}
+{"guid": "N55_011", "translations": {"ro": "serviciu", "pl": "usługa", "th": "บริการ", "ms": "perkhidmatan", "ta": "சேவை", "kn": "ಸೇವೆ", "uk": "послуга", "bn": "সেবা", "hi": "सेवा", "tr": "hizmet"}}
+{"guid": "N55_012", "translations": {"ro": "comerț", "pl": "handel", "th": "การค้า", "ms": "perdagangan", "ta": "வர்த்தகம்", "kn": "ವ್ಯಾಪಾರ", "uk": "торгівля", "bn": "বাণিজ্য", "hi": "व्यापार", "tr": "ticaret"}}
+{"guid": "N55_013", "translations": {"ro": "armată", "pl": "siły zbrojne", "th": "กองทัพ", "ms": "angkatan tentera", "ta": "படை", "kn": "ಸೈನ್ಯ", "uk": "збройні сили", "bn": "সেনাবাহিনী", "hi": "सैन्य", "tr": "silahlı kuvvetler"}}
+{"guid": "N55_014", "translations": {"ro": "armată", "pl": "armia", "th": "กองทัพ", "ms": "tentera", "ta": "சீரண்", "kn": "ಸೈನ್ಯ", "uk": "армія", "bn": "সেনাবাহিনী", "hi": "सेना", "tr": "ordu"}}
+{"guid": "N55_015", "translations": {"ro": "marină", "pl": "marynarka wojenna", "th": "กองทัพเรือ", "ms": "angkatan laut", "ta": "கடல் படை", "kn": "ಸಮುದ್ರ ಸೇನೆ", "uk": "військово-морський флот", "bn": "নৌবাহিনী", "hi": "नौसेना", "tr": "donanma"}}
+{"guid": "N55_016", "translations": {"ro": "consiliu", "pl": "rada", "th": "สภา", "ms": "majlis", "ta": "குறிப்பு", "kn": "ಸಮಿತಿ", "uk": "рада", "bn": "কাউন্সিল", "hi": "परिषद्", "tr": "konsey"}}
+{"guid": "N55_017", "translations": {"ro": "mulțime", "pl": "tłum", "th": "ฝูงชน", "ms": "kerumunan", "ta": "குழு", "kn": "ಜನತೆಗೆ", "uk": "натовп", "bn": "জনতা", "hi": "भीड़", "tr": "kalabalık"}}
+{"guid": "N55_018", "translations": {"ro": "flotă", "pl": "flota", "th": "กองเรือ", "ms": "armada", "ta": "கப்பல்படை", "kn": "ನೌಕಾಪಡೆಯ", "uk": "флот", "bn": "জাহাজবাহিনী", "hi": "बेड़े", "tr": "filo"}}
+{"guid": "N55_019", "translations": {"ro": "poliție", "pl": "policja", "th": "ตำรวจ", "ms": "polis", "ta": "போலீஸ்", "kn": "ಪೊಲೀಸ್", "uk": "поліція", "bn": "পুলিশ", "hi": "पुलिस", "tr": "polis"}}
+{"guid": "N55_020", "translations": {"ro": "curte", "pl": "sąd", "th": "ศาล", "ms": "mahkamah", "ta": "நீதிமன்றம்", "kn": "ನ್ಯಾಯಾಲಯ", "uk": "суд", "bn": "আদালত", "hi": "अदालत", "tr": "mahkeme"}}
+{"guid": "N55_021", "translations": {"ro": "parlament", "pl": "parlament", "th": "รัฐสภา", "ms": "parlimen", "ta": "பாராளுமன்றம்", "kn": "ಸಂಸದೆ", "uk": "парламент", "bn": "পার্লামেন্ট", "hi": "संसद", "tr": "parlamento"}}
+{"guid": "N55_022", "translations": {"ro": "imperiu", "pl": "imperium", "th": "จักรวรรดิ", "ms": "empayar", "ta": "அரசியலாசை", "kn": "ಸಾಮ್ರಾಜ್ಯ", "uk": "імперія", "bn": "সম্রাজ্য", "hi": "सम्राज्य", "tr": "imparatorluk"}}
+{"guid": "N55_023", "translations": {"ro": "religie", "pl": "religia", "th": "ศาสนา", "ms": "agama", "ta": "மதம்", "kn": "ಧರ್ಮ", "uk": "релігія", "bn": "ধর্ম", "hi": "धर्म", "tr": "din"}}
+{"guid": "N55_024", "translations": {"ro": "comitet", "pl": "komitet", "th": "คณะกรรมการ", "ms": "jawatankuasa", "ta": "கமிட்டி", "kn": "ಕಮಿಟೀ", "uk": "комітет", "bn": "কমিটি", "hi": "समिति", "tr": "komite"}}
+{"guid": "N55_025", "translations": {"ro": "naţiune", "pl": "naród", "th": "ชาติ", "ms": "negara", "ta": "தேசியம்", "kn": "ರಾಷ್ಟ್ರ", "uk": "нація", "bn": "জাতি", "hi": "राष्ट्र", "tr": "ulus"}}
+{"guid": "N55_026", "translations": {"ro": "impozit", "pl": "podatek", "th": "ภาษี", "ms": "cukai", "ta": "வரி", "kn": "ಕರ (kara)", "uk": "податок", "bn": "কর", "hi": "कर", "tr": "vergi"}}
+{"guid": "N55_027", "translations": {"ms": "sekolah memandu", "hi": "ड्राइविंग स्कूल", "tr": "sürücü kursu"}}
+{"guid": "N55_028", "translations": {"ms": "insurans kesihatan", "hi": "स्वास्थ्य बीमा", "tr": "sağlık sigortası"}}
+{"guid": "N55_029", "translations": {"ms": "ekonomi", "hi": "अर्थव्यवस्था", "tr": "ekonomi"}}
+{"guid": "N55_030", "translations": {"ms": "pihak berkuasa perbandaran", "hi": "नगरपालिका", "tr": "belediye"}}
+{"guid": "N55_031", "translations": {"ms": "penyelesaian", "hi": "समझौता", "tr": "uzlaşma"}}
+{"guid": "N55_032", "translations": {"ms": "warisan", "hi": "विरासत", "tr": "miras"}}
+{"guid": "N55_033", "translations": {"ms": "proses meminang", "hi": "प्रणय-निवेदन", "tr": "kur yapma"}}
+{"guid": "N55_034", "translations": {"ms": "perikatan", "hi": "गठबंधन", "tr": "ittifak"}}
+{"guid": "N55_035", "translations": {"ms": "kepimpinan", "hi": "नेतृत्व", "tr": "liderlik"}}
+{"guid": "N55_036", "translations": {"ms": "aristokrasi", "hi": "अभिजात वर्ग", "tr": "aristokrasi"}}
+{"guid": "N55_037", "translations": {"ms": "persidangan", "hi": "सम्मेलन", "tr": "konferans"}}
+{"guid": "N55_038", "translations": {"ms": "sidang", "hi": "सत्र", "tr": "oturum"}}
+{"guid": "N55_039", "translations": {"ms": "protokol", "hi": "शिष्टाचार", "tr": "protokol"}}
+{"guid": "N55_040", "translations": {"ms": "kod", "hi": "आचार संहिता", "tr": "kurallar bütünü"}}
+{"guid": "N55_041", "translations": {"ms": "liga", "hi": "लीग", "tr": "lig"}}
+{"guid": "N55_042", "translations": {"ms": "universiti", "hi": "विश्वविद्यालय", "tr": "üniversite"}}
+{"guid": "N55_043", "translations": {"ms": "tradisi", "hi": "परंपरा", "tr": "gelenek"}}
+{"guid": "N55_044", "translations": {"ms": "buli", "hi": "धौंस", "tr": "zorbalık"}}
+{"guid": "N55_045", "translations": {"ms": "dasar", "hi": "नीति", "tr": "politika"}}
+{"guid": "N55_046", "translations": {"ms": "keganasan", "hi": "आतंकवाद", "tr": "terörizm"}}
+{"guid": "N55_047", "translations": {"ms": "status sosial", "hi": "सामाजिक स्थिति", "tr": "statü"}}
+{"guid": "N55_048", "translations": {"ms": "keistimewaan", "hi": "विशेषाधिकार", "tr": "ayrıcalık"}}
+{"guid": "N55_049", "translations": {"ms": "diskriminasi", "hi": "भेदभाव", "tr": "ayrımcılık"}}
+{"guid": "N55_050", "translations": {"ms": "penguatkuasaan", "hi": "प्रवर्तन", "tr": "uygulama"}}
+{"guid": "N55_051", "translations": {"ms": "perjanjian sewa", "hi": "पट्टा", "tr": "kira sözleşmesi"}}
+{"guid": "N55_052", "translations": {"ms": "kemasukan", "hi": "प्रवेश", "tr": "kabul"}}
+{"guid": "N55_053", "translations": {"ms": "negeri naungan", "hi": "संरक्षित राज्य", "tr": "himaye"}}
+{"guid": "N55_054", "translations": {"ms": "pertabalan", "hi": "राज्याभिषेक", "tr": "taç giyme töreni"}}
+{"guid": "N55_055", "translations": {"ms": "persaingan", "hi": "प्रतिद्वंद्विता", "tr": "rekabet"}}
+{"guid": "N55_056", "translations": {"ms": "gencatan senjata", "hi": "युद्धविराम", "tr": "ateşkes"}}
+{"guid": "N55_057", "translations": {"ms": "apartheid", "hi": "रंगभेद", "tr": "apartheid"}}
+{"guid": "N55_058", "translations": {"ms": "birokrasi", "hi": "नौकरशाही", "tr": "bürokrasi"}}
+{"guid": "N55_059", "translations": {"ms": "monogami", "hi": "एकविवाह", "tr": "tek eşlilik"}}
+{"guid": "N55_060", "translations": {"ms": "forum", "hi": "मंच", "tr": "forum"}}
+{"guid": "N55_061", "translations": {"ms": "sokongan", "hi": "पक्षसमर्थन", "tr": "savunuculuk"}}
+{"guid": "N55_062", "translations": {"ms": "budaya", "hi": "संस्कृति", "tr": "kültür"}}
+{"guid": "N55_063", "translations": {"ms": "pemerintahan sendiri", "hi": "स्वशासन", "tr": "özyönetim"}}
+{"guid": "N55_064", "translations": {"ms": "negara bangsa", "hi": "राष्ट्र-राज्य", "tr": "ulus devlet"}}
+{"guid": "N55_065", "translations": {"ms": "hip-hop", "hi": "हिप-हॉप", "tr": "hip hop"}}
+{"guid": "N55_066", "translations": {"ms": "Kontra-Reformasi", "hi": "धर्मसुधार-विरोधी आंदोलन", "tr": "Karşı Reform"}}
+{"guid": "N55_067", "translations": {"ms": "laissez-faire", "hi": "अहस्तक्षेप की नीति", "tr": "bırakınız yapsınlar"}}
+{"guid": "N55_068", "translations": {"ms": "koperasi", "hi": "सहकारी संस्था", "tr": "kooperatif"}}
+{"guid": "N55_069", "translations": {"ms": "kapitalisme", "hi": "पूँजीवाद", "tr": "kapitalizm"}}
+{"guid": "N55_070", "translations": {"ms": "pembaptisan", "hi": "बपतिस्मा", "tr": "vaftiz"}}
+{"guid": "N55_071", "translations": {"ms": "denominasi agama", "hi": "धार्मिक संप्रदाय", "tr": "mezhep"}}
+{"guid": "N55_072", "translations": {"ms": "amalan berkhatan", "hi": "खतना प्रथा", "tr": "sünnet geleneği"}}
+{"guid": "N55_073", "translations": {"ms": "perpecahan", "hi": "फूट", "tr": "bölünme"}}
+{"guid": "N55_074", "translations": {"ms": "kolonialisme", "hi": "उपनिवेशवाद", "tr": "sömürgecilik"}}
+{"guid": "N55_075", "translations": {"ms": "perpaduan", "hi": "एकजुटता", "tr": "dayanışma"}}
+{"guid": "N55_076", "translations": {"ms": "liturgi", "hi": "धर्मविधि", "tr": "litürji"}}
+{"guid": "N55_077", "translations": {"ms": "tabu", "hi": "वर्जना", "tr": "tabu"}}
+{"guid": "N55_078", "translations": {"ms": "asimilasi", "hi": "समावेशन", "tr": "asimilasyon"}}
+{"guid": "N55_079", "translations": {"ms": "taman hiburan", "hi": "मनोरंजन मेला", "tr": "lunapark"}}
+{"guid": "N55_080", "translations": {"ms": "kelab", "hi": "क्लब", "tr": "kulüp"}}
+{"guid": "N55_081", "translations": {"ms": "kolej", "hi": "कॉलेज", "tr": "yüksekokul"}}
+{"guid": "N55_082", "translations": {"ms": "festival", "hi": "उत्सव", "tr": "festival"}}

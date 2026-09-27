@@ -1,10 +1,10 @@
-{"guid": "Z02_001", "translations": {"ro": "primul", "pl": "pierwszy", "th": "แรก", "ta": "முதல்", "kn": "ಪ್ರಥಮ", "uk": "перший", "bn": "প্রথম", "hi": "पहला", "bs": "prvi"}}
-{"guid": "Z02_002", "translations": {"ro": "al doilea", "pl": "drugi", "th": "ที่สอง", "ta": "இரண்டாவது", "kn": "ರಂಡನೇ", "uk": "другий", "bn": "দ্বিতীয়", "hi": "दूसरा", "bs": "drugi"}}
-{"guid": "Z02_003", "translations": {"ro": "treilea", "pl": "trzeci", "th": "ที่สาม", "ta": "மூன்றாம்", "kn": "ಮೂರನೆ", "uk": "третій", "bn": "তৃতীয়", "hi": "तीसरा", "bs": "treći"}}
-{"guid": "Z02_004", "translations": {"ro": "al patrulea", "pl": "czwarty", "th": "ที่สี่", "ta": "நால்காவது", "kn": "ನಾಲ್ಕನೇ", "uk": "четвертий", "bn": "চতুর্থ", "hi": "चौथा", "bs": "četvrti"}}
-{"guid": "Z02_005", "translations": {"ro": "al cincilea", "pl": "piąty", "th": "ที่ห้า", "ta": "ஐந்தாவது", "kn": "ಐದನೇ", "uk": "п’ятий", "bn": "পঞ্চম", "hi": "पांचवाँ", "bs": "peti"}}
-{"guid": "Z02_006", "translations": {"ro": "al șaselea", "pl": "szósty", "th": "ที่หก", "ta": "ஆறாவது", "kn": "ಆರನೆಯ", "uk": "шостий", "bn": "ষষ্ঠ", "hi": "छठा", "bs": "šesti"}}
-{"guid": "Z02_007", "translations": {"ro": "al șaptelea", "pl": "siódmy", "th": "ที่เจ็ด", "ta": "ஏழாவது", "kn": "ಏಳನೇ", "uk": "сьомий", "bn": "সপ্তম", "hi": "सातवाँ", "bs": "sedmi"}}
-{"guid": "Z02_008", "translations": {"ro": "al optulea", "pl": "ósmy", "th": "ที่แปด", "ta": "எட்டாவது", "kn": "ಎಂಟನೆಯ", "uk": "восьмий", "bn": "অষ্ঠম", "hi": "आठवाँ", "bs": "osmi"}}
-{"guid": "Z02_009", "translations": {"ro": "al nouălea", "pl": "dziewiąty", "th": "ที่เก้า", "ta": "ஒன்பதாவது", "kn": "ಒಂಭತ್ತನೆ", "uk": "девʼятий", "bn": "নবম", "hi": "नवां", "bs": "deveti"}}
-{"guid": "Z02_010", "translations": {"ro": "al zecelea", "pl": "dziesiąty", "th": "ที่สิบ", "ta": "பத்தாவது", "kn": "ಹತ್ತನೆಯ", "uk": "десятий", "bn": "দশম", "hi": "दसवाँ", "bs": "deseti"}}
+{"guid": "Z02_001", "translations": {"ro": "primul", "pl": "pierwszy", "th": "แรก", "ms": "pertama", "ta": "முதல்", "kn": "ಪ್ರಥಮ", "uk": "перший", "bn": "প্রথম", "hi": "पहला", "tr": "birinci", "bs": "prvi"}}
+{"guid": "Z02_002", "translations": {"ro": "al doilea", "pl": "drugi", "th": "ที่สอง", "ms": "kedua", "ta": "இரண்டாவது", "kn": "ರಂಡನೇ", "uk": "другий", "bn": "দ্বিতীয়", "hi": "दूसरा", "tr": "ikinci", "bs": "drugi"}}
+{"guid": "Z02_003", "translations": {"ro": "treilea", "pl": "trzeci", "th": "ที่สาม", "ms": "ketiga", "ta": "மூன்றாம்", "kn": "ಮೂರನೆ", "uk": "третій", "bn": "তৃতীয়", "hi": "तीसरा", "tr": "üçüncü", "bs": "treći"}}
+{"guid": "Z02_004", "translations": {"ro": "al patrulea", "pl": "czwarty", "th": "ที่สี่", "ms": "keempat", "ta": "நால்காவது", "kn": "ನಾಲ್ಕನೇ", "uk": "четвертий", "bn": "চতুর্থ", "hi": "चौथा", "tr": "dördüncü", "bs": "četvrti"}}
+{"guid": "Z02_005", "translations": {"ro": "al cincilea", "pl": "piąty", "th": "ที่ห้า", "ms": "kelima", "ta": "ஐந்தாவது", "kn": "ಐದನೇ", "uk": "п’ятий", "bn": "পঞ্চম", "hi": "पांचवाँ", "tr": "beşinci", "bs": "peti"}}
+{"guid": "Z02_006", "translations": {"ro": "al șaselea", "pl": "szósty", "th": "ที่หก", "ms": "keenam", "ta": "ஆறாவது", "kn": "ಆರನೆಯ", "uk": "шостий", "bn": "ষষ্ঠ", "hi": "छठा", "tr": "altıncı", "bs": "šesti"}}
+{"guid": "Z02_007", "translations": {"ro": "al șaptelea", "pl": "siódmy", "th": "ที่เจ็ด", "ms": "ketujuh", "ta": "ஏழாவது", "kn": "ಏಳನೇ", "uk": "сьомий", "bn": "সপ্তম", "hi": "सातवाँ", "tr": "yedinci", "bs": "sedmi"}}
+{"guid": "Z02_008", "translations": {"ro": "al optulea", "pl": "ósmy", "th": "ที่แปด", "ms": "kelapan", "ta": "எட்டாவது", "kn": "ಎಂಟನೆಯ", "uk": "восьмий", "bn": "অষ্ঠম", "hi": "आठवाँ", "tr": "sekizinci", "bs": "osmi"}}
+{"guid": "Z02_009", "translations": {"ro": "al nouălea", "pl": "dziewiąty", "th": "ที่เก้า", "ms": "kesembilan", "ta": "ஒன்பதாவது", "kn": "ಒಂಭತ್ತನೆ", "uk": "девʼятий", "bn": "নবম", "hi": "नवां", "tr": "dokuzuncu", "bs": "deveti"}}
+{"guid": "Z02_010", "translations": {"ro": "al zecelea", "pl": "dziesiąty", "th": "ที่สิบ", "ms": "kesepuluh", "ta": "பத்தாவது", "kn": "ಹತ್ತನೆಯ", "uk": "десятий", "bn": "দশম", "hi": "दसवाँ", "tr": "onuncu", "bs": "deseti"}}

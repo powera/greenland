@@ -1,9 +1,24 @@
-{"guid": "A01_001", "translations": {"ro": "mare", "pl": "duży", "th": "ใหญ่", "ta": "பெரிய", "kn": "ದೊಡ್ಡ", "uk": "великий", "bn": "বড়", "hi": "बड़ा", "bs": "velik"}}
-{"guid": "A01_002", "translations": {"ro": "mic", "pl": "mały", "th": "เล็ก", "ta": "சிறிய", "kn": "ಸಣ್ಣ", "uk": "малий", "bn": "ছোট", "hi": "छोटा", "bs": "mali"}}
-{"guid": "A01_003", "translations": {"ro": "mare", "pl": "duży", "th": "ใหญ่", "ta": "பெரிய", "kn": "ದೊಡ್ಡ", "uk": "великий", "bn": "বড়", "hi": "बड़ा", "bs": "velik"}}
-{"guid": "A01_004", "translations": {"ro": "minuscul", "pl": "malutki", "th": "จิ๋ว", "ta": "மிகச்சிறிய", "kn": "ಅತಿಸಣ್ಣ", "uk": "крихітний", "bn": "ক্ষুদ্র", "hi": "नन्हा", "bs": "sićušan"}}
-{"guid": "A01_005", "translations": {"ro": "imens", "pl": "ogromny", "th": "มหึมา", "ta": "மகத்தான", "kn": "ಬೃಹತ್", "uk": "величезний", "bn": "বিশাল", "hi": "विशाल", "bs": "ogroman"}}
-{"guid": "A01_006", "translations": {"ro": "mediu", "pl": "średni", "th": "ปานกลาง", "ta": "நடுத்தரமான", "kn": "ಮಧ್ಯಮ", "uk": "середній", "bn": "মধ্যম", "hi": "मध्यम", "bs": "srednji"}}
-{"guid": "A01_007", "translations": {"ro": "enorm", "pl": "olbrzymi", "th": "มโหฬาร", "ta": "மிகப்பெரிய", "kn": "ಅಗಾಧ", "uk": "огромний", "bn": "বিশাল", "hi": "विशाल", "bs": "ogroman"}}
-{"guid": "A01_008", "translations": {"ro": "miniatural", "pl": "miniaturowy", "th": "จิ๋ว", "ta": "நுண்ணிய", "kn": "ಸೂಕ್ಷ್ಮ", "uk": "мініатюрний", "bn": "ক্ষুদ্রমাত্রাই", "hi": "सूक्ष्म", "bs": "minijaturan"}}
-{"guid": "A01_009", "translations": {"ro": "gras", "pl": "gruby", "th": "อ้วน", "ta": "குண்டான", "kn": "ದಪ್ಪ", "uk": "товстий", "bn": "চর্বিবহুল", "hi": "मोटा", "bs": "debeo"}}
+{"guid": "A01_001", "translations": {"ro": "mare", "pl": "duży", "th": "ใหญ่", "ms": "besar", "ta": "பெரிய", "kn": "ದೊಡ್ಡ", "uk": "великий", "bn": "বড়", "hi": "बड़ा", "tr": "büyük", "bs": "velik"}}
+{"guid": "A01_002", "translations": {"ro": "mic", "pl": "mały", "th": "เล็ก", "ms": "kecil", "ta": "சிறிய", "kn": "ಸಣ್ಣ", "uk": "малий", "bn": "ছোট", "hi": "छोटा", "tr": "küçük", "bs": "mali"}}
+{"guid": "A01_003", "translations": {"ro": "mare", "pl": "duży", "th": "ใหญ่", "ms": "besar", "ta": "பெரிய", "kn": "ದೊಡ್ಡ", "uk": "великий", "bn": "বড়", "hi": "बड़ा", "tr": "büyük", "bs": "velik"}}
+{"guid": "A01_004", "translations": {"ro": "minuscul", "pl": "malutki", "th": "จิ๋ว", "ms": "kecil", "ta": "மிகச்சிறிய", "kn": "ಅತಿಸಣ್ಣ", "uk": "крихітний", "bn": "ক্ষুদ্র", "hi": "नन्हा", "tr": "minicik", "bs": "sićušan"}}
+{"guid": "A01_005", "translations": {"ro": "imens", "pl": "ogromny", "th": "มหึมา", "ms": "sangat besar", "ta": "மகத்தான", "kn": "ಬೃಹತ್", "uk": "величезний", "bn": "বিশাল", "hi": "विशाल", "tr": "devasa", "bs": "ogroman"}}
+{"guid": "A01_006", "translations": {"ro": "mediu", "pl": "średni", "th": "ปานกลาง", "ms": "sederhana", "ta": "நடுத்தரமான", "kn": "ಮಧ್ಯಮ", "uk": "середній", "bn": "মধ্যম", "hi": "मध्यम", "tr": "orta büyüklükte", "bs": "srednji"}}
+{"guid": "A01_007", "translations": {"ro": "enorm", "pl": "olbrzymi", "th": "มโหฬาร", "ms": "sangat besar", "ta": "மிகப்பெரிய", "kn": "ಅಗಾಧ", "uk": "огромний", "bn": "বিশাল", "hi": "विशाल", "tr": "muazzam", "bs": "ogroman"}}
+{"guid": "A01_008", "translations": {"ro": "miniatural", "pl": "miniaturowy", "th": "จิ๋ว", "ms": "miniatur", "ta": "நுண்ணிய", "kn": "ಸೂಕ್ಷ್ಮ", "uk": "мініатюрний", "bn": "ক্ষুদ্রমাত্রাই", "hi": "सूक्ष्म", "tr": "minyatür", "bs": "minijaturan"}}
+{"guid": "A01_009", "translations": {"ro": "gras", "pl": "gruby", "th": "อ้วน", "ms": "gemuk", "ta": "குண்டான", "kn": "ದಪ್ಪ", "uk": "товстий", "bn": "চর্বিবহুল", "hi": "मोटा", "tr": "şişman", "bs": "debeo"}}
+{"guid": "A01_010", "translations": {"ms": "maksimum", "hi": "अधिकतम", "tr": "azami"}}
+{"guid": "A01_011", "translations": {"ms": "amat kecil", "hi": "अत्यंत सूक्ष्म", "tr": "sonsuz küçük"}}
+{"guid": "A01_012", "translations": {"ms": "kerdil", "hi": "बौना", "tr": "cüce"}}
+{"guid": "A01_013", "translations": {"ms": "lebih besar", "hi": "बड़ा किया हुआ", "tr": "büyütülmüş"}}
+{"guid": "A01_014", "translations": {"ms": "memanjang", "hi": "लंबा", "tr": "uzamış"}}
+{"guid": "A01_015", "translations": {"ms": "berskala besar", "hi": "बड़े पैमाने का", "tr": "büyük ölçekli"}}
+{"guid": "A01_016", "translations": {"ms": "berskala kecil", "hi": "छोटे पैमाने का", "tr": "küçük ölçekli"}}
+{"guid": "A01_017", "translations": {"ms": "berskala kecil", "hi": "छोटे पैमाने का", "tr": "küçük ölçekli"}}
+{"guid": "A01_018", "translations": {"ms": "berskala penuh", "hi": "पूर्ण पैमाने का", "tr": "tam ölçekli"}}
+{"guid": "A01_019", "translations": {"ms": "kedua terbesar", "hi": "दूसरा सबसे बड़ा", "tr": "ikinci en büyük"}}
+{"guid": "A01_020", "translations": {"ms": "bersaiz sederhana", "hi": "मध्यम आकार का", "tr": "orta boyutlu"}}
+{"guid": "A01_021", "translations": {"ms": "sepenuh panjang", "hi": "पूरी लंबाई का", "tr": "tam boy"}}
+{"guid": "A01_022", "translations": {"ms": "bertingkat tinggi", "hi": "बहुमंज़िला", "tr": "yüksek katlı"}}
+{"guid": "A01_023", "translations": {"ms": "bersaiz sebenar", "hi": "आदमकद", "tr": "gerçek boyutlu"}}
+{"guid": "A01_024", "translations": {"ms": "bersaiz penuh", "hi": "पूर्ण आकार का", "tr": "tam boy"}}

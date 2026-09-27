@@ -1,1 +1,6 @@
-{"guid": "N31_001", "translations": {"ro": "Coca-Cola", "pl": "Coca-Cola", "th": "โคคา-โคลา", "ta": "கோக்கா-கோலா", "kn": "ಕೋಕಾ-ಕೋಲಾ", "uk": "Coca-Cola", "bn": "কোকা-কোলা", "hi": "कोका-कोला"}}
+{"guid": "N31_001", "translations": {"ro": "Coca-Cola", "pl": "Coca-Cola", "th": "โคคา-โคลา", "ms": "Coca-Cola", "ta": "கோக்கா-கோலா", "kn": "ಕೋಕಾ-ಕೋಲಾ", "uk": "Coca-Cola", "bn": "কোকা-কোলা", "hi": "कोका-कोला", "tr": "Coca-Cola"}}
+{"guid": "N31_002", "translations": {"ms": "perniagaan kecil", "hi": "छोटा व्यवसाय", "tr": "küçük işletme"}}
+{"guid": "N31_003", "translations": {"ms": "agensi", "hi": "एजेंसी", "tr": "ajans"}}
+{"guid": "N31_004", "translations": {"ms": "McGraw-Hill", "hi": "मैकग्रा-हिल", "tr": "McGraw-Hill"}}
+{"guid": "N31_005", "translations": {"ms": "syarikat pemula", "hi": "स्टार्टअप", "tr": "girişim"}}
+{"guid": "N31_006", "translations": {"ms": "syarikat akhbar", "hi": "समाचारपत्र प्रकाशन संस्था", "tr": "gazete kuruluşu"}}

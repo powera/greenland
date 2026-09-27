@@ -1,3 +1,24 @@
-{"guid": "N19_001", "translations": {"bs": "važnost"}}
-{"guid": "N19_002", "translations": {"bs": "prednost"}}
-{"guid": "N19_003", "translations": {"bs": "moda"}}
+{"guid": "N19_001", "translations": {"ms": "kepentingan", "hi": "महत्त्व", "tr": "önem", "bs": "važnost"}}
+{"guid": "N19_002", "translations": {"ms": "kelebihan", "hi": "लाभ", "tr": "avantaj", "bs": "prednost"}}
+{"guid": "N19_003", "translations": {"ms": "fesyen", "hi": "फ़ैशन", "tr": "moda", "bs": "moda"}}
+{"guid": "N19_004", "translations": {"ms": "besaran", "hi": "विशालता", "tr": "büyüklük"}}
+{"guid": "N19_005", "translations": {"ms": "kekerasan", "hi": "कठोरता", "tr": "sertlik"}}
+{"guid": "N19_006", "translations": {"ms": "prestasi", "hi": "प्रदर्शन", "tr": "performans"}}
+{"guid": "N19_007", "translations": {"ms": "nada", "hi": "स्वर की ऊँचाई", "tr": "perde"}}
+{"guid": "N19_008", "translations": {"ms": "kepimpinan", "hi": "नेतृत्व", "tr": "liderlik"}}
+{"guid": "N19_009", "translations": {"ms": "reputasi", "hi": "प्रतिष्ठा", "tr": "itibar"}}
+{"guid": "N19_010", "translations": {"ms": "kecekapan", "hi": "दक्षता", "tr": "verimlilik"}}
+{"guid": "N19_011", "translations": {"ms": "kecekapan", "hi": "दक्षता", "tr": "verimlilik"}}
+{"guid": "N19_012", "translations": {"ms": "kebijaksanaan", "hi": "विवेक", "tr": "basiret"}}
+{"guid": "N19_013", "translations": {"ms": "timbre", "hi": "स्वरगुण", "tr": "tını"}}
+{"guid": "N19_014", "translations": {"ms": "kefungsian", "hi": "कार्यक्षमता", "tr": "işlevsellik"}}
+{"guid": "N19_015", "translations": {"ms": "ketahanan", "hi": "टिकाऊपन", "tr": "dayanıklılık"}}
+{"guid": "N19_016", "translations": {"ms": "kecerahan", "hi": "चमक", "tr": "parlaklık"}}
+{"guid": "N19_017", "translations": {"ms": "kemunasabahan", "hi": "तर्कसंगतता", "tr": "makullük"}}
+{"guid": "N19_018", "translations": {"ms": "keadilan", "hi": "निष्पक्षता", "tr": "hakkaniyet"}}
+{"guid": "N19_019", "translations": {"ms": "kebahayaan", "hi": "खतरनाकता", "tr": "tehlikelilik"}}
+{"guid": "N19_020", "translations": {"ms": "piawaian", "hi": "मानक", "tr": "standart"}}
+{"guid": "N19_021", "translations": {"ms": "perbezaan", "hi": "अंतर", "tr": "fark"}}
+{"guid": "N19_022", "translations": {"ms": "penampilan", "hi": "रूप", "tr": "görünüş"}}
+{"guid": "N19_023", "translations": {"ms": "harga diri", "hi": "आत्मसम्मान", "tr": "özsaygı"}}
+{"guid": "N19_024", "translations": {"ms": "keunggulan", "hi": "श्रेष्ठता", "tr": "üstünlük"}}

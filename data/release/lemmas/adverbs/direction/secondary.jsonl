@@ -1,6 +1,10 @@
-{"guid": "D06_001", "translations": {"ro": "spre nord", "pl": "na północ", "th": "ไปทางเหนือ", "ta": "வடಕ್ಕೆ", "kn": "ಉತ್ತರಕ್ಕೆ", "uk": "на північ", "bn": "উত্তরে", "hi": "उत्तर की ओर"}}
-{"guid": "D06_002", "translations": {"ro": "spre sud", "pl": "na południe", "th": "ไปทางใต้", "ta": "தெற்கே", "kn": "ದಕ್ಷಿಣಕ್ಕೆ", "uk": "на південь", "bn": "দক্ষিণদিকে", "hi": "दक्षिण की ओर"}}
-{"guid": "D06_003", "translations": {"ro": "spre est", "pl": "na wschód", "th": "ไปทางตะวันออก", "ta": "கிழக்குக்கு", "kn": "ಇಶಾನ್ಯಕ್ಕೆ", "uk": "на схід", "bn": "পূর্বদিকে", "hi": "पूर्व की ओर"}}
-{"guid": "D06_004", "translations": {"ro": "spre vest", "pl": "na zachód", "th": "ไปทางตะวันตก", "ta": "மேற்குக்கு", "kn": "ಪಶ್ಚಿಮಕ್ಕೆ", "uk": "на захід", "bn": "পশ্চিমে", "hi": "पश्चिम की ओर"}}
-{"guid": "D06_005", "translations": {"ro": "la dreapta", "pl": "w prawo", "th": "ทางขวา", "ta": "வலப்பக்கமாக", "kn": "ಬಲಕ್ಕೆ", "uk": "праворуч", "bn": "ডানদিকে", "hi": "दाएँ"}}
-{"guid": "D06_006", "translations": {"ro": "la stânga", "pl": "w lewo", "th": "ไปทางซ้าย", "ta": "இடது", "kn": "ಎಡಕ್ಕೆ", "uk": "ліворуч", "bn": "বামে", "hi": "बायें"}}
+{"guid": "D06_001", "translations": {"ro": "spre nord", "pl": "na północ", "th": "ไปทางเหนือ", "ms": "ke utara", "ta": "வடಕ್ಕೆ", "kn": "ಉತ್ತರಕ್ಕೆ", "uk": "на північ", "bn": "উত্তরে", "hi": "उत्तर की ओर", "tr": "kuzeye"}}
+{"guid": "D06_002", "translations": {"ro": "spre sud", "pl": "na południe", "th": "ไปทางใต้", "ms": "ke selatan", "ta": "தெற்கே", "kn": "ದಕ್ಷಿಣಕ್ಕೆ", "uk": "на південь", "bn": "দক্ষিণদিকে", "hi": "दक्षिण की ओर", "tr": "güneye"}}
+{"guid": "D06_003", "translations": {"ro": "spre est", "pl": "na wschód", "th": "ไปทางตะวันออก", "ms": "ke timur", "ta": "கிழக்குக்கு", "kn": "ಇಶಾನ್ಯಕ್ಕೆ", "uk": "на схід", "bn": "পূর্বদিকে", "hi": "पूर्व की ओर", "tr": "doğuya"}}
+{"guid": "D06_004", "translations": {"ro": "spre vest", "pl": "na zachód", "th": "ไปทางตะวันตก", "ms": "ke barat", "ta": "மேற்குக்கு", "kn": "ಪಶ್ಚಿಮಕ್ಕೆ", "uk": "на захід", "bn": "পশ্চিমে", "hi": "पश्चिम की ओर", "tr": "batıya"}}
+{"guid": "D06_005", "translations": {"ro": "la dreapta", "pl": "w prawo", "th": "ทางขวา", "ms": "ke kanan", "ta": "வலப்பக்கமாக", "kn": "ಬಲಕ್ಕೆ", "uk": "праворуч", "bn": "ডানদিকে", "hi": "दाएँ", "tr": "sağa"}}
+{"guid": "D06_006", "translations": {"ro": "la stânga", "pl": "w lewo", "th": "ไปทางซ้าย", "ms": "ke kiri", "ta": "இடது", "kn": "ಎಡಕ್ಕೆ", "uk": "ліворуч", "bn": "বামে", "hi": "बायें", "tr": "sola"}}
+{"guid": "D06_007", "translations": {"ms": "ke pedalaman", "hi": "अंतर्देशीय दिशा में", "tr": "iç kesimlere doğru"}}
+{"guid": "D06_008", "translations": {"ms": "ke hulu", "hi": "धारा के विपरीत", "tr": "akıntıya karşı"}}
+{"guid": "D06_009", "translations": {"ms": "lebih jauh", "hi": "और दूर", "tr": "daha uzağa"}}
+{"guid": "D06_010", "translations": {"ms": "lawan arah jam", "hi": "वामावर्त", "tr": "saat yönünün tersine"}}

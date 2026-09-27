@@ -1,10 +1,40 @@
-{"guid": "N56_001", "translations": {"ro": "Oceanul Atlantic", "pl": "Ocean Atlantycki", "th": "มหาสมุทรแอตแลนติก", "ta": "அட்லாண்டிக் பெருநீர்", "kn": "ಅಟ್ಲಾಂಟಿಕ್ ಮಹಾಸಾಗರ", "uk": "Атлантичний океан", "bn": "অ্যাটলান্টিক মহাসাগর", "hi": "अटलांटिक महासागर"}}
-{"guid": "N56_002", "translations": {"ro": "Oceanul Pacific", "pl": "Ocean Spokojny", "th": "มหาสมุทรแปซิฟิก", "ta": "பசிபிக் பெருங்கடல்", "kn": "ಪ್ರಶಾಂತ ಮಹಾಸಾಗರ", "uk": "Тихий океан", "bn": "প্রশান্ত মহাসাগর", "hi": "प्रशांत महासागर"}}
-{"guid": "N56_003", "translations": {"ro": "Oceanul Indian", "pl": "Ocean Indyjski", "th": "มหาสมุทรอินเดีย", "ta": "இந்தியத் பெருங்கடல்", "kn": "ಇಂಡಿಯನ್ ಮಹಾಸಾಗರ", "uk": "Індійський океан", "bn": "ভারত মহাসাগর", "hi": "भारतीय महासागर"}}
-{"guid": "N56_004", "translations": {"ro": "Marea Baltică", "pl": "Morze Bałtyckie", "th": "ทะเลบอลติก", "ta": "பால்டிக் கடல்", "kn": "ಬಾಲ್ಟಿಕ್ ಸಮುದ್ರ", "uk": "Балтійське море", "bn": "বাল্টিক সাগর", "hi": "बाल्टिक सागर"}}
-{"guid": "N56_005", "translations": {"ro": "Marea Mediterană", "pl": "Morze Śródziemne", "th": "ทะเลเมดิเตอร์เรเนียน", "ta": "மத்தியதரைக் கடல்", "kn": "ಮಧ್ಯಧರಾ ಸಮುದ್ರ", "uk": "Середземне море", "bn": "মধ্যভূ-মধ্যসাগর", "hi": "मध्य भूमध्य सागर"}}
-{"guid": "N56_006", "translations": {"ro": "Oceanul Arctic", "pl": "Ocean Arktyczny", "th": "มหาสมุทรอาร์กติก", "ta": "ஆர்க்டிக் பெருங்கடல்", "kn": "ಅರ್ಕ್ಟಿಕ್ ಮಹಾಸಾಗರ", "uk": "Північний Льодовитий океан", "bn": "আর্কটিক মহাসাগর", "hi": "आर्कटिक महासागर"}}
-{"guid": "N56_007", "translations": {"ro": "Sahara", "pl": "Sahara", "th": "ซาฮารา", "ta": "சஹாரா", "kn": "ಸಹಾರಾ", "uk": "Сахара", "bn": "সাহারা", "hi": "सहारा"}}
-{"guid": "N56_008", "translations": {"ro": "râul Amazon", "pl": "rzeka Amazonka", "th": "แม่น้ำอเมซอน", "ta": "அமாசான் ஆறு", "kn": "ಅಮೆಜಾನ್ ನದಿ", "uk": "річка Амазонка", "bn": "আমাজন নদী", "hi": "अमेज़न नदी"}}
-{"guid": "N56_009", "translations": {"ro": "Nil", "pl": "Nil", "th": "ไนล์", "ta": "நைல்", "kn": "ನೈಲು", "uk": "Ніл", "bn": "নাইল", "hi": "नाइल"}}
-{"guid": "N56_010", "translations": {"ro": "Alpii", "pl": "Alpy", "th": "เทือกเขาแอลป์", "ta": "ஆல்ப்ஸ்", "kn": "ಆಲ್ಪ್ಸ್", "uk": "Альпи", "bn": "আলপস্", "hi": "आल्प्स"}}
+{"guid": "N56_001", "translations": {"ro": "Oceanul Atlantic", "pl": "Ocean Atlantycki", "th": "มหาสมุทรแอตแลนติก", "ms": "Lautan Atlantik", "ta": "அட்லாண்டிக் பெருநீர்", "kn": "ಅಟ್ಲಾಂಟಿಕ್ ಮಹಾಸಾಗರ", "uk": "Атлантичний океан", "bn": "অ্যাটলান্টিক মহাসাগর", "hi": "अटलांटिक महासागर", "tr": "Atlas Okyanusu"}}
+{"guid": "N56_002", "translations": {"ro": "Oceanul Pacific", "pl": "Ocean Spokojny", "th": "มหาสมุทรแปซิฟิก", "ms": "Lautan Pasifik", "ta": "பசிபிக் பெருங்கடல்", "kn": "ಪ್ರಶಾಂತ ಮಹಾಸಾಗರ", "uk": "Тихий океан", "bn": "প্রশান্ত মহাসাগর", "hi": "प्रशांत महासागर", "tr": "Pasifik Okyanusu"}}
+{"guid": "N56_003", "translations": {"ro": "Oceanul Indian", "pl": "Ocean Indyjski", "th": "มหาสมุทรอินเดีย", "ms": "Lautan Hindi", "ta": "இந்தியத் பெருங்கடல்", "kn": "ಇಂಡಿಯನ್ ಮಹಾಸಾಗರ", "uk": "Індійський океан", "bn": "ভারত মহাসাগর", "hi": "भारतीय महासागर", "tr": "Hint Okyanusu"}}
+{"guid": "N56_004", "translations": {"ro": "Marea Baltică", "pl": "Morze Bałtyckie", "th": "ทะเลบอลติก", "ms": "Laut Baltik", "ta": "பால்டிக் கடல்", "kn": "ಬಾಲ್ಟಿಕ್ ಸಮುದ್ರ", "uk": "Балтійське море", "bn": "বাল্টিক সাগর", "hi": "बाल्टिक सागर", "tr": "Baltık Denizi"}}
+{"guid": "N56_005", "translations": {"ro": "Marea Mediterană", "pl": "Morze Śródziemne", "th": "ทะเลเมดิเตอร์เรเนียน", "ms": "Laut Mediterranean", "ta": "மத்தியதரைக் கடல்", "kn": "ಮಧ್ಯಧರಾ ಸಮುದ್ರ", "uk": "Середземне море", "bn": "মধ্যভূ-মধ্যসাগর", "hi": "मध्य भूमध्य सागर", "tr": "Akdeniz"}}
+{"guid": "N56_006", "translations": {"ro": "Oceanul Arctic", "pl": "Ocean Arktyczny", "th": "มหาสมุทรอาร์กติก", "ms": "Lautan Artik", "ta": "ஆர்க்டிக் பெருங்கடல்", "kn": "ಅರ್ಕ್ಟಿಕ್ ಮಹಾಸಾಗರ", "uk": "Північний Льодовитий океан", "bn": "আর্কটিক মহাসাগর", "hi": "आर्कटिक महासागर", "tr": "Arktik Okyanusu"}}
+{"guid": "N56_007", "translations": {"ro": "Sahara", "pl": "Sahara", "th": "ซาฮารา", "ms": "Gurun Sahara", "ta": "சஹாரா", "kn": "ಸಹಾರಾ", "uk": "Сахара", "bn": "সাহারা", "hi": "सहारा", "tr": "Sahra Çölü"}}
+{"guid": "N56_008", "translations": {"ro": "râul Amazon", "pl": "rzeka Amazonka", "th": "แม่น้ำอเมซอน", "ms": "Sungai Amazon", "ta": "அமாசான் ஆறு", "kn": "ಅಮೆಜಾನ್ ನದಿ", "uk": "річка Амазонка", "bn": "আমাজন নদী", "hi": "अमेज़न नदी", "tr": "Amazon Nehri"}}
+{"guid": "N56_009", "translations": {"ro": "Nil", "pl": "Nil", "th": "ไนล์", "ms": "Sungai Nil", "ta": "நைல்", "kn": "ನೈಲು", "uk": "Ніл", "bn": "নাইল", "hi": "नाइल", "tr": "Nil Nehri"}}
+{"guid": "N56_010", "translations": {"ro": "Alpii", "pl": "Alpy", "th": "เทือกเขาแอลป์", "ms": "Alpen", "ta": "ஆல்ப்ஸ்", "kn": "ಆಲ್ಪ್ಸ್", "uk": "Альпи", "bn": "আলপস্", "hi": "आल्प्स", "tr": "Alpler"}}
+{"guid": "N56_011", "translations": {"ms": "taman negara", "hi": "राष्ट्रीय उद्यान", "tr": "millî park"}}
+{"guid": "N56_012", "translations": {"ms": "Kutub Utara", "hi": "उत्तरी ध्रुव", "tr": "Kuzey Kutbu"}}
+{"guid": "N56_013", "translations": {"ms": "Kutub Selatan", "hi": "दक्षिणी ध्रुव", "tr": "Güney Kutbu"}}
+{"guid": "N56_014", "translations": {"ms": "subruang", "hi": "उप-अंतरिक्ष", "tr": "alt uzay"}}
+{"guid": "N56_015", "translations": {"ms": "pusat bandar", "hi": "शहर का केंद्र", "tr": "şehir merkezi"}}
+{"guid": "N56_016", "translations": {"ms": "sempadan", "hi": "सीमा", "tr": "sınır"}}
+{"guid": "N56_017", "translations": {"ms": "wilayah", "hi": "क्षेत्र", "tr": "toprak"}}
+{"guid": "N56_018", "translations": {"ms": "daerah", "hi": "ज़िला", "tr": "bölge"}}
+{"guid": "N56_019", "translations": {"ms": "petempatan", "hi": "बस्ती", "tr": "yerleşim yeri"}}
+{"guid": "N56_020", "translations": {"ms": "pinggir bandar", "hi": "शहर का बाहरी इलाका", "tr": "şehir dışı"}}
+{"guid": "N56_021", "translations": {"ms": "destinasi", "hi": "गंतव्य", "tr": "varış yeri"}}
+{"guid": "N56_022", "translations": {"ms": "tanah besar", "hi": "मुख्यभूमि", "tr": "ana kara"}}
+{"guid": "N56_023", "translations": {"ms": "habitat", "hi": "आवास", "tr": "yaşam alanı"}}
+{"guid": "N56_024", "translations": {"ms": "kawasan tanah", "hi": "भूखंड", "tr": "arazi"}}
+{"guid": "N56_025", "translations": {"ms": "stepa", "hi": "स्तेपी", "tr": "bozkır"}}
+{"guid": "N56_026", "translations": {"ms": "pinggir bandar", "hi": "उपनगर", "tr": "banliyö"}}
+{"guid": "N56_027", "translations": {"ms": "ekoregion", "hi": "पारिस्थितिक क्षेत्र", "tr": "ekolojik bölge"}}
+{"guid": "N56_028", "translations": {"ms": "kawasan setinggan", "hi": "झुग्गी बस्ती", "tr": "gecekondu mahallesi"}}
+{"guid": "N56_029", "translations": {"ms": "jisim daratan", "hi": "स्थलखंड", "tr": "kara kütlesi"}}
+{"guid": "N56_030", "translations": {"ms": "dataran tinggi", "hi": "ऊँचाई वाला क्षेत्र", "tr": "yüksek arazi"}}
+{"guid": "N56_031", "translations": {"ms": "pelabuhan laut", "hi": "बंदरगाह", "tr": "liman"}}
+{"guid": "N56_032", "translations": {"ms": "lubang galian", "hi": "खुदाई स्थल", "tr": "kazı alanı"}}
+{"guid": "N56_033", "translations": {"ms": "negara kota", "hi": "नगर-राज्य", "tr": "şehir devleti"}}
+{"guid": "N56_034", "translations": {"ms": "alam bawah tanah", "hi": "पाताल लोक", "tr": "yeraltı dünyası"}}
+{"guid": "N56_035", "translations": {"ms": "Utarid", "hi": "बुध", "tr": "Merkür"}}
+{"guid": "N56_036", "translations": {"ms": "pusat bandar", "hi": "शहर का केंद्र", "tr": "şehir merkezi"}}
+{"guid": "N56_037", "translations": {"ms": "pusat bandar", "hi": "शहर का केंद्र", "tr": "şehir merkezi"}}
+{"guid": "N56_038", "translations": {"ms": "kawasan luar bandar", "hi": "देहात", "tr": "kırsal"}}
+{"guid": "N56_039", "translations": {"ms": "kampung", "hi": "गाँव", "tr": "köy"}}
+{"guid": "N56_040", "translations": {"ms": "dunia", "hi": "दुनिया", "tr": "dünya"}}

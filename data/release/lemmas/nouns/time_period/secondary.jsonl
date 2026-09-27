@@ -1,30 +1,53 @@
-{"guid": "N25_001", "translations": {"ro": "viață", "pl": "życie", "th": "ชีวิต", "ta": "வாழ்க்கை", "kn": "ಜೀವನ", "uk": "життя", "bn": "জীবন", "hi": "जीवन", "bs": "život"}}
-{"guid": "N25_002", "translations": {"ro": "zi", "pl": "dzień", "th": "วัน", "ta": "நாள்", "kn": "ದಿನ", "uk": "день", "bn": "দিন", "hi": "दिन", "bs": "dan"}}
-{"guid": "N25_003", "translations": {"ro": "noapte", "pl": "noc", "th": "กลางคืน", "ta": "இரவு", "kn": "ರಾತ್ರಿ", "uk": "ніч", "bn": "রাত", "hi": "रात", "bs": "noć"}}
-{"guid": "N25_004", "translations": {"ro": "dimineață", "pl": "poranek", "th": "เช้า", "ta": "காலை", "kn": "ಬೆಳಗ್ಗೆ", "uk": "ранок", "bn": "সকাল", "hi": "सुबह"}}
-{"guid": "N25_005", "translations": {"ro": "seară", "pl": "wieczór", "th": "เย็น", "ta": "மாலை", "kn": "ಸಂಜೆ", "uk": "вечір", "bn": "সন্ধ্যা", "hi": "शाम"}}
-{"guid": "N25_006", "translations": {"ro": "deceniu", "pl": "dekada", "th": "ทศวรรษ", "ta": "தசாப்தம்", "kn": "ದಶಕ", "uk": "десятиліття", "bn": "দশক", "hi": "दशक"}}
-{"guid": "N25_007", "translations": {"ro": "an", "pl": "rok", "th": "ปี", "ta": "ஆண்டு", "kn": "ವರ್ಷ", "uk": "рік", "bn": "বছর", "hi": "वर्ष", "bs": "godina"}}
-{"guid": "N25_008", "translations": {"ro": "lună", "pl": "miesiąc", "th": "เดือน", "ta": "மாதம்", "kn": "ತಿಂಗಳು", "uk": "місяць", "bn": "মাস", "hi": "महीना"}}
-{"guid": "N25_009", "translations": {"ro": "săptămână", "pl": "tydzień", "th": "สัปดาห์", "ta": "ஆறு", "kn": "ವಾರ", "uk": "тиждень", "bn": "সপ্তাহ", "hi": "सप्ताह"}}
-{"guid": "N25_010", "translations": {"ro": "oră", "pl": "godzina", "th": "ชั่วโมง", "ta": "மணி", "kn": "ಗಂಟೆ", "uk": "година", "bn": "ঘণ্টা", "hi": "घণ্টा", "bs": "sat"}}
-{"guid": "N25_011", "translations": {"ro": "minut", "pl": "minuta", "th": "นาที", "ta": "நிமிடம்", "kn": "ನಿಮಿಷ", "uk": "хвилина", "bn": "মিনিট", "hi": "मिनट", "bs": "minuta"}}
-{"guid": "N25_012", "translations": {"ro": "moment", "pl": "moment", "th": "วินาที", "ta": "கணம்", "kn": "ಕ್ಷಣ", "uk": "момент", "bn": "ক্ষণ", "hi": "क्षण"}}
-{"guid": "N25_013", "translations": {"ro": "moarte", "pl": "śmierć", "th": "ความตาย", "ta": "மரணம்", "kn": "ಮರಣ", "uk": "смерть", "bn": "মৃত্যু", "hi": "मृत्यु", "bs": "smrt"}}
-{"guid": "N25_020", "translations": {"ro": "trecut", "pl": "przeszłość", "th": "อดีต", "ta": "கடந்த காலம்", "kn": "ಭೂತಕಾಲ", "uk": "мину́ле", "bn": "অতীত", "hi": "अतीत"}}
-{"guid": "N25_021", "translations": {"ro": "vârstă", "pl": "wiek", "th": "อายุ", "ta": "வயது", "kn": "ವಯಸ್ಸು", "uk": "вік", "bn": "বয়স", "hi": "आयु"}}
-{"guid": "N25_022", "translations": {"ro": "viitor", "pl": "przyszłość", "th": "อนาคต", "ta": "எதிர்காலம்", "kn": "ಭವಿಷ್ಯ", "uk": "майбутнє", "bn": "ভবিষ্যত", "hi": "भविष्य"}}
-{"guid": "N25_023", "translations": {"ro": "iarna", "pl": "zima", "th": "ฤดูหนาว", "ta": "குளிர்காலம்", "kn": "ಶೀತಕಾಲ", "uk": "зима", "bn": "শীত", "hi": "सर्दी"}}
-{"guid": "N25_024", "translations": {"ro": "vară", "pl": "lato", "th": "ฤดูร้อน", "ta": "கோடை", "kn": "ಗ್ರೀಷ್ಮ", "uk": "літо", "bn": "গ্রীষ্ম", "hi": "ग्रीष्म"}}
-{"guid": "N25_025", "translations": {"ro": "primăvară", "pl": "wiosna", "th": "ฤดูใบไม้ผลิ", "ta": "வசந்தகாலம்", "kn": "ವಸಂತ", "uk": "весна", "bn": "বসন্ত", "hi": "वसंत", "bs": "proljeće"}}
-{"guid": "N25_026", "translations": {"ro": "toamnă", "pl": "jesień", "th": "ฤดูใบไม้ร่วง", "ta": "சரத்஋तु", "kn": "ಶರತ್ಕಾಲ", "uk": "осінь", "bn": "শরৎ", "hi": "शरद्\bकाल"}}
-{"guid": "N25_027", "translations": {"ro": "sezon", "pl": "sezon", "th": "ฤดู", "ta": "காலம்", "kn": "ಹಣ್ಣು", "uk": "сезон", "bn": "মৌসুম", "hi": "ऋतु"}}
-{"guid": "N25_028", "translations": {"ro": "secol", "pl": "wiek", "th": "ศตวรรษ", "ta": "நூற்றாண்டு", "kn": "ಶತಮಾನ", "uk": "століття", "bn": "শতাব্দী", "hi": "शताब्दी", "bs": "stoljeće"}}
-{"guid": "N25_029", "translations": {"ro": "perioadă", "pl": "okres", "th": "ช่วงเวลา", "ta": "காலம்", "kn": "ಕಾಲಾವಧಿ", "uk": "період", "bn": "কালখণ্ড", "hi": "अवधि"}}
-{"guid": "N25_030", "translations": {"ro": "secundă", "pl": "sekunda", "th": "วินาที", "ta": "செகண்ட்", "kn": "ಸೆಕೆಂಡ್", "uk": "секунда", "bn": "সেকেন্ড", "hi": "सेकंड"}}
-{"guid": "N25_031", "translations": {"ro": "după-amiază", "pl": "popołudnie", "th": "บ่าย", "ta": "மாலைநேரம்", "kn": "ಮಧ್ಯಾಹ್ನ", "uk": "післяобідній час", "bn": "বিকাল", "hi": "दोपहर"}}
-{"guid": "N25_032", "translations": {"ro": "weekend", "pl": "weekend", "th": "วันหยุดสุดสัปดาห์", "ta": "வாராந்திரம்", "kn": "ವಾರಾಂತ್ಯ", "uk": "вихідні", "bn": "সপ্তাহান্ত", "hi": "सप्ताहांत"}}
-{"guid": "N25_033", "translations": {"ro": "miezul nopții", "pl": "północ", "th": "เที่ยงคืน", "ta": "நள்ளிரவு", "kn": "ಅರ್ಧರಾತ್ರಿ", "uk": "опівночі", "bn": "মধ্যরাত", "hi": "मध्यरात्रि"}}
-{"guid": "N25_034", "translations": {"ro": "amiază", "pl": "południe", "th": "เที่ยงวัน", "ta": "நடுத்து நண்பகல்", "kn": "ಮಧ್ಯಾಹ್ನ", "uk": "полудень", "bn": "দুপুর", "hi": "दोपहर"}}
-{"guid": "N25_035", "translations": {"ro": "perioadă", "pl": "okres", "th": "ช่วงเวลา", "ta": "காலத்தொடர்", "kn": "ಕಾಲಾವಧಿ", "uk": "період", "bn": "কালপর্ব", "hi": "अवधि"}}
-{"guid": "N25_036", "translations": {"ro": "dată", "pl": "data", "th": "วันที่", "ta": "தேதி", "kn": "ತಾರೀಖು", "uk": "дата", "bn": "তথ্য", "hi": "तिथि", "bs": "datum"}}
+{"guid": "N25_001", "translations": {"ro": "viață", "pl": "życie", "th": "ชีวิต", "ms": "hayat", "ta": "வாழ்க்கை", "kn": "ಜೀವನ", "uk": "життя", "bn": "জীবন", "hi": "जीवन", "tr": "yaşam", "bs": "život"}}
+{"guid": "N25_002", "translations": {"ro": "zi", "pl": "dzień", "th": "วัน", "ms": "hari", "ta": "நாள்", "kn": "ದಿನ", "uk": "день", "bn": "দিন", "hi": "दिन", "tr": "gün", "bs": "dan"}}
+{"guid": "N25_003", "translations": {"ro": "noapte", "pl": "noc", "th": "กลางคืน", "ms": "malam", "ta": "இரவு", "kn": "ರಾತ್ರಿ", "uk": "ніч", "bn": "রাত", "hi": "रात", "tr": "gece", "bs": "noć"}}
+{"guid": "N25_004", "translations": {"ro": "dimineață", "pl": "poranek", "th": "เช้า", "ms": "pagi", "ta": "காலை", "kn": "ಬೆಳಗ್ಗೆ", "uk": "ранок", "bn": "সকাল", "hi": "सुबह", "tr": "sabah"}}
+{"guid": "N25_005", "translations": {"ro": "seară", "pl": "wieczór", "th": "เย็น", "ms": "petang", "ta": "மாலை", "kn": "ಸಂಜೆ", "uk": "вечір", "bn": "সন্ধ্যা", "hi": "शाम", "tr": "akşam"}}
+{"guid": "N25_006", "translations": {"ro": "deceniu", "pl": "dekada", "th": "ทศวรรษ", "ms": "dekad", "ta": "தசாப்தம்", "kn": "ದಶಕ", "uk": "десятиліття", "bn": "দশক", "hi": "दशक", "tr": "on yıl"}}
+{"guid": "N25_007", "translations": {"ro": "an", "pl": "rok", "th": "ปี", "ms": "tahun", "ta": "ஆண்டு", "kn": "ವರ್ಷ", "uk": "рік", "bn": "বছর", "hi": "वर्ष", "tr": "yıl", "bs": "godina"}}
+{"guid": "N25_008", "translations": {"ro": "lună", "pl": "miesiąc", "th": "เดือน", "ms": "bulan", "ta": "மாதம்", "kn": "ತಿಂಗಳು", "uk": "місяць", "bn": "মাস", "hi": "महीना", "tr": "ay"}}
+{"guid": "N25_009", "translations": {"ro": "săptămână", "pl": "tydzień", "th": "สัปดาห์", "ms": "minggu", "ta": "ஆறு", "kn": "ವಾರ", "uk": "тиждень", "bn": "সপ্তাহ", "hi": "सप्ताह", "tr": "hafta"}}
+{"guid": "N25_010", "translations": {"ro": "oră", "pl": "godzina", "th": "ชั่วโมง", "ms": "jam", "ta": "மணி", "kn": "ಗಂಟೆ", "uk": "година", "bn": "ঘণ্টা", "hi": "घণ্টा", "tr": "saat", "bs": "sat"}}
+{"guid": "N25_011", "translations": {"ro": "minut", "pl": "minuta", "th": "นาที", "ms": "minit", "ta": "நிமிடம்", "kn": "ನಿಮಿಷ", "uk": "хвилина", "bn": "মিনিট", "hi": "मिनट", "tr": "dakika", "bs": "minuta"}}
+{"guid": "N25_012", "translations": {"ro": "moment", "pl": "moment", "th": "วินาที", "ms": "saat", "ta": "கணம்", "kn": "ಕ್ಷಣ", "uk": "момент", "bn": "ক্ষণ", "hi": "क्षण", "tr": "an"}}
+{"guid": "N25_013", "translations": {"ro": "moarte", "pl": "śmierć", "th": "ความตาย", "ms": "kematian", "ta": "மரணம்", "kn": "ಮರಣ", "uk": "смерть", "bn": "মৃত্যু", "hi": "मृत्यु", "tr": "ölüm", "bs": "smrt"}}
+{"guid": "N25_020", "translations": {"ro": "trecut", "pl": "przeszłość", "th": "อดีต", "ms": "masa lalu", "ta": "கடந்த காலம்", "kn": "ಭೂತಕಾಲ", "uk": "мину́ле", "bn": "অতীত", "hi": "अतीत", "tr": "geçmiş"}}
+{"guid": "N25_021", "translations": {"ro": "vârstă", "pl": "wiek", "th": "อายุ", "ms": "umur", "ta": "வயது", "kn": "ವಯಸ್ಸು", "uk": "вік", "bn": "বয়স", "hi": "आयु", "tr": "yaş"}}
+{"guid": "N25_022", "translations": {"ro": "viitor", "pl": "przyszłość", "th": "อนาคต", "ms": "masa depan", "ta": "எதிர்காலம்", "kn": "ಭವಿಷ್ಯ", "uk": "майбутнє", "bn": "ভবিষ্যত", "hi": "भविष्य", "tr": "gelecek"}}
+{"guid": "N25_023", "translations": {"ro": "iarna", "pl": "zima", "th": "ฤดูหนาว", "ms": "musim sejuk", "ta": "குளிர்காலம்", "kn": "ಶೀತಕಾಲ", "uk": "зима", "bn": "শীত", "hi": "सर्दी", "tr": "kış"}}
+{"guid": "N25_024", "translations": {"ro": "vară", "pl": "lato", "th": "ฤดูร้อน", "ms": "musim panas", "ta": "கோடை", "kn": "ಗ್ರೀಷ್ಮ", "uk": "літо", "bn": "গ্রীষ্ম", "hi": "ग्रीष्म", "tr": "yaz"}}
+{"guid": "N25_025", "translations": {"ro": "primăvară", "pl": "wiosna", "th": "ฤดูใบไม้ผลิ", "ms": "musim bunga", "ta": "வசந்தகாலம்", "kn": "ವಸಂತ", "uk": "весна", "bn": "বসন্ত", "hi": "वसंत", "tr": "ilkbahar", "bs": "proljeće"}}
+{"guid": "N25_026", "translations": {"ro": "toamnă", "pl": "jesień", "th": "ฤดูใบไม้ร่วง", "ms": "musim luruh", "ta": "சரத்஋तु", "kn": "ಶರತ್ಕಾಲ", "uk": "осінь", "bn": "শরৎ", "hi": "शरद्\bकाल", "tr": "sonbahar"}}
+{"guid": "N25_027", "translations": {"ro": "sezon", "pl": "sezon", "th": "ฤดู", "ms": "musim", "ta": "காலம்", "kn": "ಹಣ್ಣು", "uk": "сезон", "bn": "মৌসুম", "hi": "ऋतु", "tr": "mevsim"}}
+{"guid": "N25_028", "translations": {"ro": "secol", "pl": "wiek", "th": "ศตวรรษ", "ms": "abad", "ta": "நூற்றாண்டு", "kn": "ಶತಮಾನ", "uk": "століття", "bn": "শতাব্দী", "hi": "शताब्दी", "tr": "yüzyıl", "bs": "stoljeće"}}
+{"guid": "N25_029", "translations": {"ro": "perioadă", "pl": "okres", "th": "ช่วงเวลา", "ms": "tempoh", "ta": "காலம்", "kn": "ಕಾಲಾವಧಿ", "uk": "період", "bn": "কালখণ্ড", "hi": "अवधि", "tr": "dönem"}}
+{"guid": "N25_030", "translations": {"ro": "secundă", "pl": "sekunda", "th": "วินาที", "ms": "saat", "ta": "செகண்ட்", "kn": "ಸೆಕೆಂಡ್", "uk": "секунда", "bn": "সেকেন্ড", "hi": "सेकंड", "tr": "saniye"}}
+{"guid": "N25_031", "translations": {"ro": "după-amiază", "pl": "popołudnie", "th": "บ่าย", "ms": "petang", "ta": "மாலைநேரம்", "kn": "ಮಧ್ಯಾಹ್ನ", "uk": "післяобідній час", "bn": "বিকাল", "hi": "दोपहर", "tr": "öğleden sonra"}}
+{"guid": "N25_032", "translations": {"ro": "weekend", "pl": "weekend", "th": "วันหยุดสุดสัปดาห์", "ms": "hujung minggu", "ta": "வாராந்திரம்", "kn": "ವಾರಾಂತ್ಯ", "uk": "вихідні", "bn": "সপ্তাহান্ত", "hi": "सप्ताहांत", "tr": "hafta sonu"}}
+{"guid": "N25_033", "translations": {"ro": "miezul nopții", "pl": "północ", "th": "เที่ยงคืน", "ms": "tengah malam", "ta": "நள்ளிரவு", "kn": "ಅರ್ಧರಾತ್ರಿ", "uk": "опівночі", "bn": "মধ্যরাত", "hi": "मध्यरात्रि", "tr": "gece yarısı"}}
+{"guid": "N25_034", "translations": {"ro": "amiază", "pl": "południe", "th": "เที่ยงวัน", "ms": "tengah hari", "ta": "நடுத்து நண்பகல்", "kn": "ಮಧ್ಯಾಹ್ನ", "uk": "полудень", "bn": "দুপুর", "hi": "दोपहर", "tr": "öğle"}}
+{"guid": "N25_035", "translations": {"ro": "perioadă", "pl": "okres", "th": "ช่วงเวลา", "ms": "tempoh", "ta": "காலத்தொடர்", "kn": "ಕಾಲಾವಧಿ", "uk": "період", "bn": "কালপর্ব", "hi": "अवधि", "tr": "dönem"}}
+{"guid": "N25_036", "translations": {"ro": "dată", "pl": "data", "th": "วันที่", "ms": "tarikh", "ta": "தேதி", "kn": "ತಾರೀಖು", "uk": "дата", "bn": "তথ্য", "hi": "तिथि", "tr": "tarih", "bs": "datum"}}
+{"guid": "N25_037", "translations": {"ms": "tahun persekolahan", "hi": "शैक्षणिक वर्ष", "tr": "öğretim yılı"}}
+{"guid": "N25_038", "translations": {"ms": "waktu konsultasi", "hi": "विद्यार्थियों से मिलने का समय", "tr": "öğretim elemanının öğrenci kabul saatleri"}}
+{"guid": "N25_039", "translations": {"ms": "waktu puncak", "hi": "व्यस्त समय", "tr": "trafik yoğun saatleri"}}
+{"guid": "N25_040", "translations": {"ms": "hari cuti", "hi": "छुट्टी का दिन", "tr": "izin günü"}}
+{"guid": "N25_041", "translations": {"ms": "tahun lompat", "hi": "अधिवर्ष", "tr": "artık yıl"}}
+{"guid": "N25_042", "translations": {"ms": "setengah jam", "hi": "आधा घंटा", "tr": "yarım saat"}}
+{"guid": "N25_043", "translations": {"ms": "usia pertengahan", "hi": "मध्य आयु", "tr": "orta yaş"}}
+{"guid": "N25_044", "translations": {"ms": "usia tua", "hi": "बुढ़ापा", "tr": "yaşlılık"}}
+{"guid": "N25_045", "translations": {"ms": "waktu rehat", "hi": "मध्यांतर", "tr": "devre arası"}}
+{"guid": "N25_046", "translations": {"ms": "pemerintahan", "hi": "शासनकाल", "tr": "saltanat"}}
+{"guid": "N25_047", "translations": {"ms": "tempoh pembuangan negeri", "hi": "निर्वासन की अवधि", "tr": "sürgün dönemi"}}
+{"guid": "N25_048", "translations": {"ms": "jangka hayat", "hi": "जीवनकाल", "tr": "ömür"}}
+{"guid": "N25_049", "translations": {"ms": "Zaman Larangan", "hi": "शराबबंदी का दौर", "tr": "İçki Yasağı Dönemi"}}
+{"guid": "N25_050", "translations": {"ms": "kronologi", "hi": "कालक्रम", "tr": "kronoloji"}}
+{"guid": "N25_051", "translations": {"ms": "ekuinoks", "hi": "विषुव", "tr": "ekinoks"}}
+{"guid": "N25_052", "translations": {"ms": "setengah jam", "hi": "आधा घंटा", "tr": "yarım saat"}}
+{"guid": "N25_053", "translations": {"ms": "setengah abad", "hi": "आधा शतक", "tr": "yarım yüzyıl"}}
+{"guid": "N25_054", "translations": {"ms": "waktu malam", "hi": "रात का समय", "tr": "gece vakti"}}
+{"guid": "N25_055", "translations": {"ms": "pertengahan September", "hi": "सितंबर का मध्य", "tr": "Eylül ortası"}}
+{"guid": "N25_056", "translations": {"ms": "hari lahir", "hi": "जन्मदिन", "tr": "doğum günü"}}
+{"guid": "N25_057", "translations": {"ms": "cuti umum", "hi": "छुट्टी", "tr": "tatil"}}
+{"guid": "N25_058", "translations": {"ms": "kalendar", "hi": "कैलेंडर", "tr": "takvim"}}
+{"guid": "N25_059", "translations": {"ms": "tengah hari", "hi": "दोपहर", "tr": "öğle vakti"}}

@@ -1,0 +1,54 @@
+{"guid": "N59_001", "translations": {"ms": "perkara yang telah diputuskan", "hi": "पूर्वन्याय", "tr": "kesin hüküm"}}
+{"guid": "N59_002", "translations": {"ms": "niat jenayah", "hi": "दोषपूर्ण मानसिक अवस्था", "tr": "suç işleme kastı"}}
+{"guid": "N59_003", "translations": {"ms": "unsur perbuatan jenayah", "hi": "अपराध का भौतिक तत्व", "tr": "suçun maddi unsuru"}}
+{"guid": "N59_004", "translations": {"ms": "res ipsa loquitur", "hi": "स्वतः स्पष्ट लापरवाही का सिद्धांत", "tr": "res ipsa loquitur"}}
+{"guid": "N59_005", "translations": {"ms": "liabiliti majikan atas perbuatan pekerja", "hi": "कर्मचारियों के कृत्यों के लिए नियोक्ता का दायित्व", "tr": "işverenin çalışanlarının fiillerinden sorumluluğu"}}
+{"guid": "N59_006", "translations": {"ms": "tuntutan nilai munasabah bagi perkhidmatan", "hi": "प्रदान की गई सेवाओं के उचित मूल्य की वसूली", "tr": "verilen hizmetlerin makul bedelinin talebi"}}
+{"guid": "N59_007", "translations": {"ms": "bukti bahawa jenayah telah berlaku", "hi": "अपराध घटित होने का प्रमाण", "tr": "suçun işlendiğinin kanıtı"}}
+{"guid": "N59_008", "translations": {"ms": "alasan penghakiman yang mengikat", "hi": "बाध्यकारी निर्णय का मूल तर्क", "tr": "bağlayıcı karar gerekçesi"}}
+{"guid": "N59_009", "translations": {"ms": "doktrin forum non conveniens", "hi": "फोरम नॉन कॉन्वेनियंस का सिद्धांत", "tr": "forum non conveniens doktrini"}}
+{"guid": "N59_010", "translations": {"ms": "notis litigasi tertunda", "hi": "लंबित मुकदमे की सूचना", "tr": "derdest dava şerhi"}}
+{"guid": "N59_011", "translations": {"ms": "risiko ditanggung pembeli", "hi": "क्रेता जोखिम", "tr": "alıcı riski"}}
+{"guid": "N59_012", "translations": {"ms": "balasan setimpal", "hi": "लेन-देन", "tr": "karşılık"}}
+{"guid": "N59_013", "translations": {"ms": "kehilangan hak tuntutan akibat kelewatan yang tidak munasabah", "hi": "अनुचित विलंब के कारण दावा करने का अधिकार खोना", "tr": "hakkı ileri sürmede makul olmayan gecikme nedeniyle hak kaybı"}}
+{"guid": "N59_014", "translations": {"ms": "estopel", "hi": "एस्टॉपेल", "tr": "estoppel"}}
+{"guid": "N59_015", "translations": {"ms": "tort", "hi": "अपकृत्य", "tr": "haksız fiil"}}
+{"guid": "N59_016", "translations": {"ms": "hak servitud", "hi": "सुखाधिकार", "tr": "irtifak hakkı"}}
+{"guid": "N59_017", "translations": {"ms": "hak lalu", "hi": "सुखाधिकार", "tr": "irtifak hakkı"}}
+{"guid": "N59_018", "translations": {"ms": "perjanjian yang mengikat", "hi": "वाचा", "tr": "taahhüt"}}
+{"guid": "N59_019", "translations": {"ms": "estopel janji", "hi": "वचन-आधारित प्रतिषेध", "tr": "vaat nedeniyle hukuki engel"}}
+{"guid": "N59_020", "translations": {"ms": "estopel isu", "hi": "पूर्वनिर्णीत मुद्दे पर पुनर्विचार निषेध", "tr": "kesin hüküm etkisi"}}
+{"guid": "N59_021", "translations": {"ms": "pengayaan tanpa asas", "hi": "अनुचित समृद्धि", "tr": "sebepsiz zenginleşme"}}
+{"guid": "N59_022", "translations": {"ms": "hak milik tanah mutlak", "hi": "पूर्ण और उत्तराधिकार योग्य भूमि स्वामित्व", "tr": "mutlak ve miras bırakılabilir arazi mülkiyeti"}}
+{"guid": "N59_023", "translations": {"ms": "hak milik sepanjang hayat", "hi": "आजीवन संपत्ति उपभोग का अधिकार", "tr": "ömür boyu intifa hakkı"}}
+{"guid": "N59_024", "translations": {"ms": "pemilikan bersama dengan bahagian yang boleh diwarisi secara berasingan", "hi": "अविभाजित हिस्सों में सह-स्वामित्व", "tr": "paylı mülkiyet"}}
+{"guid": "N59_025", "translations": {"ms": "pemilikan bersama dengan hak pemilikan penuh oleh pemilik yang masih hidup", "hi": "उत्तरजीविता के अधिकार सहित संयुक्त स्वामित्व", "tr": "sağ kalan lehine birlikte mülkiyet"}}
+{"guid": "N59_026", "translations": {"ms": "pemilikan melalui penguasaan berterusan", "hi": "प्रतिकूल कब्ज़े द्वारा स्वामित्व अर्जन", "tr": "kazandırıcı zamanaşımı"}}
+{"guid": "N59_027", "translations": {"ms": "hak pengambilan tanah oleh negara", "hi": "अधिग्रहण का अधिकार", "tr": "kamulaştırma yetkisi"}}
+{"guid": "N59_028", "translations": {"ms": "larangan perbicaraan dua kali bagi kesalahan yang sama", "hi": "एक ही अपराध के लिए दो बार मुकदमा चलाने पर रोक", "tr": "aynı suçtan iki kez yargılanma yasağı"}}
+{"guid": "N59_029", "translations": {"ms": "proses undang-undang yang sewajarnya", "hi": "उचित कानूनी प्रक्रिया", "tr": "usulüne uygun yargılama"}}
+{"guid": "N59_030", "translations": {"ms": "perlindungan yang sama di sisi undang-undang", "hi": "कानून के समक्ष समान संरक्षण", "tr": "eşit hukuki koruma"}}
+{"guid": "N59_031", "translations": {"ms": "semakan ketat", "hi": "कड़ी न्यायिक समीक्षा", "tr": "sıkı inceleme"}}
+{"guid": "N59_032", "translations": {"ms": "proses wajar substantif", "hi": "मूलभूत उचित प्रक्रिया", "tr": "maddi usul güvencesi"}}
+{"guid": "N59_033", "translations": {"ms": "buah daripada pokok beracun", "hi": "विषैले वृक्ष का फल", "tr": "zehirli ağacın meyvesi"}}
+{"guid": "N59_034", "translations": {"ms": "doktrin pengecualian bukti", "hi": "अवैध रूप से प्राप्त साक्ष्य को अस्वीकार करने का नियम", "tr": "hukuka aykırı elde edilen delillerin kabul edilmemesi kuralı"}}
+{"guid": "N59_035", "translations": {"ms": "alasan yang munasabah", "hi": "उचित आधार", "tr": "makul sebep"}}
+{"guid": "N59_036", "translations": {"ms": "syak munasabah", "hi": "उचित संदेह", "tr": "makul şüphe"}}
+{"guid": "N59_037", "translations": {"ms": "melampaui keraguan munasabah", "hi": "उचित संदेह से परे", "tr": "makul şüphenin ötesinde"}}
+{"guid": "N59_038", "translations": {"ms": "imbangan kebarangkalian", "hi": "साक्ष्यों का प्राबल्य", "tr": "delillerin üstünlüğü"}}
+{"guid": "N59_039", "translations": {"ms": "bukti yang jelas dan meyakinkan", "hi": "स्पष्ट और विश्वासोत्पादक साक्ष्य", "tr": "açık ve ikna edici delil"}}
+{"guid": "N59_040", "translations": {"ms": "kes prima facie", "hi": "प्रथम दृष्टया मामला", "tr": "ilk bakışta yeterli delil"}}
+{"guid": "N59_041", "translations": {"ms": "persoalan politik", "hi": "राजनीतिक प्रश्न", "tr": "siyasi mesele"}}
+{"guid": "N59_042", "translations": {"ms": "kekebalan berdaulat", "hi": "राज्य की संप्रभु प्रतिरक्षा", "tr": "devlet dokunulmazlığı"}}
+{"guid": "N59_043", "translations": {"ms": "imuniti bersyarat", "hi": "योग्य प्रतिरक्षा", "tr": "nitelikli dokunulmazlık"}}
+{"guid": "N59_044", "translations": {"ms": "pembunuhan semasa melakukan jenayah berat", "hi": "गंभीर अपराध के दौरान हुई हत्या", "tr": "ağır suç işlenirken meydana gelen cinayet"}}
+{"guid": "N59_045", "translations": {"ms": "perjanjian pengakuan bersalah", "hi": "दोष स्वीकार करने के बदले समझौता", "tr": "suç kabulü karşılığı anlaşma"}}
+{"guid": "N59_046", "translations": {"ms": "tempoh had masa", "hi": "सीमा अवधि", "tr": "zamanaşımı süresi"}}
+{"guid": "N59_047", "translations": {"ms": "penangguhan tempoh had masa atas dasar keadilan", "hi": "न्यायसंगत आधार पर परिसीमा अवधि का स्थगन", "tr": "hakkaniyete dayalı zamanaşımının durması"}}
+{"guid": "N59_048", "translations": {"ms": "penentuan nasib sendiri", "hi": "आत्मनिर्णय", "tr": "kendi kaderini tayin"}}
+{"guid": "N59_049", "translations": {"ms": "pembelaan diri", "hi": "आत्मरक्षा", "tr": "meşru müdafaa"}}
+{"guid": "N59_050", "translations": {"ms": "pemeriksaan balas", "hi": "प्रतिपरीक्षा", "tr": "çapraz sorgu"}}
+{"guid": "N59_051", "translations": {"ms": "pemerintahan sendiri", "hi": "स्वशासन", "tr": "özyönetim"}}
+{"guid": "N59_052", "translations": {"ms": "gencatan senjata", "hi": "युद्धविराम", "tr": "ateşkes"}}
+{"guid": "N59_053", "translations": {"ms": "eutanasia", "hi": "इच्छामृत्यु", "tr": "ötanazi"}}
+{"guid": "N59_054", "translations": {"ms": "penggeledahan", "hi": "तलाशी", "tr": "arama"}}

@@ -1,0 +1,70 @@
+{"guid": "A20_001", "translations": {"ms": "timur laut", "hi": "उत्तर-पूर्वी", "tr": "kuzeydoğu yönündeki"}}
+{"guid": "A20_002", "translations": {"ms": "barat laut", "hi": "उत्तर-पश्चिमी", "tr": "kuzeybatı"}}
+{"guid": "A20_003", "translations": {"ms": "tenggara", "hi": "दक्षिण-पूर्वी", "tr": "güneydoğuya bakan"}}
+{"guid": "A20_004", "translations": {"ms": "barat daya", "hi": "दक्षिण-पश्चिमी", "tr": "güneybatı"}}
+{"guid": "A20_005", "translations": {"ms": "utara", "hi": "उत्तरी", "tr": "kuzey"}}
+{"guid": "A20_006", "translations": {"ms": "selatan", "hi": "दक्षिणी", "tr": "güney"}}
+{"guid": "A20_007", "translations": {"ms": "timur", "hi": "पूर्वी", "tr": "doğu"}}
+{"guid": "A20_008", "translations": {"ms": "barat", "hi": "पश्चिमी", "tr": "batı"}}
+{"guid": "A20_009", "translations": {"ms": "timur laut", "hi": "उत्तर-पूर्वी", "tr": "kuzeydoğudaki"}}
+{"guid": "A20_010", "translations": {"ms": "barat laut", "hi": "उत्तर-पश्चिमी", "tr": "kuzeybatı"}}
+{"guid": "A20_011", "translations": {"ms": "tenggara", "hi": "दक्षिण-पूर्वी", "tr": "güneydoğudaki"}}
+{"guid": "A20_012", "translations": {"ms": "barat daya", "hi": "दक्षिण-पश्चिमी", "tr": "güneybatı"}}
+{"guid": "A20_013", "translations": {"ms": "atmosfera", "hi": "वायुमंडलीय", "tr": "atmosferik"}}
+{"guid": "A20_014", "translations": {"ms": "kosmik", "hi": "ब्रह्मांडीय", "tr": "kozmik"}}
+{"guid": "A20_015", "translations": {"ms": "kutub", "hi": "ध्रुवीय", "tr": "kutupsal"}}
+{"guid": "A20_016", "translations": {"ms": "berkaitan dengan rongga mata", "hi": "नेत्रगुहा-संबंधी", "tr": "göz çukuru ile ilgili"}}
+{"guid": "A20_017", "translations": {"ms": "metropolitan", "hi": "महानगरीय", "tr": "metropoliten"}}
+{"guid": "A20_018", "translations": {"ms": "terletak", "hi": "स्थित", "tr": "bulunan"}}
+{"guid": "A20_019", "translations": {"ms": "bandar", "hi": "शहरी", "tr": "kentsel"}}
+{"guid": "A20_020", "translations": {"ms": "wilayah", "hi": "प्रांतीय", "tr": "taşra"}}
+{"guid": "A20_021", "translations": {"ms": "luar bandar", "hi": "ग्रामीण", "tr": "kırsal"}}
+{"guid": "A20_022", "translations": {"ms": "luar bandar", "hi": "ग्रामीण", "tr": "kırsal"}}
+{"guid": "A20_023", "translations": {"ms": "terletak", "hi": "स्थित", "tr": "bulunan"}}
+{"guid": "A20_024", "translations": {"ms": "pedalaman", "hi": "अंतर्देशीय", "tr": "iç kesimdeki"}}
+{"guid": "A20_025", "translations": {"ms": "serantau", "hi": "क्षेत्रीय", "tr": "bölgesel"}}
+{"guid": "A20_026", "translations": {"ms": "serantau", "hi": "क्षेत्रीय", "tr": "bölgesel"}}
+{"guid": "A20_027", "translations": {"ms": "pesisir", "hi": "तटीय", "tr": "kıyısal"}}
+{"guid": "A20_028", "translations": {"ms": "pantai", "hi": "तटीय", "tr": "kıyı"}}
+{"guid": "A20_029", "translations": {"ms": "tanah besar", "hi": "मुख्यभूमि का", "tr": "ana karaya ait"}}
+{"guid": "A20_030", "translations": {"ms": "marin", "hi": "समुद्री", "tr": "denizle ilgili"}}
+{"guid": "A20_031", "translations": {"ms": "tropika", "hi": "उष्णकटिबंधीय", "tr": "tropikal"}}
+{"guid": "A20_032", "translations": {"ms": "berhutan", "hi": "वनाच्छादित", "tr": "ormanlık"}}
+{"guid": "A20_033", "translations": {"ms": "luar", "hi": "बाहरी", "tr": "açık hava"}}
+{"guid": "A20_034", "translations": {"ms": "ventral", "hi": "उदर संबंधी", "tr": "ventral"}}
+{"guid": "A20_035", "translations": {"ms": "pelvis", "hi": "श्रोणि-संबंधी", "tr": "pelvik"}}
+{"guid": "A20_036", "translations": {"ms": "toraks", "hi": "वक्षीय", "tr": "torasik"}}
+{"guid": "A20_037", "translations": {"ms": "arboreal", "hi": "वृक्षवासी", "tr": "ağaçlarda yaşayan"}}
+{"guid": "A20_038", "translations": {"ms": "yang mengalir ke dalam", "hi": "में मिलने वाला", "tr": "dökülen"}}
+{"guid": "A20_039", "translations": {"ms": "pinggir bandar", "hi": "उपनगरीय", "tr": "banliyö"}}
+{"guid": "A20_040", "translations": {"ms": "luar pesisir", "hi": "समुद्र में तट से दूर स्थित", "tr": "açık denizde"}}
+{"guid": "A20_041", "translations": {"ms": "hulu", "hi": "धारा के विपरीत दिशा में", "tr": "akıntı yukarısındaki"}}
+{"guid": "A20_042", "translations": {"ms": "terkurung daratan", "hi": "स्थलरुद्ध", "tr": "denize kıyısı olmayan"}}
+{"guid": "A20_043", "translations": {"ms": "bergunung-ganang", "hi": "पर्वतीय", "tr": "dağlık"}}
+{"guid": "A20_044", "translations": {"ms": "tanah tinggi", "hi": "पहाड़ी", "tr": "yüksek rakımlı"}}
+{"guid": "A20_045", "translations": {"ms": "antara negeri", "hi": "अंतरराज्यीय", "tr": "eyaletler arası"}}
+{"guid": "A20_046", "translations": {"ms": "bidang kuasa", "hi": "अधिकार-क्षेत्र संबंधी", "tr": "yargı yetkisine ilişkin"}}
+{"guid": "A20_047", "translations": {"ms": "tempatan", "hi": "स्थानीय", "tr": "yerel"}}
+{"guid": "A20_048", "translations": {"ms": "hulu", "hi": "ऊपरी", "tr": "yukarı"}}
+{"guid": "A20_049", "translations": {"ms": "terletak rendah", "hi": "नीचा", "tr": "alçak"}}
+{"guid": "A20_050", "translations": {"ms": "rendah", "hi": "निचला", "tr": "alçak"}}
+{"guid": "A20_051", "translations": {"ms": "berasaskan darat", "hi": "स्थलीय", "tr": "karada bulunan"}}
+{"guid": "A20_052", "translations": {"ms": "selatan-tengah", "hi": "दक्षिण-मध्य", "tr": "güney-orta"}}
+{"guid": "A20_053", "translations": {"ms": "padat dengan bangunan", "hi": "घनी आबादी वाला", "tr": "yapılaşmış"}}
+{"guid": "A20_054", "translations": {"ms": "utara-tengah", "hi": "उत्तर-मध्य", "tr": "kuzey-orta"}}
+{"guid": "A20_055", "translations": {"ms": "laut dalam", "hi": "गहरे समुद्र का", "tr": "derin deniz"}}
+{"guid": "A20_056", "translations": {"ms": "rentas sempadan", "hi": "सीमापार", "tr": "sınır ötesi"}}
+{"guid": "A20_057", "translations": {"ms": "timur-barat", "hi": "पूर्व-पश्चिम", "tr": "doğu-batı"}}
+{"guid": "A20_058", "translations": {"ms": "altitud tinggi", "hi": "उच्च ऊँचाई वाला", "tr": "yüksek rakımlı"}}
+{"guid": "A20_059", "translations": {"ms": "di lokasi", "hi": "स्थल पर", "tr": "yerinde"}}
+{"guid": "A20_060", "translations": {"ms": "dalaman", "hi": "आंतरिक", "tr": "kurum içi"}}
+{"guid": "A20_061", "translations": {"ms": "berasaskan darat", "hi": "भूमि-आधारित", "tr": "karada bulunan"}}
+{"guid": "A20_062", "translations": {"ms": "berketumpatan rendah", "hi": "कम घनत्व वाला", "tr": "düşük yoğunluklu"}}
+{"guid": "A20_063", "translations": {"ms": "pada skrin", "hi": "स्क्रीन पर दिखाई देने वाला", "tr": "ekranda görünen"}}
+{"guid": "A20_064", "translations": {"ms": "tengah lautan", "hi": "महासागर के मध्य का", "tr": "okyanus ortasındaki"}}
+{"guid": "A20_065", "translations": {"ms": "jauh", "hi": "दूरस्थ", "tr": "uzak"}}
+{"guid": "A20_066", "translations": {"ms": "di atas tanah", "hi": "ज़मीन के ऊपर", "tr": "yer üstü"}}
+{"guid": "A20_067", "translations": {"ms": "berpangkalan di London", "hi": "लंदन स्थित", "tr": "Londra merkezli"}}
+{"guid": "A20_068", "translations": {"ms": "di kawasan pusat bandar", "hi": "शहर के भीतरी इलाके का", "tr": "şehir merkezindeki"}}
+{"guid": "A20_069", "translations": {"ms": "barat-tengah", "hi": "पश्चिम-मध्य", "tr": "batı-orta"}}
+{"guid": "A20_070", "translations": {"ms": "di tingkat bawah", "hi": "नीचे की मंज़िल पर स्थित", "tr": "alt kattaki"}}

@@ -1,35 +1,108 @@
-{"guid": "N01_055", "translations": {"ro": "bărbat", "pl": "mężczyzna", "th": "ผู้ชาย", "ta": "ஆண்", "kn": "ಪುರುಷ", "uk": "чоловік", "bn": "পুরুষ", "hi": "पुरुष", "bs": "muškarac"}}
-{"guid": "N01_056", "translations": {"ro": "femeie", "pl": "kobieta", "th": "ผู้หญิง", "ta": "பெண்", "kn": "ಮಹಿಳೆ", "uk": "жінка", "bn": "মহিলা", "hi": "महिला", "bs": "žena"}}
-{"guid": "N01_057", "translations": {"ro": "băiat", "pl": "chłopiec", "th": "เด็กชาย", "ta": "ஆண் குழந்தை", "kn": "ಹುಡುಗ", "uk": "хлопчик", "bn": "ছেলে", "hi": "लड़का", "bs": "dječak"}}
-{"guid": "N01_058", "translations": {"ro": "fată", "pl": "dziewczyna", "th": "เด็กผู้หญิง", "ta": "பட்டாப்", "kn": "ಹುಡುಗಿ", "uk": "дівчина", "bn": "মেয়ে", "hi": "लड़की", "bs": "djevojčica"}}
-{"guid": "N01_059", "translations": {"ro": "prieten", "pl": "przyjaciel", "th": "เพื่อน", "ta": "நண்பர்", "kn": "ಸ್ನೇಹಿತ", "uk": "друг", "bn": "বন্ধু", "hi": "मित्र", "bs": "prijatelj"}}
-{"guid": "N01_060", "translations": {"ro": "persoană", "pl": "człowiek", "th": "มนุษย์", "ta": "மனிதன்", "kn": "ಮಾನವ", "uk": "людина", "bn": "মানুষ", "hi": "मनुष्य", "bs": "čovjek"}}
-{"guid": "N01_065", "translations": {"ro": "om", "pl": "człowiek", "th": "มนุษย์", "ta": "மனிதன்", "kn": "ಮನುಷ್ಯ", "uk": "людина", "bn": "মানুষ", "hi": "मानव"}}
-{"guid": "N01_066", "translations": {"ro": "inamic", "pl": "wróg", "th": "ศัตรู", "ta": "வரி/எதிரி", "kn": "ಶತ್ರು", "uk": "ворог", "bn": "শত্রু", "hi": "शत्रु"}}
-{"guid": "N01_069", "translations": {"ro": "oameni", "pl": "ludzie", "th": "ประชาชน", "ta": "மக்கள்", "kn": "ಜನರು", "uk": "народ", "bn": "জনতা", "hi": "लोग"}}
-{"guid": "N01_070", "translations": {"ro": "zeu", "pl": "bóg", "th": "พระเจ้า", "ta": "கடவன்", "kn": "ದೇವರು", "uk": "бог", "bn": "ঈশ্বর", "hi": "भगवान"}}
-{"guid": "N01_072", "translations": {"ro": "uriaș", "pl": "olbrzym", "th": "ยักษ์", "ta": "பெரியளவான பெருஞ்சான்று", "kn": "ದೈತ್ಯ", "uk": "гігант", "bn": "দৈত্য", "hi": "दैत्य"}}
-{"guid": "N01_073", "translations": {"ro": "băiat", "pl": "chłopak", "th": "เด็กผู้ชาย", "ta": "சின்னப்பிள்ளை", "kn": "ಹುಡುಗ", "uk": "хлопець", "bn": "ছেলে", "hi": "लड़का"}}
-{"guid": "N01_074", "translations": {"ro": "însoțitor", "pl": "towarzysz", "th": "เพื่อนร่วมทาง", "ta": "சூழலாளர்", "kn": "ಸಹಚರ", "uk": "супутник", "bn": "সঙ্গী", "hi": "साथी"}}
-{"guid": "N01_076", "translations": {"ro": "bebeluș", "pl": "niemowlę", "th": "ทารก", "ta": "முழுச்சிசு", "kn": "ಶಿಶು", "uk": "немовля", "bn": "শিশু", "hi": "शिशु", "bs": "beba"}}
-{"guid": "N01_077", "translations": {"ro": "străin", "pl": "nieznajomy", "th": "คนแปลกหน้า", "ta": "அறிய되지 않은வர்", "kn": "ಅ капит?", "uk": "іноземець", "bn": "অজানা ব্যক্তি", "hi": "अजनबी"}}
-{"guid": "N01_079", "translations": {"ro": "deținut", "pl": "więzień", "th": "นักโทษ", "ta": "затஇழுத்த", "kn": "ಕುನ್ತುಳು", "uk": "в'язень", "bn": "ব্যক্তি বন্দী", "hi": "क़ैदी"}}
-{"guid": "N01_080", "translations": {"ro": "copil", "pl": "dziecko", "th": "เด็ก", "ta": "குழந்தை", "kn": "ಮಕ್ಕಳು", "uk": "дитина", "bn": "শিশু", "hi": "बच्चा", "bs": "dijete"}}
-{"guid": "N01_081", "translations": {"ro": "adult", "pl": "dorosły", "th": "ผู้ใหญ่", "ta": "முதிர்ந்தவர்", "kn": "ವಯಸ್ಕ", "uk": "дорослий", "bn": "প্রাপ্তবয়স্ক", "hi": "वयस्क", "bs": "odrasla osoba"}}
-{"guid": "N01_082", "translations": {"ro": "vecin", "pl": "sąsiad", "th": "เพื่อนบ้าน", "ta": "ஏடோர்", "kn": "ಶೆರಿಕ", "uk": "сусід", "bn": "প্রতিবেশী", "hi": "पड़ोसी"}}
-{"guid": "N01_083", "translations": {"ro": "oaspe(t)", "pl": "gość", "th": "แขก", "ta": "விருந்தினர்", "kn": "ಅತಿಥಿ", "uk": "гість", "bn": "অতিথি", "hi": "अतिथि"}}
-{"guid": "N01_084", "translations": {"ro": "erou", "pl": "bohater", "th": "วีรบุรุษ", "ta": "வீரன்", "kn": "ನಾಯಕ", "uk": "герой", "bn": "নায়ক", "hi": "नायक"}}
-{"guid": "N01_085", "translations": {"ro": "victimă", "pl": "ofiara", "th": "เหยื่อ", "ta": "பரிதாபி", "kn": "ಗೌಣಿಸ್ಪೂರ್ತಿ", "uk": "жертва", "bn": "ভিকটিম", "hi": "पीड़ित"}}
-{"guid": "N01_086", "translations": {"ro": "tânăr", "pl": "młodzieniec", "th": "เยาวชน", "ta": "இளைஞன்", "kn": "ಯುವಕ", "uk": "юнак", "bn": "তরুণ", "hi": "युवा"}}
-{"guid": "N01_087", "translations": {"ro": "rege", "pl": "król", "th": "พระมหากษัตริย์", "ta": "மன்னன்", "kn": "ರಾಜ", "uk": "король", "bn": "রাজা", "hi": "राजा"}}
-{"guid": "N01_088", "translations": {"ro": "prinț", "pl": "książę", "th": "เจ้าชาย", "ta": "இராஜகுமாரன்", "kn": "ರಾಜಕುಮಾರ", "uk": "принц", "bn": "রাজকুমার", "hi": "राजकुमार"}}
-{"guid": "N01_089", "translations": {"ro": "șef", "pl": "wódz", "th": "ผู้นำ", "ta": "தலைவர்", "kn": "ನಾಯಕ್", "uk": "вождь", "bn": "নায়ক", "hi": "नायक"}}
-{"guid": "N01_090", "translations": {"ro": "expert", "pl": "ekspert", "th": "ผู้เชี่ยวชาญ", "ta": "நிபுணர்", "kn": "ತಜ್ಞ", "uk": "експерт", "bn": "বিশেষজ্ঞ", "hi": "विशेषज्ञ"}}
-{"guid": "N01_091", "translations": {"ro": "ghid", "pl": "przewodnik", "th": "มัคคุเทศก์", "ta": "முறைசாட்டியவர்", "kn": "ಗೈಡ್", "uk": "гід", "bn": "গাইড", "hi": "मार्गदर्शक"}}
-{"guid": "N01_092", "translations": {"ro": "manager", "pl": "menedżer", "th": "ผู้จัดการ", "ta": "மேனேஜர்", "kn": "ಮ್ಯಾನೇಜರ್", "uk": "менеджер", "bn": "ব্যবস্থাপক", "hi": "प्रबंधक"}}
-{"guid": "N01_093", "translations": {"ro": "proprietar", "pl": "właściciel", "th": "เจ้าของ", "ta": "உரிமையாளர்", "kn": "ಮಾಲೀಕ", "uk": "власник", "bn": "মালিক", "hi": "मालिक"}}
-{"guid": "N01_094", "translations": {"ro": "portar", "pl": "porter", "th": "พนักงานขนสัมภาระ", "ta": "போர்ட்டர்", "kn": "ಬಟ್ಟೆಸೇತ", "uk": "носій", "bn": "পোর্টার", "hi": "पोर्टर"}}
-{"guid": "N01_095", "translations": {"ro": "reprezentant", "pl": "przedstawiciel", "th": "ตัวแทน", "ta": "நேர்முகப் பிரதிநிதி", "kn": "ಪ್ರತಿನಿಧಿ", "uk": "представник", "bn": "প্রতিনিধি", "hi": "प्रतिनिधि"}}
-{"guid": "N01_096", "translations": {"ro": "secretar", "pl": "sekretarz", "th": "เลขานุการ", "ta": "சீகரி", "kn": "ಗೋಪ್ಯಾಧಿಕಾರಿ", "uk": "секретар", "bn": "সচিব", "hi": "सचिव"}}
-{"guid": "N01_097", "translations": {"ro": "servitor", "pl": "sługa", "th": "คนรับใช้", "ta": "சேவகர்", "kn": "ಸರವಾಯಿತಿ", "uk": "слуга", "bn": "চাকর", "hi": "नौकर"}}
-{"guid": "N01_098", "translations": {"ro": "stea", "pl": "gwiazda", "th": "ดารา", "ta": "போர்்டொளி", "kn": "ನಕ್ಷತ್ರ", "uk": "зірка", "bn": "তারা", "hi": "तारा"}}
+{"guid": "N01_055", "translations": {"ro": "bărbat", "pl": "mężczyzna", "th": "ผู้ชาย", "ms": "lelaki", "ta": "ஆண்", "kn": "ಪುರುಷ", "uk": "чоловік", "bn": "পুরুষ", "hi": "पुरुष", "tr": "erkek", "bs": "muškarac"}}
+{"guid": "N01_056", "translations": {"ro": "femeie", "pl": "kobieta", "th": "ผู้หญิง", "ms": "wanita", "ta": "பெண்", "kn": "ಮಹಿಳೆ", "uk": "жінка", "bn": "মহিলা", "hi": "महिला", "tr": "kadın", "bs": "žena"}}
+{"guid": "N01_057", "translations": {"ro": "băiat", "pl": "chłopiec", "th": "เด็กชาย", "ms": "budak lelaki", "ta": "ஆண் குழந்தை", "kn": "ಹುಡುಗ", "uk": "хлопчик", "bn": "ছেলে", "hi": "लड़का", "tr": "erkek çocuk", "bs": "dječak"}}
+{"guid": "N01_058", "translations": {"ro": "fată", "pl": "dziewczyna", "th": "เด็กผู้หญิง", "ms": "gadis", "ta": "பட்டாப்", "kn": "ಹುಡುಗಿ", "uk": "дівчина", "bn": "মেয়ে", "hi": "लड़की", "tr": "kız", "bs": "djevojčica"}}
+{"guid": "N01_059", "translations": {"ro": "prieten", "pl": "przyjaciel", "th": "เพื่อน", "ms": "kawan", "ta": "நண்பர்", "kn": "ಸ್ನೇಹಿತ", "uk": "друг", "bn": "বন্ধু", "hi": "मित्र", "tr": "arkadaş", "bs": "prijatelj"}}
+{"guid": "N01_060", "translations": {"ro": "persoană", "pl": "człowiek", "th": "มนุษย์", "ms": "orang", "ta": "மனிதன்", "kn": "ಮಾನವ", "uk": "людина", "bn": "মানুষ", "hi": "मनुष्य", "tr": "insan", "bs": "čovjek"}}
+{"guid": "N01_065", "translations": {"ro": "om", "pl": "człowiek", "th": "มนุษย์", "ms": "manusia", "ta": "மனிதன்", "kn": "ಮನುಷ್ಯ", "uk": "людина", "bn": "মানুষ", "hi": "मानव", "tr": "insan"}}
+{"guid": "N01_066", "translations": {"ro": "inamic", "pl": "wróg", "th": "ศัตรู", "ms": "musuh", "ta": "வரி/எதிரி", "kn": "ಶತ್ರು", "uk": "ворог", "bn": "শত্রু", "hi": "शत्रु", "tr": "düşman"}}
+{"guid": "N01_069", "translations": {"ro": "oameni", "pl": "ludzie", "th": "ประชาชน", "ms": "orang ramai", "ta": "மக்கள்", "kn": "ಜನರು", "uk": "народ", "bn": "জনতা", "hi": "लोग", "tr": "halk"}}
+{"guid": "N01_070", "translations": {"ro": "zeu", "pl": "bóg", "th": "พระเจ้า", "ms": "dewa", "ta": "கடவன்", "kn": "ದೇವರು", "uk": "бог", "bn": "ঈশ্বর", "hi": "भगवान", "tr": "tanrı"}}
+{"guid": "N01_072", "translations": {"ro": "uriaș", "pl": "olbrzym", "th": "ยักษ์", "ms": "gergasi", "ta": "பெரியளவான பெருஞ்சான்று", "kn": "ದೈತ್ಯ", "uk": "гігант", "bn": "দৈত্য", "hi": "दैत्य", "tr": "dev"}}
+{"guid": "N01_073", "translations": {"ro": "băiat", "pl": "chłopak", "th": "เด็กผู้ชาย", "ms": "lelaki", "ta": "சின்னப்பிள்ளை", "kn": "ಹುಡುಗ", "uk": "хлопець", "bn": "ছেলে", "hi": "लड़का", "tr": "erkek"}}
+{"guid": "N01_074", "translations": {"ro": "însoțitor", "pl": "towarzysz", "th": "เพื่อนร่วมทาง", "ms": "teman", "ta": "சூழலாளர்", "kn": "ಸಹಚರ", "uk": "супутник", "bn": "সঙ্গী", "hi": "साथी", "tr": "yol arkadaşı"}}
+{"guid": "N01_076", "translations": {"ro": "bebeluș", "pl": "niemowlę", "th": "ทารก", "ms": "bayi", "ta": "முழுச்சிசு", "kn": "ಶಿಶು", "uk": "немовля", "bn": "শিশু", "hi": "शिशु", "tr": "bebek", "bs": "beba"}}
+{"guid": "N01_077", "translations": {"ro": "străin", "pl": "nieznajomy", "th": "คนแปลกหน้า", "ms": "orang asing", "ta": "அறிய되지 않은வர்", "kn": "ಅ капит?", "uk": "іноземець", "bn": "অজানা ব্যক্তি", "hi": "अजनबी", "tr": "yabancı"}}
+{"guid": "N01_079", "translations": {"ro": "deținut", "pl": "więzień", "th": "นักโทษ", "ms": "banduan", "ta": "затஇழுத்த", "kn": "ಕುನ್ತುಳು", "uk": "в'язень", "bn": "ব্যক্তি বন্দী", "hi": "क़ैदी", "tr": "mahkûm"}}
+{"guid": "N01_080", "translations": {"ro": "copil", "pl": "dziecko", "th": "เด็ก", "ms": "kanak-kanak", "ta": "குழந்தை", "kn": "ಮಕ್ಕಳು", "uk": "дитина", "bn": "শিশু", "hi": "बच्चा", "tr": "çocuk", "bs": "dijete"}}
+{"guid": "N01_081", "translations": {"ro": "adult", "pl": "dorosły", "th": "ผู้ใหญ่", "ms": "orang dewasa", "ta": "முதிர்ந்தவர்", "kn": "ವಯಸ್ಕ", "uk": "дорослий", "bn": "প্রাপ্তবয়স্ক", "hi": "वयस्क", "tr": "yetişkin", "bs": "odrasla osoba"}}
+{"guid": "N01_082", "translations": {"ro": "vecin", "pl": "sąsiad", "th": "เพื่อนบ้าน", "ms": "jiran", "ta": "ஏடோர்", "kn": "ಶೆರಿಕ", "uk": "сусід", "bn": "প্রতিবেশী", "hi": "पड़ोसी", "tr": "komşu"}}
+{"guid": "N01_083", "translations": {"ro": "oaspe(t)", "pl": "gość", "th": "แขก", "ms": "tetamu", "ta": "விருந்தினர்", "kn": "ಅತಿಥಿ", "uk": "гість", "bn": "অতিথি", "hi": "अतिथि", "tr": "misafir"}}
+{"guid": "N01_084", "translations": {"ro": "erou", "pl": "bohater", "th": "วีรบุรุษ", "ms": "wira", "ta": "வீரன்", "kn": "ನಾಯಕ", "uk": "герой", "bn": "নায়ক", "hi": "नायक", "tr": "kahraman"}}
+{"guid": "N01_085", "translations": {"ro": "victimă", "pl": "ofiara", "th": "เหยื่อ", "ms": "mangsa", "ta": "பரிதாபி", "kn": "ಗೌಣಿಸ್ಪೂರ್ತಿ", "uk": "жертва", "bn": "ভিকটিম", "hi": "पीड़ित", "tr": "kurban"}}
+{"guid": "N01_086", "translations": {"ro": "tânăr", "pl": "młodzieniec", "th": "เยาวชน", "ms": "anak muda", "ta": "இளைஞன்", "kn": "ಯುವಕ", "uk": "юнак", "bn": "তরুণ", "hi": "युवा", "tr": "genç"}}
+{"guid": "N01_087", "translations": {"ro": "rege", "pl": "król", "th": "พระมหากษัตริย์", "ms": "raja", "ta": "மன்னன்", "kn": "ರಾಜ", "uk": "король", "bn": "রাজা", "hi": "राजा", "tr": "kral"}}
+{"guid": "N01_088", "translations": {"ro": "prinț", "pl": "książę", "th": "เจ้าชาย", "ms": "putera", "ta": "இராஜகுமாரன்", "kn": "ರಾಜಕುಮಾರ", "uk": "принц", "bn": "রাজকুমার", "hi": "राजकुमार", "tr": "prens"}}
+{"guid": "N01_089", "translations": {"ro": "șef", "pl": "wódz", "th": "ผู้นำ", "ms": "ketua", "ta": "தலைவர்", "kn": "ನಾಯಕ್", "uk": "вождь", "bn": "নায়ক", "hi": "नायक", "tr": "şef"}}
+{"guid": "N01_090", "translations": {"ro": "expert", "pl": "ekspert", "th": "ผู้เชี่ยวชาญ", "ms": "pakar", "ta": "நிபுணர்", "kn": "ತಜ್ಞ", "uk": "експерт", "bn": "বিশেষজ্ঞ", "hi": "विशेषज्ञ", "tr": "uzman"}}
+{"guid": "N01_091", "translations": {"ro": "ghid", "pl": "przewodnik", "th": "มัคคุเทศก์", "ms": "pemandu pelancong", "ta": "முறைசாட்டியவர்", "kn": "ಗೈಡ್", "uk": "гід", "bn": "গাইড", "hi": "मार्गदर्शक", "tr": "rehber"}}
+{"guid": "N01_092", "translations": {"ro": "manager", "pl": "menedżer", "th": "ผู้จัดการ", "ms": "pengurus", "ta": "மேனேஜர்", "kn": "ಮ್ಯಾನೇಜರ್", "uk": "менеджер", "bn": "ব্যবস্থাপক", "hi": "प्रबंधक", "tr": "yönetici"}}
+{"guid": "N01_093", "translations": {"ro": "proprietar", "pl": "właściciel", "th": "เจ้าของ", "ms": "pemilik", "ta": "உரிமையாளர்", "kn": "ಮಾಲೀಕ", "uk": "власник", "bn": "মালিক", "hi": "मालिक", "tr": "sahip"}}
+{"guid": "N01_094", "translations": {"ro": "portar", "pl": "porter", "th": "พนักงานขนสัมภาระ", "ms": "pengangkut", "ta": "போர்ட்டர்", "kn": "ಬಟ್ಟೆಸೇತ", "uk": "носій", "bn": "পোর্টার", "hi": "पोर्टर", "tr": "hamal"}}
+{"guid": "N01_095", "translations": {"ro": "reprezentant", "pl": "przedstawiciel", "th": "ตัวแทน", "ms": "wakil", "ta": "நேர்முகப் பிரதிநிதி", "kn": "ಪ್ರತಿನಿಧಿ", "uk": "представник", "bn": "প্রতিনিধি", "hi": "प्रतिनिधि", "tr": "temsilci"}}
+{"guid": "N01_096", "translations": {"ro": "secretar", "pl": "sekretarz", "th": "เลขานุการ", "ms": "setiausaha", "ta": "சீகரி", "kn": "ಗೋಪ್ಯಾಧಿಕಾರಿ", "uk": "секретар", "bn": "সচিব", "hi": "सचिव", "tr": "sekreter"}}
+{"guid": "N01_097", "translations": {"ro": "servitor", "pl": "sługa", "th": "คนรับใช้", "ms": "pelayan", "ta": "சேவகர்", "kn": "ಸರವಾಯಿತಿ", "uk": "слуга", "bn": "চাকর", "hi": "नौकर", "tr": "hizmetçi"}}
+{"guid": "N01_098", "translations": {"ro": "stea", "pl": "gwiazda", "th": "ดารา", "ms": "bintang", "ta": "போர்்டொளி", "kn": "ನಕ್ಷತ್ರ", "uk": "зірка", "bn": "তারা", "hi": "तारा", "tr": "yıldız"}}
+{"guid": "N01_099", "translations": {"ms": "sahabat karib", "hi": "सबसे करीबी दोस्त", "tr": "en iyi arkadaş"}}
+{"guid": "N01_100", "translations": {"ms": "pemerhati", "hi": "पर्यवेक्षक", "tr": "gözlemci"}}
+{"guid": "N01_101", "translations": {"ms": "kerdil", "hi": "बौना", "tr": "cüce"}}
+{"guid": "N01_102", "translations": {"ms": "pelancong", "hi": "पर्यटक", "tr": "turist"}}
+{"guid": "N01_103", "translations": {"ms": "pengkritik", "hi": "आलोचक", "tr": "eleştirmen"}}
+{"guid": "N01_104", "translations": {"ms": "pemangsa", "hi": "शोषक", "tr": "istismarcı"}}
+{"guid": "N01_105", "translations": {"ms": "rakan", "hi": "दोस्त", "tr": "arkadaş"}}
+{"guid": "N01_106", "translations": {"ms": "waris", "hi": "उत्तराधिकारी", "tr": "mirasçı"}}
+{"guid": "N01_107", "translations": {"ms": "pengganti", "hi": "उत्तराधिकारी", "tr": "halef"}}
+{"guid": "N01_108", "translations": {"ms": "orang buangan", "hi": "निर्वासित व्यक्ति", "tr": "sürgün"}}
+{"guid": "N01_109", "translations": {"ms": "pemain", "hi": "खिलाड़ी", "tr": "oyuncu"}}
+{"guid": "N01_110", "translations": {"ms": "pengguna", "hi": "उपयोगकर्ता", "tr": "kullanıcı"}}
+{"guid": "N01_111", "translations": {"ms": "penagih alkohol", "hi": "शराबी", "tr": "alkolik"}}
+{"guid": "N01_112", "translations": {"ms": "orang liberal", "hi": "उदारवादी", "tr": "liberal"}}
+{"guid": "N01_113", "translations": {"ms": "orang bawahan", "hi": "अधीनस्थ", "tr": "ast"}}
+{"guid": "N01_114", "translations": {"ms": "orang konservatif", "hi": "रूढ़िवादी", "tr": "muhafazakâr"}}
+{"guid": "N01_115", "translations": {"ms": "pelajar prasiswazah", "hi": "स्नातक छात्र", "tr": "lisans öğrencisi"}}
+{"guid": "N01_116", "translations": {"ms": "penjenayah", "hi": "अपराधी", "tr": "suçlu"}}
+{"guid": "N01_117", "translations": {"ms": "warganegara", "hi": "नागरिक", "tr": "vatandaş"}}
+{"guid": "N01_118", "translations": {"ms": "pencerita", "hi": "कथावाचक", "tr": "anlatıcı"}}
+{"guid": "N01_119", "translations": {"ms": "modernis", "hi": "आधुनिकतावादी", "tr": "modernist"}}
+{"guid": "N01_120", "translations": {"ms": "watak utama", "hi": "मुख्य पात्र", "tr": "başkahraman"}}
+{"guid": "N01_121", "translations": {"ms": "wira super", "hi": "सुपरहीरो", "tr": "süper kahraman"}}
+{"guid": "N01_122", "translations": {"ms": "boneka", "hi": "कठपुतली", "tr": "kukla"}}
+{"guid": "N01_123", "translations": {"ms": "parasit", "hi": "परजीवी", "tr": "asalak"}}
+{"guid": "N01_124", "translations": {"ms": "penjelajah", "hi": "अन्वेषक", "tr": "kaşif"}}
+{"guid": "N01_125", "translations": {"ms": "pengguna pengangkutan ulang-alik", "hi": "काम पर नियमित रूप से आने-जाने वाला व्यक्ति", "tr": "işe gidip gelen kişi"}}
+{"guid": "N01_126", "translations": {"ms": "migran", "hi": "प्रवासी", "tr": "göçmen"}}
+{"guid": "N01_127", "translations": {"ms": "vasal", "hi": "सामंत", "tr": "vasal"}}
+{"guid": "N01_128", "translations": {"ms": "gerila", "hi": "छापामार", "tr": "gerilla"}}
+{"guid": "N01_129", "translations": {"ms": "orang heteroseksual", "hi": "विषमलैंगिक व्यक्ति", "tr": "heteroseksüel"}}
+{"guid": "N01_130", "translations": {"ms": "orang yang melihat-lihat", "hi": "देखने-परखने वाला व्यक्ति", "tr": "göz atan kişi"}}
+{"guid": "N01_131", "translations": {"ms": "lesbian", "hi": "समलैंगिक महिला", "tr": "lezbiyen"}}
+{"guid": "N01_132", "translations": {"ms": "pengawal", "hi": "नियंत्रक", "tr": "yönetici"}}
+{"guid": "N01_133", "translations": {"ms": "pelari", "hi": "धावक", "tr": "koşucu"}}
+{"guid": "N01_134", "translations": {"ms": "pemohon", "hi": "याचिकाकर्ता", "tr": "başvurucu"}}
+{"guid": "N01_135", "translations": {"ms": "responden", "hi": "उत्तरदाता", "tr": "katılımcı"}}
+{"guid": "N01_136", "translations": {"ms": "penghutang", "hi": "ऋणी", "tr": "borçlu"}}
+{"guid": "N01_137", "translations": {"ms": "pembayar cukai", "hi": "करदाता", "tr": "vergi mükellefi"}}
+{"guid": "N01_138", "translations": {"ms": "pemohon", "hi": "आवेदक", "tr": "başvuru sahibi"}}
+{"guid": "N01_139", "translations": {"ms": "pemohon", "hi": "आवेदक", "tr": "başvuru sahibi"}}
+{"guid": "N01_140", "translations": {"ms": "ahli juri", "hi": "जूरी सदस्य", "tr": "jüri üyesi"}}
+{"guid": "N01_141", "translations": {"ms": "benefisiari", "hi": "लाभार्थी", "tr": "lehtar"}}
+{"guid": "N01_142", "translations": {"ms": "penerima manfaat", "hi": "लाभार्थी", "tr": "yararlanıcı"}}
+{"guid": "N01_143", "translations": {"ms": "wakil khas di mahkamah", "hi": "मुकदमे में हितों का प्रतिनिधित्व करने के लिए नियुक्त अभिभावक", "tr": "dava kayyımı"}}
+{"guid": "N01_144", "translations": {"ms": "sahabat mahkamah", "hi": "न्यायालय का मित्र", "tr": "mahkeme dostu"}}
+{"guid": "N01_145", "translations": {"ms": "pewasiat", "hi": "वसीयतकर्ता", "tr": "vasiyetçi"}}
+{"guid": "N01_146", "translations": {"ms": "pelaksana wasiat", "hi": "वसीयत निष्पादक", "tr": "vasiyetname vasiyeti"}}
+{"guid": "N01_147", "translations": {"ms": "penerima harta selepas tamat hak guna", "hi": "अवशिष्ट हित का उत्तराधिकारी", "tr": "sonraki hak sahibi"}}
+{"guid": "N01_148", "translations": {"ms": "individu", "hi": "व्यक्ति", "tr": "birey"}}
+{"guid": "N01_149", "translations": {"ms": "ahli", "hi": "सदस्य", "tr": "üye"}}
+{"guid": "N01_150", "translations": {"ms": "pengasas bersama", "hi": "सह-संस्थापक", "tr": "kurucu ortak"}}
+{"guid": "N01_151", "translations": {"ms": "pemburu-pengumpul", "hi": "शिकारी-संग्राहक", "tr": "avcı-toplayıcı"}}
+{"guid": "N01_152", "translations": {"ms": "pengarang bersama", "hi": "सह-लेखक", "tr": "ortak yazar"}}
+{"guid": "N01_153", "translations": {"ms": "kontrarevolusioner", "hi": "प्रतिप्लववादी", "tr": "karşıdevrimci"}}
+{"guid": "N01_154", "translations": {"ms": "bintang", "hi": "सितारा", "tr": "yıldız"}}
+{"guid": "N01_155", "translations": {"ms": "presiden ketika itu", "hi": "तत्कालीन राष्ट्रपति", "tr": "o dönemin cumhurbaşkanı"}}
+{"guid": "N01_156", "translations": {"ms": "antifasis", "hi": "फासीवाद-विरोधी", "tr": "antifaşist"}}
+{"guid": "N01_157", "translations": {"ms": "kapitalis", "hi": "पूँजीपति", "tr": "kapitalist"}}
+{"guid": "N01_158", "translations": {"ms": "autoritarian", "hi": "अधिनायकवादी", "tr": "otoriter"}}
+{"guid": "N01_159", "translations": {"ms": "ahli kemanusiaan", "hi": "मानवतावादी", "tr": "insaniyetçi"}}
+{"guid": "N01_160", "translations": {"ms": "libertarian", "hi": "स्वतंत्रतावादी", "tr": "liberteryen"}}
+{"guid": "N01_161", "translations": {"ms": "jin", "hi": "जिन्न", "tr": "cin"}}
+{"guid": "N01_162", "translations": {"ms": "rabai", "hi": "रब्बी", "tr": "hahambaşı"}}
+{"guid": "N01_163", "translations": {"ms": "rakan sekelas", "hi": "सहपाठी", "tr": "sınıf arkadaşı"}}
+{"guid": "N01_164", "translations": {"ms": "lanun", "hi": "समुद्री डाकू", "tr": "korsan"}}
+{"guid": "N01_165", "translations": {"ms": "peminat furry", "hi": "फरी फ़ैंडम का प्रशंसक", "tr": "furry hayranı"}}
+{"guid": "N01_166", "translations": {"ms": "pelajar", "hi": "विद्यार्थी", "tr": "öğrenci"}}
+{"guid": "N01_167", "translations": {"ms": "pemenang", "hi": "विजेता", "tr": "kazanan"}}
+{"guid": "N01_168", "translations": {"ms": "penumpang", "hi": "यात्री", "tr": "yolcu"}}
+{"guid": "N01_169", "translations": {"ms": "penumpang", "hi": "यात्री", "tr": "yolcu"}}
+{"guid": "N01_170", "translations": {"ms": "angkasawan", "hi": "अंतरिक्ष यात्री", "tr": "astronot"}}
+{"guid": "N01_171", "translations": {"ms": "ratu", "hi": "रानी", "tr": "kraliçe"}}

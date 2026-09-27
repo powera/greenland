@@ -1,143 +1,187 @@
-{"guid": "N17_028", "translations": {"ro": "adevăr", "pl": "prawda", "th": "ความจริง", "ta": "ஸ்த்யா", "kn": "ಸತ್ಯ", "uk": "істина", "bn": "সত্য", "hi": "सत्य"}}
-{"guid": "N17_035", "translations": {"ro": "problemă", "pl": "problem", "th": "ปัญหา", "ta": "பிரச்சினை", "kn": "ಸಮಸ್ಯೆ", "uk": "проблема", "bn": "সমস্যা", "hi": "समस्या"}}
-{"guid": "N17_046", "translations": {"ro": "bani", "pl": "pieniądz", "th": "เงิน", "ta": "பணம்", "kn": "ಹಣ", "uk": "гривня", "bn": "টাকা", "hi": "पैसे"}}
-{"guid": "N17_060", "translations": {"ro": "soluție", "pl": "rozwiązanie", "th": "ทางแก้", "ta": "தீர்வு", "kn": "ಉತ್ತರ", "uk": "розв'язок", "bn": "সমাধান", "hi": "समाधान"}}
-{"guid": "N17_072", "translations": {"ro": "magie", "pl": "magia", "th": "เวทมนตร์", "ta": "மந்திரவாதம்", "kn": "ಮುಖ್ಯ", "uk": "магія", "bn": "জাদু", "hi": "जादू"}}
-{"guid": "N17_073", "translations": {"ro": "sunet", "pl": "dźwięk", "th": "เสียง", "ta": "இசை", "kn": "ಧ್ವನಿ", "uk": "звук", "bn": "শব্দ", "hi": "ध्वनिः"}}
-{"guid": "N17_076", "translations": {"ro": "corp", "pl": "ciało", "th": "ร่างกาย", "ta": "உடல்", "kn": "ದೇಹ", "uk": "тіло", "bn": "শরীর", "hi": "शरीर", "bs": "tijelo"}}
-{"guid": "N17_080", "translations": {"ro": "chestiune", "pl": "sprawa", "th": "เรื่อง", "ta": "வिषயம்", "kn": "ವಿಷಯ", "uk": "питання", "bn": "বিষয়", "hi": "मामला"}}
-{"guid": "N17_081", "translations": {"ro": "fapt", "pl": "fakt", "th": "ข้อเท็จจริง", "ta": "வாஸ்தவம்", "kn": "ತಥ್ಯ", "uk": "факт", "bn": "তথ্য", "hi": "तथ्य"}}
-{"guid": "N17_087", "translations": {"ro": "vedere", "pl": "wzrok", "th": "การมองเห็น", "ta": "நோக்கு", "kn": "ದೃಷ್ಟಿ", "uk": "зір", "bn": "দৃষ্টি", "hi": "दृष्टि"}}
-{"guid": "N17_089", "translations": {"ro": "control", "pl": "kontrola", "th": "การควบคุม", "ta": "கட்டுப்பாடு", "kn": "ನಿಯಂತ್ರಣ", "uk": "контроль", "bn": "নিয়ন্ত্রণ", "hi": "नियंत्रण"}}
-{"guid": "N17_094", "translations": {"ro": "categorie", "pl": "rodzaj", "th": "ประเภท", "ta": "வகை", "kn": "ವರ್ಗ", "uk": "вид", "bn": "শ্রেণী", "hi": "प्रकार"}}
-{"guid": "N17_095", "translations": {"ro": "grijă", "pl": "troska", "th": "ความห่วงใย", "ta": "கவலை", "kn": "ಚಿಂತನೆ", "uk": "турбота", "bn": "কেইر", "hi": "चिंता"}}
-{"guid": "N17_099", "translations": {"ro": "caz", "pl": "przypadek", "th": "กรณี", "ta": "வெறுங்கோளம்", "kn": "ಘಟನೆಯು", "uk": "випадок", "bn": "ঘটনা", "hi": "मामला", "bs": "slučaj"}}
-{"guid": "N17_106", "translations": {"ro": "ordine", "pl": "porządek", "th": "ลำดับ", "ta": "க్రమம்", "kn": "ಕ್ರಮ", "uk": "порядок", "bn": "ক্রম", "hi": "क्रम", "bs": "red"}}
-{"guid": "N17_107", "translations": {"ro": "formă", "pl": "forma", "th": "รูปแบบ", "ta": "வடிவு", "kn": "ಆಕಾರ", "uk": "форма", "bn": "রূপ", "hi": "आकार"}}
-{"guid": "N17_108", "translations": {"ro": "ordin", "pl": "rozkaz", "th": "คำสั่ง", "ta": "ஆத்மன்பெறுதல்", "kn": "ಆಜ್ಞೆ", "uk": "наказ", "bn": "আদেশ", "hi": "आदेश"}}
-{"guid": "N17_109", "translations": {"ro": "sistem", "pl": "system", "th": "ระบบ", "ta": "கணக்கீட்டு முறை", "kn": "ವ್ಯವಸ್ಥೆ", "uk": "система", "bn": "সিস্টেম", "hi": "प्रणाली", "bs": "sistem"}}
-{"guid": "N17_111", "translations": {"ro": "miros", "pl": "zapach", "th": "กลิ่น", "ta": "மிளகாய்", "kn": "ವಾಸನೆ", "uk": "запах", "bn": "গন্ধ", "hi": "गंध"}}
-{"guid": "N17_112", "translations": {"ro": "înțelegere", "pl": "umowa", "th": "ข้อตกลง", "ta": "ஒப்பந்தம்", "kn": "ಒಪ್ಪಂದ", "uk": "угода", "bn": "চুক্তি", "hi": "संधि"}}
-{"guid": "N17_114", "translations": {"ro": "direcție", "pl": "kierunek", "th": "ทิศทาง", "ta": "திசை", "kn": "ದಿಕ್ಕು", "uk": "напрямок", "bn": "দিশা", "hi": "दिशा"}}
-{"guid": "N17_116", "translations": {"ro": "scop", "pl": "cel", "th": "จุดประสงค์", "ta": "நோக்கம்", "kn": "ಉದ್ದೇಶ", "uk": "мета", "bn": "উদ্দেশ্য", "hi": "उद्देश्य"}}
-{"guid": "N17_118", "translations": {"ro": "job", "pl": "praca", "th": "งาน", "ta": "வேலை", "kn": "ಕೆಲಸ", "uk": "робота", "bn": "কাজ", "hi": "नौकरी"}}
-{"guid": "N17_119", "translations": {"ro": "autoritate", "pl": "władza", "th": "อำนาจ", "ta": "அதிகாரம்", "kn": "ಒತ್ತಾ(ಅಧಿಕಾರ)", "uk": "влада", "bn": "প্রাধিকরণ", "hi": "अधिकार"}}
-{"guid": "N17_121", "translations": {"ro": "zgomot", "pl": "hałas", "th": "เสียงรบกวน", "ta": "ஒலி", "kn": "ಶಬ್ದ", "uk": "шум", "bn": "শব্দ", "hi": "शोर"}}
-{"guid": "N17_123", "translations": {"ro": "plan", "pl": "plan", "th": "แผน", "ta": "திட்டம்", "kn": "ಯೋಜನೆ", "uk": "план", "bn": "পরিকল্পনা", "hi": "योजना"}}
-{"guid": "N17_124", "translations": {"ro": "talent", "pl": "talent", "th": "พรสวรรค์", "ta": "திறமை", "kn": "ಪ್ರತಿಭೆ", "uk": "талант", "bn": "প্রতিভা", "hi": "प्रतिभा"}}
-{"guid": "N17_126", "translations": {"ro": "părere", "pl": "opinia", "th": "ความคิดเห็น", "ta": "மதிப்புரைக் கருத்து", "kn": "ಅಭಿಪ್ರಾಯ", "uk": "думка", "bn": "মতামত", "hi": "राय"}}
-{"guid": "N17_129", "translations": {"ro": "zâmbet", "pl": "uśmiech", "th": "รอยยิ้ม", "ta": "புன்னகை", "kn": "ನಗು", "uk": "усмішка", "bn": "হাসি", "hi": "मुस्कान"}}
-{"guid": "N17_130", "translations": {"ro": "vrăjitorie", "pl": "zaklęcie", "th": "คาถา", "ta": "மந்திரம்", "kn": "ಮಾಯಾಜಾಲ", "uk": "чарівний заклик", "bn": "মন্ত্র", "hi": "जादूया मन्त्र"}}
-{"guid": "N17_131", "translations": {"ro": "univers", "pl": "wszechświat", "th": "จักรวาล", "ta": "பிரபஞ்சம்", "kn": "ಬ್ರಹ್ಮಾಂಡ", "uk": "всесвіт", "bn": "বিশ্ব", "hi": "ब्रह्मांड"}}
-{"guid": "N17_137", "translations": {"ro": "alegere", "pl": "wybór", "th": "ทางเลือก", "ta": "தெரிவு", "kn": "ಆಯ್ಕೆ", "uk": "вибір", "bn": "পছন্দ", "hi": "चॉइस"}}
-{"guid": "N17_142", "translations": {"ro": "regulă", "pl": "zasada", "th": "กฎ", "ta": "விதி", "kn": "ನಿಯಮ", "uk": "правило", "bn": "নিয়ম", "hi": "नियम"}}
-{"guid": "N17_150", "translations": {"ro": "poziție", "pl": "pozycja", "th": "ตำแหน่ง", "ta": "இடம்", "kn": "ಸ್ಥಾನ", "uk": "положення", "bn": "অবস্থান", "hi": "स्थिति"}}
-{"guid": "N17_156", "translations": {"ro": "mod", "pl": "sposób", "th": "วิธี", "ta": "முறை", "kn": "ಓಪನೆ", "uk": "спосіб", "bn": "পদ্ধতি", "hi": "तरीका"}}
-{"guid": "N17_158", "translations": {"ro": "lucru", "pl": "rzecz", "th": "สิ่งของ", "ta": "பொருள்", "kn": "ವಸ್ತು", "uk": "річ", "bn": "জিনিস", "hi": "वस्तु"}}
-{"guid": "N17_159", "translations": {"ro": "pattern", "pl": "wzór", "th": "ลวดลาย", "ta": "வடிவமைப்பு", "kn": "ನಮೂನೆ", "uk": "візерунок", "bn": "নকশা", "hi": "नमूना"}}
-{"guid": "N17_160", "translations": {"ro": "efect", "pl": "efekt", "th": "ผลกระทบ", "ta": "ப்ரதிபலம்", "kn": "ಪ್ರಭಾವ", "uk": "ефект", "bn": "প্রভাব", "hi": "प्रभाव"}}
-{"guid": "N17_163", "translations": {"ro": "efort", "pl": "wysiłek", "th": "ความพยายาม", "ta": "முயற்சி", "kn": "ಪ್ರಯತ್ನ", "uk": "зусилля", "bn": "প্রচেষ্টা", "hi": "प्रयास"}}
-{"guid": "N17_167", "translations": {"ro": "gravitație", "pl": "grawitacja", "th": "แรงโน้มถ่วง", "ta": "கரைத்திறன்", "kn": "ಗುರುತ್ವಾಕರ್ಷಣಾ", "uk": "гравітація", "bn": "মাধ্যাকর্ষণ", "hi": "गुरुत्वाकर्षण"}}
-{"guid": "N17_171", "translations": {"ro": "natură", "pl": "przyroda", "th": "ธรรมชาติ", "ta": "பார்வை", "kn": "ಪ್ರಕೃತಿ", "uk": "природа", "bn": "প্রকৃতি", "hi": "प्रकृति"}}
-{"guid": "N17_173", "translations": {"ro": "situație", "pl": "sytuacja", "th": "สถานการณ์", "ta": "நிலைமை", "kn": "ಸ್ಥಿತಿ", "uk": "ситуація", "bn": "অবস্থা", "hi": "स्थिति"}}
-{"guid": "N17_178", "translations": {"ro": "ton", "pl": "ton", "th": "โทน", "ta": "பாண்", "kn": "ಧ್ವನಿ ಮೈನಸ", "uk": "тон", "bn": "স্বরভঙ্গি", "hi": "स्वर"}}
-{"guid": "N17_183", "translations": {"ro": "sursă", "pl": "źródło", "th": "แหล่งที่มา", "ta": "மூலம்", "kn": "ಮೂಲ", "uk": "джерело", "bn": "উৎস", "hi": "स्रोत"}}
-{"guid": "N17_184", "translations": {"ro": "program", "pl": "program", "th": "โปรแกรม", "ta": "பிரோக்ராம்", "kn": "ಕಾರ್ಯಕ್ರಮ", "uk": "програма", "bn": "প্রোগ্রাম", "hi": "कार्यक्रम"}}
-{"guid": "N17_187", "translations": {"ro": "bază", "pl": "podstawa", "th": "พื้นฐาน", "ta": "ஆதாரம்", "kn": "ಮೂಲಭೂಮಿ", "uk": "основа", "bn": "ভিত্তি", "hi": "आधार"}}
-{"guid": "N17_188", "translations": {"ro": "culoare", "pl": "kolor", "th": "สี", "ta": "வண்ணம்", "kn": "ಬಣ್ಣ", "uk": "колір", "bn": "রঙ", "hi": "रंग"}}
-{"guid": "N17_190", "translations": {"ro": "semn", "pl": "znak", "th": "เครื่องหมาย", "ta": "குறியிடம்", "kn": "ಸೂಚನೆ", "uk": "позначка", "bn": "চিহ্ন", "hi": "निशान"}}
-{"guid": "N17_194", "translations": {"ro": "prost", "pl": "głupiec", "th": "คนโง่", "ta": "காளமறை", "kn": "ಮೂಢ", "uk": "дурень", "bn": "ফুল", "hi": "मूर्ख"}}
-{"guid": "N17_196", "translations": {"ro": "respirație", "pl": "oddech", "th": "ลมหายใจ", "ta": "இச்சிறுமொழி", "kn": "ಉಸಿರೆ", "uk": "дихання", "bn": "শ্বাস", "hi": "साँस"}}
-{"guid": "N17_198", "translations": {"ro": "încredere", "pl": "zaufanie", "th": "ความเชื่อใจ", "ta": "நம்பிக்கை", "kn": "ನಂಬಿಕೆ", "uk": "довіра", "bn": "বিশ্বাস", "hi": "विश्वास"}}
-{"guid": "N17_199", "translations": {"ro": "minune", "pl": "cud", "th": "มหัศจรรย์", "ta": "ஆச்சரியம்", "kn": "ಆಶ್ಚರ್ಯ", "uk": "диво", "bn": "আশ্চর্য", "hi": "आश्चर्य"}}
-{"guid": "N17_204", "translations": {"ro": "capac", "pl": "pokrywa", "th": "ฝาปิด", "ta": "மூடணம்", "kn": "ಮುಚ್ಚು", "uk": "кришка", "bn": "ঢাকনো", "hi": "ढक्कन"}}
-{"guid": "N17_206", "translations": {"ro": "plată", "pl": "płaca", "th": "ค่าจ้าง", "ta": "சம்பளம்", "kn": "ಸಂಬಳ", "uk": "плата", "bn": "দরখানি", "hi": "वेतन"}}
-{"guid": "N17_207", "translations": {"ro": "mină", "pl": "kopalnia", "th": "เหมือง", "ta": "கணி", "kn": "ಖನಿ", "uk": "шахта", "bn": "খনি", "hi": "खदान"}}
-{"guid": "N17_208", "translations": {"ro": "fund", "pl": "dno", "th": "ก้น", "ta": "அடிப்பு", "kn": "ತಳಭಾಗ", "uk": "дно", "bn": "তল", "hi": "तल"}}
-{"guid": "N17_209", "translations": {"ro": "stare", "pl": "stan", "th": "สถานะ", "ta": "நிலை", "kn": "ಸ್ಥಿತಿ", "uk": "стан", "bn": "অবস্থা", "hi": "अवस्था"}}
-{"guid": "N17_210", "translations": {"ro": "dobândă", "pl": "oprocentowanie", "th": "ดอกเบี้ย", "ta": "வட்டி", "kn": "ಹೊರ", "uk": "відсоток", "bn": "সুদি", "hi": "ब्याज"}}
-{"guid": "N17_211", "translations": {"ro": "putere", "pl": "władza", "th": "อำนาจ", "ta": "அறம்", "kn": "ಶಕ್ತಿ", "uk": "влада", "bn": "ক্ষমতা", "hi": "शक्ति"}}
-{"guid": "N17_213", "translations": {"ro": "justiție", "pl": "sprawiedliwość", "th": "ความยุติธรรม", "ta": "நியாயம்", "kn": "ನ್ಯಾಯ", "uk": "правосуддя", "bn": "ন্যায়", "hi": "न्याय"}}
-{"guid": "N17_214", "translations": {"ro": "valoare", "pl": "wartość", "th": "คุณค่า", "ta": "மதிப்பு", "kn": "ಮೌಲ್ಯ", "uk": "цінність", "bn": "মূল্য", "hi": "मूल्य"}}
-{"guid": "N17_215", "translations": {"ro": "sarcină", "pl": "zadanie", "th": "งาน", "ta": "பணி", "kn": "ಕಾರ್ಯ", "uk": "завдання", "bn": "কাজ", "hi": "कार्य"}}
-{"guid": "N17_216", "translations": {"ro": "sfat", "pl": "rada", "th": "คำแนะนำ", "ta": "உதவி", "kn": "ಸಲಹೆ", "uk": "порада", "bn": "পরামর্শ", "hi": "सलाह"}}
-{"guid": "N17_217", "translations": {"ro": "temă", "pl": "zadanie domowe", "th": "การบ้าน", "ta": "வீட்டு பணி", "kn": "ಮನೆಯಲ್ಲಿ ಮಾಡುವ ಕೆಲಸ", "uk": "домашнє завдання", "bn": "গৃহকর্ম সচিবতা", "hi": "गृहकार्य"}}
-{"guid": "N17_218", "translations": {"ro": "lecție", "pl": "lekcja", "th": "บทเรียน", "ta": "பாடம்", "kn": "ಪಾಠ", "uk": "урок", "bn": "পাঠ", "hi": "पाठ"}}
-{"guid": "N17_219", "translations": {"ro": "argument", "pl": "argument", "th": "เหตุผลสนับสนุน", "ta": "பாதிப்பு", "kn": "ತರ್ಕ", "uk": "аргумент", "bn": "তর্ক", "hi": "तर्क"}}
-{"guid": "N17_220", "translations": {"ro": "glumă", "pl": "żart", "th": "เรื่องตลก", "ta": "வெட்கம்", "kn": "ಹಾಸ್ಯ", "uk": "жарт", "bn": "রসিকতা", "hi": "हास्य"}}
-{"guid": "N17_221", "translations": {"ro": "rețetă", "pl": "przepis", "th": "สูตรอาหาร", "ta": "சமையல்முறை", "kn": "ವಿಧಾನ", "uk": "рецепт", "bn": "রেসিপি", "hi": "नुस्खा"}}
-{"guid": "N17_222", "translations": {"ro": "predare", "pl": "nauczanie", "th": "การสอน", "ta": "பயிற்றல்", "kn": "ಬೋಧನೆ", "uk": "викладання", "bn": "শিক্ষা", "hi": "शिक्षण"}}
-{"guid": "N17_223", "translations": {"ro": "scenă", "pl": "scena", "th": "ฉาก", "ta": "காட்சி", "kn": "ದೃಶ್ಯ", "uk": "сцена", "bn": "দৃশ্য", "hi": "दृश्य"}}
-{"guid": "N17_224", "translations": {"ro": "loc", "pl": "miejsce", "th": "ที่", "ta": "இடம்", "kn": "ಸ್ಥಳ", "uk": "місце", "bn": "স্থান", "hi": "स्थान"}}
-{"guid": "N17_225", "translations": {"ro": "artă", "pl": "sztuka", "th": "ศิลปะ", "ta": "கலை", "kn": "ಕಲೆ", "uk": "мистецтво", "bn": "শিল্প", "hi": "कला"}}
-{"guid": "N17_226", "translations": {"ro": "greșeală", "pl": "błąd", "th": "ความผิดพลาด", "ta": "தவறு", "kn": "ತಪ್ಪು", "uk": "помилка", "bn": "ভুল", "hi": "त्रुटि"}}
-{"guid": "N17_227", "translations": {"ro": "cont", "pl": "konto", "th": "บัญชี", "ta": "கணக்கு", "kn": "ಖಾತೆ", "uk": "рахунок", "bn": "হিসাব", "hi": "खाता"}}
-{"guid": "N17_228", "translations": {"ro": "numerar", "pl": "gotówka", "th": "เงินสด", "ta": "பணம்விளைவு", "kn": "ನಗದು", "uk": "готівка", "bn": "নগদ", "hi": "नकद"}}
-{"guid": "N17_229", "translations": {"ro": "vânzare", "pl": "sprzedaż", "th": "การขาย", "ta": "விற்பனை", "kn": "ಮಾರಾಟ", "uk": "продаж", "bn": "বিক্রয়", "hi": "बिक्री"}}
-{"guid": "N17_230", "translations": {"ro": "parte", "pl": "bok", "th": "ข้าง", "ta": "பக்கம்", "kn": "ಬದಿ", "uk": "бік", "bn": "পাশ", "hi": "पक्ष", "bs": "strana"}}
-{"guid": "N17_231", "translations": {"ro": "amendă", "pl": "grzywna", "th": "ค่าปรับ", "ta": "ஐறுமுறை", "kn": "ದಂಡ", "uk": "штраф", "bn": "জরিমানা", "hi": "जुर्माना"}}
-{"guid": "N17_232", "translations": {"ro": "linie", "pl": "linia", "th": "เส้น", "ta": "வரி", "kn": "ರೇಖೆ", "uk": "лінія", "bn": "রেখা", "hi": "रेखा"}}
-{"guid": "N17_233", "translations": {"ro": "coadă", "pl": "kolejka", "th": "แถว", "ta": "வரிசை", "kn": "ಸಾರಿ", "uk": "черга", "bn": "লাইন", "hi": "कतार"}}
-{"guid": "N17_234", "translations": {"ro": "mijloc", "pl": "środek", "th": "กลาง", "ta": "நடைமையில்", "kn": "ಮಧ್ಯ", "uk": "середина", "bn": "মধ্য", "hi": "मध्य"}}
-{"guid": "N17_235", "translations": {"ro": "energie", "pl": "energia", "th": "พลังงาน", "ta": "ஆற்றல்", "kn": "ಶಕ್ತಿ", "uk": "енергія", "bn": "শক্তি", "hi": "ऊर्जा"}}
-{"guid": "N17_236", "translations": {"ro": "stil", "pl": "styl", "th": "สไตล์", "ta": "ஸ்டைல்", "kn": "ಶೈಲಿ", "uk": "стиль", "bn": "স্টাইল", "hi": "शैली"}}
-{"guid": "N17_237", "translations": {"ro": "cauză", "pl": "przyczyna", "th": "สาเหตุ", "ta": "காரணம்", "kn": "ಕಾರಣ", "uk": "причина", "bn": "কারণ", "hi": "कारण"}}
-{"guid": "N17_238", "translations": {"ro": "dovadă", "pl": "dowód", "th": "หลักฐาน", "ta": "சான்று", "kn": "ಸಾಕ್ಷ್ಯ", "uk": "доказ", "bn": "প্রমাণ", "hi": "सबूत"}}
-{"guid": "N17_239", "translations": {"ro": "suflet", "pl": "dusza", "th": "วิญญาณ", "ta": "ஆத்மா", "kn": "ಆತ್ಮ", "uk": "душа", "bn": "আত্মা", "hi": "आत्मा"}}
-{"guid": "N17_240", "translations": {"ro": "oraș", "pl": "miasto", "th": "เมือง", "ta": "பேரூரம்பூர்", "kn": "ಜಿಲ್ಲೆ", "uk": "місто", "bn": "শহর", "hi": "शहर"}}
-{"guid": "N17_241", "translations": {"ro": "tip", "pl": "rodzaj", "th": "ประเภท", "ta": "வகை", "kn": "ಪ್ರಕಾರ", "uk": "тип", "bn": "প্রকার", "hi": "प्रकार", "bs": "vrsta"}}
-{"guid": "N17_242", "translations": {"ro": "față", "pl": "przód", "th": "ด้านหน้า", "ta": "முன்பகுதி", "kn": "ಮುಂಭಾಗ", "uk": "перед", "bn": "সামনে", "hi": "सामने"}}
-{"guid": "N17_243", "translations": {"ro": "cartier", "pl": "kwartał", "th": "ย่าน", "ta": "க்வார்ட்டர்", "kn": "ಕವರ್ಟರ್", "uk": "квартал", "bn": "কোয়ার্টার", "hi": "क्वार्टर"}}
-{"guid": "N17_244", "translations": {"ro": "distracție", "pl": "rozbawienie", "th": "ความบันเทิง", "ta": "களிப்புணர்வு", "kn": "ಸಂತೋಷ", "uk": "задоволення", "bn": "বিনোদন", "hi": "मनोरंजन"}}
-{"guid": "N17_245", "translations": {"ro": "atracție", "pl": "atrakcyjność", "th": "แรงดึงดูด", "ta": "கவனத்தைด்?", "kn": "ಆಕರ್ಷಕತೆ", "uk": "привабливість", "bn": "আকর্ষণ", "hi": "आकर्षकता"}}
-{"guid": "N17_246", "translations": {"ro": "confort", "pl": "komfort", "th": "ความสะดวกสบาย", "ta": "அருமை", "kn": "ಆರಾಮ", "uk": "комфорт", "bn": "আরাম", "hi": "आराम"}}
-{"guid": "N17_247", "translations": {"ro": "stare", "pl": "stan", "th": "สภาพ", "ta": "நிலை", "kn": "ಸ್ಥಿತಿ", "uk": "стан", "bn": "অবস্থা", "hi": "स्थिति"}}
-{"guid": "N17_248", "translations": {"ro": "merit", "pl": "uznanie", "th": "เครดิต", "ta": "பகுதிமேடை", "kn": "ಪ್ರಶಂಸೆ", "uk": "визнання", "bn": "শ্রেয়স", "hi": "प्रशंसा"}}
-{"guid": "N17_249", "translations": {"ro": "daună", "pl": "szkoda", "th": "ความเสียหาย", "ta": "நேகம்", "kn": "ಹಾನಿ", "uk": "шкода", "bn": "ক্ষতি", "hi": "नुकसान"}}
-{"guid": "N17_250", "translations": {"ro": "datorie", "pl": "dług", "th": "หนี้", "ta": "பரிவர்த்தனை", "kn": "ಬಡ್ಡಿ", "uk": "борг", "bn": "ঋণ", "hi": "ऋण"}}
-{"guid": "N17_251", "translations": {"ro": "detaliu", "pl": "szczegół", "th": "รายละเอียด", "ta": "விவரம்", "kn": "ವಿವರ", "uk": "деталь", "bn": "বিস্তারিত", "hi": "विवरण"}}
-{"guid": "N17_252", "translations": {"ro": "educație", "pl": "edukacja", "th": "การศึกษา", "ta": "கல்வி", "kn": "ಶಿಕ್ಷಣ", "uk": "освіта", "bn": "শিক্ষা", "hi": "शिक्षा"}}
-{"guid": "N17_253", "translations": {"ro": "eroare", "pl": "błąd", "th": "ข้อผิดพลาด", "ta": "தப்பு", "kn": "ದೋಷ", "uk": "помилка", "bn": "ত্রুটি", "hi": "त्रुटि"}}
-{"guid": "N17_254", "translations": {"ro": "eveniment", "pl": "wydarzenie", "th": "เหตุการณ์", "ta": "நிகழ்வு", "kn": "เหตุการณ์", "uk": "подія", "bn": "ঘটনা", "hi": "घटना"}}
-{"guid": "N17_255", "translations": {"ro": "existență", "pl": "istnienie", "th": "การมีอยู่", "ta": "உயிர்மை", "kn": "ಅಸ್ತಿತ್ವ", "uk": "існування", "bn": "অস্তিত্ব", "hi": "अस्तित्व"}}
-{"guid": "N17_256", "translations": {"ro": "literatură de ficțiune", "pl": "literatura piękna", "th": "วรรณกรรมเหตุการณ์สมมติ", "ta": "புனைகதை இலக்கியம்", "kn": "ಕಲ್ಪನಾತ್ಮಕ ಸಾಹಿತ್ಯ", "uk": "художня література", "bn": "কল্পনাযোগ্য সাহিত্য", "hi": "काल्पनिक साहित्य"}}
-{"guid": "N17_257", "translations": {"ro": "armoniei", "pl": "harmonia", "th": "ความกลมกลืน", "ta": "இணக்கம்", "kn": "ಸಮ್ಮಿಲನ", "uk": "гармонія", "bn": "সামঞ্জস্য", "hi": "सामंजस्य"}}
-{"guid": "N17_258", "translations": {"ro": "umor", "pl": "humor", "th": "อารมณ์ขัน", "ta": "விண்ணோக்கமாக்கம்", "kn": "ಹಾಸ್ಯ", "uk": "гумор", "bn": "রসিকতা", "hi": "हास्य"}}
-{"guid": "N17_259", "translations": {"ro": "impuls", "pl": "impuls", "th": "แรงกระตุ้น", "ta": "உற்சாகம்", "kn": "ಪ್ರೇರಣೆ", "uk": "імпульс", "bn": "প্রবৃত্তি", "hi": "प्रेरणा"}}
-{"guid": "N17_260", "translations": {"ro": "industrie", "pl": "przemysł", "th": "อุตสาหกรรม", "ta": "பொருட்காட்சி", "kn": "ಕೌಶಲ್ಯೋದ್ಯಮ", "uk": "промисловість", "bn": "শিল্প", "hi": "उद्योग"}}
-{"guid": "N17_261", "translations": {"ro": "asigurare", "pl": "ubezpieczenie", "th": "ประกันภัย", "ta": "காப்பீடு", "kn": "ವಿಮೆ", "uk": "страхування", "bn": "বীমা", "hi": "बीमा"}}
-{"guid": "N17_262", "translations": {"ro": "învățare", "pl": "uczenie się", "th": "การเรียนรู้", "ta": "கற்றல்", "kn": "ಅಧ್ಯಯನ", "uk": "навчання", "bn": "অধয়ন", "hi": "अधिगमन"}}
-{"guid": "N17_263", "translations": {"ro": "sursă_de_trăinicie", "pl": "środek_do_życia", "th": "ชีพจรมหา", "ta": "வாழ்க்கைச்செலவு", "kn": "ಉದ್ಯೋಗ", "uk": "мати_засоби_до_викладу", "bn": "জীবিকা", "hi": "जीविका"}}
-{"guid": "N17_264", "translations": {"ro": "organizație", "pl": "organizacja", "th": "องค์กร", "ta": "அமைப்பு", "kn": "ಸಂಘಟನೆ", "uk": "організація", "bn": "সংগঠন", "hi": "संगठन"}}
-{"guid": "N17_265", "translations": {"ro": "plăcere", "pl": "przyjemność", "th": "ความสุข", "ta": "இன்பம்", "kn": "ಸಂತೋಷ", "uk": "задоволення", "bn": "আনন্দ", "hi": "आनंद"}}
-{"guid": "N17_266", "translations": {"ro": "profit", "pl": "zysk", "th": "กำไร", "ta": "லாபம்", "kn": "ಲಾಭ", "uk": "прибуток", "bn": "লাভ", "hi": "लाभ"}}
-{"guid": "N17_267", "translations": {"ro": "proprietate", "pl": "własność", "th": "ทรัพย์สิน", "ta": "சொத்து", "kn": "ಸ್ವತ್ತು", "uk": "власність", "bn": "সম্পত্তি", "hi": "संपत्ति"}}
-{"guid": "N17_268", "translations": {"ro": "calitate", "pl": "jakość", "th": "คุณภาพ", "ta": "தரம்", "kn": "ಗುಣಮಟ್ಟ", "uk": "якість", "bn": "গুণমান", "hi": "गुणवत्ता"}}
-{"guid": "N17_269", "translations": {"ro": "înregistrare", "pl": "rekord", "th": "บันทึก", "ta": "பதிவு", "kn": "ದಾಖಲೆ", "uk": "запис", "bn": "রেকর্ড", "hi": "रिकॉर्ड"}}
-{"guid": "N17_270", "translations": {"ro": "relație", "pl": "relacja", "th": "ความสัมพันธ์", "ta": "உறவு", "kn": "ಸಂಬಂಧ", "uk": "відношення", "bn": "সম্পর্ক", "hi": "संबंध"}}
-{"guid": "N17_271", "translations": {"ro": "respect", "pl": "szacunek", "th": "ความเคารพ", "ta": "மரியாதை", "kn": "ಗೌರವ", "uk": "повага", "bn": "সম্মান", "hi": "सम्मान"}}
-{"guid": "N17_272", "translations": {"ro": "recompensă", "pl": "nagroda", "th": "รางวัล", "ta": "பரிசு", "kn": "ಬಹುಮಾನ", "uk": "нагорода", "bn": "পুরস্কার", "hi": "इनाम"}}
-{"guid": "N17_273", "translations": {"ro": "ritm", "pl": "rytm", "th": "จังหวะ", "ta": "இதம்", "kn": "ರಿದ್ಮ್", "uk": "ритм", "bn": "রিদম", "hi": "ताल"}}
-{"guid": "N17_274", "translations": {"ro": "sex", "pl": "płeć", "th": "เพศ", "ta": "பாலினம்", "kn": "ಲಿಂಗ", "uk": "стать", "bn": "লিঙ্গ", "hi": "लिंग"}}
-{"guid": "N17_275", "translations": {"ro": "declarație", "pl": "oświadczenie", "th": "คำแถลง", "ta": "அறிக்கை", "kn": "ಪ್ರಕಟನೆ", "uk": "заява", "bn": "ঘোষণা", "hi": "बयान"}}
-{"guid": "N17_276", "translations": {"ro": "structură", "pl": "struktura", "th": "โครงสร้าง", "ta": "கட்டமைப்பு", "kn": "ರಚನೆ", "uk": "структура", "bn": "গঠন", "hi": "संरचना"}}
-{"guid": "N17_277", "translations": {"ro": "substanță", "pl": "substancja", "th": "สาร", "ta": "வஸ்து", "kn": "ದ್ರವ್ಯ", "uk": "речовина", "bn": "পদার্থ", "hi": "पदार्थ"}}
-{"guid": "N17_278", "translations": {"ro": "tendință", "pl": "tendencja", "th": "แนวโน้ม", "ta": "பண்புகள்", "kn": "ಪ್ರವೃತ್ತಿ", "uk": "тенденція", "bn": "প্রবণতা", "hi": "प्रवृत्ति"}}
-{"guid": "N17_279", "translations": {"ro": "șmecherie", "pl": "sztuczka", "th": "เล่ห์กล", "ta": "மோசடி", "kn": "ಚತುರ್ಯ", "uk": "шахрайство", "bn": "চালাকি", "hi": "धोखा"}}
-{"guid": "N17_280", "translations": {"ro": "deșeu", "pl": "odpad", "th": "ของเสีย", "ta": "அவிழிப்பு", "kn": "ವರ್ಜ್ಯ", "uk": "відхід", "bn": "নির্বর্জন", "hi": "कचरा"}}
-{"guid": "N17_281", "translations": {"ro": "crimă", "pl": "przestępstwo", "th": "อาชญากรรม", "ta": "பாவம்", "kn": "ಅಪರಾಧ", "uk": "злочин", "bn": "অপরাধ", "hi": "अपराध"}}
-{"guid": "N17_282", "translations": {"ro": "ofertă", "pl": "oferta", "th": "ข้อเสนอ", "ta": "ஆஃபர்", "kn": "ಏರ್ಪಡಿಸುವಿಕೆ", "uk": "пропозиція", "bn": "প্রস্তাব", "hi": "प्रस्ताव"}}
-{"guid": "N17_283", "translations": {"ro": "preț", "pl": "cena", "th": "ราคา", "ta": "விலை", "kn": "ಬೆಲೆ", "uk": "ціна", "bn": "মূল্য", "hi": "कीमत"}}
-{"guid": "N17_284", "translations": {"ro": "lucru", "pl": "rzecz", "th": "สิ่ง", "ta": "வச্তু", "kn": "ವಸ್ತು", "uk": "річ", "bn": "বস্তু", "hi": "वस्तु", "bs": "stvar"}}
-{"guid": "N17_285", "translations": {"ro": "umbră", "pl": "cień", "th": "ร่มเงา", "ta": "நிழல்", "kn": "ಛಾಯೆ", "uk": "тінь", "bn": "ছায়া", "hi": "छाया"}}
-{"guid": "N17_286", "translations": {"ro": "metodă", "pl": "sposób", "th": "วิธี", "ta": "முறையை", "kn": "ತರುಗು", "uk": "спосіб", "bn": "পদ্ধতি", "hi": "तरीका", "bs": "način"}}
-{"guid": "N17_287", "translations": {"ro": "vârf", "pl": "wierzchołek", "th": "ยอด", "ta": "சிகரம்", "kn": "ಶಿಖರ", "uk": "вершина", "bn": "শৃঙ্গ", "hi": "शीर्ष"}}
-{"guid": "N17_288", "translations": {"ro": "sprijin", "pl": "wsparcie", "th": "การสนับสนุน", "ta": "ஆதரவு", "kn": "ಬೆಂಬಲ", "uk": "підтримка", "bn": "সমর্থন", "hi": "सहायता"}}
-{"guid": "N17_289", "translations": {"ro": "comportament", "pl": "zachowanie", "th": "พฤติกรรม", "ta": "நடத்தை", "kn": "ವರ್ತನೆ", "uk": "поведінка", "bn": "আচরণ", "hi": "व्यवहार"}}
-{"guid": "N17_290", "translations": {"ro": "rază", "pl": "promień", "th": "ลำแสง", "ta": "கதிர்", "kn": "ಕಿರಣ", "uk": "промінь", "bn": "তরঙ্গ", "hi": "किरण"}}
-{"guid": "N17_291", "translations": {"ro": "plan", "pl": "płaszczyzna", "th": "ระนาบ", "ta": "சமம்", "kn": "Samatalya", "uk": "площина", "bn": "সমতলতা", "hi": "समतलता"}}
-{"guid": "N17_292", "translations": {"ro": "tonalitate", "pl": "tonalność", "th": "โทนัลลิตี้", "ta": "பாடத்தொகுப்பு", "kn": "ಶ್ರೇಣಿ (ಸಂಗೀತ)", "uk": "тональність", "bn": "টোনালিটি", "hi": "स्वरप्रधानता"}}
-{"guid": "N17_293", "translations": {"ro": "rock", "pl": "rock", "th": "ร็อก", "ta": "ராக்", "kn": "ರಾಕ್", "uk": "рок", "bn": "রক", "hi": "रॉक", "bs": "rok"}}
-{"guid": "N17_294", "translations": {"ro": "scară", "pl": "skala", "th": "มาตราส่วน", "ta": "அளவுக்கோலம்", "kn": "ಮಾಪನಮಾನ", "uk": "масштаб", "bn": "পরিমাপকাঠামো", "hi": "स्केल"}}
-{"guid": "N17_295", "translations": {"ro": "acțiune", "pl": "akcja", "th": "หุ้น", "ta": "பங்குகள்", "kn": "ಶೇರು", "uk": "акція", "bn": "শেয়ার", "hi": "शेयर", "bs": "dionica"}}
-{"guid": "N17_296", "translations": {"ro": "undă", "pl": "fala", "th": "คลื่น", "ta": "அலை", "kn": "ಅಲೆ", "uk": "хвиля", "bn": "তরঙ্গ", "hi": "तरंग"}}
+{"guid": "N17_028", "translations": {"ro": "adevăr", "pl": "prawda", "th": "ความจริง", "ms": "kebenaran", "ta": "ஸ்த்யா", "kn": "ಸತ್ಯ", "uk": "істина", "bn": "সত্য", "hi": "सत्य", "tr": "gerçek"}}
+{"guid": "N17_035", "translations": {"ro": "problemă", "pl": "problem", "th": "ปัญหา", "ms": "masalah", "ta": "பிரச்சினை", "kn": "ಸಮಸ್ಯೆ", "uk": "проблема", "bn": "সমস্যা", "hi": "समस्या", "tr": "sorun"}}
+{"guid": "N17_046", "translations": {"ro": "bani", "pl": "pieniądz", "th": "เงิน", "ms": "wang", "ta": "பணம்", "kn": "ಹಣ", "uk": "гривня", "bn": "টাকা", "hi": "पैसे", "tr": "para"}}
+{"guid": "N17_060", "translations": {"ro": "soluție", "pl": "rozwiązanie", "th": "ทางแก้", "ms": "penyelesaian", "ta": "தீர்வு", "kn": "ಉತ್ತರ", "uk": "розв'язок", "bn": "সমাধান", "hi": "समाधान", "tr": "çözüm"}}
+{"guid": "N17_072", "translations": {"ro": "magie", "pl": "magia", "th": "เวทมนตร์", "ms": "sihir", "ta": "மந்திரவாதம்", "kn": "ಮುಖ್ಯ", "uk": "магія", "bn": "জাদু", "hi": "जादू", "tr": "büyü"}}
+{"guid": "N17_073", "translations": {"ro": "sunet", "pl": "dźwięk", "th": "เสียง", "ms": "bunyi", "ta": "இசை", "kn": "ಧ್ವನಿ", "uk": "звук", "bn": "শব্দ", "hi": "ध्वनिः", "tr": "ses"}}
+{"guid": "N17_076", "translations": {"ro": "corp", "pl": "ciało", "th": "ร่างกาย", "ms": "badan", "ta": "உடல்", "kn": "ದೇಹ", "uk": "тіло", "bn": "শরীর", "hi": "शरीर", "tr": "vücut", "bs": "tijelo"}}
+{"guid": "N17_080", "translations": {"ro": "chestiune", "pl": "sprawa", "th": "เรื่อง", "ms": "perkara", "ta": "வिषயம்", "kn": "ವಿಷಯ", "uk": "питання", "bn": "বিষয়", "hi": "मामला", "tr": "konu"}}
+{"guid": "N17_081", "translations": {"ro": "fapt", "pl": "fakt", "th": "ข้อเท็จจริง", "ms": "fakta", "ta": "வாஸ்தவம்", "kn": "ತಥ್ಯ", "uk": "факт", "bn": "তথ্য", "hi": "तथ्य", "tr": "gerçek"}}
+{"guid": "N17_087", "translations": {"ro": "vedere", "pl": "wzrok", "th": "การมองเห็น", "ms": "penglihatan", "ta": "நோக்கு", "kn": "ದೃಷ್ಟಿ", "uk": "зір", "bn": "দৃষ্টি", "hi": "दृष्टि", "tr": "görme"}}
+{"guid": "N17_089", "translations": {"ro": "control", "pl": "kontrola", "th": "การควบคุม", "ms": "kawalan", "ta": "கட்டுப்பாடு", "kn": "ನಿಯಂತ್ರಣ", "uk": "контроль", "bn": "নিয়ন্ত্রণ", "hi": "नियंत्रण", "tr": "kontrol"}}
+{"guid": "N17_094", "translations": {"ro": "categorie", "pl": "rodzaj", "th": "ประเภท", "ms": "jenis", "ta": "வகை", "kn": "ವರ್ಗ", "uk": "вид", "bn": "শ্রেণী", "hi": "प्रकार", "tr": "tür"}}
+{"guid": "N17_095", "translations": {"ro": "grijă", "pl": "troska", "th": "ความห่วงใย", "ms": "penjagaan", "ta": "கவலை", "kn": "ಚಿಂತನೆ", "uk": "турбота", "bn": "কেইر", "hi": "चिंता", "tr": "bakım"}}
+{"guid": "N17_099", "translations": {"ro": "caz", "pl": "przypadek", "th": "กรณี", "ms": "kes", "ta": "வெறுங்கோளம்", "kn": "ಘಟನೆಯು", "uk": "випадок", "bn": "ঘটনা", "hi": "मामला", "tr": "durum", "bs": "slučaj"}}
+{"guid": "N17_106", "translations": {"ro": "ordine", "pl": "porządek", "th": "ลำดับ", "ms": "susunan", "ta": "க్రమம்", "kn": "ಕ್ರಮ", "uk": "порядок", "bn": "ক্রম", "hi": "क्रम", "tr": "düzen", "bs": "red"}}
+{"guid": "N17_107", "translations": {"ro": "formă", "pl": "forma", "th": "รูปแบบ", "ms": "bentuk", "ta": "வடிவு", "kn": "ಆಕಾರ", "uk": "форма", "bn": "রূপ", "hi": "आकार", "tr": "biçim"}}
+{"guid": "N17_108", "translations": {"ro": "ordin", "pl": "rozkaz", "th": "คำสั่ง", "ms": "perintah", "ta": "ஆத்மன்பெறுதல்", "kn": "ಆಜ್ಞೆ", "uk": "наказ", "bn": "আদেশ", "hi": "आदेश", "tr": "emir"}}
+{"guid": "N17_109", "translations": {"ro": "sistem", "pl": "system", "th": "ระบบ", "ms": "sistem", "ta": "கணக்கீட்டு முறை", "kn": "ವ್ಯವಸ್ಥೆ", "uk": "система", "bn": "সিস্টেম", "hi": "प्रणाली", "tr": "sistem", "bs": "sistem"}}
+{"guid": "N17_111", "translations": {"ro": "miros", "pl": "zapach", "th": "กลิ่น", "ms": "bau", "ta": "மிளகாய்", "kn": "ವಾಸನೆ", "uk": "запах", "bn": "গন্ধ", "hi": "गंध", "tr": "koku"}}
+{"guid": "N17_112", "translations": {"ro": "înțelegere", "pl": "umowa", "th": "ข้อตกลง", "ms": "perjanjian", "ta": "ஒப்பந்தம்", "kn": "ಒಪ್ಪಂದ", "uk": "угода", "bn": "চুক্তি", "hi": "संधि", "tr": "anlaşma"}}
+{"guid": "N17_114", "translations": {"ro": "direcție", "pl": "kierunek", "th": "ทิศทาง", "ms": "arah", "ta": "திசை", "kn": "ದಿಕ್ಕು", "uk": "напрямок", "bn": "দিশা", "hi": "दिशा", "tr": "yön"}}
+{"guid": "N17_116", "translations": {"ro": "scop", "pl": "cel", "th": "จุดประสงค์", "ms": "tujuan", "ta": "நோக்கம்", "kn": "ಉದ್ದೇಶ", "uk": "мета", "bn": "উদ্দেশ্য", "hi": "उद्देश्य", "tr": "amaç"}}
+{"guid": "N17_118", "translations": {"ro": "job", "pl": "praca", "th": "งาน", "ms": "pekerjaan", "ta": "வேலை", "kn": "ಕೆಲಸ", "uk": "робота", "bn": "কাজ", "hi": "नौकरी", "tr": "iş"}}
+{"guid": "N17_119", "translations": {"ro": "autoritate", "pl": "władza", "th": "อำนาจ", "ms": "kuasa", "ta": "அதிகாரம்", "kn": "ಒತ್ತಾ(ಅಧಿಕಾರ)", "uk": "влада", "bn": "প্রাধিকরণ", "hi": "अधिकार", "tr": "otorite"}}
+{"guid": "N17_121", "translations": {"ro": "zgomot", "pl": "hałas", "th": "เสียงรบกวน", "ms": "bunyi bising", "ta": "ஒலி", "kn": "ಶಬ್ದ", "uk": "шум", "bn": "শব্দ", "hi": "शोर", "tr": "gürültü"}}
+{"guid": "N17_123", "translations": {"ro": "plan", "pl": "plan", "th": "แผน", "ms": "rancangan", "ta": "திட்டம்", "kn": "ಯೋಜನೆ", "uk": "план", "bn": "পরিকল্পনা", "hi": "योजना", "tr": "plan"}}
+{"guid": "N17_124", "translations": {"ro": "talent", "pl": "talent", "th": "พรสวรรค์", "ms": "bakat", "ta": "திறமை", "kn": "ಪ್ರತಿಭೆ", "uk": "талант", "bn": "প্রতিভা", "hi": "प्रतिभा", "tr": "yetenek"}}
+{"guid": "N17_126", "translations": {"ro": "părere", "pl": "opinia", "th": "ความคิดเห็น", "ms": "pandangan", "ta": "மதிப்புரைக் கருத்து", "kn": "ಅಭಿಪ್ರಾಯ", "uk": "думка", "bn": "মতামত", "hi": "राय", "tr": "görüş"}}
+{"guid": "N17_129", "translations": {"ro": "zâmbet", "pl": "uśmiech", "th": "รอยยิ้ม", "ms": "senyuman", "ta": "புன்னகை", "kn": "ನಗು", "uk": "усмішка", "bn": "হাসি", "hi": "मुस्कान", "tr": "gülümseme"}}
+{"guid": "N17_130", "translations": {"ro": "vrăjitorie", "pl": "zaklęcie", "th": "คาถา", "ms": "mantera", "ta": "மந்திரம்", "kn": "ಮಾಯಾಜಾಲ", "uk": "чарівний заклик", "bn": "মন্ত্র", "hi": "जादूया मन्त्र", "tr": "büyü"}}
+{"guid": "N17_131", "translations": {"ro": "univers", "pl": "wszechświat", "th": "จักรวาล", "ms": "alam semesta", "ta": "பிரபஞ்சம்", "kn": "ಬ್ರಹ್ಮಾಂಡ", "uk": "всесвіт", "bn": "বিশ্ব", "hi": "ब्रह्मांड", "tr": "evren"}}
+{"guid": "N17_137", "translations": {"ro": "alegere", "pl": "wybór", "th": "ทางเลือก", "ms": "pilihan", "ta": "தெரிவு", "kn": "ಆಯ್ಕೆ", "uk": "вибір", "bn": "পছন্দ", "hi": "चॉइस", "tr": "seçim"}}
+{"guid": "N17_142", "translations": {"ro": "regulă", "pl": "zasada", "th": "กฎ", "ms": "peraturan", "ta": "விதி", "kn": "ನಿಯಮ", "uk": "правило", "bn": "নিয়ম", "hi": "नियम", "tr": "kural"}}
+{"guid": "N17_150", "translations": {"ro": "poziție", "pl": "pozycja", "th": "ตำแหน่ง", "ms": "kedudukan", "ta": "இடம்", "kn": "ಸ್ಥಾನ", "uk": "положення", "bn": "অবস্থান", "hi": "स्थिति", "tr": "konum"}}
+{"guid": "N17_156", "translations": {"ro": "mod", "pl": "sposób", "th": "วิธี", "ms": "cara", "ta": "முறை", "kn": "ಓಪನೆ", "uk": "спосіб", "bn": "পদ্ধতি", "hi": "तरीका", "tr": "yöntem"}}
+{"guid": "N17_158", "translations": {"ro": "lucru", "pl": "rzecz", "th": "สิ่งของ", "ms": "barang", "ta": "பொருள்", "kn": "ವಸ್ತು", "uk": "річ", "bn": "জিনিস", "hi": "वस्तु", "tr": "eşya"}}
+{"guid": "N17_159", "translations": {"ro": "pattern", "pl": "wzór", "th": "ลวดลาย", "ms": "corak", "ta": "வடிவமைப்பு", "kn": "ನಮೂನೆ", "uk": "візерунок", "bn": "নকশা", "hi": "नमूना", "tr": "desen"}}
+{"guid": "N17_160", "translations": {"ro": "efect", "pl": "efekt", "th": "ผลกระทบ", "ms": "kesan", "ta": "ப்ரதிபலம்", "kn": "ಪ್ರಭಾವ", "uk": "ефект", "bn": "প্রভাব", "hi": "प्रभाव", "tr": "etki"}}
+{"guid": "N17_163", "translations": {"ro": "efort", "pl": "wysiłek", "th": "ความพยายาม", "ms": "usaha", "ta": "முயற்சி", "kn": "ಪ್ರಯತ್ನ", "uk": "зусилля", "bn": "প্রচেষ্টা", "hi": "प्रयास", "tr": "çaba"}}
+{"guid": "N17_167", "translations": {"ro": "gravitație", "pl": "grawitacja", "th": "แรงโน้มถ่วง", "ms": "graviti", "ta": "கரைத்திறன்", "kn": "ಗುರುತ್ವಾಕರ್ಷಣಾ", "uk": "гравітація", "bn": "মাধ্যাকর্ষণ", "hi": "गुरुत्वाकर्षण", "tr": "yerçekimi"}}
+{"guid": "N17_171", "translations": {"ro": "natură", "pl": "przyroda", "th": "ธรรมชาติ", "ms": "alam semula jadi", "ta": "பார்வை", "kn": "ಪ್ರಕೃತಿ", "uk": "природа", "bn": "প্রকৃতি", "hi": "प्रकृति", "tr": "doğa"}}
+{"guid": "N17_173", "translations": {"ro": "situație", "pl": "sytuacja", "th": "สถานการณ์", "ms": "situasi", "ta": "நிலைமை", "kn": "ಸ್ಥಿತಿ", "uk": "ситуація", "bn": "অবস্থা", "hi": "स्थिति", "tr": "durum"}}
+{"guid": "N17_178", "translations": {"ro": "ton", "pl": "ton", "th": "โทน", "ms": "nada", "ta": "பாண்", "kn": "ಧ್ವನಿ ಮೈನಸ", "uk": "тон", "bn": "স্বরভঙ্গি", "hi": "स्वर", "tr": "ton"}}
+{"guid": "N17_183", "translations": {"ro": "sursă", "pl": "źródło", "th": "แหล่งที่มา", "ms": "sumber", "ta": "மூலம்", "kn": "ಮೂಲ", "uk": "джерело", "bn": "উৎস", "hi": "स्रोत", "tr": "kaynak"}}
+{"guid": "N17_184", "translations": {"ro": "program", "pl": "program", "th": "โปรแกรม", "ms": "program", "ta": "பிரோக்ராம்", "kn": "ಕಾರ್ಯಕ್ರಮ", "uk": "програма", "bn": "প্রোগ্রাম", "hi": "कार्यक्रम", "tr": "program"}}
+{"guid": "N17_187", "translations": {"ro": "bază", "pl": "podstawa", "th": "พื้นฐาน", "ms": "dasar", "ta": "ஆதாரம்", "kn": "ಮೂಲಭೂಮಿ", "uk": "основа", "bn": "ভিত্তি", "hi": "आधार", "tr": "temel"}}
+{"guid": "N17_188", "translations": {"ro": "culoare", "pl": "kolor", "th": "สี", "ms": "warna", "ta": "வண்ணம்", "kn": "ಬಣ್ಣ", "uk": "колір", "bn": "রঙ", "hi": "रंग", "tr": "renk"}}
+{"guid": "N17_190", "translations": {"ro": "semn", "pl": "znak", "th": "เครื่องหมาย", "ms": "tanda", "ta": "குறியிடம்", "kn": "ಸೂಚನೆ", "uk": "позначка", "bn": "চিহ্ন", "hi": "निशान", "tr": "iz"}}
+{"guid": "N17_194", "translations": {"ro": "prost", "pl": "głupiec", "th": "คนโง่", "ms": "orang bodoh", "ta": "காளமறை", "kn": "ಮೂಢ", "uk": "дурень", "bn": "ফুল", "hi": "मूर्ख", "tr": "aptal"}}
+{"guid": "N17_196", "translations": {"ro": "respirație", "pl": "oddech", "th": "ลมหายใจ", "ms": "nafas", "ta": "இச்சிறுமொழி", "kn": "ಉಸಿರೆ", "uk": "дихання", "bn": "শ্বাস", "hi": "साँस", "tr": "nefes"}}
+{"guid": "N17_198", "translations": {"ro": "încredere", "pl": "zaufanie", "th": "ความเชื่อใจ", "ms": "kepercayaan", "ta": "நம்பிக்கை", "kn": "ನಂಬಿಕೆ", "uk": "довіра", "bn": "বিশ্বাস", "hi": "विश्वास", "tr": "güven"}}
+{"guid": "N17_199", "translations": {"ro": "minune", "pl": "cud", "th": "มหัศจรรย์", "ms": "kehairanan", "ta": "ஆச்சரியம்", "kn": "ಆಶ್ಚರ್ಯ", "uk": "диво", "bn": "আশ্চর্য", "hi": "आश्चर्य", "tr": "hayranlık"}}
+{"guid": "N17_204", "translations": {"ro": "capac", "pl": "pokrywa", "th": "ฝาปิด", "ms": "penutup", "ta": "மூடணம்", "kn": "ಮುಚ್ಚು", "uk": "кришка", "bn": "ঢাকনো", "hi": "ढक्कन", "tr": "kapak"}}
+{"guid": "N17_206", "translations": {"ro": "plată", "pl": "płaca", "th": "ค่าจ้าง", "ms": "gaji", "ta": "சம்பளம்", "kn": "ಸಂಬಳ", "uk": "плата", "bn": "দরখানি", "hi": "वेतन", "tr": "ücret"}}
+{"guid": "N17_207", "translations": {"ro": "mină", "pl": "kopalnia", "th": "เหมือง", "ms": "lombong", "ta": "கணி", "kn": "ಖನಿ", "uk": "шахта", "bn": "খনি", "hi": "खदान", "tr": "maden"}}
+{"guid": "N17_208", "translations": {"ro": "fund", "pl": "dno", "th": "ก้น", "ms": "bahagian bawah", "ta": "அடிப்பு", "kn": "ತಳಭಾಗ", "uk": "дно", "bn": "তল", "hi": "तल", "tr": "alt kısım"}}
+{"guid": "N17_209", "translations": {"ro": "stare", "pl": "stan", "th": "สถานะ", "ms": "keadaan", "ta": "நிலை", "kn": "ಸ್ಥಿತಿ", "uk": "стан", "bn": "অবস্থা", "hi": "अवस्था", "tr": "durum"}}
+{"guid": "N17_210", "translations": {"ro": "dobândă", "pl": "oprocentowanie", "th": "ดอกเบี้ย", "ms": "faedah", "ta": "வட்டி", "kn": "ಹೊರ", "uk": "відсоток", "bn": "সুদি", "hi": "ब्याज", "tr": "faiz"}}
+{"guid": "N17_211", "translations": {"ro": "putere", "pl": "władza", "th": "อำนาจ", "ms": "kuasa", "ta": "அறம்", "kn": "ಶಕ್ತಿ", "uk": "влада", "bn": "ক্ষমতা", "hi": "शक्ति", "tr": "güç"}}
+{"guid": "N17_213", "translations": {"ro": "justiție", "pl": "sprawiedliwość", "th": "ความยุติธรรม", "ms": "keadilan", "ta": "நியாயம்", "kn": "ನ್ಯಾಯ", "uk": "правосуддя", "bn": "ন্যায়", "hi": "न्याय", "tr": "adalet"}}
+{"guid": "N17_214", "translations": {"ro": "valoare", "pl": "wartość", "th": "คุณค่า", "ms": "nilai", "ta": "மதிப்பு", "kn": "ಮೌಲ್ಯ", "uk": "цінність", "bn": "মূল্য", "hi": "मूल्य", "tr": "değer"}}
+{"guid": "N17_215", "translations": {"ro": "sarcină", "pl": "zadanie", "th": "งาน", "ms": "tugas", "ta": "பணி", "kn": "ಕಾರ್ಯ", "uk": "завдання", "bn": "কাজ", "hi": "कार्य", "tr": "görev"}}
+{"guid": "N17_216", "translations": {"ro": "sfat", "pl": "rada", "th": "คำแนะนำ", "ms": "nasihat", "ta": "உதவி", "kn": "ಸಲಹೆ", "uk": "порада", "bn": "পরামর্শ", "hi": "सलाह", "tr": "tavsiye"}}
+{"guid": "N17_217", "translations": {"ro": "temă", "pl": "zadanie domowe", "th": "การบ้าน", "ms": "kerja rumah", "ta": "வீட்டு பணி", "kn": "ಮನೆಯಲ್ಲಿ ಮಾಡುವ ಕೆಲಸ", "uk": "домашнє завдання", "bn": "গৃহকর্ম সচিবতা", "hi": "गृहकार्य", "tr": "ödev"}}
+{"guid": "N17_218", "translations": {"ro": "lecție", "pl": "lekcja", "th": "บทเรียน", "ms": "pelajaran", "ta": "பாடம்", "kn": "ಪಾಠ", "uk": "урок", "bn": "পাঠ", "hi": "पाठ", "tr": "ders"}}
+{"guid": "N17_219", "translations": {"ro": "argument", "pl": "argument", "th": "เหตุผลสนับสนุน", "ms": "hujah", "ta": "பாதிப்பு", "kn": "ತರ್ಕ", "uk": "аргумент", "bn": "তর্ক", "hi": "तर्क", "tr": "argüman"}}
+{"guid": "N17_220", "translations": {"ro": "glumă", "pl": "żart", "th": "เรื่องตลก", "ms": "jenaka", "ta": "வெட்கம்", "kn": "ಹಾಸ್ಯ", "uk": "жарт", "bn": "রসিকতা", "hi": "हास्य", "tr": "şaka"}}
+{"guid": "N17_221", "translations": {"ro": "rețetă", "pl": "przepis", "th": "สูตรอาหาร", "ms": "resipi", "ta": "சமையல்முறை", "kn": "ವಿಧಾನ", "uk": "рецепт", "bn": "রেসিপি", "hi": "नुस्खा", "tr": "tarif"}}
+{"guid": "N17_222", "translations": {"ro": "predare", "pl": "nauczanie", "th": "การสอน", "ms": "pengajaran", "ta": "பயிற்றல்", "kn": "ಬೋಧನೆ", "uk": "викладання", "bn": "শিক্ষা", "hi": "शिक्षण", "tr": "öğretmenlik"}}
+{"guid": "N17_223", "translations": {"ro": "scenă", "pl": "scena", "th": "ฉาก", "ms": "babak", "ta": "காட்சி", "kn": "ದೃಶ್ಯ", "uk": "сцена", "bn": "দৃশ্য", "hi": "दृश्य", "tr": "sahne"}}
+{"guid": "N17_224", "translations": {"ro": "loc", "pl": "miejsce", "th": "ที่", "ms": "tempat", "ta": "இடம்", "kn": "ಸ್ಥಳ", "uk": "місце", "bn": "স্থান", "hi": "स्थान", "tr": "yer"}}
+{"guid": "N17_225", "translations": {"ro": "artă", "pl": "sztuka", "th": "ศิลปะ", "ms": "seni", "ta": "கலை", "kn": "ಕಲೆ", "uk": "мистецтво", "bn": "শিল্প", "hi": "कला", "tr": "sanat"}}
+{"guid": "N17_226", "translations": {"ro": "greșeală", "pl": "błąd", "th": "ความผิดพลาด", "ms": "kesilapan", "ta": "தவறு", "kn": "ತಪ್ಪು", "uk": "помилка", "bn": "ভুল", "hi": "त्रुटि", "tr": "hata"}}
+{"guid": "N17_227", "translations": {"ro": "cont", "pl": "konto", "th": "บัญชี", "ms": "akaun bank", "ta": "கணக்கு", "kn": "ಖಾತೆ", "uk": "рахунок", "bn": "হিসাব", "hi": "खाता", "tr": "banka hesabı"}}
+{"guid": "N17_228", "translations": {"ro": "numerar", "pl": "gotówka", "th": "เงินสด", "ms": "wang tunai", "ta": "பணம்விளைவு", "kn": "ನಗದು", "uk": "готівка", "bn": "নগদ", "hi": "नकद", "tr": "nakit"}}
+{"guid": "N17_229", "translations": {"ro": "vânzare", "pl": "sprzedaż", "th": "การขาย", "ms": "jualan", "ta": "விற்பனை", "kn": "ಮಾರಾಟ", "uk": "продаж", "bn": "বিক্রয়", "hi": "बिक्री", "tr": "satış"}}
+{"guid": "N17_230", "translations": {"ro": "parte", "pl": "bok", "th": "ข้าง", "ms": "sebelah", "ta": "பக்கம்", "kn": "ಬದಿ", "uk": "бік", "bn": "পাশ", "hi": "पक्ष", "tr": "yan", "bs": "strana"}}
+{"guid": "N17_231", "translations": {"ro": "amendă", "pl": "grzywna", "th": "ค่าปรับ", "ms": "denda", "ta": "ஐறுமுறை", "kn": "ದಂಡ", "uk": "штраф", "bn": "জরিমানা", "hi": "जुर्माना", "tr": "para cezası"}}
+{"guid": "N17_232", "translations": {"ro": "linie", "pl": "linia", "th": "เส้น", "ms": "garis", "ta": "வரி", "kn": "ರೇಖೆ", "uk": "лінія", "bn": "রেখা", "hi": "रेखा", "tr": "çizgi"}}
+{"guid": "N17_233", "translations": {"ro": "coadă", "pl": "kolejka", "th": "แถว", "ms": "barisan", "ta": "வரிசை", "kn": "ಸಾರಿ", "uk": "черга", "bn": "লাইন", "hi": "कतार", "tr": "sıra"}}
+{"guid": "N17_234", "translations": {"ro": "mijloc", "pl": "środek", "th": "กลาง", "ms": "tengah", "ta": "நடைமையில்", "kn": "ಮಧ್ಯ", "uk": "середина", "bn": "মধ্য", "hi": "मध्य", "tr": "orta"}}
+{"guid": "N17_235", "translations": {"ro": "energie", "pl": "energia", "th": "พลังงาน", "ms": "tenaga", "ta": "ஆற்றல்", "kn": "ಶಕ್ತಿ", "uk": "енергія", "bn": "শক্তি", "hi": "ऊर्जा", "tr": "enerji"}}
+{"guid": "N17_236", "translations": {"ro": "stil", "pl": "styl", "th": "สไตล์", "ms": "gaya", "ta": "ஸ்டைல்", "kn": "ಶೈಲಿ", "uk": "стиль", "bn": "স্টাইল", "hi": "शैली", "tr": "üslup"}}
+{"guid": "N17_237", "translations": {"ro": "cauză", "pl": "przyczyna", "th": "สาเหตุ", "ms": "sebab", "ta": "காரணம்", "kn": "ಕಾರಣ", "uk": "причина", "bn": "কারণ", "hi": "कारण", "tr": "neden"}}
+{"guid": "N17_238", "translations": {"ro": "dovadă", "pl": "dowód", "th": "หลักฐาน", "ms": "bukti", "ta": "சான்று", "kn": "ಸಾಕ್ಷ್ಯ", "uk": "доказ", "bn": "প্রমাণ", "hi": "सबूत", "tr": "kanıt"}}
+{"guid": "N17_239", "translations": {"ro": "suflet", "pl": "dusza", "th": "วิญญาณ", "ms": "jiwa", "ta": "ஆத்மா", "kn": "ಆತ್ಮ", "uk": "душа", "bn": "আত্মা", "hi": "आत्मा", "tr": "ruh"}}
+{"guid": "N17_240", "translations": {"ro": "oraș", "pl": "miasto", "th": "เมือง", "ms": "pekan", "ta": "பேரூரம்பூர்", "kn": "ಜಿಲ್ಲೆ", "uk": "місто", "bn": "শহর", "hi": "शहर", "tr": "kasaba"}}
+{"guid": "N17_241", "translations": {"ro": "tip", "pl": "rodzaj", "th": "ประเภท", "ms": "jenis", "ta": "வகை", "kn": "ಪ್ರಕಾರ", "uk": "тип", "bn": "প্রকার", "hi": "प्रकार", "tr": "tür", "bs": "vrsta"}}
+{"guid": "N17_242", "translations": {"ro": "față", "pl": "przód", "th": "ด้านหน้า", "ms": "bahagian hadapan", "ta": "முன்பகுதி", "kn": "ಮುಂಭಾಗ", "uk": "перед", "bn": "সামনে", "hi": "सामने", "tr": "ön"}}
+{"guid": "N17_243", "translations": {"ro": "cartier", "pl": "kwartał", "th": "ย่าน", "ms": "daerah", "ta": "க்வார்ட்டர்", "kn": "ಕವರ್ಟರ್", "uk": "квартал", "bn": "কোয়ার্টার", "hi": "क्वार्टर", "tr": "mahalle"}}
+{"guid": "N17_244", "translations": {"ro": "distracție", "pl": "rozbawienie", "th": "ความบันเทิง", "ms": "hiburan", "ta": "களிப்புணர்வு", "kn": "ಸಂತೋಷ", "uk": "задоволення", "bn": "বিনোদন", "hi": "मनोरंजन", "tr": "eğlence"}}
+{"guid": "N17_245", "translations": {"ro": "atracție", "pl": "atrakcyjność", "th": "แรงดึงดูด", "ms": "daya tarikan", "ta": "கவனத்தைด்?", "kn": "ಆಕರ್ಷಕತೆ", "uk": "привабливість", "bn": "আকর্ষণ", "hi": "आकर्षकता", "tr": "çekicilik"}}
+{"guid": "N17_246", "translations": {"ro": "confort", "pl": "komfort", "th": "ความสะดวกสบาย", "ms": "keselesaan", "ta": "அருமை", "kn": "ಆರಾಮ", "uk": "комфорт", "bn": "আরাম", "hi": "आराम", "tr": "rahatlık"}}
+{"guid": "N17_247", "translations": {"ro": "stare", "pl": "stan", "th": "สภาพ", "ms": "keadaan", "ta": "நிலை", "kn": "ಸ್ಥಿತಿ", "uk": "стан", "bn": "অবস্থা", "hi": "स्थिति", "tr": "durum"}}
+{"guid": "N17_248", "translations": {"ro": "merit", "pl": "uznanie", "th": "เครดิต", "ms": "penghargaan", "ta": "பகுதிமேடை", "kn": "ಪ್ರಶಂಸೆ", "uk": "визнання", "bn": "শ্রেয়স", "hi": "प्रशंसा", "tr": "takdir"}}
+{"guid": "N17_249", "translations": {"ro": "daună", "pl": "szkoda", "th": "ความเสียหาย", "ms": "kerosakan", "ta": "நேகம்", "kn": "ಹಾನಿ", "uk": "шкода", "bn": "ক্ষতি", "hi": "नुकसान", "tr": "hasar"}}
+{"guid": "N17_250", "translations": {"ro": "datorie", "pl": "dług", "th": "หนี้", "ms": "hutang", "ta": "பரிவர்த்தனை", "kn": "ಬಡ್ಡಿ", "uk": "борг", "bn": "ঋণ", "hi": "ऋण", "tr": "borç"}}
+{"guid": "N17_251", "translations": {"ro": "detaliu", "pl": "szczegół", "th": "รายละเอียด", "ms": "perincian", "ta": "விவரம்", "kn": "ವಿವರ", "uk": "деталь", "bn": "বিস্তারিত", "hi": "विवरण", "tr": "ayrıntı"}}
+{"guid": "N17_252", "translations": {"ro": "educație", "pl": "edukacja", "th": "การศึกษา", "ms": "pendidikan", "ta": "கல்வி", "kn": "ಶಿಕ್ಷಣ", "uk": "освіта", "bn": "শিক্ষা", "hi": "शिक्षा", "tr": "eğitim"}}
+{"guid": "N17_253", "translations": {"ro": "eroare", "pl": "błąd", "th": "ข้อผิดพลาด", "ms": "kesilapan", "ta": "தப்பு", "kn": "ದೋಷ", "uk": "помилка", "bn": "ত্রুটি", "hi": "त्रुटि", "tr": "hata"}}
+{"guid": "N17_254", "translations": {"ro": "eveniment", "pl": "wydarzenie", "th": "เหตุการณ์", "ms": "peristiwa", "ta": "நிகழ்வு", "kn": "เหตุการณ์", "uk": "подія", "bn": "ঘটনা", "hi": "घटना", "tr": "olay"}}
+{"guid": "N17_255", "translations": {"ro": "existență", "pl": "istnienie", "th": "การมีอยู่", "ms": "kewujudan", "ta": "உயிர்மை", "kn": "ಅಸ್ತಿತ್ವ", "uk": "існування", "bn": "অস্তিত্ব", "hi": "अस्तित्व", "tr": "varoluş"}}
+{"guid": "N17_256", "translations": {"ro": "literatură de ficțiune", "pl": "literatura piękna", "th": "วรรณกรรมเหตุการณ์สมมติ", "ms": "fiksyen", "ta": "புனைகதை இலக்கியம்", "kn": "ಕಲ್ಪನಾತ್ಮಕ ಸಾಹಿತ್ಯ", "uk": "художня література", "bn": "কল্পনাযোগ্য সাহিত্য", "hi": "काल्पनिक साहित्य", "tr": "kurgu"}}
+{"guid": "N17_257", "translations": {"ro": "armoniei", "pl": "harmonia", "th": "ความกลมกลืน", "ms": "keharmonian", "ta": "இணக்கம்", "kn": "ಸಮ್ಮಿಲನ", "uk": "гармонія", "bn": "সামঞ্জস্য", "hi": "सामंजस्य", "tr": "uyum"}}
+{"guid": "N17_258", "translations": {"ro": "umor", "pl": "humor", "th": "อารมณ์ขัน", "ms": "kelucuan", "ta": "விண்ணோக்கமாக்கம்", "kn": "ಹಾಸ್ಯ", "uk": "гумор", "bn": "রসিকতা", "hi": "हास्य", "tr": "mizah"}}
+{"guid": "N17_259", "translations": {"ro": "impuls", "pl": "impuls", "th": "แรงกระตุ้น", "ms": "dorongan", "ta": "உற்சாகம்", "kn": "ಪ್ರೇರಣೆ", "uk": "імпульс", "bn": "প্রবৃত্তি", "hi": "प्रेरणा", "tr": "dürtü"}}
+{"guid": "N17_260", "translations": {"ro": "industrie", "pl": "przemysł", "th": "อุตสาหกรรม", "ms": "industri", "ta": "பொருட்காட்சி", "kn": "ಕೌಶಲ್ಯೋದ್ಯಮ", "uk": "промисловість", "bn": "শিল্প", "hi": "उद्योग", "tr": "sanayi"}}
+{"guid": "N17_261", "translations": {"ro": "asigurare", "pl": "ubezpieczenie", "th": "ประกันภัย", "ms": "insurans", "ta": "காப்பீடு", "kn": "ವಿಮೆ", "uk": "страхування", "bn": "বীমা", "hi": "बीमा", "tr": "sigorta"}}
+{"guid": "N17_262", "translations": {"ro": "învățare", "pl": "uczenie się", "th": "การเรียนรู้", "ms": "pembelajaran", "ta": "கற்றல்", "kn": "ಅಧ್ಯಯನ", "uk": "навчання", "bn": "অধয়ন", "hi": "अधिगमन", "tr": "öğrenme"}}
+{"guid": "N17_263", "translations": {"ro": "sursă_de_trăinicie", "pl": "środek_do_życia", "th": "ชีพจรมหา", "ms": "mata pencarian", "ta": "வாழ்க்கைச்செலவு", "kn": "ಉದ್ಯೋಗ", "uk": "мати_засоби_до_викладу", "bn": "জীবিকা", "hi": "जीविका", "tr": "geçim kaynağı"}}
+{"guid": "N17_264", "translations": {"ro": "organizație", "pl": "organizacja", "th": "องค์กร", "ms": "organisasi", "ta": "அமைப்பு", "kn": "ಸಂಘಟನೆ", "uk": "організація", "bn": "সংগঠন", "hi": "संगठन", "tr": "örgüt"}}
+{"guid": "N17_265", "translations": {"ro": "plăcere", "pl": "przyjemność", "th": "ความสุข", "ms": "keseronokan", "ta": "இன்பம்", "kn": "ಸಂತೋಷ", "uk": "задоволення", "bn": "আনন্দ", "hi": "आनंद", "tr": "zevk"}}
+{"guid": "N17_266", "translations": {"ro": "profit", "pl": "zysk", "th": "กำไร", "ms": "keuntungan", "ta": "லாபம்", "kn": "ಲಾಭ", "uk": "прибуток", "bn": "লাভ", "hi": "लाभ", "tr": "kâr"}}
+{"guid": "N17_267", "translations": {"ro": "proprietate", "pl": "własność", "th": "ทรัพย์สิน", "ms": "harta benda", "ta": "சொத்து", "kn": "ಸ್ವತ್ತು", "uk": "власність", "bn": "সম্পত্তি", "hi": "संपत्ति", "tr": "mülk"}}
+{"guid": "N17_268", "translations": {"ro": "calitate", "pl": "jakość", "th": "คุณภาพ", "ms": "kualiti", "ta": "தரம்", "kn": "ಗುಣಮಟ್ಟ", "uk": "якість", "bn": "গুণমান", "hi": "गुणवत्ता", "tr": "kalite"}}
+{"guid": "N17_269", "translations": {"ro": "înregistrare", "pl": "rekord", "th": "บันทึก", "ms": "rekod", "ta": "பதிவு", "kn": "ದಾಖಲೆ", "uk": "запис", "bn": "রেকর্ড", "hi": "रिकॉर्ड", "tr": "kayıt"}}
+{"guid": "N17_270", "translations": {"ro": "relație", "pl": "relacja", "th": "ความสัมพันธ์", "ms": "hubungan", "ta": "உறவு", "kn": "ಸಂಬಂಧ", "uk": "відношення", "bn": "সম্পর্ক", "hi": "संबंध", "tr": "ilişki"}}
+{"guid": "N17_271", "translations": {"ro": "respect", "pl": "szacunek", "th": "ความเคารพ", "ms": "rasa hormat", "ta": "மரியாதை", "kn": "ಗೌರವ", "uk": "повага", "bn": "সম্মান", "hi": "सम्मान", "tr": "saygı"}}
+{"guid": "N17_272", "translations": {"ro": "recompensă", "pl": "nagroda", "th": "รางวัล", "ms": "ganjaran", "ta": "பரிசு", "kn": "ಬಹುಮಾನ", "uk": "нагорода", "bn": "পুরস্কার", "hi": "इनाम", "tr": "ödül"}}
+{"guid": "N17_273", "translations": {"ro": "ritm", "pl": "rytm", "th": "จังหวะ", "ms": "irama", "ta": "இதம்", "kn": "ರಿದ್ಮ್", "uk": "ритм", "bn": "রিদম", "hi": "ताल", "tr": "ritim"}}
+{"guid": "N17_274", "translations": {"ro": "sex", "pl": "płeć", "th": "เพศ", "ms": "jantina", "ta": "பாலினம்", "kn": "ಲಿಂಗ", "uk": "стать", "bn": "লিঙ্গ", "hi": "लिंग", "tr": "cinsiyet"}}
+{"guid": "N17_275", "translations": {"ro": "declarație", "pl": "oświadczenie", "th": "คำแถลง", "ms": "pernyataan", "ta": "அறிக்கை", "kn": "ಪ್ರಕಟನೆ", "uk": "заява", "bn": "ঘোষণা", "hi": "बयान", "tr": "ifade"}}
+{"guid": "N17_276", "translations": {"ro": "structură", "pl": "struktura", "th": "โครงสร้าง", "ms": "struktur", "ta": "கட்டமைப்பு", "kn": "ರಚನೆ", "uk": "структура", "bn": "গঠন", "hi": "संरचना", "tr": "yapı"}}
+{"guid": "N17_277", "translations": {"ro": "substanță", "pl": "substancja", "th": "สาร", "ms": "bahan", "ta": "வஸ்து", "kn": "ದ್ರವ್ಯ", "uk": "речовина", "bn": "পদার্থ", "hi": "पदार्थ", "tr": "madde"}}
+{"guid": "N17_278", "translations": {"ro": "tendință", "pl": "tendencja", "th": "แนวโน้ม", "ms": "kecenderungan", "ta": "பண்புகள்", "kn": "ಪ್ರವೃತ್ತಿ", "uk": "тенденція", "bn": "প্রবণতা", "hi": "प्रवृत्ति", "tr": "eğilim"}}
+{"guid": "N17_279", "translations": {"ro": "șmecherie", "pl": "sztuczka", "th": "เล่ห์กล", "ms": "muslihat", "ta": "மோசடி", "kn": "ಚತುರ್ಯ", "uk": "шахрайство", "bn": "চালাকি", "hi": "धोखा", "tr": "hile"}}
+{"guid": "N17_280", "translations": {"ro": "deșeu", "pl": "odpad", "th": "ของเสีย", "ms": "sisa", "ta": "அவிழிப்பு", "kn": "ವರ್ಜ್ಯ", "uk": "відхід", "bn": "নির্বর্জন", "hi": "कचरा", "tr": "atık"}}
+{"guid": "N17_281", "translations": {"ro": "crimă", "pl": "przestępstwo", "th": "อาชญากรรม", "ms": "jenayah", "ta": "பாவம்", "kn": "ಅಪರಾಧ", "uk": "злочин", "bn": "অপরাধ", "hi": "अपराध", "tr": "suç"}}
+{"guid": "N17_282", "translations": {"ro": "ofertă", "pl": "oferta", "th": "ข้อเสนอ", "ms": "tawaran", "ta": "ஆஃபர்", "kn": "ಏರ್ಪಡಿಸುವಿಕೆ", "uk": "пропозиція", "bn": "প্রস্তাব", "hi": "प्रस्ताव", "tr": "teklif"}}
+{"guid": "N17_283", "translations": {"ro": "preț", "pl": "cena", "th": "ราคา", "ms": "harga", "ta": "விலை", "kn": "ಬೆಲೆ", "uk": "ціна", "bn": "মূল্য", "hi": "कीमत", "tr": "fiyat"}}
+{"guid": "N17_284", "translations": {"ro": "lucru", "pl": "rzecz", "th": "สิ่ง", "ms": "benda", "ta": "வச্তু", "kn": "ವಸ್ತು", "uk": "річ", "bn": "বস্তু", "hi": "वस्तु", "tr": "şey", "bs": "stvar"}}
+{"guid": "N17_285", "translations": {"ro": "umbră", "pl": "cień", "th": "ร่มเงา", "ms": "tempat teduh", "ta": "நிழல்", "kn": "ಛಾಯೆ", "uk": "тінь", "bn": "ছায়া", "hi": "छाया", "tr": "gölge"}}
+{"guid": "N17_286", "translations": {"ro": "metodă", "pl": "sposób", "th": "วิธี", "ms": "cara", "ta": "முறையை", "kn": "ತರುಗು", "uk": "спосіб", "bn": "পদ্ধতি", "hi": "तरीका", "tr": "yöntem", "bs": "način"}}
+{"guid": "N17_287", "translations": {"ro": "vârf", "pl": "wierzchołek", "th": "ยอด", "ms": "puncak", "ta": "சிகரம்", "kn": "ಶಿಖರ", "uk": "вершина", "bn": "শৃঙ্গ", "hi": "शीर्ष", "tr": "zirve"}}
+{"guid": "N17_288", "translations": {"ro": "sprijin", "pl": "wsparcie", "th": "การสนับสนุน", "ms": "sokongan", "ta": "ஆதரவு", "kn": "ಬೆಂಬಲ", "uk": "підтримка", "bn": "সমর্থন", "hi": "सहायता", "tr": "destek"}}
+{"guid": "N17_289", "translations": {"ro": "comportament", "pl": "zachowanie", "th": "พฤติกรรม", "ms": "tingkah laku", "ta": "நடத்தை", "kn": "ವರ್ತನೆ", "uk": "поведінка", "bn": "আচরণ", "hi": "व्यवहार", "tr": "davranış"}}
+{"guid": "N17_290", "translations": {"ro": "rază", "pl": "promień", "th": "ลำแสง", "ms": "sinar", "ta": "கதிர்", "kn": "ಕಿರಣ", "uk": "промінь", "bn": "তরঙ্গ", "hi": "किरण", "tr": "ışın"}}
+{"guid": "N17_291", "translations": {"ro": "plan", "pl": "płaszczyzna", "th": "ระนาบ", "ms": "permukaan rata", "ta": "சமம்", "kn": "Samatalya", "uk": "площина", "bn": "সমতলতা", "hi": "समतलता", "tr": "düzlem"}}
+{"guid": "N17_292", "translations": {"ro": "tonalitate", "pl": "tonalność", "th": "โทนัลลิตี้", "ms": "nada dasar", "ta": "பாடத்தொகுப்பு", "kn": "ಶ್ರೇಣಿ (ಸಂಗೀತ)", "uk": "тональність", "bn": "টোনালিটি", "hi": "स्वरप्रधानता", "tr": "tonalite"}}
+{"guid": "N17_293", "translations": {"ro": "rock", "pl": "rock", "th": "ร็อก", "ms": "muzik rock", "ta": "ராக்", "kn": "ರಾಕ್", "uk": "рок", "bn": "রক", "hi": "रॉक", "tr": "rock müzik", "bs": "rok"}}
+{"guid": "N17_294", "translations": {"ro": "scară", "pl": "skala", "th": "มาตราส่วน", "ms": "skala", "ta": "அளவுக்கோலம்", "kn": "ಮಾಪನಮಾನ", "uk": "масштаб", "bn": "পরিমাপকাঠামো", "hi": "स्केल", "tr": "ölçek"}}
+{"guid": "N17_295", "translations": {"ro": "acțiune", "pl": "akcja", "th": "หุ้น", "ms": "saham", "ta": "பங்குகள்", "kn": "ಶೇರು", "uk": "акція", "bn": "শেয়ার", "hi": "शेयर", "tr": "hisse senedi", "bs": "dionica"}}
+{"guid": "N17_296", "translations": {"ro": "undă", "pl": "fala", "th": "คลื่น", "ms": "gelombang", "ta": "அலை", "kn": "ಅಲೆ", "uk": "хвиля", "bn": "তরঙ্গ", "hi": "तरंग", "tr": "dalga"}}
+{"guid": "N17_297", "translations": {"ms": "kontrasepsi", "hi": "गर्भनिरोध", "tr": "doğum kontrolü"}}
+{"guid": "N17_298", "translations": {"ms": "hak asasi manusia", "hi": "मानवाधिकार", "tr": "insan hakkı"}}
+{"guid": "N17_299", "translations": {"ms": "kebebasan bersuara", "hi": "अभिव्यक्ति की स्वतंत्रता", "tr": "ifade özgürlüğü"}}
+{"guid": "N17_300", "translations": {"ms": "pendapat umum", "hi": "जनमत", "tr": "kamuoyu"}}
+{"guid": "N17_301", "translations": {"ms": "aksiom", "hi": "स्वयंसिद्ध", "tr": "aksiyom"}}
+{"guid": "N17_302", "translations": {"ms": "fraktal", "hi": "फ्रैक्टल", "tr": "fraktal"}}
+{"guid": "N17_303", "translations": {"ms": "ikatan", "hi": "संबंध", "tr": "bağ"}}
+{"guid": "N17_304", "translations": {"ms": "sintesis", "hi": "संश्लेषण", "tr": "sentez"}}
+{"guid": "N17_305", "translations": {"ms": "fenomena", "hi": "असाधारण व्यक्ति या वस्तु", "tr": "fenomen"}}
+{"guid": "N17_306", "translations": {"ms": "tema", "hi": "विषय", "tr": "tema"}}
+{"guid": "N17_307", "translations": {"ms": "versi", "hi": "संस्करण", "tr": "sürüm"}}
+{"guid": "N17_308", "translations": {"ms": "kesetiaan", "hi": "निष्ठा", "tr": "bağlılık"}}
+{"guid": "N17_309", "translations": {"ms": "mitos", "hi": "मिथक", "tr": "mit"}}
+{"guid": "N17_310", "translations": {"ms": "alam ghaib", "hi": "अलौकिक जगत", "tr": "doğaüstü"}}
+{"guid": "N17_311", "translations": {"ms": "konsep", "hi": "अवधारणा", "tr": "kavram"}}
+{"guid": "N17_312", "translations": {"ms": "keperluan", "hi": "आवश्यकता", "tr": "gereklilik"}}
+{"guid": "N17_313", "translations": {"ms": "rancangan", "hi": "योजना", "tr": "plan"}}
+{"guid": "N17_314", "translations": {"ms": "justifikasi", "hi": "औचित्य", "tr": "gerekçe"}}
+{"guid": "N17_315", "translations": {"ms": "pernyataan", "hi": "प्रतिज्ञप्ति", "tr": "önerme"}}
+{"guid": "N17_316", "translations": {"ms": "persetujuan", "hi": "सहमति", "tr": "rıza"}}
+{"guid": "N17_317", "translations": {"ms": "rasional", "hi": "औचित्य", "tr": "gerekçe"}}
+{"guid": "N17_318", "translations": {"ms": "piawaian", "hi": "मानक", "tr": "standart"}}
+{"guid": "N17_319", "translations": {"ms": "contoh", "hi": "उदाहरण", "tr": "örnek"}}
+{"guid": "N17_320", "translations": {"ms": "asas", "hi": "आधार", "tr": "temel"}}
+{"guid": "N17_321", "translations": {"ms": "asal usul", "hi": "उद्गम", "tr": "köken"}}
+{"guid": "N17_322", "translations": {"ms": "unsur", "hi": "तत्व", "tr": "unsur"}}
+{"guid": "N17_323", "translations": {"ms": "kompromi", "hi": "समझौता", "tr": "ödünleşim"}}
+{"guid": "N17_324", "translations": {"ms": "kala", "hi": "काल", "tr": "zaman"}}
+{"guid": "N17_325", "translations": {"ms": "bentuk tunggal", "hi": "एकवचन", "tr": "tekil"}}
+{"guid": "N17_326", "translations": {"ms": "gender", "hi": "लिंग पहचान", "tr": "toplumsal cinsiyet"}}
+{"guid": "N17_327", "translations": {"ms": "takrif", "hi": "परिभाषा", "tr": "tanım"}}
+{"guid": "N17_328", "translations": {"ms": "sinonim", "hi": "पर्यायवाची", "tr": "eş anlamlı sözcük"}}
+{"guid": "N17_329", "translations": {"ms": "monisme", "hi": "अद्वैतवाद", "tr": "monizm"}}
+{"guid": "N17_330", "translations": {"ms": "sebab-akibat", "hi": "कार्य-कारण संबंध", "tr": "nedensellik"}}
+{"guid": "N17_331", "translations": {"ms": "kesilapan logik", "hi": "तर्कदोष", "tr": "mantık safsatası"}}
+{"guid": "N17_332", "translations": {"ms": "klitik", "hi": "क्लिटिक", "tr": "klitik"}}
+{"guid": "N17_333", "translations": {"ms": "model", "hi": "प्रतिमान", "tr": "örnek"}}
+{"guid": "N17_334", "translations": {"ms": "kasus vokatif", "hi": "संबोधन कारक", "tr": "seslenme hâli"}}
+{"guid": "N17_335", "translations": {"ms": "aspek", "hi": "पहलू", "tr": "yön"}}
+{"guid": "N17_336", "translations": {"ms": "diglosia", "hi": "द्विरूपता", "tr": "diglosi"}}
+{"guid": "N17_337", "translations": {"ms": "garis isoglos", "hi": "समभाषा रेखा", "tr": "izoglos"}}
+{"guid": "N17_338", "translations": {"ms": "kawasan linguistik", "hi": "भाषा संघ", "tr": "dil birliği"}}
+{"guid": "N17_339", "translations": {"ms": "matlamat", "hi": "लक्ष्य", "tr": "hedef"}}
+{"guid": "N17_340", "translations": {"ms": "kepentingan", "hi": "ख़ातिर", "tr": "hatır"}}
