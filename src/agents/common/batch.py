@@ -24,7 +24,6 @@ from clients.batch_queue import BatchQueue, get_batch_manager
 from concepts.generate.batch import complete_concept_body_batch
 from util.telemetry import CostConfig
 from storage.backend import create_session as create_backend_session
-from storage.translation_helpers import LANGUAGE_FIELDS, set_translation
 from sentences.batch_completion import apply_sentence_translation_results
 
 logger = logging.getLogger(__name__)
@@ -206,88 +205,9 @@ def _apply_sentence_translations(
 def _apply_voras_translations(
     requests: Iterable[BatchQueue], session: Any, batch_id: str
 ) -> Dict[str, int]:
-    from storage.crud.operation_log import log_translation_change
-    from storage.models.schema import Lemma
+    from words.translation_batch import apply_populate_results
 
-    results = {"processed": 0, "updated": 0, "failed": 0}
-
-    languages_to_update = [lc for lc in LANGUAGE_FIELDS.keys() if lc != "lt"]
-    translation_field_map = {
-        "zh": "chinese_translation",
-        "ko": "korean_translation",
-        "fr": "french_translation",
-        "sw": "swahili_translation",
-        "vi": "vietnamese_translation",
-    }
-
-    for req in requests:
-        results["processed"] += 1
-
-        try:
-            if not req.response_body:
-                continue
-            response_data = json.loads(req.response_body)
-            translations = {}
-            if response_data.get("output"):
-                for output_item in response_data["output"]:
-                    if output_item.get("type") == "message" and output_item.get("content"):
-                        for content_item in output_item["content"]:
-                            if content_item.get("type") == "output_text":
-                                text_content = content_item.get("text", "")
-                                if text_content:
-                                    translations = json.loads(text_content)
-                                break
-
-            if not translations:
-                logger.warning("No translations found for request %s", req.custom_id)
-                results["failed"] += 1
-                continue
-
-            lemma_id = req.entity_id
-            lemma = session.query(Lemma).filter_by(id=lemma_id).first()
-
-            if not lemma:
-                logger.warning("Lemma %s not found for request %s", lemma_id, req.custom_id)
-                results["failed"] += 1
-                continue
-
-            updated_count = 0
-            for lang_code in languages_to_update:
-                llm_field = translation_field_map.get(lang_code)
-                translation = translations.get(llm_field, "").strip()
-
-                if translation:
-                    old_translation, new_translation = set_translation(
-                        session, lemma, lang_code, translation
-                    )
-                    log_translation_change(
-                        session=session,
-                        source="voras-agent/batch",
-                        operation_type="translation",
-                        lemma_id=lemma.id,
-                        language_code=lang_code,
-                        old_translation=old_translation,
-                        new_translation=new_translation,
-                    )
-                    updated_count += 1
-
-            if updated_count > 0:
-                session.commit()
-                results["updated"] += 1
-            else:
-                results["failed"] += 1
-
-        except Exception as exc:
-            results["failed"] += 1
-            session.rollback()
-            logger.error(
-                "Failed to apply voras translations for request %s (batch %s): %s",
-                req.custom_id,
-                batch_id,
-                exc,
-            )
-
-    return results
+    return apply_populate_results(requests, session, batch_id)
 
 
 def _report_concept_seed_results(results: Dict[str, int], agent_name: str) -> None:
@@ -306,7 +226,8 @@ def _report_voras_results(results: Dict[str, int]) -> None:
     logger.info("BATCH RESULTS SUMMARY (VORAS)")
     logger.info("=" * 80)
     logger.info("Total requests processed: %s", results["processed"])
-    logger.info("Lemmas updated: %s", results["updated"])
+    logger.info("Requests that wrote translations: %s", results["updated"])
+    logger.info("Translations written: %s", results.get("translations", 0))
     logger.info("Failed: %s", results["failed"])
     logger.info("=" * 80)
 

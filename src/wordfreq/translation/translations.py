@@ -4,6 +4,7 @@
 
 import json
 import logging
+from dataclasses import dataclass
 from typing import Any, Callable, Dict, List, Optional, Tuple
 
 import util.prompt_loader
@@ -53,47 +54,51 @@ def _requests_ancient_language(languages: List[str]) -> bool:
     return any(lang_code in ANCIENT_LANGUAGE_GROUP for lang_code in languages)
 
 
-def query_translations(
-    client: Any,
+@dataclass
+class TranslationPrompt:
+    """Everything one word-translation request sends: system context, prompt and schema."""
+
+    context: str
+    prompt: str
+    schema: Schema
+
+
+def build_translation_prompt(
     english_word: str,
     reference_translation: Tuple[str, str],
     definition: str,
     pos_type: str,
-    get_session_func: Callable,
     pos_subtype: Optional[str] = None,
     languages: Optional[List[str]] = None,
-    model: Optional[str] = None,
-) -> Tuple[Dict[str, Any], bool]:
-    """
-    Query LLM to generate translations for a word with known English, reference translation, and definition.
+) -> Optional[TranslationPrompt]:
+    """Build the word-translation request without sending it.
 
-    This is used when you already have the English lemma, one reference translation, and definition
-    in the database, and you just need to generate translations to other languages.
+    Shared by :func:`query_translations` and the OpenAI Batch populate path
+    (``words.translation_batch``), so a batched word gets exactly the prompt a
+    synchronous one would.
 
     Args:
-        client: UnifiedLLMClient instance
         english_word: English lemma form
-        reference_translation: Tuple of (language_code, translation) for a known translation in another language
-                              e.g., ('lt', 'valgyti') or ('fr', 'manger'). Used as context for generating other translations.
+        reference_translation: (language_code, translation) of a known translation,
+            e.g. ('lt', 'valgyti'). Used as disambiguating context.
         definition: Definition of the word
         pos_type: Part of speech (noun, verb, etc.)
-        get_session_func: Function to get database session
         pos_subtype: Optional part of speech subtype
-        languages: List of ISO language codes to translate to (e.g., ['fr', 'es', 'de']).
-                  If None, uses default set: ['zh', 'ko', 'fr', 'es', 'de', 'pt', 'sw', 'vi']
+        languages: ISO language codes to translate to. If None, uses
+            ['zh', 'ko', 'fr', 'es', 'de', 'pt', 'sw', 'vi']. Capped at
+            MAX_LLM_LANGUAGES_PER_OPERATION.
 
     Returns:
-        Tuple of (translations dict, success flag)
-        translations dict has keys like: chinese_translation, french_translation, spanish_translation, etc.
+        The prompt, or None when the inputs are unusable (logged).
     """
     if not english_word or not reference_translation or len(reference_translation) != 2:
         logger.error("English word and reference translation (lang_code, translation) are required")
-        return {}, False
+        return None
 
     ref_lang_code, ref_translation = reference_translation
     if not ref_lang_code or not ref_translation:
         logger.error("Reference translation must contain both language code and translation text")
-        return {}, False
+        return None
 
     # Use default languages if not specified
     if languages is None:
@@ -148,7 +153,7 @@ def query_translations(
 
     if not schema_properties:
         logger.error("No valid languages specified")
-        return {}, False
+        return None
 
     schema = Schema(
         name="Translations",
@@ -193,10 +198,57 @@ def query_translations(
         languages_list=languages_list,
         disambiguation_instruction=disambiguation_instruction,
     )
+    return TranslationPrompt(context=context, prompt=prompt, schema=schema)
+
+
+def query_translations(
+    client: Any,
+    english_word: str,
+    reference_translation: Tuple[str, str],
+    definition: str,
+    pos_type: str,
+    get_session_func: Callable,
+    pos_subtype: Optional[str] = None,
+    languages: Optional[List[str]] = None,
+    model: Optional[str] = None,
+) -> Tuple[Dict[str, Any], bool]:
+    """
+    Query LLM to generate translations for a word with known English, reference translation, and definition.
+
+    This is used when you already have the English lemma, one reference translation, and definition
+    in the database, and you just need to generate translations to other languages.
+
+    Args:
+        client: UnifiedLLMClient instance
+        english_word: English lemma form
+        reference_translation: Tuple of (language_code, translation) for a known translation in another language
+                              e.g., ('lt', 'valgyti') or ('fr', 'manger'). Used as context for generating other translations.
+        definition: Definition of the word
+        pos_type: Part of speech (noun, verb, etc.)
+        get_session_func: Function to get database session
+        pos_subtype: Optional part of speech subtype
+        languages: List of ISO language codes to translate to (e.g., ['fr', 'es', 'de']).
+                  If None, uses default set: ['zh', 'ko', 'fr', 'es', 'de', 'pt', 'sw', 'vi']
+
+    Returns:
+        Tuple of (translations dict, success flag)
+        translations dict has keys like: chinese_translation, french_translation, spanish_translation, etc.
+    """
+    built = build_translation_prompt(
+        english_word,
+        reference_translation,
+        definition,
+        pos_type,
+        pos_subtype=pos_subtype,
+        languages=languages,
+    )
+    if built is None:
+        return {}, False
+    prompt = built.prompt
 
     try:
         response = client.generate_chat(
-            prompt=prompt, model=model, json_schema=schema, context=context
+            prompt=prompt, model=model, json_schema=built.schema, context=built.context
         )
         setattr(
             client, "_last_query_cost_usd", float(response.usage.cost) if response.usage else 0.0

@@ -27,7 +27,7 @@ from words.lemma_selection import LemmaQueryBuilder, apply_limit_and_sample_rate
 # Import submodules
 from words import translation_coverage as coverage
 from clients.barsukas_cache import BarsukasCacheClient
-from clients.batch_queue import BatchRequestMetadata, get_batch_manager
+from clients.batch_queue import get_batch_manager
 from storage.backend import create_session as create_backend_session
 from storage.backend.config import BackendType, DataSourceConfig
 from storage.crud.operation_log import log_translation_change
@@ -701,29 +701,27 @@ class TranslationWorkflow:
         self,
         limit: Optional[int] = None,
         dry_run: bool = False,
-        batch_mode: bool = False,
         lemmas: Optional[List[Lemma]] = None,
     ) -> Dict[str, Any]:
         """
         Delete all non-Lithuanian translations and regenerate them fresh.
 
+        There is deliberately no batch mode: deleting first and regenerating
+        hours later leaves every word untranslated in between.  To fill gaps
+        through the Batch API, use populate (``words.translation_batch``).
+
         Args:
             limit: Maximum number of words to process
             dry_run: If True, only report what would be done without making changes
-            batch_mode: If True, queue batch requests instead of making synchronous calls
             lemmas: Optional pre-filtered list of lemmas to process (if None, queries all curated)
 
         Returns:
             Dictionary with regeneration results
         """
-        if batch_mode:
-            logger.info("Starting translation regeneration in BATCH MODE (queueing requests)...")
-        else:
-            logger.info("Starting translation regeneration (delete + regenerate all non-LT)...")
+        logger.info("Starting translation regeneration (delete + regenerate all non-LT)...")
 
         session = self.get_session()
         client = self.get_linguistic_client()
-        batch_manager = get_batch_manager(debug=self.debug) if batch_mode else None
 
         # All languages except Lithuanian
         languages_to_regenerate = [lc for lc in LANGUAGE_FIELDS.keys() if lc != "lt"]
@@ -733,7 +731,6 @@ class TranslationWorkflow:
             "total_words_processed": 0,
             "total_translations_added": 0,
             "total_failed": 0,
-            "batch_requests_queued": 0,
             "llm_cost_usd": 0.0,
             "by_language": {
                 lang_code: {
@@ -793,60 +790,50 @@ class TranslationWorkflow:
                         )
                         continue
 
-                    if batch_mode:
-                        # Queue batch request - implementation would go here using batch module
-                        # For brevity, just increment counter
-                        results["batch_requests_queued"] += 1
-                        if i % 100 == 0:
-                            logger.info(
-                                f"Queued {results['batch_requests_queued']} batch requests..."
-                            )
-                    else:
-                        # Synchronous mode: use query_translations method - ONE CALL
-                        # Use Lithuanian as reference translation
-                        translations, success = client.query_translations(
-                            english_word=lemma.lemma_text,
-                            reference_translation=(
-                                "lt",
-                                get_translation(session, lemma, "lt") or "",
-                            ),
-                            definition=lemma.definition_text,
-                            pos_type=lemma.pos_type,
-                            pos_subtype=lemma.pos_subtype,
-                        )
+                    # Use Lithuanian as reference translation - ONE CALL
+                    translations, success = client.query_translations(
+                        english_word=lemma.lemma_text,
+                        reference_translation=(
+                            "lt",
+                            get_translation(session, lemma, "lt") or "",
+                        ),
+                        definition=lemma.definition_text,
+                        pos_type=lemma.pos_type,
+                        pos_subtype=lemma.pos_subtype,
+                    )
 
-                        if not success or not translations:
-                            logger.warning(f"Failed to get translations for '{lemma.lemma_text}'")
-                            for lang_code in languages_to_regenerate:
-                                results["by_language"][lang_code]["failed"] += 1
-                            results["total_failed"] += 1
-                            continue
-
-                        # Add all non-Lithuanian translations
-                        added_this_word = 0
+                    if not success or not translations:
+                        logger.warning(f"Failed to get translations for '{lemma.lemma_text}'")
                         for lang_code in languages_to_regenerate:
-                            field_name, language_name = LANGUAGE_FIELDS[lang_code]
-                            llm_field = LANG_CODE_TO_LLM_FIELD.get(lang_code, "")
-                            translation = translations.get(llm_field, "").strip()
+                            results["by_language"][lang_code]["failed"] += 1
+                        results["total_failed"] += 1
+                        continue
 
-                            if translation:
-                                setattr(lemma, field_name, translation)
-                                logger.debug(f"  Added {language_name}: '{translation}'")
-                                results["by_language"][lang_code]["added"] += 1
-                                results["total_translations_added"] += 1
-                                added_this_word += 1
-                            else:
-                                logger.warning(
-                                    f"  LLM returned empty {language_name} translation for '{lemma.lemma_text}'"
-                                )
-                                results["by_language"][lang_code]["failed"] += 1
-                                results["total_failed"] += 1
+                    # Add all non-Lithuanian translations
+                    added_this_word = 0
+                    for lang_code in languages_to_regenerate:
+                        field_name, language_name = LANGUAGE_FIELDS[lang_code]
+                        llm_field = LANG_CODE_TO_LLM_FIELD.get(lang_code, "")
+                        translation = translations.get(llm_field, "").strip()
 
-                        # Commit all updates for this word at once
-                        session.commit()
-                        logger.info(
-                            f"Added {added_this_word}/{len(languages_to_regenerate)} translations for '{lemma.lemma_text}' (GUID: {lemma.guid})"
-                        )
+                        if translation:
+                            setattr(lemma, field_name, translation)
+                            logger.debug(f"  Added {language_name}: '{translation}'")
+                            results["by_language"][lang_code]["added"] += 1
+                            results["total_translations_added"] += 1
+                            added_this_word += 1
+                        else:
+                            logger.warning(
+                                f"  LLM returned empty {language_name} translation for '{lemma.lemma_text}'"
+                            )
+                            results["by_language"][lang_code]["failed"] += 1
+                            results["total_failed"] += 1
+
+                    # Commit all updates for this word at once
+                    session.commit()
+                    logger.info(
+                        f"Added {added_this_word}/{len(languages_to_regenerate)} translations for '{lemma.lemma_text}' (GUID: {lemma.guid})"
+                    )
 
                 except Exception as e:
                     logger.error(f"Error processing '{lemma.lemma_text}': {e}")

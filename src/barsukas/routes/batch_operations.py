@@ -12,7 +12,7 @@ from clients.batch_queue import (
     create_batch_database_session,
 )
 from clients.openai.batch_client import BatchStatus, OpenAIBatchClient
-from sentences.batch_completion import apply_results_for_agent
+from barsukas.batch_poller import apply_completed_requests
 
 bp = Blueprint("batch_operations", __name__, url_prefix="/batch-operations")
 
@@ -174,7 +174,7 @@ def check_batch_status(batch_id: str) -> ResponseReturnValue:
                 by_agent.setdefault(row.agent_name, []).append(row)
             for agent_name, rows in by_agent.items():
                 try:
-                    result = apply_results_for_agent(agent_name, rows, g.db, batch_id)
+                    result = apply_completed_requests(agent_name, rows, g.db, batch_id)
                     g.db.commit()
                     flash(
                         f"Applied {agent_name}: {result['updated']} updated, {result['failed']} failed.",

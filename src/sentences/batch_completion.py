@@ -68,10 +68,17 @@ def apply_results_for_agent(
 
     The Phase-1 (translate-only) and combined/Phase-3 batches have different
     response schemas; the agent name on each BatchQueue row tells us which.
+
+    Raises:
+        ValueError: For an agent that is not a sentence agent.  Falling back to
+            the sentence applier would read another agent's entity ids (lemma
+            ids, say) as sentence ids.
     """
     if agent_name == TRANSLATE_AGENT_NAME:
         return apply_phase1_translation_results(requests, session, batch_id)
-    return apply_sentence_translation_results(requests, session, batch_id)
+    if agent_name == DECOMPOSE_AGENT_NAME:
+        return apply_sentence_translation_results(requests, session, batch_id)
+    raise ValueError(f"No sentence batch applier for agent '{agent_name}'")
 
 
 def apply_sentence_translation_results(
