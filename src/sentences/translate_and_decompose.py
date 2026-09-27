@@ -188,10 +188,22 @@ def _find_missing_surface_forms(
 
     missing: List[str] = []
     for token in translation_tokens:
-        if token in surface_token_set:
+        if token in surface_token_set or _elided_parts_covered(token, surface_token_set):
             continue
         missing.append(token)
     return translation_tokens, missing
+
+
+# French and Italian write an elided article or pronoun onto the next word
+# ("l’abdomen", "d’encre", "dell’acqua"), so whitespace makes it one token, while
+# the LLM rightly returns "l’" and "abdomen" as two words.
+_ELISION_APOSTROPHES = "'’ʼ"
+
+
+def _elided_parts_covered(token: str, surface_token_set: set[str]) -> bool:
+    """True when a token joined by an elision apostrophe is covered part by part."""
+    parts = [part for part in re.split(f"[{_ELISION_APOSTROPHES}]", token) if part]
+    return len(parts) > 1 and all(part in surface_token_set for part in parts)
 
 
 # How many missing surface forms to tolerate before failing a decomposition.
