@@ -587,10 +587,11 @@ def get_argument_parser() -> argparse.ArgumentParser:
 
     parser.add_argument(
         "--pivot-languages",
-        default="bn,uk,kn",
+        default=None,
         help=(
             "Comma-separated pivot languages used to disambiguate candidate lemmas "
-            "for sentences without SentenceWordHint lemma links (default: bn,uk,kn). "
+            "for sentences without SentenceWordHint lemma links (default: the "
+            "candidate-lookup pivots, sentences.candidate_lookup.DEFAULT_SOURCE_LANGUAGES). "
             "Pivot translations must already exist as SentenceTranslation rows. "
             "Pass an empty string to disable pivot disambiguation."
         ),

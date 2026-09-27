@@ -35,6 +35,7 @@ from flask.typing import ResponseReturnValue
 import constants
 from agents.strazdas import StrazdasAgent
 from agents.vieversys import VieversysAgent
+from sentences.candidate_lookup import DEFAULT_SOURCE_LANGUAGES
 from storage.backend.config import BackendType, DataSourceConfig
 from storage.models.schema import BarsukasTask, Lemma
 from workqueue.task_queue import TaskStatus, TaskType, enqueue_task
@@ -1009,17 +1010,8 @@ def batch_translate_sentences() -> ResponseReturnValue:
     )
 
 
-_BATCH_DECOMPOSE_DEFAULT_TARGETS: List[str] = ["en", "fr", "zh", "lt", "es"]
-_BATCH_DECOMPOSE_REQUIRED_LOOKUP: List[str] = [
-    "en",
-    "fr",
-    "lt",
-    "zh",
-    "es",
-    "bn",
-    "uk",
-    "kn",
-]
+_BATCH_DECOMPOSE_DEFAULT_TARGETS: List[str] = ["en", "fr", "zh", "lt", "es", "es-419"]
+_BATCH_DECOMPOSE_REQUIRED_LOOKUP: List[str] = list(DEFAULT_SOURCE_LANGUAGES)
 
 
 @bp.route("/sentences/batch_decompose", methods=["POST"])
@@ -1029,14 +1021,14 @@ def batch_decompose_sentences() -> ResponseReturnValue:
 
     Requires that every sentence already has ``SentenceTranslation`` rows for
     each of the ``decompose_languages`` plus the candidate-lookup pool
-    (``en, fr, lt, zh, es, bn, uk, kn``). If any are missing, returns ``400``
+    (``DEFAULT_SOURCE_LANGUAGES``). If any are missing, returns ``400``
     with ``data.missing`` describing what's needed — call
     ``/sentences/batch_translate`` first.
 
     Request body (JSON):
         sentence_ids (list[int], required): Up to 15 sentence IDs.
         decompose_languages (list[str], optional): Languages to produce per-word
-            breakdowns for. Defaults to ``["en","fr","zh","lt","es"]``.
+            breakdowns for. Defaults to ``["en","fr","zh","lt","es","es-419"]``.
         model (str, optional): LLM model (default: system default).
         batch_window_minutes (int, optional): Batch window 1-10 (default: 10).
 
