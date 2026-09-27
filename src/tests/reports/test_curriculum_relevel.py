@@ -8,7 +8,6 @@ from reports.curriculum_bands import (
     commonness_key,
     effective_rank,
     family_reserved_level,
-    is_us_state,
     stable_commonness_key,
 )
 from reports.curriculum_relevel import (
@@ -22,6 +21,7 @@ from reports.curriculum_relevel import (
 from reports.curriculum_sense_fixes import plan_core_polysemy
 from reports.level_words import LevelWord, format_level_words
 from storage.models.schema import Lemma, LemmaTier
+from wordfreq.data.cohorts import DAYS_AND_MONTHS
 
 
 def test_balanced_sizes_stay_near_target() -> None:
@@ -41,18 +41,6 @@ def test_family_levels_come_from_reserved_section_values() -> None:
     mother.pos_subtype = "family_relation"
 
     assert family_reserved_level(mother) == 5
-
-
-def test_us_state_cohort_uses_definition_not_every_region() -> None:
-    state = _lemma(1, "N45_038", "Illinois", 49, "common")
-    state.pos_subtype = "region"
-    state.definition_text = "a state of the United States, in the midwest"
-    country = _lemma(2, "N45_005", "Germany", 49, "common")
-    country.pos_subtype = "region"
-    country.definition_text = "a country in central Europe"
-
-    assert is_us_state(state)
-    assert not is_us_state(country)
 
 
 def test_tier_evidence_never_outranks_corpus_evidence() -> None:
@@ -150,6 +138,21 @@ def test_hardcoded_verbs_are_pinned_only_from_the_core() -> None:
 
     assert reserved_level(like) == 4
     assert reserved_level(be) is None
+
+
+def test_fixed_sets_own_their_level() -> None:
+    element = _lemma(1, "N20_001", "antimony", 1100, "common", subtype="chemical_compound")
+    gold = _lemma(2, "N20_002", "gold", 179, "common", subtype="chemical_compound")
+    state = _lemma(3, "N45_038", "Illinois", 240, "common", subtype="region")
+    stray_region = _lemma(4, "N45_039", "Bavaria", 150, "common", subtype="region")
+    # Misfiled, and reported by cohort_warnings -- but never moved.
+    misfiled = _lemma(5, "N30_001", "iron", 1100, "common", subtype="appliance")
+
+    assert reserved_level(element) == 1100
+    assert reserved_level(state) == 240
+    assert reserved_level(gold) is None
+    assert reserved_level(stray_region) is None
+    assert reserved_level(misfiled) == 1100
 
 
 def test_oversized_core_subtype_spills_its_least_common_words() -> None:
@@ -272,6 +275,20 @@ def test_core_levels_have_verbs_and_spread_function_words() -> None:
         assert 1 <= len(verbs) <= 5
         assert function_words
         assert 30 <= len(members) <= 40
+
+
+def test_core_packing_numbers_around_a_fixed_set() -> None:
+    pool = [
+        _lemma(index, f"N{index:05d}", f"word{index}", 8, "common", subtype=f"subtype{index // 12}")
+        for index in range(560)
+    ]
+
+    # A word pinned at 22 makes the core reach it; 21 is days and months.
+    proposed = pack_core_levels(pool, RankEvidence(), {}, fixed_level_counts={22: 1})
+
+    levels = set(proposed.values())
+    assert DAYS_AND_MONTHS.level not in levels
+    assert max(levels) == 22
 
 
 def _lemma(
