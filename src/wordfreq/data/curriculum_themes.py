@@ -13,9 +13,12 @@ enough words to fill a level.
 The tag is written to ``Lemma.tags`` / ``PendingImport.tags`` (see
 ``storage.crud.lemma_tags``); it is the theme's name.
 
-Not yet a theme: modern medicine. No corpus covers it -- ``wiki_biology`` is
-organisms and anatomy, ``early_modern_science`` is historical -- so medical
-words still place by subtype (``disease_condition``, ``medication_remedy``).
+Not yet a theme: modern medicine in general. No corpus covers it --
+``wiki_biology`` is organisms and anatomy, ``early_modern_science`` is
+historical -- so medical words still place by subtype (``disease_condition``,
+``medication_remedy``). Drug names alone are the ``medications`` theme, an
+assembled list with neither a corpus nor a subtype of its own: aspirin and
+vitamins share ``medication_remedy`` and belong in the general curriculum.
 """
 
 from dataclasses import dataclass
@@ -71,6 +74,7 @@ CURRICULUM_THEMES: tuple[CurriculumTheme, ...] = (
     # No level yet: 1100 is the chemical-elements cohort, which owns it.
     CurriculumTheme("chemistry", (), subtypes=frozenset({"chemical_compound"})),
     CurriculumTheme("linguistics", (1110,), ("wiki_linguistics",)),
+    CurriculumTheme("medications", (1140,), description="drugs by generic and brand name"),
 )
 
 THEMES_BY_NAME: Mapping[str, CurriculumTheme] = {theme.name: theme for theme in CURRICULUM_THEMES}
