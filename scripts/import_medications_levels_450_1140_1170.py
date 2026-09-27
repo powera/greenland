@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Import medication names: the WHO essential medicines, top sellers, and brands.
+"""Import medication names: essential medicines, other drugs, brands, vaccines.
 
 Assembled rather than mined, like the chemical elements at 1100.  These are
 wanted less for teaching than for recognition: a drug name in a news article,
@@ -7,44 +7,58 @@ a court opinion or a parliamentary debate should resolve to a known lemma
 instead of surfacing as an unknown token in every corpus survey.  The obscure
 ones -- bedaquiline, odesivimab -- are the point, not a cost.
 
-Three sources, in this order:
+One named-band level and four topic levels:
 
-* ``WHO_ESSENTIAL`` -- the WHO Model List of Essential Medicines, 24th list
-  (2025), as transcribed on the English Wikipedia article "WHO Model List of
-  Essential Medicines" (fetched 2026-09-27), in the list's own section order so
-  a reviewer can check it against the source.  Combination products are split
-  into their ingredients ("lopinavir/ritonavir" gives both), and salt suffixes
-  are dropped ("heparin sodium" is heparin).  Left out: vaccines, blood
-  products, immunoglobulins, devices, solutions and nutrition products, and the
-  entries that are ordinary vocabulary or chemistry rather than drug names
-  (oxygen, glucose, urea, ethanol, iodine, magnesium sulfate, activated
-  charcoal).
-* ``US_PRESCRIBED`` -- the most-prescribed drugs in the United States (the
-  ClinCalc / MEPS top 200), less what the WHO list already has.
-* ``TOP_REVENUE`` -- the world's best-selling drugs by revenue, less both of the
-  above.  Mostly biologics and targeted cancer drugs, so this is where most of
-  the -mab and -nib names come from.
+* 450, ``COMMON`` -- the drugs common enough for general vocabulary: insulin,
+  morphine, caffeine, ibuprofen, quinine, the hormones (testosterone,
+  progesterone, oxytocin, epinephrine) and nitrous oxide.  They join aspirin,
+  paracetamol and the other medications already at 450.  Testosterone is
+  already a lemma, as a chemical compound at 1050, so the preflight will skip
+  it; moving it is a separate decision.
+* 1140, ``WHO_ESSENTIAL`` -- the WHO Model List of Essential Medicines, 24th
+  list (2025), as transcribed on the English Wikipedia article "WHO Model List
+  of Essential Medicines" (fetched 2026-09-27), in the list's own section order
+  so a reviewer can check it against the source.  Combination products are
+  split into their ingredients ("lopinavir/ritonavir" gives both), and a salt
+  suffix is dropped where the drug is usually named without it ("heparin
+  sodium" is heparin); two-word names stay where the second word is part of
+  the name (silver sulfadiazine, isosorbide dinitrate).  Left out: vaccines
+  (1170 covers them differently), blood products, immunoglobulins, devices,
+  solutions and nutrition products, and the entries that are ordinary
+  vocabulary or chemistry rather than drug names (oxygen, glucose, urea,
+  ethanol, iodine, magnesium sulfate).
+* 1150, ``OTHER_PRESCRIPTION`` -- other prescription drugs, from two lists less
+  what the WHO list already has: the most-prescribed drugs in the United
+  States (the ClinCalc / MEPS top 200), then the world's best sellers by
+  revenue, which are mostly biologics and targeted cancer drugs -- most of the
+  -mab and -nib names.
+* 1160, ``BRANDS`` -- brand names for the drugs above.
+* 1170, ``VACCINES`` -- only the vaccine names that are words of their own.
+  "Rotavirus vaccine" and the other twenty-odd WHO entries are the disease
+  plus "vaccine", and a lemma for each would add nothing the two words do not
+  already say.  What is left is the brands (Gardasil, Comirnaty) and the
+  historic names (Salk vaccine), which name one vaccine as a unit.  The
+  abbreviations (MMR, DTaP, BCG) are left out: as tokens they say nothing a
+  tokenizer needs.
 
 Spellings are American (USAN), not INN, for the reason the elements list gives:
 this database is American-spelled, and an INN spelling beside an existing USAN
 lemma would mint a second lemma for the same drug.  So acyclovir, rifampin,
 cephalexin, albuterol, nitroglycerin, leuprolide and scopolamine rather than
 aciclovir, rifampicin, cefalexin, salbutamol, glyceryl trinitrate, leuprorelin
-and hyoscine.  Two WHO entries are left out as already lemmas at 450:
-acetylsalicylic acid, as "aspirin", and paracetamol.  (Its American name,
-acetaminophen, is deliberately not added; it would duplicate that lemma.)
+and hyoscine.  (Acetaminophen is deliberately absent: paracetamol is already
+the lemma, and the American name would duplicate it.)
 
 Generic names go through ``add_word``: sense discovery handles a single-sense
-technical noun well, and supplies the definition and translations.  Brand
-names go through ``add_term`` as :class:`TermEntry` rows, because asked what
-"Lipitor" means the model would answer "atorvastatin" and file it there.  Each
-brand is its own lemma -- one per brand, not per product line -- with a
-definition naming its generic, and is tagged ``medications``.  Brands are
-proper nouns and keep their capitals.
+technical noun well, and supplies the definition and translations.  Brand and
+vaccine names go through ``add_term`` as :class:`TermEntry` rows, because
+asked what "Lipitor" means the model would answer "atorvastatin" and file it
+there.  Each brand is its own lemma -- one per brand, not per product line --
+with a definition naming its generic, and is tagged ``medications``.  Brands
+are proper nouns and keep their capitals.
 
 Not pre-deduplicated against the database; the preflight skips what is already
-accounted for.  When the list was drawn up only testosterone was -- as a
-chemical compound at 1050 -- so even insulin, morphine and caffeine are new.
+accounted for.  When the list was drawn up none of it was.
 
 Running without ``--execute`` only prints the plan and makes no HTTP requests.
 """
@@ -59,28 +73,41 @@ ROOT = Path(__file__).resolve().parent.parent
 if str(ROOT) not in sys.path:
     sys.path.insert(0, str(ROOT))
 
-from scripts.wordlist_import_helper import TermEntry, run_mixed_import
+from scripts.wordlist_import_helper import TermEntry, run_leveled_import
 
-DIFFICULTY_LEVEL = 1140
+COMMON_LEVEL = 450
+ESSENTIAL_LEVEL = 1140
+OTHER_PRESCRIPTION_LEVEL = 1150
+BRAND_LEVEL = 1160
+VACCINE_LEVEL = 1170
 
 TAGS: Sequence[str] = ("medications",)
+
+COMMON: Sequence[str] = (
+    "insulin",
+    "morphine",
+    "caffeine",
+    "ibuprofen",
+    "quinine",
+    "testosterone",
+    "progesterone",
+    "oxytocin",
+    "epinephrine",
+    "nitrous oxide",
+)
 
 WHO_ESSENTIAL: Sequence[str] = (
     # Anesthetics, preoperative medicines and medical gases
     "isoflurane",
-    "nitrous oxide",
     "sevoflurane",
     "ketamine",
     "propofol",
     "bupivacaine",
     "lidocaine",
-    "epinephrine",
     "ephedrine",
     "atropine",
     "midazolam",
     # Pain and palliative care
-    "morphine",
-    "ibuprofen",
     "codeine",
     "fentanyl",
     "methadone",
@@ -149,6 +176,7 @@ WHO_ESSENTIAL: Sequence[str] = (
     "metronidazole",
     "nitrofurantoin",
     "penicillin V",
+    "benzathine penicillin",
     "spectinomycin",
     "sulfamethoxazole",
     "trimethoprim",
@@ -249,7 +277,6 @@ WHO_ESSENTIAL: Sequence[str] = (
     "dihydroartemisinin",
     "piperaquine",
     "primaquine",
-    "quinine",
     "sulfadoxine",
     "pyrimethamine",
     "sulfadiazine",
@@ -333,6 +360,7 @@ WHO_ESSENTIAL: Sequence[str] = (
     "rasburicase",
     "zoledronic acid",
     # Blood
+    "ferrous sulfate",
     "folic acid",
     "hydroxocobalamin",
     "dabigatran",
@@ -348,7 +376,7 @@ WHO_ESSENTIAL: Sequence[str] = (
     # Cardiovascular
     "bisoprolol",
     "nitroglycerin",
-    "isosorbide",
+    "isosorbide dinitrate",
     "digoxin",
     "amiodarone",
     "amlodipine",
@@ -376,6 +404,7 @@ WHO_ESSENTIAL: Sequence[str] = (
     "miconazole",
     "terbinafine",
     "mupirocin",
+    "silver sulfadiazine",
     "betamethasone",
     "calamine",
     "benzoyl peroxide",
@@ -401,9 +430,7 @@ WHO_ESSENTIAL: Sequence[str] = (
     "sulfasalazine",
     # Hormones and endocrine
     "fludrocortisone",
-    "testosterone",
     "medroxyprogesterone",
-    "insulin",
     "empagliflozin",
     "gliclazide",
     "metformin",
@@ -437,16 +464,13 @@ WHO_ESSENTIAL: Sequence[str] = (
     "ulipristal",
     "estradiol",
     "etonogestrel",
-    "progesterone",
     "clomiphene",
     "letrozole",
     "carbetocin",
     "ergonovine",
     "misoprostol",
-    "oxytocin",
     "mifepristone",
     "nifedipine",
-    "caffeine",
     "alprostadil",
     "beractant",
     "poractant",
@@ -494,6 +518,7 @@ US_PRESCRIBED: Sequence[str] = (
     "rivaroxaban",
     "clonidine",
     "diltiazem",
+    "isosorbide mononitrate",
     "olmesartan",
     "irbesartan",
     "benazepril",
@@ -862,8 +887,37 @@ BRANDS: Sequence[TermEntry] = (
     _brand("Botox", "a brand name for botulinum toxin, injected to relax muscles"),
 )
 
-WORDS: Sequence[str] = (*WHO_ESSENTIAL, *US_PRESCRIBED, *TOP_REVENUE)
+
+def _vaccine(name: str, definition: str) -> TermEntry:
+    return TermEntry(name, "noun", "medication_remedy", definition)
+
+
+VACCINES: Sequence[TermEntry] = (
+    # Historic names
+    _vaccine("Salk vaccine", "the first polio vaccine, given by injection"),
+    _vaccine("Sabin vaccine", "an oral polio vaccine"),
+    # Brands
+    _vaccine("Gardasil", "a brand name for a vaccine against human papillomavirus (HPV)"),
+    _vaccine("Shingrix", "a brand name for a vaccine against shingles"),
+    _vaccine("Prevnar", "a brand name for a pneumococcal vaccine"),
+    _vaccine("Rotarix", "a brand name for a rotavirus vaccine"),
+    _vaccine("Comirnaty", "a brand name for the Pfizer-BioNTech COVID-19 vaccine"),
+    _vaccine("Spikevax", "a brand name for the Moderna COVID-19 vaccine"),
+)
+
+OTHER_PRESCRIPTION: Sequence[str] = (*US_PRESCRIBED, *TOP_REVENUE)
 
 
 if __name__ == "__main__":
-    raise SystemExit(run_mixed_import(WORDS, BRANDS, DIFFICULTY_LEVEL, __doc__ or "", tags=TAGS))
+    raise SystemExit(
+        run_leveled_import(
+            [
+                (COMMON_LEVEL, COMMON),
+                (ESSENTIAL_LEVEL, WHO_ESSENTIAL),
+                (OTHER_PRESCRIPTION_LEVEL, OTHER_PRESCRIPTION),
+            ],
+            [(BRAND_LEVEL, BRANDS), (VACCINE_LEVEL, VACCINES)],
+            __doc__ or "",
+            tags=TAGS,
+        )
+    )
