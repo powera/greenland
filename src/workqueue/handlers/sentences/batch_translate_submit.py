@@ -40,6 +40,11 @@ _AGENT_NAME = "barsukas_translate"
 _OPERATION_TYPE = "batch_translate_sentence"
 _BATCH_ENDPOINT = "/v1/chat/completions"
 
+# Decompose targets that are not candidate-lookup pivots.  es-419 shares most
+# lemma-level vocabulary with es, so matching on both would double-count one
+# piece of evidence; it is translated here only so Phase 3 can decompose it.
+_TRANSLATE_ONLY_DEFAULT_TARGETS: List[str] = ["es-419"]
+
 
 def _pick_source_language(existing_languages: set[str]) -> str:
     if not existing_languages:
@@ -60,13 +65,16 @@ def handle_sentences_batch_translate_submit(
     """Submit a batch of Phase-1 sentence-translation requests to OpenAI Batch.
 
     ``target_languages`` defaults to :data:`DEFAULT_SOURCE_LANGUAGES` (minus the
-    source) so the candidate-lemma pool used by Phase 3 has rich coverage.
+    source) so the candidate-lemma pool used by Phase 3 has rich coverage, plus
+    es-419, which Phase 3 decomposes but candidate lookup does not match on.
     """
     if not sentence_ids:
         raise ValueError("sentence_ids must be a non-empty list")
 
     requested_targets: List[str] = (
-        list(target_languages) if target_languages else list(DEFAULT_SOURCE_LANGUAGES)
+        list(target_languages)
+        if target_languages
+        else [*DEFAULT_SOURCE_LANGUAGES, *_TRANSLATE_ONLY_DEFAULT_TARGETS]
     )
 
     batch_session = create_batch_database_session()

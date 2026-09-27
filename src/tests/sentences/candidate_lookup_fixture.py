@@ -1,7 +1,7 @@
 """Test database fixture for candidate_lookup tests.
 
 Builds an in-memory SQLite database seeded from a slice of data/release
-(~50 real lemmas with bn/uk/kn translations from secondary.jsonl) plus a
+(~50 real lemmas with vi from base.jsonl and hi from secondary.jsonl) plus a
 handful of hand-authored ambiguous lemmas that the release data does not
 supply (notably two senses of "can" — modal vs. container — and two senses
 of "play" — verb vs. noun).
@@ -27,7 +27,7 @@ from storage.models.schema import Base, DerivativeForm, Lemma, LemmaTranslation,
 # Languages we pull out of the release JSONL files. "en" comes from the
 # release "translations" map (NOT from concept_label, because some entries
 # have disambiguation parentheticals).
-_RELEASE_BASE_LANGUAGES = ["en", "fr", "es", "lt", "zh", "de", "sv", "ja"]
+_RELEASE_BASE_LANGUAGES = ["en", "fr", "es", "lt", "zh", "de", "sv", "ja", "vi"]
 
 # Languages we expect in secondary.jsonl.
 _RELEASE_SECONDARY_LANGUAGES = ["bn", "uk", "kn", "hi", "ta", "th"]
@@ -64,8 +64,9 @@ class _CustomLemma:
 
 
 # The two senses of "can" that drive the core ambiguity test. Translations
-# are chosen so that bn/uk/kn rendering of a modal-"can" sentence confirms
-# the modal lemma but not the container lemma (and vice versa).
+# are chosen so that the hi/vi/ms rendering of a modal-"can" sentence confirms
+# the modal lemma but not the container lemma (and vice versa).  ms is not in
+# the release data, so only these hand-authored lemmas carry it.
 _CUSTOM_LEMMAS: List[_CustomLemma] = [
     _CustomLemma(
         guid="TEST_CAN_MODAL",
@@ -81,14 +82,14 @@ _CUSTOM_LEMMAS: List[_CustomLemma] = [
             "de": "können",
             "sv": "kunna",
             "ja": "できる",
-            "bn": "পারা",
-            "uk": "могти",
-            "kn": "ಸಾಧ್ಯ",
+            "hi": "सकना",
+            "vi": "có thể",
+            "ms": "boleh",
         },
         derivative_forms=[
             ("en", "can", "base"),
-            ("uk", "можу", "1s_present"),
-            ("uk", "можеш", "2s_present"),
+            ("hi", "सकता", "present_participle_m"),
+            ("hi", "सकती", "present_participle_f"),
         ],
     ),
     _CustomLemma(
@@ -105,9 +106,9 @@ _CUSTOM_LEMMAS: List[_CustomLemma] = [
             "de": "Dose",
             "sv": "burk",
             "ja": "缶",
-            "bn": "ক্যান",
-            "uk": "банка",
-            "kn": "ಕ್ಯಾನ್",
+            "hi": "डिब्बा",
+            "vi": "lon",
+            "ms": "tin",
         },
     ),
     _CustomLemma(
@@ -124,9 +125,9 @@ _CUSTOM_LEMMAS: List[_CustomLemma] = [
             "de": "Theaterstück",
             "sv": "pjäs",
             "ja": "劇",
-            "bn": "নাটক",
-            "uk": "вистава",
-            "kn": "ನಾಟಕ",
+            "hi": "नाटक",
+            "vi": "vở kịch",
+            "ms": "drama",
         },
     ),
     _CustomLemma(
@@ -143,9 +144,9 @@ _CUSTOM_LEMMAS: List[_CustomLemma] = [
             "de": "heute",
             "sv": "idag",
             "ja": "今日",
-            "bn": "আজ",
-            "uk": "сьогодні",
-            "kn": "ಇಂದು",
+            "hi": "आज",
+            "vi": "hôm nay",
+            "ms": "hari ini",
         },
     ),
 ]

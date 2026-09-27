@@ -13,12 +13,14 @@ order. Stage-3 decomposition selects/validates per word.
 """
 
 import logging
+import unicodedata
 from dataclasses import dataclass, field
 from typing import Dict, List, Optional, Sequence, Set, Tuple
 
 from sqlalchemy import func
 from sqlalchemy.orm import Session
 
+from langtools.dialect_overrides import get_base_language
 from langtools.tokenizer import tokenize
 from storage.models.schema import DerivativeForm, Lemma, LemmaTranslation, SentenceTranslation
 from storage.translation_helpers import LANGUAGE_FIELDS, get_translation
@@ -27,14 +29,33 @@ logger = logging.getLogger(__name__)
 
 # Languages searched for candidate lemmas (their tokens are matched against
 # Lemma.lemma_text / DerivativeForm). These are the languages a sentence is
-# expected to be translated into during the pipeline.
-DEFAULT_SOURCE_LANGUAGES: List[str] = ["en", "fr", "lt", "zh", "es", "bn", "uk", "kn"]
+# expected to be translated into during the pipeline.  hi/vi/ms are pivot-only
+# (translated, never decomposed) and were picked because their dictionary forms
+# survive into running text: Hindi writes postpositions as separate words, and
+# Vietnamese and Malay barely inflect.  Agglutinative or case-heavy languages
+# (bn, kn, uk) rarely show a bare lemma, so exact matching found little there.
+DEFAULT_SOURCE_LANGUAGES: List[str] = ["en", "fr", "lt", "zh", "es", "hi", "vi", "ms"]
 
 # Cap on the flat candidate list passed to the LLM.
 DEFAULT_MAX_CANDIDATES = 30
 
 # Characters stripped from token boundaries before matching.
 _PUNCTUATION_STRIP = ".,!?;:\"'()[]{}—-…"
+
+# Adjacent tokens are also looked up as space-joined n-grams up to this length,
+# so a translation written as several words still matches: Vietnamese "hình
+# tròn" (circle) or Spanish "tomar una decisión".
+_MAX_NGRAM = 3
+
+# Languages whose tokens are not space-separated in running text; joining them
+# with a space can never reproduce a stored translation.
+_UNSPACED_LANGUAGES: Set[str] = {"zh", "ja", "ko", "th"}
+
+# Clitics written onto an otherwise bare lemma.  Stripping one recovers the
+# dictionary form, e.g. Malay "rumahnya" (his house) -> "rumah".  The stem must
+# keep at least _MIN_CLITIC_STEM characters so short words are left alone.
+_CLITIC_SUFFIXES: Dict[str, Tuple[str, ...]] = {"ms": ("nya", "ku", "mu")}
+_MIN_CLITIC_STEM = 3
 
 
 def _forms_match(token: str, lemma_form: str, language_code: str) -> bool:
@@ -71,8 +92,41 @@ class CandidateLemma:
 
 
 def _normalize_token(token: str) -> str:
-    """Strip surrounding punctuation and lowercase."""
-    return token.strip(_PUNCTUATION_STRIP).strip().lower()
+    """Strip surrounding punctuation, NFC-normalize and lowercase.
+
+    Stored translations are NFC; a sentence arriving in NFD (Vietnamese tone
+    marks as combining characters) would otherwise never match.
+    """
+    return unicodedata.normalize("NFC", token.strip(_PUNCTUATION_STRIP).strip()).lower()
+
+
+def _match_keys(tokens: Sequence[str], language_code: str) -> List[str]:
+    """Surface strings to look up for one translation, deduplicated in order.
+
+    Each token, its clitic-stripped stem where the language has one, and every
+    space-joined n-gram of 2.._MAX_NGRAM adjacent tokens.
+    """
+    base_language = get_base_language(language_code)
+    keys: List[str] = []
+    seen: Set[str] = set()
+
+    def _add(key: str) -> None:
+        if key and key not in seen:
+            seen.add(key)
+            keys.append(key)
+
+    for token in tokens:
+        _add(token)
+        for suffix in _CLITIC_SUFFIXES.get(base_language, ()):
+            if token.endswith(suffix) and len(token) - len(suffix) >= _MIN_CLITIC_STEM:
+                _add(token[: -len(suffix)])
+
+    if base_language not in _UNSPACED_LANGUAGES:
+        for size in range(2, _MAX_NGRAM + 1):
+            for start in range(len(tokens) - size + 1):
+                _add(" ".join(tokens[start : start + size]))
+
+    return keys
 
 
 def _all_tokens(text: str, language_code: str) -> List[str]:
@@ -280,9 +334,9 @@ def _run_candidate_lookup(
     max_candidates: int,
 ) -> List[CandidateLemma]:
     """Core multi-language candidate lookup. Returns a flat ranked list."""
-    # Tokenize each language's translation once.
-    tokens_by_language: Dict[str, List[str]] = {}
-    unique_tokens_by_language: Dict[str, List[str]] = {}
+    # Tokenize each language's translation once, then expand the tokens into
+    # the deduplicated keys (tokens, clitic stems, n-grams) that get matched.
+    keys_by_language: Dict[str, List[str]] = {}
     for lang in source_languages:
         text = translations_by_language.get(lang)
         if not text:
@@ -290,23 +344,16 @@ def _run_candidate_lookup(
         all_toks = _all_tokens(text, lang)
         if not all_toks:
             continue
-        tokens_by_language[lang] = all_toks
-        seen: Set[str] = set()
-        uniq: List[str] = []
-        for token in all_toks:
-            if token not in seen:
-                seen.add(token)
-                uniq.append(token)
-        unique_tokens_by_language[lang] = uniq
+        keys_by_language[lang] = _match_keys(all_toks, lang)
 
-    if not unique_tokens_by_language:
+    if not keys_by_language:
         return []
 
-    # 1. Source candidate lemmas from every language's tokens.
+    # 1. Source candidate lemmas from every language's keys.
     candidates_by_id: Dict[int, Lemma] = {}
-    for lang, tokens in unique_tokens_by_language.items():
-        for token in tokens:
-            for lemma in _find_candidate_lemmas_in_language(session, lang, token):
+    for lang, keys in keys_by_language.items():
+        for key in keys:
+            for lemma in _find_candidate_lemmas_in_language(session, lang, key):
                 if lemma.id not in candidates_by_id:
                     candidates_by_id[lemma.id] = lemma
 
@@ -320,10 +367,10 @@ def _run_candidate_lookup(
         score = 0
         matched: List[str] = []
         for lang in source_languages:
-            lang_tokens = tokens_by_language.get(lang)
-            if not lang_tokens:
+            lang_keys = keys_by_language.get(lang)
+            if not lang_keys:
                 continue
-            if _language_confirms_lemma(session, lemma.id, lang, lang_tokens):
+            if _language_confirms_lemma(session, lemma.id, lang, lang_keys):
                 score += 1
                 matched.append(lang)
         candidate = _build_candidate(session, lemma, list(source_languages), score, matched)

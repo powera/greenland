@@ -44,7 +44,7 @@ from workqueue.tools import workqueue_payload_handler
 
 logger = logging.getLogger(__name__)
 
-_DEFAULT_LANGUAGES: List[str] = ["fr", "zh", "lt", "es", "bn", "uk", "kn"]
+_DEFAULT_LANGUAGES: List[str] = ["fr", "zh", "lt", "es", "es-419"]
 _AGENT_NAME = "barsukas_decompose"
 _OPERATION_TYPE = "decompose_sentence"
 _BATCH_ENDPOINT = "/v1/chat/completions"

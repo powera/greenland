@@ -705,7 +705,7 @@ def api_check_disambiguation() -> ResponseReturnValue:
 
 
 _DECOMPOSE_SENTENCES_MAX = 15
-_DECOMPOSE_LANGUAGES: List[str] = ["fr", "zh", "lt", "es", "bn", "uk", "kn"]
+_DECOMPOSE_LANGUAGES: List[str] = ["fr", "zh", "lt", "es", "es-419"]
 
 
 @bp.route("/sentences/decompose", methods=["POST"])
@@ -912,7 +912,7 @@ def _accumulate_or_enqueue_batch(
     )
 
 
-_BATCH_TRANSLATE_DEFAULT_TARGETS: List[str] = ["fr", "lt", "zh", "es", "bn", "uk", "kn"]
+_BATCH_TRANSLATE_DEFAULT_TARGETS: List[str] = ["fr", "lt", "zh", "es", "es-419", "hi", "vi", "ms"]
 
 
 @bp.route("/sentences/batch_translate", methods=["POST"])
@@ -928,7 +928,7 @@ def batch_translate_sentences() -> ResponseReturnValue:
     Request body (JSON):
         sentence_ids (list[int], required): Up to 15 sentence IDs.
         target_languages (list[str], optional): Languages to translate into.
-            Defaults to ``["fr","lt","zh","es","bn","uk","kn"]``.
+            Defaults to ``["fr","lt","zh","es","es-419","hi","vi","ms"]``.
         model (str, optional): LLM model (default: system default).
         batch_window_minutes (int, optional): Batch window 1-10 (default: 10).
 

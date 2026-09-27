@@ -43,7 +43,7 @@ _AGENT_NAME = "barsukas_decompose"
 _OPERATION_TYPE = "decompose_sentence"
 _BATCH_ENDPOINT = "/v1/chat/completions"
 
-_DEFAULT_DECOMPOSE_LANGUAGES: List[str] = ["en", "fr", "zh", "lt", "es"]
+_DEFAULT_DECOMPOSE_LANGUAGES: List[str] = ["en", "fr", "zh", "lt", "es", "es-419"]
 
 
 def _candidates_for_prompt(candidates: List[CandidateLemma]) -> List[Dict[str, Any]]:
