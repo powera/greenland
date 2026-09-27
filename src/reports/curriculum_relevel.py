@@ -15,7 +15,8 @@ different shapes:
   most of its words already have.
 
 The topic band (1000+) is never touched, and no word changes band except a
-lesser sense leaving the core.
+lesser sense leaving the core. A fixed set's level (US states, chemical
+elements; see ``wordfreq.data.cohorts``) is never repacked.
 
 Missing frequency data always reads as uncommon, and the packer leans towards
 the current layout whenever the evidence is not clear; see
@@ -45,7 +46,6 @@ from reports.curriculum_bands import (
     PRESERVED_LEVEL_MAX,
     TIER_ORDER,
     UNRANKED_SENTINEL,
-    US_STATE_COHORT_LEVEL,
     PlannedMove,
     RankEvidence,
     WarningRow,
@@ -57,7 +57,6 @@ from reports.curriculum_bands import (
     family_reserved_level,
     is_function_pos,
     is_function_word,
-    is_us_state,
     load_rank_evidence,
     load_verb_affinity,
     stable_commonness_key,
@@ -74,6 +73,7 @@ from storage.models.schema import (
 )
 from storage.translation_helpers import RELEASE_LANGUAGES
 from wordfreq.corpora.cooccurrence import HARDCODED_VERB_LEVELS
+from wordfreq.data.cohorts import COHORT_LEVELS, COHORTS, cohort_at
 from wordfreq.tools.country_override_manager import CountryOverrideManager
 from wordfreq.tools.country_word_priorities import (
     CONTINENT_NAMES,
@@ -283,13 +283,13 @@ def _tier_evidence(tiers: Sequence[LemmaTier]) -> str:
     )
 
 
-def _theme_of(pos_type: str, pos_subtype: Optional[str]) -> str:
+def theme_of(pos_type: str, pos_subtype: Optional[str]) -> str:
     """Return the broad curriculum theme for a stored subtype."""
     return THEME_BY_SUBTYPE.get(pos_subtype or pos_type, f"other_{pos_type}")
 
 
 def _theme(lemma: Lemma) -> str:
-    return _theme_of(lemma.pos_type, lemma.pos_subtype)
+    return theme_of(lemma.pos_type, lemma.pos_subtype)
 
 
 def _split_run(items: Sequence[Lemma], *, chunk_target: int, chunk_max: int) -> list[list[Lemma]]:
@@ -601,6 +601,9 @@ def pack_core_levels(
     ``fixed_level_counts`` are words already pinned to a level above the
     preserved ones (the family tiers). They take room at their level, and the
     packed core always reaches the highest of them.
+
+    A fixed set's level (``wordfreq.data.cohorts``) is skipped: the packed
+    levels number around it, and nothing is packed into it.
     """
     if not pool:
         return {}
@@ -614,11 +617,15 @@ def pack_core_levels(
     runs = _order_core_runs(content, evidence)
 
     first_level = PRESERVED_LEVEL_MAX + 1
-    available = constants.CORE_DIFFICULTY_LEVEL_MAX - PRESERVED_LEVEL_MAX
-    fewest_levels = max([1, *(level - PRESERVED_LEVEL_MAX for level in fixed)])
+    numbers = [
+        level
+        for level in range(first_level, constants.CORE_DIFFICULTY_LEVEL_MAX + 1)
+        if level not in COHORT_LEVELS
+    ]
+    fewest_levels = max([1, *(numbers.index(level) + 1 for level in fixed if level in numbers)])
     best: Optional[tuple[float, dict[int, list[Lemma]]]] = None
-    for level_count in range(fewest_levels, available + 1):
-        levels = list(range(first_level, first_level + level_count))
+    for level_count in range(fewest_levels, len(numbers) + 1):
+        levels = numbers[:level_count]
         extra_per_level = (len(verbs) + len(function_words)) / level_count
         result = _pack_numbered(
             runs, levels, _core_bounds(extra_per_level, fixed), _core_segment_cost
@@ -897,12 +904,17 @@ def reserved_level(lemma: Lemma) -> Optional[int]:
 
     ``HARDCODED_VERB_LEVELS`` pins only verbs already in the core: be and have
     sit in the named band until their per-language core levels exist.
+
+    A fixed set (``wordfreq.data.cohorts``) owns its level, and whatever is
+    stored there stays. A word of the same kind elsewhere -- gold in the
+    metals -- is ordinary vocabulary.
     """
     family_level = family_reserved_level(lemma)
     if family_level is not None:
         return family_level
-    if is_us_state(lemma):
-        return US_STATE_COHORT_LEVEL
+    cohort = cohort_at(lemma.difficulty_level)
+    if cohort is not None:
+        return cohort.level
     if lemma.pos_subtype == "region" and lemma.lemma_text in (COUNTRY_NAMES | CONTINENT_NAMES):
         return COUNTRY_COHORT_LEVEL
     hardcoded = HARDCODED_VERB_LEVELS.get(lemma.lemma_text)
@@ -1046,6 +1058,7 @@ def build_assignments(
                     proposed[lemma.id]
                     for lemma in fixed_in_core
                     if proposed[lemma.id] > PRESERVED_LEVEL_MAX
+                    and proposed[lemma.id] not in COHORT_LEVELS
                 ),
             )
         )
@@ -1107,6 +1120,9 @@ def _structural_warnings(assignments: Sequence[Assignment]) -> list[WarningRow]:
         by_level[assignment.proposed_level].append(assignment)
 
     for level, items in sorted(by_level.items()):
+        if level in COHORT_LEVELS:
+            # A fixed set is as big as it is; cohort_warnings checks its contents.
+            continue
         guids = ";".join(item.guid for item in items)
         verbs = [item for item in items if item.pos_type == "verb"]
         band = band_of(level)
@@ -1183,13 +1199,13 @@ def _structural_warnings(assignments: Sequence[Assignment]) -> list[WarningRow]:
                     )
                 )
         elif band == "named":
-            if level in (US_STATE_COHORT_LEVEL, COUNTRY_COHORT_LEVEL):
+            if level == COUNTRY_COHORT_LEVEL:
                 continue
             if level in COUNTRY_LEVEL_CAPACITIES:
                 continue
             content = [item for item in items if item.pos_type != "verb"] or items
             subtypes = {(item.pos_type, item.pos_subtype or item.pos_type) for item in content}
-            themes = {_theme_of(item.pos_type, item.pos_subtype) for item in content}
+            themes = {theme_of(item.pos_type, item.pos_subtype) for item in content}
             maximum = NAMED_RULES.coherent_maximum if len(subtypes) == 1 else NAMED_RULES.maximum
             if not NAMED_RULES.minimum <= len(items) <= maximum:
                 warnings.append(
@@ -1229,13 +1245,43 @@ def _structural_warnings(assignments: Sequence[Assignment]) -> list[WarningRow]:
     return warnings
 
 
+def cohort_warnings(session: Session) -> list[WarningRow]:
+    """Words at a fixed set's level stored under a subtype the set does not use.
+
+    Reads the database rather than the assignments: a set may own a topic-band
+    level, which the rebalance never loads.
+    """
+    warnings: list[WarningRow] = []
+    for cohort in COHORTS:
+        strays = (
+            session.query(Lemma)
+            .filter(
+                Lemma.difficulty_level == cohort.level,
+                Lemma.pos_subtype.is_distinct_from(cohort.pos_subtype),
+            )
+            .order_by(Lemma.guid)
+            .all()
+        )
+        for lemma in strays:
+            warnings.append(
+                WarningRow(
+                    "cohort-subtype",
+                    lemma.lemma_text,
+                    lemma.guid or "",
+                    f"level {cohort.level} is {cohort.name} ({cohort.pos_subtype}); "
+                    f"stored as {lemma.pos_type}/{lemma.pos_subtype}",
+                )
+            )
+    return warnings
+
+
 def build_warnings(
     session: Session,
     assignments: Sequence[Assignment],
     extra_warnings: Sequence[WarningRow] = (),
 ) -> list[WarningRow]:
-    """Build sense, definition, lemma/form, and level-shape review warnings."""
-    warnings: list[WarningRow] = list(extra_warnings)
+    """Build sense, definition, lemma/form, level-shape, and fixed-set review warnings."""
+    warnings: list[WarningRow] = [*extra_warnings, *cohort_warnings(session)]
     by_headword: dict[str, list[Assignment]] = defaultdict(list)
     for assignment in assignments:
         by_headword[assignment.lemma_text.casefold()].append(assignment)

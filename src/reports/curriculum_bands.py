@@ -32,6 +32,7 @@ from sqlalchemy.orm import Session
 import constants
 from storage.crud.operation_log import FieldChange, log_field_changes
 from storage.models.schema import Lemma, LemmaTier
+from wordfreq.data.cohorts import US_STATES
 from wordfreq.data.family_relations_sections import ALL_SECTIONS
 from wordfreq.frequency.combined_rank import lemmas_without_corpus_evidence
 
@@ -74,7 +75,7 @@ FUNCTION_SUBTYPES = frozenset({"adverb_other"})
 
 # Where the two big name cohorts sit after the band renumbering (migration
 # 20260919). Each is one coherent unit, larger than an ordinary level.
-US_STATE_COHORT_LEVEL = 240
+US_STATE_COHORT_LEVEL = US_STATES.level
 COUNTRY_COHORT_LEVEL = 245
 
 # Country lemmas stay together at their base cohort, then move per language
@@ -249,13 +250,6 @@ def family_reserved_level(lemma: Lemma) -> Optional[int]:
         elif "female" in disambiguation:
             lemma_text = "female cousin"
     return FAMILY_LEVEL_BY_TEXT.get(lemma_text)
-
-
-def is_us_state(lemma: Lemma) -> bool:
-    """Whether the lemma is one of the US states cohort."""
-    return lemma.pos_subtype == "region" and "state of the united states" in (
-        lemma.definition_text.casefold()
-    )
 
 
 def load_verb_affinity(path: Path) -> dict[str, dict[str, float]]:
