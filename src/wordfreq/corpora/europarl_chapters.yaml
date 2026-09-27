@@ -1,0 +1,1359 @@
+# Europarl chapters for the parliament_debates corpus.
+# Written by wordfreq/corpora/europarl_select.py; edit by hand to drop a
+# chapter, and re-run the selector only to redraw the whole sample.
+#
+# 1332 chapters, 10,008,879 words.
+
+source: Europarl v7 source release, English
+criteria:
+  target_words: 10000000
+  min_words: 800
+chapters:
+  '1996':
+    ep-96-04-15_ch6: Synergy programme
+    ep-96-04-16_ch8: Fisheries agreement with Morocco
+    ep-96-04-16_ch9: Health monitoring
+    ep-96-04-17_ch13: Biocidal products
+    ep-96-04-17_ch2: European Council in Turin
+    ep-96-04-17_ch8: Chernobyl, prospects for EU involvement
+    ep-96-04-18_ch2: Monetary cooperation
+    ep-96-04-18_ch9: Civil protection action programme
+    ep-96-04-19_ch5: Cooperation Agreement with Nepal
+    ep-96-04-19_ch7: G7 meeting on employment
+    ep-96-05-08_ch12: HIV/AIDS in developing countries
+    ep-96-05-08_ch13: Environmental measures in developing countries
+    ep-96-05-08_ch9: Boatmasters' certificates
+    ep-96-06-05_ch10: Common transport policy - action programme 1995-2000
+    ep-96-06-05_ch13: Green Paper on innovation
+    ep-96-06-05_ch4: Urgent political matters
+    ep-96-06-05_ch7: Agreement with Morocco - Human Rights in Morocco and Western Sahara (continuation)
+    ep-96-06-05_ch8: Non-admission of Croatia to the Council of Europe
+    ep-96-06-06_ch2: Financial services and movement of natural persons
+    ep-96-06-17_ch8: Short sea shipping
+    ep-96-06-17_ch9: Climate change
+    ep-96-06-18_ch7: Practice of the profession of lawyer
+    ep-96-06-18_ch8: Question Time (Commission)
+    ep-96-06-19_ch2: European Council in Florence - IGC
+    ep-96-06-19_ch6: Aid to former Yugoslavia
+    ep-96-06-19_ch8: Question Time (Council)
+    ep-96-06-20_ch8: Money laundering
+    ep-96-06-21_ch7: Fishery products from Ceuta
+    ep-96-07-03_ch5: Transitional periods in accession treaties
+    ep-96-07-03_ch7: Renewable energy
+    ep-96-07-03_ch8: Population conference in Cairo
+    ep-96-07-03_ch9: Women and Olympic Games
+    ep-96-07-04_ch1: Commercial transactions, capital markets and information networks
+    ep-96-07-16_ch9: Biology and medicine (Bioethics Convention) (continuation)
+    ep-96-07-17_ch10: Question Time (Council)
+    ep-96-07-17_ch16: Market organization for sheepmeat and goatmeat
+    ep-96-07-17_ch7: Progress in CFSP (continuation)
+    ep-96-07-17_ch8: Broad economic policy guidelines
+    ep-96-07-18_ch4: Reconstruction aid to former Yugoslavia
+    ep-96-07-19_ch5: Supplementary premium to sheep producers in Ireland and UK
+    ep-96-07-19_ch6: Protocol to Agreement with Andorra
+    ep-96-09-04_ch10: Structural measures in Greece, Portugal and Spain
+    ep-96-09-04_ch14: Safety rules for passenger ships
+    ep-96-09-17_ch2: The information society - copyright and related rights
+    ep-96-09-17_ch7: Reduction in working hours
+    ep-96-09-17_ch8: Question Time (Commission)
+    ep-96-09-18_ch10: Child abuse
+    ep-96-09-18_ch13: Third SME programme (1997-2000)
+    ep-96-09-18_ch3: State of the European Union
+    ep-96-09-18_ch9: Political situation in Turkey
+    ep-96-09-19_ch1: Fight against fraud
+    ep-96-09-19_ch2: Elections in Bosnia
+    ep-96-09-20_ch11: Working time in maritime transport
+    ep-96-09-20_ch8: Aid to shipbuilding
+    ep-96-10-21_ch7: Free movement of doctors and mutual  recognition of qualifications
+    ep-96-10-22_ch12: Burma
+    ep-96-10-22_ch6: 1996 budget implementation - 1997 draft general budget - 1997 draft ECSC operating budget (continuation)
+    ep-96-10-22_ch9: Health monitoring
+    ep-96-10-23_ch10: Marine equipment
+    ep-96-10-23_ch11: Roadworthiness tests
+    ep-96-10-23_ch8: Question Time (Council)
+    ep-96-10-24_ch5: Tourism
+    ep-96-10-24_ch6: Topical and urgent debate
+    ep-96-10-25_ch3: Protection against certain legislation (Rule 97 of the Rules of Procedure)
+    ep-96-10-25_ch5: European rural policy
+    ep-96-10-25_ch7: Olive oil
+    ep-96-11-11_ch5: Amendment of Rule 49
+    ep-96-11-11_ch9: Energy efficiency - gas and electricity
+    ep-96-11-12_ch11: NGOs in environmental protection
+    ep-96-11-12_ch12: Effects of certain projects on the environment
+    ep-96-11-12_ch3: Court of Auditors' annual report and general budget activities
+    ep-96-11-12_ch8: Return of cultural objects
+    ep-96-11-12_ch9: Epidemiological surveillance
+    ep-96-11-13_ch7: Scope of the codecision procedure
+    ep-96-11-15_ch6: Equal opportunities in the civil service
+    ep-96-11-27_ch5: Convergence and single currency
+    ep-96-12-09_ch7: Customs 2000
+    ep-96-12-09_ch9: Participation in the institutional system
+    ep-96-12-10_ch3: Commission's 1997 work programme and previous year's legislative programme
+    ep-96-12-10_ch6: Communities' draft general budget for 1997  (continuation)
+    ep-96-12-10_ch8: EU/associated countries relations in agricultural field
+    ep-96-12-10_ch9: Question Time (Commission)
+    ep-96-12-11_ch2: European Council on 13/14 December in Dublin and the situation in Serbia
+    ep-96-12-12_ch9: Parking card for the disabled - Rights  of the disabled
+    ep-96-12-13_ch11: Court of Auditor's report on Mostar
+  '1997':
+    ep-97-01-15_ch10: Cross-border credit transfers
+    ep-97-01-15_ch11: EU-Latin America partnership
+    ep-97-01-16_ch10: Application of customs and agricultural law
+    ep-97-01-29_ch6: Combating terrorism
+    ep-97-01-29_ch8: Cultural aspects in European Community action
+    ep-97-02-18_ch10: Investor compensation schemes
+    ep-97-02-19_ch15: Staff Regulations of Officials of the Communities (Equal treatment of men and women)
+    ep-97-02-19_ch5: Veterinary medicine residues in food
+    ep-97-02-19_ch9: Consumer policy priorities (1996-1998) (continuation)
+    ep-97-03-10_ch6: The information society
+    ep-97-03-11_ch11: Genetically modified micro-organisms
+    ep-97-03-11_ch14: Driftnets
+    ep-97-03-11_ch9: The information society, culture and education
+    ep-97-03-12_ch2: Community Transit System
+    ep-97-03-12_ch4: Community Transit System (continuation)
+    ep-97-03-12_ch7: Follow-up to the Barcelona Conference
+    ep-97-03-13_ch11: Withdrawal of GSP from Myanmar
+    ep-97-04-07_ch5: Maize and genetically modified organisms
+    ep-97-04-08_ch12: Simpler legislation for the internal market (SLIM)
+    ep-97-04-08_ch13: Capital adequacy and investment services
+    ep-97-04-08_ch9: Driving licences
+    ep-97-04-09_ch10: Petrol and diesel quality - motor vehicle emissions
+    ep-97-04-10_ch2: Conservation of fishery resources
+    ep-97-04-23_ch11: New maritime strategies
+    ep-97-05-12_ch4: Legal protection for encrypted services
+    ep-97-05-13_ch11: Community environmental law
+    ep-97-05-13_ch6: Preliminary draft budget for 1998 (presentation)
+    ep-97-05-13_ch7: Emissions from non-road mobile machinery
+    ep-97-05-14_ch4: Common security policy
+    ep-97-05-14_ch7: Regional cooperation with former Yugoslavia and contractual relations with south-east Europe
+    ep-97-05-15_ch3: Renewable energy sources
+    ep-97-05-15_ch9: Social legislation on road transport
+    ep-97-05-16_ch5: Cross-border and inter-regional co-operation
+    ep-97-05-28_ch11: Social aspects of housing
+    ep-97-05-28_ch13: Air carrier liability in the event of accidents
+    ep-97-05-28_ch5: Excessive deficits and economic policies
+    ep-97-05-28_ch6: European Council of 23 May 1997
+    ep-97-06-09_ch5: Television broadcasting
+    ep-97-06-09_ch6: Health monitoring
+    ep-97-06-09_ch7: Noise policy
+    ep-97-06-10_ch12: Novel foods
+    ep-97-06-10_ch5: Telecommunications and ONP
+    ep-97-06-10_ch9: Tourism
+    ep-97-06-11_ch4: Progress in CFSP 1996
+    ep-97-06-11_ch5: EP-national parliaments relations
+    ep-97-06-11_ch9: Baltic initiative
+    ep-97-06-12_ch2: European voluntary service action programme
+    ep-97-06-12_ch5: TOPICAL AND URGENT DEBATE
+    ep-97-06-12_ch7: EU role in sport
+    ep-97-06-12_ch8: Excise duty on certain mineral oils
+    ep-97-06-13_ch3: Article 366a of Lomé IV
+    ep-97-06-13_ch5: Mandate of Advisers on Biotechnology
+    ep-97-06-25_ch12: PHARE programme
+    ep-97-06-25_ch4: Urgent political matters
+    ep-97-06-25_ch6: Dangerous preparations
+    ep-97-07-14_ch6: Annual report of the European Ombudsman for 1996
+    ep-97-07-14_ch7: Annual report on the activities of the European Ombudsman in 1996
+    ep-97-07-15_ch4: Biotechnology and the White Paper
+    ep-97-07-16_ch11: Question Time (Council)
+    ep-97-07-16_ch17: Shipments of waste to non-OECD countries
+    ep-97-07-17_ch6: Topical and urgent debate
+    ep-97-09-15_ch8: Cultural Heritage - the Raphael programme
+    ep-97-09-16_ch12: Imports of CFC products from China and Russia
+    ep-97-09-16_ch2: Equal opportunities for men and women
+    ep-97-09-16_ch6: Draft budget for 1998
+    ep-97-09-16_ch9: Question Time (Commission)
+    ep-97-09-17_ch6: NGOs in environmental protection
+    ep-97-09-17_ch7: CO2 and other greenhouse gas emissions
+    ep-97-10-01_ch15: EU-former Yugoslav Republic of Macedonia cooperation agreement
+    ep-97-10-02_ch2: EU-ACP relations for the 21st Century
+    ep-97-10-21_ch10: Fight against fraud
+    ep-97-10-21_ch12: Agreement with FYROM - agreement with Slovenia
+    ep-97-10-21_ch5: Amending budget No 1/97-1998 draft general budget - draft 1997 ECSC operating budget
+    ep-97-10-21_ch7: Amending budget No 1/97-1998 draft general budget - draft 1997 ECSC operating budget (continuation)
+    ep-97-10-22_ch7: Insurance undertakings
+    ep-97-10-23_ch5: New technologies and the press
+    ep-97-10-24_ch4: Apples, pears, peaches and nectarines
+    ep-97-11-05_ch11: Fishing vessel safety
+    ep-97-11-05_ch4: Child sex abuse
+    ep-97-11-05_ch5: Common fisheries policy after 2002
+    ep-97-11-05_ch9: Denominations and specifications of Euro coins
+    ep-97-11-06_ch2: 1996 report on competition policy
+    ep-97-11-18_ch12: Economic and social cohesion
+    ep-97-11-18_ch15: Gender issues in development cooperation
+    ep-97-11-18_ch6: BSE (continuation)
+    ep-97-11-19_ch11: Indirect taxation systems (Fiscalis)
+    ep-97-11-20_ch9: Asylum, immigration and external border crossing (Odysseus programme)
+    ep-97-11-21_ch5: Antarctic fisheries
+    ep-97-12-15_ch5: Trafficking in women for the purpose of sexual exploitation
+    ep-97-12-15_ch7: Consumer protection and price indication
+    ep-97-12-15_ch8: Postal Services
+    ep-97-12-16_ch8: Energy policy
+    ep-97-12-16_ch9: Question Time (Commission)
+    ep-97-12-17_ch10: Humane trapping
+    ep-97-12-17_ch12: Cofinancing with NGOs for developing countries
+    ep-97-12-17_ch4: Commission work programme for 1998 (continuation)
+    ep-97-12-17_ch8: Olives and olive oil
+    ep-97-12-18_ch5: Topical and urgent debate
+    ep-97-12-19_ch4: Interim agreement with Uzbekistan
+    ep-97-12-19_ch5: UEFA decisions on Coca-Cola Cup winners
+  '1998':
+    ep-98-01-12_ch7: New Rule 79a of the Rules of Procedure
+    ep-98-01-14_ch10: Relocation and investment in third countries
+    ep-98-01-14_ch9: Question Time (Council)
+    ep-98-01-15_ch6: Alpine transit (continuation)
+    ep-98-01-15_ch9: Community aid (continuation)
+    ep-98-01-16_ch3: Debt relief for heavily indebted ACP countries
+    ep-98-01-16_ch4: Fisheries relations with Latvia
+    ep-98-01-16_ch5: Mountain regions and Structural Funds
+    ep-98-01-28_ch12: Open network provision (ONP) to voice telephony
+    ep-98-01-29_ch2: Training of seafarers
+    ep-98-01-29_ch4: EC- Republic of Yemen cooperation agreement
+    ep-98-02-16_ch3: Macro-financial assistance for Ukraine
+    ep-98-02-19_ch9: Simpler legislation for the internal market (SLIM)
+    ep-98-02-20_ch3: System of own resources
+    ep-98-02-20_ch5: Community cereals trade
+    ep-98-03-09_ch5: Women's rights
+    ep-98-03-09_ch6: Sale of consumer goods and guarantees
+    ep-98-03-10_ch13: Injury prevention - rare diseases - pollution-related diseases - health protection - Alzheimer's
+    ep-98-03-10_ch4: 'The euro: public administrations, tourism and legal convergence'
+    ep-98-03-11_ch2: Assistance to the applicant countries in central and eastern Europe - Accession   partnerships
+    ep-98-03-30_ch6: Tourism
+    ep-98-03-31_ch11: Passenger vehicles
+    ep-98-03-31_ch8: Shipbuilding
+    ep-98-04-01_ch10: Aid for Bosnia and Herzegovina, Croatia, the Federal Republic of Yugoslavia and the former Yugoslav Republic of Macedonia - post-SFOR strategy (continuation)
+    ep-98-04-01_ch13: 1999 budget procedure - Adjustment of the financial perspective
+    ep-98-04-01_ch3: Development policy - Cooperation Agreements with ACP countries - Decentralized  cooperation
+    ep-98-04-01_ch6: Democratic accountability in the third stage of EMU
+    ep-98-04-01_ch8: Aid for Bosnia and Herzegovina, Croatia, the Federal Republic of Yugoslavia and the former Yugoslav Republic of Macedonia - post-SFOR strategy
+    ep-98-04-02_ch11: Mutual legal assistance in criminal matters
+    ep-98-04-29_ch13: Aspects relating to world trade
+    ep-98-04-29_ch8: 1998 annual economic report
+    ep-98-04-29_ch9: Textiles and the clothing industry
+    ep-98-04-30_ch4: ALTENER II
+    ep-98-05-12_ch10: Eco-label
+    ep-98-05-12_ch11: Question Time (Commission)
+    ep-98-05-13_ch14: Provision of information in the field of technical standards and regulations
+    ep-98-05-13_ch5: Common defence policy
+    ep-98-05-13_ch8: Kosovo
+    ep-98-05-14_ch6: Topical and urgent debate
+    ep-98-05-15_ch5: Audit of certain aspects of German reunification measures (Court of Auditors report)
+    ep-98-05-27_ch5: Preparation for the European Council meeting in Cardiff
+    ep-98-05-27_ch6: Common foreign and security policy for 1997
+    ep-98-05-27_ch8: Economic policy guidelines of the Member States and the Community
+    ep-98-05-28_ch2: Cohesion Fund - Structural Funds - Island regions
+    ep-98-06-16_ch12: Fifth Framework Programme for RTD
+    ep-98-06-16_ch15: Second WTO ministerial conference
+    ep-98-06-18_ch2: European Council in Cardiff - activities during the British presidency
+    ep-98-06-18_ch6: Herring for industrial purposes - fishery resources in the Baltic, Belts and Sound - industrial fisheries
+    ep-98-06-19_ch3: Market in oils and fat
+    ep-98-06-19_ch4: Set-aside requirement
+    ep-98-07-01_ch10: Citizenship of the Union
+    ep-98-07-01_ch5: Euro-Mediterranean Agreement with Jordan
+    ep-98-07-01_ch6: Urban environment
+    ep-98-07-01_ch8: Vendor control systems
+    ep-98-07-02_ch2: Transnational trade union rights
+    ep-98-07-14_ch14: Women's health
+    ep-98-07-14_ch8: Electoral procedure (continuation)
+    ep-98-07-16_ch7: Denied-boarding compensation system in scheduled air transport
+    ep-98-07-17_ch5: Fishing off the Comoros
+    ep-98-09-15_ch13: Supervision of insurance undertakings
+    ep-98-09-15_ch2: Amendment of Financial Regulation
+    ep-98-09-16_ch13: Tax harmonisation
+    ep-98-09-16_ch2: International financial crisis and political developments in Russia
+    ep-98-09-16_ch7: Situation in Kosovo
+    ep-98-09-16_ch9: Question Time (Council)
+    ep-98-09-17_ch3: 'Women: impact of unemployment'
+    ep-98-09-17_ch4: Role of cooperatives in women's employment
+    ep-98-10-06_ch8: European Agency for the Evaluation of Medicinal Products
+    ep-98-10-07_ch12: Conditional access services
+    ep-98-10-09_ch6: 'Objective 2: job-creation'
+    ep-98-10-20_ch5: Nobel Peace Prize
+    ep-98-10-20_ch9: Commission statement on MAI
+    ep-98-10-21_ch6: Telecommunications, media and information technology
+    ep-98-10-22_ch4: Decommissioning of nuclear power stations
+    ep-98-10-23_ch3: Role of libraries
+    ep-98-11-05_ch2: Work-linked training
+    ep-98-11-16_ch5: Combating fraud - Protection of the euro - Action against organised crime
+    ep-98-11-17_ch8: Social dialogue
+    ep-98-11-18_ch11: Pre-accession strategy (continuation)
+    ep-98-11-18_ch15: Structural Funds (continuation)
+    ep-98-11-18_ch16: CAP, EAGGF
+    ep-98-11-19_ch3: Displaced persons
+    ep-98-11-19_ch4: TOPICAL AND URGENT DEBATE
+    ep-98-11-19_ch7: Visas/Airport transit
+    ep-98-11-20_ch4: 'WTO: financial services'
+    ep-98-12-15_ch10: Information strategy on euro
+    ep-98-12-15_ch14: Diversification out of certain fishing activities
+    ep-98-12-16_ch6: Human rights in the world
+    ep-98-12-17_ch11: Better law-making (1997 report)
+  '1999':
+    ep-99-01-12_ch1: German Presidency and the situation in Kosovo
+    ep-99-01-12_ch2: Transparency in the European Union
+    ep-99-01-12_ch4: Approval by Parliament of Commission President
+    ep-99-01-12_ch5: European Capital of Culture (2005 to 2019)
+    ep-99-01-12_ch8: Question Time (Commission)
+    ep-99-01-13_ch8: Application of Article 93 of the EC Treaty
+    ep-99-01-13_ch9: Right to deduct VAT
+    ep-99-01-15_ch3: Export of renewable energy technologies
+    ep-99-01-15_ch4: Impact of financial crisis on European industry
+    ep-99-01-27_ch11: Public procurement
+    ep-99-01-27_ch3: Defence-related industries
+    ep-99-01-27_ch7: Climate change
+    ep-99-02-08_ch7: Shipments of waste to non-OECD countries
+    ep-99-02-09_ch11: Crossing of EU external borders
+    ep-99-02-09_ch12: Classification, packaging and labelling of dangerous preparations
+    ep-99-02-09_ch6: Mutual recognition of telecommunications equipment
+    ep-99-02-10_ch12: Water policy
+    ep-99-02-24_ch10: Tobacco taxes
+    ep-99-02-24_ch13: Reinforcing cohesion and competitiveness
+    ep-99-02-24_ch14: Conformity assessment procedure for packaging
+    ep-99-02-24_ch7: Harmonisation of social legislation on transport
+    ep-99-02-24_ch8: Including Turkey in Socrates and Youth for Europe
+    ep-99-02-24_ch9: Socrates programme (second phase)
+    ep-99-03-08_ch7: Women's health
+    ep-99-03-09_ch10: Bananas
+    ep-99-03-09_ch12: Question Time (Commission)
+    ep-99-03-09_ch13: Own resources (continuation)
+    ep-99-03-09_ch14: Transportable pressure equipment
+    ep-99-03-09_ch9: Public health policy
+    ep-99-03-10_ch11: Nuclear sector-related activities for third countries (continuation)
+    ep-99-03-10_ch12: Multiannual energy programmes
+    ep-99-03-10_ch3: Preparation for the extraordinary European Council in Berlin on 24-25 March 1999
+    ep-99-03-11_ch2: EU relations with Central Asia
+    ep-99-03-11_ch4: TOPICAL AND URGENT DEBATE
+    ep-99-03-11_ch9: Protection of inventions by utility model
+    ep-99-03-12_ch5: Macro-financial assistance to Bosnia and Herzegovina
+    ep-99-03-22_ch9: Common system of VAT (standard rate)
+    ep-99-03-23_ch3: Guidelines for the draft general budget for 2000
+    ep-99-04-12_ch4: Civil liberties
+    ep-99-04-13_ch10: Waste incineration
+    ep-99-04-13_ch11: Waste incineration (continuation)
+    ep-99-04-13_ch12: Financial instrument for the environment
+    ep-99-04-13_ch14: Pollution-related illnesses
+    ep-99-04-13_ch15: Rare diseases
+    ep-99-04-13_ch3: Statement by Mr Prodi, nominee for President of the Commission
+    ep-99-04-13_ch6: Informing and consulting employees
+    ep-99-04-13_ch8: Democracy, rule of law, human rights and fundamental rights
+    ep-99-04-14_ch5: Second bi-annual BSE follow-up report
+    ep-99-04-14_ch8: Applications for EU membership
+    ep-99-04-14_ch9: Agreements and concerted practices
+    ep-99-04-15_ch2: 1998 annual reports
+    ep-99-04-16_ch6: Venice
+    ep-99-05-03_ch13: Dispute between the EU and the USA
+    ep-99-05-03_ch14: Reduction of VAT on labour-intensive services
+    ep-99-05-04_ch12: Distance marketing of financial services
+    ep-99-05-04_ch3: Statement by Mr Prodi, nominee for President of the Commission
+    ep-99-05-04_ch7: Statute for MEPs
+    ep-99-05-04_ch9: Budget estimates for the European Parliament and the European Ombudsman for 2000
+    ep-99-05-07_ch3: Hannover 2000
+    ep-99-05-07_ch4: European textiles market
+    ep-99-07-21_ch3: European Council of 3 and 4 June/ German Presidency
+    ep-99-07-21_ch7: Position of Mr Bangemann
+    ep-99-07-22_ch2: Dioxin
+    ep-99-09-14_ch5: Statement by Mr Prodi (continued)
+    ep-99-09-15_ch12: Question Time (Council)
+    ep-99-09-15_ch3: Preparatory work for the European Council meeting in Tampere
+    ep-99-09-15_ch7: Preparation of the European Council meeting in Tampere (continued)
+    ep-99-09-15_ch8: Situation in East Timor
+    ep-99-09-16_ch10: Dagestan
+    ep-99-09-16_ch7: Financial crisis in Russia
+    ep-99-09-16_ch9: Earthquakes in Turkey and Greece
+    ep-99-10-05_ch4: Eleventh international AIDS conference in Lusaka
+    ep-99-10-05_ch9: Communication from the President of the Commission
+    ep-99-10-06_ch6: Opening of the Millennium Round (continued)
+    ep-99-10-07_ch4: Human rights
+    ep-99-10-25_ch4: Electronic signatures
+    ep-99-10-25_ch7: Passenger cableway installations
+    ep-99-10-26_ch4: Assessing the Community' s humanitarian actions and looking to the future
+    ep-99-11-15_ch6: Rights of the Child
+    ep-99-11-16_ch3: Budgetary discipline
+    ep-99-11-16_ch4: Supplementary and amending budget No 5/1999
+    ep-99-11-16_ch5: Environment and Community energy policy
+    ep-99-11-18_ch12: Rwanda/Burundi
+    ep-99-11-18_ch16: Counterfeit travel documents
+    ep-99-11-19_ch4: Shipbuilding
+    ep-99-12-01_ch13: Safety and health of workers at risk from explosive atmospheres
+    ep-99-12-01_ch15: Marketing of forest reproductive material
+    ep-99-12-01_ch7: Preparation of European Council of 10-11 December 1999 in Helsinki
+    ep-99-12-13_ch8: Civil liability in respect of the use of motor vehicles
+    ep-99-12-14_ch12: Technical regulations for wheeled vehicles
+    ep-99-12-14_ch3: European Council/Finnish Presidency, Chechnya, OSCE
+    ep-99-12-14_ch6: Commission communication - Decisions taken at that day' s meeting
+    ep-99-12-14_ch9: 2000 budget (continuation)
+    ep-99-12-15_ch13: 'Bovine animals and beef: identification, registration and labelling'
+    ep-99-12-16_ch7: Human rights
+    ep-99-12-17_ch4: Community agricultural statistics
+  '2000':
+    ep-00-01-18_ch3: Protection under criminal law of the Union's financial interests
+    ep-00-01-18_ch5: Oil slick off the French coast
+    ep-00-02-02_ch10: ALTENER
+    ep-00-02-02_ch12: CULTURE 2000
+    ep-00-02-03_ch1: End-of-life vehicles
+    ep-00-02-15_ch11: Community policy in the field of water (continuation)
+    ep-00-02-15_ch13: Modernising social protection
+    ep-00-02-16_ch15: Agreement on comitology
+    ep-00-02-16_ch17: Increasing penal sanctions against counterfeiting of the euro
+    ep-00-02-17_ch3: Mutual assistance in criminal matters between the Member States
+    ep-00-02-18_ch3: European postal services
+    ep-00-03-01_ch6: Women in the decision-making process
+    ep-00-03-02_ch2: Shipwreck of the Erika
+    ep-00-03-13_ch2: Special European Council (23-24 March 2000 in Lisbon)
+    ep-00-03-13_ch4: Conservation and sustainable forest management
+    ep-00-03-14_ch10: Question Time (Commission)
+    ep-00-03-14_ch15: Environmental legislation
+    ep-00-03-15_ch7: Question Time (Council)
+    ep-00-03-16_ch2: Information society for All
+    ep-00-03-29_ch8: High Level Working Group on Asylum and Migration
+    ep-00-03-30_ch2: The  "Echelon"  system
+    ep-00-04-10_ch7: Food additives other than colours and sweeteners
+    ep-00-04-11_ch3: 1998 discharge, budgetary control
+    ep-00-05-03_ch10: Aid to uprooted people in Asia and Latin America
+    ep-00-05-03_ch5: Trans-European networks (1998 Annual Report)
+    ep-00-05-15_ch3: Agricultural prices
+    ep-00-05-16_ch10: Carbon dioxide emissions from new cars
+    ep-00-05-16_ch3: Presentation by Commission of preliminary draft budget for 2001
+    ep-00-05-17_ch14: European research area
+    ep-00-05-17_ch2: Broad outlines of economic policies
+    ep-00-05-17_ch4: Adoption of single currency by Greece
+    ep-00-05-17_ch7: Adoption of single currency by Greece (continuation)
+    ep-00-05-17_ch8: Transparency of financial relations between Member States and public undertakings
+    ep-00-05-17_ch9: Poor countries'  debt
+    ep-00-05-18_ch13: Trafficking in women (continuation)
+    ep-00-05-18_ch9: Sierra Leone
+    ep-00-06-13_ch15: EU strategy on financial information
+    ep-00-06-13_ch18: Historical liabilities from JRC nuclear activities
+    ep-00-06-13_ch19: Restrictions for products subject to excise duties (Sweden)
+    ep-00-06-14_ch14: Crime victims in the EU
+    ep-00-06-14_ch4: Security and defence
+    ep-00-06-14_ch8: Tunisia - Human rights - EU-Tunisia Agreement
+    ep-00-06-14_ch9: China's accession to WTO
+    ep-00-06-15_ch4: Structural Funds (1998)
+    ep-00-06-15_ch7: Coup d'état in Paraguay
+    ep-00-07-03_ch8: Safe harbour privacy principles
+    ep-00-07-03_ch9: Visas
+    ep-00-07-04_ch10: Draft supplementary and amending budgets (SAB) for 2000
+    ep-00-07-04_ch2: 1998 discharge
+    ep-00-07-05_ch2: ECB annual report
+    ep-00-07-06_ch10: Human rights
+    ep-00-07-06_ch11: Venezuela
+    ep-00-07-06_ch15: Civil dialogue
+    ep-00-09-04_ch7: Common Community diplomacy
+    ep-00-09-05_ch8: Financial year 2001
+    ep-00-09-06_ch13: End-of-life vehicles
+    ep-00-09-06_ch16: Dangerous substances and preparations (azocolourants)
+    ep-00-09-20_ch10: Sustainable management of forests in developing countries
+    ep-00-10-02_ch5: European system of national and regional accounts (taxes and social contributions)
+    ep-00-10-03_ch2: Preparation for the informal European Council in Biarritz of 13/14 October/Charter of Fundamental Rights
+    ep-00-10-03_ch5: Progress towards accession by the 12 candidate countries (continued)
+    ep-00-10-04_ch11: Question Time (Commission)
+    ep-00-10-04_ch13: Separating financial control functions
+    ep-00-10-04_ch4: Compound feedingstuffs
+    ep-00-10-05_ch11: Samina ferry disaster in Greece
+    ep-00-10-05_ch7: Peru
+    ep-00-10-23_ch8: Community framework strategy on gender equality (2001-2005)
+    ep-00-10-23_ch9: Competition policy
+    ep-00-10-24_ch6: Question Time (Council)
+    ep-00-10-24_ch8: Protection of personal data
+    ep-00-10-25_ch15: Unbundled access to local loop
+    ep-00-10-25_ch2: Food safety
+    ep-00-10-25_ch8: Cooperation with ACP countries involved in armed conflicts
+    ep-00-11-14_ch10: ASEM III
+    ep-00-11-14_ch6: Euro-Mediterranean conferences in Marseilles
+    ep-00-11-14_ch8: Question Time (Council)
+    ep-00-11-15_ch2: General product safety
+    ep-00-11-16_ch9: Human rights
+    ep-00-11-17_ch5: Specific nature of sport
+    ep-00-11-30_ch1: Safety at sea
+    ep-00-12-11_ch4: Summer time
+    ep-00-12-12_ch15: Resale right
+    ep-00-12-12_ch3: 2001 budget
+    ep-00-12-13_ch10: European digital content
+    ep-00-12-13_ch5: Bananas COM (continuation)
+    ep-00-12-14_ch7: Political prisoners in Serbia and instability on the borders of Kosovo
+  '2001':
+    ep-01-01-15_ch5: Credit institutions
+    ep-01-01-16_ch11: Question Time (Commission)
+    ep-01-01-16_ch13: Bangladesh
+    ep-01-01-17_ch2: Rapid reaction facility
+    ep-01-01-18_ch6: Trial of former Khmers Rouges in Cambodia
+    ep-01-01-31_ch4: Mediterranean region
+    ep-01-01-31_ch6: Plan Colombia
+    ep-01-01-31_ch8: Trade relations with certain industrialised countries
+    ep-01-02-13_ch11: Community Eco-Management and Audit Scheme (EMAS)
+    ep-01-02-13_ch13: Two or three-wheel motor vehicles
+    ep-01-02-13_ch3: Industrial restructuring and mergers
+    ep-01-02-13_ch8: Reform of the beef and veal market
+    ep-01-02-15_ch8: Human rights
+    ep-01-02-28_ch9: Development policy
+    ep-01-03-01_ch1: Air strikes in Iraq
+    ep-01-03-13_ch17: Emissions of pollutants from large combustion plants
+    ep-01-03-13_ch21: Energy efficiency
+    ep-01-03-14_ch12: EU election assistance and observation
+    ep-01-03-14_ch7: Foot-and-mouth disease
+    ep-01-03-15_ch11: Disasters
+    ep-01-03-15_ch12: Assistants' statute
+    ep-01-03-15_ch3: Water management
+    ep-01-03-15_ch4: Biotechnology industry
+    ep-01-03-15_ch8: Afghanistan
+    ep-01-03-15_ch9: Human rights
+    ep-01-04-03_ch8: Foot-and-mouth disease
+    ep-01-04-04_ch12: Community programmes/Judicial network
+    ep-01-04-04_ch7: Question Time (Council)
+    ep-01-04-05_ch11: Situation in Mexico
+    ep-01-04-05_ch12: Situation in Somalia and attack against "Médecins sans frontières
+    ep-01-04-05_ch14: Professional fees
+    ep-01-04-05_ch4: Expenditure on CFP control, inspection and surveillance systems
+    ep-01-05-02_ch10: Nuclear safety fifteen years after Chernobyl
+    ep-01-05-02_ch13: Transmissible spongiform encephalopathies
+    ep-01-05-02_ch4: Request for the waiver of Peter Sichrovsky's immunity
+    ep-01-05-02_ch7: Public access to documents
+    ep-01-05-03_ch4: Company accounts
+    ep-01-05-14_ch5: Animal nutrition
+    ep-01-05-14_ch6: Mobility in teaching and training
+    ep-01-05-15_ch9: Sustainable development strategy
+    ep-01-05-16_ch3: State of the transatlantic dialogue
+    ep-01-05-16_ch7: Statute and financing of European political parties
+    ep-01-05-17_ch11: Floods in France
+    ep-01-05-17_ch13: Works councils and redundancies
+    ep-01-05-17_ch14: Gas directive
+    ep-01-06-11_ch4: Sexual exploitation of children - Trafficking in human beings
+    ep-01-06-11_ch7: Export and return of cultural goods
+    ep-01-06-12_ch4: Animal by-products
+    ep-01-06-14_ch10: Situation in Angola
+    ep-01-06-14_ch11: Civil emergency protection
+    ep-01-06-14_ch13: EEC/Comoros fisheries agreement
+    ep-01-06-14_ch6: Biological and toxins weapons convention
+    ep-01-07-03_ch1: European Council meeting of 15-16 June 2001 in Göteborg - Swedish presidency
+    ep-01-07-03_ch10: Institutions for occupational retirement provision
+    ep-01-07-03_ch11: Solvency margin for insurance undertakings
+    ep-01-07-03_ch12: Electricity from renewable energy sources
+    ep-01-07-03_ch6: ECB and the euro (continuation)
+    ep-01-07-04_ch1: Programme of the Belgian presidency
+    ep-01-07-04_ch12: Coastal zone management in Europe
+    ep-01-07-05_ch1: G8 Summit
+    ep-01-07-05_ch10: Earthquake in Peru
+    ep-01-07-05_ch11: Results of the multiannual guidance programmes for fishing fleets
+    ep-01-07-05_ch2: Recreational craft
+    ep-01-07-05_ch6: Death penalty in the world
+    ep-01-09-03_ch7: European works council
+    ep-01-09-03_ch8: Monitoring application of Community law (1999)
+    ep-01-09-03_ch9: Commission reform
+    ep-01-09-05_ch11: Data protection in electronic communications (continuation)
+    ep-01-09-05_ch15: Quality and safety standards for human blood and blood components
+    ep-01-09-05_ch8: Presentation by the Council of the draft general budget for 2002
+    ep-01-09-12_ch1: Acts of terrorism in the United States
+    ep-01-09-19_ch11: Harassment in the work place
+    ep-01-10-02_ch5: Arms exports
+    ep-01-10-03_ch9: Strengthening economic policy coordination within the euro area - Contribution of public finances to growth and employment
+    ep-01-10-04_ch11: Association of overseas countries and territories with the EC
+    ep-01-10-23_ch10: ESF (2000 - 2006)
+    ep-01-10-23_ch3: Informing and consulting employees
+    ep-01-10-24_ch1: European Council meeting (Ghent, 19 October 2001)
+    ep-01-10-24_ch14: Address by His Holiness the XIVth Dalai-Lama
+    ep-01-10-25_ch2: COM in sheepmeat and goatmeat
+    ep-01-11-12_ch5: Public access to Parliament documents
+    ep-01-11-12_ch6: Membership of interparliamentary delegations and joint parliamentary committees
+    ep-01-11-12_ch9: Electronic communications (processing of personal data and protection of privacy)
+    ep-01-11-13_ch1: Decision on urgent procedure
+    ep-01-11-13_ch13: Chemicals strategy
+    ep-01-11-13_ch15: Packaging and packaging waste
+    ep-01-11-13_ch4: Approximation of civil and commercial law
+    ep-01-11-13_ch8: Passenger transport by rail, road and inland waterway
+    ep-01-11-14_ch12: Cross-border payments in euro
+    ep-01-11-14_ch2: European Research Area (Multiannual Framework Programme 2002-2006)
+    ep-01-11-14_ch8: International situation
+    ep-01-11-15_ch14: 2003, European Year of People with Disabilities
+    ep-01-11-15_ch6: Protection of employees in the event of the insolvency of their employer
+    ep-01-11-15_ch9: Accident in the Gotthard Tunnel
+    ep-01-11-28_ch11: Global Fund to fight HIV/AIDS, Tuberculosis and Malaria
+    ep-01-11-28_ch4: Future of the European Union
+    ep-01-11-28_ch7: Communities' financial interests
+    ep-01-12-10_ch6: Report on financial assistance for innovative and job creating SMEs
+    ep-01-12-11_ch11: WTO meeting in Qatar (continuation)
+    ep-01-12-11_ch7: Draft general budget for 2002 (as amended by the Council) and Letter of Amendment 2/2002
+    ep-01-12-12_ch10: Cross-border provision of occupational pensions
+    ep-01-12-12_ch13: Award of Sakharov Prize 2001
+    ep-01-12-12_ch6: Question Time (Council)
+    ep-01-12-13_ch10: Zimbabwe
+    ep-01-12-13_ch7: EC/Islamic Republic of Mauritania fisheries agreement
+  '2002':
+    ep-02-01-17_ch7: Training and recruitment of seafarers
+    ep-02-02-05_ch14: Climate change
+    ep-02-02-05_ch3: Financial services legislation
+    ep-02-02-05_ch4: Structure and rates of excise duty applied on manufactured tobacco
+    ep-02-02-06_ch12: Economic and social cohesion
+    ep-02-02-06_ch14: Excise duty on rum, liqueurs and eaux-de-vie
+    ep-02-02-06_ch7: Preparations for the March 2002 meeting of the UNCHR in Geneva
+    ep-02-02-06_ch8: Relations between the EP and national parliaments
+    ep-02-02-27_ch11: Supplementary estimates for 2002 - DAB 1/2002
+    ep-02-02-27_ch7: International Criminal Court
+    ep-02-03-11_ch1.5: The next item is the debate on the recommendation for second reading (A5-0058/2002) by Mr Ferber, on behalf of the Committee on Regional Policy, Transport and Tourism, on the common position adopted b
+    ep-02-03-12_ch2.10: 'The next item is the recommendation for second reading (A5-0044/2002), by Mrs Emilia Franziska Müller, on behalf of the Committee on the Environment, Public Health and Consumer Policy, on the Council '
+    ep-02-03-12_ch2.8: The next item is Questions to the Commission (B5-0008/2002).
+    ep-02-03-13_ch3.10: 'The next item is a joint debate on two reports by the Committee on Economic and Monetary Affairs:'
+    ep-02-03-13_ch3.5: 'The next item is the Oral Questions:'
+    ep-02-03-13_ch3.9: 'The next item is the continuation of the joint debate on three reports by the Committee on Economic and Monetary Affairs:'
+    ep-02-03-14_ch4.4: The next item is the report (A5-0040/2002) by Mr Maat, on behalf of the Committee on Fisheries, on the proposal for a Council regulation on the conclusion of the Protocol setting out the fishing oppor
+    ep-02-03-14_ch4.9: 'The next item is the joint debate on the following motions for resolutions:'
+    ep-02-04-09_ch2.2: 'The next item is the debate on the recommendation for second reading (?5-0093/2002) by Mr Schmitt, on behalf of the Committee on Regional Policy, Transport and Tourism, on the Council common position '
+    ep-02-04-09_ch2.3: 'The next item is the joint debate on the Council statement on defence policy, including EU/NATO relations and the following two oral questions:'
+    ep-02-04-09_ch2.5: The next item is the recommendation for second reading (A5-0095/2002) by Mr Sterckx on behalf of the Committee on Regional Policy, Transport and Tourism on the Council common position for adopting a E
+    ep-02-04-09_ch2.8: The next item is the recommendation for second reading (A5-0090/2002) by Mrs Ries on behalf of the Committee on the Environment, Public Health and Consumer Policy on the Council common position for ad
+    ep-02-04-10_ch3.0: The next item is the statement by the Council and the Commission on the situation in Chechnya.
+    ep-02-04-10_ch3.3: The next item is the debate on the report (A5-0071/2002) by Mr Fatuzzo, on behalf of the Committee on Employment and Social Affairs, on the Commission communication 'Supporting national strategies for
+    ep-02-04-24_ch3.4: The next item is the debate on the report (A5-0109/2002) by Mr Wynn, on behalf of the Committee on Budgets, on the Draft Amending Budget 2/2002 of the European Union for the financial year 2002 (7033/
+    ep-02-04-24_ch3.5: 'The next item is the joint debate on two reports: (A5-0066/2002) by Mrs Martens, on behalf of the Committee on Women''s Rights and Equal Opportunities, on the communication from the Commission to the C'
+    ep-02-04-24_ch3.7: The next item is the debate on the report (A5-0110/2002) by Mrs Thorning-Schmidt, on the joint text approved by the Conciliation Committee for a European Parliament and Council directive on the minimu
+    ep-02-05-13_ch1.2: The next item is the recommendation for second reading A5-0134/2002 by Jacqueline Foster, on behalf of the Committee on Regional Policy, Transport and Tourism, on the Council common position for adopt
+    ep-02-05-13_ch1.4: The next item is the recommendation for second reading (A5-0143/2002) by Mr Bouwman, on behalf of the Committee on Employment and Social Affairs, on the Council common position for adopting a European
+    ep-02-05-14_ch2.7: The next item is the Council and Commission statements on progress and perspectives in immigration and asylum policy. I am pleased to welcome Mr Rajoy Brey to introduce the debate on behalf of the Cou
+    ep-02-05-15_ch3.3: The next item is the statements by Mr Solana, High Representative for the Common Foreign and Security Policy, and the Commission on the situation in the Middle East.
+    ep-02-05-15_ch3.7: The next item is the report (A5-0157/2002) by Baroness Nicholson of Winterbourne, on behalf of the Committee on Foreign Affairs, Human Rights, Common Security and Defence Policy, on the situation in I
+    ep-02-05-15_ch3.8: The next item is the report (A5-0118/2002) by Doris Pack, on behalf of the Committee on Foreign Affairs, Human Rights, Common Security and Defence Policy, on the Commission report to the Council on th
+    ep-02-05-15_ch3.9: The next item is the report (A5-0039/2002) by Willy Rothley, on behalf of the Committee on Legal Affairs and the Internal Market, with recommendations to the Commission on the drawing-up of a directiv
+    ep-02-05-16_ch4.0: Sustainable development
+    ep-02-05-16_ch4.7: 'The next item is the joint debate on the following motions for resolutions:'
+    ep-02-05-29_ch3.1: The next item is the Commission statement on the common fisheries policy.
+    ep-02-05-29_ch3.11: The next item is the joint debate on the oral questions (B5-0019/02) and (B5-0020/02) to the Commission, on the situation in the European shipbuilding sector.
+    ep-02-05-29_ch3.7: The next item is the recommendation for second reading (A5-0136/2002), on behalf of the Committee on the Environment, Public Health and Consumer Policy on the Council common position for adopting a Eu
+    ep-02-05-30_ch4.4: The next item is a report (A5-0179/2002) by Mr Podestà, on behalf of the Committee on Budgets, on Draft supplementary and amending budget No 2/2002 of the European Union for the financial year 2002, a
+    ep-02-06-11_ch2.7: The next item is the statements by the Council and the Commission on the results of the preparatory meeting for the Johannesburg Summit, which took place between 27 May and 7 June 2002 in Bali.
+    ep-02-06-12_ch3.1: The next item is the continuation of the vote.
+    ep-02-06-12_ch3.4: The next item is the report (A5-0182/2002) by Mr García-Margallo y Marfil on behalf of the Committee on Economic and Monetary Affairs on the proposal for a European Parliament and Council decision (CO
+    ep-02-06-12_ch3.7: The next item is a report (A5-0198/2002) by Mrs Ayuso González, on behalf of the Committee on Agriculture and Rural Development, on the Common Organisation of the Market in ethyl alcohol of agricultur
+    ep-02-06-13_ch4.6: 'The next item is the joint debate on the following motions for resolutions:'
+    ep-02-07-02_ch2.1: The next item is the joint debate on the European Council report and Commission statement on the European Council meeting held in Seville on 21 and 22 June 2002, and the statement by the President-in-
+    ep-02-07-02_ch2.7: The next item is the report (A5-0243/2002) by Mr Lisi, on behalf of the Committee on the Environment, Public Health and Consumer Policy, on the proposal for a European Parliament and Council directive
+    ep-02-07-03_ch3.1: The next item is the statement by the President-in-Office of the Council on the programme of the Danish presidency.
+    ep-02-07-04_ch4.3: The next item is the Commission statement on the situation in Somalia.
+    ep-02-09-02_ch1.3: The next item is the debate on the report (A5-0242/2002) by Mr Stevenson, on behalf of the Committee on Agriculture and Rural Development, on the Commission communication to the Council and the Europe
+    ep-02-09-03_ch2.10: The next item is the report (A5-0249/2002) tabled by Mr Berenguer Fuster, on behalf of the Committee on Economic and Monetary Affairs, on the draft Commission regulation on the application of Articles
+    ep-02-09-03_ch2.12: The next item is the report (A5-0256/2002) by Mrs Smet, on behalf of the Committee on Employment and Legal Affairs, on the scoreboard on implementing the social policy agenda [2001/2241(INI)].
+    ep-02-09-03_ch2.9: The next item is the continuation of the debate on sales promotions in the internal market.
+    ep-02-09-04_ch3.2: The next item is the Council and Commission statements on the situation in Afghanistan.
+    ep-02-09-05_ch4.2: The next item is the report (A5-0183/2002) by Mrs Gutiérrez-Cortines, on behalf of the Committee on Culture, Youth, Education, the Media and Sport, on Universities and higher education in the European
+    ep-02-09-24_ch2.3: The next item is the debate on the report by Mr Casaca (A5-0275/2002), on behalf of the Committee on Budgetary Control, on scrutiny by Member States of transactions forming part of the system of finan
+    ep-02-09-24_ch2.5: The next item is the debate on the general budget of the European Union for the financial year 2003.
+    ep-02-09-25_ch3.7: The next item is the recommendation for second reading (A5-0288/2002) by Mr Callanan, on behalf of the Committee on the Environment, Public Health and Consumer Policy, on the common position on recrea
+    ep-02-10-09_ch3.2: 'The next item is a joint debate on:'
+    ep-02-10-09_ch3.4: 'The next item is the report (A5-0341/2002) by Mr Berend, on behalf of the Committee on Regional Policy, Transport and Tourism, on the proposal for a Council regulation establishing the European Union '
+    ep-02-10-09_ch3.5: The next item is the recommendation for second reading from the Committee on Industry, External Trade, Research and Energy, concerning the common position adopted by the Council with a view to adoptin
+    ep-02-10-10_ch4.0: The next item is the report (A5-0303/2002) by Mr Jorge Moreira Da Silva on behalf of the Committee on the Environment, Public Health and Consumer Policy on the proposal for a European Parliament and C
+    ep-02-10-22_ch2.2: 'The next item is the joint debate on the following reports on the 2003 General Budget on behalf of the Committee on Budgets:'
+    ep-02-10-22_ch2.5: 'The next item is the report (A5-0310/2002) by Mr Stephen Hughes, on behalf of the Committee on Employment and Social Affairs, on the Commission communication: Adapting to change in work and society: a'
+    ep-02-10-22_ch2.7: The next item is the report (A5-0325/2002) by Mr Michiel van Hulten, on behalf of the Committee on Budgetary Control, on the draft Commission Regulation laying down detailed rules for the implementati
+    ep-02-10-23_ch3.2: The next item is the Council and Commission statements on combating terrorism.
+    ep-02-10-23_ch3.5: The next item is the debate on the report (A5-0298/2002) by Mr Lisi, on behalf of the Committee on Regional Policy, Transport and Tourism, on the proposal for a European Parliament and Council regulat
+    ep-02-10-24_ch4.7: 'The next item is the debate on the following five motions for resolutions on the International Criminal Court:'
+    ep-02-11-06_ch3.3: The next item is the statement by Mr Solana on the situation in the Middle East and Iraq.
+    ep-02-11-06_ch3.5: The next item is the Commission statement on the financing of the nuclear sector in the context of the programme for nuclear weapons.
+    ep-02-11-07_ch4.0: The next item is the Council and Commission statements on completing the internal market.
+    ep-02-11-18_ch1.3: The next item is the debate on the recommendation for second reading (A5-0367/2002) by Mr Lipietz, on behalf of the Committee on Economic and Monetary Affairs, on the common position adopted by the Co
+    ep-02-11-20_ch3.2: The next item is the statements made by the Council and the Commission on the outcome of the EU-Russia Summit.
+    ep-02-11-20_ch3.7: The next item is the report (A5-0365/2002) by Mr Nisticò, on behalf of the Committee on the Environment, Public Health and Consumer Policy, on the proposal for a directive of the European Parliament a
+    ep-02-11-21_ch4.0: The next item is the report (A5-0364/2002) by Mrs van den Burg, on behalf of the Committee on Economic and Monetary Affairs, on the European Investment Bank annual report for 2001 [2001/2256(INI)].
+    ep-02-11-21_ch4.3: The next item is the Commission statement on climate change.
+    ep-02-12-04_ch3.4: 'The next item is the joint debate on the following three reports:'
+    ep-02-12-04_ch3.6: The next item is the report (A5-0390/2002) by Mr Lage, on behalf of the Committee on Fisheries, on the proposal for a Council regulation on the conclusion of the Protocol setting out, for the period f
+    ep-02-12-04_ch3.7: The next item is the report (A5-0400/2002) by Mr Karas on behalf of the Committee on Economic and Monetary Affairs on the Commission communication on streamlining the annual economic and employment po
+    ep-02-12-17_ch2.4: 'The next item is the report (A5-0442/2002) by Mr Nisticò, on behalf of the European Parliament delegation to the Conciliation Committee, on the joint text approved by the Conciliation Committee for a '
+    ep-02-12-17_ch2.8: The next item is the report (A5-0435/2002) by Eija-Riitta Anneli Korhola, on the joint text approved by the Conciliation Committee for a European Parliament and Council directive on public access to e
+    ep-02-12-19_ch4.4: The next item is the Commission statement on sustainable development in mountain regions.
+    ep-02-12-19_ch4.8: 'The next item is the joint debate on the following six proposals for resolutions on Tibet:'
+  '2003':
+    ep-03-01-13_ch1.2: The next item is the report (A5-0427/2002) by Giorgio Napolitano, on behalf of the Committee on Constitutional Affairs, on the role of regional and local authorities in European integration (2002/141(
+    ep-03-01-14_ch2.6: The next item is the report (A5-0452/2002) by Mr Mantovani, on behalf of the Committee on Employment and Social Affairs, on the Commission communication to the Council, the European Parliament, the Ec
+    ep-03-01-15_ch3.0: The next item is the Council and Commission statements on Afghanistan, one year after the Bonn Agreement.
+    ep-03-01-15_ch3.1: The next item is the report (A5-0001/2003), by Mrs Roth-Behrendt, on behalf of the European Parliament delegation to the Conciliation Committee, on the joint text approved by the Conciliation Committe
+    ep-03-01-16_ch4.1: 'The next item is the report (A5-0448/2002) by Hugues Martin, on behalf of the Committee on Fisheries, on aquaculture in the European Union: present and future (2002/2058(INI)).'
+    ep-03-01-29_ch3.1: The next item is the statement by the High Representative for Common Foreign and Security Policy on the situation in Iraq.
+    ep-03-01-29_ch3.3: The next item is the Council and Commission statements on the 59th UNHCR meeting to take place in Geneva from 17 March 2003 to 25 April 2003.
+    ep-03-01-29_ch3.4: The next item is a report (A5-0002/2003) by Mr McCartin, on behalf of the Committee on Budgetary Control, on action taken by the Commission on the observations accompanying the decision giving dischar
+    ep-03-02-10_ch1.2: The next item is the Commission statement on the World Economic Forum (Davos) and the World Social Forum (Porto Alegre).
+    ep-03-02-11_ch2.0: The next item is the report (A5-0009/2003) by Mr Santini, on behalf of the Committee on Citizens' Freedoms and Rights, Justice and Home Affairs, on the proposal for a European Parliament and Council d
+    ep-03-02-11_ch2.10: The next item is the debate on transport policy for 2010.
+    ep-03-02-11_ch2.11: The next item is the joint debate on the following reports tabled by the Committee on Industry, External Trade, Research and Energy
+    ep-03-02-11_ch2.5: The next item is the recommendation by Mr Salafranca Sánchez-Neyra (A5-0017/2003) on behalf of the Committee on Foreign Affairs, Human Rights, Common Security and Defence Policy on the conclusion of a
+    ep-03-02-11_ch2.6: The next item is the debate on the report (A5-0019/2003) by Mr Caveri, on behalf of the Committee on Regional Policy, Transport and Tourism, on the establishment of an ecopoint system applicable to he
+    ep-03-02-11_ch2.8: The next item is the communication from the Commission on the adjustment of the Financial Perspective to take account of enlargement.
+    ep-03-02-12_ch3.2: The next item is the statements by the Council and the Commission on the situation in Iraq.
+    ep-03-02-13_ch4.6: 'The next item is the debate on the following six motions for resolutions on Venezuela:'
+    ep-03-03-10_ch1.3: The next item is a recommendation for second reading (A5-0050/2003) by Mr Jarzembowski, on behalf of the Committee on Regional Policy, Transport and Tourism, on the Council common position for adoptin
+    ep-03-03-12_ch3.2: The next item is the statement by the Council and the Commission on the military mission of the Union in the former Yugoslav Republic of Macedonia.
+    ep-03-03-12_ch3.4: The next item is Question Time (B5-0085/2003)
+    ep-03-03-12_ch3.5: The next item is the report (A5-0060/2003) by Lissy Gröner, on behalf of the Committee on Women's Rights and Equal Opportunities, on gender mainstreaming in the European Parliament (2002/2025(INI)).
+    ep-03-03-13_ch4.0: 'The next item is the joint debate on the following reports:'
+    ep-03-03-26_ch3.2: The next item is the report (A5-0077/2003) by Mr Brok and Mr Wynn, on behalf of the Committee on Foreign Affairs, Human Rights, Common Security and Defence Policy and the Committee on Budgets, contain
+    ep-03-03-26_ch3.3: 'The next item is the joint debate on the Reform of Staff Regulations:'
+    ep-03-03-26_ch3.5: The next item is the report (A5-0044/2003) by Mr Lannoye, on behalf of the Committee on the Environment, Public Health and Consumer Policy, on the proposal for a directive of the European Parliament a
+    ep-03-03-26_ch3.6: 'The next item is the report (A5-0064/2003) by Mr Nisticò, on behalf of the European Parliament delegation to the Conciliation Committee, on the joint text approved by the Conciliation Committee for a '
+    ep-03-04-07_ch1.3: The next item is the debate on the report (A5-0087/2003) by Mrs De Sarnez, on behalf of the Committee on Culture, Youth, Education, the Media and Sport, on the proposal for a European Parliament and C
+    ep-03-04-07_ch1.4: The next item is the report (A5-0080/2003) by Mr Mauro, on behalf of the Committee on Culture, Youth, Education, the Media and Sport, on the proposal for a decision of the European Parliament and of t
+    ep-03-04-08_ch2.4: The next item is the Commission statement on the economic forecasts for spring; guidelines for employment. The Commissioner, Mr Pedro Solbes Mira, has the floor.
+    ep-03-04-08_ch2.7: The next item is the report (A5-0104/2003) by Mr Kirkhope, on behalf of the Committee on Citizens' Freedoms and Rights, Justice and Home Affairs, on the initiative by the Federal Republic of Germany w
+    ep-03-04-09_ch3.8: The next item is the report (A5-0049/2003) by Mrs Ferreira, on behalf of the Committee on the Environment, Public Health and Consumer Policy, on the proposal for a Directive of the European Parliament
+    ep-03-04-10_ch4.2: The next item is the Commission statement on the crisis on the international coffee market.
+    ep-03-04-10_ch4.7: 'The next item is the debate on the following five motions for resolutions:'
+    ep-03-06-02_ch1.5: The next item is the report (A5-0192/2003) by Bastiaan Belder, on behalf of the Committee on Industry, External Trade, Research and Energy, on the implementation of macro-financial assistance to third
+    ep-03-06-03_ch2.6: The next item is the recommendation for second reading (A5-0154/2003), on behalf of the Committee on the Environment, Public Health and Consumer Policy, on the Council common position for adopting a E
+    ep-03-06-04_ch3.4: The next item is two oral questions (B5-0094/2003 and B5-0095/2003) by Mr Brok to the Council and the Commission on a renewed transatlantic partnership for the third millennium.
+    ep-03-06-04_ch3.9: The next item is the report (A5-0167/2003) by Mrs Fraisse, on behalf of the Committee on Women's Rights and Equal Opportunities, on women and sport [2002/2280(INI)].
+    ep-03-06-05_ch4.1: The next item is the report (A5-0156/2003) by Mr Schnellhardt, on behalf of the Committee on the Environment, Public Health and Consumer Policy, on the proposal for a European Parliament and Council r
+    ep-03-06-18_ch3.2: The next item is the statements by the High Representative for Common Foreign and Security Policy and by the Commission on the Middle East.
+    ep-03-06-18_ch3.6: The next item is the report (A5-0196/2003) by Mr Wijkman, on behalf of the Committee on Development and Cooperation, on the Commission communication to the European Parliament and to the Council on 'e
+    ep-03-06-19_ch4.1: The next item is the joint debate on the report (A5-0171/2003) by Mr Lisi, on behalf of the Committee on Fisheries, on a Community Action Plan for the conservation and sustainable exploitation of fish
+    ep-03-06-30_ch1.1: The next item is the report (A5-0246/2003) by Klaus-Heiner Lehne, on behalf of the Committee on Legal Affairs and the Internal Market, on the request for waiver of the immunity of Mr Daniel Marc Cohn-
+    ep-03-07-01_ch2.6: The next item is the oral question to the Commission by Mr Lannoye and others, on behalf of the Group of the Greens/European Free Alliance, on water and proteins added to chicken meat (O-0045/2003 - B
+    ep-03-07-01_ch2.7: The next item is the report (A5-0240/2003) by Mr Mulder, on behalf of the Committee on Budgets, on the 2004 budget in view of the conciliation procedure before the Council's first reading [2003/2027(B
+    ep-03-07-01_ch2.8: 'The next item is the report (A5-0233/2003) by Mr Färm, on behalf of the Committee on Budgets, on the 2003 budget: implementation profile, transfers of appropriations and supplementary and amending bud'
+    ep-03-07-02_ch3.0: The next item is the statement by the President-in-Office of the Council on the programme of the Italian Presidency.
+    ep-03-07-02_ch3.4: The next item is Question Time (B5-0098/2003).
+    ep-03-07-02_ch3.5: The next item is the joint debate on
+    ep-03-09-02_ch2.9: The next item is Question Time (B5-0273/2003), although we are running behind enormously, by 25 minutes, which has been happening every sitting, and I do not hold President Imbeni responsible for that
+    ep-03-09-03_ch3.0: The next item is the oral questions (B5-0271/2003), to the Council, and (B5-0272/2003), to the Commission, by Mr Elmar Brok, on behalf of the Committee on Foreign Affairs, Human Rights, Common Foreign
+    ep-03-09-03_ch3.8: The next item is the debate on the report (A5-0217/2003) by Mr John Bowis, on behalf of the Committee on Development and Cooperation, on the Commission Communication on health and poverty reduction in
+    ep-03-09-23_ch2.0: The next item is the debate on the recommendation (A5-0307/2003), on behalf of the Committee on Economic and Monetary Affairs, on the appointment of Mr Jean-Claude Trichet as President of the European
+    ep-03-09-24_ch3.7: The next item is the report (A5-0292/2003) by Mr Lisi, on behalf of the Committee on the Environment, Public Health and Consumer Policy, on the proposal for a European Parliament and Council directive
+    ep-03-09-25_ch4.2: 'The next item is the report (A5-0239/2003) by Mrs González Álvarez, on behalf of the Committee on Petitions, on the deliberations of the Committee on Petitions during the parliamentary year 2002-2003 '
+    ep-03-09-25_ch4.3: The next item is the report (A5-0203/2003) by Mr Perry, on behalf of the Committee on Petitions, on the petition declared admissible on the Lloyd's Petitions (Petitions 1273/1997, 71/1999, 207/2000, 3
+    ep-03-09-25_ch4.6: The next item is the Commission statement on the European Union and the campaign against torture.
+    ep-03-10-08_ch1.6: The next item is the report (A5-0257/2003) by Mr Della Vedova, on behalf of the Committee on Economic and Monetary Affairs, on the proposal for a Council regulation on the control of concentrations be
+    ep-03-10-21_ch1.10: The next item is the debate on the oral question (O-0066/2003 – B5-0281/2003) byMr Gargani, Mr Rothley, Mr Lehne and Mr Manders, on behalf of the Committee on Legal Affairs and the Internal Market, to
+    ep-03-10-21_ch1.9: The next item is the debate on the recommendation for second reading (A5-0345/2003), on behalf of the Committee on the Environment, Public Health and Consumer Policy, on the common position of the Cou
+    ep-03-10-22_ch1.5: The next item is the report (A5-0351/2003) by Mr Menéndez del Valle, on behalf of the Committee on Foreign Affairs, Human Rights, Common Security and Defence Policy, on peace and dignity in the Middle
+    ep-03-10-22_ch1.6: The next item is the report (A5-0330/2003) by Mrs Angelilli, on behalf of the Committee on Citizens' Freedoms and Rights, Justice and Home Affairs, on compensation to crime victims.
+    ep-03-10-22_ch1.8: The next item is the Commission statement on the situation in Bolivia.
+    ep-03-10-23_ch1.2: The next item is the report (A5-0331/2003) by Mrs Figueiredo, on behalf of the Committee on Fisheries, on the Commission communication ‘Towards uniform and effective implementation of the common fishe
+    ep-03-10-23_ch1.3: The next item is the report (A5-0332/2003) by Mrs McKenna, on behalf of the Committee on Fisheries, on the annual report from the Commission to the Council and the European Parliament on the results o
+    ep-03-10-23_ch1.6: The next item is the debate on the motion for a resolution (B5-0434/2003), on behalf of the Committee on Development and Cooperation, on human rights violations and failure to show respect for the rul
+    ep-03-10-23_ch1.8: 'The next item is the joint debate on the following motions for resolutions on Nepal:'
+    ep-03-11-05_ch1.3: The next item is the report (A5-0312/2003) by Marieke Sanders-ten Holte, on behalf of the Committee on Development and Cooperation, on the proposal for a European Parliament and Council regulation con
+    ep-03-11-05_ch1.8: 'The next item is the debate on the report (A5-0360/2003) by Mr Blak, on behalf of the Committee on Budgetary Control, on the discharges to be given for the financial year 2001 to: 1. the European Agen'
+    ep-03-11-05_ch1.9: The next item is the debate on the report (A5-0265/2003) by Mrs Honeyball, on behalf of the Committee on Economic and Monetary Affairs, on the Commission communication on taxation of passenger cars in
+    ep-03-11-06_ch1.0: The next item is the Commission statement on employment prospects in the EU automobile sector.
+    ep-03-11-17_ch1.0: ''
+    ep-03-11-17_ch1.4: 'The next item is the joint debate on the following three reports:'
+    ep-03-11-19_ch1.3: The next item is the Council and Commission statements on the outcome of the EU-Russia Summit.(1)
+    ep-03-11-19_ch1.5: The next item is the Council and Commission statements on the Northern dimension.
+    ep-03-11-19_ch1.9: The next item is the report (A5-0390/2003) by Mr Swoboda, on behalf of the Committee on Foreign Affairs, Human Rights, Common Foreign and Defence Policy, on the proposal for a Council Regulation amend
+    ep-03-12-16_ch1.3: The next item is Questions to the Council
+    ep-03-12-17_ch1.12: The next item is the report (A5-0459/2003) by Struan Stevenson, on behalf of the Committee on Fisheries, on the proposal for a Council regulation on the conclusion of an agreement in the form of an ex
+    ep-03-12-17_ch1.4: The next item is the debate on the report (A5-0435/2003) by Mrs Sommer, on behalf of the Committee on Regional Policy, Transport and Tourism, on the proposal for a directive of the European Parliament
+    ep-03-12-17_ch1.5: 'The next item is the report (A5-0475/2003) by Mr Paolo Costa on behalf of the European Parliament delegation to the Conciliation Committee on the joint text approved by the Conciliation Committee for '
+    ep-03-12-17_ch1.6: 'The next item on the agenda is the report (A5-0464/2003) by Mr Lisi on behalf of the Parliament delegation to the Conciliation Committee on the joint text approved by the Conciliation Committee for a '
+    ep-03-12-18_ch1.1: The next item is the report (A5-0451/2003) by Mrs Aaltonen on behalf of the Committee on Petitions on petition 842/2001 concerning the effects of discriminatory treatment afforded to persons with Mult
+  '2004':
+    ep-04-01-12_ch1.3: 'The next item is the joint debate on the following reports:'
+    ep-04-01-13_ch1.10: The next item is a report (A5-0329/2003) by Mr Bébéar, on behalf of the Committee on Development and Cooperation, on the New Partnership for Africa's Development (NEPAD) [2003/2106(INI)].
+    ep-04-01-13_ch1.3: The next item is the Commission’s statement on the prospects for the Doha Round following the meeting of the WTO General Councilon 15 December 2003.
+    ep-04-01-13_ch1.8: 'The next item is a recommendation at second reading (A5-0455/2003) by Mr Nobilia, on behalf of the Committee on the Environment, Public Health and Consumer Policy, on the Council common position with '
+    ep-04-01-14_ch1.2: The next item is the Council and Commission statements on preparations for the 60th session of the United Nations Commission on Human Rights.
+    ep-04-01-14_ch1.7: The next item is the oral question to the Commission (O-0076/2003 – B5-0417/2003), by Stephen Hughes, Proinsias de Rossa and Jan Andersson on behalf of the PSE Group, on harassment at the workplace.
+    ep-04-01-15_ch1.3: 'The next item is the joint debate on the following seven motions for resolutions:'
+    ep-04-01-28_ch1.1: The next item is the Council and Commission statements on the programme of the Irish presidency and the European Constitution.
+    ep-04-02-09_ch1.1: The next item is the report (A5-0040/2004) by Giorgos Katiforis, on behalf of the Committee on Economic and Monetary Affairs, on the role and methods of credit rating agencies (2003/2081(INI)).
+    ep-04-02-09_ch1.4: The next item is the report (A5-0015/2004) by Hans Modrow, on behalf of the Committee on Development and Cooperation, on the communication from the Commission to the Council and the European Parliamen
+    ep-04-02-10_ch1.5: 'The next item is the Commission statement on the broad political framework for the next financial perspective: Making Europe prosper – policy agenda and budgetary means for an enlarged Union 2007-2013'
+    ep-04-02-11_ch1.1: The next item is the joint debate on the oral questions by the PSE, Verts/ALE, ELDR and GUE/NGL political groups, to the Council (B5 0008/2004) and to the Commission (B5 0013/2004), on nuclear disarma
+    ep-04-02-11_ch1.3: The next item is the Council statement on the position of the European Union on the hearing in the International Court of Justice on the Israeli wall.
+    ep-04-02-11_ch1.4: The next item is Question Time (B5-0007/2004).
+    ep-04-02-12_ch1.5: 'The next item is the joint debate on the following motions for resolutions:'
+    ep-04-02-25_ch1.5: 'The next item is the debate on the report (A5-0062/2004) by Mr Kuckelkorn, on behalf of the Committee on Budgets, on the 2005 budget: guidelines for Sections II, IV, V, VI, VII, VIII(A) and VIII(B) an'
+    ep-04-02-25_ch1.7: 'The next item is the debate on the report (A5-0080/2004) by Mr Graça Moura, on behalf of the Committee on Culture, Youth, Education, the Media and Sport, on the role of schools and learning at school '
+    ep-04-02-25_ch1.9: The next item is the debate on the report (A5-0056/2004) by Mrs Randzio-Plath, on behalf of the Committee on Economic and Monetary Affairs, on the proposal for a Council regulation amending Regulation
+    ep-04-02-26_ch1.1: The next item is the debate on the report (A5-0053/2004) by Mr Belder, on behalf of the Committee on Foreign Affairs, Human Rights, Common Security and Defence Policy with a proposal for a European Pa
+    ep-04-02-26_ch1.2: The next item is the report (Α5-0052/2004) by Mr Gahrton, on behalf of the Committee on Foreign Affairs, Human Rights, Common Security and Defence Policy, with a proposal for a European Parliament rec
+    ep-04-03-08_ch1.6: The next item is the report by Mr Dimitrakopoulos (A5-0071/2004) on behalf of the Committee on Constitutional Affairs, on the amendments to the European Parliament’s Rules of Procedure following the a
+    ep-04-03-09_ch1.1: The next item is the report (A5-0449/2003) by Mrs Paulsen, on behalf of the Committee on the Environment, Public Health and Consumer Policy, on official feed and food controls [COM(2003) 52 – C5-0032/
+    ep-04-03-09_ch1.10: The next item is the report (A5-0047/2004) by Mr Kronberger on behalf of the Committee on the Environment, Public Health and Consumer Policy on the proposal for a European Parliament and Council direc
+    ep-04-03-09_ch1.3: 'The next item is the third report (A5-0118/2004) by Mr Medina Ortega, on behalf of the Committee on Legal Affairs and the Internal Market, on the Commission communication on simplifying and improving '
+    ep-04-03-09_ch1.6: The next item is the report (A5-0107/2004) by Mr Andreasen on behalf of the Committee on Foreign Affairs, Human Rights, Common Security and Defence Policy on the proposal for a European Parliament rec
+    ep-04-03-10_ch1.0: The next item is the Council and Commission statements on the preparation of the European Council in Brussels, 25 and 26 March 2004 – follow up to the IGC.
+    ep-04-03-10_ch1.5: 'The next item is the joint debate on:'
+    ep-04-03-10_ch1.7: The next item is the second report (A5-0122/2004) by Olle Schmidt, on behalf of the Committee on Economic and Monetary Affairs, on the proposal for a Council directive amending Directive 77/388/EEC as
+    ep-04-03-11_ch1.1: The next item is the report (A5-0058/2004) by Mrs Gillig, on behalf of the Committee on Employment and Social Affairs, on the proposal for a European Parliament and Council regulation amending Council
+    ep-04-03-29_ch1.4: The next item is the report (A5-0155/2004) by Mrs Prets, on behalf of the Committee on Women’s Rights and Equal Opportunities, on the proposal for a Council directive implementing the principle of equ
+    ep-04-03-30_ch1.13: The next item is the debate on the report (A5-0177/2004) by Mr Sjöstedt, on behalf of the Committee on the Environment, Public Health and Consumer Policy, on the proposal for a European Parliament and
+    ep-04-03-30_ch1.2: 'The next item is the joint debate on:'
+    ep-04-03-30_ch1.3: The next item is the report (A5-0197/2004) by Albert Jan Maat, on behalf of the Committee on Agriculture and Rural Development, on the proposal for a Council regulation on the protection of animals du
+    ep-04-03-30_ch1.7: The next item is the report (Α5-0133/2004) by Mrs Keppelhoff, on behalf of the Committee on the Environment, Public Health and Consumer Policy, on requirements for feed hygiene.
+    ep-04-03-30_ch1.8: 'The next item is the report (Α5-0147/2004) by Mrs Thors, on behalf of the Committee on the Environment, Public Health and Consumer Policy, on materials and articles intended to come into contact with '
+    ep-04-03-30_ch1.9: The next item is the debate on the report (A5-0172/2004) by Mr Goodwill, on behalf of the Committee on the Environment, Public Health and Consumer Policy, on the proposal for a European Parliament and
+    ep-04-03-31_ch1.1: 'The next item is the joint debate on the European Council and security:'
+    ep-04-03-31_ch1.10: The next item is the debate on the report (A5-0143/2004) by Mr Scarbonchi, on behalf of the Committee on Development and Cooperation, on budgetisation of the European Development Fund (EDF).
+    ep-04-03-31_ch1.2: The next item is the report (A5-0206/2004) by Mr Baltas, on behalf of the Committee on Foreign Affairs, Human Rights, Common Security and Defence Policy, containing a proposal for a European Parliamen
+    ep-04-03-31_ch1.7: The next item is the report (A5-0211/2004) by Mr Schmitt, on behalf of the Committee on Citizens’ Freedoms and Rights, Justice and Home Affairs, on the initiative of the Kingdom of Spain with a view t
+    ep-04-04-01_ch1.2: 'The next item is the debate on the report (A5-0176/2004) on behalf of the Committee on the Environment, Public Health and Consumer Policy, on the communication from the Commission: Towards a thematic '
+    ep-04-04-19_ch1.0: ''
+    ep-04-04-19_ch1.1: The next item is the report (A5-0227/2004) by Johannes Voggenhuber, on behalf of the Committee on Constitutional Affairs, on respect for and promotion of the values on which the Union is based.
+    ep-04-04-19_ch1.5: The next item is the report (A5-0171/2004) by Mrs Thors, on behalf of the Committee on the Environment, Public Health and Consumer Policy, on the proposal for a directive of the European Parliament an
+    ep-04-04-20_ch1.10: The next item is the report (A5-0271/2004) by Mrs Boogerd-Quaak on behalf of the Committee on Citizens’ Freedoms and Rights, Justice and Home Affairs on the proposal for a Council decision on the conc
+    ep-04-04-20_ch1.11: The next item is the report (A5-0230/2004) by Mrs Boogerd-Quaak on behalf of the Committee on Citizens’ Freedoms and Rights, Justice and Home Affairs on the risks of violation, in the EU and especiall
+    ep-04-04-21_ch1.0: ''
+    ep-04-04-21_ch1.2: The next item is the Council and Commission statements on the situation in the Middle East.
+    ep-04-04-22_ch1.5: The next item is the Commission statement on the preparations by the European Union for the Review Conference on the Ottawa Treaty on anti-personnel mines.
+    ep-04-05-04_ch1.0: 'The next item is the commemoration of Jean Monnet and the twentieth anniversary of the draft Treaty establishing the European Union (1984 – Rapporteur: Altiero Spinelli).'
+    ep-04-05-04_ch1.1: The next item is the general debate on the future of the enlarged European Union.
+    ep-04-07-20_ch1.0: ''
+    ep-04-07-21_ch1.1: The next item is the joint debate on the Report of the European Council and the Commission Statement – European Councils of 17, 18 and 29 June 2004 – and the Council Statement – Six months of the Iris
+    ep-04-07-21_ch1.2: The next item is the debate on the Council Statement – Work programme of the Dutch Presidency.
+    ep-04-09-14_ch1.4: The next item is the legal protection of designs.
+    ep-04-09-14_ch1.6: The next item is the debate on the Council and Commission statements on the humanitarian situation in Sudan.
+    ep-04-09-15_ch1.0: The next item is the debate on the Council and Commission Statements on the seizure of hostages and massacre in Beslan and the fight against terrorism.
+    ep-04-09-15_ch1.3: The next item is the debate on the Council and Commission Statements on the Stability and Growth Pact.
+    ep-04-09-15_ch1.5: The next item is Questions to the Council (B6-0007/04).
+    ep-04-09-16_ch1.0: 'The next item is two oral questions to the Commission on the Dutch boat belonging to the ‘Women on Waves’ association:'
+    ep-04-10-13_ch1.1: The next item is the speeches on matters of political importance.
+    ep-04-10-25_ch1.1: The next item is speeches on matters of political importance.
+    ep-04-10-25_ch1.3: The next item is the Commission statement on restructuring of the automobile sector. I shall give the floor straight away to Mr Rehn, to speak on behalf of the Commission.
+    ep-04-10-27_ch1.0: The next item is the debate on the Council and Commission statements on the preparation of the Brussels European Council on 4 and 5 November.
+    ep-04-10-27_ch1.3: The next item is the Council and Commission statements on the result of the referendum and elections in Belarus.
+    ep-04-10-28_ch1.2: The next item is oral question B6-0018/04 by Karl-Heinz Florenz, on behalf of the Committee on the Environment, Public Health and Food Safety, to the Commission, on the environmental effects of high-i
+    ep-04-11-15_ch1.1: The next item is speeches on matters of political importance.
+    ep-04-11-16_ch1.2: 'The next item is the joint debate on:'
+    ep-04-11-17_ch1.0: The next item is the debate on the Report by the European Council and the Commission Statement on the European Council in Brussels on 4 and 5 November 2004.
+    ep-04-12-01_ch1.5: The next item is the debate on the report (A6-0033/2004) by Edith Mastenbroek, on behalf of the Committee on Civil Liberties, Justice and Home Affairs, on the proposal for a decision of the European P
+    ep-04-12-13_ch1.1: The next item is the one-minute speeches.
+    ep-04-12-15_ch1.0: The next item is the Commission and Council statements on the preparation of the European Council (17 December 2004).
+  '2005':
+    ep-05-01-11_ch1.1: The next item is the Commission communication on the Green Paper on admission for employment.
+    ep-05-01-11_ch1.2: The next item is Question Time, with questions to the Commission (B6-0001/2005).
+    ep-05-01-12_ch1.5: The next item is Question Time, with questions to the Council (B6-0001/2005).
+    ep-05-02-22_ch1.1: 'The next item is the joint debate on the following reports:'
+    ep-05-02-22_ch1.3: The next item is the debate on the report by Mrs Ries on the European Environment and Health Action Plan.
+    ep-05-02-22_ch1.5: The next item is an oral question to the Commission on the policy for financing nature protection and especially Natura 2000.
+    ep-05-02-22_ch1.7: The next item is the report (A6-0016/2005) by Mr Grosch, on behalf of the Committee on Transport and Tourism, on driving licences.
+    ep-05-02-24_ch1.1: The next item is the report under Rule 134 of the Rules of Procedure on a specific action for transfers of vessels to countries hit by the tsunami in 2004 (COM(2005)0036 – C6-0036/2005 –2005/0005(CNS)
+    ep-05-02-24_ch1.2: The next item is the debate on six motions for resolutions on Togo(1).
+    ep-05-03-07_ch1.1: 'The next item is the debate on the report (A6-0032/2005) by Alain Lipietz, on behalf of the Committee on Economic and Monetary Affairs, on the Report on the activities of the European Investment Bank '
+    ep-05-03-07_ch1.3: The next item is the oral question to the Commission (B6-0018/2005) by Mechtild Rothe, Reino Paasilinna and Hannes Swoboda, on behalf of the Socialist Group in the European Parliament, and by Dimitrio
+    ep-05-03-08_ch1.11: 'The next item is the joint debate on the following reports:'
+    ep-05-03-10_ch1.4: The next item is the debate on the six motions for resolutions on Belarus(1).
+    ep-05-04-11_ch1.0: ''
+    ep-05-04-13_ch1.4: The next item is the joint debate on the following oral questions to the Commission on fiscal and environmental dumping, by Mr Ford, on behalf of the Socialist Group in the European Parliament, by Mrs
+    ep-05-04-14_ch1.3: The next item is the Commission Statement on the drought in Portugal.
+    ep-05-04-27_ch1.1: The next item is the debate on the report by Mr Coveney on the Annual Report on Human Rights in the World 2004 and the EU's policy on the matter [2004/2151(INI)] (A6-0086/2005).
+    ep-05-04-27_ch1.3: The next item is the report (A6-0085/2005) by Mr Cabrnoch on modernising social protection and developing good quality health care [2004/2189(INI)].
+    ep-05-05-09_ch1.1: 'The next item is the Commission Statement: Justice for the McCartney family.'
+    ep-05-05-09_ch1.2: The next item is the recommendation for second reading (A6-0102/2005) from the Committee on the Environment, Public Health and Food Safety, on the Council common position for adopting a directive of t
+    ep-05-05-10_ch1.5: The next item is the report (A6-0094/2005) by Mrs Berès, on behalf of the Committee on Economic and Monetary Affairs, on the appointment of an Executive Board Member of the European Central Bank.
+    ep-05-05-12_ch1.2: The next item is the Commission statement on the drought in Spain.
+    ep-05-05-25_ch1.2: The next item is the debate on the report by Mrs Gál, on behalf of the Committee on Civil Liberties, Justice and Home Affairs, on promotion and protection of fundamental rights [2005/2007(INI)] (A6014
+    ep-05-05-25_ch1.4: The next item is the report (A60137/2005) by Mr Nassauer, on behalf of the Committee on Civil Liberties, Justice and Home Affairs, on the proposal for a directive of the European Parliament and of the
+    ep-05-06-06_ch1.1: The next item is the one-minute speeches.
+    ep-05-06-06_ch1.2: 'The next item is the debate on the report by Anne Laperrouze, on behalf of the Committee on Industry, Research and Energy, on the proposal for a decision of the European Parliament and of the Council '
+    ep-05-06-06_ch1.6: The next item is the debate on the report by Mr Skinner, on behalf of the Committee on Economic and Monetary Affairs, on the proposal for a directive of the European Parliament and of the Council on r
+    ep-05-06-07_ch1.5: The next item is the recommendation for second reading by the Committee on Civil Liberties, Justice and Home Affairs on the Council common position for adopting a regulation of the European Parliament
+    ep-05-06-08_ch1.3: The next item is the debate on the Council and the Commission statements on reform of the UN.
+    ep-05-06-09_ch1.1: The next item is the report (A6-0157/2005) by Mr Freitas, on behalf of the Committee on Fisheries, on the proposal for a Council decision on the conclusion by the European Community of the Agreement o
+    ep-05-07-04_ch1.1: The next item is the report (A6-0210/2005) by Mrs Wallis on behalf of the Committee on Legal Affairs on the request for defence of the immunity and privileges of Mr Bossi (2004/2101(IMM)).
+    ep-05-07-04_ch1.7: The next item is the report by Giles Chichester, on behalf of the Committee on Industry, Research and Energy, on the proposal for a directive of the European Parliament and of the Council concerning m
+    ep-05-07-05_ch1.2: 'The next item is the joint debate on:'
+    ep-05-07-06_ch1.4: The next item is the Council and Commission statements on a world without landmines.
+    ep-05-07-06_ch1.5: The next item is Question Time (B6-0247/2005).
+    ep-05-09-05_ch1.0: ''
+    ep-05-09-05_ch1.5: The next item is the debate on the report (A6-0212/2005) by Mrs Etelka Barsi-Pataky on behalf of the Committee on Industry, Research and Energy on the European programme of satellite radionavigation (
+    ep-05-09-06_ch1.4: The next item is a general debate on the European Union general budget for 2006.
+    ep-05-09-06_ch1.7: The next item is the debate on the report (A6-0244/2005) by Mrs De Sarnez on the proposal for a recommendation of the European Parliament and of the Council on the protection of minors and human digni
+    ep-05-09-26_ch1.1: 'The next item is the adoption of the order of business for the present part-session and the October I part-session, as drawn up by the Conference of Presidents at its meeting of Thursday 22 September '
+    ep-05-09-27_ch1.1: The next item is the Commission statement on the EU-US Wine Agreement.
+    ep-05-09-28_ch1.2: The next item is the Council and Commission statements on oil price rises and dependence on oil.
+    ep-05-09-28_ch1.4: The next item is the Commission declaration on Belarus.
+    ep-05-09-28_ch1.5: 'The next item is the debate on the report (A6-0256/2005) by Emilio Menéndez del Valle on behalf of the Committee on Foreign Affairs on EU-India relations: a strategic partnership [2004/2169(INI)].'
+    ep-05-09-29_ch1.3: The next item is the debate on six motions for resolutions on the human rights situation in Nepal.
+    ep-05-10-12_ch1.0: ''
+    ep-05-10-12_ch1.1: The next item on the agenda is the Council and Commission statements on current problems regarding immigration.
+    ep-05-10-12_ch1.4: The next item is the Commission communication on EU policy on Africa.
+    ep-05-10-13_ch1.2: The next item is the report (A6-0265/2005) by Mr Chmielewski, on behalf of the Committee on Fisheries, on the proposal for a Council regulation for the conservation of fishery resources through techni
+    ep-05-10-24_ch1.3: The next item is the report by Mrs Gröner, on behalf of the Committee on Culture and Education, on the proposal for a Decision of the European Parliament and of the Council creating the ‘Youth in Acti
+    ep-05-10-24_ch1.5: The next item is the report (A6-0278/2005) by Mrs Hieronymi, on behalf of the Committee on Culture and Education, on the proposal for a decision of the European Parliament and of the Council concernin
+    ep-05-10-25_ch1.1: The next item is the oral question to the Commission by Mr Karl-Heinz Florenz, on behalf of the Committee on the Environment, Public Health and Food Safety, on the strategy against an influenza pandem
+    ep-05-10-25_ch1.4: The next item is Question Time (B6-0332/2005).
+    ep-05-10-26_ch1.0: ''
+    ep-05-10-26_ch1.1: The next item is the debate on the Council and Commission statements on the preparation for the next informal European Council.
+    ep-05-10-27_ch1.2: The next item is the debate on six motions for resolutions on human rights in Western Sahara(1).
+    ep-05-11-15_ch1.7: 'The next item is the report (A6-0310/2005) by Mrs De Veyrac, on behalf of the Committee on Transport and Tourism, on the proposal for a regulation of the European Parliament and of the Council on the '
+    ep-05-11-15_ch1.8: 'The next item is the debate on the following reports:'
+    ep-05-11-16_ch1.5: The next item is questions to the Council (B6-0339/2005).
+    ep-05-11-16_ch1.6: 'The next item is the report (A6-0304/2005) by Mrs Scheele, on behalf of the Committee on the Environment, Public Health and Food Safety, on the proposal for a directive of the European Parliament and '
+    ep-05-11-30_ch1.3: The next item is the joint debate on
+    ep-05-11-30_ch1.8: The next item is the debate on the report by Mr Duff, on behalf of the Committee on Constitutional Affairs, on guidelines for the approval of the European Commission (2005/2024(INI)) (A6-0179/2005).
+    ep-05-12-12_ch1.1: The next item is the one-minute speeches on matters of political importance. I shall give priority to those Members who have not yet spoken.
+    ep-05-12-12_ch1.4: The next item is the report (A6-0334/2005) by Mrs Kauppi, on behalf of the Committee on Economic and Monetary Affairs, on the proposal for a directive of the European Parliament and of the Council ame
+    ep-05-12-12_ch1.6: The next item is the recommendation for second reading (A6-0343/2005), on behalf of the Committee on Industry, Research and Industry, on the Council common position for adopting a directive of the Eur
+    ep-05-12-13_ch1.1: 'The next item is the joint debate on:'
+    ep-05-12-13_ch1.10: The next item is the report (A6-0281/2005) by Mr Lehideux, on behalf of the Committee on Development, on the proposal for a regulation of the European Parliament and of the Council establishing accomp
+    ep-05-12-13_ch1.3: The next item is the statements by the Council and the Commission on the Council’s annual report on human rights.
+    ep-05-12-13_ch1.6: The next item is Question Time (B6-0343/2005).
+    ep-05-12-13_ch1.9: The next item is the report (A6-0378/2005) by Mr Kristensen on behalf of the Committee on Internal Market and Consumer Protection on the promotion and protection of consumers’ interests in the new Mem
+    ep-05-12-14_ch1.0: ''
+    ep-05-12-15_ch1.2: The next item is the debate on six motions for resolutions on Russia.
+  '2006':
+    ep-06-01-17_ch1.2: We now come to the statements by the Council and the Commission on the security of energy supply – and in particular that of gas.
+    ep-06-01-17_ch1.3: The next item is the joint debate on
+    ep-06-01-19_ch1.1: The next item is the report by Mrs Estrela, on behalf of the Committee on Women’s Rights and Gender Equality, on the future of the Lisbon Strategy from a gender perspective (2004/2219(INI)) (A6-0402/2
+    ep-06-01-19_ch1.2: The next item is the oral question to the Commission (O-0080/2005 – B6-0345/2005) by Mr Bowis, on behalf of the Committee on Development, on disability and development.
+    ep-06-01-19_ch1.3: The next item is the continuation of the debate on disability and development.
+    ep-06-02-14_ch1.1: 'The next item is the report (A6-0406/2005) by Mr Mihael Brejc, on behalf of the Committee on Civil Liberties, Justice and Home Affairs, on the proposal for a regulation of the European Parliament and '
+    ep-06-02-14_ch1.4: The next item is the debate on the report (A6-0409/2005) by Evelyne Gebhardt, on behalf of the Committee on the Internal Market and Consumer Protection, on the proposal for a directive of the European
+    ep-06-02-15_ch1.1: The next item is the Council and Commission statements on the right to freedom of expression and respect for religious beliefs.
+    ep-06-03-13_ch1.0: ''
+    ep-06-03-14_ch1.8: The next item is the report (A6-0028/2006) by Mrs Bauer, on behalf of the Committee on Employment and Social Affairs, on social protection and social inclusion (2005/2097(INI)).
+    ep-06-03-14_ch1.9: The next item is the report (A6-0058/2006) by Mr Grech, on behalf of the Committee on Budgets, on the guidelines for the 2007 budget procedure – Sections II, IV, V, VI, VII, VIII(A) and VIII(B) and on
+    ep-06-03-15_ch1.3: The next item is the report (A6-0025/2006) by Mr Brok, on behalf of the Committee on Foreign Affairs, on the Commission’s 2005 enlargement strategy paper (2005/2206(INI)).
+    ep-06-03-22_ch1.6: The next item is the report by Jo Leinen, on behalf of the Committee on Constitutional Affairs, on European political parties (2005/2224(INI)) (A6-0042/2006).
+    ep-06-04-03_ch1.2: The next item is the Commission Statement on the situation of the refugee camps in Malta.
+    ep-06-04-04_ch1.4: 'The next item is the joint debate ‘Better law-making’, which deals with four reports:'
+    ep-06-04-05_ch1.3: The next item is a statement by the Council and the Commission on the elections in Ukraine.
+    ep-06-04-06_ch1.5: The next item is the debate on the six motions for resolutions on Darfur(1).
+    ep-06-04-06_ch1.7: The next item is the debate on six motions for resolutions on the case of Ayman Nour in Egypt.
+    ep-06-04-26_ch1.2: 'The next item is the oral question to the Commission by Mr Brok, Mr Moscovici and Mr Van Orden, on behalf of the Committee on Foreign Affairs, on the accession of Bulgaria and Romania to the European '
+    ep-06-04-26_ch1.6: The next item is the continuation of the joint debate on the discharges for the implementation of the European Union general budget for the financial year 2004.
+    ep-06-04-26_ch1.8: 'The next item is the report (A6-0073/2006) by Sophia in ''t Veld, on behalf of the Committee on Economic and Monetary Affairs, on sectoral aspects of the State Aid Action Plan: aid for innovation (2006'
+    ep-06-04-27_ch1.2: 'The next item is the report (A6-0074/2006) by Mr Mavrommatis, on behalf of the Committee on Culture and Education, on measures to promote multilingualism and language learning in the European Union: E'
+    ep-06-05-15_ch1.4: The next item is the report (A6-0140/2006) by Mr Maat, on behalf of the Committee on Fisheries, on the proposal for a Council regulation establishing measures for the recovery of the stock of European
+    ep-06-05-15_ch1.5: The next item is the report by Daniel Varela Suanzes-Carpegna, on behalf of the Committee on Fisheries, on the proposal for a Council regulation on the conclusion of the Fisheries Partnership Agreemen
+    ep-06-05-16_ch1.5: The next item is the report (A6-0161/2006) by Mrs Roth-Behrendt, on behalf of the Committee on the Environment, Public Health and Food Safety, on rules for the prevention, control and eradication of c
+    ep-06-05-16_ch1.8: The next item is the report (A6-0162/2006) by Mr Rosati, on behalf of the Committee on Economic and Monetary Affairs, on public finances in the EMU (2005/2166(INI)).
+    ep-06-05-18_ch1.0: ''
+    ep-06-05-18_ch1.2: The next item is the debate on six motions for resolutions on Nepal(1).
+    ep-06-05-18_ch1.3: The next item is the debate on five motions for resolutions on Sri Lanka(1).
+    ep-06-05-31_ch1.8: The next item is the report by Mr Grech on behalf of the Committee on Budgets on Parliament’s estimates for 2007 [2006/2022(BUD)] (A6-0188/2006).
+    ep-06-06-12_ch1.2: The next item is the recommendation for second reading (A6-0146/2006), on behalf of the Committee on the Environment, Public Health and Food Safety, on the common position established by the Council (
+    ep-06-06-13_ch1.0: ''
+    ep-06-06-13_ch1.4: The next item is the report (A6-0172/2006) by Mr Gargani, on behalf of the Committee on Legal Affairs, on the consequences of the judgment of the Court of 13 September 2005 (Case C-176/03 Commission v
+    ep-06-06-13_ch1.7: 'The next item is the report (A6-0124/2006) by Mrs Brepoels, on behalf of the Committee on Civil Liberties, Justice and Home Affairs, on the proposal for a regulation of the European Parliament and of '
+    ep-06-06-14_ch1.5: The next item is Question Time (B6-0224/2006).
+    ep-06-07-04_ch1.10: The next item is the report (A6-0174/2006) by Mr Seppänen, on behalf of the Committee on Industry, Research and Energy, on the proposal for a Council directive on the supervision and control of shipme
+    ep-06-07-04_ch1.4: 'The next item is the report (A6–0204/2006) by Mrs del Castillo Vera, on behalf of the Committee on Industry, Research and Energy, on Implementing the Community Lisbon Programme: More Research and Inno'
+    ep-06-07-04_ch1.6: The next item is Question Time (B6-0312/2006).
+    ep-06-09-04_ch1.1: The next item is one-minute speeches on matters of political importance.
+    ep-06-09-06_ch1.2: The next item is the Council and Commission statements on the situation in the Middle East.
+    ep-06-09-26_ch1.7: The next item is the report by Panayiotis Demetriou, on behalf of the Committee on Civil Liberties, Justice and Home Affairs, on the proposal for a Council Framework Decision on taking account of conv
+    ep-06-09-27_ch1.5: The next item is the report by Friedrich-Wilhelm Graefe zu Baringdorf, on behalf of the Committee on Agriculture and Rural Development, on the proposal for a Council Regulation amending Regulation (EE
+    ep-06-09-28_ch1.0: 'The next item is the report (A6-0216/2006) by Mr Ransdorf on behalf of the Committee on Industry, Research and Energy, on nanoscience and nanotechnologies: An action plan for Europe 2005-2009 [2006/20'
+    ep-06-10-11-014_ch014: Informal summit in Lahti and EU-Russia relations following the murder of journalist Anna Politkovskaya (debate)
+    ep-06-10-11-015_ch015: Use of passenger data (PNR) (debate)
+    ep-06-10-11-018_ch018: One-minute speeches (Rule 144)
+    ep-06-10-11-020_ch020: Follow-up to the report on competition in professional services (debate)
+    ep-06-10-23-016_ch016: Establishment, operation and use of SIS II (regulation) - Establishment, operation and use of SIS II (decision) - Access to SIS II by the services responsible for issuing vehicle registration certificates (debate)
+    ep-06-10-23-021_ch021: Community civil protection mechanism (debate)
+    ep-06-10-23-022_ch022: European order for payment procedure (debate)
+    ep-06-10-24-018_ch018: Action programme in the field of lifelong learning (debate)
+    ep-06-10-24-019_ch019: '"Europe for Citizens" programme (2007-2013) (debate)'
+    ep-06-10-25-012_ch012: Export of toxic waste to Africa - Use of criminal law to protect the environment (debate)
+    ep-06-10-25-016_ch016: Inland waterway transport (debate)
+    ep-06-11-13-019_ch019: Milk quotas (debate)
+    ep-06-11-14-005_ch005: Presentation of the Court of Auditors' Annual Report - 2005 (debate)
+    ep-06-11-14-006_ch006: Joint Undertaking for the European air traffic management system (SESAR) (debate)
+    ep-06-11-14-008_ch008: Mortgage credit (debate)
+    ep-06-11-14-010_ch010: Formal sitting - Georgia
+    ep-06-11-14-017_ch017: Council Question Time
+    ep-06-11-14-020_ch020: The European Union's Generalised System of Preferences (debate)
+    ep-06-11-15-015_ch015: A Baltic Sea Strategy for the Northern Dimension (debate)
+    ep-06-11-15-019_ch019: Succession and wills (debate)
+    ep-06-11-16-011_ch011: Famagusta/Varosha (debate)
+    ep-06-11-29-013_ch013: Russia-EU summit (debate)
+    ep-06-11-29-017_ch017: One-minute speeches on matters of political importance
+    ep-06-11-29-018_ch018: Implementation of the Seventh Framework Programme of the EC and the EAEC (debate)
+    ep-06-11-30-006_ch006: Time to move up a gear  Creating a Europe of entrepreneurship and growth
+    ep-06-12-12-012_ch012: Formal sitting - Award of the 2006 Sakharov Prize
+    ep-06-12-12-018_ch018: Coordination of certain of the Member States' provisions on television broadcasting (debate)
+    ep-06-12-12-023_ch023: Establishing the European Globalisation adjustment Fund (debate)
+    ep-06-12-12-024_ch024: European Institute for Gender Equality (debate)
+    ep-06-12-13-013_ch013: Data protection (debate)
+    ep-06-12-13-016_ch016: Preparation for the European Council (14-15 December 2006) (continuation of debate)
+    ep-06-12-13-023_ch023: Double-hull or equivalent design requirements for single-hull oil tankers (debate)
+    ep-06-12-13-026_ch026: Amendment of the Rules of Procedure (committees, quaestors) (debate)
+  '2007':
+    ep-07-01-16-002_ch002: Announcement of the candidates for election to the office of President
+    ep-07-01-17-013_ch013: Amendment of the ACP-EC Partnership Agreement (debate)
+    ep-07-01-31-018_ch018: Climate change (continuation of debate)
+    ep-07-01-31-019_ch019: New PNR agreement  SWIFT (debate)
+    ep-07-01-31-022_ch022: Limitation periods in cross-border disputes involving personal injuries and fatal accidents (debate)
+    ep-07-02-13-013_ch013: Radio Spectrum (debate)
+    ep-07-02-14-009_ch009: External dimension of the fight against terrorism (debate)
+    ep-07-02-14-010_ch010: EC-Russia short-stay visa agreement - EC-Russia readmission agreement (debate)
+    ep-07-02-14-011_ch011: Economic policy guidelines for 2007 - Member States' employment policies (debate)
+    ep-07-02-15-005_ch005: Shareholders' voting rights (debate)
+    ep-07-03-13-012_ch012: Non-proliferation and nuclear disarmament (debate)
+    ep-07-03-13-016_ch016: Marketing of the meat of bovine animals aged 12 months or less (debate)
+    ep-07-03-14-003_ch003: Berlin Declaration (debate)
+    ep-07-03-15-009_ch009: Banning seal products in the EU (debate)
+    ep-07-03-28-012_ch012: Follow-up to the Berlin declaration (debate)
+    ep-07-03-28-014_ch014: The future of Kosovo and the role of the EU (debate)
+    ep-07-03-28-016_ch016: Organic production and labelling of organic products (debate)
+    ep-07-03-28-020_ch020: Compliance with the obligations of Flag States - Civil liability and financial guarantees of shipowners (debate)
+    ep-07-04-24-016_ch016: Common rules in the field of civil aviation security (debate)
+    ep-07-04-25-016_ch016: Ukraine (debate)
+    ep-07-04-25-020_ch020: Public Finances in the EMU 2006 (debate)
+    ep-07-04-25-021_ch021: Strengthening European legislation in the field of information and consultation of workers (debate)
+    ep-07-05-21-018_ch018: Environmental quality standards in the field of water policy (debate)
+    ep-07-05-22-008_ch008: The economic partnership agreements (debate)
+    ep-07-05-23-009_ch009: Debate on the future of Europe (debate)
+    ep-07-05-23-012_ch012: Council Question Time
+    ep-07-05-24-004_ch004: 'Kashmir: present situation and future prospects (debate)'
+    ep-07-05-24-005_ch005: Via Baltica (debate)
+    ep-07-06-06-014_ch014: United Nations Human Rights Council (debate)
+    ep-07-06-19-016_ch016: Commission Question Time
+    ep-07-06-19-019_ch019: The banning of exports and the safe storage of metallic mercury (debate)
+    ep-07-06-20-003_ch003: Improving the method for consulting Parliament in procedures relating to enlargement of the euro area - Adoption by Cyprus of the single currency on 1 January 2008 - Adoption by Malta of the single currency on 1 January 2008 (debate)
+    ep-07-06-20-017_ch017: Exchanges of information extracted from criminal records (debate)
+    ep-07-06-20-018_ch018: Framework decision on combating racism and xenophobia (debate)
+    ep-07-06-27-003_ch003: European Council meeting of 21-22 June 2007  Activity report of the German Presidency (report and statements followed by debate)
+    ep-07-06-27-006_ch006: European Council meeting of 21-22 June 2007  Activity report of the German Presidency (continuation of debate)
+    ep-07-07-09-020_ch020: Measuring devices containing mercury (debate)
+    ep-07-07-10-007_ch007: Modernising labour law to meet the challenges of the 21st century (debate)
+    ep-07-07-10-014_ch014: Posting of workers (debate)
+    ep-07-07-10-021_ch021: Recent developments in bilateral trade relations with China (debate)
+    ep-07-07-11-011_ch011: Eurozone (2007) - European Central Bank (2006) (debate)
+    ep-07-07-11-013_ch013: Eurozone (2007) - European Central Bank (2006) (continuation of debate)
+    ep-07-07-11-015_ch015: Situation in Pakistan (debate)
+    ep-07-07-11-021_ch021: Democratic scrutiny under the Development Cooperation Instrument (debate)
+    ep-07-09-03-015_ch015: One-minute speeches on matters of political importance
+    ep-07-09-03-018_ch018: 'EURES activity report 2004-2005: Towards a single European labour market (debate)'
+    ep-07-09-04-014_ch014: Inland transport of dangerous goods (debate)
+    ep-07-09-04-016_ch016: Single European Sky (debate)
+    ep-07-09-04-021_ch021: Dehydrated preserved milk for human consumption - Common organisation of the milk and milk products market - Additional rules on the common organisation of the milk and milk products markets (debate)
+    ep-07-09-25-005_ch005: Dangerous toys manufactured in China (debate)
+    ep-07-09-25-014_ch014: European Institute of Technology (debate)
+    ep-07-09-26-012_ch012: Situation in Burma (debate)
+    ep-07-09-26-013_ch013: Council Question Time
+    ep-07-09-26-015_ch015: Obligations of cross-border service providers (debate)
+    ep-07-10-10-019_ch019: A Maritime Policy for the EU
+    ep-07-10-10-020_ch020: Murder of women in Mexico and Central America
+    ep-07-10-10-023_ch023: Combating cigarette smuggling (EC-Philip Morris agreement) (debate)
+    ep-07-10-11-003_ch003: EC-USA air transport agreement (debate)
+    ep-07-10-22-013_ch013: One-minute speeches on matters of political importance
+    ep-07-10-22-016_ch016: Community Strategy to reduce CO2 emissions from passenger cars and light-commercial vehicles (debate)
+    ep-07-10-23-018_ch018: Protocol amending TRIPS (debate)
+    ep-07-10-24-012_ch012: EU-Serbia relations (debate)
+    ep-07-10-25-002_ch002: European Ombudsman's activities in 2006 (debate)
+    ep-07-11-12-019_ch019: Application of Directive 2004/38/EC on the right of citizens of the Union and their families to move and reside freely within the territory of the Member States (debate)
+    ep-07-11-12-022_ch022: Comitology (debate)
+    ep-07-11-12-023_ch023: International accounting standards (debate)
+    ep-07-11-13-017_ch017: Regulations governing political parties at European level and the rules regarding their funding (debate)
+    ep-07-11-13-018_ch018: Question Time (Commission)
+    ep-07-11-13-021_ch021: Complaint by Boeing (US) against Airbus (EU) before the WTO (debate)
+    ep-07-11-13-022_ch022: Report on the deliberations of the Committee on Petitions during the year 2006 (debate)
+    ep-07-11-14-002_ch002: 'The European Interest: succeeding in the age of globalisation (debate)'
+    ep-07-11-14-010_ch010: Strengthening the European Neighbourhood Policy - Situation in Georgia (debate)
+    ep-07-11-14-011_ch011: Question Time (Council)
+    ep-07-11-28-015_ch015: Common principles on flexicurity (debate)
+    ep-07-11-28-018_ch018: Amendment of Directive 2004/49/EC on safety on the Community's railways - Interoperability of the Community rail system (recast) - Amendment of Regulation (EC) No 881/2004 establishing a European Railway Agency (debate)
+    ep-07-12-10-016_ch016: 'Protection and conservation of the marine environment: Marine Strategy Directive (debate)'
+    ep-07-12-11-015_ch015: Annual report of the European Union on Human Rights (debate)
+    ep-07-12-11-017_ch017: Question Time (Commission)
+    ep-07-12-11-021_ch021: Legal protection of designs (debate)
+    ep-07-12-12-004_ch004: Proclamation of the Charter of Fundamental Rights
+    ep-07-12-12-011_ch011: EU/China summit - EU/China human rights dialogue (debate)
+    ep-07-12-12-013_ch013: 'Montenegro - EC/Montenegro: Stabilisation and Association Agreement (debate)'
+    ep-07-12-12-015_ch015: Shipping disaster in the Sea of Asov/Black Sea and the subsequent oil pollution (debate)
+    ep-07-12-12-018_ch018: Asset management II (debate)
+    ep-07-12-12-019_ch019: Cooperation between the Fundamental Rights Agency and the Council of Europe (debate)
+    ep-07-12-18-005_ch005: Results of the European Council meeting of 13 and 14 December 2007 in Brussels - Report on the six months of the Portuguese Presidency (debate)
+  '2008':
+    ep-08-01-15-005_ch005: Community strategy on health and safety at work 2007-2012 (debate)
+    ep-08-01-16-009_ch009: EUROPOL (debate)
+    ep-08-01-30-024_ch024: European Grouping of Territorial Cooperation (debate)
+    ep-08-03-10-016_ch016: One-minute speeches on matters of political importance
+    ep-08-03-10-017_ch017: Ongoing negotiations on bilateral agreements between the USA and certain Member States with regard to visas and PNR (Passenger Name Record) (debate)
+    ep-08-03-11-011_ch011: Formal sitting - Estonia
+    ep-08-03-11-018_ch018: Follow-up after the review of the "Lamfalussy Process" (debate)
+    ep-08-03-11-019_ch019: Commission Question Time
+    ep-08-03-11-021_ch021: 'Sustainable agriculture and biogas: review of EU legislation (debate)'
+    ep-08-03-12-013_ch013: Situation in Chad (debate)
+    ep-08-03-12-019_ch019: The particular situation of women in prison and the impact of the imprisonment of parents on social and family life (debate)
+    ep-08-04-10-004_ch004: The Green Paper on 'Adapting to climate change in Europe - options for EU action' (debate)
+    ep-08-04-21-015_ch015: Proposed hearing of the Commission on crimes of genocide, crimes against humanity and war crimes committed by totalitarian regimes (8 April 2008) (debate)
+    ep-08-04-22-017_ch017: Programming implementation of the 10th European Development Fund (debate)
+    ep-08-04-23-002_ch002: European Union-Latin America and Caribbean Summit (debate)
+    ep-08-05-07-016_ch016: One-minute speeches on matters of political importance
+    ep-08-05-08-004_ch004: White Paper on Sport (debate)
+    ep-08-05-20-013_ch013: Conditions to be complied with to pursue the occupation of road transport operator - International carriage of passengers by coach and bus (recast) - International carriage of goods by road (recast) (debate)
+    ep-08-05-21-003_ch003: 'Scientific facts of climate change: findings and recommendations for decision-making (debate)'
+    ep-08-05-21-017_ch017: REACH (Draft Test Methods Regulation) (debate)
+    ep-08-05-21-018_ch018: Animal health strategy 2007-2013 (debate)
+    ep-08-06-04-024_ch024: 'Competition: Sector inquiry on retail banking - Retail Financial Services in the Single Market (debate)'
+    ep-08-06-04-025_ch025: Community system against illegal, unreported and unregulated fishing (debate)
+    ep-08-06-05-002_ch002: 'The Barcelona Process: Union for the Mediterranean (debate)'
+    ep-08-06-16-020_ch020: Environmental quality standards in the field of water policy (debate)
+    ep-08-06-16-023_ch023: European Year for Combating Poverty and Social Exclusion (debate)
+    ep-08-06-16-027_ch027: Policy coherence for development and the effects of the EU's exploitation of certain biological natural resources on development in West Africa (debate)
+    ep-08-06-17-005_ch005: Adoption by Slovakia of the single currency on 1 January 2009(debate)
+    ep-08-06-17-011_ch011: Internal market in electricity - Conditions for access to the network for cross-border exchanges in electricity - Agency for the Cooperation of Energy Regulators - Towards a European Charter on the Rights of Energy Consumers (debate)
+    ep-08-06-18-005_ch005: Formal sitting - 2008, European Year of Intercultural Dialogue
+    ep-08-06-18-017_ch017: Road infrastructure safety (debate)
+    ep-08-07-07-017_ch017: Airbus/Boeing WTO disputes (debate)
+    ep-08-07-08-006_ch006: Amendment of Directive 2003/87/EC so as to include aviation activities in the scheme for greenhouse gas emission allowance trading within the Community (debate)
+    ep-08-07-08-012_ch012: Conditions for access to the natural gas transmission networks - Internal market in natural gas - European strategic energy technology plan (debate)
+    ep-08-07-08-014_ch014: Question Time (Council)
+    ep-08-07-09-011_ch011: Situation in China after the earthquake and before the Olympic Games (debate)
+    ep-08-07-09-016_ch016: Situation in Zimbabwe (debate)
+    ep-08-07-10-010_ch010: Quorum
+    ep-08-09-01-020_ch020: Situation in Georgia (debate)
+    ep-08-09-01-021_ch021: Evaluation of the Dublin system (continuation of debate)
+    ep-08-09-01-022_ch022: Common frame of reference for European contract law (debate)
+    ep-08-09-02-010_ch010: Electronic communications networks and services - European Electronic Communications Market Authority - Common approach to the use of the spectrum released by the digital switchover - Electronic communications networks and services, protection of privacy and consumer protection (debate)
+    ep-08-09-02-013_ch013: Special Report from the European Ombudsman following the draft recommendation to the European Commission in complaint 3453/2005/GG (debate)
+    ep-08-09-02-014_ch014: Equality between women and men - 2008 (debate)
+    ep-08-09-03-003_ch003: Classification, labelling and packaging of substances and mixtures - Classification, labelling and packaging of substances and mixtures (amendment of Directives 76/768/EEC, 88/378/EEC, 1999/13/EC, 2000/53/EC, 2002/96/EC and 2004/42/EC) - Classification, labelling and packaging of substances and mixtures (amendment of Regulation (EC) No 648/2004) (debate)
+    ep-08-09-03-008_ch008: Formal sitting - Costa Rica
+    ep-08-09-03-013_ch013: Evaluation of EU sanctions as part of the EU's actions and policies in the area of human rights (debate)
+    ep-08-09-04-005_ch005: Soil protection (debate)
+    ep-08-09-22-019_ch019: Hedge funds and private equity - Transparency of institutional investors (debate)
+    ep-08-09-23-015_ch015: International Tropical Timber Agreement 2006 - International Tropical Timber Agreement 2006 (debate)
+    ep-08-09-24-016_ch016: Question Time (Commission)
+    ep-08-09-24-017_ch017: White Paper on Nutrition, Overweight and Obesity-related health issues (debate)
+    ep-08-10-08-015_ch015: Lamfalussy follow up - Future Structure of Supervision (debate)
+    ep-08-10-08-020_ch020: Enforcement of the ECJ judgment on the 'Turco' case (debate)
+    ep-08-10-09-003_ch003: Use by Parliament of the symbols of the Union (new Rule 202a) (debate)
+    ep-08-10-09-004_ch004: 'Together for Health: A Strategic Approach for the EU 2008-2013 (debate)'
+    ep-08-10-20-015_ch015: Evaluation of the Australia-EU PNR agreement - EU PNR (debate)
+    ep-08-10-20-017_ch017: Protecting children using the Internet and other communication technologies (debate)
+    ep-08-10-21-006_ch006: Challenges to collective agreements in the EU (debate)
+    ep-08-10-22-003_ch003: Protection of consumers in respect of certain aspects of timeshares (debate)
+    ep-08-10-22-014_ch014: Commemoration of the Holodomor, the Ukraine artificial famine (1932-1933) (debate)
+    ep-08-11-17-018_ch018: One-minute speeches on matters of political importance
+    ep-08-11-17-020_ch020: One-minute speeches on matters of political importance (continuation)
+    ep-08-11-17-021_ch021: 'EMU10: The first 10 years of Economic and Monetary Union and future challenges (debate)'
+    ep-08-11-19-011_ch011: Conditions of entry and residence of third-country nationals for the purposes of highly qualified employment - Single application procedure for residence and work
+    ep-08-11-19-012_ch012: 'European Space Policy: How to bring space down to earth (debate)'
+    ep-08-11-19-019_ch019: Amendment of the single CMO Regulation (debate)
+    ep-08-12-03-012_ch012: Preparation of the European Council (11-12 December 2008) (debate)
+    ep-08-12-03-015_ch015: Israel's participation in Community programmes - Israel's participation in Community programmes (debate)
+    ep-08-12-03-022_ch022: The situation of women in the Balkans (short presentation)
+    ep-08-12-15-015_ch015: European Works Council (Recast version) (debate)
+    ep-08-12-16-013_ch013: Geological storage of carbon dioxide (debate)
+    ep-08-12-16-016_ch016: Energy and climate change (conclusion)
+    ep-08-12-17-014_ch014: The situation of fundamental rights in the European Union (2004-2008) - European area of freedom, security and justice (debate)
+  '2009':
+    ep-09-01-12-013_ch013: One-minute speeches on matters of political importance
+    ep-09-01-12-014_ch014: Framework for Community action to achieve a sustainable use of pesticides - Placing of plant protection products on the market (debate)
+    ep-09-01-13-012_ch012: Security features and biometrics in passports and travel documents (debate)
+    ep-09-01-13-013_ch013: Public access to European Parliament, Council and Commission documents (debate)
+    ep-09-01-13-015_ch015: Question Time (Commission)
+    ep-09-01-14-009_ch009: Gas supplies by Russia to Ukraine and the EU (debate)
+    ep-09-01-14-010_ch010: Question Time (Council)
+    ep-09-02-02-015_ch015: Production and employment in the textile and clothing sector in various EU Member States (debate)
+    ep-09-02-02-018_ch018: Wilderness in Europe (short presentation)
+    ep-09-02-02-021_ch021: 'Pre-commercial Procurement: Driving innovation to ensure sustainable high quality public services in Europe (short presentation)'
+    ep-09-02-03-004_ch004: Combating the sexual exploitation of children and child pornography (debate)
+    ep-09-02-03-011_ch011: Resettlement of Guantánamo prisoners - Alleged use of European countries by the CIA for the transport and illegal detention of prisoners (debate)
+    ep-09-02-03-012_ch012: Worrying situation in the retention centres for immigrants, especially in the islands of Mayotte and Lampedusa (debate)
+    ep-09-02-04-006_ch006: Formal sitting - Palestinian Authority
+    ep-09-02-04-011_ch011: Kosovo (debate)
+    ep-09-02-04-012_ch012: Impact of the financial crisis on the car industry (debate)
+    ep-09-02-04-016_ch016: Use of PCB waste oils in an Irish food recycling plant (debate)
+    ep-09-02-18-020_ch020: 'The Barcelona Process: Union for the Mediterranean (debate)'
+    ep-09-02-18-024_ch024: Community legal framework for a European Research Infrastructure (ERI) (debate)
+    ep-09-02-18-028_ch028: Mental health (short presentation)
+    ep-09-03-09-026_ch026: Facing oil challenges (short presentation)
+    ep-09-03-10-017_ch017: Childcare facilities - Barcelona objectives (debate)
+    ep-09-03-11-012_ch012: 'Croatia: progress report 2008 - Turkey: progress report 2008 - Former Yugoslav Republic of Macedonia: progress report 2008 (debate)'
+    ep-09-03-23-013_ch013: One-minute speeches on matters of political importance
+    ep-09-03-23-017_ch017: 'One year after Lisbon: the EU-Africa partnership at work (debate)'
+    ep-09-03-23-018_ch018: The MDG contracts (short presentation)
+    ep-09-03-23-020_ch020: An EU-India Free Trade Agreement (short presentation)
+    ep-09-03-23-023_ch023: Active dialogue with citizens on Europe (short presentation)
+    ep-09-03-24-014_ch014: Interoperability of mobile chargers (debate)
+    ep-09-03-24-017_ch017: Substances that deplete the ozone layer (recast) (debate)
+    ep-09-03-25-002_ch002: Conclusions of the European Council (19-20 March 2009) (debate)
+    ep-09-03-25-008_ch008: Interim Trade Agreement with Turkmenistan - Interim Agreement with Turkmenistan (debate)
+    ep-09-04-01-015_ch015: 'ERDF, ESF and Cohesion Fund: provisions relating to financial management - New types of costs eligible for a contribution from the ESF - Investments in energy efficiency and renewable energy for housing (amendment of Regulation (EC) No 1080/2006 on ERDF) (debate)'
+    ep-09-04-21-021_ch021: Addressing the challenges of deforestation and forest degradation to tackle climate change and biodiversity loss - Timber and timber products (debate)
+    ep-09-04-21-028_ch028: Gender mainstreaming in the work of committees and delegations (short presentation)
+    ep-09-04-21-029_ch029: Green Paper on the future of TEN-T policy (short presentation)
+    ep-09-04-22-011_ch011: '2007 discharge: EU general budget - Council (debate)'
+    ep-09-04-22-018_ch018: Action Plan on Urban Mobility (debate)
+    ep-09-04-22-020_ch020: Second 'Marco Polo' programme (debate)
+    ep-09-04-23-016_ch016: Consolidating stability and prosperity in the Western Balkans - Situation in Bosnia and Herzegovina (debate)
+    ep-09-04-23-018_ch018: United Nations Convention on the Rights of Persons with Disabilities - UN Convention on the Rights of Persons with Disabilities - Optional Protocol to the UN Convention on the Rights of Persons with Disabilities (debate)
+    ep-09-04-23-019_ch019: Question Time (Council)
+    ep-09-04-23-021_ch021: Harmonised conditions for the marketing of construction products (debate)
+    ep-09-05-05-004_ch004: Energy labelling and standard product information (recast) (debate)
+    ep-09-05-05-011_ch011: Question Time (Commission)
+    ep-09-05-05-013_ch013: Rosé wines and permitted oenological practices (debate)
+    ep-09-05-05-017_ch017: The petitions process (amendment of Title VIII of the Rules of Procedure) (debate)
+    ep-09-05-06-012_ch012: European Refugee Fund for the period 2008-2013 (amendment of Decision No 573/2007/EC) - Minimum standards for the reception of asylum seekers (recast) - Application for international protection lodged in one of the Member States by third-country nationals or stateless persons (recast) - Establishment of 'Eurodac' for the comparison of fingerprints (recast) - Establishment of a European Asylum Support Office (debate)
+    ep-09-09-14-019_ch019: One-minute speeches on matters of political importance
+    ep-09-09-14-022_ch022: 'Free trade agreement with South Korea: impact on European industry (debate)'
+    ep-09-09-14-023_ch023: The effects of the global financial and economic crisis on developing countries and on development cooperation (debate)
+    ep-09-09-16-004_ch004: G20 Summit in Pittsburgh (24-25 September) (debate)
+    ep-09-09-16-013_ch013: Conclusion of a Partnership and Cooperation Agreement between the EC and the Republic of Tajikistan (debate)
+    ep-09-09-16-014_ch014: New regulations on visas for Western Balkan countries (Former Yugoslav Republic of Macedonia, Montenegro, Serbia) (debate)
+    ep-09-09-16-016_ch016: Question Time (Council)
+    ep-09-09-17-002_ch002: Crisis in the dairy farming sector (debate)
+    ep-09-09-17-008_ch008: Situation in Taiwan following the recent typhoon (debate)
+    ep-09-10-07-016_ch016: Outcome of the referendum in Ireland (debate)
+    ep-09-10-08-005_ch005: Freedom of information in Italy (debate)
+    ep-09-10-21-002_ch002: Preparation of the European Council (29 and 30 October 2009) (debate)
+    ep-09-10-21-010_ch010: Question Time (Council)
+    ep-09-11-11-017_ch017: Implementation of the Services Directive (debate)
+    ep-09-11-11-019_ch019: One-minute speeches on matters of political importance
+    ep-09-11-12-005_ch005: The European Ombudsman's activities (2008) (debate)
+    ep-09-11-23-017_ch017: Electronic communication networks and services (debate)
+    ep-09-11-23-020_ch020: Macro-financial assistance to Georgia - Macro-financial assistance to Armenia - Macro-financial assistance to Serbia - Macro-financial assistance to Bosnia and Herzegovina (debate)
+    ep-09-11-24-008_ch008: Question Hour with the President of the Commission
+    ep-09-11-25-006_ch006: Preparation of the European Council to be held on 10 and 11 December 2009 (debate)
+    ep-09-11-25-012_ch012: Enlargement strategy 2009 concerning the countries of the western Balkans, Iceland and Turkey (debate)
+    ep-09-11-25-019_ch019: Meat imports from third countries (debate)
+    ep-09-12-14-016_ch016: Prospects for the Doha Development Agenda following the Seventh WTO Ministerial Conference (debate)
+    ep-09-12-15-014_ch014: Restrictive measures affecting the rights of individuals following the entry into force of the Lisbon Treaty (debate)
+    ep-09-12-16-009_ch009: New EU action plan for Afghanistan and Pakistan (debate)
+    ep-09-12-17-003_ch003: The cohesion policy after 2013 (debate)
+  '2010':
+    ep-10-01-20-005_ch005: Presentation of the programme of the Spanish Presidency (continuation of debate)
+    ep-10-01-20-011_ch011: Outcome of the Copenhagen Summit on climate change (debate)
+    ep-10-01-20-014_ch014: Democratisation in Turkey (debate)
+    ep-10-01-21-002_ch002: EU-Tunisia relations (debate)
+    ep-10-02-08-013_ch013: One-minute speeches on matters of political importance
+    ep-10-02-09-010_ch010: Difficult monetary, economic and social situation of Eurozone countries (debate)
+    ep-10-02-09-011_ch011: Progress made on resettling Guantánamo detainees and on closing Guantánamo (debate)
+    ep-10-02-10-008_ch008: 2009 progress report on Croatia - 2009 progress report on the Former Yugoslav Republic of Macedonia - 2009 progress report on Turkey (debate)
+    ep-10-02-10-019_ch019: EU - South Korea free trade agreement (debate)
+    ep-10-02-24-013_ch013: EU 2020 - Follow-up of the informal European Council of 11 February 2010 (debate)
+    ep-10-02-24-019_ch019: Beijing +15 - UN Platform for Action for Gender Equality (debate)
+    ep-10-02-24-021_ch021: Major natural disaster in the autonomous region of Madeira (debate)
+    ep-10-02-24-022_ch022: Investment projects in energy infrastructure within the European Community (debate)
+    ep-10-03-10-012_ch012: Cuba (debate)
+    ep-10-03-11-002_ch002: Investing in Low Carbon Technologies (debate)
+    ep-10-03-11-005_ch005: Situation in Chile and EU humanitarian aid strategy (debate)
+    ep-10-03-24-015_ch015: One-minute speeches on matters of political importance
+    ep-10-03-24-016_ch016: 'Priorities for the 2011 budget - Section III - Commission - Budget guidelines: 2011 - other sections (debate)'
+    ep-10-03-24-020_ch020: Fight against tuberculosis (debate)
+    ep-10-04-07-004_ch004: Conclusions of the European Council meeting (25-26 March 2010) (debate)
+    ep-10-04-19-015_ch015: One-minute speeches on matters of political importance
+    ep-10-04-19-016_ch016: Power of legislative delegation (debate)
+    ep-10-04-19-017_ch017: 'Air safety: EU airline blacklist (debate)'
+    ep-10-04-19-021_ch021: Europeana - the next steps (short presentation)
+    ep-10-04-19-022_ch022: Evaluation and assessment of the Animal Welfare Action Plan 2006-2010 (short presentation)
+    ep-10-04-20-012_ch012: Question Time (Commission)
+    ep-10-04-20-013_ch013: Establishment of a European Asylum Support Office (debate)
+    ep-10-04-21-005_ch005: SWIFT (debate)
+    ep-10-05-05-018_ch018: Preparation of the Summit of Heads of State or Government of the euro area (7 May 2010) (debate)
+    ep-10-05-05-025_ch025: Mobilising Information and Communication Technologies to facilitate the transition to an energy-efficient, low-carbon economy (debate)
+    ep-10-05-17-018_ch018: New developments in public procurement (short presentation)
+    ep-10-05-18-015_ch015: Question Time (Commission)
+    ep-10-05-18-016_ch016: Principle of subsidiarity and universality of social public services in the EU (debate)
+    ep-10-05-19-011_ch011: University Business Dialogue (debate)
+    ep-10-05-20-003_ch003: Union for the Mediterranean (debate)
+    ep-10-06-14-018_ch018: Mandate for the trilogue on the 2011 Draft Budget (debate)
+    ep-10-06-14-020_ch020: European rail network for competitive freight (debate)
+    ep-10-06-14-024_ch024: One-minute speeches on matters of political importance
+    ep-10-06-15-013_ch013: Securities to be offered to the public and harmonisation of transparency requirements (debate)
+    ep-10-06-15-017_ch017: Joint Baltic Sea Research and Development Programme (BONUS-169) (debate)
+    ep-10-06-15-019_ch019: Sport, specifically concerning players' agents (debate)
+    ep-10-06-16-018_ch018: Implementation of the first railway package directives (debate)
+    ep-10-06-16-019_ch019: Floods in Central European countries, in particular Poland, the Czech Republic, Slovakia and Hungary (debate)
+    ep-10-06-17-005_ch005: A catch documentation programme for bluefin tuna (thunnus thynnus) (debate)
+    ep-10-06-23-009_ch009: Conclusions of the European Council meeting (17 June 2010) (debate)
+    ep-10-07-05-019_ch019: Annual report of the Petitions Committee 2009 (debate)
+    ep-10-07-05-020_ch020: One-minute speeches (Rule 150)
+    ep-10-07-06-004_ch004: Review of the Spanish Presidency (debate)
+    ep-10-07-08-003_ch003: Future of the CAP after 2013 (debate)
+    ep-10-09-20-021_ch021: One-minute speeches on matters of political importance
+    ep-10-09-20-024_ch024: Prevention of natural and man-made disasters (short presentation)
+    ep-10-09-21-011_ch011: Multiannual financial framework for 2007-2013 (debate)
+    ep-10-09-21-015_ch015: Inclusion of aviation activities in the scheme for greenhouse gas emission allowance trading within the Community (debate)
+    ep-10-09-22-009_ch009: Failures in protection of human rights and justice in the Democratic Republic of Congo (debate)
+    ep-10-09-22-011_ch011: Question Time (Council)
+    ep-10-09-23-003_ch003: Import of Laogai-made goods into the EU (debate)
+    ep-10-10-06-010_ch010: World day against the death penalty (debate)
+    ep-10-10-06-014_ch014: Third countries whose nationals must be in possession of visas when crossing the external borders of Member States (debate)
+    ep-10-10-06-016_ch016: Commission fines in antitrust cases (debate)
+    ep-10-10-18-016_ch016: Convention on Future Multilateral Cooperation in the Northwest Atlantic Fisheries - Scheme of control and enforcement applicable in the area covered by the Convention on future multilateral cooperation in the North-East Atlantic fisheries (debate)
+    ep-10-10-19-012_ch012: 'Parliament''s position on the 2011 draft budget as modified by the Council - all sections - Draft amending budget No 3/2010: Section III - Commission - BAM (Banana Accompanying Measures) (debate)'
+    ep-10-11-10-018_ch018: Innovation partnerships (debate)
+    ep-10-11-11-003_ch003: Presentation of the Court of Auditors' annual report - 2009 (debate)
+    ep-10-11-22-018_ch018: Restriction of the use of certain hazardous substances in electrical and electronic equipment (debate)
+    ep-10-11-24-007_ch007: Results of the G20 summit (debate)
+    ep-10-11-25-004_ch004: European Ombudsman's activity report for 2009 - Special Report from the European Ombudsman to the European Parliament following the draft recommendation to the European Commission in Complaint 676/2008/RT (According to Rule 205(2), 1st part) - 26th Annual Report on Monitoring the Application of European Union Law (2008) (debate)
+    ep-10-12-13-017_ch017: Creation of an immigration liaison officers' network (debate)
+    ep-10-12-13-019_ch019: Extension of the scope of Directive 2003/109/EC to beneficiaries of international protection (debate)
+    ep-10-12-14-018_ch018: Energy Efficiency Action Plan (debate)
+    ep-10-12-15-008_ch008: Award of the Sakharov Prize (formal sitting)
+    ep-10-12-15-017_ch017: Outcome of the NATO Summit in Lisbon (debate)
+    ep-10-12-16-004_ch004: Welfare of laying hens (debate)
+  '2011':
+    ep-11-01-17-012_ch012: Harmonised conditions for the marketing of construction products (debate)
+    ep-11-01-17-013_ch013: Consequences in the European Union of the dioxin animal feed incident (debate)
+    ep-11-01-17-016_ch016: EU-Cameroon forest law agreement - EU-Republic of Congo forest law agreement - FLEGT voluntary partnership agreements (continuation of debate)
+    ep-11-01-17-017_ch017: Interim Partnership Agreement between the EC and the Pacific States - Interim Partnership Agreement between the EC and the Pacific States (debate)
+    ep-11-01-17-018_ch018: International adoption in the European Union (debate)
+    ep-11-01-18-006_ch006: Review of the Belgian Presidency of the Council (debate)
+    ep-11-01-18-015_ch015: Question Time (Commission)
+    ep-11-01-18-018_ch018: Violation of freedom of expression and discrimination on the basis of sexual orientation in Lithuania (debate)
+    ep-11-01-19-013_ch013: EU-Libya Framework Agreement
+    ep-11-01-20-003_ch003: Report on competition policy 2009 (debate)
+    ep-11-01-20-004_ch004: A sustainable EU policy for the High North (debate)
+    ep-11-02-02-017_ch017: Appointments of ESA senior executives (debate)
+    ep-11-02-02-018_ch018: Agreements on trade in bananas - Repeal of Council Regulation (EC) No 1964/2005 on the tariff rates for bananas - Agreements on trade in bananas (debate)
+    ep-11-02-14-016_ch016: Practical aspects regarding the revision of EU instruments to support SME finance in the next programming period (debate)
+    ep-11-02-15-012_ch012: Adoption of modifications to the Treaty (debate)
+    ep-11-02-15-014_ch014: Immediate EU measures in support of Italy and other Member States affected by exceptional migratory flows (debate)
+    ep-11-02-15-020_ch020: World Bank energy strategy (debate)
+    ep-11-02-16-013_ch013: Media law in Hungary (debate)
+    ep-11-02-16-016_ch016: Question Time (Council)
+    ep-11-02-17-004_ch004: EU guarantee to the EIB against losses under loans and guarantees for projects outside the EU (debate)
+    ep-11-03-07-018_ch018: General Fisheries Commission for the Mediterranean Agreement Area (debate)
+    ep-11-03-07-019_ch019: EU-Mauritania Fisheries Partnership Agreement (debate)
+    ep-11-03-07-024_ch024: Reducing health inequalities (short presentation)
+    ep-11-03-07-027_ch027: EU protein deficit (short presentation)
+    ep-11-03-08-006_ch006: Guidelines for the 2012 budget - other sections (debate)
+    ep-11-03-08-008_ch008: 100th anniversary of International Women's Day
+    ep-11-03-08-013_ch013: Preparation of the Eurozone summit of 11 March 2011 (debate)
+    ep-11-03-08-019_ch019: Securing Europe's supply of rare earth elements (debate)
+    ep-11-03-09-014_ch014: EU approach towards Iran (debate)
+    ep-11-03-09-016_ch016: State of play of the peace process for the Middle East (debate)
+    ep-11-03-10-004_ch004: Prevention of natural and man-made disasters (debate)
+    ep-11-03-10-005_ch005: Volcanic ash crisis (debate)
+    ep-11-03-23-016_ch016: Preparation for the European Council meeting (24-25 March 2011) (debate)
+    ep-11-03-23-020_ch020: Consumer rights (debate)
+    ep-11-04-04-016_ch016: European statistics on tourism (debate)
+    ep-11-04-05-010_ch010: EU framework for coordinating national Roma integration strategies (debate)
+    ep-11-04-05-011_ch011: Estimates of revenue and expenditure for 2012 - Section I - Parliament (debate)
+    ep-11-04-05-012_ch012: Protection of Communities' financial interests - fight against fraud (debate)
+    ep-11-04-05-014_ch014: Political parties at European level and rules regarding their funding (debate)
+    ep-11-04-06-015_ch015: 2010 progress report on Iceland
+    ep-11-04-06-017_ch017: Situation in Côte d'Ivoire
+    ep-11-04-07-004_ch004: Vaccination against bluetongue (debate)
+    ep-11-04-07-005_ch005: EU tomato imports from Morocco (Petition 1565/2009) (debate)
+    ep-11-05-09-018_ch018: Radio spectrum policy (debate)
+    ep-11-05-09-020_ch020: Free trade agreement with India (debate)
+    ep-11-05-09-021_ch021: EU-Japan trade relations (debate)
+    ep-11-05-10-016_ch016: Interinstitutional agreement on a common Transparency Register - Amendment of the Rules following the establishment of a common Transparency Register
+    ep-11-05-10-018_ch018: Question Time (Commission)
+    ep-11-05-10-019_ch019: Textile names and related labelling of textile products (debate)
+    ep-11-05-11-004_ch004: 'Main aspects of the common foreign and security policy and the common security and defence policy - Situation in Syria and in Camp Ashraf - Report: Albertini - Annual report from the Council to Parliament on the main aspects of CFSP in 2009 - Report: Gualtieri - Development of CSDP following the entry into force of the Lisbon Treaty - Report: Muñiz De Urquiza - The EU as a global actor: its role in multilateral organisations (debate)'
+    ep-11-05-11-014_ch014: Efficiency of the European agencies linked to employment, working conditions and training (debate)
+    ep-11-05-11-016_ch016: ILO Convention supplemented by a recommendation on domestic workers (debate)
+    ep-11-05-11-017_ch017: Antibiotic resistance (debate)
+    ep-11-06-06-016_ch016: European environmental economic accounts (debate)
+    ep-11-06-06-017_ch017: Selection process of a new Managing Director for the IMF and external representation of the euro (debate)
+    ep-11-06-06-020_ch020: One-minute speeches (Rule 150)
+    ep-11-06-06-021_ch021: Credit rating agencies (short presentation)
+    ep-11-06-06-023_ch023: External dimension of social policy (short presentation)
+    ep-11-06-06-024_ch024: Financing instrument for development cooperation (short presentation)
+    ep-11-06-06-025_ch025: Progress towards a European contract law for consumers and businesses (short presentation)
+    ep-11-06-07-006_ch006: EHEC outbreak in the EU Member States (debate)
+    ep-11-06-07-007_ch007: Charging of heavy goods vehicles (debate)
+    ep-11-06-07-016_ch016: Question Time (Commission)
+    ep-11-06-08-011_ch011: Revised Hungarian constitution (debate)
+    ep-11-06-08-013_ch013: EU-Russia summit (debate)
+    ep-11-06-22-014_ch014: Preparations for the European Council meeting (24 June 2011) (continuation of debate)
+    ep-11-06-22-021_ch021: Greenhouse gas emission reductions and risk of carbon leakage (short presentation)
+    ep-11-06-23-004_ch004: 2012 draft budget trilogue (debate)
+    ep-11-06-23-007_ch007: '5th cohesion report and strategy for the post-2013 cohesion policy - Implementation of cohesion policy programmes for 2007-2013 - European urban agenda and its future in cohesion policy - Objective 3: future agenda for cross-border, transnational and interregional cooperation - Increased effectiveness between ERDF and other structural funds (continuation of debate)'
+    ep-11-07-04-019_ch019: Derivatives, central counterparties and trade repositories (debate)
+    ep-11-07-04-022_ch022: Investor-compensation schemes (debate)
+    ep-11-07-04-023_ch023: Agency for the management of large-scale IT systems in the area of freedom, security and justice (debate)
+    ep-11-07-04-025_ch025: One-minute speeches on matters of political importance
+    ep-11-07-04-027_ch027: A more efficient and fairer retail market (short presentation)
+    ep-11-07-04-031_ch031: Impact of EU development policy (short presentation)
+    ep-11-07-05-006_ch006: Possibility for Member States to restrict or prohibit the cultivation of GMOs in their territory (debate)
+    ep-11-07-05-014_ch014: Question Time (Commission)
+    ep-11-07-05-015_ch015: Cross-border exchange of information on road safety related traffic offences
+    ep-11-07-06-003_ch003: 'Financial, economic and social crisis: measures and initiatives to be taken (debate)'
+    ep-11-07-06-012_ch012: Situation in the Arab world and North Africa - Situation in Yemen - Situation in Syria (continuation of debate)
+    ep-11-07-06-018_ch018: Approach of the European Parliament to implementing Articles 9 and 10 of Protocol 1 of the Lisbon Treaty on parliamentary cooperation in the field of CFSP/CSDP (debate)

@@ -83,6 +83,12 @@ def test_tokens_keep_apostrophes_and_real_single_letters() -> None:
     assert tokens == ["i", "can't", "find", "a", "whale's", "tail", "o", "reader"]
 
 
+def test_accented_letters_stay_inside_the_word() -> None:
+    """An ASCII-only token class once split "café" into "caf"."""
+    tokens = [token for token, _, _ in iter_tokens("A naïve café in Lomé, said Wallström.")]
+    assert tokens == ["a", "naïve", "café", "in", "lomé", "said", "wallström"]
+
+
 def test_curly_apostrophes_normalize_to_straight() -> None:
     tokens = [token for token, _, _ in iter_tokens("It’s Alice’s book.")]
     assert tokens == ["it's", "alice's", "book"]
