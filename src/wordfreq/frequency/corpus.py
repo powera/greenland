@@ -292,9 +292,9 @@ CORPUS_CONFIGS = [
         enabled=True,
     ),
     CorpusConfig(
-        name="parliament_debates",
+        name="eu_parliament_debates",
         description="Word frequency data from European Parliament debates, 1996-2011",
-        file_path="parliament_debates.json",
+        file_path="eu_parliament_debates.json",
         max_words=5500,
         file_type="json",
         value_type="auto",

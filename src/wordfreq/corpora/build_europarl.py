@@ -8,7 +8,7 @@
 
 Reads the chapter list written by ``europarl_select.py``, parses those
 chapters out of the cached session files, and writes
-``data/wordfreq/parliament_debates.json`` through the same
+``data/wordfreq/eu_parliament_debates.json`` through the same
 ``frequency_build`` path every other builder uses.
 
 The point of the corpus is the vocabulary of *debating* politics -- vote,
@@ -65,7 +65,7 @@ from wordfreq.corpora.frequency_build import (
 
 logger = logging.getLogger(__name__)
 
-CORPUS_NAME = "parliament_debates"
+CORPUS_NAME = "eu_parliament_debates"
 
 # ~1300 chapters, as legal_scotus has ~1500 opinions: the same floor.
 DEFAULT_MIN_CHAPTERS = 8

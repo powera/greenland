@@ -175,7 +175,7 @@ def write_selection(
 ) -> None:
     words = sum(item.words for item in selected)
     header = (
-        "# Europarl chapters for the parliament_debates corpus.\n"
+        "# Europarl chapters for the eu_parliament_debates corpus.\n"
         "# Written by wordfreq/corpora/europarl_select.py; edit by hand to drop a\n"
         "# chapter, and re-run the selector only to redraw the whole sample.\n"
         f"#\n# {len(selected)} chapters, {words:,} words.\n\n"
