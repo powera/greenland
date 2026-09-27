@@ -74,7 +74,11 @@ CURRICULUM_THEMES: tuple[CurriculumTheme, ...] = (
     # No level yet: 1100 is the chemical-elements cohort, which owns it.
     CurriculumTheme("chemistry", (), subtypes=frozenset({"chemical_compound"})),
     CurriculumTheme("linguistics", (1110,), ("wiki_linguistics",)),
-    CurriculumTheme("medications", (1140,), description="drugs by generic and brand name"),
+    CurriculumTheme(
+        "medications",
+        (1140, 1150, 1160, 1170),
+        description="drugs by generic and brand name, and vaccines",
+    ),
 )
 
 THEMES_BY_NAME: Mapping[str, CurriculumTheme] = {theme.name: theme for theme in CURRICULUM_THEMES}

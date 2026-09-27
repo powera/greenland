@@ -477,6 +477,56 @@ def run_mixed_import(
     return 0
 
 
+def run_leveled_import(
+    word_groups: Sequence[tuple[int, Sequence[str]]],
+    term_groups: Sequence[tuple[int, Sequence[TermEntry]]],
+    description: str,
+    tags: Sequence[str] | None = None,
+) -> int:
+    """Import several wordlists and term lists, each at its own level.
+
+    :func:`run_mixed_import` for a topic split across levels -- essential
+    medicines at one, brand names at another -- whose provenance note is
+    shared.  Each group is ``(level, entries)``.  ``--limit`` applies to the
+    words and to each term group separately, as it does in the mixed import.
+
+    ``tags`` applies to the terms only, matching :func:`run_term_import`.
+    """
+    words = [word for _level, group in word_groups for word in group]
+    term_texts = [entry.term for _level, group in term_groups for entry in group]
+    collisions = {_normalized(word) for word in words} & {_normalized(t) for t in term_texts}
+    if collisions:
+        raise ValueError(f"A word is listed both as a word and as a term: {sorted(collisions)!r}")
+    if len({_normalized(term) for term in term_texts}) != len(term_texts):
+        raise ValueError("A term is listed more than once")
+
+    args = parse_args(description)
+    for level, group in word_groups:
+        print("Sense-discovery wordlist:")
+        print_plan(group, level)
+        print()
+    for level, term_group in term_groups:
+        print("Fully specified terms:")
+        print_term_plan(term_group, level)
+        print()
+    if not args.execute:
+        print("No API calls made. Re-run with --execute only after approval.")
+        return 0
+
+    print(f"LIVE MODE: Barsukas will use {args.model!r} for paid calls.")
+    assignments = [(word, level) for level, group in word_groups for word in group]
+    try:
+        queued = pending_queue_words()
+        if assignments:
+            execute_assignments(assignments, args.model, args.limit, queued=queued)
+        for level, term_group in term_groups:
+            execute_terms(term_group, level, args.model, args.limit, tags=tags, queued=queued)
+    except (BarsukasAPIError, RuntimeError, requests.exceptions.RequestException) as error:
+        print(f"Import stopped: {error}", file=sys.stderr)
+        return 1
+    return 0
+
+
 def run_domain_import(
     words: Sequence[str],
     general_words: Sequence[str],
