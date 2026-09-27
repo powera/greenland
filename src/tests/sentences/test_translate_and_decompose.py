@@ -14,6 +14,7 @@ from clients.unified_client import UnifiedLLMClient
 from langtools.dialect_overrides import get_dialect_display_name
 from sentences.translate_and_decompose import (
     DecomposedLanguage,
+    _find_missing_surface_forms,
     TranslateAndDecomposeResult,
     build_phase1_prompt,
     format_conversation_context,
@@ -414,3 +415,30 @@ def test_conversation_context_block_survives_a_missing_scene() -> None:
     block = format_conversation_context(context)
     assert "Scene: At the playground" in block  # falls back to the title
     assert "They look happy." in block
+
+
+def test_elided_tokens_are_covered_by_their_split_words() -> None:
+    # The LLM splits "l’abdomen" into "L’" + "abdomen"; that is complete, not missing.
+    words = [
+        {"surface_form": surface}
+        for surface in ["L’", "abdomen", "de", "l’", "abeille", "était", "couvert", "poils", "fins"]
+    ]
+
+    tokens, missing = _find_missing_surface_forms(
+        target_language="fr",
+        target_translation="L’abdomen de l’abeille était couvert de poils fins.",
+        words=words,
+    )
+
+    assert "l’abdomen" in tokens
+    assert missing == []
+
+
+def test_elided_token_with_an_uncovered_part_is_still_missing() -> None:
+    _tokens, missing = _find_missing_surface_forms(
+        target_language="fr",
+        target_translation="J’ai remplacé la cartouche d’encre.",
+        words=[{"surface_form": s} for s in ["J’", "ai", "remplacé", "la", "cartouche", "d’"]],
+    )
+
+    assert missing == ["d’encre"]
