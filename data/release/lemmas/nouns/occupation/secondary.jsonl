@@ -1,56 +1,120 @@
-{"guid": "N36_001", "translations": {"ro": "contabil", "pl": "księgowy", "th": "นักบัญชี", "ta": "பணப்பொறியாளர்", "kn": "ಲೆಕ್ಕಚಾರ", "uk": "бухгалтер", "bn": "হিসাবরক্ষক", "hi": "लेखाकार"}}
-{"guid": "N36_014", "translations": {"ro": "profesor", "pl": "nauczyciel", "th": "ครู", "ta": "ஆசிரியர்", "kn": "ಶಿಕ್ಷಕ", "uk": "вчитель", "bn": "শিক্ষক", "hi": "शिक्षक", "bs": "učitelj"}}
-{"guid": "N36_015", "translations": {"ro": "doctor", "pl": "lekarz", "th": "แพทย์", "ta": "மருத்துவர்", "kn": "ವೈದ್ಯ", "uk": "лікар", "bn": "চিকিৎসক", "hi": "डॉक्टर", "bs": "liječnik"}}
-{"guid": "N36_016", "translations": {"ro": "asistent medical", "pl": "pielęgniarka", "th": "พยาบาล", "ta": "நர்ஸ்", "kn": "ನರ್ಸ್", "uk": "медсестра", "bn": "নার্স", "hi": "नर्स", "bs": "medicinski tehničar"}}
-{"guid": "N36_017", "translations": {"ro": "inginer", "pl": "inżynier", "th": "วิศวกร", "ta": "பெறியாளர்", "kn": "ಅಭಿಯಂತ್ರಿ", "uk": "інженер", "bn": "ইঞ্জিনিয়ার", "hi": "अभियंता"}}
-{"guid": "N36_018", "translations": {"ro": "avocat", "pl": "adwokat", "th": "ทนายความ", "ta": "வக்கீல்", "kn": "ವಕೀಲ", "uk": "адвокат", "bn": "বকিল", "hi": "वकील"}}
-{"guid": "N36_019", "translations": {"ro": "polițist", "pl": "policjant", "th": "เจ้าหน้าที่ตำรวจ", "ta": "போலீஸ் அதிகாரி", "kn": "ಸೇನೆಗಾರನು", "uk": "поліцейний", "bn": "পুলিশ কর্মকর্তা", "hi": "पुलिस अधिकारी", "bs": "policajac"}}
-{"guid": "N36_020", "translations": {"ro": "pompier", "pl": "strażak", "th": "พลตระเวนดับเพลิง", "ta": "தீயணையாளன்", "kn": "ಅಗ್ನಿಶಾಮಕ", "uk": "пожежник", "bn": "অগ্নিশামক", "hi": "दमकलकर्मी", "bs": "vatrogasac"}}
-{"guid": "N36_021", "translations": {"ro": "bucătar", "pl": "kucharz", "th": "พ่อครัว", "ta": "சமையலர்", "kn": "ಶೇಖರ್", "uk": "кухар", "bn": "রাঁধুনি", "hi": "रसोइया", "bs": "kuhar"}}
-{"guid": "N36_022", "translations": {"ro": "fermier", "pl": "rolnik", "th": "ชาวนา", "ta": "பண்ணையர்", "kn": "ಕಿಸಾನ್", "uk": "фермер", "bn": "কৃষক", "hi": "किसान", "bs": "poljoprivrednik"}}
-{"guid": "N36_023", "translations": {"ro": "pilot", "pl": "pilot", "th": "นักบิน", "ta": "பயிலைட்", "kn": "ಪೈಲಟ್", "uk": "пілот", "bn": "পাইলট", "hi": "पायलट"}}
-{"guid": "N36_024", "translations": {"ro": "șofer", "pl": "kierowca", "th": "คนขับรถ", "ta": "சாரதி", "kn": "ಚಾಲಕ", "uk": "водій", "bn": "চালক", "hi": "ड्राइवर", "bs": "vozač"}}
-{"guid": "N36_025", "translations": {"ro": "mecanic", "pl": "mechanik", "th": "ช่างเครื่อง", "ta": "யந்திரப்பணி நிபுணர்", "kn": "ಯಂತ್ರಸ್ಥ", "uk": "механік", "bn": "মেকানিক", "hi": "मेकानिक"}}
-{"guid": "N36_026", "translations": {"ro": "electrician", "pl": "elektryk", "th": "ช่างไฟฟ้า", "ta": "மின்சாரத்தொழில்நுட்பிகள்", "kn": "ವಿದ್ಯುತ್‌ಕಾರ", "uk": "електрик", "bn": "বৈদ্যুতিক", "hi": "बिजलीकार"}}
-{"guid": "N36_027", "translations": {"ro": "instalator", "pl": "hydraulik", "th": "ช่างประปา", "ta": "கூவர்செயலர்", "kn": "ನೀರಿನ ಅಜ್ಜಿಕೆಗಾರ", "uk": "сантехнік", "bn": "নলশিল্পী", "hi": "प्लंबर"}}
-{"guid": "N36_028", "translations": {"ro": "dulgher", "pl": "stolarz", "th": "ช่างไม้", "ta": "தச்சர்", "kn": "ದರ್ಜಿಹೊಳಪು (Alternatively common: ಚಿಲಿಪಂಪು?)", "uk": "столяр", "bn": "তষ্‌‌টকার (This seems wrong)", "hi": "बढ़ई"}}
-{"guid": "N36_030", "translations": {"ro": "muzician", "pl": "muzyk", "th": "นักดนตรี", "ta": "இசைத்தகரர்", "kn": "ಸಂಗೀತಕಾರ", "uk": "музикант", "bn": "সঙ্গীতশিল্পী", "hi": "संगीतकार", "bs": "muzičar"}}
-{"guid": "N36_031", "translations": {"ro": "artist", "pl": "artysta", "th": "ศิลปิน", "ta": "கலைஞர்", "kn": "ಕಲಾವಿರ", "uk": "художник", "bn": "শিল্পী", "hi": "कलाकार", "bs": "umjetnik"}}
-{"guid": "N36_032", "translations": {"ro": "scriitor", "pl": "pisarz", "th": "นักเขียน", "ta": "எழுத்தாளர்", "kn": "ಲೇಖಕ", "uk": "письменник", "bn": "লেখক", "hi": "लेखक"}}
-{"guid": "N36_033", "translations": {"ro": "jurnalist", "pl": "dziennikarz", "th": "นักข่าว", "ta": "பத்திரிகையாளர்", "kn": "ಸಂಧರ್ಶನಕಾರ(சೊಂದರ್ಶನಕಾರ)", "uk": "журналіст", "bn": "সাংবাদিক", "hi": "पत्रकार"}}
-{"guid": "N36_034", "translations": {"ro": "fotograf", "pl": "fotograf", "th": "ช่างภาพ", "ta": "புகைப்படக் கலைஞர்", "kn": "ಫೋಟೋಗ್ರಾಫರ್", "uk": "фотограф", "bn": "ফটোগ্রাফার", "hi": "फोटोग्राफर"}}
-{"guid": "N36_035", "translations": {"ro": "dentist", "pl": "dentysta", "th": "ทันตแพทย์", "ta": "பல் மருத்துவர்", "kn": "ದಂತವೈದ್ಯ", "uk": "стоматолог", "bn": "দাঁতবিশেষজ্ঞ", "hi": "दंत चिकित्सक"}}
-{"guid": "N36_036", "translations": {"ro": "veterinar", "pl": "weterynarz", "th": "สัตวแพทย์", "ta": "விலங்கு மருத்துவர்", "kn": "ಪ್ರಾಣಿ ವೈದ್ಯ", "uk": "ветеринар", "bn": "পশু চিকিৎসক", "hi": "पशु चिकित्सक"}}
-{"guid": "N36_041", "translations": {"ro": "brutar", "pl": "piekarz", "th": "ช่างอบขนมปัง", "ta": "ஓவ்பு", "kn": "ಬೈಸರ್", "uk": "пекар", "bn": "বেকার", "hi": "बेक़र"}}
-{"guid": "N36_042", "translations": {"ro": "soldat", "pl": "żołnierz", "th": "ทหาร", "ta": "சூலா", "kn": "ಸೈನಿಕ", "uk": "солдат", "bn": "সৈনিক", "hi": "सैन्यक"}}
-{"guid": "N36_043", "translations": {"ro": "ospătar", "pl": "kelner", "th": "พนักงานเสิร์ฟ", "ta": "வெயிட்டர்", "kn": "ವೆಟರ", "uk": "офіціант", "bn": "ওয়েটার", "hi": "वेटर"}}
-{"guid": "N36_044", "translations": {"ro": "farmacist", "pl": "farmaceuta", "th": "เภสัชกร", "ta": "மருந்தாளர்", "kn": "ಔಷಧಿಗಾರ", "uk": "фармацевт", "bn": "ফার্মাসিস্ট", "hi": "फ़ार्मासिस्ट"}}
-{"guid": "N36_045", "translations": {"ro": "arhitect", "pl": "architekt", "th": "สถาปนิก", "ta": "கலைநிலையாளர்", "kn": "ವಾಸ್ತುಶಿಲ್ಪಿ", "uk": "архітектор", "bn": "স্থপতি", "hi": "वास्तुशिल्पी"}}
-{"guid": "N36_046", "translations": {"ro": "om de știință", "pl": "naukowiec", "th": "นักวิทยาศาสตร์", "ta": "அறிவியல் நிபுணர்", "kn": "ವೈಜ್ಞಾನಿಕ", "uk": "вчений", "bn": "বিজ্ঞানী", "hi": "वैज्ञानिक"}}
-{"guid": "N36_047", "translations": {"ro": "actor", "pl": "aktor", "th": "นักแสดง", "ta": "நடன்", "kn": "ನಟ", "uk": "актор", "bn": "অভিনেতা", "hi": "अभिनेता"}}
-{"guid": "N36_048", "translations": {"ro": "judecător", "pl": "sędzia", "th": "ผู้พิพากษา", "ta": "நீதி நீதிபதி", "kn": "ನ್ಯಾಯಾಧೀಶ", "uk": "суддя", "bn": "বিচারক", "hi": "न्यायाधीश"}}
-{"guid": "N36_049", "translations": {"ro": "coafor", "pl": "fryzjer", "th": "ช่างตัดผม", "ta": "முடிஞ்சுவர்", "kn": "ಹೆರೆಯುವೃ", "uk": "перукар", "bn": "কেশবন্ধু", "hi": "नाई"}}
-{"guid": "N36_050", "translations": {"ro": "pescar", "pl": "rybak", "th": "ชาวประมง", "ta": "மீனவர்", "kn": "ಮೊಗ್ಗಾರ", "uk": "рибалка", "bn": "মাছশিকারী", "hi": "मछुआरा"}}
-{"guid": "N36_051", "translations": {"ro": "muncitor", "pl": "robotnik", "th": "คนงาน", "ta": "தொழிலாளி", "kn": "ಉದ್ಯೋಗಿ", "uk": "працівник", "bn": "শ্রমিক", "hi": "मजदूर"}}
-{"guid": "N36_052", "translations": {"ro": "bibliotecar", "pl": "bibliotekarz", "th": "บรรณารักษ์", "ta": "நூலகரர்", "kn": "ಗ್ರಂಥಾಲಯಧ್ಯಕ್ಷ", "uk": "бібліотекар", "bn": "গ্রন্থাগারিক", "hi": "पुस्तकालयाध्यक्ष"}}
-{"guid": "N36_053", "translations": {"ro": "chirurg", "pl": "chirurg", "th": "ศัลยแพทย์", "ta": "மூட்டை அறுவைச் சிகிச்சையாளர்", "kn": "ಶಸ್ತ್ರಚಿಕಿತ್ಸಕ", "uk": "хірург", "bn": "শল্যচিকিৎসক", "hi": "शल्य चिकित्सक"}}
-{"guid": "N36_054", "translations": {"ro": "programator", "pl": "programista", "th": "โปรแกรมเมอร์", "ta": "ப்ரோக்ராமர்", "kn": "ಪ್ರೋಗ್ರಾಮರ್", "uk": "програміст", "bn": "প্রোগ্রামার", "hi": "प्रोग्रामर"}}
-{"guid": "N36_055", "translations": {"ro": "marinar", "pl": "marynarz", "th": "นักเดินเรือ", "ta": "கப்பல் ஓட்டுநர்", "kn": "ಸಮುದ್ರಕರ್ಮಿ", "uk": "моряк", "bn": "নাবিক", "hi": "नाविक"}}
-{"guid": "N36_056", "translations": {"ro": "croitor", "pl": "krawiec", "th": "ช่างตัดเสื้อ", "ta": "தையல்காரர்", "kn": "ದರ್ಬಾರಿ", "uk": "кравець", "bn": "যন্ত্রী", "hi": "दऱ्ज़ी"}}
-{"guid": "N36_057", "translations": {"ro": "zugrav", "pl": "malarz", "th": "ช่างทาสี", "ta": "வர்ணக்காரர்", "kn": "ಬಣ್ಣಕಾರ", "uk": "маляр", "bn": "রঙচিত্রকারী", "hi": "रंगीन (Note: 'रंगीन' means colorful)"}}
-{"guid": "N36_058", "translations": {"ro": "măcelar", "pl": "rzeźnik", "th": "คนขายเนื้อ", "ta": "சிக்கன் விற்பவர்", "kn": "ಮಾಂಸದಾರ", "uk": "м'ясник", "bn": "কসাই", "hi": "कसाई"}}
-{"guid": "N36_059", "translations": {"ro": "grădinar", "pl": "ogrodnik", "th": "คนสวน", "ta": "தோட்டக்காரர்", "kn": "ಮಾಲೀಕ/ತೋಟಗಾರ", "uk": "садівник", "bn": "মালিক/উদ্যানরক্ষক", "hi": "माली"}}
-{"guid": "N36_060", "translations": {"ro": "traducător", "pl": "tłumacz", "th": "นักแปล", "ta": "மொழிபெயர்ப்பாளர்", "kn": "ಅನುವಾದಕ", "uk": "перекладач", "bn": "অনুবাদক", "hi": "अनुवादक"}}
-{"guid": "N36_061", "translations": {"ro": "receptioner", "pl": "recepcjonista", "th": "พนักงานต้อนรับ", "ta": "ரிசெப்ஷனிஸ்ட்", "kn": "ರಿಸೆಪ್ಶನಿಸ್ಟ್", "uk": "адміністратор", "bn": "রিসেপশনিস্ট", "hi": "रिसेप्शनिस्ट"}}
-{"guid": "N36_062", "translations": {"ro": "antrenor", "pl": "trener", "th": "โค้ช", "ta": "பெய்ம்பயிற்றுநர்", "kn": "ಭಟ", "uk": "тренер", "bn": "প্রশিক্ষক", "hi": "प्रशिक्षक"}}
-{"guid": "N36_063", "translations": {"ro": "profesor", "pl": "profesor", "th": "ศาสตราจารย์", "ta": "ப்ரொஃபெசர்", "kn": "ಪ್ರೊಫೆಸರ್", "uk": "професор", "bn": "প্রফেসর", "hi": "प्रोफ़ेसर"}}
-{"guid": "N36_064", "translations": {"ro": "psiholog", "pl": "psycholog", "th": "นักจิตวิทยา", "ta": "மனோவியலாளர்", "kn": "ಮಾನಸಶಾಸ್ತ್ರಜ್ಞ", "uk": "психолог", "bn": "মনোবিজ্ঞানী", "hi": "मनोवैज्ञानिक"}}
-{"guid": "N36_065", "translations": {"ro": "terapeut", "pl": "terapeuta", "th": "นักบำบัด", "ta": "சிகிச்சையாளர்", "kn": "ಚಿಕಿತ್ಸಕ", "uk": "терапевт", "bn": "তন্ত্রিকবিদ্যাবিদ", "hi": "चिकित्सक"}}
-{"guid": "N36_066", "translations": {"ro": "casier", "pl": "kasjer", "th": "พนักงานเก็บเงิน", "ta": "காசுசெய்வோர்", "kn": "ಕ್ಯಾಶಿಯರ್", "uk": "касир", "bn": "ক্যাশিয়ার", "hi": "कैशियर"}}
-{"guid": "N36_067", "translations": {"ro": "îngrijitor", "pl": "dozorca", "th": "พนักงานทำความสะอาด", "ta": "வளமைப்பாளர்", "kn": "ಸರಕಾರಿ_cleaner", "uk": "доглядач", "bn": "পরিচ্ছন্নতাকর্মী", "hi": "सफाईकर्मী"}}
-{"guid": "N36_068", "translations": {"ro": "agent de securitate", "pl": "ochroniarz", "th": "พนักงานรักษาความปลอดภัย", "ta": "பாதுகாப்பு ஊழியர்", "kn": "ರಕ್ಷಣಾ ಸಿಬ್ಬಂದಿ", "uk": "охоронець", "bn": "নিরাপত্তা প্রহরী", "hi": "सुरक्षा गार्ड"}}
-{"guid": "N36_069", "translations": {"ro": "detectiv", "pl": "detektyw", "th": "นักสืบ", "ta": "விசாரணையாளர்", "kn": "ತদন্তಕಾರ", "uk": "детектив", "bn": "গোয়েন্দা", "hi": "गुप्तचर"}}
-{"guid": "N36_070", "translations": {"ro": "paramedic", "pl": "ratownik medyczny", "th": "พยาบาลฉุกเฉิน", "ta": "பாராமெடிக்", "kn": "ಪ್ಯಾರಾಮೆಡಿಕ್", "uk": "парамедик", "bn": "প্যারামেডিক", "hi": "पैरामेडिक"}}
-{"guid": "N36_072", "translations": {"ro": "economist", "pl": "ekonomista", "th": "นักเศรษฐศาสตร์", "ta": "பொருளாதாரவ scalloped?", "kn": "ಅರ್ಥಶಾಸ್ತ್ರಜ್ಞ", "uk": "економіст", "bn": "অর্থনীতিবিদ", "hi": "अर्थशास्त्रज्ञ"}}
-{"guid": "N36_073", "translations": {"ro": "diplomat", "pl": "dyplomata", "th": "นักการทูต", "ta": "தூதர்", "kn": "ದೂತ", "uk": "діпломат", "bn": "রাজদূত", "hi": "राजदूत"}}
-{"guid": "N36_074", "translations": {"ro": "miner", "pl": "górnik", "th": "คนงานเหมือง", "ta": "தாழுபவர்", "kn": "ಖನಿಕ", "uk": "шахтар", "bn": "খনিক", "hi": "खनिक"}}
+{"guid": "N36_001", "translations": {"ro": "contabil", "pl": "księgowy", "th": "นักบัญชี", "ms": "akauntan", "ta": "பணப்பொறியாளர்", "kn": "ಲೆಕ್ಕಚಾರ", "uk": "бухгалтер", "bn": "হিসাবরক্ষক", "hi": "लेखाकार", "tr": "muhasebeci"}}
+{"guid": "N36_014", "translations": {"ro": "profesor", "pl": "nauczyciel", "th": "ครู", "ms": "guru", "ta": "ஆசிரியர்", "kn": "ಶಿಕ್ಷಕ", "uk": "вчитель", "bn": "শিক্ষক", "hi": "शिक्षक", "tr": "öğretmen", "bs": "učitelj"}}
+{"guid": "N36_015", "translations": {"ro": "doctor", "pl": "lekarz", "th": "แพทย์", "ms": "doktor", "ta": "மருத்துவர்", "kn": "ವೈದ್ಯ", "uk": "лікар", "bn": "চিকিৎসক", "hi": "डॉक्टर", "tr": "doktor", "bs": "liječnik"}}
+{"guid": "N36_016", "translations": {"ro": "asistent medical", "pl": "pielęgniarka", "th": "พยาบาล", "ms": "jururawat", "ta": "நர்ஸ்", "kn": "ನರ್ಸ್", "uk": "медсестра", "bn": "নার্স", "hi": "नर्स", "tr": "hemşire", "bs": "medicinski tehničar"}}
+{"guid": "N36_017", "translations": {"ro": "inginer", "pl": "inżynier", "th": "วิศวกร", "ms": "jurutera", "ta": "பெறியாளர்", "kn": "ಅಭಿಯಂತ್ರಿ", "uk": "інженер", "bn": "ইঞ্জিনিয়ার", "hi": "अभियंता", "tr": "mühendis"}}
+{"guid": "N36_018", "translations": {"ro": "avocat", "pl": "adwokat", "th": "ทนายความ", "ms": "peguam", "ta": "வக்கீல்", "kn": "ವಕೀಲ", "uk": "адвокат", "bn": "বকিল", "hi": "वकील", "tr": "avukat"}}
+{"guid": "N36_019", "translations": {"ro": "polițist", "pl": "policjant", "th": "เจ้าหน้าที่ตำรวจ", "ms": "pegawai polis", "ta": "போலீஸ் அதிகாரி", "kn": "ಸೇನೆಗಾರನು", "uk": "поліцейний", "bn": "পুলিশ কর্মকর্তা", "hi": "पुलिस अधिकारी", "tr": "polis memuru", "bs": "policajac"}}
+{"guid": "N36_020", "translations": {"ro": "pompier", "pl": "strażak", "th": "พลตระเวนดับเพลิง", "ms": "ahli bomba", "ta": "தீயணையாளன்", "kn": "ಅಗ್ನಿಶಾಮಕ", "uk": "пожежник", "bn": "অগ্নিশামক", "hi": "दमकलकर्मी", "tr": "itfaiyeci", "bs": "vatrogasac"}}
+{"guid": "N36_021", "translations": {"ro": "bucătar", "pl": "kucharz", "th": "พ่อครัว", "ms": "tukang masak", "ta": "சமையலர்", "kn": "ಶೇಖರ್", "uk": "кухар", "bn": "রাঁধুনি", "hi": "रसोइया", "tr": "aşçı", "bs": "kuhar"}}
+{"guid": "N36_022", "translations": {"ro": "fermier", "pl": "rolnik", "th": "ชาวนา", "ms": "petani", "ta": "பண்ணையர்", "kn": "ಕಿಸಾನ್", "uk": "фермер", "bn": "কৃষক", "hi": "किसान", "tr": "çiftçi", "bs": "poljoprivrednik"}}
+{"guid": "N36_023", "translations": {"ro": "pilot", "pl": "pilot", "th": "นักบิน", "ms": "juruterbang", "ta": "பயிலைட்", "kn": "ಪೈಲಟ್", "uk": "пілот", "bn": "পাইলট", "hi": "पायलट", "tr": "pilot"}}
+{"guid": "N36_024", "translations": {"ro": "șofer", "pl": "kierowca", "th": "คนขับรถ", "ms": "pemandu", "ta": "சாரதி", "kn": "ಚಾಲಕ", "uk": "водій", "bn": "চালক", "hi": "ड्राइवर", "tr": "sürücü", "bs": "vozač"}}
+{"guid": "N36_025", "translations": {"ro": "mecanic", "pl": "mechanik", "th": "ช่างเครื่อง", "ms": "mekanik", "ta": "யந்திரப்பணி நிபுணர்", "kn": "ಯಂತ್ರಸ್ಥ", "uk": "механік", "bn": "মেকানিক", "hi": "मेकानिक", "tr": "mekanik"}}
+{"guid": "N36_026", "translations": {"ro": "electrician", "pl": "elektryk", "th": "ช่างไฟฟ้า", "ms": "juruelektrik", "ta": "மின்சாரத்தொழில்நுட்பிகள்", "kn": "ವಿದ್ಯುತ್‌ಕಾರ", "uk": "електрик", "bn": "বৈদ্যুতিক", "hi": "बिजलीकार", "tr": "elektrikçi"}}
+{"guid": "N36_027", "translations": {"ro": "instalator", "pl": "hydraulik", "th": "ช่างประปา", "ms": "tukang paip", "ta": "கூவர்செயலர்", "kn": "ನೀರಿನ ಅಜ್ಜಿಕೆಗಾರ", "uk": "сантехнік", "bn": "নলশিল্পী", "hi": "प्लंबर", "tr": "tesisatçı"}}
+{"guid": "N36_028", "translations": {"ro": "dulgher", "pl": "stolarz", "th": "ช่างไม้", "ms": "tukang kayu", "ta": "தச்சர்", "kn": "ದರ್ಜಿಹೊಳಪು (Alternatively common: ಚಿಲಿಪಂಪು?)", "uk": "столяр", "bn": "তষ্‌‌টকার (This seems wrong)", "hi": "बढ़ई", "tr": "marangoz"}}
+{"guid": "N36_030", "translations": {"ro": "muzician", "pl": "muzyk", "th": "นักดนตรี", "ms": "ahli muzik", "ta": "இசைத்தகரர்", "kn": "ಸಂಗೀತಕಾರ", "uk": "музикант", "bn": "সঙ্গীতশিল্পী", "hi": "संगीतकार", "tr": "müzisyen", "bs": "muzičar"}}
+{"guid": "N36_031", "translations": {"ro": "artist", "pl": "artysta", "th": "ศิลปิน", "ms": "seniman", "ta": "கலைஞர்", "kn": "ಕಲಾವಿರ", "uk": "художник", "bn": "শিল্পী", "hi": "कलाकार", "tr": "sanatçı", "bs": "umjetnik"}}
+{"guid": "N36_032", "translations": {"ro": "scriitor", "pl": "pisarz", "th": "นักเขียน", "ms": "penulis", "ta": "எழுத்தாளர்", "kn": "ಲೇಖಕ", "uk": "письменник", "bn": "লেখক", "hi": "लेखक", "tr": "yazar"}}
+{"guid": "N36_033", "translations": {"ro": "jurnalist", "pl": "dziennikarz", "th": "นักข่าว", "ms": "wartawan", "ta": "பத்திரிகையாளர்", "kn": "ಸಂಧರ್ಶನಕಾರ(சೊಂದರ್ಶನಕಾರ)", "uk": "журналіст", "bn": "সাংবাদিক", "hi": "पत्रकार", "tr": "gazeteci"}}
+{"guid": "N36_034", "translations": {"ro": "fotograf", "pl": "fotograf", "th": "ช่างภาพ", "ms": "jurugambar", "ta": "புகைப்படக் கலைஞர்", "kn": "ಫೋಟೋಗ್ರಾಫರ್", "uk": "фотограф", "bn": "ফটোগ্রাফার", "hi": "फोटोग्राफर", "tr": "fotoğrafçı"}}
+{"guid": "N36_035", "translations": {"ro": "dentist", "pl": "dentysta", "th": "ทันตแพทย์", "ms": "doktor gigi", "ta": "பல் மருத்துவர்", "kn": "ದಂತವೈದ್ಯ", "uk": "стоматолог", "bn": "দাঁতবিশেষজ্ঞ", "hi": "दंत चिकित्सक", "tr": "diş hekimi"}}
+{"guid": "N36_036", "translations": {"ro": "veterinar", "pl": "weterynarz", "th": "สัตวแพทย์", "ms": "doktor haiwan", "ta": "விலங்கு மருத்துவர்", "kn": "ಪ್ರಾಣಿ ವೈದ್ಯ", "uk": "ветеринар", "bn": "পশু চিকিৎসক", "hi": "पशु चिकित्सक", "tr": "veteriner"}}
+{"guid": "N36_041", "translations": {"ro": "brutar", "pl": "piekarz", "th": "ช่างอบขนมปัง", "ms": "tukang roti", "ta": "ஓவ்பு", "kn": "ಬೈಸರ್", "uk": "пекар", "bn": "বেকার", "hi": "बेक़र", "tr": "fırıncı"}}
+{"guid": "N36_042", "translations": {"ro": "soldat", "pl": "żołnierz", "th": "ทหาร", "ms": "askar", "ta": "சூலா", "kn": "ಸೈನಿಕ", "uk": "солдат", "bn": "সৈনিক", "hi": "सैन्यक", "tr": "asker"}}
+{"guid": "N36_043", "translations": {"ro": "ospătar", "pl": "kelner", "th": "พนักงานเสิร์ฟ", "ms": "pelayan", "ta": "வெயிட்டர்", "kn": "ವೆಟರ", "uk": "офіціант", "bn": "ওয়েটার", "hi": "वेटर", "tr": "garson"}}
+{"guid": "N36_044", "translations": {"ro": "farmacist", "pl": "farmaceuta", "th": "เภสัชกร", "ms": "ahli farmasi", "ta": "மருந்தாளர்", "kn": "ಔಷಧಿಗಾರ", "uk": "фармацевт", "bn": "ফার্মাসিস্ট", "hi": "फ़ार्मासिस्ट", "tr": "eczacı"}}
+{"guid": "N36_045", "translations": {"ro": "arhitect", "pl": "architekt", "th": "สถาปนิก", "ms": "arkitek", "ta": "கலைநிலையாளர்", "kn": "ವಾಸ್ತುಶಿಲ್ಪಿ", "uk": "архітектор", "bn": "স্থপতি", "hi": "वास्तुशिल्पी", "tr": "mimar"}}
+{"guid": "N36_046", "translations": {"ro": "om de știință", "pl": "naukowiec", "th": "นักวิทยาศาสตร์", "ms": "saintis", "ta": "அறிவியல் நிபுணர்", "kn": "ವೈಜ್ಞಾನಿಕ", "uk": "вчений", "bn": "বিজ্ঞানী", "hi": "वैज्ञानिक", "tr": "bilim insanı"}}
+{"guid": "N36_047", "translations": {"ro": "actor", "pl": "aktor", "th": "นักแสดง", "ms": "pelakon", "ta": "நடன்", "kn": "ನಟ", "uk": "актор", "bn": "অভিনেতা", "hi": "अभिनेता", "tr": "oyuncu"}}
+{"guid": "N36_048", "translations": {"ro": "judecător", "pl": "sędzia", "th": "ผู้พิพากษา", "ms": "hakim", "ta": "நீதி நீதிபதி", "kn": "ನ್ಯಾಯಾಧೀಶ", "uk": "суддя", "bn": "বিচারক", "hi": "न्यायाधीश", "tr": "yargıç"}}
+{"guid": "N36_049", "translations": {"ro": "coafor", "pl": "fryzjer", "th": "ช่างตัดผม", "ms": "pendandan rambut", "ta": "முடிஞ்சுவர்", "kn": "ಹೆರೆಯುವೃ", "uk": "перукар", "bn": "কেশবন্ধু", "hi": "नाई", "tr": "kuaför"}}
+{"guid": "N36_050", "translations": {"ro": "pescar", "pl": "rybak", "th": "ชาวประมง", "ms": "nelayan", "ta": "மீனவர்", "kn": "ಮೊಗ್ಗಾರ", "uk": "рибалка", "bn": "মাছশিকারী", "hi": "मछुआरा", "tr": "balıkçı"}}
+{"guid": "N36_051", "translations": {"ro": "muncitor", "pl": "robotnik", "th": "คนงาน", "ms": "pekerja", "ta": "தொழிலாளி", "kn": "ಉದ್ಯೋಗಿ", "uk": "працівник", "bn": "শ্রমিক", "hi": "मजदूर", "tr": "işçi"}}
+{"guid": "N36_052", "translations": {"ro": "bibliotecar", "pl": "bibliotekarz", "th": "บรรณารักษ์", "ms": "pustakawan", "ta": "நூலகரர்", "kn": "ಗ್ರಂಥಾಲಯಧ್ಯಕ್ಷ", "uk": "бібліотекар", "bn": "গ্রন্থাগারিক", "hi": "पुस्तकालयाध्यक्ष", "tr": "kütüphaneci"}}
+{"guid": "N36_053", "translations": {"ro": "chirurg", "pl": "chirurg", "th": "ศัลยแพทย์", "ms": "pakar bedah", "ta": "மூட்டை அறுவைச் சிகிச்சையாளர்", "kn": "ಶಸ್ತ್ರಚಿಕಿತ್ಸಕ", "uk": "хірург", "bn": "শল্যচিকিৎসক", "hi": "शल्य चिकित्सक", "tr": "cerrah"}}
+{"guid": "N36_054", "translations": {"ro": "programator", "pl": "programista", "th": "โปรแกรมเมอร์", "ms": "pengatur cara", "ta": "ப்ரோக்ராமர்", "kn": "ಪ್ರೋಗ್ರಾಮರ್", "uk": "програміст", "bn": "প্রোগ্রামার", "hi": "प्रोग्रामर", "tr": "programcı"}}
+{"guid": "N36_055", "translations": {"ro": "marinar", "pl": "marynarz", "th": "นักเดินเรือ", "ms": "kelasi", "ta": "கப்பல் ஓட்டுநர்", "kn": "ಸಮುದ್ರಕರ್ಮಿ", "uk": "моряк", "bn": "নাবিক", "hi": "नाविक", "tr": "denizci"}}
+{"guid": "N36_056", "translations": {"ro": "croitor", "pl": "krawiec", "th": "ช่างตัดเสื้อ", "ms": "tukang jahit", "ta": "தையல்காரர்", "kn": "ದರ್ಬಾರಿ", "uk": "кравець", "bn": "যন্ত্রী", "hi": "दऱ्ज़ी", "tr": "terzi"}}
+{"guid": "N36_057", "translations": {"ro": "zugrav", "pl": "malarz", "th": "ช่างทาสี", "ms": "pengecat", "ta": "வர்ணக்காரர்", "kn": "ಬಣ್ಣಕಾರ", "uk": "маляр", "bn": "রঙচিত্রকারী", "hi": "रंगीन (Note: 'रंगीन' means colorful)", "tr": "boyacı"}}
+{"guid": "N36_058", "translations": {"ro": "măcelar", "pl": "rzeźnik", "th": "คนขายเนื้อ", "ms": "penjual daging", "ta": "சிக்கன் விற்பவர்", "kn": "ಮಾಂಸದಾರ", "uk": "м'ясник", "bn": "কসাই", "hi": "कसाई", "tr": "kasap"}}
+{"guid": "N36_059", "translations": {"ro": "grădinar", "pl": "ogrodnik", "th": "คนสวน", "ms": "tukang kebun", "ta": "தோட்டக்காரர்", "kn": "ಮಾಲೀಕ/ತೋಟಗಾರ", "uk": "садівник", "bn": "মালিক/উদ্যানরক্ষক", "hi": "माली", "tr": "bahçıvan"}}
+{"guid": "N36_060", "translations": {"ro": "traducător", "pl": "tłumacz", "th": "นักแปล", "ms": "penterjemah", "ta": "மொழிபெயர்ப்பாளர்", "kn": "ಅನುವಾದಕ", "uk": "перекладач", "bn": "অনুবাদক", "hi": "अनुवादक", "tr": "çevirmen"}}
+{"guid": "N36_061", "translations": {"ro": "receptioner", "pl": "recepcjonista", "th": "พนักงานต้อนรับ", "ms": "penyambut tetamu", "ta": "ரிசெப்ஷனிஸ்ட்", "kn": "ರಿಸೆಪ್ಶನಿಸ್ಟ್", "uk": "адміністратор", "bn": "রিসেপশনিস্ট", "hi": "रिसेप्शनिस्ट", "tr": "resepsiyonist"}}
+{"guid": "N36_062", "translations": {"ro": "antrenor", "pl": "trener", "th": "โค้ช", "ms": "jurulatih", "ta": "பெய்ம்பயிற்றுநர்", "kn": "ಭಟ", "uk": "тренер", "bn": "প্রশিক্ষক", "hi": "प्रशिक्षक", "tr": "antrenör"}}
+{"guid": "N36_063", "translations": {"ro": "profesor", "pl": "profesor", "th": "ศาสตราจารย์", "ms": "profesor", "ta": "ப்ரொஃபெசர்", "kn": "ಪ್ರೊಫೆಸರ್", "uk": "професор", "bn": "প্রফেসর", "hi": "प्रोफ़ेसर", "tr": "profesör"}}
+{"guid": "N36_064", "translations": {"ro": "psiholog", "pl": "psycholog", "th": "นักจิตวิทยา", "ms": "ahli psikologi", "ta": "மனோவியலாளர்", "kn": "ಮಾನಸಶಾಸ್ತ್ರಜ್ಞ", "uk": "психолог", "bn": "মনোবিজ্ঞানী", "hi": "मनोवैज्ञानिक", "tr": "psikolog"}}
+{"guid": "N36_065", "translations": {"ro": "terapeut", "pl": "terapeuta", "th": "นักบำบัด", "ms": "ahli terapi", "ta": "சிகிச்சையாளர்", "kn": "ಚಿಕಿತ್ಸಕ", "uk": "терапевт", "bn": "তন্ত্রিকবিদ্যাবিদ", "hi": "चिकित्सक", "tr": "terapist"}}
+{"guid": "N36_066", "translations": {"ro": "casier", "pl": "kasjer", "th": "พนักงานเก็บเงิน", "ms": "juruwang", "ta": "காசுசெய்வோர்", "kn": "ಕ್ಯಾಶಿಯರ್", "uk": "касир", "bn": "ক্যাশিয়ার", "hi": "कैशियर", "tr": "kasiyer"}}
+{"guid": "N36_067", "translations": {"ro": "îngrijitor", "pl": "dozorca", "th": "พนักงานทำความสะอาด", "ms": "tukang cuci", "ta": "வளமைப்பாளர்", "kn": "ಸರಕಾರಿ_cleaner", "uk": "доглядач", "bn": "পরিচ্ছন্নতাকর্মী", "hi": "सफाईकर्मী", "tr": "hademe"}}
+{"guid": "N36_068", "translations": {"ro": "agent de securitate", "pl": "ochroniarz", "th": "พนักงานรักษาความปลอดภัย", "ms": "pengawal keselamatan", "ta": "பாதுகாப்பு ஊழியர்", "kn": "ರಕ್ಷಣಾ ಸಿಬ್ಬಂದಿ", "uk": "охоронець", "bn": "নিরাপত্তা প্রহরী", "hi": "सुरक्षा गार्ड", "tr": "güvenlik görevlisi"}}
+{"guid": "N36_069", "translations": {"ro": "detectiv", "pl": "detektyw", "th": "นักสืบ", "ms": "detektif", "ta": "விசாரணையாளர்", "kn": "ತদন্তಕಾರ", "uk": "детектив", "bn": "গোয়েন্দা", "hi": "गुप्तचर", "tr": "dedektif"}}
+{"guid": "N36_070", "translations": {"ro": "paramedic", "pl": "ratownik medyczny", "th": "พยาบาลฉุกเฉิน", "ms": "paramedik", "ta": "பாராமெடிக்", "kn": "ಪ್ಯಾರಾಮೆಡಿಕ್", "uk": "парамедик", "bn": "প্যারামেডিক", "hi": "पैरामेडिक", "tr": "paramedik"}}
+{"guid": "N36_072", "translations": {"ro": "economist", "pl": "ekonomista", "th": "นักเศรษฐศาสตร์", "ms": "ahli ekonomi", "ta": "பொருளாதாரவ scalloped?", "kn": "ಅರ್ಥಶಾಸ್ತ್ರಜ್ಞ", "uk": "економіст", "bn": "অর্থনীতিবিদ", "hi": "अर्थशास्त्रज्ञ", "tr": "ekonomist"}}
+{"guid": "N36_073", "translations": {"ro": "diplomat", "pl": "dyplomata", "th": "นักการทูต", "ms": "diplomat", "ta": "தூதர்", "kn": "ದೂತ", "uk": "діпломат", "bn": "রাজদূত", "hi": "राजदूत", "tr": "diplomat"}}
+{"guid": "N36_074", "translations": {"ro": "miner", "pl": "górnik", "th": "คนงานเหมือง", "ms": "pelombong", "ta": "தாழுபவர்", "kn": "ಖನಿಕ", "uk": "шахтар", "bn": "খনিক", "hi": "खनिक", "tr": "madenci"}}
+{"guid": "N36_075", "translations": {"ms": "pramugari", "hi": "विमान परिचारक", "tr": "uçuş görevlisi"}}
+{"guid": "N36_076", "translations": {"ms": "posmen", "hi": "डाकिया", "tr": "postacı"}}
+{"guid": "N36_077", "translations": {"ms": "pemandu bas", "hi": "बस चालक", "tr": "otobüs şoförü"}}
+{"guid": "N36_078", "translations": {"ms": "pemandu teksi", "hi": "टैक्सी चालक", "tr": "taksi şoförü"}}
+{"guid": "N36_079", "translations": {"ms": "pemandu lori", "hi": "ट्रक चालक", "tr": "kamyon şoförü"}}
+{"guid": "N36_080", "translations": {"ms": "pekerja sosial", "hi": "सामाजिक कार्यकर्ता", "tr": "sosyal hizmet uzmanı"}}
+{"guid": "N36_081", "translations": {"ms": "jurulatih peribadi", "hi": "व्यक्तिगत प्रशिक्षक", "tr": "kişisel antrenör"}}
+{"guid": "N36_082", "translations": {"ms": "pemandu pelancong", "hi": "पर्यटक गाइड", "tr": "tur rehberi"}}
+{"guid": "N36_083", "translations": {"ms": "ejen hartanah", "hi": "रियल एस्टेट एजेंट", "tr": "emlakçı"}}
+{"guid": "N36_084", "translations": {"ms": "ejen pelancongan", "hi": "ट्रैवल एजेंट", "tr": "seyahat acentesi"}}
+{"guid": "N36_085", "translations": {"ms": "jurutera perisian", "hi": "सॉफ्टवेयर इंजीनियर", "tr": "yazılım mühendisi"}}
+{"guid": "N36_086", "translations": {"ms": "pereka grafik", "hi": "ग्राफ़िक डिज़ाइनर", "tr": "grafik tasarımcı"}}
+{"guid": "N36_087", "translations": {"ms": "bintang filem", "hi": "फ़िल्म सितारा", "tr": "film yıldızı"}}
+{"guid": "N36_088", "translations": {"ms": "penganggar kos", "hi": "लागत आकलक", "tr": "maliyet hesap uzmanı"}}
+{"guid": "N36_089", "translations": {"ms": "datuk bandar", "hi": "महापौर", "tr": "belediye başkanı"}}
+{"guid": "N36_090", "translations": {"ms": "presiden", "hi": "अध्यक्ष", "tr": "başkan"}}
+{"guid": "N36_091", "translations": {"ms": "badut", "hi": "जोकर", "tr": "palyaço"}}
+{"guid": "N36_092", "translations": {"ms": "penari", "hi": "नर्तक", "tr": "dansçı"}}
+{"guid": "N36_093", "translations": {"ms": "tenor", "hi": "टेनर", "tr": "tenor"}}
+{"guid": "N36_094", "translations": {"ms": "pengarang", "hi": "लेखक", "tr": "yazar"}}
+{"guid": "N36_095", "translations": {"ms": "pengkritik", "hi": "समीक्षक", "tr": "eleştirmen"}}
+{"guid": "N36_096", "translations": {"ms": "pengarah", "hi": "निदेशक", "tr": "direktör"}}
+{"guid": "N36_097", "translations": {"ms": "anggota marin", "hi": "नौसैनिक", "tr": "deniz piyadesi"}}
+{"guid": "N36_098", "translations": {"ms": "komander", "hi": "कमांडर", "tr": "komutan"}}
+{"guid": "N36_099", "translations": {"ms": "komander", "hi": "कमांडर", "tr": "komodor"}}
+{"guid": "N36_100", "translations": {"ms": "kerjaya", "hi": "करियर", "tr": "kariyer"}}
+{"guid": "N36_101", "translations": {"ms": "pembantu", "hi": "सहायक", "tr": "asistan"}}
+{"guid": "N36_102", "translations": {"ms": "pereka cipta", "hi": "आविष्कारक", "tr": "mucit"}}
+{"guid": "N36_103", "translations": {"ms": "ahli falsafah", "hi": "दार्शनिक", "tr": "filozof"}}
+{"guid": "N36_104", "translations": {"ms": "pegawai", "hi": "अधिकारी", "tr": "yetkili"}}
+{"guid": "N36_105", "translations": {"ms": "majikan", "hi": "नियोक्ता", "tr": "işveren"}}
+{"guid": "N36_106", "translations": {"ms": "pendakwa", "hi": "अभियोजक", "tr": "savcı"}}
+{"guid": "N36_107", "translations": {"ms": "pekerja", "hi": "कर्मचारी", "tr": "çalışan"}}
+{"guid": "N36_108", "translations": {"ms": "pegawai", "hi": "अधिकारी", "tr": "görevli"}}
+{"guid": "N36_109", "translations": {"ms": "penghibur", "hi": "कलाकार", "tr": "sanatçı"}}
+{"guid": "N36_110", "translations": {"ms": "penyanyi soprano", "hi": "सोप्रानो गायिका", "tr": "soprano"}}
+{"guid": "N36_111", "translations": {"ms": "pengukir", "hi": "मूर्तिकार", "tr": "heykeltıraş"}}
+{"guid": "N36_112", "translations": {"ms": "ahli geografi", "hi": "भूगोलवेत्ता", "tr": "coğrafyacı"}}
+{"guid": "N36_113", "translations": {"ms": "pengeksport", "hi": "निर्यातक", "tr": "ihracatçı"}}
+{"guid": "N36_114", "translations": {"ms": "duta besar", "hi": "राजदूत", "tr": "büyükelçi"}}
+{"guid": "N36_115", "translations": {"ms": "samurai", "hi": "समुराई", "tr": "samuray"}}
+{"guid": "N36_116", "translations": {"ms": "canselor", "hi": "कुलाधिपति", "tr": "şansölye"}}
+{"guid": "N36_117", "translations": {"ms": "pertukangan batu", "hi": "राजगीरी", "tr": "duvarcılık"}}
+{"guid": "N36_118", "translations": {"ms": "penyusun", "hi": "संकलक", "tr": "derleyici"}}
+{"guid": "N36_119", "translations": {"ms": "panglima tertinggi", "hi": "सर्वोच्च सेनापति", "tr": "başkomutan"}}
+{"guid": "N36_120", "translations": {"ms": "naib presiden", "hi": "उपराष्ट्रपति", "tr": "başkan yardımcısı"}}
+{"guid": "N36_121", "translations": {"ms": "naib presiden", "hi": "उपाध्यक्ष", "tr": "başkan yardımcısı"}}
+{"guid": "N36_122", "translations": {"ms": "setiausaha agung", "hi": "महासचिव", "tr": "genel sekreter"}}
+{"guid": "N36_123", "translations": {"ms": "setiausaha agung", "hi": "महासचिव", "tr": "genel sekreter"}}
+{"guid": "N36_124", "translations": {"ms": "penyanyi-penulis lagu", "hi": "गायक-गीतकार", "tr": "şarkıcı-şarkı yazarı"}}
+{"guid": "N36_125", "translations": {"ms": "ketua editor", "hi": "प्रधान संपादक", "tr": "genel yayın yönetmeni"}}
+{"guid": "N36_126", "translations": {"ms": "pelakon utama bersama", "hi": "सह-प्रमुख अभिनेता", "tr": "başrol oyuncusu"}}
+{"guid": "N36_127", "translations": {"ms": "mejar jeneral", "hi": "मेजर जनरल", "tr": "tümgeneral"}}
+{"guid": "N36_128", "translations": {"ms": "ahli teologi", "hi": "धर्मशास्त्री", "tr": "teolog"}}
+{"guid": "N36_129", "translations": {"ms": "ahli antropologi", "hi": "मानवविज्ञानी", "tr": "antropolog"}}
+{"guid": "N36_130", "translations": {"ms": "ahli sosiologi", "hi": "समाजशास्त्री", "tr": "sosyolog"}}
+{"guid": "N36_131", "translations": {"ms": "ahli linguistik", "hi": "भाषावैज्ञानिक", "tr": "dilbilimci"}}
+{"guid": "N36_132", "translations": {"ms": "bintang pop", "hi": "पॉप स्टार", "tr": "pop yıldızı"}}
+{"guid": "N36_133", "translations": {"ms": "ahli perniagaan", "hi": "व्यवसायी", "tr": "iş adamı"}}
+{"guid": "N36_134", "translations": {"ms": "ahli perniagaan", "hi": "व्यवसायी", "tr": "iş insanı"}}
+{"guid": "N36_135", "translations": {"ms": "ahli kimia", "hi": "रसायनशास्त्री", "tr": "kimyager"}}
+{"guid": "N36_136", "translations": {"ms": "pereka", "hi": "डिज़ाइनर", "tr": "tasarımcı"}}
+{"guid": "N36_137", "translations": {"ms": "ahli bomba", "hi": "अग्निशामक", "tr": "itfaiyeci"}}
+{"guid": "N36_138", "translations": {"ms": "penyanyi", "hi": "गायक", "tr": "şarkıcı"}}

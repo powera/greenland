@@ -1,10 +1,156 @@
-{"guid": "N15_001", "translations": {"ro": "oxigen", "pl": "tlen", "th": "ออกซิเจน", "ta": "ஆம்லநாவு", "kn": "ಆಮ್ಲಜನಕ", "uk": "кисень", "bn": "অক্সিজেন", "hi": "ऑक्सीजन"}}
-{"guid": "N15_002", "translations": {"ro": "dioxid de carbon", "pl": "dwutlenek węgla", "th": "ก๊าซคาร์บอนไดออกไซด์", "ta": "கார்புன்டை ஆக்சைடு", "kn": "ಕಾರ್ಬನ್ ದ್ವಿ ಆಕ್ಸೈಡ್", "uk": "вуглекислий газ", "bn": "কার্বন ডাইঅক্সাইড", "hi": "कार्बन डाइऑक्साइड"}}
-{"guid": "N15_003", "translations": {"ro": "litiu", "pl": "lit", "th": "ลิเธียม", "ta": "லித்தியம்", "kn": "ಲಿಥಿಯಂ", "uk": "літій", "bn": "লিথিয়াম", "hi": "लिथियम"}}
-{"guid": "N15_004", "translations": {"ro": "hidrogen", "pl": "wodór", "th": "ไฮโดรเจน", "ta": "ஹைட்ரஜன்", "kn": "ಹೈಡ್ರೋಜನ್", "uk": "водень", "bn": "হাইড্রোজেন", "hi": "हाइड्रोजन"}}
-{"guid": "N15_005", "translations": {"ro": "azot", "pl": "azot", "th": "ไนโตรเจน", "ta": "நைட்ரஜன்", "kn": "ನೈಟ್ರೋಜನ್", "uk": "азот", "bn": "নাইট্রোজেন", "hi": "नाइट्रोजन"}}
-{"guid": "N15_006", "translations": {"ro": "amoniac", "pl": "amoniak", "th": "แอมโมเนีย", "ta": "அமோனியாக்", "kn": "ಅಮೋನಿಯಾಕ್", "uk": "амоніак", "bn": "অ্যামোনিয়া", "hi": "अमोनिया"}}
-{"guid": "N15_007", "translations": {"ro": "metan", "pl": "metan", "th": "มีเทน", "ta": "மிதேன்", "kn": "ಮಿಥೇನ್", "uk": "метан", "bn": "মিথেন", "hi": "मेथेन"}}
-{"guid": "N15_008", "translations": {"ro": "clor", "pl": "chlor", "th": "คลอรีน", "ta": "குளோறின்", "kn": "ಕ್ಲೋರಿನ್", "uk": "хлор", "bn": "ক্লোরিন", "hi": "क्लोरीन"}}
-{"guid": "N15_009", "translations": {"ro": "acid", "pl": "kwas", "th": "กรด", "ta": "அமிலம்", "kn": "ಅಮ್ಲ", "uk": "кислота", "bn": "অম্ল", "hi": "अम्ल"}}
-{"guid": "N15_010", "translations": {"ro": "bază", "pl": "zasada", "th": "เบส", "ta": "கலிம்பு", "kn": "ಅಧಾರಕ", "uk": "основа", "bn": "ক্ষার", "hi": "क्षार"}}
+{"guid": "N15_001", "translations": {"ro": "oxigen", "pl": "tlen", "th": "ออกซิเจน", "ms": "oksigen", "ta": "ஆம்லநாவு", "kn": "ಆಮ್ಲಜನಕ", "uk": "кисень", "bn": "অক্সিজেন", "hi": "ऑक्सीजन", "tr": "oksijen"}}
+{"guid": "N15_002", "translations": {"ro": "dioxid de carbon", "pl": "dwutlenek węgla", "th": "ก๊าซคาร์บอนไดออกไซด์", "ms": "karbon dioksida", "ta": "கார்புன்டை ஆக்சைடு", "kn": "ಕಾರ್ಬನ್ ದ್ವಿ ಆಕ್ಸೈಡ್", "uk": "вуглекислий газ", "bn": "কার্বন ডাইঅক্সাইড", "hi": "कार्बन डाइऑक्साइड", "tr": "karbondioksit"}}
+{"guid": "N15_003", "translations": {"ro": "litiu", "pl": "lit", "th": "ลิเธียม", "ms": "litium", "ta": "லித்தியம்", "kn": "ಲಿಥಿಯಂ", "uk": "літій", "bn": "লিথিয়াম", "hi": "लिथियम", "tr": "lityum"}}
+{"guid": "N15_004", "translations": {"ro": "hidrogen", "pl": "wodór", "th": "ไฮโดรเจน", "ms": "hidrogen", "ta": "ஹைட்ரஜன்", "kn": "ಹೈಡ್ರೋಜನ್", "uk": "водень", "bn": "হাইড্রোজেন", "hi": "हाइड्रोजन", "tr": "hidrojen"}}
+{"guid": "N15_005", "translations": {"ro": "azot", "pl": "azot", "th": "ไนโตรเจน", "ms": "nitrogen", "ta": "நைட்ரஜன்", "kn": "ನೈಟ್ರೋಜನ್", "uk": "азот", "bn": "নাইট্রোজেন", "hi": "नाइट्रोजन", "tr": "azot"}}
+{"guid": "N15_006", "translations": {"ro": "amoniac", "pl": "amoniak", "th": "แอมโมเนีย", "ms": "amonia", "ta": "அமோனியாக்", "kn": "ಅಮೋನಿಯಾಕ್", "uk": "амоніак", "bn": "অ্যামোনিয়া", "hi": "अमोनिया", "tr": "amonyak"}}
+{"guid": "N15_007", "translations": {"ro": "metan", "pl": "metan", "th": "มีเทน", "ms": "metana", "ta": "மிதேன்", "kn": "ಮಿಥೇನ್", "uk": "метан", "bn": "মিথেন", "hi": "मेथेन", "tr": "metan"}}
+{"guid": "N15_008", "translations": {"ro": "clor", "pl": "chlor", "th": "คลอรีน", "ms": "klorin", "ta": "குளோறின்", "kn": "ಕ್ಲೋರಿನ್", "uk": "хлор", "bn": "ক্লোরিন", "hi": "क्लोरीन", "tr": "klor"}}
+{"guid": "N15_009", "translations": {"ro": "acid", "pl": "kwas", "th": "กรด", "ms": "asid", "ta": "அமிலம்", "kn": "ಅಮ್ಲ", "uk": "кислота", "bn": "অম্ল", "hi": "अम्ल", "tr": "asit"}}
+{"guid": "N15_010", "translations": {"ro": "bază", "pl": "zasada", "th": "เบส", "ms": "bes", "ta": "கலிம்பு", "kn": "ಅಧಾರಕ", "uk": "основа", "bn": "ক্ষার", "hi": "क्षार", "tr": "baz"}}
+{"guid": "N15_011", "translations": {"ms": "molekul", "hi": "अणु", "tr": "molekül"}}
+{"guid": "N15_012", "translations": {"ms": "ion", "hi": "आयन", "tr": "iyon"}}
+{"guid": "N15_013", "translations": {"ms": "natrium", "hi": "सोडियम", "tr": "sodyum"}}
+{"guid": "N15_014", "translations": {"ms": "karbonat", "hi": "कार्बोनेट", "tr": "karbonat"}}
+{"guid": "N15_015", "translations": {"ms": "klorida", "hi": "क्लोराइड", "tr": "klorür"}}
+{"guid": "N15_016", "translations": {"ms": "elektron", "hi": "इलेक्ट्रॉन", "tr": "elektron"}}
+{"guid": "N15_017", "translations": {"ms": "karbon", "hi": "कार्बन", "tr": "karbon"}}
+{"guid": "N15_018", "translations": {"ms": "nitrat", "hi": "नाइट्रेट", "tr": "nitrat"}}
+{"guid": "N15_019", "translations": {"ms": "oksida", "hi": "ऑक्साइड", "tr": "oksit"}}
+{"guid": "N15_020", "translations": {"ms": "pemangkin", "hi": "उत्प्रेरक", "tr": "katalizör"}}
+{"guid": "N15_021", "translations": {"ms": "bisa", "hi": "विष", "tr": "zehir"}}
+{"guid": "N15_022", "translations": {"ms": "sebatian", "hi": "यौगिक", "tr": "bileşik"}}
+{"guid": "N15_023", "translations": {"ms": "kolagen", "hi": "कोलेजन", "tr": "kolajen"}}
+{"guid": "N15_024", "translations": {"ms": "propelan", "hi": "प्रणोदक", "tr": "itici madde"}}
+{"guid": "N15_025", "translations": {"ms": "isotop", "hi": "समस्थानिक", "tr": "izotop"}}
+{"guid": "N15_026", "translations": {"ms": "proton", "hi": "प्रोटॉन", "tr": "proton"}}
+{"guid": "N15_027", "translations": {"ms": "sulfat", "hi": "सल्फेट", "tr": "sülfat"}}
+{"guid": "N15_028", "translations": {"ms": "hidroksida", "hi": "हाइड्रॉक्साइड", "tr": "hidroksit"}}
+{"guid": "N15_029", "translations": {"ms": "fosfat", "hi": "फॉस्फेट", "tr": "fosfat"}}
+{"guid": "N15_030", "translations": {"ms": "amonium", "hi": "अमोनियम", "tr": "amonyum"}}
+{"guid": "N15_031", "translations": {"ms": "ozon", "hi": "ओज़ोन", "tr": "ozon"}}
+{"guid": "N15_032", "translations": {"ms": "dioksida", "hi": "डाइऑक्साइड", "tr": "dioksit"}}
+{"guid": "N15_033", "translations": {"ms": "fluorida", "hi": "फ्लोराइड", "tr": "florür"}}
+{"guid": "N15_034", "translations": {"ms": "sulfida", "hi": "सल्फाइड", "tr": "sülfür"}}
+{"guid": "N15_035", "translations": {"ms": "monoksida", "hi": "मोनोऑक्साइड", "tr": "monoksit"}}
+{"guid": "N15_036", "translations": {"ms": "silikon dioksida", "hi": "सिलिकॉन डाइऑक्साइड", "tr": "silisyum dioksit"}}
+{"guid": "N15_037", "translations": {"ms": "silikat", "hi": "सिलिकेट", "tr": "silikat"}}
+{"guid": "N15_038", "translations": {"ms": "etilena", "hi": "एथिलीन", "tr": "etilen"}}
+{"guid": "N15_039", "translations": {"ms": "metanol", "hi": "मेथनॉल", "tr": "metanol"}}
+{"guid": "N15_040", "translations": {"ms": "fruktosa", "hi": "फ्रुक्टोज़", "tr": "fruktoz"}}
+{"guid": "N15_041", "translations": {"ms": "benzena", "hi": "बेंजीन", "tr": "benzen"}}
+{"guid": "N15_042", "translations": {"ms": "formaldehid", "hi": "फॉर्मल्डिहाइड", "tr": "formaldehit"}}
+{"guid": "N15_043", "translations": {"ms": "sianida", "hi": "सायनाइड", "tr": "siyanür"}}
+{"guid": "N15_044", "translations": {"ms": "anion", "hi": "ऋणायन", "tr": "anyon"}}
+{"guid": "N15_045", "translations": {"ms": "testosteron", "hi": "टेस्टोस्टेरोन", "tr": "testosteron"}}
+{"guid": "N15_046", "translations": {"ms": "propana", "hi": "प्रोपेन", "tr": "propan"}}
+{"guid": "N15_047", "translations": {"ms": "klorofil", "hi": "क्लोरोफिल", "tr": "klorofil"}}
+{"guid": "N15_048", "translations": {"ms": "peroksida", "hi": "पेरोक्साइड", "tr": "peroksit"}}
+{"guid": "N15_049", "translations": {"ms": "bikarbonat", "hi": "बाइकार्बोनेट", "tr": "bikarbonat"}}
+{"guid": "N15_050", "translations": {"ms": "urea", "hi": "यूरिया", "tr": "üre"}}
+{"guid": "N15_051", "translations": {"ms": "hidrolisis", "hi": "जल-अपघटन", "tr": "hidroliz"}}
+{"guid": "N15_052", "translations": {"ms": "aseton", "hi": "एसीटोन", "tr": "aseton"}}
+{"guid": "N15_053", "translations": {"ms": "ganja", "hi": "मारिजुआना", "tr": "esrar"}}
+{"guid": "N15_054", "translations": {"ms": "helium", "hi": "हीलियम", "tr": "helyum"}}
+{"guid": "N15_055", "translations": {"ms": "berilium", "hi": "बेरिलियम", "tr": "berilyum"}}
+{"guid": "N15_056", "translations": {"ms": "boron", "hi": "बोरॉन", "tr": "bor"}}
+{"guid": "N15_057", "translations": {"ms": "fluorin", "hi": "फ्लोरीन", "tr": "flor"}}
+{"guid": "N15_058", "translations": {"ms": "neon", "hi": "नियॉन", "tr": "neon"}}
+{"guid": "N15_059", "translations": {"ms": "magnesium", "hi": "मैग्नीशियम", "tr": "magnezyum"}}
+{"guid": "N15_060", "translations": {"ms": "silikon", "hi": "सिलिकॉन", "tr": "silisyum"}}
+{"guid": "N15_061", "translations": {"ms": "fosforus", "hi": "फॉस्फोरस", "tr": "fosfor"}}
+{"guid": "N15_062", "translations": {"ms": "sulfur", "hi": "गंधक", "tr": "kükürt"}}
+{"guid": "N15_063", "translations": {"ms": "argon", "hi": "आर्गन", "tr": "argon"}}
+{"guid": "N15_064", "translations": {"ms": "kalium", "hi": "पोटैशियम", "tr": "potasyum"}}
+{"guid": "N15_065", "translations": {"ms": "kalsium", "hi": "कैल्शियम", "tr": "kalsiyum"}}
+{"guid": "N15_066", "translations": {"ms": "skandium", "hi": "स्कैंडियम", "tr": "skandiyum"}}
+{"guid": "N15_067", "translations": {"ms": "titanium", "hi": "टाइटेनियम", "tr": "titanyum"}}
+{"guid": "N15_068", "translations": {"ms": "vanadium", "hi": "वैनेडियम", "tr": "vanadyum"}}
+{"guid": "N15_069", "translations": {"ms": "kromium", "hi": "क्रोमियम", "tr": "krom"}}
+{"guid": "N15_070", "translations": {"ms": "mangan", "hi": "मैंगनीज़", "tr": "manganez"}}
+{"guid": "N15_071", "translations": {"ms": "kobalt", "hi": "कोबाल्ट", "tr": "kobalt"}}
+{"guid": "N15_072", "translations": {"ms": "nikel", "hi": "निकेल", "tr": "nikel"}}
+{"guid": "N15_073", "translations": {"ms": "galium", "hi": "गैलियम", "tr": "galyum"}}
+{"guid": "N15_074", "translations": {"ms": "germanium", "hi": "जर्मेनियम", "tr": "germanyum"}}
+{"guid": "N15_075", "translations": {"ms": "arsenik", "hi": "आर्सेनिक", "tr": "arsenik"}}
+{"guid": "N15_076", "translations": {"ms": "selenium", "hi": "सेलेनियम", "tr": "selenyum"}}
+{"guid": "N15_077", "translations": {"ms": "bromin", "hi": "ब्रोमीन", "tr": "brom"}}
+{"guid": "N15_078", "translations": {"ms": "kripton", "hi": "क्रिप्टॉन", "tr": "kripton"}}
+{"guid": "N15_079", "translations": {"ms": "rubidium", "hi": "रुबिडियम", "tr": "rubidyum"}}
+{"guid": "N15_080", "translations": {"ms": "strontium", "hi": "स्ट्रॉन्शियम", "tr": "stronsiyum"}}
+{"guid": "N15_081", "translations": {"ms": "itrium", "hi": "इट्रियम", "tr": "itriyum"}}
+{"guid": "N15_082", "translations": {"ms": "zirkonium", "hi": "ज़िरकोनियम", "tr": "zirkonyum"}}
+{"guid": "N15_083", "translations": {"ms": "niobium", "hi": "निओबियम", "tr": "niyobyum"}}
+{"guid": "N15_084", "translations": {"ms": "molibdenum", "hi": "मोलिब्डेनम", "tr": "molibden"}}
+{"guid": "N15_085", "translations": {"ms": "teknetium", "hi": "टेक्नीशियम", "tr": "teknesyum"}}
+{"guid": "N15_086", "translations": {"ms": "rutenium", "hi": "रूथेनियम", "tr": "rutenyum"}}
+{"guid": "N15_087", "translations": {"ms": "rodium", "hi": "रोडियम", "tr": "rodyum"}}
+{"guid": "N15_088", "translations": {"ms": "paladium", "hi": "पैलेडियम", "tr": "paladyum"}}
+{"guid": "N15_089", "translations": {"ms": "kadmium", "hi": "कैडमियम", "tr": "kadmiyum"}}
+{"guid": "N15_090", "translations": {"ms": "indium", "hi": "इंडियम", "tr": "indiyum"}}
+{"guid": "N15_091", "translations": {"ms": "antimoni", "hi": "ऐंटिमनी", "tr": "antimon"}}
+{"guid": "N15_092", "translations": {"ms": "telurium", "hi": "टेल्यूरियम", "tr": "tellür"}}
+{"guid": "N15_093", "translations": {"ms": "iodin", "hi": "आयोडीन", "tr": "iyot"}}
+{"guid": "N15_094", "translations": {"ms": "xenon", "hi": "ज़ेनॉन", "tr": "ksenon"}}
+{"guid": "N15_095", "translations": {"ms": "sesium", "hi": "सीज़ियम", "tr": "sezyum"}}
+{"guid": "N15_096", "translations": {"ms": "barium", "hi": "बेरियम", "tr": "baryum"}}
+{"guid": "N15_097", "translations": {"ms": "lantanum", "hi": "लैंथेनम", "tr": "lantan"}}
+{"guid": "N15_098", "translations": {"ms": "serium", "hi": "सीरियम", "tr": "seryum"}}
+{"guid": "N15_099", "translations": {"ms": "praseodimium", "hi": "प्रसीओडिमियम", "tr": "praseodim"}}
+{"guid": "N15_100", "translations": {"ms": "neodimium", "hi": "नियोडिमियम", "tr": "neodimyum"}}
+{"guid": "N15_101", "translations": {"ms": "prometium", "hi": "प्रोमेथियम", "tr": "prometyum"}}
+{"guid": "N15_102", "translations": {"ms": "samarium", "hi": "समेरियम", "tr": "samaryum"}}
+{"guid": "N15_103", "translations": {"ms": "europium", "hi": "यूरोपियम", "tr": "evropiyum"}}
+{"guid": "N15_104", "translations": {"ms": "gadolinium", "hi": "गैडोलिनियम", "tr": "gadolinyum"}}
+{"guid": "N15_105", "translations": {"ms": "terbium", "hi": "टर्बियम", "tr": "terbiyum"}}
+{"guid": "N15_106", "translations": {"ms": "disprosium", "hi": "डिस्प्रोसियम", "tr": "disprosyum"}}
+{"guid": "N15_107", "translations": {"ms": "holmium", "hi": "होल्मियम", "tr": "holmiyum"}}
+{"guid": "N15_108", "translations": {"ms": "erbium", "hi": "एर्बियम", "tr": "erbiyum"}}
+{"guid": "N15_109", "translations": {"ms": "tulium", "hi": "थ्यूलियम", "tr": "tulyum"}}
+{"guid": "N15_110", "translations": {"ms": "iterbium", "hi": "इटर्बियम", "tr": "itterbiyum"}}
+{"guid": "N15_111", "translations": {"ms": "lutetium", "hi": "ल्यूटेटियम", "tr": "lütesyum"}}
+{"guid": "N15_112", "translations": {"ms": "hafnium", "hi": "हाफ़्नियम", "tr": "hafniyum"}}
+{"guid": "N15_113", "translations": {"ms": "tantalum", "hi": "टैंटलम", "tr": "tantal"}}
+{"guid": "N15_114", "translations": {"ms": "tungsten", "hi": "टंगस्टन", "tr": "tungsten"}}
+{"guid": "N15_115", "translations": {"ms": "renium", "hi": "रेनियम", "tr": "renyum"}}
+{"guid": "N15_116", "translations": {"ms": "osmium", "hi": "ऑस्मियम", "tr": "ozmiyum"}}
+{"guid": "N15_117", "translations": {"ms": "iridium", "hi": "इरिडियम", "tr": "iridyum"}}
+{"guid": "N15_118", "translations": {"ms": "platinum", "hi": "प्लैटिनम", "tr": "platin"}}
+{"guid": "N15_119", "translations": {"ms": "merkuri", "hi": "पारा", "tr": "cıva"}}
+{"guid": "N15_120", "translations": {"ms": "talium", "hi": "थैलियम", "tr": "talyum"}}
+{"guid": "N15_121", "translations": {"ms": "bismut", "hi": "बिस्मथ", "tr": "bizmut"}}
+{"guid": "N15_122", "translations": {"ms": "polonium", "hi": "पोलोनियम", "tr": "polonyum"}}
+{"guid": "N15_123", "translations": {"ms": "astatin", "hi": "ऐस्टैटीन", "tr": "astatin"}}
+{"guid": "N15_124", "translations": {"ms": "radon", "hi": "रेडॉन", "tr": "radon"}}
+{"guid": "N15_125", "translations": {"ms": "fransium", "hi": "फ्रैंशियम", "tr": "fransiyum"}}
+{"guid": "N15_126", "translations": {"ms": "radium", "hi": "रेडियम", "tr": "radyum"}}
+{"guid": "N15_127", "translations": {"ms": "aktinium", "hi": "ऐक्टिनियम", "tr": "aktinyum"}}
+{"guid": "N15_128", "translations": {"ms": "torium", "hi": "थोरियम", "tr": "toryum"}}
+{"guid": "N15_129", "translations": {"ms": "protaktinium", "hi": "प्रोटैक्टिनियम", "tr": "protaktinyum"}}
+{"guid": "N15_130", "translations": {"ms": "uranium", "hi": "यूरेनियम", "tr": "uranyum"}}
+{"guid": "N15_131", "translations": {"ms": "neptunium", "hi": "नेप्टूनियम", "tr": "neptünyum"}}
+{"guid": "N15_132", "translations": {"ms": "plutonium", "hi": "प्लूटोनियम", "tr": "plütonyum"}}
+{"guid": "N15_133", "translations": {"ms": "amerisium", "hi": "अमेरिसियम", "tr": "amerikyum"}}
+{"guid": "N15_134", "translations": {"ms": "kurium", "hi": "क्यूरियम", "tr": "küriyum"}}
+{"guid": "N15_135", "translations": {"ms": "berkelium", "hi": "बर्केलियम", "tr": "berkelyum"}}
+{"guid": "N15_136", "translations": {"ms": "kalifornium", "hi": "कैलिफ़ोर्नियम", "tr": "kaliforniyum"}}
+{"guid": "N15_137", "translations": {"ms": "einsteinium", "hi": "आइंस्टीनियम", "tr": "einsteinyum"}}
+{"guid": "N15_138", "translations": {"ms": "fermium", "hi": "फर्मियम", "tr": "fermiyum"}}
+{"guid": "N15_139", "translations": {"ms": "mendelevium", "hi": "मेंडेलीवियम", "tr": "mendelevyum"}}
+{"guid": "N15_140", "translations": {"ms": "nobelium", "hi": "नोबेलियम", "tr": "nobelyum"}}
+{"guid": "N15_141", "translations": {"ms": "lawrensium", "hi": "लॉरेन्सियम", "tr": "lavrensiyum"}}
+{"guid": "N15_142", "translations": {"ms": "rutherfordium", "hi": "रदरफोर्डियम", "tr": "rutherfordyum"}}
+{"guid": "N15_143", "translations": {"ms": "dubnium", "hi": "डब्नियम", "tr": "dubniyum"}}
+{"guid": "N15_144", "translations": {"ms": "seaborgium", "hi": "सीबोर्गियम", "tr": "seaborgiyum"}}
+{"guid": "N15_145", "translations": {"ms": "bohrium", "hi": "बोह्रियम", "tr": "bohriyum"}}
+{"guid": "N15_146", "translations": {"ms": "hasium", "hi": "हैसियम", "tr": "hassiyum"}}
+{"guid": "N15_147", "translations": {"ms": "meitnerium", "hi": "माइटनरियम", "tr": "meitneriyum"}}
+{"guid": "N15_148", "translations": {"ms": "darmstadtium", "hi": "डार्मस्टैड्टियम", "tr": "darmstadtiyum"}}
+{"guid": "N15_149", "translations": {"ms": "roentgenium", "hi": "रॉन्टजेनियम", "tr": "röntgenyum"}}
+{"guid": "N15_150", "translations": {"ms": "kopernisium", "hi": "कोपरनिसियम", "tr": "kopernikyum"}}
+{"guid": "N15_151", "translations": {"ms": "nihonium", "hi": "निहोनियम", "tr": "nihonyum"}}
+{"guid": "N15_152", "translations": {"ms": "flerovium", "hi": "फ्लेरोवियम", "tr": "flerovyum"}}
+{"guid": "N15_153", "translations": {"ms": "moskovium", "hi": "मॉस्कोवियम", "tr": "moskovyum"}}
+{"guid": "N15_154", "translations": {"ms": "livermorium", "hi": "लिवरमोरियम", "tr": "livermoryum"}}
+{"guid": "N15_155", "translations": {"ms": "tenesin", "hi": "टेनेसिन", "tr": "tennessin"}}
+{"guid": "N15_156", "translations": {"ms": "oganesson", "hi": "ओगनेसन", "tr": "oganesson"}}

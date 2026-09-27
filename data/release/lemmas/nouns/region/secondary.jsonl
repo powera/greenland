@@ -1,25 +1,112 @@
-{"guid": "N45_001", "translations": {"ro": "Lituania", "pl": "Litwa", "th": "ลิทัวเนีย", "ta": "லித்துவேனியா", "kn": "ಲಿಥುವೇನಿಯಾ", "uk": "Литва", "bn": "লিথুয়ানিয়া", "hi": "लिथुआनिया"}}
-{"guid": "N45_002", "translations": {"ro": "Letonia", "pl": "Łotwa", "th": "ลัตเวีย", "ta": "லாட்ட்வியா", "kn": "ಲಾಟ್ವಿಯಾ", "uk": "Латвія", "bn": "লাটভিয়া", "hi": "लाटविया"}}
-{"guid": "N45_003", "translations": {"ro": "Estonia", "pl": "Estonia", "th": "เอสโตเนีย", "ta": "எஸ்டோனியா", "kn": "ಎಸ್ಟ್\u0000ೋನಿಯಾ", "uk": "Естонія", "bn": "এস্তোনিয়া", "hi": "एस्टोनिया"}}
-{"guid": "N45_004", "translations": {"ro": "Polonia", "pl": "Polska", "th": "โปแลนด์", "ta": "போலந்து", "kn": "ಪೋಲೆಂಡ್", "uk": "Польща", "bn": "পোল্যান্ড", "hi": "पोलैंड"}}
-{"guid": "N45_005", "translations": {"ro": "Germania", "pl": "Niemcy", "th": "เยอรมนี", "ta": "ஜெர்மனி", "kn": "ಜರ್ಮನಿ", "uk": "Німеччина", "bn": "জার্মানি", "hi": "जर्मनी"}}
-{"guid": "N45_006", "translations": {"ro": "Franța", "pl": "Francja", "th": "ฝรั่งเศส", "ta": "பிரான்ஸ்", "kn": "ಫ್ರಾನ್ಸ್", "uk": "Франція", "bn": "ফ্রান্স", "hi": "फ्रांस"}}
-{"guid": "N45_007", "translations": {"ro": "Spania", "pl": "Hiszpania", "th": "สเปน", "ta": "ஸ்பெயின்", "kn": "ಸ್ಪೇನ್", "uk": "Іспанія", "bn": "স্পেন", "hi": "स्पेन"}}
-{"guid": "N45_008", "translations": {"ro": "Italia", "pl": "Włochy", "th": "อิตาลี", "ta": "இத்தாலி", "kn": "ಇಟಲಿ", "uk": "Італія", "bn": "ইটালি", "hi": "इटली"}}
-{"guid": "N45_009", "translations": {"ro": "Rusia", "pl": "Rosja", "th": "รัสเซีย", "ta": "ரஷ்யா", "kn": "ರಷ್ಯಾ", "uk": "Росія", "bn": "রাশিয়া", "hi": "रूस"}}
-{"guid": "N45_010", "translations": {"ro": "Anglia", "pl": "Anglia", "th": "อังกฤษ", "ta": "இங்கிலாந்து", "kn": "ಇಂಗ್ಲೆಂಡ್", "uk": "Англія", "bn": "ইংল্যান্ড", "hi": "इंग्लैंड"}}
-{"guid": "N45_011", "translations": {"ro": "Statele Unite ale Americii", "pl": "Stany Zjednoczone", "th": "สหรัฐอเมริกา", "ta": "அமெரிக்கா நாடு", "kn": "ಅಮೇರಿಕದ ಸಂಯುಕ್ತ ರಾಜ್ಯಗಳು", "uk": "Сполучені Штати", "bn": "যুক্তরাষ্ট্র", "hi": "संयुक्त राज्य अमेरिका"}}
-{"guid": "N45_012", "translations": {"ro": "Canada", "pl": "Kanada", "th": "แคนาดา", "ta": "கனடா", "kn": "ಕನಡಾ", "uk": "Канада", "bn": "কানাডা", "hi": "कनाडा"}}
-{"guid": "N45_013", "translations": {"ro": "Japonia", "pl": "Japonia", "th": "ญี่ปุ่น", "ta": "ஜப்பான்", "kn": "ಜಪಾನ್", "uk": "Японія", "bn": "জাপান", "hi": "जापान"}}
-{"guid": "N45_014", "translations": {"ro": "China", "pl": "Chiny", "th": "จีน", "ta": "சீனா", "kn": "ಚೀನಾ", "uk": "Китай", "bn": "চীন", "hi": "चीन"}}
-{"guid": "N45_015", "translations": {"ro": "India", "pl": "Indie", "th": "อินเดีย", "ta": "இந்தியா", "kn": "ಭಾರತ", "uk": "Індія", "bn": "ভারত", "hi": "भारत"}}
-{"guid": "N45_016", "translations": {"ro": "Brazilia", "pl": "Brazylia", "th": "บราซิล", "ta": "பிரேசில்", "kn": "ಬ್ರೆಜಿಲ್", "uk": "Бразилія", "bn": "ব্রাজিল", "hi": "ब्राज़ील"}}
-{"guid": "N45_017", "translations": {"ro": "Australia", "pl": "Australia", "th": "ออสเตรเลีย", "ta": "ஆஸ்திரேலியா", "kn": "ಆಸ್ಟ್ರೇಲಿಯಾ", "uk": "Австралія", "bn": "অস্ট্রেলিয়া", "hi": "ऑस्ट्रेलिया"}}
-{"guid": "N45_018", "translations": {"ro": "Suedia", "pl": "Szwecja", "th": "สวีเดน", "ta": "சுவீடன்", "kn": "ಸ್ವೀಡನ್", "uk": "Швеція", "bn": "সুইডেন", "hi": "स्वीडन"}}
-{"guid": "N45_019", "translations": {"ro": "Norvegia", "pl": "Norwegia", "th": "นอร์เวย์", "ta": "நார்வே", "kn": "ನಾರ್ವೆ", "uk": "Норвегія", "bn": "নরওয়ে", "hi": "नॉर्वे"}}
-{"guid": "N45_020", "translations": {"ro": "Finlanda", "pl": "Finlandia", "th": "ฟินแลนด์", "ta": "பின்லாந்து", "kn": "ಫಿನ್ನ್ಲ್ಯಂಡ್", "uk": "Фінляндія", "bn": "ফিনল্যান্ড", "hi": "फिनलैंड"}}
-{"guid": "N45_021", "translations": {"ro": "Coreea de Sud", "pl": "Korea Południowa", "th": "เกาหลีใต้", "ta": "தென் கொரியா", "kn": "ದಕ್ಷಿಣ ಕೊರಿಯಾದ", "uk": "Південна Корея", "bn": "দক্ষিণ কোরিয়া", "hi": "दक्षिण कोरिया"}}
-{"guid": "N45_022", "translations": {"ro": "Thailanda", "pl": "Tajlandia", "th": "ประเทศไทย", "ta": "தாய்லாந்து", "kn": "ಥೈಲ್ಯಾಂಡ್", "uk": "Таїланд", "bn": "থাইল্যান্ড", "hi": "थाईलैंड"}}
-{"guid": "N45_023", "translations": {"ro": "Vietnam", "pl": "Wietnam", "th": "เวียดนาม", "ta": "வியட்நாம்", "kn": "ವಿಯೆಟ್ನಾಮ್", "uk": "В’єтнам", "bn": "ভিয়েতনাম", "hi": "वियतनाम"}}
-{"guid": "N45_024", "translations": {"ro": "Africa de Sud", "pl": "Republika Południowej Afryki", "th": "สาธารณรัฐแอฟริกาใต้", "ta": "தென்னாசியாப் பிரதேசம்", "kn": "ದಕ್ಷಿಣ ಆಫ್ರಿಕಾ", "uk": "Південно-Африканська Республіка", "bn": "দক্ষিণ আফ্রিকা", "hi": "दक्षिण अफ्रीका"}}
-{"guid": "N45_025", "translations": {"ro": "Egipt", "pl": "Egipt", "th": "อียิปต์", "ta": "எகிப்து", "kn": "ಈಜಿಪ್ಟ್", "uk": "Єгипет", "bn": "মিশর", "hi": "मिस्र"}}
+{"guid": "N45_001", "translations": {"ro": "Lituania", "pl": "Litwa", "th": "ลิทัวเนีย", "ms": "Lithuania", "ta": "லித்துவேனியா", "kn": "ಲಿಥುವೇನಿಯಾ", "uk": "Литва", "bn": "লিথুয়ানিয়া", "hi": "लिथुआनिया", "tr": "Litvanya"}}
+{"guid": "N45_002", "translations": {"ro": "Letonia", "pl": "Łotwa", "th": "ลัตเวีย", "ms": "Latvia", "ta": "லாட்ட்வியா", "kn": "ಲಾಟ್ವಿಯಾ", "uk": "Латвія", "bn": "লাটভিয়া", "hi": "लाटविया", "tr": "Letonya"}}
+{"guid": "N45_003", "translations": {"ro": "Estonia", "pl": "Estonia", "th": "เอสโตเนีย", "ms": "Estonia", "ta": "எஸ்டோனியா", "kn": "ಎಸ್ಟ್\u0000ೋನಿಯಾ", "uk": "Естонія", "bn": "এস্তোনিয়া", "hi": "एस्टोनिया", "tr": "Estonya"}}
+{"guid": "N45_004", "translations": {"ro": "Polonia", "pl": "Polska", "th": "โปแลนด์", "ms": "Poland", "ta": "போலந்து", "kn": "ಪೋಲೆಂಡ್", "uk": "Польща", "bn": "পোল্যান্ড", "hi": "पोलैंड", "tr": "Polonya"}}
+{"guid": "N45_005", "translations": {"ro": "Germania", "pl": "Niemcy", "th": "เยอรมนี", "ms": "Jerman", "ta": "ஜெர்மனி", "kn": "ಜರ್ಮನಿ", "uk": "Німеччина", "bn": "জার্মানি", "hi": "जर्मनी", "tr": "Almanya"}}
+{"guid": "N45_006", "translations": {"ro": "Franța", "pl": "Francja", "th": "ฝรั่งเศส", "ms": "Perancis", "ta": "பிரான்ஸ்", "kn": "ಫ್ರಾನ್ಸ್", "uk": "Франція", "bn": "ফ্রান্স", "hi": "फ्रांस", "tr": "Fransa"}}
+{"guid": "N45_007", "translations": {"ro": "Spania", "pl": "Hiszpania", "th": "สเปน", "ms": "Sepanyol", "ta": "ஸ்பெயின்", "kn": "ಸ್ಪೇನ್", "uk": "Іспанія", "bn": "স্পেন", "hi": "स्पेन", "tr": "İspanya"}}
+{"guid": "N45_008", "translations": {"ro": "Italia", "pl": "Włochy", "th": "อิตาลี", "ms": "Itali", "ta": "இத்தாலி", "kn": "ಇಟಲಿ", "uk": "Італія", "bn": "ইটালি", "hi": "इटली", "tr": "İtalya"}}
+{"guid": "N45_009", "translations": {"ro": "Rusia", "pl": "Rosja", "th": "รัสเซีย", "ms": "Rusia", "ta": "ரஷ்யா", "kn": "ರಷ್ಯಾ", "uk": "Росія", "bn": "রাশিয়া", "hi": "रूस", "tr": "Rusya"}}
+{"guid": "N45_010", "translations": {"ro": "Anglia", "pl": "Anglia", "th": "อังกฤษ", "ms": "England", "ta": "இங்கிலாந்து", "kn": "ಇಂಗ್ಲೆಂಡ್", "uk": "Англія", "bn": "ইংল্যান্ড", "hi": "इंग्लैंड", "tr": "İngiltere"}}
+{"guid": "N45_011", "translations": {"ro": "Statele Unite ale Americii", "pl": "Stany Zjednoczone", "th": "สหรัฐอเมริกา", "ms": "Amerika Syarikat", "ta": "அமெரிக்கா நாடு", "kn": "ಅಮೇರಿಕದ ಸಂಯುಕ್ತ ರಾಜ್ಯಗಳು", "uk": "Сполучені Штати", "bn": "যুক্তরাষ্ট্র", "hi": "संयुक्त राज्य अमेरिका", "tr": "Amerika Birleşik Devletleri"}}
+{"guid": "N45_012", "translations": {"ro": "Canada", "pl": "Kanada", "th": "แคนาดา", "ms": "Kanada", "ta": "கனடா", "kn": "ಕನಡಾ", "uk": "Канада", "bn": "কানাডা", "hi": "कनाडा", "tr": "Kanada"}}
+{"guid": "N45_013", "translations": {"ro": "Japonia", "pl": "Japonia", "th": "ญี่ปุ่น", "ms": "Jepun", "ta": "ஜப்பான்", "kn": "ಜಪಾನ್", "uk": "Японія", "bn": "জাপান", "hi": "जापान", "tr": "Japonya"}}
+{"guid": "N45_014", "translations": {"ro": "China", "pl": "Chiny", "th": "จีน", "ms": "China", "ta": "சீனா", "kn": "ಚೀನಾ", "uk": "Китай", "bn": "চীন", "hi": "चीन", "tr": "Çin"}}
+{"guid": "N45_015", "translations": {"ro": "India", "pl": "Indie", "th": "อินเดีย", "ms": "India", "ta": "இந்தியா", "kn": "ಭಾರತ", "uk": "Індія", "bn": "ভারত", "hi": "भारत", "tr": "Hindistan"}}
+{"guid": "N45_016", "translations": {"ro": "Brazilia", "pl": "Brazylia", "th": "บราซิล", "ms": "Brazil", "ta": "பிரேசில்", "kn": "ಬ್ರೆಜಿಲ್", "uk": "Бразилія", "bn": "ব্রাজিল", "hi": "ब्राज़ील", "tr": "Brezilya"}}
+{"guid": "N45_017", "translations": {"ro": "Australia", "pl": "Australia", "th": "ออสเตรเลีย", "ms": "Australia", "ta": "ஆஸ்திரேலியா", "kn": "ಆಸ್ಟ್ರೇಲಿಯಾ", "uk": "Австралія", "bn": "অস্ট্রেলিয়া", "hi": "ऑस्ट्रेलिया", "tr": "Avustralya"}}
+{"guid": "N45_018", "translations": {"ro": "Suedia", "pl": "Szwecja", "th": "สวีเดน", "ms": "Sweden", "ta": "சுவீடன்", "kn": "ಸ್ವೀಡನ್", "uk": "Швеція", "bn": "সুইডেন", "hi": "स्वीडन", "tr": "İsveç"}}
+{"guid": "N45_019", "translations": {"ro": "Norvegia", "pl": "Norwegia", "th": "นอร์เวย์", "ms": "Norway", "ta": "நார்வே", "kn": "ನಾರ್ವೆ", "uk": "Норвегія", "bn": "নরওয়ে", "hi": "नॉर्वे", "tr": "Norveç"}}
+{"guid": "N45_020", "translations": {"ro": "Finlanda", "pl": "Finlandia", "th": "ฟินแลนด์", "ms": "Finland", "ta": "பின்லாந்து", "kn": "ಫಿನ್ನ್ಲ್ಯಂಡ್", "uk": "Фінляндія", "bn": "ফিনল্যান্ড", "hi": "फिनलैंड", "tr": "Finlandiya"}}
+{"guid": "N45_021", "translations": {"ro": "Coreea de Sud", "pl": "Korea Południowa", "th": "เกาหลีใต้", "ms": "Korea Selatan", "ta": "தென் கொரியா", "kn": "ದಕ್ಷಿಣ ಕೊರಿಯಾದ", "uk": "Південна Корея", "bn": "দক্ষিণ কোরিয়া", "hi": "दक्षिण कोरिया", "tr": "Güney Kore"}}
+{"guid": "N45_022", "translations": {"ro": "Thailanda", "pl": "Tajlandia", "th": "ประเทศไทย", "ms": "Thailand", "ta": "தாய்லாந்து", "kn": "ಥೈಲ್ಯಾಂಡ್", "uk": "Таїланд", "bn": "থাইল্যান্ড", "hi": "थाईलैंड", "tr": "Tayland"}}
+{"guid": "N45_023", "translations": {"ro": "Vietnam", "pl": "Wietnam", "th": "เวียดนาม", "ms": "Vietnam", "ta": "வியட்நாம்", "kn": "ವಿಯೆಟ್ನಾಮ್", "uk": "В’єтнам", "bn": "ভিয়েতনাম", "hi": "वियतनाम", "tr": "Vietnam"}}
+{"guid": "N45_024", "translations": {"ro": "Africa de Sud", "pl": "Republika Południowej Afryki", "th": "สาธารณรัฐแอฟริกาใต้", "ms": "Afrika Selatan", "ta": "தென்னாசியாப் பிரதேசம்", "kn": "ದಕ್ಷಿಣ ಆಫ್ರಿಕಾ", "uk": "Південно-Африканська Республіка", "bn": "দক্ষিণ আফ্রিকা", "hi": "दक्षिण अफ्रीका", "tr": "Güney Afrika"}}
+{"guid": "N45_025", "translations": {"ro": "Egipt", "pl": "Egipt", "th": "อียิปต์", "ms": "Mesir", "ta": "எகிப்து", "kn": "ಈಜಿಪ್ಟ್", "uk": "Єгипет", "bn": "মিশর", "hi": "मिस्र", "tr": "Mısır"}}
+{"guid": "N45_026", "translations": {"ms": "Alabama", "hi": "अलबामा", "tr": "Alabama"}}
+{"guid": "N45_027", "translations": {"ms": "Alaska", "hi": "अलास्का", "tr": "Alaska"}}
+{"guid": "N45_028", "translations": {"ms": "Arizona", "hi": "एरिज़ोना", "tr": "Arizona"}}
+{"guid": "N45_029", "translations": {"ms": "Arkansas", "hi": "अर्कन्सास", "tr": "Arkansas"}}
+{"guid": "N45_030", "translations": {"ms": "California", "hi": "कैलिफ़ोर्निया", "tr": "Kaliforniya"}}
+{"guid": "N45_031", "translations": {"ms": "Colorado", "hi": "कोलोराडो", "tr": "Colorado"}}
+{"guid": "N45_032", "translations": {"ms": "Connecticut", "hi": "कनेक्टिकट", "tr": "Connecticut"}}
+{"guid": "N45_033", "translations": {"ms": "Delaware", "hi": "डेलावेयर", "tr": "Delaware"}}
+{"guid": "N45_034", "translations": {"ms": "Florida", "hi": "फ्लोरिडा", "tr": "Florida"}}
+{"guid": "N45_035", "translations": {"ms": "Georgia", "hi": "जॉर्जिया", "tr": "Georgia"}}
+{"guid": "N45_036", "translations": {"ms": "Hawaii", "hi": "हवाई", "tr": "Hawaii"}}
+{"guid": "N45_037", "translations": {"ms": "Idaho", "hi": "आइडाहो", "tr": "Idaho"}}
+{"guid": "N45_038", "translations": {"ms": "Illinois", "hi": "इलिनॉय", "tr": "Illinois"}}
+{"guid": "N45_039", "translations": {"ms": "Indiana", "hi": "इंडियाना", "tr": "Indiana"}}
+{"guid": "N45_040", "translations": {"ms": "Iowa", "hi": "आयोवा", "tr": "Iowa"}}
+{"guid": "N45_041", "translations": {"ms": "Kansas", "hi": "कान्सास", "tr": "Kansas"}}
+{"guid": "N45_042", "translations": {"ms": "Kentucky", "hi": "केंटकी", "tr": "Kentucky"}}
+{"guid": "N45_043", "translations": {"ms": "Louisiana", "hi": "लुइज़ियाना", "tr": "Louisiana"}}
+{"guid": "N45_044", "translations": {"ms": "Maine", "hi": "मेन", "tr": "Maine"}}
+{"guid": "N45_045", "translations": {"ms": "Maryland", "hi": "मैरीलैंड", "tr": "Maryland"}}
+{"guid": "N45_046", "translations": {"ms": "Massachusetts", "hi": "मैसाचुसेट्स", "tr": "Massachusetts"}}
+{"guid": "N45_047", "translations": {"ms": "Michigan", "hi": "मिशिगन", "tr": "Michigan"}}
+{"guid": "N45_048", "translations": {"ms": "Minnesota", "hi": "मिनेसोटा", "tr": "Minnesota"}}
+{"guid": "N45_049", "translations": {"ms": "Mississippi", "hi": "मिसिसिपी", "tr": "Mississippi"}}
+{"guid": "N45_050", "translations": {"ms": "Missouri", "hi": "मिसौरी", "tr": "Missouri"}}
+{"guid": "N45_051", "translations": {"ms": "Montana", "hi": "मोंटाना", "tr": "Montana"}}
+{"guid": "N45_052", "translations": {"ms": "Nebraska", "hi": "नेब्रास्का", "tr": "Nebraska"}}
+{"guid": "N45_053", "translations": {"ms": "Nevada", "hi": "नेवादा", "tr": "Nevada"}}
+{"guid": "N45_054", "translations": {"ms": "New Hampshire", "hi": "न्यू हैम्पशायर", "tr": "New Hampshire"}}
+{"guid": "N45_055", "translations": {"ms": "New Jersey", "hi": "न्यू जर्सी", "tr": "New Jersey"}}
+{"guid": "N45_056", "translations": {"ms": "New Mexico", "hi": "न्यू मेक्सिको", "tr": "New Mexico"}}
+{"guid": "N45_057", "translations": {"ms": "Carolina Utara", "hi": "उत्तरी कैरोलाइना", "tr": "Kuzey Karolina"}}
+{"guid": "N45_058", "translations": {"ms": "Dakota Utara", "hi": "नॉर्थ डकोटा", "tr": "Kuzey Dakota"}}
+{"guid": "N45_059", "translations": {"ms": "Ohio", "hi": "ओहायो", "tr": "Ohio"}}
+{"guid": "N45_060", "translations": {"ms": "Oklahoma", "hi": "ओक्लाहोमा", "tr": "Oklahoma"}}
+{"guid": "N45_061", "translations": {"ms": "Oregon", "hi": "ओरेगन", "tr": "Oregon"}}
+{"guid": "N45_062", "translations": {"ms": "Pennsylvania", "hi": "पेंसिल्वेनिया", "tr": "Pensilvanya"}}
+{"guid": "N45_063", "translations": {"ms": "Pulau Rhode", "hi": "रोड आइलैंड", "tr": "Rhode Island"}}
+{"guid": "N45_064", "translations": {"ms": "Carolina Selatan", "hi": "दक्षिण कैरोलाइना", "tr": "Güney Carolina"}}
+{"guid": "N45_065", "translations": {"ms": "Dakota Selatan", "hi": "दक्षिण डकोटा", "tr": "Güney Dakota"}}
+{"guid": "N45_066", "translations": {"ms": "Tennessee", "hi": "टेनेसी", "tr": "Tennessee"}}
+{"guid": "N45_067", "translations": {"ms": "Texas", "hi": "टेक्सास", "tr": "Teksas"}}
+{"guid": "N45_068", "translations": {"ms": "Utah", "hi": "यूटा", "tr": "Utah"}}
+{"guid": "N45_069", "translations": {"ms": "Vermont", "hi": "वरमॉन्ट", "tr": "Vermont"}}
+{"guid": "N45_070", "translations": {"ms": "Virginia", "hi": "वर्जीनिया", "tr": "Virginia"}}
+{"guid": "N45_071", "translations": {"ms": "Washington", "hi": "वॉशिंगटन", "tr": "Washington"}}
+{"guid": "N45_072", "translations": {"ms": "Virginia Barat", "hi": "पश्चिम वर्जीनिया", "tr": "Batı Virginia"}}
+{"guid": "N45_073", "translations": {"ms": "Wisconsin", "hi": "विस्कॉन्सिन", "tr": "Wisconsin"}}
+{"guid": "N45_074", "translations": {"ms": "Wyoming", "hi": "वायोमिंग", "tr": "Wyoming"}}
+{"guid": "N45_075", "translations": {"ms": "Greece", "hi": "यूनान", "tr": "Yunanistan"}}
+{"guid": "N45_076", "translations": {"ms": "Turki", "hi": "तुर्की", "tr": "Türkiye"}}
+{"guid": "N45_077", "translations": {"ms": "Iran", "hi": "ईरान", "tr": "İran"}}
+{"guid": "N45_078", "translations": {"ms": "Iraq", "hi": "इराक", "tr": "Irak"}}
+{"guid": "N45_079", "translations": {"ms": "Austria", "hi": "ऑस्ट्रिया", "tr": "Avusturya"}}
+{"guid": "N45_080", "translations": {"ms": "Switzerland", "hi": "स्विट्ज़रलैंड", "tr": "İsviçre"}}
+{"guid": "N45_081", "translations": {"ms": "Portugal", "hi": "पुर्तगाल", "tr": "Portekiz"}}
+{"guid": "N45_082", "translations": {"ms": "Belanda", "hi": "नीदरलैंड", "tr": "Hollanda"}}
+{"guid": "N45_083", "translations": {"ms": "Belgium", "hi": "बेल्जियम", "tr": "Belçika"}}
+{"guid": "N45_084", "translations": {"ms": "Denmark", "hi": "डेनमार्क", "tr": "Danimarka"}}
+{"guid": "N45_085", "translations": {"ms": "Ireland", "hi": "आयरलैंड", "tr": "İrlanda"}}
+{"guid": "N45_086", "translations": {"ms": "Scotland", "hi": "स्कॉटलैंड", "tr": "İskoçya"}}
+{"guid": "N45_087", "translations": {"ms": "Wales", "hi": "वेल्स", "tr": "Galler"}}
+{"guid": "N45_088", "translations": {"ms": "Hungary", "hi": "हंगरी", "tr": "Macaristan"}}
+{"guid": "N45_089", "translations": {"ms": "Ukraine", "hi": "यूक्रेन", "tr": "Ukrayna"}}
+{"guid": "N45_090", "translations": {"ms": "Mexico", "hi": "मेक्सिको", "tr": "Meksika"}}
+{"guid": "N45_091", "translations": {"ms": "Argentina", "hi": "अर्जेंटीना", "tr": "Arjantin"}}
+{"guid": "N45_092", "translations": {"ms": "Chile", "hi": "चिली", "tr": "Şili"}}
+{"guid": "N45_093", "translations": {"ms": "Peru", "hi": "पेरू", "tr": "Peru"}}
+{"guid": "N45_094", "translations": {"ms": "Cuba", "hi": "क्यूबा", "tr": "Küba"}}
+{"guid": "N45_095", "translations": {"ms": "Israel", "hi": "इज़राइल", "tr": "İsrail"}}
+{"guid": "N45_096", "translations": {"ms": "Maghribi", "hi": "मोरक्को", "tr": "Fas"}}
+{"guid": "N45_097", "translations": {"ms": "Ethiopia", "hi": "इथियोपिया", "tr": "Etiyopya"}}
+{"guid": "N45_098", "translations": {"ms": "Indonesia", "hi": "इंडोनेशिया", "tr": "Endonezya"}}
+{"guid": "N45_099", "translations": {"ms": "Filipina", "hi": "फ़िलीपींस", "tr": "Filipinler"}}
+{"guid": "N45_100", "translations": {"ms": "Eropah", "hi": "यूरोप", "tr": "Avrupa"}}
+{"guid": "N45_101", "translations": {"ms": "Asia", "hi": "एशिया", "tr": "Asya"}}
+{"guid": "N45_102", "translations": {"ms": "Afrika", "hi": "अफ़्रीका", "tr": "Afrika"}}
+{"guid": "N45_103", "translations": {"ms": "Amerika Utara", "hi": "उत्तरी अमेरिका", "tr": "Kuzey Amerika"}}
+{"guid": "N45_104", "translations": {"ms": "Amerika Selatan", "hi": "दक्षिण अमेरिका", "tr": "Güney Amerika"}}
+{"guid": "N45_105", "translations": {"ms": "Antartika", "hi": "अंटार्कटिका", "tr": "Antarktika"}}
+{"guid": "N45_106", "translations": {"ms": "wilayah", "hi": "प्रांत", "tr": "eyalet"}}
+{"guid": "N45_107", "translations": {"ms": "kerajaan", "hi": "राज्य", "tr": "krallık"}}
+{"guid": "N45_108", "translations": {"ms": "prefektur", "hi": "प्रांत", "tr": "prefektörlük"}}
+{"guid": "N45_109", "translations": {"ms": "negeri naungan", "hi": "संरक्षित राज्य", "tr": "protektora"}}
+{"guid": "N45_110", "translations": {"ms": "rantau", "hi": "क्षेत्र", "tr": "bölge"}}
+{"guid": "N45_111", "translations": {"ms": "Austria-Hungary", "hi": "ऑस्ट्रिया-हंगरी", "tr": "Avusturya-Macaristan"}}
+{"guid": "N45_112", "translations": {"ms": "New York", "hi": "न्यूयॉर्क राज्य", "tr": "New York Eyaleti"}}

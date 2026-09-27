@@ -1,11 +1,125 @@
-{"guid": "N21_001", "translations": {"ro": "știință", "pl": "nauka", "th": "วิทยาศาสตร์", "ta": "அறிவு", "kn": "ವಿಜ್ಞಾನ", "uk": "наука", "bn": "বিজ্ঞান", "hi": "विज्ञान", "bs": "nauka"}}
-{"guid": "N21_002", "translations": {"ro": "istorie", "pl": "historia", "th": "ประวัติศาสตร์", "ta": "வரலாறு", "kn": "ಇತಿಹಾಸ", "uk": "історія", "bn": "ইতিহাস", "hi": "इतिहास", "bs": "historija"}}
-{"guid": "N21_003", "translations": {"ro": "matematică", "pl": "matematyka", "th": "คณิตศาสตร์", "ta": "கணிதம்", "kn": "ಗಣಿತಶಾಸ್ತ್ರ", "uk": "математика", "bn": "গণিত", "hi": "गणित", "bs": "matematika"}}
-{"guid": "N21_004", "translations": {"ro": "filosofie", "pl": "filozofia", "th": "ปรัชญา", "ta": "தத்துவம்", "kn": "ದರ್ಶನಶಾಸ್ತ್ರ", "uk": "філософія", "bn": "দর্শনশাস্ত্র", "hi": "दर्शनशास्त्र"}}
-{"guid": "N21_005", "translations": {"ro": "geografie", "pl": "geografia", "th": "ภูมิศาสตร์", "ta": "புவியியல்", "kn": "ಭೂಗೋಳಶಾಸ್ತ್ರ", "uk": "географія", "bn": "ভূগোল", "hi": "भूगोल"}}
-{"guid": "N21_006", "translations": {"ro": "biologie", "pl": "biologia", "th": "ชีววิทยา", "ta": "உயிரியல்", "kn": "ಜೈವಶಾಸ್ತ್ರ", "uk": "біологія", "bn": "জীববিজ্ঞান", "hi": "जैवविज्ञान"}}
-{"guid": "N21_007", "translations": {"ro": "fizică", "pl": "fizyka", "th": "ฟิสิกส์", "ta": "பொருளியல்", "kn": "ಭೌತಶಾಸ್ತ್ರ", "uk": "фізика", "bn": "ভৌতবিদ্যা", "hi": "भौतिकी"}}
-{"guid": "N21_008", "translations": {"ro": "chimie", "pl": "chemia", "th": "เคมี", "ta": "ரசவியல்", "kn": "ರಸಶಾಸ್ತ್ರ", "uk": "хімія", "bn": "রসায়ন", "hi": "रसायनशास्त्र"}}
-{"guid": "N21_009", "translations": {"ro": "matematică", "pl": "matematyka", "th": "คณิตศาสตร์", "ta": "கணிதம்", "kn": "ಗಣಿತ", "uk": "математика", "bn": "গণিত", "hi": "गणित"}}
-{"guid": "N21_010", "translations": {"ro": "specie", "pl": "gatunek", "th": "ชนิด", "ta": "வகை", "kn": "ಪ್ರಭೇದ", "uk": "вид", "bn": "প্রজাতি", "hi": "प्रजाति", "bs": "vrsta"}}
-{"guid": "N21_011", "translations": {"ro": "domeniu", "pl": "dziedzina", "th": "สาขา", "ta": "களம்", "kn": "ಶೇಖರಣೆ", "uk": "сфера", "bn": "ক্ষেত্র", "hi": "क्षेत्र", "bs": "područje"}}
+{"guid": "N21_001", "translations": {"ro": "știință", "pl": "nauka", "th": "วิทยาศาสตร์", "ms": "sains", "ta": "அறிவு", "kn": "ವಿಜ್ಞಾನ", "uk": "наука", "bn": "বিজ্ঞান", "hi": "विज्ञान", "tr": "bilim", "bs": "nauka"}}
+{"guid": "N21_002", "translations": {"ro": "istorie", "pl": "historia", "th": "ประวัติศาสตร์", "ms": "sejarah", "ta": "வரலாறு", "kn": "ಇತಿಹಾಸ", "uk": "історія", "bn": "ইতিহাস", "hi": "इतिहास", "tr": "tarih", "bs": "historija"}}
+{"guid": "N21_003", "translations": {"ro": "matematică", "pl": "matematyka", "th": "คณิตศาสตร์", "ms": "matematik", "ta": "கணிதம்", "kn": "ಗಣಿತಶಾಸ್ತ್ರ", "uk": "математика", "bn": "গণিত", "hi": "गणित", "tr": "matematik", "bs": "matematika"}}
+{"guid": "N21_004", "translations": {"ro": "filosofie", "pl": "filozofia", "th": "ปรัชญา", "ms": "falsafah", "ta": "தத்துவம்", "kn": "ದರ್ಶನಶಾಸ್ತ್ರ", "uk": "філософія", "bn": "দর্শনশাস্ত্র", "hi": "दर्शनशास्त्र", "tr": "felsefe"}}
+{"guid": "N21_005", "translations": {"ro": "geografie", "pl": "geografia", "th": "ภูมิศาสตร์", "ms": "geografi", "ta": "புவியியல்", "kn": "ಭೂಗೋಳಶಾಸ್ತ್ರ", "uk": "географія", "bn": "ভূগোল", "hi": "भूगोल", "tr": "coğrafya"}}
+{"guid": "N21_006", "translations": {"ro": "biologie", "pl": "biologia", "th": "ชีววิทยา", "ms": "biologi", "ta": "உயிரியல்", "kn": "ಜೈವಶಾಸ್ತ್ರ", "uk": "біологія", "bn": "জীববিজ্ঞান", "hi": "जैवविज्ञान", "tr": "biyoloji"}}
+{"guid": "N21_007", "translations": {"ro": "fizică", "pl": "fizyka", "th": "ฟิสิกส์", "ms": "fizik", "ta": "பொருளியல்", "kn": "ಭೌತಶಾಸ್ತ್ರ", "uk": "фізика", "bn": "ভৌতবিদ্যা", "hi": "भौतिकी", "tr": "fizik"}}
+{"guid": "N21_008", "translations": {"ro": "chimie", "pl": "chemia", "th": "เคมี", "ms": "kimia", "ta": "ரசவியல்", "kn": "ರಸಶಾಸ್ತ್ರ", "uk": "хімія", "bn": "রসায়ন", "hi": "रसायनशास्त्र", "tr": "kimya"}}
+{"guid": "N21_009", "translations": {"ro": "matematică", "pl": "matematyka", "th": "คณิตศาสตร์", "ms": "matematik", "ta": "கணிதம்", "kn": "ಗಣಿತ", "uk": "математика", "bn": "গণিত", "hi": "गणित", "tr": "matematik"}}
+{"guid": "N21_010", "translations": {"ro": "specie", "pl": "gatunek", "th": "ชนิด", "ms": "spesies", "ta": "வகை", "kn": "ಪ್ರಭೇದ", "uk": "вид", "bn": "প্রজাতি", "hi": "प्रजाति", "tr": "tür", "bs": "vrsta"}}
+{"guid": "N21_011", "translations": {"ro": "domeniu", "pl": "dziedzina", "th": "สาขา", "ms": "bidang", "ta": "களம்", "kn": "ಶೇಖರಣೆ", "uk": "сфера", "bn": "ক্ষেত্র", "hi": "क्षेत्र", "tr": "alan", "bs": "područje"}}
+{"guid": "N21_012", "translations": {"ms": "kecerdasan buatan", "hi": "कृत्रिम बुद्धिमत्ता", "tr": "yapay zekâ"}}
+{"guid": "N21_013", "translations": {"ms": "pembelajaran mesin", "hi": "मशीन लर्निंग", "tr": "makine öğrenimi"}}
+{"guid": "N21_014", "translations": {"ms": "fiksyen sains", "hi": "विज्ञान कथा", "tr": "bilim kurgu"}}
+{"guid": "N21_015", "translations": {"ms": "polinomial", "hi": "बहुपद", "tr": "polinom"}}
+{"guid": "N21_016", "translations": {"ms": "sinus", "hi": "ज्या", "tr": "sinüs"}}
+{"guid": "N21_017", "translations": {"ms": "kosinus", "hi": "कोसाइन", "tr": "kosinüs"}}
+{"guid": "N21_018", "translations": {"ms": "trigonometri", "hi": "त्रिकोणमिति", "tr": "trigonometri"}}
+{"guid": "N21_019", "translations": {"ms": "topologi", "hi": "टोपोलॉजी", "tr": "topoloji"}}
+{"guid": "N21_020", "translations": {"ms": "isomorfisme", "hi": "समरूपता", "tr": "izomorfizm"}}
+{"guid": "N21_021", "translations": {"ms": "homologi", "hi": "समजातता", "tr": "homoloji"}}
+{"guid": "N21_022", "translations": {"ms": "homologi", "hi": "समरूपता", "tr": "homoloji"}}
+{"guid": "N21_023", "translations": {"ms": "homotopi", "hi": "समरूपता", "tr": "homotopi"}}
+{"guid": "N21_024", "translations": {"ms": "kombinatorik", "hi": "संयोजनिकी", "tr": "kombinatorik"}}
+{"guid": "N21_025", "translations": {"ms": "homomorfisme", "hi": "समरूपता", "tr": "homomorfizma"}}
+{"guid": "N21_026", "translations": {"ms": "subruang", "hi": "उपसमष्टि", "tr": "alt uzay"}}
+{"guid": "N21_027", "translations": {"ms": "kohomologi", "hi": "सहसमरूपता", "tr": "kohomoloji"}}
+{"guid": "N21_028", "translations": {"ms": "morfisme", "hi": "रूपवाद", "tr": "morfizma"}}
+{"guid": "N21_029", "translations": {"ms": "lema", "hi": "प्रविष्टि शीर्षक", "tr": "lemma"}}
+{"guid": "N21_030", "translations": {"ms": "automorfisme", "hi": "स्वरूपसमरूपता", "tr": "otomorfizm"}}
+{"guid": "N21_031", "translations": {"ms": "homeomorfisme", "hi": "होमियोमॉर्फ़िज़्म", "tr": "homeomorfizm"}}
+{"guid": "N21_032", "translations": {"ms": "kriptografi", "hi": "कूटलेखन", "tr": "kriptografi"}}
+{"guid": "N21_033", "translations": {"ms": "genre", "hi": "शैली", "tr": "tür"}}
+{"guid": "N21_034", "translations": {"ms": "seni bina", "hi": "वास्तुकला", "tr": "mimarlık"}}
+{"guid": "N21_035", "translations": {"ms": "seni", "hi": "कलाएँ", "tr": "sanatlar"}}
+{"guid": "N21_036", "translations": {"ms": "jazz", "hi": "जैज़", "tr": "caz"}}
+{"guid": "N21_037", "translations": {"ms": "bas", "hi": "बास", "tr": "bas"}}
+{"guid": "N21_038", "translations": {"ms": "ragtime", "hi": "रैगटाइम", "tr": "ragtime"}}
+{"guid": "N21_039", "translations": {"ms": "kamus", "hi": "शब्दकोश", "tr": "sözlük"}}
+{"guid": "N21_040", "translations": {"ms": "genus", "hi": "वंश", "tr": "cins"}}
+{"guid": "N21_041", "translations": {"ms": "alam", "hi": "जगत", "tr": "âlem"}}
+{"guid": "N21_042", "translations": {"ms": "kejuruteraan", "hi": "अभियांत्रिकी", "tr": "mühendislik"}}
+{"guid": "N21_043", "translations": {"ms": "kurikulum", "hi": "पाठ्यक्रम", "tr": "müfredat"}}
+{"guid": "N21_044", "translations": {"ms": "etika", "hi": "नीतिशास्त्र", "tr": "etik"}}
+{"guid": "N21_045", "translations": {"ms": "teologi", "hi": "धर्मशास्त्र", "tr": "teoloji"}}
+{"guid": "N21_046", "translations": {"ms": "psikologi", "hi": "मनोविज्ञान", "tr": "psikoloji"}}
+{"guid": "N21_047", "translations": {"ms": "barang", "hi": "वस्तु", "tr": "mal"}}
+{"guid": "N21_048", "translations": {"ms": "ideologi", "hi": "विचारधारा", "tr": "ideoloji"}}
+{"guid": "N21_049", "translations": {"ms": "pemahaman mendalam", "hi": "अंतर्दृष्टि", "tr": "kavrayış"}}
+{"guid": "N21_050", "translations": {"ms": "mitologi", "hi": "पौराणिकी", "tr": "mitoloji"}}
+{"guid": "N21_051", "translations": {"ms": "funktor", "hi": "फलनक", "tr": "funktör"}}
+{"guid": "N21_052", "translations": {"ms": "muzik blues", "hi": "ब्लूज़", "tr": "blues"}}
+{"guid": "N21_053", "translations": {"ms": "muzik punk", "hi": "पंक रॉक", "tr": "punk rock"}}
+{"guid": "N21_054", "translations": {"ms": "muzik disko", "hi": "डिस्को संगीत", "tr": "disko müziği"}}
+{"guid": "N21_055", "translations": {"ms": "reggae", "hi": "रेगे", "tr": "reggae"}}
+{"guid": "N21_056", "translations": {"ms": "modernisme", "hi": "आधुनिकतावाद", "tr": "modernizm"}}
+{"guid": "N21_057", "translations": {"ms": "tempo", "hi": "लय", "tr": "tempo"}}
+{"guid": "N21_058", "translations": {"ms": "raga", "hi": "राग", "tr": "raga"}}
+{"guid": "N21_059", "translations": {"ms": "Barok", "hi": "बैरोक", "tr": "Barok"}}
+{"guid": "N21_060", "translations": {"ms": "muzikologi", "hi": "संगीतशास्त्र", "tr": "müzikoloji"}}
+{"guid": "N21_061", "translations": {"ms": "pascamodenisme", "hi": "उत्तरआधुनिकतावाद", "tr": "postmodernizm"}}
+{"guid": "N21_062", "translations": {"ms": "filogeni", "hi": "जातिवृत्त", "tr": "filogeni"}}
+{"guid": "N21_063", "translations": {"ms": "suborder", "hi": "उपगण", "tr": "alt takım"}}
+{"guid": "N21_064", "translations": {"ms": "kladogram", "hi": "क्लैडोग्राम", "tr": "kladogram"}}
+{"guid": "N21_065", "translations": {"ms": "arkeologi", "hi": "पुरातत्व", "tr": "arkeoloji"}}
+{"guid": "N21_066", "translations": {"ms": "historiografi", "hi": "इतिहासलेखन", "tr": "tarih yazımı"}}
+{"guid": "N21_067", "translations": {"ms": "industri aeroangkasa", "hi": "विमानन और अंतरिक्ष उद्योग", "tr": "havacılık ve uzay endüstrisi"}}
+{"guid": "N21_068", "translations": {"ms": "bioteknologi", "hi": "जैव प्रौद्योगिकी", "tr": "biyoteknoloji"}}
+{"guid": "N21_069", "translations": {"ms": "spektroskopi", "hi": "स्पेक्ट्रोस्कोपी", "tr": "spektroskopi"}}
+{"guid": "N21_070", "translations": {"ms": "elektromagnetisme", "hi": "विद्युतचुंबकत्व", "tr": "elektromanyetizma"}}
+{"guid": "N21_071", "translations": {"ms": "penyelidikan", "hi": "अनुसंधान", "tr": "araştırma"}}
+{"guid": "N21_072", "translations": {"ms": "avant-garde", "hi": "अवाँ-गार्द", "tr": "avangart"}}
+{"guid": "N21_073", "translations": {"ms": "bahasa Proto-Jermanik", "hi": "आद्य-जर्मनिक भाषा", "tr": "Proto-Cermence"}}
+{"guid": "N21_074", "translations": {"ms": "meta-analisis", "hi": "मेटा-विश्लेषण", "tr": "meta-analiz"}}
+{"guid": "N21_075", "translations": {"ms": "kata nama", "hi": "संज्ञा", "tr": "isim"}}
+{"guid": "N21_076", "translations": {"ms": "kata kerja", "hi": "क्रिया", "tr": "fiil"}}
+{"guid": "N21_077", "translations": {"ms": "kata adjektif", "hi": "विशेषण", "tr": "sıfat"}}
+{"guid": "N21_078", "translations": {"ms": "kata keterangan", "hi": "क्रिया विशेषण", "tr": "zarf"}}
+{"guid": "N21_079", "translations": {"ms": "tatabahasa", "hi": "व्याकरण", "tr": "dilbilgisi"}}
+{"guid": "N21_080", "translations": {"ms": "dialek", "hi": "बोली", "tr": "lehçe"}}
+{"guid": "N21_081", "translations": {"ms": "celik huruf", "hi": "साक्षरता", "tr": "okuryazarlık"}}
+{"guid": "N21_082", "translations": {"ms": "sintaksis", "hi": "वाक्यविन्यास", "tr": "sözdizimi"}}
+{"guid": "N21_083", "translations": {"ms": "sintaksis", "hi": "वाक्यविन्यास", "tr": "sözdizimi"}}
+{"guid": "N21_084", "translations": {"ms": "sosiologi", "hi": "समाजशास्त्र", "tr": "sosyoloji"}}
+{"guid": "N21_085", "translations": {"ms": "antropologi", "hi": "मानवशास्त्र", "tr": "antropoloji"}}
+{"guid": "N21_086", "translations": {"ms": "epistemologi", "hi": "ज्ञानमीमांसा", "tr": "epistemoloji"}}
+{"guid": "N21_087", "translations": {"ms": "metafizik", "hi": "तत्त्वमीमांसा", "tr": "metafizik"}}
+{"guid": "N21_088", "translations": {"ms": "idealisme", "hi": "आदर्शवाद", "tr": "idealizm"}}
+{"guid": "N21_089", "translations": {"ms": "liberalisme", "hi": "उदारवाद", "tr": "liberalizm"}}
+{"guid": "N21_090", "translations": {"ms": "fenomenologi", "hi": "प्रत्ययवाद", "tr": "fenomenoloji"}}
+{"guid": "N21_091", "translations": {"ms": "ontologi", "hi": "सत्तामीमांसा", "tr": "ontoloji"}}
+{"guid": "N21_092", "translations": {"ms": "positivisme", "hi": "प्रत्यक्षवाद", "tr": "pozitivizm"}}
+{"guid": "N21_093", "translations": {"ms": "rasionalisme", "hi": "बुद्धिवाद", "tr": "rasyonalizm"}}
+{"guid": "N21_094", "translations": {"ms": "utilitarianisme", "hi": "उपयोगितावाद", "tr": "faydacılık"}}
+{"guid": "N21_095", "translations": {"ms": "empirisisme", "hi": "अनुभववाद", "tr": "ampirizm"}}
+{"guid": "N21_096", "translations": {"ms": "linguistik", "hi": "भाषाविज्ञान", "tr": "dilbilim"}}
+{"guid": "N21_097", "translations": {"ms": "fonetik", "hi": "ध्वनिविज्ञान", "tr": "fonetik"}}
+{"guid": "N21_098", "translations": {"ms": "fonologi", "hi": "स्वनिमविज्ञान", "tr": "fonoloji"}}
+{"guid": "N21_099", "translations": {"ms": "morfologi", "hi": "रूपविज्ञान", "tr": "biçimbilim"}}
+{"guid": "N21_100", "translations": {"ms": "semantik", "hi": "अर्थविज्ञान", "tr": "anlambilim"}}
+{"guid": "N21_101", "translations": {"ms": "pragmatik", "hi": "प्रयोगविज्ञान", "tr": "edimbilim"}}
+{"guid": "N21_102", "translations": {"ms": "sosiolinguistik", "hi": "समाजभाषाविज्ञान", "tr": "toplumdilbilim"}}
+{"guid": "N21_103", "translations": {"ms": "etimologi", "hi": "व्युत्पत्तिशास्त्र", "tr": "etimoloji"}}
+{"guid": "N21_104", "translations": {"ms": "filologi", "hi": "भाषाशास्त्र", "tr": "filoloji"}}
+{"guid": "N21_105", "translations": {"ms": "tipologi", "hi": "प्ररूपविज्ञान", "tr": "tipoloji"}}
+{"guid": "N21_106", "translations": {"ms": "leksikografi", "hi": "शब्दकोशविद्या", "tr": "sözlükçülük"}}
+{"guid": "N21_107", "translations": {"ms": "fonem", "hi": "स्वनिम", "tr": "fonem"}}
+{"guid": "N21_108", "translations": {"ms": "alofon", "hi": "स्वनिमपरक ध्वनिरूप", "tr": "alofon"}}
+{"guid": "N21_109", "translations": {"ms": "diftong", "hi": "संयुक्त स्वर", "tr": "diftong"}}
+{"guid": "N21_110", "translations": {"ms": "sonoran", "hi": "सोनोरेंट", "tr": "sonorant"}}
+{"guid": "N21_111", "translations": {"ms": "prosodi", "hi": "छंदशास्त्र", "tr": "prozodi"}}
+{"guid": "N21_112", "translations": {"ms": "penggabungan kata", "hi": "समास", "tr": "birleşik kelime yapımı"}}
+{"guid": "N21_113", "translations": {"ms": "leksem", "hi": "लेक्सीम", "tr": "biçimbirim"}}
+{"guid": "N21_114", "translations": {"ms": "golongan deklinasi", "hi": "शब्दरूप-परिवर्तन वर्ग", "tr": "çekim sınıfı"}}
+{"guid": "N21_115", "translations": {"ms": "leksikon", "hi": "शब्दावली", "tr": "söz varlığı"}}
+{"guid": "N21_116", "translations": {"ms": "kasus datif", "hi": "संप्रदान कारक", "tr": "yönelme hâli"}}
+{"guid": "N21_117", "translations": {"ms": "valensi", "hi": "संयोजकता", "tr": "valans"}}
+{"guid": "N21_118", "translations": {"ms": "kata kerja penghubung", "hi": "संबंधसूचक क्रिया", "tr": "bağ fiil"}}
+{"guid": "N21_119", "translations": {"ms": "penentu", "hi": "निर्धारक", "tr": "belirleyici"}}
+{"guid": "N21_120", "translations": {"ms": "deiksis", "hi": "निर्देशात्मकता", "tr": "deiksis"}}
+{"guid": "N21_121", "translations": {"ms": "polisemi", "hi": "अनेकार्थकता", "tr": "çok anlamlılık"}}
+{"guid": "N21_122", "translations": {"ms": "homonim", "hi": "समनाम", "tr": "eş adlı sözcük"}}
+{"guid": "N21_123", "translations": {"ms": "hiponim", "hi": "अधिशब्द", "tr": "alt anlamlı sözcük"}}
+{"guid": "N21_124", "translations": {"ms": "ortografi", "hi": "वर्तनी", "tr": "yazım"}}
+{"guid": "N21_125", "translations": {"ms": "muzik rock", "hi": "रॉक संगीत", "tr": "rock müzik"}}

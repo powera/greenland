@@ -1,30 +1,80 @@
-{"guid": "V09_001", "translations": {"ro": "vorbi", "pl": "mówić", "th": "พูด", "ta": "பேசு", "kn": "ಮಾತನಾಡು", "uk": "говорити", "bn": "কথা বলা", "hi": "बोलना", "bs": "govoriti"}}
-{"guid": "V09_002", "translations": {"ro": "vorbi", "pl": "mówić", "th": "พูด", "ta": "பேசு", "kn": "ಮಾತನಾಡು", "uk": "говорити", "bn": "কথা বলা", "hi": "बोलना"}}
-{"guid": "V09_003", "translations": {"ro": "spune", "pl": "powiedzieć", "th": "บอก", "ta": "புலம்புதல்", "kn": "ಹೇಳು", "uk": "сказати", "bn": "বলা", "hi": "कहना", "bs": "reći"}}
-{"guid": "V09_004", "translations": {"ro": "întreba", "pl": "pytać", "th": "ถาม", "ta": "கேட்பு", "kn": "ಕುಂಬಳಿಸು", "uk": "питати", "bn": "জিজ্ঞাসা করা", "hi": "पूछना", "bs": "pitati"}}
-{"guid": "V09_005", "translations": {"ro": "răspunde", "pl": "odpowiedzieć", "th": "ตอบ", "ta": "பதில் கூறு", "kn": "ಉತ್ತರಿಸು", "uk": "відповісти", "bn": "উত্তর দেওয়া", "hi": "उत्तर देना"}}
-{"guid": "V09_006", "translations": {"ro": "spune", "pl": "powiedzieć", "th": "พูด", "ta": "சொல்வது", "kn": "ಹೇಳುವುದು", "uk": "сказати", "bn": "কওয়া", "hi": "कहना", "bs": "reći"}}
-{"guid": "V09_007", "translations": {"ro": "a chema", "pl": "wołać", "th": "ร้องเรียก", "ta": "கொஞ்", "kn": "ಶುಟ್ಟು", "uk": "кликати", "bn": "ডাকা", "hi": "ड बुलाना"}}
-{"guid": "V09_008", "translations": {"ro": "ține răspuns", "pl": "krzyczeć", "th": "ตะโกน", "ta": "கூவல்", "kn": "ಆರತಲೇ", "uk": "кричати", "bn": "চিৎকার করা", "hi": "चिल्लाना"}}
-{"guid": "V09_009", "translations": {"ro": "șopti", "pl": "szeptać", "th": "กระซิบ", "ta": "கிசுகிசு பேசு", "kn": "ರೆಹರಿಸು", "uk": "шепотіти", "bn": "ফিসফিস করা", "hi": "फुसफुसाना"}}
-{"guid": "V09_010", "translations": {"ro": "răspunde", "pl": "odpowiedzieć", "th": "ตอบ", "ta": "பதில் சொல்ல", "kn": "ಪ್ರತಿಕ್ರಿಯೆ ನೀಡಲು", "uk": "відповісти", "bn": "উত্তর দেওয়া", "hi": "जवाब देना"}}
-{"guid": "V09_011", "translations": {"ro": "explica", "pl": "wyjaśnić", "th": "อธิบาย", "ta": "விளக்கம் கொள்", "kn": "ವಿವರಣೆ ಮಾಡು", "uk": "пояснити", "bn": "বর্ণনা করা", "hi": "व्याख्या करना"}}
-{"guid": "V09_012", "translations": {"ro": "anunța", "pl": "ogłosić", "th": "ประกาศ", "ta": "அறிமுகப்படுத்து", "kn": "ಪ್ರಕಟನೆ ಮಾಡು", "uk": "оголосити", "bn": "ঘোষণা করা", "hi": "घोषणा करना"}}
-{"guid": "V09_013", "translations": {"ro": "discută", "pl": "dyskutować", "th": "หารือ", "ta": "பரிவேசிப்பது", "kn": "ಚರ್ಚೆ ಮಾಡು", "uk": "обговорити", "bn": "আলোচনা করা", "hi": "चर्चा करना"}}
-{"guid": "V09_014", "translations": {"ro": "descrie", "pl": "opisać", "th": "อธิบาย", "ta": "வर्णிக்க", "kn": "ವರ್ಣಿಸು", "uk": "описати", "bn": "বর্ণনা করা", "hi": "वर्णन करना"}}
-{"guid": "V09_015", "translations": {"ro": "menționa", "pl": "wspomnieć", "th": "กล่าวถึง", "ta": "குறிப்பிடுவது", "kn": "ಉಲ್ಲೇಖಿಸುವುದು", "uk": "згадати", "bn": "উল্লেখ করা", "hi": "उल्लेख करना"}}
-{"guid": "V09_016", "translations": {"ro": "sugera", "pl": "sugerować", "th": "แนะนำ", "ta": "சம்பந்தம்", "kn": "ಸೂಚಿಸು", "uk": "запропонувати", "bn": "প্রস্তাব করা", "hi": "सुझाव देना"}}
-{"guid": "V09_017", "translations": {"ro": "promite", "pl": "obiecać", "th": "สัญญา", "ta": "உறுதி அளிக்க", "kn": "ಪ್ರತಿಜ್ಞೆ ಮಾಡು", "uk": "пообіцяти", "bn": "প্রতিশ্রুতি দেওয়া", "hi": "वचन देना"}}
-{"guid": "V09_018", "translations": {"ro": "avertiza", "pl": "ostrzegać", "th": "เตือน", "ta": "எச்சரிக்கச் சொல்வது", "kn": "ಎಚ್ಚರಿಸುವುದು", "uk": "попереджувати", "bn": "সতর্ক করা", "hi": "चेतावनी देना"}}
-{"guid": "V09_019", "translations": {"ro": "plânge-se", "pl": "narzekać", "th": "บ่น", "ta": "பணி் புகாரளிக்க", "kn": "ಶಿಕಾಯತ್ ಮಾಡು", "uk": "скаржитися", "bn": "অভিযোগ করা", "hi": "शिकायत करना"}}
-{"guid": "V09_020", "translations": {"ro": "mulțumi", "pl": "dziękować", "th": "ขอบคุณ", "ta": "நன்றி தெரிவிக்க", "kn": "ಧನ್ಯವಾದ ಹೇಳು", "uk": "дякувати", "bn": "ধন্যবাদ জ্ঞাপন করা", "hi": "धन्यवाद कहना"}}
-{"guid": "V09_021", "translations": {"ro": "traduce", "pl": "tłumaczyć", "th": "แปล", "ta": "மொழிபெயர்க்க", "kn": "ಅನುವಾದಿಸು", "uk": "перекладати", "bn": "অনুবাদ করা", "hi": "अनुवाद करना"}}
-{"guid": "V09_022", "translations": {"ro": "cânta", "pl": "śpiewać", "th": "ร้องเพลง", "ta": "பாடு", "kn": "ಹಾಡು", "uk": "співати", "bn": "গাওয়া", "hi": "गाना"}}
-{"guid": "V09_023", "translations": {"ro": "a solicita", "pl": "prosić", "th": "ขอ", "ta": "கோரிக்கை செய்வது", "kn": "ಬೇಡಿಕೊಳ್ಳಲು", "uk": "прохати", "bn": "অনুরোধ করা", "hi": "अनुरोध करना"}}
-{"guid": "V09_024", "translations": {"ro": "nega", "pl": "zaprzeczyć", "th": "ปฏิเสธ", "ta": "否認", "kn": "ನಿರಾಕರಿಸು", "uk": "заперечувати", "bn": "অস্বীকার করা", "hi": "इनकार करना"}}
-{"guid": "V09_025", "translations": {"ro": "mormăi", "pl": "chrząkać", "th": "คราง", "ta": "உற்குதல்", "kn": "ಉರಕುವುದು", "uk": "урчати", "bn": "গুড়্গু করা", "hi": "कराहना"}}
-{"guid": "V09_026", "translations": {"ro": "trimite prin poștă", "pl": "wysłać pocztą", "th": "ส่งไปรษณีย์", "ta": "அஞ்சல் அனுப்ப", "kn": "ತಪ್\fಡಿಸಲು", "uk": "надсилати", "bn": "ডাক পাঠানো", "hi": "डाक भेजना"}}
-{"guid": "V09_027", "translations": {"ro": "publica", "pl": "opublikować", "th": "โพสต์", "ta": "பதிவேற்ற", "kn": "ಪ್ರಕಾಶಿಸಲು", "uk": "опублікувати", "bn": "প্রকাশ করা", "hi": "प्रकाशित करना"}}
-{"guid": "V09_028", "translations": {"ro": "semna", "pl": "podpisać", "th": "ลงนาม", "ta": "கையொப்பம் இடு", "kn": "ಸಹಿ ಹಾಕು", "uk": "підписати", "bn": "সই করা", "hi": "हस्ताक्षर करना"}}
-{"guid": "V09_029", "translations": {"ro": "minți", "pl": "kłamać", "th": "โกหก", "ta": "பொய் சொல்", "kn": "ಸುಳ್ಳು ಹೇಳು", "uk": "брехати", "bn": "মিথ্যা বলা", "hi": "झूठ बोलना"}}
-{"guid": "V09_030", "translations": {"ro": "telefona", "pl": "dzwonić", "th": "โทร", "ta": "கால் செய்தல்", "kn": "ಫೋನ್‌ಮಾಡು", "uk": "дзвонити", "bn": "কল করা", "hi": "फोन करना"}}
+{"guid": "V09_001", "translations": {"ro": "vorbi", "pl": "mówić", "th": "พูด", "ms": "bercakap", "ta": "பேசு", "kn": "ಮಾತನಾಡು", "uk": "говорити", "bn": "কথা বলা", "hi": "बोलना", "tr": "konuşmak", "bs": "govoriti"}}
+{"guid": "V09_002", "translations": {"ro": "vorbi", "pl": "mówić", "th": "พูด", "ms": "bercakap", "ta": "பேசு", "kn": "ಮಾತನಾಡು", "uk": "говорити", "bn": "কথা বলা", "hi": "बोलना", "tr": "konuşmak"}}
+{"guid": "V09_003", "translations": {"ro": "spune", "pl": "powiedzieć", "th": "บอก", "ms": "memberitahu", "ta": "புலம்புதல்", "kn": "ಹೇಳು", "uk": "сказати", "bn": "বলা", "hi": "कहना", "tr": "söylemek", "bs": "reći"}}
+{"guid": "V09_004", "translations": {"ro": "întreba", "pl": "pytać", "th": "ถาม", "ms": "bertanya", "ta": "கேட்பு", "kn": "ಕುಂಬಳಿಸು", "uk": "питати", "bn": "জিজ্ঞাসা করা", "hi": "पूछना", "tr": "sormak", "bs": "pitati"}}
+{"guid": "V09_005", "translations": {"ro": "răspunde", "pl": "odpowiedzieć", "th": "ตอบ", "ms": "menjawab", "ta": "பதில் கூறு", "kn": "ಉತ್ತರಿಸು", "uk": "відповісти", "bn": "উত্তর দেওয়া", "hi": "उत्तर देना", "tr": "cevap vermek"}}
+{"guid": "V09_006", "translations": {"ro": "spune", "pl": "powiedzieć", "th": "พูด", "ms": "berkata", "ta": "சொல்வது", "kn": "ಹೇಳುವುದು", "uk": "сказати", "bn": "কওয়া", "hi": "कहना", "tr": "söylemek", "bs": "reći"}}
+{"guid": "V09_007", "translations": {"ro": "a chema", "pl": "wołać", "th": "ร้องเรียก", "ms": "menyeru", "ta": "கொஞ்", "kn": "ಶುಟ್ಟು", "uk": "кликати", "bn": "ডাকা", "hi": "ड बुलाना", "tr": "seslenmek"}}
+{"guid": "V09_008", "translations": {"ro": "ține răspuns", "pl": "krzyczeć", "th": "ตะโกน", "ms": "menjerit", "ta": "கூவல்", "kn": "ಆರತಲೇ", "uk": "кричати", "bn": "চিৎকার করা", "hi": "चिल्लाना", "tr": "bağırmak"}}
+{"guid": "V09_009", "translations": {"ro": "șopti", "pl": "szeptać", "th": "กระซิบ", "ms": "berbisik", "ta": "கிசுகிசு பேசு", "kn": "ರೆಹರಿಸು", "uk": "шепотіти", "bn": "ফিসফিস করা", "hi": "फुसफुसाना", "tr": "fısıldamak"}}
+{"guid": "V09_010", "translations": {"ro": "răspunde", "pl": "odpowiedzieć", "th": "ตอบ", "ms": "menjawab", "ta": "பதில் சொல்ல", "kn": "ಪ್ರತಿಕ್ರಿಯೆ ನೀಡಲು", "uk": "відповісти", "bn": "উত্তর দেওয়া", "hi": "जवाब देना", "tr": "yanıt vermek"}}
+{"guid": "V09_011", "translations": {"ro": "explica", "pl": "wyjaśnić", "th": "อธิบาย", "ms": "menerangkan", "ta": "விளக்கம் கொள்", "kn": "ವಿವರಣೆ ಮಾಡು", "uk": "пояснити", "bn": "বর্ণনা করা", "hi": "व्याख्या करना", "tr": "açıklamak"}}
+{"guid": "V09_012", "translations": {"ro": "anunța", "pl": "ogłosić", "th": "ประกาศ", "ms": "mengumumkan", "ta": "அறிமுகப்படுத்து", "kn": "ಪ್ರಕಟನೆ ಮಾಡು", "uk": "оголосити", "bn": "ঘোষণা করা", "hi": "घोषणा करना", "tr": "duyurmak"}}
+{"guid": "V09_013", "translations": {"ro": "discută", "pl": "dyskutować", "th": "หารือ", "ms": "membincangkan", "ta": "பரிவேசிப்பது", "kn": "ಚರ್ಚೆ ಮಾಡು", "uk": "обговорити", "bn": "আলোচনা করা", "hi": "चर्चा करना", "tr": "tartışmak"}}
+{"guid": "V09_014", "translations": {"ro": "descrie", "pl": "opisać", "th": "อธิบาย", "ms": "menggambarkan", "ta": "வर्णிக்க", "kn": "ವರ್ಣಿಸು", "uk": "описати", "bn": "বর্ণনা করা", "hi": "वर्णन करना", "tr": "betimlemek"}}
+{"guid": "V09_015", "translations": {"ro": "menționa", "pl": "wspomnieć", "th": "กล่าวถึง", "ms": "menyebut", "ta": "குறிப்பிடுவது", "kn": "ಉಲ್ಲೇಖಿಸುವುದು", "uk": "згадати", "bn": "উল্লেখ করা", "hi": "उल्लेख करना", "tr": "bahsetmek"}}
+{"guid": "V09_016", "translations": {"ro": "sugera", "pl": "sugerować", "th": "แนะนำ", "ms": "mencadangkan", "ta": "சம்பந்தம்", "kn": "ಸೂಚಿಸು", "uk": "запропонувати", "bn": "প্রস্তাব করা", "hi": "सुझाव देना", "tr": "önermek"}}
+{"guid": "V09_017", "translations": {"ro": "promite", "pl": "obiecać", "th": "สัญญา", "ms": "berjanji", "ta": "உறுதி அளிக்க", "kn": "ಪ್ರತಿಜ್ಞೆ ಮಾಡು", "uk": "пообіцяти", "bn": "প্রতিশ্রুতি দেওয়া", "hi": "वचन देना", "tr": "söz vermek"}}
+{"guid": "V09_018", "translations": {"ro": "avertiza", "pl": "ostrzegać", "th": "เตือน", "ms": "memperingatkan", "ta": "எச்சரிக்கச் சொல்வது", "kn": "ಎಚ್ಚರಿಸುವುದು", "uk": "попереджувати", "bn": "সতর্ক করা", "hi": "चेतावनी देना", "tr": "uyarmak"}}
+{"guid": "V09_019", "translations": {"ro": "plânge-se", "pl": "narzekać", "th": "บ่น", "ms": "mengeluh", "ta": "பணி் புகாரளிக்க", "kn": "ಶಿಕಾಯತ್ ಮಾಡು", "uk": "скаржитися", "bn": "অভিযোগ করা", "hi": "शिकायत करना", "tr": "şikâyet etmek"}}
+{"guid": "V09_020", "translations": {"ro": "mulțumi", "pl": "dziękować", "th": "ขอบคุณ", "ms": "berterima kasih", "ta": "நன்றி தெரிவிக்க", "kn": "ಧನ್ಯವಾದ ಹೇಳು", "uk": "дякувати", "bn": "ধন্যবাদ জ্ঞাপন করা", "hi": "धन्यवाद कहना", "tr": "teşekkür etmek"}}
+{"guid": "V09_021", "translations": {"ro": "traduce", "pl": "tłumaczyć", "th": "แปล", "ms": "menterjemahkan", "ta": "மொழிபெயர்க்க", "kn": "ಅನುವಾದಿಸು", "uk": "перекладати", "bn": "অনুবাদ করা", "hi": "अनुवाद करना", "tr": "çevirmek"}}
+{"guid": "V09_022", "translations": {"ro": "cânta", "pl": "śpiewać", "th": "ร้องเพลง", "ms": "menyanyi", "ta": "பாடு", "kn": "ಹಾಡು", "uk": "співати", "bn": "গাওয়া", "hi": "गाना", "tr": "şarkı söylemek"}}
+{"guid": "V09_023", "translations": {"ro": "a solicita", "pl": "prosić", "th": "ขอ", "ms": "meminta", "ta": "கோரிக்கை செய்வது", "kn": "ಬೇಡಿಕೊಳ್ಳಲು", "uk": "прохати", "bn": "অনুরোধ করা", "hi": "अनुरोध करना", "tr": "rica etmek"}}
+{"guid": "V09_024", "translations": {"ro": "nega", "pl": "zaprzeczyć", "th": "ปฏิเสธ", "ms": "menafikan", "ta": "否認", "kn": "ನಿರಾಕರಿಸು", "uk": "заперечувати", "bn": "অস্বীকার করা", "hi": "इनकार करना", "tr": "inkâr etmek"}}
+{"guid": "V09_025", "translations": {"ro": "mormăi", "pl": "chrząkać", "th": "คราง", "ms": "menggeram", "ta": "உற்குதல்", "kn": "ಉರಕುವುದು", "uk": "урчати", "bn": "গুড়্গু করা", "hi": "कराहना", "tr": "homurdanmak"}}
+{"guid": "V09_026", "translations": {"ro": "trimite prin poștă", "pl": "wysłać pocztą", "th": "ส่งไปรษณีย์", "ms": "mengirim melalui pos", "ta": "அஞ்சல் அனுப்ப", "kn": "ತಪ್\fಡಿಸಲು", "uk": "надсилати", "bn": "ডাক পাঠানো", "hi": "डाक भेजना", "tr": "postalamak"}}
+{"guid": "V09_027", "translations": {"ro": "publica", "pl": "opublikować", "th": "โพสต์", "ms": "memuat naik", "ta": "பதிவேற்ற", "kn": "ಪ್ರಕಾಶಿಸಲು", "uk": "опублікувати", "bn": "প্রকাশ করা", "hi": "प्रकाशित करना", "tr": "paylaşmak"}}
+{"guid": "V09_028", "translations": {"ro": "semna", "pl": "podpisać", "th": "ลงนาม", "ms": "menandatangani", "ta": "கையொப்பம் இடு", "kn": "ಸಹಿ ಹಾಕು", "uk": "підписати", "bn": "সই করা", "hi": "हस्ताक्षर करना", "tr": "imzalamak"}}
+{"guid": "V09_029", "translations": {"ro": "minți", "pl": "kłamać", "th": "โกหก", "ms": "berbohong", "ta": "பொய் சொல்", "kn": "ಸುಳ್ಳು ಹೇಳು", "uk": "брехати", "bn": "মিথ্যা বলা", "hi": "झूठ बोलना", "tr": "yalan söylemek"}}
+{"guid": "V09_030", "translations": {"ro": "telefona", "pl": "dzwonić", "th": "โทร", "ms": "menelefon", "ta": "கால் செய்தல்", "kn": "ಫೋನ್‌ಮಾಡು", "uk": "дзвонити", "bn": "কল করা", "hi": "फोन करना", "tr": "telefon etmek"}}
+{"guid": "V09_031", "translations": {"ms": "berima", "hi": "तुकांत होना", "tr": "kafiye yapmak"}}
+{"guid": "V09_032", "translations": {"ms": "memberi isyarat", "hi": "संकेत देना", "tr": "sinyal vermek"}}
+{"guid": "V09_033", "translations": {"ms": "berhujah", "hi": "तर्क करना", "tr": "savunmak"}}
+{"guid": "V09_034", "translations": {"ms": "membenarkan", "hi": "औचित्य सिद्ध करना", "tr": "haklı çıkarmak"}}
+{"guid": "V09_035", "translations": {"ms": "menegaskan", "hi": "दावा करना", "tr": "iddia etmek"}}
+{"guid": "V09_036", "translations": {"ms": "menegaskan", "hi": "दावा करना", "tr": "ileri sürmek"}}
+{"guid": "V09_037", "translations": {"ms": "melakonkan dengan gerak isyarat", "hi": "इशारों से अभिनय करना", "tr": "jestlerle anlatmak"}}
+{"guid": "V09_038", "translations": {"ms": "mengarah", "hi": "निर्देशन करना", "tr": "yönetmek"}}
+{"guid": "V09_039", "translations": {"ms": "mengarahkan", "hi": "निर्देश देना", "tr": "yönlendirmek"}}
+{"guid": "V09_040", "translations": {"ms": "berlakon bersama sebagai pelakon utama", "hi": "सह-कलाकार के रूप में अभिनय करना", "tr": "başrolü paylaşmak"}}
+{"guid": "V09_041", "translations": {"ms": "bekerjasama", "hi": "सहयोग करना", "tr": "iş birliği yapmak"}}
+{"guid": "V09_042", "translations": {"ms": "menjemput", "hi": "आमंत्रित करना", "tr": "davet etmek"}}
+{"guid": "V09_043", "translations": {"ms": "menjemput", "hi": "आमंत्रित करना", "tr": "davet etmek"}}
+{"guid": "V09_044", "translations": {"ms": "berucap kepada", "hi": "संबोधित करना", "tr": "hitap etmek"}}
+{"guid": "V09_045", "translations": {"ms": "mengulangi", "hi": "दोहराना", "tr": "tekrarlamak"}}
+{"guid": "V09_046", "translations": {"ms": "menyoal", "hi": "प्रश्न पूछकर परीक्षा लेना", "tr": "sınamak"}}
+{"guid": "V09_047", "translations": {"ms": "menjelaskan", "hi": "स्पष्ट करना", "tr": "açıklığa kavuşturmak"}}
+{"guid": "V09_048", "translations": {"ms": "mengulas", "hi": "टिप्पणी करना", "tr": "yorum yapmak"}}
+{"guid": "V09_049", "translations": {"ms": "mengutuk", "hi": "निंदा करना", "tr": "kınamak"}}
+{"guid": "V09_050", "translations": {"ms": "mengesahkan", "hi": "पुष्टि करना", "tr": "doğrulamak"}}
+{"guid": "V09_051", "translations": {"ms": "menyangkal", "hi": "खंडन करना", "tr": "çelişmek"}}
+{"guid": "V09_052", "translations": {"ms": "meyakinkan", "hi": "मनाना", "tr": "ikna etmek"}}
+{"guid": "V09_053", "translations": {"ms": "mengkritik", "hi": "आलोचना करना", "tr": "eleştirmek"}}
+{"guid": "V09_054", "translations": {"ms": "mengisytiharkan", "hi": "घोषित करना", "tr": "ilan etmek"}}
+{"guid": "V09_055", "translations": {"ms": "mengisytiharkan", "hi": "घोषित करना", "tr": "ilan etmek"}}
+{"guid": "V09_056", "translations": {"ms": "mengisytiharkan", "hi": "घोषित करना", "tr": "beyan etmek"}}
+{"guid": "V09_057", "translations": {"ms": "mentakrifkan", "hi": "परिभाषित करना", "tr": "tanımlamak"}}
+{"guid": "V09_058", "translations": {"ms": "mentakrifkan", "hi": "परिभाषित करना", "tr": "tanımlamak"}}
+{"guid": "V09_059", "translations": {"ms": "ingkar", "hi": "अवज्ञा करना", "tr": "karşı gelmek"}}
+{"guid": "V09_060", "translations": {"ms": "menuntut", "hi": "माँग करना", "tr": "talep etmek"}}
+{"guid": "V09_061", "translations": {"ms": "menjelaskan", "hi": "समझाना", "tr": "açıklamak"}}
+{"guid": "V09_062", "translations": {"ms": "menyiratkan", "hi": "संकेत करना", "tr": "ima etmek"}}
+{"guid": "V09_063", "translations": {"ms": "berkeras", "hi": "ज़ोर देना", "tr": "ısrar etmek"}}
+{"guid": "V09_064", "translations": {"ms": "mentafsir", "hi": "व्याख्या करना", "tr": "yorumlamak"}}
+{"guid": "V09_065", "translations": {"ms": "menterjemah secara lisan", "hi": "मौखिक अनुवाद करना", "tr": "sözlü tercüme etmek"}}
+{"guid": "V09_066", "translations": {"ms": "menentang", "hi": "विरोध करना", "tr": "karşı çıkmak"}}
+{"guid": "V09_067", "translations": {"ms": "menggariskan", "hi": "संक्षेप में रूपरेखा देना", "tr": "ana hatlarıyla belirtmek"}}
+{"guid": "V09_068", "translations": {"ms": "memujuk", "hi": "मनाना", "tr": "ikna etmek"}}
+{"guid": "V09_069", "translations": {"ms": "memuji", "hi": "प्रशंसा करना", "tr": "övmek"}}
+{"guid": "V09_070", "translations": {"ms": "memuji", "hi": "स्तुति करना", "tr": "övmek"}}
+{"guid": "V09_071", "translations": {"ms": "membuktikan", "hi": "साबित करना", "tr": "kanıtlamak"}}
+{"guid": "V09_072", "translations": {"ms": "membuktikan", "hi": "सिद्ध करना", "tr": "kanıtlamak"}}
+{"guid": "V09_073", "translations": {"ms": "mengesyorkan", "hi": "सिफ़ारिश करना", "tr": "tavsiye etmek"}}
+{"guid": "V09_074", "translations": {"ms": "mencalonkan", "hi": "नामांकित करना", "tr": "aday göstermek"}}
+{"guid": "V09_075", "translations": {"ms": "menyatakan semula", "hi": "पुनः कहना", "tr": "yeniden ifade etmek"}}
+{"guid": "V09_076", "translations": {"ms": "mendedahkan", "hi": "प्रकट करना", "tr": "açıklamak"}}
+{"guid": "V09_077", "translations": {"ms": "menyatakan", "hi": "निर्दिष्ट करना", "tr": "belirtmek"}}
+{"guid": "V09_078", "translations": {"ms": "menentukan", "hi": "निर्दिष्ट करना", "tr": "belirtmek"}}
+{"guid": "V09_079", "translations": {"ms": "merumuskan", "hi": "सारांश देना", "tr": "özetlemek"}}
+{"guid": "V09_080", "translations": {"ms": "mensintesis", "hi": "संश्लेषित करना", "tr": "sentezlemek"}}

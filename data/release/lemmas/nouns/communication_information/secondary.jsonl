@@ -1,38 +1,159 @@
-{"guid": "N50_001", "translations": {"ro": "cuvânt", "pl": "słowo", "th": "คำ", "ta": "சொல்", "kn": "ಪದ", "uk": "слово", "bn": "শব্দ", "hi": "शब्द"}}
-{"guid": "N50_002", "translations": {"ro": "limbă", "pl": "język", "th": "ภาษา", "ta": "மொழி", "kn": "ಭಾಷೆ", "uk": "мова", "bn": "ভাষা", "hi": "भाषा"}}
-{"guid": "N50_003", "translations": {"ro": "voce", "pl": "głos", "th": "เสียง", "ta": "குரல்", "kn": "ಸ್ವರ", "uk": "голос", "bn": "কণ্ঠ", "hi": "स्वर"}}
-{"guid": "N50_004", "translations": {"ro": "întrebare", "pl": "pytanie", "th": "คำถาม", "ta": "கேள்வி", "kn": "ಪ್ರಶ್ನೆ", "uk": "питання", "bn": "প্রশ্ন", "hi": "प्रश्न"}}
-{"guid": "N50_005", "translations": {"ro": "răspuns", "pl": "odpowiedź", "th": "คำตอบ", "ta": "பதில்", "kn": "ಉತ್ತರ", "uk": "відповідь", "bn": "উত্তর", "hi": "उत्तर"}}
-{"guid": "N50_006", "translations": {"ro": "poveste", "pl": "opowieść", "th": "เรื่องราว", "ta": "கதை", "kn": "ಕಥೆ", "uk": "історія", "bn": "কাহিনী", "hi": "कहानी"}}
-{"guid": "N50_007", "translations": {"ro": "exemplu", "pl": "przykład", "th": "ตัวอย่าง", "ta": "உதாரணம்", "kn": "ಉದಾಹರಣೆ", "uk": "приклад", "bn": "উদাহরণ", "hi": "उदाहरण"}}
-{"guid": "N50_008", "translations": {"ro": "informație", "pl": "informacja", "th": "ข้อมูล", "ta": "தகவல்", "kn": "ಮಾಹಿತಿ", "uk": "інформація", "bn": "তথ্য", "hi": "जानकारी"}}
-{"guid": "N50_009", "translations": {"ro": "știre", "pl": "wiadomość", "th": "ข่าว", "ta": "செய்தி", "kn": "ಸುದ್ದಿ", "uk": "новина", "bn": "সংবাদ", "hi": "समाचार"}}
-{"guid": "N50_010", "translations": {"ro": "nume", "pl": "imię", "th": "ชื่อ", "ta": "பெயர்", "kn": "ಹೆಸರು", "uk": "ім'я", "bn": "নাম", "hi": "नाम"}}
-{"guid": "N50_011", "translations": {"ro": "capitol", "pl": "rozdział", "th": "บท", "ta": "அத்தியாயம்", "kn": "ಅಧ್ಯಾಯ", "uk": "розділ", "bn": "অধ্যায়", "hi": "अध्याय"}}
-{"guid": "N50_012", "translations": {"ro": "mesaj", "pl": "wiadomość", "th": "ข้อความ", "ta": "செய்தி", "kn": "ಸಂದೇಶ", "uk": "повідомлення", "bn": "বার্তা", "hi": "सूचना"}}
-{"guid": "N50_013", "translations": {"ro": "discurs", "pl": "przemówienie", "th": "สุนทรพจน์", "ta": "பேச்சு", "kn": "ಭಾಷಣ", "uk": "промова", "bn": "বক্তৃতা", "hi": "भाषण"}}
-{"guid": "N50_014", "translations": {"ro": "notă", "pl": "notatka", "th": "บันทึกสั้น", "ta": "குறிப்பு", "kn": "ಕುರ್ತು", "uk": "нотатка", "bn": "নোট", "hi": "नोट"}}
-{"guid": "N50_015", "translations": {"ro": "cântec", "pl": "piosenka", "th": "เพลง", "ta": "பாடல்", "kn": "ಹೇಗೆ", "uk": "пісня", "bn": "গান", "hi": "गीत"}}
-{"guid": "N50_016", "translations": {"ro": "raport", "pl": "raport", "th": "รายงาน", "ta": "அறிக்கை", "kn": "ವರದಿ", "uk": "звіт", "bn": "রিপোর্ট", "hi": "रिपोर्ट"}}
-{"guid": "N50_017", "translations": {"ro": "poveste", "pl": "opowieść", "th": "เรื่องเล่า", "ta": "கதை", "kn": "ಕಥೆ", "uk": "казка", "bn": "কথা", "hi": "कहानी"}}
-{"guid": "N50_018", "translations": {"ro": "subiect", "pl": "temat", "th": "หัวข้อ", "ta": "தலைப்பு", "kn": "ವಿಷಯ", "uk": "тема", "bn": "বিষয়", "hi": "विषय"}}
-{"guid": "N50_019", "translations": {"ro": "avertisment", "pl": "ostrzeżenie", "th": "คำเตือน", "ta": "எச்சரிக்கை", "kn": "ಎಚ್ಚರಿಕೆ", "uk": "попередження", "bn": "সতর্কতা", "hi": "चेतावनी"}}
-{"guid": "N50_020", "translations": {"ro": "secret", "pl": "tajemnica", "th": "ความลับ", "ta": "ரகசியம்", "kn": "ರಹಸ್ಯ", "uk": "таємниця", "bn": "রহস্য", "hi": "रहस्य"}}
-{"guid": "N50_021", "translations": {"ro": "semn", "pl": "znak", "th": "เครื่องหมาย", "ta": "சின்னம்", "kn": "ಸಂಕೇತ", "uk": "знак", "bn": "চিহ্ন", "hi": "संकेत"}}
-{"guid": "N50_022", "translations": {"ro": "scrisoare", "pl": "list", "th": "จดหมาย", "ta": "கத்தெழுத்து", "kn": "ಕಟ್ಟೆ ಪತ್ರ", "uk": "лист", "bn": "চিঠি", "hi": "पत्र"}}
-{"guid": "N50_023", "translations": {"ro": "conversație", "pl": "rozmowa", "th": "การสนทนา", "ta": "பேச்சு", "kn": "ಸಂಭಾಷಣೆ", "uk": "розмова", "bn": "সংবাদলাপ", "hi": "वार्तालाप"}}
-{"guid": "N50_024", "translations": {"ro": "propoziție", "pl": "zdanie", "th": "ประโยค", "ta": "வாக்கியம்", "kn": "ವಾಕ್ಯ", "uk": "речення", "bn": "বাক্য", "hi": "वाक्य"}}
-{"guid": "N50_025", "translations": {"ro": "pagină", "pl": "strona", "th": "หน้า", "ta": "பக்கம்", "kn": "ಪುಟ", "uk": "сторінка", "bn": "পৃষ্ঠা", "hi": "पृष्ठ"}}
-{"guid": "N50_026", "translations": {"ro": "imagine", "pl": "obraz", "th": "ภาพ", "ta": "படம்", "kn": "ಚಿತ್ರ", "uk": "зображення", "bn": "ছবি", "hi": "चित्र"}}
-{"guid": "N50_027", "translations": {"ro": "fotografie", "pl": "fotografia", "th": "รูปถ่าย", "ta": "புகைப்படம்", "kn": "ಫೋಟೋ", "uk": "фотографія", "bn": "ছবি", "hi": "फोटो"}}
-{"guid": "N50_028", "translations": {"ro": "bilet", "pl": "bilet", "th": "ตั๋ว", "ta": "டிக்கெட்", "kn": "ಟಿಕೆಟ್", "uk": "квиток", "bn": "টিকিট", "hi": "टिकट"}}
-{"guid": "N50_029", "translations": {"ro": "hartă", "pl": "mapa", "th": "แผนที่", "ta": "வரைபடம்", "kn": "ನಕ್ಷೆ", "uk": "карта", "bn": "নকশা", "hi": "नक्शा"}}
-{"guid": "N50_030", "translations": {"ro": "termen", "pl": "termin", "th": "คำศัพท์", "ta": "பழம்", "kn": "ಪದ", "uk": "термін", "bn": "শব্দ", "hi": "पद"}}
-{"guid": "N50_031", "translations": {"ro": "reclamă", "pl": "reklama", "th": "โฆษณา", "ta": "விளம்பரம்", "kn": "ಜಾಹಿರಾತು", "uk": "реклама", "bn": "বিজ্ঞাপন", "hi": "विज्ञापन"}}
-{"guid": "N50_032", "translations": {"ro": "listă", "pl": "lista", "th": "รายการ", "ta": "பட்டியல்", "kn": "ಪಟ್ಟಿ", "uk": "список", "bn": "তালিকা", "hi": "सूची"}}
-{"guid": "N50_033", "translations": {"ro": "imprimat", "pl": "druk", "th": "พิมพ์", "ta": "ஒற்றைப்படை", "kn": "ಮುದ್ರಣ", "uk": "друк", "bn": "ছাপা", "hi": "मुद्रण"}}
-{"guid": "N50_034", "translations": {"ro": "proză", "pl": "proza", "th": "ร้อยแก้ว", "ta": "பிராஸ்", "kn": "ಪ್ರೋಸ್", "uk": "проза", "bn": "গদ্য", "hi": "गद्य"}}
-{"guid": "N50_035", "translations": {"ro": "vers", "pl": "wiersz", "th": "บทกวี", "ta": "கவிதை", "kn": "ಕಾವ್ಯ", "uk": "вірш", "bn": "কবিতা", "hi": "कविता"}}
-{"guid": "N50_036", "translations": {"ro": "formular", "pl": "formularz", "th": "แบบฟอร์ม", "ta": "அடிவிவரம்", "kn": "ಫಾರ್ಮ್", "uk": "форма", "bn": "ফরম", "hi": "प्रपत्र"}}
-{"guid": "N50_037", "translations": {"ro": "testament", "pl": "testament", "th": "พินัยกรรม", "ta": "வซีராகம்", "kn": "ವसीರಾತ್", "uk": "заповіт", "bn": "ইচ্ছাপত্র", "hi": "वसीयत"}}
-{"guid": "N50_038", "translations": {"ro": "sugestie", "pl": "wskazówka", "th": "คำแนะนำ", "ta": "சலுகை", "kn": "ಸಲಹೆ", "uk": "порада", "bn": "পর্দর্শন", "hi": "सुझाव"}}
+{"guid": "N50_001", "translations": {"ro": "cuvânt", "pl": "słowo", "th": "คำ", "ms": "perkataan", "ta": "சொல்", "kn": "ಪದ", "uk": "слово", "bn": "শব্দ", "hi": "शब्द", "tr": "kelime"}}
+{"guid": "N50_002", "translations": {"ro": "limbă", "pl": "język", "th": "ภาษา", "ms": "bahasa", "ta": "மொழி", "kn": "ಭಾಷೆ", "uk": "мова", "bn": "ভাষা", "hi": "भाषा", "tr": "dil"}}
+{"guid": "N50_003", "translations": {"ro": "voce", "pl": "głos", "th": "เสียง", "ms": "suara", "ta": "குரல்", "kn": "ಸ್ವರ", "uk": "голос", "bn": "কণ্ঠ", "hi": "स्वर", "tr": "ses"}}
+{"guid": "N50_004", "translations": {"ro": "întrebare", "pl": "pytanie", "th": "คำถาม", "ms": "soalan", "ta": "கேள்வி", "kn": "ಪ್ರಶ್ನೆ", "uk": "питання", "bn": "প্রশ্ন", "hi": "प्रश्न", "tr": "soru"}}
+{"guid": "N50_005", "translations": {"ro": "răspuns", "pl": "odpowiedź", "th": "คำตอบ", "ms": "jawapan", "ta": "பதில்", "kn": "ಉತ್ತರ", "uk": "відповідь", "bn": "উত্তর", "hi": "उत्तर", "tr": "cevap"}}
+{"guid": "N50_006", "translations": {"ro": "poveste", "pl": "opowieść", "th": "เรื่องราว", "ms": "cerita", "ta": "கதை", "kn": "ಕಥೆ", "uk": "історія", "bn": "কাহিনী", "hi": "कहानी", "tr": "öykü"}}
+{"guid": "N50_007", "translations": {"ro": "exemplu", "pl": "przykład", "th": "ตัวอย่าง", "ms": "contoh", "ta": "உதாரணம்", "kn": "ಉದಾಹರಣೆ", "uk": "приклад", "bn": "উদাহরণ", "hi": "उदाहरण", "tr": "örnek"}}
+{"guid": "N50_008", "translations": {"ro": "informație", "pl": "informacja", "th": "ข้อมูล", "ms": "maklumat", "ta": "தகவல்", "kn": "ಮಾಹಿತಿ", "uk": "інформація", "bn": "তথ্য", "hi": "जानकारी", "tr": "bilgi"}}
+{"guid": "N50_009", "translations": {"ro": "știre", "pl": "wiadomość", "th": "ข่าว", "ms": "berita", "ta": "செய்தி", "kn": "ಸುದ್ದಿ", "uk": "новина", "bn": "সংবাদ", "hi": "समाचार", "tr": "haber"}}
+{"guid": "N50_010", "translations": {"ro": "nume", "pl": "imię", "th": "ชื่อ", "ms": "nama", "ta": "பெயர்", "kn": "ಹೆಸರು", "uk": "ім'я", "bn": "নাম", "hi": "नाम", "tr": "ad"}}
+{"guid": "N50_011", "translations": {"ro": "capitol", "pl": "rozdział", "th": "บท", "ms": "bab", "ta": "அத்தியாயம்", "kn": "ಅಧ್ಯಾಯ", "uk": "розділ", "bn": "অধ্যায়", "hi": "अध्याय", "tr": "bölüm"}}
+{"guid": "N50_012", "translations": {"ro": "mesaj", "pl": "wiadomość", "th": "ข้อความ", "ms": "pesan", "ta": "செய்தி", "kn": "ಸಂದೇಶ", "uk": "повідомлення", "bn": "বার্তা", "hi": "सूचना", "tr": "mesaj"}}
+{"guid": "N50_013", "translations": {"ro": "discurs", "pl": "przemówienie", "th": "สุนทรพจน์", "ms": "ucapan", "ta": "பேச்சு", "kn": "ಭಾಷಣ", "uk": "промова", "bn": "বক্তৃতা", "hi": "भाषण", "tr": "konuşma"}}
+{"guid": "N50_014", "translations": {"ro": "notă", "pl": "notatka", "th": "บันทึกสั้น", "ms": "nota", "ta": "குறிப்பு", "kn": "ಕುರ್ತು", "uk": "нотатка", "bn": "নোট", "hi": "नोट", "tr": "not"}}
+{"guid": "N50_015", "translations": {"ro": "cântec", "pl": "piosenka", "th": "เพลง", "ms": "lagu", "ta": "பாடல்", "kn": "ಹೇಗೆ", "uk": "пісня", "bn": "গান", "hi": "गीत", "tr": "şarkı"}}
+{"guid": "N50_016", "translations": {"ro": "raport", "pl": "raport", "th": "รายงาน", "ms": "laporan", "ta": "அறிக்கை", "kn": "ವರದಿ", "uk": "звіт", "bn": "রিপোর্ট", "hi": "रिपोर्ट", "tr": "rapor"}}
+{"guid": "N50_017", "translations": {"ro": "poveste", "pl": "opowieść", "th": "เรื่องเล่า", "ms": "cerita", "ta": "கதை", "kn": "ಕಥೆ", "uk": "казка", "bn": "কথা", "hi": "कहानी", "tr": "masal"}}
+{"guid": "N50_018", "translations": {"ro": "subiect", "pl": "temat", "th": "หัวข้อ", "ms": "topik", "ta": "தலைப்பு", "kn": "ವಿಷಯ", "uk": "тема", "bn": "বিষয়", "hi": "विषय", "tr": "konu"}}
+{"guid": "N50_019", "translations": {"ro": "avertisment", "pl": "ostrzeżenie", "th": "คำเตือน", "ms": "amaran", "ta": "எச்சரிக்கை", "kn": "ಎಚ್ಚರಿಕೆ", "uk": "попередження", "bn": "সতর্কতা", "hi": "चेतावनी", "tr": "uyarı"}}
+{"guid": "N50_020", "translations": {"ro": "secret", "pl": "tajemnica", "th": "ความลับ", "ms": "rahsia", "ta": "ரகசியம்", "kn": "ರಹಸ್ಯ", "uk": "таємниця", "bn": "রহস্য", "hi": "रहस्य", "tr": "sır"}}
+{"guid": "N50_021", "translations": {"ro": "semn", "pl": "znak", "th": "เครื่องหมาย", "ms": "tanda", "ta": "சின்னம்", "kn": "ಸಂಕೇತ", "uk": "знак", "bn": "চিহ্ন", "hi": "संकेत", "tr": "işaret"}}
+{"guid": "N50_022", "translations": {"ro": "scrisoare", "pl": "list", "th": "จดหมาย", "ms": "surat", "ta": "கத்தெழுத்து", "kn": "ಕಟ್ಟೆ ಪತ್ರ", "uk": "лист", "bn": "চিঠি", "hi": "पत्र", "tr": "mektup"}}
+{"guid": "N50_023", "translations": {"ro": "conversație", "pl": "rozmowa", "th": "การสนทนา", "ms": "perbualan", "ta": "பேச்சு", "kn": "ಸಂಭಾಷಣೆ", "uk": "розмова", "bn": "সংবাদলাপ", "hi": "वार्तालाप", "tr": "konuşma"}}
+{"guid": "N50_024", "translations": {"ro": "propoziție", "pl": "zdanie", "th": "ประโยค", "ms": "ayat", "ta": "வாக்கியம்", "kn": "ವಾಕ್ಯ", "uk": "речення", "bn": "বাক্য", "hi": "वाक्य", "tr": "cümle"}}
+{"guid": "N50_025", "translations": {"ro": "pagină", "pl": "strona", "th": "หน้า", "ms": "halaman", "ta": "பக்கம்", "kn": "ಪುಟ", "uk": "сторінка", "bn": "পৃষ্ঠা", "hi": "पृष्ठ", "tr": "sayfa"}}
+{"guid": "N50_026", "translations": {"ro": "imagine", "pl": "obraz", "th": "ภาพ", "ms": "gambar", "ta": "படம்", "kn": "ಚಿತ್ರ", "uk": "зображення", "bn": "ছবি", "hi": "चित्र", "tr": "resim"}}
+{"guid": "N50_027", "translations": {"ro": "fotografie", "pl": "fotografia", "th": "รูปถ่าย", "ms": "foto", "ta": "புகைப்படம்", "kn": "ಫೋಟೋ", "uk": "фотографія", "bn": "ছবি", "hi": "फोटो", "tr": "fotoğraf"}}
+{"guid": "N50_028", "translations": {"ro": "bilet", "pl": "bilet", "th": "ตั๋ว", "ms": "tiket", "ta": "டிக்கெட்", "kn": "ಟಿಕೆಟ್", "uk": "квиток", "bn": "টিকিট", "hi": "टिकट", "tr": "bilet"}}
+{"guid": "N50_029", "translations": {"ro": "hartă", "pl": "mapa", "th": "แผนที่", "ms": "peta", "ta": "வரைபடம்", "kn": "ನಕ್ಷೆ", "uk": "карта", "bn": "নকশা", "hi": "नक्शा", "tr": "harita"}}
+{"guid": "N50_030", "translations": {"ro": "termen", "pl": "termin", "th": "คำศัพท์", "ms": "istilah", "ta": "பழம்", "kn": "ಪದ", "uk": "термін", "bn": "শব্দ", "hi": "पद", "tr": "terim"}}
+{"guid": "N50_031", "translations": {"ro": "reclamă", "pl": "reklama", "th": "โฆษณา", "ms": "iklan", "ta": "விளம்பரம்", "kn": "ಜಾಹಿರಾತು", "uk": "реклама", "bn": "বিজ্ঞাপন", "hi": "विज्ञापन", "tr": "reklam"}}
+{"guid": "N50_032", "translations": {"ro": "listă", "pl": "lista", "th": "รายการ", "ms": "senarai", "ta": "பட்டியல்", "kn": "ಪಟ್ಟಿ", "uk": "список", "bn": "তালিকা", "hi": "सूची", "tr": "liste"}}
+{"guid": "N50_033", "translations": {"ro": "imprimat", "pl": "druk", "th": "พิมพ์", "ms": "cetakan", "ta": "ஒற்றைப்படை", "kn": "ಮುದ್ರಣ", "uk": "друк", "bn": "ছাপা", "hi": "मुद्रण", "tr": "baskı"}}
+{"guid": "N50_034", "translations": {"ro": "proză", "pl": "proza", "th": "ร้อยแก้ว", "ms": "prosa", "ta": "பிராஸ்", "kn": "ಪ್ರೋಸ್", "uk": "проза", "bn": "গদ্য", "hi": "गद्य", "tr": "düzyazı"}}
+{"guid": "N50_035", "translations": {"ro": "vers", "pl": "wiersz", "th": "บทกวี", "ms": "puisi", "ta": "கவிதை", "kn": "ಕಾವ್ಯ", "uk": "вірш", "bn": "কবিতা", "hi": "कविता", "tr": "şiir"}}
+{"guid": "N50_036", "translations": {"ro": "formular", "pl": "formularz", "th": "แบบฟอร์ม", "ms": "borang", "ta": "அடிவிவரம்", "kn": "ಫಾರ್ಮ್", "uk": "форма", "bn": "ফরম", "hi": "प्रपत्र", "tr": "form"}}
+{"guid": "N50_037", "translations": {"ro": "testament", "pl": "testament", "th": "พินัยกรรม", "ms": "wasiat", "ta": "வซีராகம்", "kn": "ವसीರಾತ್", "uk": "заповіт", "bn": "ইচ্ছাপত্র", "hi": "वसीयत", "tr": "vasiyetname"}}
+{"guid": "N50_038", "translations": {"ro": "sugestie", "pl": "wskazówka", "th": "คำแนะนำ", "ms": "petua", "ta": "சலுகை", "kn": "ಸಲಹೆ", "uk": "порада", "bn": "পর্দর্শন", "hi": "सुझाव", "tr": "tavsiye"}}
+{"guid": "N50_039", "translations": {"ms": "senarai barang untuk dibeli", "hi": "खरीदारी की सूची", "tr": "alışveriş listesi"}}
+{"guid": "N50_040", "translations": {"ms": "buku laporan prestasi", "hi": "प्रगति पत्र", "tr": "karne"}}
+{"guid": "N50_041", "translations": {"ms": "saman parkir", "hi": "पार्किंग का जुर्माना", "tr": "park cezası"}}
+{"guid": "N50_042", "translations": {"ms": "lesen memandu", "hi": "ड्राइविंग लाइसेंस", "tr": "sürücü belgesi"}}
+{"guid": "N50_043", "translations": {"ms": "pas masuk kapal terbang", "hi": "बोर्डिंग पास", "tr": "biniş kartı"}}
+{"guid": "N50_044", "translations": {"ms": "nama tengah", "hi": "मध्य नाम", "tr": "ikinci ad"}}
+{"guid": "N50_045", "translations": {"ms": "nama keluarga", "hi": "उपनाम", "tr": "soyadı"}}
+{"guid": "N50_046", "translations": {"ms": "nama pertama", "hi": "पहला नाम", "tr": "ilk ad"}}
+{"guid": "N50_047", "translations": {"ms": "nama keluarga sebelum berkahwin", "hi": "विवाह-पूर्व उपनाम", "tr": "kızlık soyadı"}}
+{"guid": "N50_048", "translations": {"ms": "mesej teks", "hi": "टेक्स्ट संदेश", "tr": "kısa mesaj"}}
+{"guid": "N50_049", "translations": {"ms": "nombor telefon", "hi": "फ़ोन नंबर", "tr": "telefon numarası"}}
+{"guid": "N50_050", "translations": {"ms": "alamat e-mel", "hi": "ईमेल पता", "tr": "e-posta adresi"}}
+{"guid": "N50_051", "translations": {"ms": "surat iringan", "hi": "आवेदन पत्र के साथ भेजा जाने वाला पत्र", "tr": "ön yazı"}}
+{"guid": "N50_052", "translations": {"ms": "lembaran muzik", "hi": "स्वरलिपि", "tr": "nota"}}
+{"guid": "N50_053", "translations": {"ms": "graf", "hi": "आलेख", "tr": "grafik"}}
+{"guid": "N50_054", "translations": {"ms": "lema", "hi": "उपप्रमेय", "tr": "yardımcı önerme"}}
+{"guid": "N50_055", "translations": {"ms": "ketidaklengkapan", "hi": "अपूर्णता", "tr": "eksiklik"}}
+{"guid": "N50_056", "translations": {"ms": "dentuman", "hi": "धमाका", "tr": "gümbürtü"}}
+{"guid": "N50_057", "translations": {"ms": "episod", "hi": "प्रसंग", "tr": "bölüm"}}
+{"guid": "N50_058", "translations": {"ms": "bunyi letupan kecil", "hi": "पटाख़े जैसी आवाज़", "tr": "patlama sesi"}}
+{"guid": "N50_059", "translations": {"ms": "dialog", "hi": "संवाद", "tr": "diyalog"}}
+{"guid": "N50_060", "translations": {"ms": "dialog", "hi": "संवाद", "tr": "diyalog"}}
+{"guid": "N50_061", "translations": {"ms": "puisi", "hi": "कविता", "tr": "şiir"}}
+{"guid": "N50_062", "translations": {"ms": "naratif", "hi": "कथा", "tr": "anlatı"}}
+{"guid": "N50_063", "translations": {"ms": "rima", "hi": "तुक", "tr": "kafiye"}}
+{"guid": "N50_064", "translations": {"ms": "manuskrip", "hi": "पांडुलिपि", "tr": "el yazması"}}
+{"guid": "N50_065", "translations": {"ms": "intonasi", "hi": "स्वराघात", "tr": "tonlama"}}
+{"guid": "N50_066", "translations": {"ms": "isyarat", "hi": "संकेत", "tr": "sinyal"}}
+{"guid": "N50_067", "translations": {"ms": "kod", "hi": "कूट", "tr": "kod"}}
+{"guid": "N50_068", "translations": {"ms": "tradisi", "hi": "परंपरा", "tr": "gelenek"}}
+{"guid": "N50_069", "translations": {"ms": "bahasa slanga", "hi": "बोलचाल की भाषा", "tr": "argo"}}
+{"guid": "N50_070", "translations": {"ms": "dasar", "hi": "नीति", "tr": "politika"}}
+{"guid": "N50_071", "translations": {"ms": "petisyen", "hi": "याचिका", "tr": "dilekçe"}}
+{"guid": "N50_072", "translations": {"ms": "aduan", "hi": "शिकायत", "tr": "şikâyet"}}
+{"guid": "N50_073", "translations": {"ms": "rayuan", "hi": "गुहार", "tr": "yakarı"}}
+{"guid": "N50_074", "translations": {"ms": "keterangan", "hi": "गवाही", "tr": "tanıklık"}}
+{"guid": "N50_075", "translations": {"ms": "rayuan", "hi": "अपील", "tr": "çağrı"}}
+{"guid": "N50_076", "translations": {"ms": "penafian", "hi": "इनकार", "tr": "inkâr"}}
+{"guid": "N50_077", "translations": {"ms": "perenggan", "hi": "अनुच्छेद", "tr": "paragraf"}}
+{"guid": "N50_078", "translations": {"ms": "perenggan", "hi": "अनुच्छेद", "tr": "madde"}}
+{"guid": "N50_079", "translations": {"ms": "tafsiran", "hi": "व्याख्या", "tr": "yorum"}}
+{"guid": "N50_080", "translations": {"ms": "arahan", "hi": "निर्देश", "tr": "talimat"}}
+{"guid": "N50_081", "translations": {"ms": "pembelaan", "hi": "बचाव", "tr": "savunma"}}
+{"guid": "N50_082", "translations": {"ms": "dakwaan", "hi": "दावा", "tr": "iddia"}}
+{"guid": "N50_083", "translations": {"ms": "petunjuk", "hi": "संकेत", "tr": "belirti"}}
+{"guid": "N50_084", "translations": {"ms": "lesen", "hi": "लाइसेंस", "tr": "lisans"}}
+{"guid": "N50_085", "translations": {"ms": "cadangan", "hi": "सिफ़ारिश", "tr": "tavsiye"}}
+{"guid": "N50_086", "translations": {"ms": "muzik tango", "hi": "टैंगो संगीत", "tr": "tango müziği"}}
+{"guid": "N50_087", "translations": {"ms": "lagu pujian gereja", "hi": "भजन", "tr": "kilise ilahisi"}}
+{"guid": "N50_088", "translations": {"ms": "rakaman video", "hi": "वीडियो फुटेज", "tr": "video görüntüsü"}}
+{"guid": "N50_089", "translations": {"ms": "bahagian akhir", "hi": "अंतिम भाग", "tr": "final"}}
+{"guid": "N50_090", "translations": {"ms": "penceritaan", "hi": "कथन", "tr": "anlatım"}}
+{"guid": "N50_091", "translations": {"ms": "pemancar", "hi": "प्रेषक", "tr": "iletici"}}
+{"guid": "N50_092", "translations": {"ms": "pengesahan ketulenan", "hi": "प्रामाणिकता की पुष्टि", "tr": "doğrulama"}}
+{"guid": "N50_093", "translations": {"ms": "gema", "hi": "गुंजन", "tr": "rezonans"}}
+{"guid": "N50_094", "translations": {"ms": "petikan", "hi": "उद्धरण", "tr": "alıntı"}}
+{"guid": "N50_095", "translations": {"ms": "gangguan", "hi": "उत्पीड़न", "tr": "taciz"}}
+{"guid": "N50_096", "translations": {"ms": "rujukan", "hi": "उद्धरण", "tr": "atıf"}}
+{"guid": "N50_097", "translations": {"ms": "kandungan", "hi": "विषयवस्तु", "tr": "içerik"}}
+{"guid": "N50_098", "translations": {"ms": "permohonan", "hi": "आवेदन", "tr": "başvuru"}}
+{"guid": "N50_099", "translations": {"ms": "ungkapan", "hi": "अभिव्यक्ति", "tr": "ifade"}}
+{"guid": "N50_100", "translations": {"ms": "bukan fiksyen", "hi": "गैर-काल्पनिक साहित्य", "tr": "kurgu dışı"}}
+{"guid": "N50_101", "translations": {"ms": "kerjasama", "hi": "सहायता", "tr": "yardım"}}
+{"guid": "N50_102", "translations": {"ms": "potret diri", "hi": "आत्म-चित्रण", "tr": "öz portre"}}
+{"guid": "N50_103", "translations": {"ms": "kata ganti nama", "hi": "सर्वनाम", "tr": "zamir"}}
+{"guid": "N50_104", "translations": {"ms": "kata sendi nama", "hi": "संबंधसूचक अव्यय", "tr": "edat"}}
+{"guid": "N50_105", "translations": {"ms": "vokal", "hi": "स्वर", "tr": "ünlü ses"}}
+{"guid": "N50_106", "translations": {"ms": "suku kata", "hi": "अक्षर", "tr": "hece"}}
+{"guid": "N50_107", "translations": {"ms": "loghat", "hi": "लहजा", "tr": "aksan"}}
+{"guid": "N50_108", "translations": {"ms": "sebutan", "hi": "उच्चारण", "tr": "telaffuz"}}
+{"guid": "N50_109", "translations": {"ms": "ejaan", "hi": "वर्तनी", "tr": "yazım"}}
+{"guid": "N50_110", "translations": {"ms": "skrip", "hi": "पटकथा", "tr": "senaryo"}}
+{"guid": "N50_111", "translations": {"ms": "tanda baca", "hi": "विराम चिह्न", "tr": "noktalama"}}
+{"guid": "N50_112", "translations": {"ms": "apostrof", "hi": "संबोधन", "tr": "seslenme"}}
+{"guid": "N50_113", "translations": {"ms": "perbendaharaan kata", "hi": "शब्दावली", "tr": "kelime dağarcığı"}}
+{"guid": "N50_114", "translations": {"ms": "takrif", "hi": "परिभाषा", "tr": "tanım"}}
+{"guid": "N50_115", "translations": {"ms": "simpulan bahasa", "hi": "मुहावरा", "tr": "deyim"}}
+{"guid": "N50_116", "translations": {"ms": "buku frasa", "hi": "वाक्यांश-पुस्तिका", "tr": "konuşma kılavuzu"}}
+{"guid": "N50_117", "translations": {"ms": "peribahasa", "hi": "कहावत", "tr": "atasözü"}}
+{"guid": "N50_118", "translations": {"ms": "sintaksis", "hi": "वाक्य-विन्यास", "tr": "sözdizimi"}}
+{"guid": "N50_119", "translations": {"ms": "hadis", "hi": "हदीस", "tr": "hadis"}}
+{"guid": "N50_120", "translations": {"ms": "mantera", "hi": "मंत्र", "tr": "mantra"}}
+{"guid": "N50_121", "translations": {"ms": "konsonan geseran", "hi": "घर्षी व्यंजन", "tr": "sürtünmeli ünsüz"}}
+{"guid": "N50_122", "translations": {"ms": "konsonan letupan", "hi": "स्पर्श व्यंजन", "tr": "patlamalı ünsüz"}}
+{"guid": "N50_123", "translations": {"ms": "konsonan desis", "hi": "ऊष्म ध्वनि", "tr": "ıslıklı ünsüz"}}
+{"guid": "N50_124", "translations": {"ms": "prosodi", "hi": "स्वराघात", "tr": "prozodi"}}
+{"guid": "N50_125", "translations": {"ms": "morfem", "hi": "रूपिम", "tr": "morfem"}}
+{"guid": "N50_126", "translations": {"ms": "pengulangan", "hi": "द्विरुक्ति", "tr": "ikileme"}}
+{"guid": "N50_127", "translations": {"ms": "penerang", "hi": "विशेषक", "tr": "niteleyici"}}
+{"guid": "N50_128", "translations": {"ms": "konotasi", "hi": "लक्षणा", "tr": "yan anlam"}}
+{"guid": "N50_129", "translations": {"ms": "denotasi", "hi": "अभिधा", "tr": "düz anlam"}}
+{"guid": "N50_130", "translations": {"ms": "kata serumpun", "hi": "सजातीय शब्द", "tr": "kökendaş sözcük"}}
+{"guid": "N50_131", "translations": {"ms": "transliterasi", "hi": "लिप्यंतरण", "tr": "transliterasyon"}}
+{"guid": "N50_132", "translations": {"ms": "kata pinjaman", "hi": "आगंतुक शब्द", "tr": "ödünç kelime"}}
+{"guid": "N50_133", "translations": {"ms": "bahasa vernakular", "hi": "बोलचाल की भाषा", "tr": "yerel dil"}}
+{"guid": "N50_134", "translations": {"ms": "daftar", "hi": "रजिस्टर", "tr": "kayıt"}}
+{"guid": "N50_135", "translations": {"ms": "korpus", "hi": "भाषा-संग्रह", "tr": "derlem"}}
+{"guid": "N50_136", "translations": {"ms": "terjemahan pinjam", "hi": "अनुवादानुवाद", "tr": "öyküntü"}}
+{"guid": "N50_137", "translations": {"ms": "koine", "hi": "कोइने", "tr": "koine"}}
+{"guid": "N50_138", "translations": {"ms": "bahasa kreol", "hi": "क्रियोल भाषा", "tr": "kreol dili"}}
+{"guid": "N50_139", "translations": {"ms": "bahasa pijin", "hi": "पिजिन भाषा", "tr": "pidgin dili"}}
+{"guid": "N50_140", "translations": {"ms": "substratum", "hi": "अधःस्तर", "tr": "alt katman"}}
+{"guid": "N50_141", "translations": {"ms": "tepukan", "hi": "ताली की आवाज़", "tr": "alkış sesi"}}
+{"guid": "N50_142", "translations": {"ms": "bahasa Inggeris", "hi": "अंग्रेज़ी", "tr": "İngilizce"}}
+{"guid": "N50_143", "translations": {"ms": "detikan", "hi": "टिक-टिक", "tr": "tıkırtı"}}
+{"guid": "N50_144", "translations": {"ms": "video", "hi": "वीडियो", "tr": "video"}}
+{"guid": "N50_145", "translations": {"ms": "alamat", "hi": "पता", "tr": "adres"}}
+{"guid": "N50_146", "translations": {"ms": "perbualan", "hi": "बातचीत", "tr": "sohbet"}}
+{"guid": "N50_147", "translations": {"ms": "poskad", "hi": "डाक-पत्र", "tr": "kartpostal"}}
+{"guid": "N50_148", "translations": {"ms": "jadual waktu", "hi": "समय-सारणी", "tr": "sefer tarifesi"}}
+{"guid": "N50_149", "translations": {"ms": "saluran", "hi": "माध्यम", "tr": "kanal"}}
+{"guid": "N50_150", "translations": {"ms": "saluran televisyen", "hi": "टेलीविजन चैनल", "tr": "televizyon kanalı"}}
+{"guid": "N50_151", "translations": {"ms": "diari", "hi": "डायरी", "tr": "günlük"}}
+{"guid": "N50_152", "translations": {"ms": "majalah", "hi": "पत्रिका", "tr": "dergi"}}
+{"guid": "N50_153", "translations": {"ms": "akhbar", "hi": "अख़बार", "tr": "gazete"}}
+{"guid": "N50_154", "translations": {"ms": "komen", "hi": "टिप्पणी", "tr": "yorum"}}
+{"guid": "N50_155", "translations": {"ms": "tuntutan", "hi": "मांग", "tr": "talep"}}
+{"guid": "N50_156", "translations": {"ms": "petunjuk", "hi": "संकेत", "tr": "ipucu"}}
+{"guid": "N50_157", "translations": {"ms": "rangka", "hi": "रूपरेखा", "tr": "taslak"}}
+{"guid": "N50_158", "translations": {"ms": "pujian", "hi": "प्रशंसा", "tr": "övgü"}}
+{"guid": "N50_159", "translations": {"ms": "pujian", "hi": "स्तुति", "tr": "övgü"}}

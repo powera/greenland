@@ -1,18 +1,31 @@
-{"guid": "N37_001", "translations": {"ro": "cerc", "pl": "koło", "th": "วงกลม", "ta": "வட்டம்", "kn": "ವೃತ್ತ", "uk": "коло", "bn": "বৃত্ত", "hi": "वृत्त", "bs": "krug"}}
-{"guid": "N37_002", "translations": {"ro": "pătrat", "pl": "kwadrat", "th": "สี่เหลี่ยมจัตุรัส", "ta": "சதுரம்", "kn": "ಚೌಕ", "uk": "квадрат", "bn": "বর্গ", "hi": "वर्ग", "bs": "kvadrat"}}
-{"guid": "N37_003", "translations": {"ro": "triunghi", "pl": "trójkąt", "th": "สามเหลี่ยม", "ta": "முக்கோணம்", "kn": "ತ್ರಿಕೋನ", "uk": "трикутник", "bn": "ত্রিভুজ", "hi": "त्रिकोण", "bs": "trokut"}}
-{"guid": "N37_004", "translations": {"ro": "dreptunghi", "pl": "prostokąt", "th": "สี่เหลี่ยมผืนผ้า", "ta": "செவ்வகம்", "kn": "ಆಯತ", "uk": "прямокутник", "bn": "আয়তক্ষেত্র", "hi": "आयत", "bs": "pravougaonik"}}
-{"guid": "N37_005", "translations": {"ro": "oval", "pl": "owal", "th": "วงรี", "ta": "நீள்வட்டம்", "kn": "ಅಂಡಾಕಾರ", "uk": "овал", "bn": "ডিমাকার", "hi": "अण्डाकार", "bs": "oval"}}
-{"guid": "N37_006", "translations": {"ro": "cub", "pl": "sześcian", "th": "ลูกบาศก์", "ta": "கனசதுரம்", "kn": "ಘನ", "uk": "куб", "bn": "ঘনক", "hi": "घन", "bs": "kocka"}}
-{"guid": "N37_007", "translations": {"ro": "sferă", "pl": "kula", "th": "ทรงกลม", "ta": "கோளம்", "kn": "ಗೋಳ", "uk": "куля", "bn": "গোলক", "hi": "गोला", "bs": "sfera"}}
-{"guid": "N37_008", "translations": {"ro": "cilindru", "pl": "cylinder", "th": "ทรงกระบอก", "ta": "உருளை", "kn": "ಸಿಲಿಂಡರ್", "uk": "циліндр", "bn": "সিলিন্ডার", "hi": "सिलिंडर", "bs": "cilindar"}}
-{"guid": "N37_009", "translations": {"ro": "con", "pl": "stożek", "th": "กรวย", "ta": "கூம்பு", "kn": "ಶಂಕು", "uk": "конус", "bn": "শঙ্কু", "hi": "शंकु", "bs": "kupa"}}
-{"guid": "N37_010", "translations": {"ro": "piramidă", "pl": "piramida", "th": "พีระมิด", "ta": "கூம்பகம்", "kn": "ಪಿರಮಿಡ್", "uk": "піраміда", "bn": "পিরামিড", "hi": "पिरामिड", "bs": "piramida"}}
-{"guid": "N37_011", "translations": {"ro": "hexagon", "pl": "sześciokąt", "th": "หกเหลี่ยม", "ta": "அறுகோணம்", "kn": "ಷಡ್ಭುಜ", "uk": "шестикутник", "bn": "ষষ্ঠভুজ", "hi": "षट्भुज", "bs": "šesterokut"}}
-{"guid": "N37_012", "translations": {"ro": "pentagon", "pl": "pięciokąt", "th": "ห้าเหลี่ยม", "ta": "ஐங்கோணம்", "kn": "ಪಂಚಭುಜ", "uk": "п'ятикутник", "bn": "পঞ্চভুজ", "hi": "पंचभुज", "bs": "peterokut"}}
-{"guid": "N37_013", "translations": {"ro": "octogon", "pl": "ośmiokąt", "th": "แปดเหลี่ยม", "ta": "எண்கோணம்", "kn": "ಅಷ್ಟಭುಜ", "uk": "восьмикутник", "bn": "অষ্টভুজ", "hi": "अष्टभुज", "bs": "oktogon"}}
-{"guid": "N37_014", "translations": {"ro": "formă", "pl": "kształt", "th": "รูปร่าง", "ta": "வடிவம்", "kn": "ಆಕಾರ", "uk": "форма", "bn": "আকৃতি", "hi": "आकार", "bs": "oblik"}}
-{"guid": "N37_015", "translations": {"ro": "unghi", "pl": "kąt", "th": "มุม", "ta": "கோணம்", "kn": "ಕೋನ", "uk": "кут", "bn": "কোণ", "hi": "कोण", "bs": "ugao"}}
-{"guid": "N37_016", "translations": {"ro": "curbă", "pl": "krzywa", "th": "เส้นโค้ง", "ta": "வளைவு", "kn": "ವಕ್ರರೇಖೆ", "uk": "крива", "bn": "কৌক circul?", "hi": "वक्र", "bs": "krivulja"}}
-{"guid": "N37_017", "translations": {"ro": "margine", "pl": "krawędź", "th": "ขอบ", "ta": "விளிம்பு", "kn": "ಅಂಚು", "uk": "край", "bn": "প্রান্ত", "hi": "किनारा", "bs": "rub"}}
-{"guid": "N37_018", "translations": {"ro": "stea", "pl": "gwiazda", "th": "ดาว", "ta": "நட்சத்திரம்", "kn": "ನಕ್ಷತ್ರ", "uk": "зірка", "bn": "তারা", "hi": "तारा", "bs": "zvijezda"}}
+{"guid": "N37_001", "translations": {"ro": "cerc", "pl": "koło", "th": "วงกลม", "ms": "bulatan", "ta": "வட்டம்", "kn": "ವೃತ್ತ", "uk": "коло", "bn": "বৃত্ত", "hi": "वृत्त", "tr": "daire", "bs": "krug"}}
+{"guid": "N37_002", "translations": {"ro": "pătrat", "pl": "kwadrat", "th": "สี่เหลี่ยมจัตุรัส", "ms": "segi empat sama", "ta": "சதுரம்", "kn": "ಚೌಕ", "uk": "квадрат", "bn": "বর্গ", "hi": "वर्ग", "tr": "kare", "bs": "kvadrat"}}
+{"guid": "N37_003", "translations": {"ro": "triunghi", "pl": "trójkąt", "th": "สามเหลี่ยม", "ms": "segi tiga", "ta": "முக்கோணம்", "kn": "ತ್ರಿಕೋನ", "uk": "трикутник", "bn": "ত্রিভুজ", "hi": "त्रिकोण", "tr": "üçgen", "bs": "trokut"}}
+{"guid": "N37_004", "translations": {"ro": "dreptunghi", "pl": "prostokąt", "th": "สี่เหลี่ยมผืนผ้า", "ms": "segi empat tepat", "ta": "செவ்வகம்", "kn": "ಆಯತ", "uk": "прямокутник", "bn": "আয়তক্ষেত্র", "hi": "आयत", "tr": "dikdörtgen", "bs": "pravougaonik"}}
+{"guid": "N37_005", "translations": {"ro": "oval", "pl": "owal", "th": "วงรี", "ms": "bujur", "ta": "நீள்வட்டம்", "kn": "ಅಂಡಾಕಾರ", "uk": "овал", "bn": "ডিমাকার", "hi": "अण्डाकार", "tr": "oval", "bs": "oval"}}
+{"guid": "N37_006", "translations": {"ro": "cub", "pl": "sześcian", "th": "ลูกบาศก์", "ms": "kubus", "ta": "கனசதுரம்", "kn": "ಘನ", "uk": "куб", "bn": "ঘনক", "hi": "घन", "tr": "küp", "bs": "kocka"}}
+{"guid": "N37_007", "translations": {"ro": "sferă", "pl": "kula", "th": "ทรงกลม", "ms": "sfera", "ta": "கோளம்", "kn": "ಗೋಳ", "uk": "куля", "bn": "গোলক", "hi": "गोला", "tr": "küre", "bs": "sfera"}}
+{"guid": "N37_008", "translations": {"ro": "cilindru", "pl": "cylinder", "th": "ทรงกระบอก", "ms": "silinder", "ta": "உருளை", "kn": "ಸಿಲಿಂಡರ್", "uk": "циліндр", "bn": "সিলিন্ডার", "hi": "सिलिंडर", "tr": "silindir", "bs": "cilindar"}}
+{"guid": "N37_009", "translations": {"ro": "con", "pl": "stożek", "th": "กรวย", "ms": "kon", "ta": "கூம்பு", "kn": "ಶಂಕು", "uk": "конус", "bn": "শঙ্কু", "hi": "शंकु", "tr": "koni", "bs": "kupa"}}
+{"guid": "N37_010", "translations": {"ro": "piramidă", "pl": "piramida", "th": "พีระมิด", "ms": "piramid", "ta": "கூம்பகம்", "kn": "ಪಿರಮಿಡ್", "uk": "піраміда", "bn": "পিরামিড", "hi": "पिरामिड", "tr": "piramit", "bs": "piramida"}}
+{"guid": "N37_011", "translations": {"ro": "hexagon", "pl": "sześciokąt", "th": "หกเหลี่ยม", "ms": "segi enam", "ta": "அறுகோணம்", "kn": "ಷಡ್ಭುಜ", "uk": "шестикутник", "bn": "ষষ্ঠভুজ", "hi": "षट्भुज", "tr": "altıgen", "bs": "šesterokut"}}
+{"guid": "N37_012", "translations": {"ro": "pentagon", "pl": "pięciokąt", "th": "ห้าเหลี่ยม", "ms": "segi lima", "ta": "ஐங்கோணம்", "kn": "ಪಂಚಭುಜ", "uk": "п'ятикутник", "bn": "পঞ্চভুজ", "hi": "पंचभुज", "tr": "beşgen", "bs": "peterokut"}}
+{"guid": "N37_013", "translations": {"ro": "octogon", "pl": "ośmiokąt", "th": "แปดเหลี่ยม", "ms": "segi lapan", "ta": "எண்கோணம்", "kn": "ಅಷ್ಟಭುಜ", "uk": "восьмикутник", "bn": "অষ্টভুজ", "hi": "अष्टभुज", "tr": "sekizgen", "bs": "oktogon"}}
+{"guid": "N37_014", "translations": {"ro": "formă", "pl": "kształt", "th": "รูปร่าง", "ms": "bentuk", "ta": "வடிவம்", "kn": "ಆಕಾರ", "uk": "форма", "bn": "আকৃতি", "hi": "आकार", "tr": "şekil", "bs": "oblik"}}
+{"guid": "N37_015", "translations": {"ro": "unghi", "pl": "kąt", "th": "มุม", "ms": "sudut", "ta": "கோணம்", "kn": "ಕೋನ", "uk": "кут", "bn": "কোণ", "hi": "कोण", "tr": "açı", "bs": "ugao"}}
+{"guid": "N37_016", "translations": {"ro": "curbă", "pl": "krzywa", "th": "เส้นโค้ง", "ms": "lengkung", "ta": "வளைவு", "kn": "ವಕ್ರರೇಖೆ", "uk": "крива", "bn": "কৌক circul?", "hi": "वक्र", "tr": "eğri", "bs": "krivulja"}}
+{"guid": "N37_017", "translations": {"ro": "margine", "pl": "krawędź", "th": "ขอบ", "ms": "tepi", "ta": "விளிம்பு", "kn": "ಅಂಚು", "uk": "край", "bn": "প্রান্ত", "hi": "किनारा", "tr": "kenar", "bs": "rub"}}
+{"guid": "N37_018", "translations": {"ro": "stea", "pl": "gwiazda", "th": "ดาว", "ms": "bintang", "ta": "நட்சத்திரம்", "kn": "ನಕ್ಷತ್ರ", "uk": "зірка", "bn": "তারা", "hi": "तारा", "tr": "yıldız", "bs": "zvijezda"}}
+{"guid": "N37_019", "translations": {"ms": "garis tangen", "hi": "स्पर्शरेखा", "tr": "teğet"}}
+{"guid": "N37_020", "translations": {"ms": "segi empat", "hi": "चतुर्भुज", "tr": "dörtgen"}}
+{"guid": "N37_021", "translations": {"ms": "poligon", "hi": "बहुभुज", "tr": "çokgen"}}
+{"guid": "N37_022", "translations": {"ms": "parabola", "hi": "परवलय", "tr": "parabol"}}
+{"guid": "N37_023", "translations": {"ms": "segi empat selari", "hi": "समांतर चतुर्भुज", "tr": "paralelkenar"}}
+{"guid": "N37_024", "translations": {"ms": "hipotenus", "hi": "कर्ण", "tr": "hipotenüs"}}
+{"guid": "N37_025", "translations": {"ms": "polihedron", "hi": "बहुफलक", "tr": "çokyüzlü"}}
+{"guid": "N37_026", "translations": {"ms": "torus", "hi": "टोरस", "tr": "torus"}}
+{"guid": "N37_027", "translations": {"ms": "juring bulatan", "hi": "वृत्तखंड", "tr": "daire dilimi"}}
+{"guid": "N37_028", "translations": {"ms": "pusat", "hi": "केंद्र", "tr": "merkez"}}
+{"guid": "N37_029", "translations": {"ms": "gelung", "hi": "कुंडली", "tr": "sargı"}}
+{"guid": "N37_030", "translations": {"ms": "keratan rentas", "hi": "अनुप्रस्थ काट", "tr": "kesit"}}
+{"guid": "N37_031", "translations": {"ms": "garis luar", "hi": "रूपरेखा", "tr": "kontur"}}

@@ -1,0 +1,77 @@
+{"guid": "A23_001", "translations": {"ms": "organik", "hi": "जैविक", "tr": "organik"}}
+{"guid": "A23_002", "translations": {"ms": "nuklear", "hi": "केंद्रक-संबंधी", "tr": "çekirdeksel"}}
+{"guid": "A23_003", "translations": {"ms": "pupus", "hi": "विलुप्त", "tr": "soyu tükenmiş"}}
+{"guid": "A23_004", "translations": {"ms": "nokturnal", "hi": "निशाचर", "tr": "gececil"}}
+{"guid": "A23_005", "translations": {"ms": "berotot", "hi": "मांसपेशीय", "tr": "kaslı"}}
+{"guid": "A23_006", "translations": {"ms": "fosil", "hi": "जीवाश्मीय", "tr": "fosil"}}
+{"guid": "A23_007", "translations": {"ms": "pembiakan", "hi": "प्रजनन संबंधी", "tr": "üreme"}}
+{"guid": "A23_008", "translations": {"ms": "pembiakan", "hi": "प्रजननक्षम", "tr": "üreyebilen"}}
+{"guid": "A23_009", "translations": {"ms": "marin", "hi": "समुद्री", "tr": "denizel"}}
+{"guid": "A23_010", "translations": {"ms": "berbunga", "hi": "फूलता हुआ", "tr": "çiçek açan"}}
+{"guid": "A23_011", "translations": {"ms": "genetik", "hi": "आनुवंशिक", "tr": "genetik"}}
+{"guid": "A23_012", "translations": {"ms": "dilahirkan", "hi": "जन्मा हुआ", "tr": "doğmuş"}}
+{"guid": "A23_013", "translations": {"ms": "buatan", "hi": "निर्मित", "tr": "imal edilmiş"}}
+{"guid": "A23_014", "translations": {"ms": "maskulin", "hi": "पुल्लिंग", "tr": "eril"}}
+{"guid": "A23_015", "translations": {"ms": "berkaitan dengan perlembagaan tubuh", "hi": "शारीरिक गठन से संबंधित", "tr": "bünyesel"}}
+{"guid": "A23_016", "translations": {"ms": "filogenetik", "hi": "वंशवृक्षीय", "tr": "filogenetik"}}
+{"guid": "A23_017", "translations": {"ms": "tulang belakang", "hi": "रीढ़ संबंधी", "tr": "omurgaya ait"}}
+{"guid": "A23_018", "translations": {"ms": "tunjang", "hi": "मेरुरज्जु संबंधी", "tr": "omurilikle ilgili"}}
+{"guid": "A23_019", "translations": {"ms": "vaskular", "hi": "संवहनी", "tr": "damarsal"}}
+{"guid": "A23_020", "translations": {"ms": "monofiletik", "hi": "एकजातिवृत्तीय", "tr": "monofiletik"}}
+{"guid": "A23_021", "translations": {"ms": "parafiletik", "hi": "पैराफ़ाइलेटिक", "tr": "parafiletik"}}
+{"guid": "A23_022", "translations": {"ms": "parasitik", "hi": "परजीवी", "tr": "parazitik"}}
+{"guid": "A23_023", "translations": {"ms": "kulat", "hi": "कवकीय", "tr": "fungal"}}
+{"guid": "A23_024", "translations": {"ms": "berisi", "hi": "गूदेदार", "tr": "etli"}}
+{"guid": "A23_025", "translations": {"ms": "menahun", "hi": "बहुवर्षीय", "tr": "çok yıllık"}}
+{"guid": "A23_026", "translations": {"ms": "bertulang belakang", "hi": "रीढ़धारी", "tr": "omurgalı"}}
+{"guid": "A23_027", "translations": {"ms": "karnivor", "hi": "मांसाहारी", "tr": "etçil"}}
+{"guid": "A23_028", "translations": {"ms": "pelvis", "hi": "श्रोणि-संबंधी", "tr": "pelvik"}}
+{"guid": "A23_029", "translations": {"ms": "tiroid", "hi": "थायरॉइड", "tr": "tiroid"}}
+{"guid": "A23_030", "translations": {"ms": "rangka", "hi": "कंकाल संबंधी", "tr": "iskeletle ilgili"}}
+{"guid": "A23_031", "translations": {"ms": "larva", "hi": "लार्वीय", "tr": "larval"}}
+{"guid": "A23_032", "translations": {"ms": "berjari kaki", "hi": "पंजे वाला", "tr": "parmaklı"}}
+{"guid": "A23_033", "translations": {"ms": "bersirip", "hi": "पंखयुक्त", "tr": "yüzgeçli"}}
+{"guid": "A23_034", "translations": {"ms": "serebrum", "hi": "मस्तिष्कीय", "tr": "serebral"}}
+{"guid": "A23_035", "translations": {"ms": "herbivor", "hi": "शाकाहारी", "tr": "otçul"}}
+{"guid": "A23_036", "translations": {"ms": "vertebra", "hi": "कशेरुकीय", "tr": "omurga ile ilgili"}}
+{"guid": "A23_037", "translations": {"ms": "urinari", "hi": "मूत्र संबंधी", "tr": "üriner"}}
+{"guid": "A23_038", "translations": {"ms": "peredaran darah", "hi": "रक्तसंचार संबंधी", "tr": "dolaşımla ilgili"}}
+{"guid": "A23_039", "translations": {"ms": "tidak dapat terbang", "hi": "उड़ानहीन", "tr": "uçamayan"}}
+{"guid": "A23_040", "translations": {"ms": "herba", "hi": "शाकीय", "tr": "otsu"}}
+{"guid": "A23_041", "translations": {"ms": "berkhasiat", "hi": "पोषण संबंधी", "tr": "beslenme"}}
+{"guid": "A23_042", "translations": {"ms": "epitelium", "hi": "उपकला संबंधी", "tr": "epitelyal"}}
+{"guid": "A23_043", "translations": {"ms": "plasenta", "hi": "अपरा-संबंधी", "tr": "plasental"}}
+{"guid": "A23_044", "translations": {"ms": "simbiotik", "hi": "सहजीवी", "tr": "simbiyotik"}}
+{"guid": "A23_045", "translations": {"ms": "botani", "hi": "वनस्पति संबंधी", "tr": "botanik"}}
+{"guid": "A23_046", "translations": {"ms": "transgender", "hi": "ट्रांसजेंडर", "tr": "transgender"}}
+{"guid": "A23_047", "translations": {"ms": "balistik", "hi": "बैलिस्टिक", "tr": "balistik"}}
+{"guid": "A23_048", "translations": {"ms": "bukan organik", "hi": "अकार्बनिक", "tr": "inorganik"}}
+{"guid": "A23_049", "translations": {"ms": "refraktif", "hi": "अपवर्तक", "tr": "refraktif"}}
+{"guid": "A23_050", "translations": {"ms": "sama jantina", "hi": "समलैंगिक", "tr": "eşcinsel"}}
+{"guid": "A23_051", "translations": {"ms": "sesama jenis", "hi": "समलैंगिक", "tr": "eşcinsel"}}
+{"guid": "A23_052", "translations": {"ms": "bukan manusia", "hi": "अमानवीय", "tr": "insan dışı"}}
+{"guid": "A23_053", "translations": {"ms": "berbilang etnik", "hi": "बहुजातीय", "tr": "çok etnikli"}}
+{"guid": "A23_054", "translations": {"ms": "kidal", "hi": "बाएँ हाथ से काम करने वाला", "tr": "solak"}}
+{"guid": "A23_055", "translations": {"ms": "berpendidikan tinggi", "hi": "अच्छी तरह शिक्षित", "tr": "iyi eğitimli"}}
+{"guid": "A23_056", "translations": {"ms": "bersel tunggal", "hi": "एककोशिकीय", "tr": "tek hücreli"}}
+{"guid": "A23_057", "translations": {"ms": "hidup bebas", "hi": "स्वतंत्र रूप से रहने वाला", "tr": "serbest yaşayan"}}
+{"guid": "A23_058", "translations": {"ms": "berekor putih", "hi": "सफेद पूँछ वाला", "tr": "beyaz kuyruklu"}}
+{"guid": "A23_059", "translations": {"ms": "semua perempuan", "hi": "सभी महिलाओं वाला", "tr": "tamamı kadınlardan oluşan"}}
+{"guid": "A23_060", "translations": {"ms": "berdarah sejuk", "hi": "शीतरक्ती", "tr": "soğukkanlı"}}
+{"guid": "A23_061", "translations": {"ms": "belajar sendiri", "hi": "स्वशिक्षित", "tr": "otodidaktik"}}
+{"guid": "A23_062", "translations": {"ms": "bertelur", "hi": "अंडे देने वाला", "tr": "yumurtlayan"}}
+{"guid": "A23_063", "translations": {"ms": "dwibahasa", "hi": "द्विभाषी", "tr": "iki dilli"}}
+{"guid": "A23_064", "translations": {"ms": "burung", "hi": "पक्षी-संबंधी", "tr": "kuşlara ait"}}
+{"guid": "A23_065", "translations": {"ms": "bertelinga", "hi": "कर्णयुक्त", "tr": "kulaklı"}}
+{"guid": "A23_066", "translations": {"ms": "semula jadi", "hi": "जन्मजात", "tr": "doğuştan"}}
+{"guid": "A23_067", "translations": {"ms": "geseran", "hi": "घर्षी", "tr": "sürtünmeli"}}
+{"guid": "A23_068", "translations": {"ms": "letupan", "hi": "विस्फोटक", "tr": "patlamalı"}}
+{"guid": "A23_069", "translations": {"ms": "berdesis", "hi": "सीटी जैसी ध्वनि वाला", "tr": "ıslıklı"}}
+{"guid": "A23_070", "translations": {"ms": "glotis", "hi": "स्वरयंत्रद्वारीय", "tr": "gırtlak açıklığıyla ilgili"}}
+{"guid": "A23_071", "translations": {"ms": "lelangit keras", "hi": "तालव्य", "tr": "damaksıl"}}
+{"guid": "A23_072", "translations": {"ms": "velar", "hi": "कोमल तालव्य", "tr": "artdamaksıl"}}
+{"guid": "A23_073", "translations": {"ms": "labial", "hi": "ओष्ठ्य", "tr": "dudaksıl"}}
+{"guid": "A23_074", "translations": {"ms": "berkaitan dengan sebutan bunyi /r/", "hi": "रोटिक", "tr": "rotik"}}
+{"guid": "A23_075", "translations": {"ms": "sonoran", "hi": "सोनोरेंट", "tr": "sonorant"}}
+{"guid": "A23_076", "translations": {"ms": "fonetik", "hi": "ध्वन्यात्मक", "tr": "fonetik"}}
+{"guid": "A23_077", "translations": {"ms": "fonemik", "hi": "स्वनिमिक", "tr": "fonemik"}}

@@ -1,12 +1,25 @@
-{"guid": "N13_001", "translations": {"ro": "drum", "pl": "droga", "th": "ถนน", "ta": "சாலை", "kn": "ರಸ್ತೆ", "uk": "дорога", "bn": "রাস্তায়", "hi": "सड़क"}}
-{"guid": "N13_002", "translations": {"ro": "pod", "pl": "most", "th": "สะพาน", "ta": "பாலம்", "kn": "ಸೇತುವೆ", "uk": "міст", "bn": "সেতু", "hi": "पुल"}}
-{"guid": "N13_003", "translations": {"ro": "tunel", "pl": "tunel", "th": "อุโมงค์", "ta": "சுரங்கப்பாதை", "kn": "ಸುರಂಗ", "uk": "тунель", "bn": "tuneল? Wait need Bengali script of 'tunnel' lemma: 'টানেল'", "hi": "tunel?"}}
-{"guid": "N13_004", "translations": {"ro": "stradă", "pl": "ulica", "th": "ถนน", "ta": "தெரு", "kn": "ಬೀದಿ", "uk": "вулиця", "bn": "রাস্তা", "hi": "सड़क"}}
-{"guid": "N13_005", "translations": {"ro": "autostradă", "pl": "autostrada", "th": "ทางหลวง", "ta": "நெடுஞ்சாலை", "kn": "ಹೆದ್ದಾರಿ", "uk": "автошлях", "bn": "হাইওয়ে", "hi": "हाइवे"}}
-{"guid": "N13_006", "translations": {"ro": "trotuar", "pl": "chodnik", "th": "ทางเท้า", "ta": "நடைபாதை", "kn": "ಕಾಲುದಾರಿ", "uk": "тротуар", "bn": "ফুটপাত", "hi": "फुटपाथ"}}
-{"guid": "N13_007", "translations": {"ro": "intersecție", "pl": "skrzyżowanie", "th": "สี่แยก", "ta": "சந்திப்பு", "kn": "ಕೂಡುರಸ್ತೆ", "uk": "перехрестя", "bn": "চৌরাস্তা", "hi": "चौराहा"}}
-{"guid": "N13_008", "translations": {"ro": "trecere de pietoni", "pl": "przejście dla pieszych", "th": "ทางม้าลาย", "ta": "பாதசாரி கடவை", "kn": "ಪಾದಚಾರಿ ದಾಟುವ ಮಾರ್ಗ", "uk": "пішохідний перехід", "bn": "পথচারীর পারাপার স্থান", "hi": "पैदल यात्री क्रॉसिंग"}}
-{"guid": "N13_009", "translations": {"ro": "cale ferată", "pl": "kolej", "th": "ทางรถไฟ", "ta": "இரயில்வே", "kn": "ರೈಲ್ವೆ", "uk": "залізниця", "bn": "রেলওয়ে", "hi": "रेलवे"}}
-{"guid": "N13_010", "translations": {"ro": "șină", "pl": "szyna", "th": "ราง", "ta": "தண்டவாளம்", "kn": "ಹಳಿ", "uk": "рейка", "bn": "রেল", "hi": "रेल"}}
-{"guid": "N13_011", "translations": {"ro": "scenă", "pl": "scena", "th": "เวที", "ta": "மேடை", "kn": "ವೇದಿಕೆ", "uk": "сцена", "bn": "মঞ্চ", "hi": "मंच"}}
-{"guid": "N13_012", "translations": {"ro": "pistă", "pl": "tor", "th": "สนามแข่ง", "ta": "பந்தயப்பாதை", "kn": "ಓಟದ ಹಾದಿ", "uk": "трасa", "bn": "ট্র্যাক", "hi": "ट्रैक"}}
+{"guid": "N13_001", "translations": {"ro": "drum", "pl": "droga", "th": "ถนน", "ms": "jalan raya", "ta": "சாலை", "kn": "ರಸ್ತೆ", "uk": "дорога", "bn": "রাস্তায়", "hi": "सड़क", "tr": "yol"}}
+{"guid": "N13_002", "translations": {"ro": "pod", "pl": "most", "th": "สะพาน", "ms": "jambatan", "ta": "பாலம்", "kn": "ಸೇತುವೆ", "uk": "міст", "bn": "সেতু", "hi": "पुल", "tr": "köprü"}}
+{"guid": "N13_003", "translations": {"ro": "tunel", "pl": "tunel", "th": "อุโมงค์", "ms": "terowong", "ta": "சுரங்கப்பாதை", "kn": "ಸುರಂಗ", "uk": "тунель", "bn": "tuneল? Wait need Bengali script of 'tunnel' lemma: 'টানেল'", "hi": "tunel?", "tr": "tünel"}}
+{"guid": "N13_004", "translations": {"ro": "stradă", "pl": "ulica", "th": "ถนน", "ms": "jalan", "ta": "தெரு", "kn": "ಬೀದಿ", "uk": "вулиця", "bn": "রাস্তা", "hi": "सड़क", "tr": "sokak"}}
+{"guid": "N13_005", "translations": {"ro": "autostradă", "pl": "autostrada", "th": "ทางหลวง", "ms": "lebuh raya", "ta": "நெடுஞ்சாலை", "kn": "ಹೆದ್ದಾರಿ", "uk": "автошлях", "bn": "হাইওয়ে", "hi": "हाइवे", "tr": "otoyol"}}
+{"guid": "N13_006", "translations": {"ro": "trotuar", "pl": "chodnik", "th": "ทางเท้า", "ms": "kaki lima", "ta": "நடைபாதை", "kn": "ಕಾಲುದಾರಿ", "uk": "тротуар", "bn": "ফুটপাত", "hi": "फुटपाथ", "tr": "kaldırım"}}
+{"guid": "N13_007", "translations": {"ro": "intersecție", "pl": "skrzyżowanie", "th": "สี่แยก", "ms": "persimpangan", "ta": "சந்திப்பு", "kn": "ಕೂಡುರಸ್ತೆ", "uk": "перехрестя", "bn": "চৌরাস্তা", "hi": "चौराहा", "tr": "kavşak"}}
+{"guid": "N13_008", "translations": {"ro": "trecere de pietoni", "pl": "przejście dla pieszych", "th": "ทางม้าลาย", "ms": "lintasan pejalan kaki", "ta": "பாதசாரி கடவை", "kn": "ಪಾದಚಾರಿ ದಾಟುವ ಮಾರ್ಗ", "uk": "пішохідний перехід", "bn": "পথচারীর পারাপার স্থান", "hi": "पैदल यात्री क्रॉसिंग", "tr": "yaya geçidi"}}
+{"guid": "N13_009", "translations": {"ro": "cale ferată", "pl": "kolej", "th": "ทางรถไฟ", "ms": "landasan kereta api", "ta": "இரயில்வே", "kn": "ರೈಲ್ವೆ", "uk": "залізниця", "bn": "রেলওয়ে", "hi": "रेलवे", "tr": "demiryolu"}}
+{"guid": "N13_010", "translations": {"ro": "șină", "pl": "szyna", "th": "ราง", "ms": "rel kereta api", "ta": "தண்டவாளம்", "kn": "ಹಳಿ", "uk": "рейка", "bn": "রেল", "hi": "रेल", "tr": "ray"}}
+{"guid": "N13_011", "translations": {"ro": "scenă", "pl": "scena", "th": "เวที", "ms": "pentas", "ta": "மேடை", "kn": "ವೇದಿಕೆ", "uk": "сцена", "bn": "মঞ্চ", "hi": "मंच", "tr": "sahne"}}
+{"guid": "N13_012", "translations": {"ro": "pistă", "pl": "tor", "th": "สนามแข่ง", "ms": "litar perlumbaan", "ta": "பந்தயப்பாதை", "kn": "ಓಟದ ಹಾದಿ", "uk": "трасa", "bn": "ট্র্যাক", "hi": "ट्रैक", "tr": "yarış pisti"}}
+{"guid": "N13_013", "translations": {"ms": "tempat letak kereta", "hi": "पार्किंग स्थल", "tr": "otopark"}}
+{"guid": "N13_014", "translations": {"ms": "dataran bandar", "hi": "नगर चौक", "tr": "kasaba meydanı"}}
+{"guid": "N13_015", "translations": {"ms": "halaman depan", "hi": "सामने का आँगन", "tr": "ön bahçe"}}
+{"guid": "N13_016", "translations": {"ms": "halaman belakang", "hi": "पिछवाड़ा", "tr": "arka bahçe"}}
+{"guid": "N13_017", "translations": {"ms": "lampu isyarat", "hi": "ट्रैफिक लाइट", "tr": "trafik ışığı"}}
+{"guid": "N13_018", "translations": {"ms": "perhentian bas", "hi": "बस स्टॉप", "tr": "otobüs durağı"}}
+{"guid": "N13_019", "translations": {"ms": "laluan", "hi": "पगडंडी", "tr": "patika"}}
+{"guid": "N13_020", "translations": {"ms": "landasan kereta api", "hi": "रेलमार्ग", "tr": "demiryolu"}}
+{"guid": "N13_021", "translations": {"ms": "laluan air", "hi": "जलमार्ग", "tr": "su yolu"}}
+{"guid": "N13_022", "translations": {"ms": "akses", "hi": "पहुँच", "tr": "erişim"}}
+{"guid": "N13_023", "translations": {"ms": "saluran paip", "hi": "पाइपलाइन", "tr": "boru hattı"}}
+{"guid": "N13_024", "translations": {"ms": "lebuh raya", "hi": "द्रुतमार्ग", "tr": "otoyol"}}
+{"guid": "N13_025", "translations": {"ms": "tempat letak kereta", "hi": "कार पार्किंग स्थल", "tr": "otopark"}}

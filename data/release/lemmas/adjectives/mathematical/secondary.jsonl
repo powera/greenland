@@ -1,0 +1,59 @@
+{"guid": "A26_001", "translations": {"ms": "kuadratik", "hi": "द्विघात", "tr": "ikinci dereceden"}}
+{"guid": "A26_002", "translations": {"ms": "eksponen", "hi": "घातांकीय", "tr": "üstel"}}
+{"guid": "A26_003", "translations": {"ms": "algebra", "hi": "बीजीय", "tr": "cebirsel"}}
+{"guid": "A26_004", "translations": {"ms": "trigonometri", "hi": "त्रिकोणमितीय", "tr": "trigonometrik"}}
+{"guid": "A26_005", "translations": {"ms": "asosiatif", "hi": "साहचर्यात्मक", "tr": "birleşme özelliğine sahip"}}
+{"guid": "A26_006", "translations": {"ms": "faktorial", "hi": "फैक्टोरियल", "tr": "faktöriyel"}}
+{"guid": "A26_007", "translations": {"ms": "fraktal", "hi": "भग्न", "tr": "fraktal"}}
+{"guid": "A26_008", "translations": {"ms": "topologi", "hi": "टोपोलॉजिकल", "tr": "topolojik"}}
+{"guid": "A26_009", "translations": {"ms": "komutatif", "hi": "क्रमविनिमेय", "tr": "değişmeli"}}
+{"guid": "A26_010", "translations": {"ms": "abelian", "hi": "एबेलियन", "tr": "değişmeli"}}
+{"guid": "A26_011", "translations": {"ms": "holomorfik", "hi": "होलोमॉर्फिक", "tr": "holomorf"}}
+{"guid": "A26_012", "translations": {"ms": "unjuran", "hi": "प्रक्षेपी", "tr": "projektif"}}
+{"guid": "A26_013", "translations": {"ms": "boleh terbitan", "hi": "अवकलनीय", "tr": "türevlenebilir"}}
+{"guid": "A26_014", "translations": {"ms": "afin", "hi": "एफ़ाइन", "tr": "afin"}}
+{"guid": "A26_015", "translations": {"ms": "isomorfik", "hi": "समरूपी", "tr": "izomorfik"}}
+{"guid": "A26_016", "translations": {"ms": "boleh dikira", "hi": "गणनीय", "tr": "hesaplanabilir"}}
+{"guid": "A26_017", "translations": {"ms": "stokastik", "hi": "यादृच्छिक", "tr": "stokastik"}}
+{"guid": "A26_018", "translations": {"ms": "binomial", "hi": "द्विपद", "tr": "binom"}}
+{"guid": "A26_019", "translations": {"ms": "berkaitan kon", "hi": "शंक्वाकार", "tr": "konik"}}
+{"guid": "A26_020", "translations": {"ms": "multiplikatif", "hi": "गुणात्मक", "tr": "çarpımsal"}}
+{"guid": "A26_021", "translations": {"ms": "multiplikatif", "hi": "गुणात्मक", "tr": "çarpımsal"}}
+{"guid": "A26_022", "translations": {"ms": "kombinatorik", "hi": "संयोजनात्मक", "tr": "kombinatorik"}}
+{"guid": "A26_023", "translations": {"ms": "boleh dikira", "hi": "गणनीय", "tr": "sayılabilir"}}
+{"guid": "A26_024", "translations": {"ms": "boleh diintegralkan", "hi": "समाकलनीय", "tr": "integrallenebilir"}}
+{"guid": "A26_025", "translations": {"ms": "distributif", "hi": "वितरणात्मक", "tr": "dağılmalı"}}
+{"guid": "A26_026", "translations": {"ms": "asimptotik", "hi": "अनस्पर्शी", "tr": "asimptotik"}}
+{"guid": "A26_027", "translations": {"ms": "tak terfaktorkan", "hi": "अविघटनीय", "tr": "indirgenemez"}}
+{"guid": "A26_028", "translations": {"ms": "parametrik", "hi": "प्राचलिक", "tr": "parametrik"}}
+{"guid": "A26_029", "translations": {"ms": "boleh songsang", "hi": "प्रतिलोमनीय", "tr": "tersinir"}}
+{"guid": "A26_030", "translations": {"ms": "tak komutatif", "hi": "गैर-क्रमविनिमेय", "tr": "değişmeli olmayan"}}
+{"guid": "A26_031", "translations": {"ms": "simpleks", "hi": "सिम्प्लेक्सीय", "tr": "simpleks"}}
+{"guid": "A26_032", "translations": {"ms": "tidak berat sebelah", "hi": "निष्पक्ष", "tr": "yansız"}}
+{"guid": "A26_033", "translations": {"ms": "deterministik", "hi": "नियतात्मक", "tr": "deterministik"}}
+{"guid": "A26_034", "translations": {"ms": "transitif", "hi": "संक्रामक", "tr": "geçişli"}}
+{"guid": "A26_035", "translations": {"ms": "homeomorfik", "hi": "होमियोमॉर्फिक", "tr": "homeomorfik"}}
+{"guid": "A26_036", "translations": {"ms": "bijektif", "hi": "द्वितः एकैकी", "tr": "bijektif"}}
+{"guid": "A26_037", "translations": {"ms": "kebarangkalian", "hi": "प्रायिकतात्मक", "tr": "olasılıksal"}}
+{"guid": "A26_038", "translations": {"ms": "saling lepas", "hi": "असंबद्ध", "tr": "ayrık"}}
+{"guid": "A26_039", "translations": {"ms": "injektif", "hi": "एकैकी", "tr": "birebir"}}
+{"guid": "A26_040", "translations": {"ms": "multivariat", "hi": "बहुचर", "tr": "çok değişkenli"}}
+{"guid": "A26_041", "translations": {"ms": "bersudut", "hi": "कोणीय", "tr": "açısal"}}
+{"guid": "A26_042", "translations": {"ms": "bersenggat", "hi": "अंशांकित", "tr": "dereceli"}}
+{"guid": "A26_043", "translations": {"ms": "verbal", "hi": "क्रियात्मक", "tr": "fiilsel"}}
+{"guid": "A26_044", "translations": {"ms": "inklusif", "hi": "समावेशी", "tr": "dahil"}}
+{"guid": "A26_045", "translations": {"ms": "dinamik", "hi": "गतिक", "tr": "dinamik"}}
+{"guid": "A26_046", "translations": {"ms": "kromatik", "hi": "वर्णक्रमीय", "tr": "kromatik"}}
+{"guid": "A26_047", "translations": {"ms": "terdefinisi dengan baik", "hi": "सुपरिभाषित", "tr": "iyi tanımlı"}}
+{"guid": "A26_048", "translations": {"ms": "dua dimensi", "hi": "द्विविमीय", "tr": "iki boyutlu"}}
+{"guid": "A26_049", "translations": {"ms": "bukan sifar", "hi": "शून्येतर", "tr": "sıfırdan farklı"}}
+{"guid": "A26_050", "translations": {"ms": "satu dimensi", "hi": "एक-आयामी", "tr": "tek boyutlu"}}
+{"guid": "A26_051", "translations": {"ms": "berfrekuensi tinggi", "hi": "उच्च आवृत्ति वाला", "tr": "yüksek frekanslı"}}
+{"guid": "A26_052", "translations": {"ms": "peringkat kedua", "hi": "द्वितीय कोटि का", "tr": "ikinci mertebeden"}}
+{"guid": "A26_053", "translations": {"ms": "bukan negatif", "hi": "गैर-ऋणात्मक", "tr": "negatif olmayan"}}
+{"guid": "A26_054", "translations": {"ms": "berfrekuensi rendah", "hi": "निम्न आवृत्ति वाला", "tr": "düşük frekanslı"}}
+{"guid": "A26_055", "translations": {"ms": "jamak", "hi": "बहुवचन", "tr": "çoğul"}}
+{"guid": "A26_056", "translations": {"ms": "tunggal", "hi": "एकवचन", "tr": "tekil"}}
+{"guid": "A26_057", "translations": {"ms": "nominatif", "hi": "कर्ताकारक", "tr": "yalın hâl"}}
+{"guid": "A26_058", "translations": {"ms": "datif", "hi": "संप्रदान कारक संबंधी", "tr": "datif"}}
+{"guid": "A26_059", "translations": {"ms": "ablatif", "hi": "अपादान कारक संबंधी", "tr": "ablatif"}}

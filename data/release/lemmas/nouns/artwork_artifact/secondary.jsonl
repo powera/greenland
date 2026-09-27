@@ -1,11 +1,93 @@
-{"guid": "N10_001", "translations": {"ro": "sculptură", "pl": "rzeźba", "th": "ประติมากรรม", "ta": "சிற்பம்", "kn": "ಶಿಲ್ಪ", "uk": "скульптура", "bn": "ভাস্কর্য", "hi": "मूर्तिकला", "bs": "skulptura"}}
-{"guid": "N10_002", "translations": {"ro": "statuie", "pl": "posąg", "th": "รูปปั้น", "ta": "சிலை", "kn": "ಪ್ರತಿಮೆ", "uk": "статуя", "bn": "মূর্তি", "hi": "प्रतिमा", "bs": "kip"}}
-{"guid": "N10_003", "translations": {"ro": "pictură", "pl": "obraz", "th": "ภาพวาด", "ta": "ஓவியம்", "kn": "ಚಿತ್ರಕಲೆ", "uk": "картина", "bn": "চিত্র", "hi": "चित्र"}}
-{"guid": "N10_004", "translations": {"ro": "portret", "pl": "portret", "th": "ภาพเหมือน", "ta": "உருவப்படம்", "kn": "ಭಾವಚಿತ್ರ", "uk": "портрет", "bn": "প্রতিচিত্র", "hi": "प्रतिमा", "bs": "portret"}}
-{"guid": "N10_005", "translations": {"ro": "mozaic", "pl": "mozaika", "th": "โมเสก", "ta": "மொசைக்", "kn": "ಮೊಸಾಯಿಕ್", "uk": "мозаїка", "bn": "মোজাইক", "hi": "मोज़ाइक"}}
-{"guid": "N10_006", "translations": {"ro": "pictură murală", "pl": "mural", "th": "จิตรกรรมฝาผนัง", "ta": "சுவரோவியம்", "kn": "ಗೋಡೆಚಿತ್ರ", "uk": "фреска", "bn": "প্রাচীরচিত্র", "hi": "भित्तिचित्र"}}
-{"guid": "N10_007", "translations": {"ro": "tapiserie", "pl": "gobelin", "th": "ผ้าทอลาย", "ta": "நெசவுத்திரை", "kn": "ನೇಯ್ಗೆ ಚಿತ್ರ", "uk": "гобелен", "bn": "গোবিলেন", "hi": "गोबलेन"}}
-{"guid": "N10_008", "translations": {"ro": "ceramică", "pl": "ceramika", "th": "เครื่องปั้นดินเผา", "ta": "மட்பாண்டம்", "kn": "ಮಣ್ಣಿನ ಪಾತ್ರೆ", "uk": "кераміка", "bn": "মৃৎব্যঞ্জন", "hi": "मिट्टी के बर्तन"}}
-{"guid": "N10_009", "translations": {"ro": "fotografie", "pl": "fotografia", "th": "ภาพถ่าย", "ta": "புகைப்படம்", "kn": "ಛಾಯಾಚಿತ್ರ", "uk": "фотографія", "bn": "ফটোগ্রাফ", "hi": "फोटोग्राफ", "bs": "fotografija"}}
-{"guid": "N10_010", "translations": {"ro": "schiță", "pl": "szkic", "th": "ภาพร่าง", "ta": "ஓவியக்குறிப்பு", "kn": "ರೇಖಾಚಿತ್ರ", "uk": "ескіз", "bn": "স্কেচ", "hi": "स्केच"}}
-{"guid": "N10_011", "translations": {"ro": "piesă muzicală", "pl": "utwór", "th": "เพลง", "ta": "பாடல்", "kn": "ಹಾಡು", "uk": "трек", "bn": "ট্র্যাক", "hi": "ट्रैक", "bs": "pjesma"}}
+{"guid": "N10_001", "translations": {"ro": "sculptură", "pl": "rzeźba", "th": "ประติมากรรม", "ms": "arca", "ta": "சிற்பம்", "kn": "ಶಿಲ್ಪ", "uk": "скульптура", "bn": "ভাস্কর্য", "hi": "मूर्तिकला", "tr": "heykel", "bs": "skulptura"}}
+{"guid": "N10_002", "translations": {"ro": "statuie", "pl": "posąg", "th": "รูปปั้น", "ms": "patung", "ta": "சிலை", "kn": "ಪ್ರತಿಮೆ", "uk": "статуя", "bn": "মূর্তি", "hi": "प्रतिमा", "tr": "heykel", "bs": "kip"}}
+{"guid": "N10_003", "translations": {"ro": "pictură", "pl": "obraz", "th": "ภาพวาด", "ms": "lukisan", "ta": "ஓவியம்", "kn": "ಚಿತ್ರಕಲೆ", "uk": "картина", "bn": "চিত্র", "hi": "चित्र", "tr": "tablo"}}
+{"guid": "N10_004", "translations": {"ro": "portret", "pl": "portret", "th": "ภาพเหมือน", "ms": "potret", "ta": "உருவப்படம்", "kn": "ಭಾವಚಿತ್ರ", "uk": "портрет", "bn": "প্রতিচিত্র", "hi": "प्रतिमा", "tr": "portre", "bs": "portret"}}
+{"guid": "N10_005", "translations": {"ro": "mozaic", "pl": "mozaika", "th": "โมเสก", "ms": "mozek", "ta": "மொசைக்", "kn": "ಮೊಸಾಯಿಕ್", "uk": "мозаїка", "bn": "মোজাইক", "hi": "मोज़ाइक", "tr": "mozaik"}}
+{"guid": "N10_006", "translations": {"ro": "pictură murală", "pl": "mural", "th": "จิตรกรรมฝาผนัง", "ms": "mural", "ta": "சுவரோவியம்", "kn": "ಗೋಡೆಚಿತ್ರ", "uk": "фреска", "bn": "প্রাচীরচিত্র", "hi": "भित्तिचित्र", "tr": "duvar resmi"}}
+{"guid": "N10_007", "translations": {"ro": "tapiserie", "pl": "gobelin", "th": "ผ้าทอลาย", "ms": "permaidani dinding", "ta": "நெசவுத்திரை", "kn": "ನೇಯ್ಗೆ ಚಿತ್ರ", "uk": "гобелен", "bn": "গোবিলেন", "hi": "गोबलेन", "tr": "duvar halısı"}}
+{"guid": "N10_008", "translations": {"ro": "ceramică", "pl": "ceramika", "th": "เครื่องปั้นดินเผา", "ms": "tembikar", "ta": "மட்பாண்டம்", "kn": "ಮಣ್ಣಿನ ಪಾತ್ರೆ", "uk": "кераміка", "bn": "মৃৎব্যঞ্জন", "hi": "मिट्टी के बर्तन", "tr": "çömlekçilik"}}
+{"guid": "N10_009", "translations": {"ro": "fotografie", "pl": "fotografia", "th": "ภาพถ่าย", "ms": "gambar", "ta": "புகைப்படம்", "kn": "ಛಾಯಾಚಿತ್ರ", "uk": "фотографія", "bn": "ফটোগ্রাফ", "hi": "फोटोग्राफ", "tr": "fotoğraf", "bs": "fotografija"}}
+{"guid": "N10_010", "translations": {"ro": "schiță", "pl": "szkic", "th": "ภาพร่าง", "ms": "lakaran", "ta": "ஓவியக்குறிப்பு", "kn": "ರೇಖಾಚಿತ್ರ", "uk": "ескіз", "bn": "স্কেচ", "hi": "स्केच", "tr": "taslak"}}
+{"guid": "N10_011", "translations": {"ro": "piesă muzicală", "pl": "utwór", "th": "เพลง", "ms": "lagu", "ta": "பாடல்", "kn": "ಹಾಡು", "uk": "трек", "bn": "ট্র্যাক", "hi": "ट्रैक", "tr": "parça", "bs": "pjesma"}}
+{"guid": "N10_012", "translations": {"ms": "kereta api luncur", "hi": "रोलर कोस्टर", "tr": "hız treni"}}
+{"guid": "N10_013", "translations": {"ms": "teka-teki jigsaw", "hi": "जिगसॉ पहेली", "tr": "yapboz"}}
+{"guid": "N10_014", "translations": {"ms": "teka silang kata", "hi": "शब्द पहेली", "tr": "bulmaca"}}
+{"guid": "N10_015", "translations": {"ms": "papan catur", "hi": "शतरंज की बिसात", "tr": "satranç tahtası"}}
+{"guid": "N10_016", "translations": {"ms": "cerita pendek", "hi": "लघुकथा", "tr": "öykü"}}
+{"guid": "N10_017", "translations": {"ms": "buku komik", "hi": "कॉमिक बुक", "tr": "çizgi roman"}}
+{"guid": "N10_018", "translations": {"ms": "rancangan bual bicara", "hi": "टॉक शो", "tr": "sohbet programı"}}
+{"guid": "N10_019", "translations": {"ms": "aureola", "hi": "प्रभामंडल", "tr": "hale"}}
+{"guid": "N10_020", "translations": {"ms": "muzikal", "hi": "संगीतमय नाटक", "tr": "müzikal"}}
+{"guid": "N10_021", "translations": {"ms": "animasi", "hi": "एनिमेशन", "tr": "animasyon"}}
+{"guid": "N10_022", "translations": {"ms": "novel", "hi": "उपन्यास", "tr": "roman"}}
+{"guid": "N10_023", "translations": {"ms": "melodi", "hi": "धुन", "tr": "melodi"}}
+{"guid": "N10_024", "translations": {"ms": "kesusasteraan", "hi": "साहित्य", "tr": "edebiyat"}}
+{"guid": "N10_025", "translations": {"ms": "harpa", "hi": "वीणा", "tr": "arp"}}
+{"guid": "N10_026", "translations": {"ms": "edisi", "hi": "संस्करण", "tr": "baskı"}}
+{"guid": "N10_027", "translations": {"ms": "edisi", "hi": "संस्करण", "tr": "baskı"}}
+{"guid": "N10_028", "translations": {"ms": "drama", "hi": "नाटक", "tr": "drama"}}
+{"guid": "N10_029", "translations": {"ms": "opera", "hi": "ओपेरा", "tr": "opera"}}
+{"guid": "N10_030", "translations": {"ms": "seni", "hi": "कलाएँ", "tr": "sanatlar"}}
+{"guid": "N10_031", "translations": {"ms": "komedi", "hi": "हास्य रचना", "tr": "komedi"}}
+{"guid": "N10_032", "translations": {"ms": "gendang", "hi": "ढोल", "tr": "davul"}}
+{"guid": "N10_033", "translations": {"ms": "puisi", "hi": "कविता", "tr": "şiir"}}
+{"guid": "N10_034", "translations": {"ms": "dialog", "hi": "संवाद", "tr": "diyalog"}}
+{"guid": "N10_035", "translations": {"ms": "balet", "hi": "बैले", "tr": "bale"}}
+{"guid": "N10_036", "translations": {"ms": "karya agung", "hi": "उत्कृष्ट कृति", "tr": "başyapıt"}}
+{"guid": "N10_037", "translations": {"ms": "sarkas", "hi": "सर्कस", "tr": "sirk"}}
+{"guid": "N10_038", "translations": {"ms": "pameran", "hi": "प्रदर्शनी", "tr": "sergi"}}
+{"guid": "N10_039", "translations": {"ms": "prelud", "hi": "प्रस्तावना", "tr": "prelüd"}}
+{"guid": "N10_040", "translations": {"ms": "penggambaran", "hi": "चित्रण", "tr": "tasvir"}}
+{"guid": "N10_041", "translations": {"ms": "penghormatan", "hi": "श्रद्धांजलि", "tr": "anma"}}
+{"guid": "N10_042", "translations": {"ms": "tajuk", "hi": "शीर्षक", "tr": "başlık"}}
+{"guid": "N10_043", "translations": {"ms": "sulaman", "hi": "कढ़ाई", "tr": "nakış"}}
+{"guid": "N10_044", "translations": {"ms": "manga", "hi": "मंगा", "tr": "manga"}}
+{"guid": "N10_045", "translations": {"ms": "anime", "hi": "ऐनिमे", "tr": "anime"}}
+{"guid": "N10_046", "translations": {"ms": "parodi", "hi": "पैरोडी", "tr": "parodi"}}
+{"guid": "N10_047", "translations": {"ms": "simfoni", "hi": "सिम्फनी", "tr": "senfoni"}}
+{"guid": "N10_048", "translations": {"ms": "cello", "hi": "वायलनचेलो", "tr": "çello"}}
+{"guid": "N10_049", "translations": {"ms": "konserto", "hi": "वाद्यवृंद के साथ एकल वाद्य के लिए रचित संगीत", "tr": "konçerto"}}
+{"guid": "N10_050", "translations": {"ms": "satira", "hi": "व्यंग्य", "tr": "hiciv"}}
+{"guid": "N10_051", "translations": {"ms": "lut", "hi": "वीणा", "tr": "lavta"}}
+{"guid": "N10_052", "translations": {"ms": "gamelan", "hi": "गमेलन", "tr": "gamelan"}}
+{"guid": "N10_053", "translations": {"ms": "karya seni", "hi": "कलाकृति", "tr": "sanat eseri"}}
+{"guid": "N10_054", "translations": {"ms": "sonata", "hi": "सोनाटा", "tr": "sonat"}}
+{"guid": "N10_055", "translations": {"ms": "grafiti", "hi": "भित्तिचित्र", "tr": "grafiti"}}
+{"guid": "N10_056", "translations": {"ms": "seni grafiti", "hi": "भित्तिचित्र कला", "tr": "grafiti sanatı"}}
+{"guid": "N10_057", "translations": {"ms": "kaligrafi", "hi": "सुलेख", "tr": "hat sanatı"}}
+{"guid": "N10_058", "translations": {"ms": "ukiran", "hi": "नक़्क़ाशी", "tr": "gravür"}}
+{"guid": "N10_059", "translations": {"ms": "aria", "hi": "आरिया", "tr": "arya"}}
+{"guid": "N10_060", "translations": {"ms": "kabuki", "hi": "काबुकी", "tr": "kabuki"}}
+{"guid": "N10_061", "translations": {"ms": "kolaj", "hi": "कोलाज", "tr": "kolaj"}}
+{"guid": "N10_062", "translations": {"ms": "parodi", "hi": "पैरोडी", "tr": "parodi"}}
+{"guid": "N10_063", "translations": {"ms": "fuga", "hi": "फ्यूग", "tr": "füg"}}
+{"guid": "N10_064", "translations": {"ms": "soneta", "hi": "सॉनेट", "tr": "sone"}}
+{"guid": "N10_065", "translations": {"ms": "trilogi", "hi": "त्रयी", "tr": "üçleme"}}
+{"guid": "N10_066", "translations": {"ms": "sekuel", "hi": "अगली कड़ी", "tr": "devam filmi"}}
+{"guid": "N10_067", "translations": {"ms": "balada", "hi": "गाथागीत", "tr": "balad"}}
+{"guid": "N10_068", "translations": {"ms": "balada", "hi": "गाथागीत", "tr": "balad"}}
+{"guid": "N10_069", "translations": {"ms": "boneka", "hi": "कठपुतली", "tr": "kukla"}}
+{"guid": "N10_070", "translations": {"ms": "runut bunyi", "hi": "साउंडट्रैक", "tr": "film müziği"}}
+{"guid": "N10_071", "translations": {"ms": "karikatur", "hi": "व्यंग्यचित्र", "tr": "karikatür"}}
+{"guid": "N10_072", "translations": {"ms": "lukisan cat air", "hi": "जलरंग चित्र", "tr": "suluboya resim"}}
+{"guid": "N10_073", "translations": {"ms": "saga", "hi": "गाथा", "tr": "saga"}}
+{"guid": "N10_074", "translations": {"ms": "libreto", "hi": "लिब्रेटो", "tr": "libretto"}}
+{"guid": "N10_075", "translations": {"ms": "trio", "hi": "त्रयी", "tr": "üçlü"}}
+{"guid": "N10_076", "translations": {"ms": "lira", "hi": "वीणा", "tr": "lir"}}
+{"guid": "N10_077", "translations": {"ms": "subgenre", "hi": "उपविधा", "tr": "alt tür"}}
+{"guid": "N10_078", "translations": {"ms": "lukisan fresko", "hi": "भित्तिचित्र", "tr": "fresk"}}
+{"guid": "N10_079", "translations": {"ms": "seni wayang kulit", "hi": "कठपुतली कला", "tr": "kukla sanatı"}}
+{"guid": "N10_080", "translations": {"ms": "autobiografi", "hi": "आत्मकथा", "tr": "otobiyografi"}}
+{"guid": "N10_081", "translations": {"ms": "prototaip", "hi": "प्रारूप", "tr": "prototip"}}
+{"guid": "N10_082", "translations": {"ms": "karya asli", "hi": "मूल कृति", "tr": "orijinal"}}
+{"guid": "N10_083", "translations": {"ms": "produk", "hi": "उत्पाद", "tr": "ürün"}}
+{"guid": "N10_084", "translations": {"ms": "imej", "hi": "चित्र", "tr": "görüntü"}}
+{"guid": "N10_085", "translations": {"ms": "karya terbitan", "hi": "स्पिन-ऑफ़", "tr": "yan ürün"}}
+{"guid": "N10_086", "translations": {"ms": "potret diri", "hi": "स्व-चित्र", "tr": "otoportre"}}
+{"guid": "N10_087", "translations": {"ms": "poster", "hi": "पोस्टर", "tr": "afiş"}}
+{"guid": "N10_088", "translations": {"ms": "DVD", "hi": "डीवीडी", "tr": "DVD"}}
+{"guid": "N10_089", "translations": {"ms": "video", "hi": "वीडियो", "tr": "video"}}
+{"guid": "N10_090", "translations": {"ms": "hadiah", "hi": "पुरस्कार", "tr": "ödül"}}
+{"guid": "N10_091", "translations": {"ms": "orang salji", "hi": "हिममानव", "tr": "kardan adam"}}
+{"guid": "N10_092", "translations": {"ms": "kalendar", "hi": "कैलेंडर", "tr": "takvim"}}
+{"guid": "N10_093", "translations": {"ms": "roket bunga api", "hi": "आतिशबाज़ी का रॉकेट", "tr": "havai fişek roketi"}}

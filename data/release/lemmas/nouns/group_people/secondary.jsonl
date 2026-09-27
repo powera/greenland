@@ -1,6 +1,32 @@
-{"guid": "N26_001", "translations": {"ro": "echipă", "pl": "zespół", "th": "ทีม", "ta": "அணி", "kn": "ತಂಡ", "uk": "команда", "bn": "দল", "hi": "टीम"}}
-{"guid": "N26_002", "translations": {"ro": "populație", "pl": "ludność", "th": "ประชากร", "ta": "மக்கள் தொகை", "kn": "ಜನಸಂಖ್ಯೆ", "uk": "населення", "bn": "জনসংখ্যা", "hi": "जनसंख्या"}}
-{"guid": "N26_003", "translations": {"ro": "bandă", "pl": "zespół", "th": "วงดนตรี", "ta": "பேண்ட்", "kn": "ಬ್ಯಾಂಡ್", "uk": "гурт", "bn": "ব্যান্ড", "hi": "बैंड"}}
-{"guid": "N26_004", "translations": {"ro": "consiliu", "pl": "rada", "th": "คณะกรรมการ", "ta": "வர்ை", "kn": "ಬೋರ್ಡ್", "uk": "рада", "bn": "বোর্ড", "hi": "परिषद्"}}
-{"guid": "N26_005", "translations": {"ro": "filială", "pl": "oddział", "th": "สาขา", "ta": "கிளை", "kn": "ಶಾಖೆ", "uk": "філія", "bn": "শাখা", "hi": "शाखा"}}
-{"guid": "N26_006", "translations": {"ro": "guvern", "pl": "gabinet", "th": "คณะรัฐมนตรี", "ta": "கேபினெட்", "kn": "ಕ್ಯಾಬಿನೆಟ್", "uk": "кабінет", "bn": "মন্ত্রিসভা", "hi": "मंत्रिमंडल"}}
+{"guid": "N26_001", "translations": {"ro": "echipă", "pl": "zespół", "th": "ทีม", "ms": "pasukan", "ta": "அணி", "kn": "ತಂಡ", "uk": "команда", "bn": "দল", "hi": "टीम", "tr": "takım"}}
+{"guid": "N26_002", "translations": {"ro": "populație", "pl": "ludność", "th": "ประชากร", "ms": "penduduk", "ta": "மக்கள் தொகை", "kn": "ಜನಸಂಖ್ಯೆ", "uk": "населення", "bn": "জনসংখ্যা", "hi": "जनसंख्या", "tr": "nüfus"}}
+{"guid": "N26_003", "translations": {"ro": "bandă", "pl": "zespół", "th": "วงดนตรี", "ms": "kumpulan muzik", "ta": "பேண்ட்", "kn": "ಬ್ಯಾಂಡ್", "uk": "гурт", "bn": "ব্যান্ড", "hi": "बैंड", "tr": "müzik grubu"}}
+{"guid": "N26_004", "translations": {"ro": "consiliu", "pl": "rada", "th": "คณะกรรมการ", "ms": "lembaga pengarah", "ta": "வர்ை", "kn": "ಬೋರ್ಡ್", "uk": "рада", "bn": "বোর্ড", "hi": "परिषद्", "tr": "yönetim kurulu"}}
+{"guid": "N26_005", "translations": {"ro": "filială", "pl": "oddział", "th": "สาขา", "ms": "cawangan", "ta": "கிளை", "kn": "ಶಾಖೆ", "uk": "філія", "bn": "শাখা", "hi": "शाखा", "tr": "şube"}}
+{"guid": "N26_006", "translations": {"ro": "guvern", "pl": "gabinet", "th": "คณะรัฐมนตรี", "ms": "jemaah menteri", "ta": "கேபினெட்", "kn": "ಕ್ಯಾಬಿನೆಟ್", "uk": "кабінет", "bn": "মন্ত্রিসভা", "hi": "मंत्रिमंडल", "tr": "bakanlar kurulu"}}
+{"guid": "N26_007", "translations": {"ms": "kumpulan belajar", "hi": "अध्ययन समूह", "tr": "çalışma grubu"}}
+{"guid": "N26_008", "translations": {"ms": "kelas menengah", "hi": "मध्यम वर्ग", "tr": "orta sınıf"}}
+{"guid": "N26_009", "translations": {"ms": "kelas pekerja", "hi": "श्रमिक वर्ग", "tr": "işçi sınıfı"}}
+{"guid": "N26_010", "translations": {"ms": "subkumpulan", "hi": "उपसमूह", "tr": "alt grup"}}
+{"guid": "N26_011", "translations": {"ms": "orkestra", "hi": "वाद्यवृंद", "tr": "orkestra"}}
+{"guid": "N26_012", "translations": {"ms": "penonton", "hi": "दर्शक", "tr": "izleyici kitlesi"}}
+{"guid": "N26_013", "translations": {"ms": "koir", "hi": "गायकमंडली", "tr": "koro"}}
+{"guid": "N26_014", "translations": {"ms": "sekutu", "hi": "सहयोगी", "tr": "müttefik"}}
+{"guid": "N26_015", "translations": {"ms": "klan", "hi": "कुल", "tr": "klan"}}
+{"guid": "N26_016", "translations": {"ms": "pesaing", "hi": "प्रतिद्वंद्वी", "tr": "rakip"}}
+{"guid": "N26_017", "translations": {"ms": "kumpulan etnik", "hi": "जातीय समूह", "tr": "etnik grup"}}
+{"guid": "N26_018", "translations": {"ms": "juri", "hi": "जूरी", "tr": "jüri"}}
+{"guid": "N26_019", "translations": {"ms": "juri", "hi": "निर्णायक मंडल", "tr": "jüri"}}
+{"guid": "N26_020", "translations": {"ms": "juri", "hi": "जूरी", "tr": "jüri"}}
+{"guid": "N26_021", "translations": {"ms": "pertahanan", "hi": "रक्षा", "tr": "savunma"}}
+{"guid": "N26_022", "translations": {"ms": "pihak pembela", "hi": "बचाव पक्ष", "tr": "savunma ekibi"}}
+{"guid": "N26_023", "translations": {"ms": "kumpulan tiga", "hi": "तिकड़ी", "tr": "üçlü"}}
+{"guid": "N26_024", "translations": {"ms": "trio", "hi": "तिकड़ी", "tr": "üçlü"}}
+{"guid": "N26_025", "translations": {"ms": "subkeluarga", "hi": "उपपरिवार", "tr": "alt aile"}}
+{"guid": "N26_026", "translations": {"ms": "puak", "hi": "गुट", "tr": "fraksiyon"}}
+{"guid": "N26_027", "translations": {"ms": "komuniti", "hi": "समुदाय", "tr": "topluluk"}}
+{"guid": "N26_028", "translations": {"ms": "sampah masyarakat", "hi": "नीच व्यक्ति", "tr": "pislik"}}
+{"guid": "N26_029", "translations": {"ms": "golongan avant-garde", "hi": "अग्रगामी कलाकार", "tr": "avangart"}}
+{"guid": "N26_030", "translations": {"ms": "bukan Muslim", "hi": "गैर-मुस्लिम", "tr": "Müslüman olmayanlar"}}
+{"guid": "N26_031", "translations": {"ms": "naib juara", "hi": "उपविजेता", "tr": "ikinci olan"}}
+{"guid": "N26_032", "translations": {"ms": "dunia", "hi": "दुनिया", "tr": "dünya"}}

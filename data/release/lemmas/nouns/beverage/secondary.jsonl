@@ -1,28 +1,31 @@
-{"guid": "N42_001", "translations": {"ro": "apă", "pl": "woda", "th": "น้ำ", "ta": "தண்ணீர்", "kn": "ನೀರು", "uk": "вода", "bn": "পানি", "hi": "पानी", "bs": "voda"}}
-{"guid": "N42_002", "translations": {"ro": "cafea", "pl": "kawa", "th": "กาแฟ", "ta": "காபி", "kn": "ಕಾಫಿ", "uk": "кава", "bn": "কফি", "hi": "कॉफ़ी", "bs": "kafa"}}
-{"guid": "N42_003", "translations": {"ro": "ceai", "pl": "herbata", "th": "ชา", "ta": "தேநீர்", "kn": "ಚಹಾ", "uk": "чай", "bn": "চা", "hi": "चाय", "bs": "čaj"}}
-{"guid": "N42_004", "translations": {"ro": "bere", "pl": "piwo", "th": "เบียร์", "ta": "பீர்", "kn": "ಬಿಯರ್", "uk": "пиво", "bn": "বিয়ার", "hi": "बियर", "bs": "pivo"}}
-{"guid": "N42_005", "translations": {"ro": "vin", "pl": "wino", "th": "ไวน์", "ta": "மது", "kn": "ವೈನ್", "uk": "вино", "bn": "শরাব", "hi": "शराब", "bs": "vino"}}
-{"guid": "N42_006", "translations": {"ro": "lapte", "pl": "mleko", "th": "นม", "ta": "பால்", "kn": "ಹಾಲು", "uk": "молоко", "bn": "দুধ", "hi": "दूध", "bs": "mlijeko"}}
-{"guid": "N42_007", "translations": {"ro": "suc acidulat", "pl": "napój gazowany", "th": "น้ำอัดลม", "ta": "சோடா", "kn": "ಸೋಡಾ", "uk": "газований напій", "bn": "সোডা", "hi": "सोडा", "bs": "gazirano piće"}}
-{"guid": "N42_008", "translations": {"ro": "suc", "pl": "sok", "th": "น้ำผลไม้", "ta": "சாறு", "kn": "ರಸ", "uk": "сік", "bn": "রস", "hi": "रस"}}
-{"guid": "N42_009", "translations": {"ro": "limonadă", "pl": "lemoniada", "th": "น้ำมะนาว", "ta": "எலுமிச்சை பானம்", "kn": "ನಿಂಬೆ ಪಾನಕ", "uk": "лимонад", "bn": "লেবুর শরবত", "hi": "लेमोनेड", "bs": "limunada"}}
-{"guid": "N42_010", "translations": {"ro": "ciocolată caldă", "pl": "gorąca czekolada", "th": "ช็อกโกแลตร้อน", "ta": "சூடான சாக்லேட்", "kn": "ಹಾಟ್ ಚಾಕೊಲೇಟ್", "uk": "гарячий шоколад", "bn": "হট চকোলেট", "hi": "हॉट चॉकलेट", "bs": "vruća čokolada"}}
-{"guid": "N42_011", "translations": {"ro": "smoothie", "pl": "koktajl owocowy", "th": "สมูทตี้", "ta": "ஸ்மூத்தி", "kn": "ಸ್ಮೂಥಿ", "uk": "смузі", "bn": "স্মুদি", "hi": "स्मूदी", "bs": "smoothie"}}
-{"guid": "N42_012", "translations": {"ro": "cocktail", "pl": "koktajl", "th": "ค็อกเทล", "ta": "காக்டெய்ல்", "kn": "ಕಾಕ್‌ಟೈಲ್", "uk": "коктейль", "bn": "ককটেল", "hi": "कॉकटेल", "bs": "koktel"}}
-{"guid": "N42_013", "translations": {"ro": "băutură spirtoasă", "pl": "alkohol wysokoprocentowy", "th": "สุรา", "ta": "மதுபானம்", "kn": "ಮದ್ಯ", "uk": "крепкі алкогольні напої", "bn": "কঠোর মদ", "hi": "मज़बूत शराब", "bs": "žestoko piće"}}
-{"guid": "N42_014", "translations": {"ro": "whisky", "pl": "whisky", "th": "วิสกี้", "ta": "விஸ்கி", "kn": "ವಿಸ್ಕಿ", "uk": "віскі", "bn": "হুইস্কি", "hi": "व्हиски", "bs": "viski"}}
-{"guid": "N42_015", "translations": {"ro": "vodcă", "pl": "wódka", "th": "วอดก้า", "ta": "வோட்கா", "kn": "ವೋಡ್ಕಾ", "uk": "горілка", "bn": "ভদকা", "hi": "वोदका", "bs": "votka"}}
-{"guid": "N42_016", "translations": {"ro": "rom", "pl": "rum", "th": "รัม", "ta": "ரம்", "kn": "ರಮ್", "uk": "ром", "bn": "রাম", "hi": "रम", "bs": "rum"}}
-{"guid": "N42_017", "translations": {"ro": "șampanie", "pl": "szampan", "th": "แชมเปญ", "ta": "ஷாம்பெயின்", "kn": "ಶ್ಯಾಂಪೇನ್", "uk": "шампанське", "bn": "শ্যাম্পেইন", "hi": "शैम्पेन", "bs": "šampanjac"}}
-{"guid": "N42_018", "translations": {"ro": "sake", "pl": "sake", "th": "สาเก", "ta": "சாகே", "kn": "ಸಾಕೆ", "uk": "саке", "bn": "সাকি", "hi": "साके", "bs": "sake"}}
-{"guid": "N42_019", "translations": {"ro": "cidru", "pl": "cydr", "th": "ไซเดอร์", "ta": "சைடர்", "kn": "ಸೈಡರ್", "uk": "сидр", "bn": "সাইডার", "hi": "साइडर", "bs": "jabukovača"}}
-{"guid": "N42_020", "translations": {"ro": "băutură", "pl": "napój", "th": "เครื่องดื่ม", "ta": "பானம்", "kn": "ಪಾನೀಯ", "uk": "напій", "bn": "পানীয়", "hi": "पेय", "bs": "napitak"}}
-{"guid": "N42_021", "translations": {"ro": "vin de Porto", "pl": "porto", "th": "พอร์ตไวน์", "ta": "போர்ட் ஒயின்", "kn": "ಪೋರ್ಟ್ ವೈನ್", "uk": "портвейн", "bn": "পোর্টওয়াইন", "hi": "पोर्ट वाइन"}}
-{"guid": "N42_022", "translations": {"bs": "sok od narandže"}}
-{"guid": "N42_023", "translations": {"bs": "zeleni čaj"}}
-{"guid": "N42_024", "translations": {"bs": "ledeni čaj"}}
-{"guid": "N42_025", "translations": {"bs": "instant-kafa"}}
-{"guid": "N42_026", "translations": {"bs": "mineralna voda"}}
-{"guid": "N42_027", "translations": {"bs": "gazirana voda"}}
-{"guid": "N42_028", "translations": {"bs": "voda iz slavine"}}
+{"guid": "N42_001", "translations": {"ro": "apă", "pl": "woda", "th": "น้ำ", "ms": "air", "ta": "தண்ணீர்", "kn": "ನೀರು", "uk": "вода", "bn": "পানি", "hi": "पानी", "tr": "su", "bs": "voda"}}
+{"guid": "N42_002", "translations": {"ro": "cafea", "pl": "kawa", "th": "กาแฟ", "ms": "kopi", "ta": "காபி", "kn": "ಕಾಫಿ", "uk": "кава", "bn": "কফি", "hi": "कॉफ़ी", "tr": "kahve", "bs": "kafa"}}
+{"guid": "N42_003", "translations": {"ro": "ceai", "pl": "herbata", "th": "ชา", "ms": "teh", "ta": "தேநீர்", "kn": "ಚಹಾ", "uk": "чай", "bn": "চা", "hi": "चाय", "tr": "çay", "bs": "čaj"}}
+{"guid": "N42_004", "translations": {"ro": "bere", "pl": "piwo", "th": "เบียร์", "ms": "bir", "ta": "பீர்", "kn": "ಬಿಯರ್", "uk": "пиво", "bn": "বিয়ার", "hi": "बियर", "tr": "bira", "bs": "pivo"}}
+{"guid": "N42_005", "translations": {"ro": "vin", "pl": "wino", "th": "ไวน์", "ms": "wain", "ta": "மது", "kn": "ವೈನ್", "uk": "вино", "bn": "শরাব", "hi": "शराब", "tr": "şarap", "bs": "vino"}}
+{"guid": "N42_006", "translations": {"ro": "lapte", "pl": "mleko", "th": "นม", "ms": "susu", "ta": "பால்", "kn": "ಹಾಲು", "uk": "молоко", "bn": "দুধ", "hi": "दूध", "tr": "süt", "bs": "mlijeko"}}
+{"guid": "N42_007", "translations": {"ro": "suc acidulat", "pl": "napój gazowany", "th": "น้ำอัดลม", "ms": "minuman berkarbonat", "ta": "சோடா", "kn": "ಸೋಡಾ", "uk": "газований напій", "bn": "সোডা", "hi": "सोडा", "tr": "gazlı içecek", "bs": "gazirano piće"}}
+{"guid": "N42_008", "translations": {"ro": "suc", "pl": "sok", "th": "น้ำผลไม้", "ms": "jus", "ta": "சாறு", "kn": "ರಸ", "uk": "сік", "bn": "রস", "hi": "रस", "tr": "meyve suyu"}}
+{"guid": "N42_009", "translations": {"ro": "limonadă", "pl": "lemoniada", "th": "น้ำมะนาว", "ms": "air limau", "ta": "எலுமிச்சை பானம்", "kn": "ನಿಂಬೆ ಪಾನಕ", "uk": "лимонад", "bn": "লেবুর শরবত", "hi": "लेमोनेड", "tr": "limonata", "bs": "limunada"}}
+{"guid": "N42_010", "translations": {"ro": "ciocolată caldă", "pl": "gorąca czekolada", "th": "ช็อกโกแลตร้อน", "ms": "coklat panas", "ta": "சூடான சாக்லேட்", "kn": "ಹಾಟ್ ಚಾಕೊಲೇಟ್", "uk": "гарячий шоколад", "bn": "হট চকোলেট", "hi": "हॉट चॉकलेट", "tr": "sıcak çikolata", "bs": "vruća čokolada"}}
+{"guid": "N42_011", "translations": {"ro": "smoothie", "pl": "koktajl owocowy", "th": "สมูทตี้", "ms": "minuman smoothie", "ta": "ஸ்மூத்தி", "kn": "ಸ್ಮೂಥಿ", "uk": "смузі", "bn": "স্মুদি", "hi": "स्मूदी", "tr": "smoothie", "bs": "smoothie"}}
+{"guid": "N42_012", "translations": {"ro": "cocktail", "pl": "koktajl", "th": "ค็อกเทล", "ms": "koktel", "ta": "காக்டெய்ல்", "kn": "ಕಾಕ್‌ಟೈಲ್", "uk": "коктейль", "bn": "ককটেল", "hi": "कॉकटेल", "tr": "kokteyl", "bs": "koktel"}}
+{"guid": "N42_013", "translations": {"ro": "băutură spirtoasă", "pl": "alkohol wysokoprocentowy", "th": "สุรา", "ms": "minuman keras", "ta": "மதுபானம்", "kn": "ಮದ್ಯ", "uk": "крепкі алкогольні напої", "bn": "কঠোর মদ", "hi": "मज़बूत शराब", "tr": "damıtılmış alkollü içki", "bs": "žestoko piće"}}
+{"guid": "N42_014", "translations": {"ro": "whisky", "pl": "whisky", "th": "วิสกี้", "ms": "wiski", "ta": "விஸ்கி", "kn": "ವಿಸ್ಕಿ", "uk": "віскі", "bn": "হুইস্কি", "hi": "व्हиски", "tr": "viski", "bs": "viski"}}
+{"guid": "N42_015", "translations": {"ro": "vodcă", "pl": "wódka", "th": "วอดก้า", "ms": "vodka", "ta": "வோட்கா", "kn": "ವೋಡ್ಕಾ", "uk": "горілка", "bn": "ভদকা", "hi": "वोदका", "tr": "votka", "bs": "votka"}}
+{"guid": "N42_016", "translations": {"ro": "rom", "pl": "rum", "th": "รัม", "ms": "rum", "ta": "ரம்", "kn": "ರಮ್", "uk": "ром", "bn": "রাম", "hi": "रम", "tr": "rom", "bs": "rum"}}
+{"guid": "N42_017", "translations": {"ro": "șampanie", "pl": "szampan", "th": "แชมเปญ", "ms": "wain Champagne", "ta": "ஷாம்பெயின்", "kn": "ಶ್ಯಾಂಪೇನ್", "uk": "шампанське", "bn": "শ্যাম্পেইন", "hi": "शैम्पेन", "tr": "şampanya", "bs": "šampanjac"}}
+{"guid": "N42_018", "translations": {"ro": "sake", "pl": "sake", "th": "สาเก", "ms": "sake", "ta": "சாகே", "kn": "ಸಾಕೆ", "uk": "саке", "bn": "সাকি", "hi": "साके", "tr": "sake", "bs": "sake"}}
+{"guid": "N42_019", "translations": {"ro": "cidru", "pl": "cydr", "th": "ไซเดอร์", "ms": "sider", "ta": "சைடர்", "kn": "ಸೈಡರ್", "uk": "сидр", "bn": "সাইডার", "hi": "साइडर", "tr": "elma şarabı", "bs": "jabukovača"}}
+{"guid": "N42_020", "translations": {"ro": "băutură", "pl": "napój", "th": "เครื่องดื่ม", "ms": "minuman", "ta": "பானம்", "kn": "ಪಾನೀಯ", "uk": "напій", "bn": "পানীয়", "hi": "पेय", "tr": "içecek", "bs": "napitak"}}
+{"guid": "N42_021", "translations": {"ro": "vin de Porto", "pl": "porto", "th": "พอร์ตไวน์", "ms": "wain port", "ta": "போர்ட் ஒயின்", "kn": "ಪೋರ್ಟ್ ವೈನ್", "uk": "портвейн", "bn": "পোর্টওয়াইন", "hi": "पोर्ट वाइन", "tr": "porto şarabı"}}
+{"guid": "N42_022", "translations": {"ms": "jus oren", "hi": "संतरे का रस", "tr": "portakal suyu", "bs": "sok od narandže"}}
+{"guid": "N42_023", "translations": {"ms": "teh hijau", "hi": "हरी चाय", "tr": "yeşil çay", "bs": "zeleni čaj"}}
+{"guid": "N42_024", "translations": {"ms": "teh ais", "hi": "आइस्ड टी", "tr": "buzlu çay", "bs": "ledeni čaj"}}
+{"guid": "N42_025", "translations": {"ms": "kopi segera", "hi": "इंस्टेंट कॉफ़ी", "tr": "hazır kahve", "bs": "instant-kafa"}}
+{"guid": "N42_026", "translations": {"ms": "air mineral", "hi": "मिनरल वाटर", "tr": "maden suyu", "bs": "mineralna voda"}}
+{"guid": "N42_027", "translations": {"ms": "air berkarbonat", "hi": "कार्बोनेटेड पानी", "tr": "maden suyu", "bs": "gazirana voda"}}
+{"guid": "N42_028", "translations": {"ms": "air paip", "hi": "नल का पानी", "tr": "musluk suyu", "bs": "voda iz slavine"}}
+{"guid": "N42_029", "translations": {"ms": "gin", "hi": "जिन", "tr": "cin"}}
+{"guid": "N42_030", "translations": {"ms": "wain sheri", "hi": "शेरी", "tr": "şeri"}}
+{"guid": "N42_031", "translations": {"ms": "susu kocak", "hi": "मिल्कशेक", "tr": "milkshake"}}

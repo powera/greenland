@@ -1,11 +1,20 @@
-{"guid": "A02_001", "translations": {"ro": "negru", "pl": "czarny", "th": "ดำ", "ta": "கருப்பு", "kn": "ಕಪ್ಪು", "uk": "чорний", "bn": "কালো", "hi": "काला", "bs": "crn"}}
-{"guid": "A02_002", "translations": {"ro": "alb", "pl": "biały", "th": "ขาว", "ta": "வெள்ளை", "kn": "ಬಿಳಿ", "uk": "білий", "bn": "সাদা", "hi": "सफ़ेद", "bs": "bijel"}}
-{"guid": "A02_003", "translations": {"ro": "roșu", "pl": "czerwony", "th": "แดง", "ta": "சிவப்பு", "kn": "ಕೆಂಪು", "uk": "червоний", "bn": "লাল", "hi": "लाल", "bs": "crven"}}
-{"guid": "A02_004", "translations": {"ro": "albastru", "pl": "niebieski", "th": "น้ำเงิน", "ta": "நீலம்", "kn": "ನೀಲಿ", "uk": "синій", "bn": "নীল", "hi": "नीला", "bs": "plav"}}
-{"guid": "A02_005", "translations": {"ro": "verde", "pl": "zielony", "th": "เขียว", "ta": "பச்சை", "kn": "ಹಸಿರು", "uk": "зелений", "bn": "সবুজ", "hi": "हरा", "bs": "zelen"}}
-{"guid": "A02_006", "translations": {"ro": "galben", "pl": "żółty", "th": "เหลือง", "ta": "மஞ்சள்", "kn": "ಹಳದಿ", "uk": "жовтий", "bn": "হলুদ", "hi": "पीला", "bs": "žut"}}
-{"guid": "A02_007", "translations": {"ro": "maro", "pl": "brązowy", "th": "น้ำตาล", "ta": "பழுப்பு", "kn": "ಕಂದು", "uk": "коричневий", "bn": "বাদামী", "hi": "भूरा", "bs": "smeđ"}}
-{"guid": "A02_008", "translations": {"ro": "gri", "pl": "szary", "th": "เทา", "ta": "சாம்பல்", "kn": "ಬೂದು", "uk": "сірий", "bn": "ধূসর", "hi": "धूसर", "bs": "siv"}}
-{"guid": "A02_009", "translations": {"ro": "portocaliu", "pl": "pomarańczowy", "th": "ส้ม", "ta": "ஆரஞ்சு", "kn": "ಕಿತ್ತಳೆ", "uk": "помаранчевий", "bn": "কমলা", "hi": "नारंगी", "bs": "narančast"}}
-{"guid": "A02_010", "translations": {"ro": "violet", "pl": "fioletowy", "th": "ม่วง", "ta": "ஊதா", "kn": "ನೇರಳೆ", "uk": "фіолетовий", "bn": "বেগুনি", "hi": "बैंगनी", "bs": "ljubičast"}}
-{"guid": "A02_011", "translations": {"ro": "roz", "pl": "różowy", "th": "ชมพู", "ta": "இளஞ்சிவப்பு", "kn": "ಗುಲಾಬಿ", "uk": "рожевий", "bn": "বেগুনি", "hi": "गुलाबी", "bs": "ružičast"}}
+{"guid": "A02_001", "translations": {"ro": "negru", "pl": "czarny", "th": "ดำ", "ms": "hitam", "ta": "கருப்பு", "kn": "ಕಪ್ಪು", "uk": "чорний", "bn": "কালো", "hi": "काला", "tr": "siyah", "bs": "crn"}}
+{"guid": "A02_002", "translations": {"ro": "alb", "pl": "biały", "th": "ขาว", "ms": "putih", "ta": "வெள்ளை", "kn": "ಬಿಳಿ", "uk": "білий", "bn": "সাদা", "hi": "सफ़ेद", "tr": "beyaz", "bs": "bijel"}}
+{"guid": "A02_003", "translations": {"ro": "roșu", "pl": "czerwony", "th": "แดง", "ms": "merah", "ta": "சிவப்பு", "kn": "ಕೆಂಪು", "uk": "червоний", "bn": "লাল", "hi": "लाल", "tr": "kırmızı", "bs": "crven"}}
+{"guid": "A02_004", "translations": {"ro": "albastru", "pl": "niebieski", "th": "น้ำเงิน", "ms": "biru", "ta": "நீலம்", "kn": "ನೀಲಿ", "uk": "синій", "bn": "নীল", "hi": "नीला", "tr": "mavi", "bs": "plav"}}
+{"guid": "A02_005", "translations": {"ro": "verde", "pl": "zielony", "th": "เขียว", "ms": "hijau", "ta": "பச்சை", "kn": "ಹಸಿರು", "uk": "зелений", "bn": "সবুজ", "hi": "हरा", "tr": "yeşil", "bs": "zelen"}}
+{"guid": "A02_006", "translations": {"ro": "galben", "pl": "żółty", "th": "เหลือง", "ms": "kuning", "ta": "மஞ்சள்", "kn": "ಹಳದಿ", "uk": "жовтий", "bn": "হলুদ", "hi": "पीला", "tr": "sarı", "bs": "žut"}}
+{"guid": "A02_007", "translations": {"ro": "maro", "pl": "brązowy", "th": "น้ำตาล", "ms": "coklat", "ta": "பழுப்பு", "kn": "ಕಂದು", "uk": "коричневий", "bn": "বাদামী", "hi": "भूरा", "tr": "kahverengi", "bs": "smeđ"}}
+{"guid": "A02_008", "translations": {"ro": "gri", "pl": "szary", "th": "เทา", "ms": "kelabu", "ta": "சாம்பல்", "kn": "ಬೂದು", "uk": "сірий", "bn": "ধূসর", "hi": "धूसर", "tr": "gri", "bs": "siv"}}
+{"guid": "A02_009", "translations": {"ro": "portocaliu", "pl": "pomarańczowy", "th": "ส้ม", "ms": "oren", "ta": "ஆரஞ்சு", "kn": "ಕಿತ್ತಳೆ", "uk": "помаранчевий", "bn": "কমলা", "hi": "नारंगी", "tr": "turuncu", "bs": "narančast"}}
+{"guid": "A02_010", "translations": {"ro": "violet", "pl": "fioletowy", "th": "ม่วง", "ms": "ungu", "ta": "ஊதா", "kn": "ನೇರಳೆ", "uk": "фіолетовий", "bn": "বেগুনি", "hi": "बैंगनी", "tr": "mor", "bs": "ljubičast"}}
+{"guid": "A02_011", "translations": {"ro": "roz", "pl": "różowy", "th": "ชมพู", "ms": "merah jambu", "ta": "இளஞ்சிவப்பு", "kn": "ಗುಲಾಬಿ", "uk": "рожевий", "bn": "বেগুনি", "hi": "गुलाबी", "tr": "pembe", "bs": "ružičast"}}
+{"guid": "A02_012", "translations": {"ms": "bertompok", "hi": "धब्बेदार", "tr": "benekli"}}
+{"guid": "A02_013", "translations": {"ms": "berjalur", "hi": "धारीदार", "tr": "çizgili"}}
+{"guid": "A02_014", "translations": {"ms": "kromatik", "hi": "वर्ण-संबंधी", "tr": "kromatik"}}
+{"guid": "A02_015", "translations": {"ms": "berwarna terakota", "hi": "टेराकोटा रंग का", "tr": "terakota rengi"}}
+{"guid": "A02_016", "translations": {"ms": "hitam putih", "hi": "श्याम-श्वेत", "tr": "siyah beyaz"}}
+{"guid": "A02_017", "translations": {"ms": "perang kemerahan", "hi": "लाल-भूरा", "tr": "kızıl kahverengi"}}
+{"guid": "A02_018", "translations": {"ms": "berekor putih", "hi": "सफेद पूँछ वाला", "tr": "beyaz kuyruklu"}}
+{"guid": "A02_019", "translations": {"ms": "biru kehijauan", "hi": "नीला-हरा", "tr": "mavi-yeşil"}}
+{"guid": "A02_020", "translations": {"ms": "berambut perang", "hi": "सुनहरे बालों वाला", "tr": "sarışın"}}

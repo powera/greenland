@@ -1,43 +1,47 @@
-{"guid": "N46_001", "translations": {"ro": "Varșovia", "pl": "Warszawa", "th": "วอร์ซอ", "ta": "வர்சா", "kn": "ವಾರ್ಸಾ", "uk": "Варшава", "bn": "ওয়ারশা", "hi": "वारसा"}}
-{"guid": "N46_002", "translations": {"ro": "Berlin", "pl": "Berlin", "th": "เบอร์ลิน", "ta": "பெர்லின்", "kn": "ಬೆರ್ಲಿನ್", "uk": "Берлін", "bn": "বার্লিন", "hi": "बर्लिन"}}
-{"guid": "N46_003", "translations": {"ro": "Paris", "pl": "Paryż", "th": "ปารีส", "ta": "பாரிஸ்", "kn": "ಪ್ಯಾರಿಸ್", "uk": "Париж", "bn": "প্যারিস", "hi": "पेरिस"}}
-{"guid": "N46_004", "translations": {"ro": "Londra", "pl": "Londyn", "th": "ลอนดอน", "ta": "லண்டன்", "kn": "ಲಂಡನ್", "uk": "Лондон", "bn": "লন্ডন", "hi": "लंदन"}}
-{"guid": "N46_005", "translations": {"ro": "Roma", "pl": "Rzym", "th": "โรม", "ta": "ரோம்", "kn": "ರೋಮ್", "uk": "Рим", "bn": "রোম", "hi": "रोम"}}
-{"guid": "N46_006", "translations": {"ro": "Madrid", "pl": "Madryt", "th": "มาดริด", "ta": "மாட்ரிட்", "kn": "ಮ್ಯಾಡ್ರಿಡ್", "uk": "Мадрид", "bn": "মাদ্রিদ", "hi": "मैड्रिड"}}
-{"guid": "N46_007", "translations": {"ro": "Moscova", "pl": "Moskwa", "th": "มอสโก", "ta": "மாஸ்கோ", "kn": "ಮಾಸ್ಕೋ", "uk": "Москва", "bn": "মস্কো", "hi": "मास्को"}}
-{"guid": "N46_008", "translations": {"ro": "New York", "pl": "Nowy Jork", "th": "นิวยอร์ก", "ta": "நியூயார்க்", "kn": "ನ್ಯೂಯಾರ್ಕ್", "uk": "Нью-Йорк", "bn": "নিউ ইয়র্ক", "hi": "न्यूयॉर्क"}}
-{"guid": "N46_009", "translations": {"ro": "Chicago", "pl": "Chicago", "th": "ชิคาโก", "ta": "சிகாகோ", "kn": "ಶಿಕಾಗೋ", "uk": "Чикаго", "bn": "শিকাগো", "hi": "शिकागो"}}
-{"guid": "N46_010", "translations": {"ro": "Los Angeles", "pl": "Los Angeles", "th": "ลอสแอนเจลิส", "ta": "லாஸ் ஏஞ்சலிஸ்", "kn": "ಲಾಸ್ ಏಂಜೆಲಿಸ್", "uk": "Лос-Анджелес", "bn": "লস এঞ্জেলেস", "hi": "लॉस एंजेलेस"}}
-{"guid": "N46_011", "translations": {"ro": "Tokio", "pl": "Tokio", "th": "โตเกียว", "ta": "டோக்கியோ", "kn": "ಟೋಕಿಯೋ", "uk": "Токіо", "bn": "টোকিও", "hi": "टोक्यो"}}
-{"guid": "N46_012", "translations": {"ro": "Beijing", "pl": "Pekin", "th": "ปักกิ่ง", "ta": "பீஜிங்", "kn": "ಬೈಜಿಂಗ್", "uk": "Пекін", "bn": "বেইজিং", "hi": "बीजिंग"}}
-{"guid": "N46_013", "translations": {"ro": "Stockholm", "pl": "Sztokholm", "th": "สตอกโฮล์ม", "ta": "ஸ்டாக்ஹோல்ம்", "kn": "ಸ್ಟಾಕ್‌ಹೋಲ್ಮ್", "uk": "Стокгольм", "bn": "স্টকহোম", "hi": "स्टॉकहोล์म"}}
-{"guid": "N46_014", "translations": {"ro": "Oslo", "pl": "Oslo", "th": "ออสโล", "ta": "ஓஸ்லோ", "kn": "ಒಸ್ಲೋ", "uk": "Осло", "bn": "ওসলো", "hi": "ओस्लो"}}
-{"guid": "N46_015", "translations": {"ro": "Helsinki", "pl": "Helsinki", "th": "เฮลซิงกิ", "ta": "ஹெல்சிங்கி", "kn": "ಹೆಲ್ಸಿಂಕಿ", "uk": "Гельсінкі", "bn": "হেলসিঙ্কি", "hi": "हेलसिंकी"}}
-{"guid": "N46_016", "translations": {"ro": "Seul", "pl": "Seul", "th": "โซล", "ta": "சியோல்", "kn": "ಸಿಯೋಲ್", "uk": "Сеул", "bn": "সিয়োল", "hi": "सियोल"}}
-{"guid": "N46_017", "translations": {"ro": "Cairo", "pl": "Kair", "th": "ไคโร", "ta": "கெய்ரோ", "kn": "ಕೈರೊ", "uk": "Каїр", "bn": "কাইরো", "hi": "कैरो"}}
-{"guid": "N46_018", "translations": {"ro": "Sydney", "pl": "Sydney", "th": "ซิดนีย์", "ta": "சிட்னி", "kn": "ಸಿಡ್ನಿ", "uk": "Сідней", "bn": "সিডনি", "hi": "सिड्नी"}}
-{"guid": "N46_019", "translations": {"ro": "Bangkok", "pl": "Bangkok", "th": "กรุงเทพมหานคร", "ta": "பாங்குக்", "kn": "ಬ್ಯಾಂಕಾಕ್", "uk": "Бангкок", "bn": "ব্যাংকক", "hi": "बैंकोक"}}
-{"guid": "N46_020", "translations": {"ro": "Mexico City", "pl": "Miasto Meksyk", "th": "เม็กซิโกซิตี้", "ta": "மெக்ஸிகோ நகரம்", "kn": "ಮೆಕ್ಸಿಕೋ ನಗರ", "uk": "Мехіко", "bn": "মেক্সিকো সিটি", "hi": "मेक्सिको सिटी"}}
-{"guid": "N46_022", "translations": {"ro": "Sao Paulo", "pl": "São Paulo", "th": "เซาเปาโล", "ta": "சாவோ பௌலோ", "kn": "ಸಾವ್ ಪಾಳೋ (ಸೆಯೋ ಪೌಲೋ)", "uk": "Сан-Паулу", "bn": "সাও পাওলো", "hi": "साओ पाउलो"}}
-{"guid": "N46_023", "translations": {"ro": "Toronto", "pl": "Toronto", "th": "โตรอนโต", "ta": "டொரொன்டோ", "kn": "ಟೊರೊಂಟೋ", "uk": "Торонто", "bn": "টরন্টো", "hi": "टोरंटो"}}
-{"guid": "N46_024", "translations": {"ro": "Amsterdam", "pl": "Amsterdam", "th": "อัมสเตอร์ดัม", "ta": "ஆம்ஸ்டர்டம்", "kn": "ಆಮ್ಸ್ಟರ್ಡ್ಯಾಮ್", "uk": "Амстердам", "bn": "অ্যামস্টারডাম", "hi": "एम्स्टर्डम"}}
-{"guid": "N46_025", "translations": {"ro": "Viena", "pl": "Wiedeń", "th": "เวียนนา", "ta": "வியென்னா", "kn": "ವಿಯನ್ನಾ", "uk": "Відень", "bn": "ভিয়েনা", "hi": "वियना"}}
-{"guid": "N46_026", "translations": {"ro": "Praga", "pl": "Praga", "th": "ปราก", "ta": "பிராக்", "kn": "ಪ್ರಾಗ್", "uk": "Прага", "bn": "প্রাগ", "hi": "प्राग"}}
-{"guid": "N46_027", "translations": {"ro": "Atena", "pl": "Ateny", "th": "เอเธนส์", "ta": "அத்தியென்ஸ்", "kn": "ಆಥೆನ್ಸ್", "uk": "Афіни", "bn": "অ্যাথেন্স", "hi": "एथेंस"}}
-{"guid": "N46_028", "translations": {"ro": "Istanbul", "pl": "Stambuł", "th": "อิสตันบูล", "ta": "இஸ்தான்புல்", "kn": "ಇಸ್ತಂಬೂಲ್", "uk": "Стамбул", "bn": "ইস্তাম্বুল", "hi": "इस्तांबुल"}}
-{"guid": "N46_029", "translations": {"ro": "Lisabona", "pl": "Lizbona", "th": "ลิสบอน", "ta": "லிச்பன்", "kn": "ಲಿಸ್ಬನ್", "uk": "Лісабон", "bn": "লিসবন", "hi": "लिस्बन"}}
-{"guid": "N46_030", "translations": {"ro": "Dublin", "pl": "Dublin", "th": "ดับลิน", "ta": "டப்ளின்", "kn": "ಡಬ್ಲಿನ್", "uk": "Дублін", "bn": "ডাবলিন", "hi": "डब्लिन"}}
-{"guid": "N46_031", "translations": {"ro": "Copenhaga", "pl": "Kopenhaga", "th": "โคเปนเฮเกน", "ta": "கோபன்ஹேகன்", "kn": "ಕೊಪನ್‌ಹೇಗನ್", "uk": "Копенгаген", "bn": "কোপেনহেগেন", "hi": "कोपेनहेଗन"}}
-{"guid": "N46_032", "translations": {"ro": "Bruxelles", "pl": "Bruksela", "th": "บรัสเซลส์", "ta": "பிரஸ்செல்ஸ்", "kn": "ಬ್ರಸ್ಸೆಲ್ಸ್", "uk": "Брюссель", "bn": "ব্রাসেলস", "hi": "ब्रसेल्स"}}
-{"guid": "N46_033", "translations": {"ro": "Barcelona", "pl": "Barcelona", "th": "บาร์เซโลนา", "ta": "பார்சலோனா", "kn": "ಬಾರ್ಸೆಲೋನಾ", "uk": "Барселона", "bn": "বার্সেলোনা", "hi": "बार्सिलोना"}}
-{"guid": "N46_034", "translations": {"ro": "Shanghai", "pl": "Szanghaj", "th": "เซี่ยงไฮ้", "ta": "ஷாங்ஹாய்", "kn": "ಶಾಂಘай್", "uk": "Шанхай", "bn": "শাংহай", "hi": "शंघाई"}}
-{"guid": "N46_035", "translations": {"ro": "Mumbai", "pl": "Mumbaj", "th": "มุมไบ", "ta": "மும்பை", "kn": "ಮುಂಬೈ", "uk": "Мумбаї", "bn": "মুম্বাই", "hi": "मुंबई"}}
-{"guid": "N46_036", "translations": {"ro": "Singapore", "pl": "Singapur", "th": "สิงคโปร์", "ta": "சிங்கப்பூர்", "kn": "ಸಿಂಗಾಪೂರು", "uk": "Сінгапур", "bn": "সিঙ্গাপুর", "hi": "सिंगापुर"}}
-{"guid": "N46_037", "translations": {"ro": "Hong Kong", "pl": "Hongkong", "th": "ฮ่องกง", "ta": "ஹாங்காங்", "kn": "ಹೋಂಗ್ ಕಾಂಗ್", "uk": "Гонконг", "bn": "হংকং", "hi": "हांगकांग"}}
-{"guid": "N46_038", "translations": {"ro": "Taipei", "pl": "Taipej", "th": "ไทเป", "ta": "தைபே", "kn": "ತೈಪೇ", "uk": "Тайбей", "bn": "তাইপে", "hi": "ताइपे"}}
-{"guid": "N46_039", "translations": {"ro": "Jakarta", "pl": "Dżakarta", "th": "จาการ์ตา", "ta": "ஜகதா(ஜகார்த்தா)", "kn": "ಜಾಕಾರ್ತಾ", "uk": "Джакарта", "bn": "জাকার্তা", "hi": "जकार्ता"}}
-{"guid": "N46_040", "translations": {"ro": "Lagos", "pl": "Lagos", "th": "ลากอส", "ta": "லகோஸ்", "kn": "ಲಾಗೋಸ್", "uk": "Лагос", "bn": "লাগোস", "hi": "לאגոս"}}
-{"guid": "N46_041", "translations": {"ro": "Nairobi", "pl": "Nairobi", "th": "ไนโรบี", "ta": "நைரோபி", "kn": "ನೈರೋಬಿ", "uk": "Найробі", "bn": "নাইরোবি", "hi": "नाइरौबी"}}
-{"guid": "N46_042", "translations": {"ro": "Cape Town", "pl": "Kapsztad", "th": "เคปทาวน์", "ta": "கேப் டௌன்", "kn": "ಕೇಪ್ ಟೌನ್", "uk": "Кейптаун", "bn": "কেপ টাউন", "hi": "केपटाउन"}}
-{"guid": "N46_043", "translations": {"ro": "Dubai", "pl": "Dubaj", "th": "ดูไบ", "ta": "துபாய்", "kn": "ದುಬೈ", "uk": "Дубай", "bn": "দুবাই", "hi": "दुबई"}}
-{"guid": "N46_044", "translations": {"ro": "Melbourne", "pl": "Melbourne", "th": "เมลเบิร์น", "ta": "மெல்பர்ன்", "kn": "ಮೆಲ್ಬರ್ನ್", "uk": "Мельбурн", "bn": "মেলবর্ণ", "hi": "मेलबोर्न"}}
+{"guid": "N46_001", "translations": {"ro": "Varșovia", "pl": "Warszawa", "th": "วอร์ซอ", "ms": "Warsaw", "ta": "வர்சா", "kn": "ವಾರ್ಸಾ", "uk": "Варшава", "bn": "ওয়ারশা", "hi": "वारसा", "tr": "Varşova"}}
+{"guid": "N46_002", "translations": {"ro": "Berlin", "pl": "Berlin", "th": "เบอร์ลิน", "ms": "Berlin", "ta": "பெர்லின்", "kn": "ಬೆರ್ಲಿನ್", "uk": "Берлін", "bn": "বার্লিন", "hi": "बर्लिन", "tr": "Berlin"}}
+{"guid": "N46_003", "translations": {"ro": "Paris", "pl": "Paryż", "th": "ปารีส", "ms": "Paris", "ta": "பாரிஸ்", "kn": "ಪ್ಯಾರಿಸ್", "uk": "Париж", "bn": "প্যারিস", "hi": "पेरिस", "tr": "Paris"}}
+{"guid": "N46_004", "translations": {"ro": "Londra", "pl": "Londyn", "th": "ลอนดอน", "ms": "London", "ta": "லண்டன்", "kn": "ಲಂಡನ್", "uk": "Лондон", "bn": "লন্ডন", "hi": "लंदन", "tr": "Londra"}}
+{"guid": "N46_005", "translations": {"ro": "Roma", "pl": "Rzym", "th": "โรม", "ms": "Rom", "ta": "ரோம்", "kn": "ರೋಮ್", "uk": "Рим", "bn": "রোম", "hi": "रोम", "tr": "Roma"}}
+{"guid": "N46_006", "translations": {"ro": "Madrid", "pl": "Madryt", "th": "มาดริด", "ms": "Madrid", "ta": "மாட்ரிட்", "kn": "ಮ್ಯಾಡ್ರಿಡ್", "uk": "Мадрид", "bn": "মাদ্রিদ", "hi": "मैड्रिड", "tr": "Madrid"}}
+{"guid": "N46_007", "translations": {"ro": "Moscova", "pl": "Moskwa", "th": "มอสโก", "ms": "Moscow", "ta": "மாஸ்கோ", "kn": "ಮಾಸ್ಕೋ", "uk": "Москва", "bn": "মস্কো", "hi": "मास्को", "tr": "Moskova"}}
+{"guid": "N46_008", "translations": {"ro": "New York", "pl": "Nowy Jork", "th": "นิวยอร์ก", "ms": "Kota New York", "ta": "நியூயார்க்", "kn": "ನ್ಯೂಯಾರ್ಕ್", "uk": "Нью-Йорк", "bn": "নিউ ইয়র্ক", "hi": "न्यूयॉर्क", "tr": "New York Şehri"}}
+{"guid": "N46_009", "translations": {"ro": "Chicago", "pl": "Chicago", "th": "ชิคาโก", "ms": "Chicago", "ta": "சிகாகோ", "kn": "ಶಿಕಾಗೋ", "uk": "Чикаго", "bn": "শিকাগো", "hi": "शिकागो", "tr": "Şikago"}}
+{"guid": "N46_010", "translations": {"ro": "Los Angeles", "pl": "Los Angeles", "th": "ลอสแอนเจลิส", "ms": "Los Angeles", "ta": "லாஸ் ஏஞ்சலிஸ்", "kn": "ಲಾಸ್ ಏಂಜೆಲಿಸ್", "uk": "Лос-Анджелес", "bn": "লস এঞ্জেলেস", "hi": "लॉस एंजेलेस", "tr": "Los Angeles"}}
+{"guid": "N46_011", "translations": {"ro": "Tokio", "pl": "Tokio", "th": "โตเกียว", "ms": "Tokyo", "ta": "டோக்கியோ", "kn": "ಟೋಕಿಯೋ", "uk": "Токіо", "bn": "টোকিও", "hi": "टोक्यो", "tr": "Tokyo"}}
+{"guid": "N46_012", "translations": {"ro": "Beijing", "pl": "Pekin", "th": "ปักกิ่ง", "ms": "Beijing", "ta": "பீஜிங்", "kn": "ಬೈಜಿಂಗ್", "uk": "Пекін", "bn": "বেইজিং", "hi": "बीजिंग", "tr": "Pekin"}}
+{"guid": "N46_013", "translations": {"ro": "Stockholm", "pl": "Sztokholm", "th": "สตอกโฮล์ม", "ms": "Stockholm", "ta": "ஸ்டாக்ஹோல்ம்", "kn": "ಸ್ಟಾಕ್‌ಹೋಲ್ಮ್", "uk": "Стокгольм", "bn": "স্টকহোম", "hi": "स्टॉकहोล์म", "tr": "Stokholm"}}
+{"guid": "N46_014", "translations": {"ro": "Oslo", "pl": "Oslo", "th": "ออสโล", "ms": "Oslo", "ta": "ஓஸ்லோ", "kn": "ಒಸ್ಲೋ", "uk": "Осло", "bn": "ওসলো", "hi": "ओस्लो", "tr": "Oslo"}}
+{"guid": "N46_015", "translations": {"ro": "Helsinki", "pl": "Helsinki", "th": "เฮลซิงกิ", "ms": "Helsinki", "ta": "ஹெல்சிங்கி", "kn": "ಹೆಲ್ಸಿಂಕಿ", "uk": "Гельсінкі", "bn": "হেলসিঙ্কি", "hi": "हेलसिंकी", "tr": "Helsinki"}}
+{"guid": "N46_016", "translations": {"ro": "Seul", "pl": "Seul", "th": "โซล", "ms": "Seoul", "ta": "சியோல்", "kn": "ಸಿಯೋಲ್", "uk": "Сеул", "bn": "সিয়োল", "hi": "सियोल", "tr": "Seul"}}
+{"guid": "N46_017", "translations": {"ro": "Cairo", "pl": "Kair", "th": "ไคโร", "ms": "Kaherah", "ta": "கெய்ரோ", "kn": "ಕೈರೊ", "uk": "Каїр", "bn": "কাইরো", "hi": "कैरो", "tr": "Kahire"}}
+{"guid": "N46_018", "translations": {"ro": "Sydney", "pl": "Sydney", "th": "ซิดนีย์", "ms": "Sydney", "ta": "சிட்னி", "kn": "ಸಿಡ್ನಿ", "uk": "Сідней", "bn": "সিডনি", "hi": "सिड्नी", "tr": "Sidney"}}
+{"guid": "N46_019", "translations": {"ro": "Bangkok", "pl": "Bangkok", "th": "กรุงเทพมหานคร", "ms": "Bangkok", "ta": "பாங்குக்", "kn": "ಬ್ಯಾಂಕಾಕ್", "uk": "Бангкок", "bn": "ব্যাংকক", "hi": "बैंकोक", "tr": "Bangkok"}}
+{"guid": "N46_020", "translations": {"ro": "Mexico City", "pl": "Miasto Meksyk", "th": "เม็กซิโกซิตี้", "ms": "Bandar Raya Mexico", "ta": "மெக்ஸிகோ நகரம்", "kn": "ಮೆಕ್ಸಿಕೋ ನಗರ", "uk": "Мехіко", "bn": "মেক্সিকো সিটি", "hi": "मेक्सिको सिटी", "tr": "Meksiko Şehri"}}
+{"guid": "N46_022", "translations": {"ro": "Sao Paulo", "pl": "São Paulo", "th": "เซาเปาโล", "ms": "São Paulo", "ta": "சாவோ பௌலோ", "kn": "ಸಾವ್ ಪಾಳೋ (ಸೆಯೋ ಪೌಲೋ)", "uk": "Сан-Паулу", "bn": "সাও পাওলো", "hi": "साओ पाउलो", "tr": "São Paulo"}}
+{"guid": "N46_023", "translations": {"ro": "Toronto", "pl": "Toronto", "th": "โตรอนโต", "ms": "Toronto", "ta": "டொரொன்டோ", "kn": "ಟೊರೊಂಟೋ", "uk": "Торонто", "bn": "টরন্টো", "hi": "टोरंटो", "tr": "Toronto"}}
+{"guid": "N46_024", "translations": {"ro": "Amsterdam", "pl": "Amsterdam", "th": "อัมสเตอร์ดัม", "ms": "Amsterdam", "ta": "ஆம்ஸ்டர்டம்", "kn": "ಆಮ್ಸ್ಟರ್ಡ್ಯಾಮ್", "uk": "Амстердам", "bn": "অ্যামস্টারডাম", "hi": "एम्स्टर्डम", "tr": "Amsterdam"}}
+{"guid": "N46_025", "translations": {"ro": "Viena", "pl": "Wiedeń", "th": "เวียนนา", "ms": "Vienna", "ta": "வியென்னா", "kn": "ವಿಯನ್ನಾ", "uk": "Відень", "bn": "ভিয়েনা", "hi": "वियना", "tr": "Viyana"}}
+{"guid": "N46_026", "translations": {"ro": "Praga", "pl": "Praga", "th": "ปราก", "ms": "Prague", "ta": "பிராக்", "kn": "ಪ್ರಾಗ್", "uk": "Прага", "bn": "প্রাগ", "hi": "प्राग", "tr": "Prag"}}
+{"guid": "N46_027", "translations": {"ro": "Atena", "pl": "Ateny", "th": "เอเธนส์", "ms": "Athens", "ta": "அத்தியென்ஸ்", "kn": "ಆಥೆನ್ಸ್", "uk": "Афіни", "bn": "অ্যাথেন্স", "hi": "एथेंस", "tr": "Atina"}}
+{"guid": "N46_028", "translations": {"ro": "Istanbul", "pl": "Stambuł", "th": "อิสตันบูล", "ms": "Istanbul", "ta": "இஸ்தான்புல்", "kn": "ಇಸ್ತಂಬೂಲ್", "uk": "Стамбул", "bn": "ইস্তাম্বুল", "hi": "इस्तांबुल", "tr": "İstanbul"}}
+{"guid": "N46_029", "translations": {"ro": "Lisabona", "pl": "Lizbona", "th": "ลิสบอน", "ms": "Lisbon", "ta": "லிச்பன்", "kn": "ಲಿಸ್ಬನ್", "uk": "Лісабон", "bn": "লিসবন", "hi": "लिस्बन", "tr": "Lizbon"}}
+{"guid": "N46_030", "translations": {"ro": "Dublin", "pl": "Dublin", "th": "ดับลิน", "ms": "Dublin", "ta": "டப்ளின்", "kn": "ಡಬ್ಲಿನ್", "uk": "Дублін", "bn": "ডাবলিন", "hi": "डब्लिन", "tr": "Dublin"}}
+{"guid": "N46_031", "translations": {"ro": "Copenhaga", "pl": "Kopenhaga", "th": "โคเปนเฮเกน", "ms": "Kopenhagen", "ta": "கோபன்ஹேகன்", "kn": "ಕೊಪನ್‌ಹೇಗನ್", "uk": "Копенгаген", "bn": "কোপেনহেগেন", "hi": "कोपेनहेଗन", "tr": "Kopenhag"}}
+{"guid": "N46_032", "translations": {"ro": "Bruxelles", "pl": "Bruksela", "th": "บรัสเซลส์", "ms": "Brussels", "ta": "பிரஸ்செல்ஸ்", "kn": "ಬ್ರಸ್ಸೆಲ್ಸ್", "uk": "Брюссель", "bn": "ব্রাসেলস", "hi": "ब्रसेल्स", "tr": "Brüksel"}}
+{"guid": "N46_033", "translations": {"ro": "Barcelona", "pl": "Barcelona", "th": "บาร์เซโลนา", "ms": "Barcelona", "ta": "பார்சலோனா", "kn": "ಬಾರ್ಸೆಲೋನಾ", "uk": "Барселона", "bn": "বার্সেলোনা", "hi": "बार्सिलोना", "tr": "Barselona"}}
+{"guid": "N46_034", "translations": {"ro": "Shanghai", "pl": "Szanghaj", "th": "เซี่ยงไฮ้", "ms": "Shanghai", "ta": "ஷாங்ஹாய்", "kn": "ಶಾಂಘай್", "uk": "Шанхай", "bn": "শাংহай", "hi": "शंघाई", "tr": "Şanghay"}}
+{"guid": "N46_035", "translations": {"ro": "Mumbai", "pl": "Mumbaj", "th": "มุมไบ", "ms": "Mumbai", "ta": "மும்பை", "kn": "ಮುಂಬೈ", "uk": "Мумбаї", "bn": "মুম্বাই", "hi": "मुंबई", "tr": "Mumbai"}}
+{"guid": "N46_036", "translations": {"ro": "Singapore", "pl": "Singapur", "th": "สิงคโปร์", "ms": "Singapura", "ta": "சிங்கப்பூர்", "kn": "ಸಿಂಗಾಪೂರು", "uk": "Сінгапур", "bn": "সিঙ্গাপুর", "hi": "सिंगापुर", "tr": "Singapur"}}
+{"guid": "N46_037", "translations": {"ro": "Hong Kong", "pl": "Hongkong", "th": "ฮ่องกง", "ms": "Hong Kong", "ta": "ஹாங்காங்", "kn": "ಹೋಂಗ್ ಕಾಂಗ್", "uk": "Гонконг", "bn": "হংকং", "hi": "हांगकांग", "tr": "Hong Kong"}}
+{"guid": "N46_038", "translations": {"ro": "Taipei", "pl": "Taipej", "th": "ไทเป", "ms": "Taipei", "ta": "தைபே", "kn": "ತೈಪೇ", "uk": "Тайбей", "bn": "তাইপে", "hi": "ताइपे", "tr": "Taipei"}}
+{"guid": "N46_039", "translations": {"ro": "Jakarta", "pl": "Dżakarta", "th": "จาการ์ตา", "ms": "Jakarta", "ta": "ஜகதா(ஜகார்த்தா)", "kn": "ಜಾಕಾರ್ತಾ", "uk": "Джакарта", "bn": "জাকার্তা", "hi": "जकार्ता", "tr": "Cakarta"}}
+{"guid": "N46_040", "translations": {"ro": "Lagos", "pl": "Lagos", "th": "ลากอส", "ms": "Lagos", "ta": "லகோஸ்", "kn": "ಲಾಗೋಸ್", "uk": "Лагос", "bn": "লাগোস", "hi": "לאגոս", "tr": "Lagos"}}
+{"guid": "N46_041", "translations": {"ro": "Nairobi", "pl": "Nairobi", "th": "ไนโรบี", "ms": "Nairobi", "ta": "நைரோபி", "kn": "ನೈರೋಬಿ", "uk": "Найробі", "bn": "নাইরোবি", "hi": "नाइरौबी", "tr": "Nairobi"}}
+{"guid": "N46_042", "translations": {"ro": "Cape Town", "pl": "Kapsztad", "th": "เคปทาวน์", "ms": "Cape Town", "ta": "கேப் டௌன்", "kn": "ಕೇಪ್ ಟೌನ್", "uk": "Кейптаун", "bn": "কেপ টাউন", "hi": "केपटाउन", "tr": "Cape Town"}}
+{"guid": "N46_043", "translations": {"ro": "Dubai", "pl": "Dubaj", "th": "ดูไบ", "ms": "Dubai", "ta": "துபாய்", "kn": "ದುಬೈ", "uk": "Дубай", "bn": "দুবাই", "hi": "दुबई", "tr": "Dubai"}}
+{"guid": "N46_044", "translations": {"ro": "Melbourne", "pl": "Melbourne", "th": "เมลเบิร์น", "ms": "Melbourne", "ta": "மெல்பர்ன்", "kn": "ಮೆಲ್ಬರ್ನ್", "uk": "Мельбурн", "bn": "মেলবর্ণ", "hi": "मेलबोर्न", "tr": "Melburn"}}
+{"guid": "N46_045", "translations": {"ms": "metropolis", "hi": "महानगर", "tr": "metropol"}}
+{"guid": "N46_046", "translations": {"ms": "perbandaran", "hi": "नगरपालिका", "tr": "belediye"}}
+{"guid": "N46_047", "translations": {"ms": "daerah pentadbiran New York", "hi": "न्यूयॉर्क का प्रशासनिक क्षेत्र", "tr": "New York idari ilçesi"}}
+{"guid": "N46_048", "translations": {"ms": "ibu negara", "hi": "राजधानी", "tr": "başkent"}}
