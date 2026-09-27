@@ -112,7 +112,8 @@ the tokenizer treats brackets as boundaries those would otherwise count as
 `parliament_debates` is built from European Parliament debates (Europarl v7),
 for the vocabulary of *debating* politics — vote, coalition, amendment,
 opposition — in the register politicians speak rather than the one
-legislation is drafted in. Not yet built or registered in `CORPUS_CONFIGS`.
+legislation is drafted in. Registered in `CORPUS_CONFIGS` at weight 0.5, with
+the other topic corpora.
 
 ```bash
 # 1. Download the release (~1.5GB, one tarball of every language) and extract
