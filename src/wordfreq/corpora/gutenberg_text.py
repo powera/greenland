@@ -85,9 +85,11 @@ DASH_VARIANTS = "—–―‒−"
 _DASH_RE = re.compile(f"[{DASH_VARIANTS}]|--+")
 
 # A raw token may contain digits; those are dropped afterwards, so that "1st"
-# disappears entirely instead of contributing a bogus "st".
-RAW_TOKEN_RE = re.compile(r"[A-Za-z0-9]+(?:'[A-Za-z0-9]+)*")
-CONTAINS_DIGIT_RE = re.compile(r"[0-9]")
+# disappears entirely instead of contributing a bogus "st".  Letters are any
+# Unicode letter ([^\W_] is \w without the underscore): an ASCII-only class
+# split "café" into "caf", "Wallström" into "Wallstr" and "Lomé" into "Lom".
+RAW_TOKEN_RE = re.compile(r"[^\W_]+(?:'[^\W_]+)*")
+CONTAINS_DIGIT_RE = re.compile(r"\d")
 
 # Single letters that are real English words; every other one-letter token is
 # scanning noise or a list marker.

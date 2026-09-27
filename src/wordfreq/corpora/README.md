@@ -107,6 +107,54 @@ brackets to fit the sentence quoting them (`"[w]hen"`, `"see[k]"`), and since
 the tokenizer treats brackets as boundaries those would otherwise count as
 `hen` and `see`.
 
+## The parliament-debates corpus
+
+`parliament_debates` is built from European Parliament debates (Europarl v7),
+for the vocabulary of *debating* politics — vote, coalition, amendment,
+opposition — in the register politicians speak rather than the one
+legislation is drafted in. Not yet built or registered in `CORPUS_CONFIGS`.
+
+```bash
+# 1. Download the release (~1.5GB, one tarball of every language) and extract
+#    English to data/working/europarl (gitignored).  Resumes if interrupted.
+PYTHONPATH=src python src/wordfreq/corpora/download_europarl.py
+
+# 2. Choose ~10M words of chapters; writes europarl_chapters.yaml (checked in).
+PYTHONPATH=src python src/wordfreq/corpora/europarl_select.py
+
+# 3. Build the corpus JSON from the chosen chapters.
+PYTHONPATH=src python src/wordfreq/corpora/build_europarl.py --phrases-from-db
+```
+
+The unit of analysis is the **chapter**, one agenda item. The selector drops
+procedural chapters by title (minutes, agenda, voting time, explanations of
+vote) and draws a deterministic, year-balanced sample; the list it writes is
+what the builder reads, so it can be reviewed and hand-edited like the wiki
+lists. The chair's speeches, stage directions and opening vocatives ("Mr
+President, ladies and gentlemen,") are stripped before counting.
+
+Per-document name detection is off. It exists for a character confined to one
+novel; here `--min-chapters` already keeps one debate's names out, and what
+the rule caught instead was words capitalized in every debate ("Commission",
+"European", "Greece"). The people debated about then come through ("Barroso",
+"Prodi", particles like "Van"); as a stopgap, a capitalized entry is kept
+only within the top 2000 ranks (`--max-capitalized-rank`).
+
+The text is British English and the database is American, so British
+spellings are folded before counting ("programme" counts as "program"; see
+`british_spelling.py`). This is a stopgap until en-GB spellings exist as
+variant forms in the database.
+
+From 2002 to mid-2006 a session file is a whole day in one chapter; those are
+split at the chair's "The next item is ..." announcements, which become the
+segments' titles.
+
+Speeches given in other languages appear in the English files as professional
+translations and are counted. The English files cannot identify the speeches
+given in English — `LANGUAGE` tags translations, and is missing for most
+speeches in some years — so there is no native-only variant; one would need a
+second language's files, where the English originals are the tagged ones.
+
 ## The Wikipedia corpora
 
 The `wiki_*` corpora are built from a Wikipedia dump snapshot rather
