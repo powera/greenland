@@ -107,9 +107,9 @@ brackets to fit the sentence quoting them (`"[w]hen"`, `"see[k]"`), and since
 the tokenizer treats brackets as boundaries those would otherwise count as
 `hen` and `see`.
 
-## The parliament-debates corpus
+## The EU parliament-debates corpus
 
-`parliament_debates` is built from European Parliament debates (Europarl v7),
+`eu_parliament_debates` is built from European Parliament debates (Europarl v7),
 for the vocabulary of *debating* politics — vote, coalition, amendment,
 opposition — in the register politicians speak rather than the one
 legislation is drafted in. Registered in `CORPUS_CONFIGS` at weight 0.5, with

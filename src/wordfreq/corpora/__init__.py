@@ -6,7 +6,7 @@ builders share the package, one per kind of source:
 
 * ``build_gutenberg`` -- the five Project Gutenberg book lists.
 * ``build_scotus`` -- ``legal_scotus``, from Supreme Court opinions.
-* ``build_europarl`` -- ``parliament_debates``, from European Parliament
+* ``build_europarl`` -- ``eu_parliament_debates``, from European Parliament
   debates, over the chapters ``europarl_select`` chose.
 * ``build_wikipedia`` -- ``wiki_arts``, ``wiki_math``, ``wiki_geography``,
   ``wiki_biology`` and ``wiki_modern_life``, from a dump snapshot.

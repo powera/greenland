@@ -1,4 +1,4 @@
-# Europarl chapters for the parliament_debates corpus.
+# Europarl chapters for the eu_parliament_debates corpus.
 # Written by wordfreq/corpora/europarl_select.py; edit by hand to drop a
 # chapter, and re-run the selector only to redraw the whole sample.
 #
