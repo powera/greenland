@@ -69,6 +69,24 @@ def test_core_module_imports(module: str) -> None:
     assert importlib.import_module(module) is not None
 
 
+def test_tokenizer_language_hooks_resolve() -> None:
+    """Every tier 1/2 lemma-matching module loads, and one lookup works.
+
+    langtools.tokenizer finds ``langtools.<lang>.tokenizer`` by building the
+    name as a string, so importing the dispatcher alone proves nothing about
+    the language modules -- a renamed or broken one would silently fall back
+    to exact matching.  One call per language forces the import.
+    """
+    from langtools.tokenizer import lemma_lookup_keys, supports_lemma_candidates
+    from storage.translation_helpers import TIER_1_LANGUAGES, TIER_2_LANGUAGES
+
+    missing = [
+        code for code in TIER_1_LANGUAGES + TIER_2_LANGUAGES if not supports_lemma_candidates(code)
+    ]
+    assert not missing, f"No candidate_lemmas hook for: {missing}"
+    assert "canción" in lemma_lookup_keys("es", "canciones")
+
+
 def test_storage_package_fully_imports() -> None:
     """Every module under storage/ imports.
 
