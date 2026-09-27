@@ -4,6 +4,7 @@
 import argparse
 import sys
 from pathlib import Path
+from typing import List, Optional
 
 # Add src directory to path
 if str(Path(__file__).parent.parent.parent.parent) not in sys.path:
@@ -63,11 +64,12 @@ def get_argument_parser() -> argparse.ArgumentParser:
     )
     parser.add_argument(
         "--pivot-languages",
-        default="bn,uk,kn",
+        default=None,
         help=(
             "Comma-separated pivot languages used to disambiguate ambiguous English "
-            "words via sentence-level translations (default: bn,uk,kn). Pass an empty "
-            "string to disable pivot disambiguation."
+            "words via sentence-level translations (default: the candidate-lookup "
+            "pivots, sentences.candidate_lookup.DEFAULT_SOURCE_LANGUAGES). Pass an "
+            "empty string to disable pivot disambiguation."
         ),
     )
 
@@ -114,7 +116,12 @@ def main() -> None:
     ):
         return
 
-    pivot_languages = [lang.strip() for lang in args.pivot_languages.split(",") if lang.strip()]
+    # None lets the agent use DEFAULT_SOURCE_LANGUAGES; an empty list disables pivots.
+    pivot_languages: Optional[List[str]] = (
+        None
+        if args.pivot_languages is None
+        else [lang.strip() for lang in args.pivot_languages.split(",") if lang.strip()]
+    )
 
     results = agent.process_document(
         tags=staged_tags,
