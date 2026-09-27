@@ -20,7 +20,8 @@ Langtools is being aligned to a language-plugin architecture with these rules:
    - verb conjugation,
    - noun/other inflectional form generation,
    - language-specific prompt direction notes,
-   - tokenizer/splitting helpers,
+   - tokenizer/splitting and lemma-matching helpers (surface token ->
+     candidate dictionary forms),
    - script/romanization helpers,
    - registry-based LLM form querying.
 

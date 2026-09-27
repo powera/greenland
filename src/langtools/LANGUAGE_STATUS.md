@@ -18,14 +18,30 @@ Legend:
 | zh | ✅ | ✅ | ⭕ | ✅ | ✅ | ✅ |
 | ja | ✅ | ✅ | ⭕ | ✅ | ⭕ | ⭕ |
 | ko | ✅ | ✅ | ⭕ | ⭕ | ✅ | ⭕ |
-| fr | ✅ | ✅ | ✅ | ✅ | ✅ | ⭕ |
-| it | ✅ | ✅ | ✅ | ✅ | ✅ | ⭕ |
-| de | ✅ | ✅ | ✅ | ✅ | ✅ | ⭕ |
-| es | ✅ | ✅ | ✅ | ✅ | ✅ | ⭕ |
-| pt | ✅ | ✅ | ✅ | ✅ | ✅ | ⭕ |
-| nl | ✅ | ✅ | ✅ | ✅ | ✅ | ⭕ |
-| sv | ✅ | ✅ | ✅ | ✅ | ✅ | ⭕ |
-| lt | ✅ | ✅ | ✅ | ✅ | ✅ | ⭕ |
+| fr | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ |
+| it | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ |
+| de | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ |
+| es | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ |
+| pt | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ |
+| nl | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ |
+| sv | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ |
+| lt | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ |
+
+`tokenizer.py` hooks present per language (all optional; see
+`LANGUAGE_MODULE_FORMAT.md`):
+
+| Language | `tokenize` | `split_contractions` | `candidate_lemmas` |
+|---|---:|---:|---:|
+| zh | ✅ jieba | ⭕ | ✅ |
+| fr | ◐ | ✅ | ✅ |
+| it | ◐ | ✅ | ✅ |
+| de | ◐ | ✅ | ✅ |
+| es | ◐ | ✅ | ✅ |
+| pt | ◐ | ✅ | ✅ |
+| nl | ◐ | ✅ | ✅ |
+| sv | ◐ | ⭕ | ✅ |
+| lt | ◐ | ⭕ | ✅ |
+| ja, ko | ◐ | ⭕ | ⭕ |
 
 ## Notes for architecture cleanup
 
@@ -34,10 +50,38 @@ Legend:
    all core languages listed here.
 3. **Verb conjugation** is currently concentrated in FIGS + `pt`, `nl`, `sv`,
    `lt`, `de`, while CJK languages use other morphology pathways.
-4. Tokenization is mixed: `zh` has language-local tokenizer logic, while many
-   other languages rely on shared behavior.
+4. Tokenization: only `zh` has a language-local `tokenize`; the others split
+   on whitespace.  Lemma matching (`candidate_lemmas`) covers all tier 1/2
+   languages.
 5. Dispatcher standardization at top-level `src/langtools/*.py` should continue
    to converge toward language-first dynamic import entrypoints.
+
+## Lemma matching for tier 1/2 languages (2026-09-26)
+
+Sentence decomposition matched tokens to lemmas by exact string equality
+against `LemmaTranslation` and `DerivativeForm`, and `DerivativeForm` rows are
+nearly absent outside `lt` (~24k rows; `fr` 26, the rest 0).  In inflected
+languages most tokens therefore never matched.
+
+- `langtools.tokenizer` is now the dispatcher for three optional per-language
+  hooks in `<lang>/tokenizer.py` -- `tokenize`, `split_contractions`,
+  `candidate_lemmas` -- loaded by convention instead of a hard-coded module map.
+- New top-level entry points: `lemma_lookup_keys(language, token)` (the token,
+  its contraction parts and its lemma candidates, for DB lookup) and
+  `surface_matches_lemma(language, surface, lemma)` (the confirm step).
+- `suffix_rules.py` holds the shared suffix-rule engine.  Rules over-generate;
+  the stored-lemma lookup is the filter.
+- Share of sentence-translation tokens (400 sampled sentences per language)
+  matching a stored lemma or form, exact vs with `lemma_lookup_keys`:
+  `lt` 59% -> 72%, `es` 40% -> 65%, `fr` 45% -> 77%, `de` 36% -> 68%,
+  `pt` 41% -> 68%, `nl` 46% -> 67%, `sv` 33% -> 62%, `zh` 42% -> 47%
+  (`it` had too few translated sentences to measure).  Most remaining misses
+  are grammatical words and lemmas not in the database.
+- Known gaps: German/Dutch separable verbs split across the clause ("ich rufe
+  dich an"), irregular forms outside the small per-language tables, and Chinese
+  segmentation mismatches beyond the attached-particle / 的 / compound cases.
+- Callers (`sentences.candidate_lookup`, `sentences.dialog_coverage`) still use
+  exact matching; switching them to `lemma_lookup_keys` is the follow-up.
 
 ## es-419 as a form-storing language (2026-09-15)
 
