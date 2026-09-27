@@ -291,6 +291,22 @@ CORPUS_CONFIGS = [
         max_unknown_rank=20000,
         enabled=True,
     ),
+    CorpusConfig(
+        name="parliament_debates",
+        description="Word frequency data from European Parliament debates, 1996-2011",
+        file_path="parliament_debates.json",
+        max_words=5500,
+        file_type="json",
+        value_type="auto",
+        # The vocabulary of debating politics -- bilateral, quotas, coalition,
+        # amendment -- as politicians speak it rather than as legislation is
+        # drafted.  Weighted with the topic corpora: its subject matter is
+        # narrow, and its commonest institutional words ("Commission",
+        # "Member States") say little about how English is distributed.
+        corpus_weight=0.5,
+        max_unknown_rank=11000,
+        enabled=True,
+    ),
 ]
 
 
