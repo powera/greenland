@@ -84,6 +84,11 @@ def _created_guids(response: Mapping[str, Any], *, word: str) -> List[str]:
     return created_guids
 
 
+def _normalized(word: str) -> str:
+    """``word`` as ``words_exist`` and the pending queue key it: stripped, lowercase."""
+    return word.strip().lower()
+
+
 def check_words_exist(words: Sequence[str]) -> dict[str, bool]:
     """Which of ``words`` the database already accounts for.
 
@@ -94,9 +99,11 @@ def check_words_exist(words: Sequence[str]) -> dict[str, bool]:
         words: The words to survey.
 
     Returns:
-        Each word mapped to whether the database accounts for it -- as a lemma,
-        a disambiguated lemma, an English derivative form or an alternate
-        spelling.
+        Each word, normalized by :func:`_normalized` as the endpoint reports it,
+        mapped to whether the database accounts for it -- as a lemma, a
+        disambiguated lemma, an English derivative form or an alternate
+        spelling.  Look a word up by its normalized form: "Lipitor" is
+        reported as "lipitor".
     """
     existence_data: dict[str, bool] = {}
     for start in range(0, len(words), EXISTS_BATCH_SIZE):
@@ -188,9 +195,11 @@ def execute_assignments(
     if queued is None:
         queued = pending_queue_words()
 
-    unaccounted_words = [word for word in words if not bool(existence_data.get(word, False))]
-    queued_words = [word for word in unaccounted_words if word in queued]
-    all_missing_words = [word for word in unaccounted_words if word not in queued]
+    unaccounted_words = [
+        word for word in words if not bool(existence_data.get(_normalized(word), False))
+    ]
+    queued_words = [word for word in unaccounted_words if _normalized(word) in queued]
+    all_missing_words = [word for word in unaccounted_words if _normalized(word) not in queued]
     words_to_add = all_missing_words[:limit] if limit is not None else all_missing_words
     existing_count = len(words) - len(unaccounted_words)
     print(
@@ -305,9 +314,11 @@ def execute_terms(
     if queued is None:
         queued = pending_queue_words()
 
-    unaccounted = [entry for entry in terms if not bool(existence_data.get(entry.term, False))]
-    queued_entries = [entry for entry in unaccounted if entry.term in queued]
-    missing = [entry for entry in unaccounted if entry.term not in queued]
+    unaccounted = [
+        entry for entry in terms if not bool(existence_data.get(_normalized(entry.term), False))
+    ]
+    queued_entries = [entry for entry in unaccounted if _normalized(entry.term) in queued]
+    missing = [entry for entry in unaccounted if _normalized(entry.term) not in queued]
     to_add = missing[:limit] if limit is not None else missing
     existing_count = len(terms) - len(unaccounted)
 
