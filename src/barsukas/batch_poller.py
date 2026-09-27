@@ -4,13 +4,15 @@ Runs inside the unified Barsukas server (alongside the workqueue worker
 thread). Every 5 minutes it:
 
 1. Scans the batch-tracking DB for ``BatchQueue`` rows submitted by the
-   ``barsukas_decompose`` agent that are still in flight
+   sentence translate/decompose agents or the ``voras`` lemma-populate
+   agent (``words.translation_batch``) that are still in flight
    (``submitted`` / ``processing``).
 2. For each unique ``batch_id``, calls ``BatchQueueManager.check_batch_status``
    so the local state mirrors OpenAI.
 3. If a batch has reached ``completed`` on OpenAI, downloads results via
    ``retrieve_batch_results`` and applies them to the main database with
-   ``apply_sentence_translation_results``.
+   the agent's applier (``apply_results_for_agent`` for sentences,
+   ``apply_populate_results`` for lemma translations).
 
 If no batches are in flight the poller does nothing and goes back to sleep.
 """
@@ -36,11 +38,13 @@ from sentences.batch_completion import (
     TRANSLATE_AGENT_NAME,
     apply_results_for_agent,
 )
+from words.translation_batch import AGENT_NAME as LEMMA_TRANSLATE_AGENT_NAME
+from words.translation_batch import apply_populate_results
 
 logger = logging.getLogger(__name__)
 
 DEFAULT_POLL_INTERVAL_SECONDS = 300
-_AGENT_NAMES = (DECOMPOSE_AGENT_NAME, TRANSLATE_AGENT_NAME)
+_AGENT_NAMES = (DECOMPOSE_AGENT_NAME, TRANSLATE_AGENT_NAME, LEMMA_TRANSLATE_AGENT_NAME)
 _IN_FLIGHT_STATUSES = (
     BatchRequestStatus.SUBMITTED.value,
     BatchRequestStatus.PROCESSING.value,
@@ -58,6 +62,23 @@ def _collect_active_batch_ids(batch_session: Session) -> list[tuple[str, str]]:
         .all()
     )
     return [(row[0], row[1]) for row in rows if row[0]]
+
+
+def apply_completed_requests(
+    agent_name: str, requests: list[BatchQueue], main_session: Session, batch_id: str
+) -> dict[str, int]:
+    """Apply one agent's completed requests with that agent's applier.
+
+    The single dispatch point for Barsukas-applied batches: the poller and the
+    batch page's "check and finish" both come through here, so an agent the
+    poller knows is one the page knows too.
+
+    Raises:
+        ValueError: For an agent with no applier here.
+    """
+    if agent_name == LEMMA_TRANSLATE_AGENT_NAME:
+        return apply_populate_results(requests, main_session, batch_id)
+    return apply_results_for_agent(agent_name, requests, main_session, batch_id)
 
 
 def poll_once(main_session_factory: Callable[[], Session]) -> None:
@@ -97,10 +118,10 @@ def poll_once(main_session_factory: Callable[[], Session]) -> None:
 
             main_session = main_session_factory()
             try:
-                result = apply_results_for_agent(agent_name, completed, main_session, batch_id)
+                result = apply_completed_requests(agent_name, completed, main_session, batch_id)
                 main_session.commit()
                 logger.info(
-                    "Applied batch %s (%s): %s sentences updated, %s failed",
+                    "Applied batch %s (%s): %s updated, %s failed",
                     batch_id,
                     agent_name,
                     result["updated"],
