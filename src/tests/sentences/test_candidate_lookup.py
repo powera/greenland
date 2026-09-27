@@ -8,6 +8,7 @@ in the configured source languages and ranked by the count of those
 languages that confirm each candidate.
 """
 
+import unicodedata
 import unittest
 from typing import ClassVar, Dict, List
 
@@ -17,6 +18,7 @@ from sqlalchemy.orm import Session
 from sentences.candidate_lookup import (
     CandidateLemma,
     DEFAULT_SOURCE_LANGUAGES,
+    _match_keys,
     find_candidate_lemmas_for_sentence,
     find_candidate_lemmas_from_translations,
 )
@@ -73,9 +75,9 @@ class TestUnambiguousWord(CandidateLookupTestCase):
             self.session,
             {
                 "en": "The dog runs",
-                "bn": "কুকুর দৌড়ায়",
-                "uk": "Собака біжить",
-                "kn": "ನಾಯಿ ಓಡುತ್ತದೆ",
+                "hi": "कुत्ता दौड़ता है",
+                "vi": "Con chó chạy",
+                "ms": "Anjing itu berlari",
             },
         )
         candidates = find_candidate_lemmas_for_sentence(self.session, sentence.id)
@@ -87,7 +89,7 @@ class TestUnambiguousWord(CandidateLookupTestCase):
     def test_translations_populated_for_source_languages(self) -> None:
         sentence = add_test_sentence(
             self.session,
-            {"en": "The dog runs", "bn": "কুকুর দৌড়ায়"},
+            {"en": "The dog runs", "hi": "कुत्ता दौड़ता है"},
         )
         candidates = find_candidate_lemmas_for_sentence(self.session, sentence.id)
         dog = _find_guid(candidates, _release_dog_guid(self.session))
@@ -102,9 +104,9 @@ class TestAmbiguityResolution(CandidateLookupTestCase):
             self.session,
             {
                 "en": "I can play today",
-                "bn": "আমি আজ পারা",
-                "uk": "Я можу грати сьогодні",
-                "kn": "ನಾನು ಇಂದು ಸಾಧ್ಯ ಆಡಲು",
+                "hi": "मैं आज खेल सकता हूँ",
+                "vi": "Tôi có thể chơi hôm nay",
+                "ms": "Saya boleh bermain hari ini",
             },
         )
         candidates = find_candidate_lemmas_for_sentence(self.session, sentence.id)
@@ -123,9 +125,9 @@ class TestAmbiguityResolution(CandidateLookupTestCase):
             self.session,
             {
                 "en": "I see a can",
-                "bn": "আমি একটি ক্যান দেখি",
-                "uk": "Я бачу банка",
-                "kn": "ನಾನು ಒಂದು ಕ್ಯಾನ್ ನೋಡುತ್ತೇನೆ",
+                "hi": "मैं एक डिब्बा देखता हूँ",
+                "vi": "Tôi thấy một cái lon",
+                "ms": "Saya nampak sebuah tin",
             },
         )
         candidates = find_candidate_lemmas_for_sentence(self.session, sentence.id)
@@ -229,11 +231,39 @@ class TestCapAndScoring(CandidateLookupTestCase):
             self.assertIn(lang, dog.matched_languages)
 
 
+class TestPivotMatching(CandidateLookupTestCase):
+    def test_multi_word_translation_matches_as_ngram(self) -> None:
+        # vi "hôm nay" is two whitespace tokens; the bigram must still match.
+        sentence = add_test_sentence(self.session, {"vi": "Hôm nay trời đẹp"})
+        candidates = find_candidate_lemmas_for_sentence(self.session, sentence.id)
+        self.assertIn("vi", _find_guid(candidates, "TEST_TODAY").matched_languages)
+
+    def test_decomposed_unicode_matches_composed_translation(self) -> None:
+        nfd_text = unicodedata.normalize("NFD", "Tôi có thể chơi")
+        self.assertNotEqual(nfd_text, unicodedata.normalize("NFC", nfd_text))
+        sentence = add_test_sentence(self.session, {"vi": nfd_text})
+        candidates = find_candidate_lemmas_for_sentence(self.session, sentence.id)
+        self.assertIn("vi", _find_guid(candidates, "TEST_CAN_MODAL").matched_languages)
+
+    def test_malay_possessive_clitic_is_stripped(self) -> None:
+        sentence = add_test_sentence(self.session, {"ms": "Saya buka tinnya"})
+        candidates = find_candidate_lemmas_for_sentence(self.session, sentence.id)
+        self.assertIn("ms", _find_guid(candidates, "TEST_CAN_CONTAINER").matched_languages)
+
+    def test_clitic_strip_leaves_short_stems_alone(self) -> None:
+        self.assertEqual(_match_keys(["ibu"], "ms"), ["ibu"])
+        self.assertEqual(_match_keys(["rumahnya"], "ms"), ["rumahnya", "rumah"])
+
+    def test_unspaced_language_gets_no_ngrams(self) -> None:
+        self.assertEqual(_match_keys(["今天", "天气"], "zh"), ["今天", "天气"])
+        self.assertEqual(_match_keys(["今天", "天气"], "zh-tw"), ["今天", "天气"])
+
+
 class TestDefaultSources(CandidateLookupTestCase):
     def test_default_source_languages_constant(self) -> None:
         self.assertEqual(
             DEFAULT_SOURCE_LANGUAGES,
-            ["en", "fr", "lt", "zh", "es", "bn", "uk", "kn"],
+            ["en", "fr", "lt", "zh", "es", "hi", "vi", "ms"],
         )
 
 
@@ -241,9 +271,9 @@ class TestInMemoryVariant(CandidateLookupTestCase):
     def test_from_translations_matches_from_sentence(self) -> None:
         translations = {
             "en": "I can play today",
-            "bn": "আমি আজ পারা",
-            "uk": "Я можу грати сьогодні",
-            "kn": "ನಾನು ಇಂದು ಸಾಧ್ಯ ಆಡಲು",
+            "hi": "मैं आज खेल सकता हूँ",
+            "vi": "Tôi có thể chơi hôm nay",
+            "ms": "Saya boleh bermain hari ini",
         }
         sentence = add_test_sentence(self.session, translations)
 
