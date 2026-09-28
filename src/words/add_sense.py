@@ -47,7 +47,7 @@ from storage.backend.config import DataSourceConfig
 from storage.crud.lemma_tags import add_tags, normalize_tags, read_tags
 from storage.crud.operation_log import FieldChange, log_field_changes, log_translation_change
 from storage.crud.variant_form import add_variant_form
-from storage.models.guid_prefixes import SUBTYPE_GUID_PREFIXES
+from storage.models.guid_prefixes import SUBTYPE_GUID_PREFIXES, render_subtype_list
 from storage.models.schema import SENSE_PROMINENCE_RARE, Lemma
 from storage.models.variant_form import VARIANT_KIND_ABBREVIATION
 from storage.queries.lemma import get_english_senses
@@ -217,8 +217,13 @@ def build_sense_prompt(
         context = util.prompt_loader.get_context("translation", "sense_known_type")
         return context, prompt, _sense_schema(ask_pos=False)
 
+    # Noun subtypes carry their descriptions and examples: from the names alone
+    # the model filed referee as a participant_role and a volley as noun_other.
+    # A field's terms are overwhelmingly nouns, and describing every POS's
+    # subtypes would put well over a hundred glosses in each call, so the other
+    # lists stay bare names.  The catch-all is withheld, as in the schema.
     context = util.prompt_loader.get_context("translation", "sense").format(
-        noun_subtypes=", ".join(_offered_subtypes(get_subtype_values_for_pos("noun"))),
+        noun_subtypes=render_subtype_list("noun", include_catch_all=False),
         verb_subtypes=", ".join(_offered_subtypes(get_subtype_values_for_pos("verb"))),
         adjective_subtypes=", ".join(_offered_subtypes(get_subtype_values_for_pos("adjective"))),
         adverb_subtypes=", ".join(_offered_subtypes(get_subtype_values_for_pos("adverb"))),
