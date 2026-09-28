@@ -318,3 +318,59 @@ class TestValidation:
 
         assert result.status == "error"
         assert client.calls == []
+
+
+class TestFixedSubtype:
+    def test_fixed_subtype_overrides_the_model(
+        self, session: Session, config: DataSourceConfig
+    ) -> None:
+        # The model is not asked, but a stray answer must not win either.
+        sense = dict(_chess_check(), pos="verb", pos_subtype="mental_state")
+        client = _FakeClient(sense)
+
+        result = _add(session, config, client, pos_subtype="strategic_tactic")
+
+        assert result.status == "created"
+        lemma = session.query(Lemma).filter(Lemma.guid == result.guid).one()
+        assert (lemma.pos_type, lemma.pos_subtype) == ("noun", "strategic_tactic")
+
+    def test_fixed_subtype_is_not_asked_for(
+        self, session: Session, config: DataSourceConfig
+    ) -> None:
+        client = _FakeClient(_chess_check())
+
+        _add(session, config, client, pos_subtype="strategic_tactic")
+
+        call = client.calls[0]
+        assert "pos" not in call["json_schema"].properties
+        assert "pos_subtype" not in call["json_schema"].properties
+        assert "NOUN SUBTYPES" not in call["context"]
+        assert "It is a noun." in call["prompt"]
+        assert "an attack on the king" in call["prompt"]
+
+    @pytest.mark.parametrize("subtype", ["no_such_subtype", "noun_other"])
+    def test_unusable_subtype_is_rejected_before_the_call(
+        self, session: Session, config: DataSourceConfig, subtype: str
+    ) -> None:
+        client = _FakeClient(_chess_check())
+
+        result = _add(session, config, client, pos_subtype=subtype)
+
+        assert result.status == "error"
+        assert client.calls == []
+
+    def test_covered_sense_keeps_its_own_subtype(
+        self, session: Session, config: DataSourceConfig
+    ) -> None:
+        result = _add(
+            session,
+            config,
+            _FakeClient(_chess_check(covered_by=1)),
+            word="queen",
+            hint=None,
+            pos_subtype="strategic_tactic",
+        )
+
+        assert result.status == "covered"
+        queen = session.query(Lemma).filter(Lemma.lemma_text == "queen").one()
+        assert queen.pos_subtype == "small_movable_object"

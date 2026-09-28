@@ -1343,6 +1343,8 @@ def add_sense_endpoint() -> ResponseReturnValue:
       - ``relevel_existing``: when true, a matched existing sense is moved to
         ``difficulty_level`` and given ``disambiguation`` rather than only
         tagged.
+      - ``pos_subtype``: optional subtype for a new lemma, e.g. ``"region"``.
+        The part of speech follows from it and the model is asked for neither.
 
     ``status`` is ``created``, ``covered`` (an existing sense matched and was
     tagged), ``moved`` (matched and moved), or ``already_exists`` (matched with
@@ -1366,7 +1368,7 @@ def add_sense_endpoint() -> ResponseReturnValue:
         required_values[field_name] = field_value.strip()
 
     optional_values: Dict[str, Optional[str]] = {}
-    for field_name in ("disambiguation", "hint", "abbreviation"):
+    for field_name in ("disambiguation", "hint", "abbreviation", "pos_subtype"):
         field_value = payload.get(field_name)
         if field_value is not None and not isinstance(field_value, str):
             return _build_error_response(f"{field_name} must be a string or null")
@@ -1419,6 +1421,7 @@ def add_sense_endpoint() -> ResponseReturnValue:
         difficulty_level=difficulty_level,
         tags=tags,
         relevel_existing=relevel_existing,
+        pos_subtype=optional_values["pos_subtype"],
         source=Config.OPERATION_LOG_SOURCE,
     )
 
