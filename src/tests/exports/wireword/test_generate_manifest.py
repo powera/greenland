@@ -357,3 +357,40 @@ def test_generate_manifest_variant_keeps_the_dialect_code(tmp_path: Path) -> Non
     manifest = _load_manifest(manifest_path)
     assert manifest["language_code"] == "es-419"
     assert manifest["language"] == "spanish"
+
+
+def _write_words_file(tmp_path: Path, start: int, end: int, levels: list[int]) -> None:
+    """A level-range file holding one word at each of ``levels``."""
+    words = [{"guid": f"N01_{level:03d}", "level": level} for level in levels]
+    _write_json_file(tmp_path / f"wireword_levels_{start}_{end}.json", json.dumps(words))
+
+
+def test_generate_manifest_ships_metadata_for_exported_levels_only(tmp_path: Path) -> None:
+    """Unshipped levels are dropped, and so are prerequisites that name them."""
+    _write_words_file(tmp_path, 1, 30, [1, 20])
+    _write_words_file(tmp_path, 100, 499, [100, 120])
+    level_metadata = [
+        {"level": 120, "name": {"en": "Food & Cooking II"}, "cefr": "B1", "prerequisites": [100]},
+        {"level": 1, "name": {"en": "First Words", "es": "Primeras palabras"}, "cefr": "A1"},
+        {"level": 105, "name": {"en": "Not Exported"}},
+        {"level": 100, "name": {"en": "Food & Cooking I"}, "prerequisites": [105]},
+        {"level": 1000, "name": {"en": "Topic"}, "icon": "🧪"},
+    ]
+
+    success, manifest_path = generate_manifest(str(tmp_path), "lt", level_metadata=level_metadata)
+
+    assert success
+    assert _load_manifest(manifest_path)["config"]["levels"] == [
+        {"level": 1, "name": {"en": "First Words", "es": "Primeras palabras"}, "cefr": "A1"},
+        {"level": 100, "name": {"en": "Food & Cooking I"}},
+        {"level": 120, "name": {"en": "Food & Cooking II"}, "cefr": "B1", "prerequisites": [100]},
+    ]
+
+
+def test_generate_manifest_omits_levels_without_metadata(tmp_path: Path) -> None:
+    _write_words_file(tmp_path, 1, 30, [1])
+
+    success, manifest_path = generate_manifest(str(tmp_path), "lt", level_metadata=[])
+
+    assert success
+    assert "levels" not in _load_manifest(manifest_path)["config"]

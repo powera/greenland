@@ -26,7 +26,16 @@ from dataclasses import dataclass
 from pathlib import Path
 from typing import Any, Callable, Dict, Optional
 
-from storage.release import idiom, lemma, lemma_audio, name, phrase, sentence, tombstone
+from storage.release import (
+    curriculum_level,
+    idiom,
+    lemma,
+    lemma_audio,
+    name,
+    phrase,
+    sentence,
+    tombstone,
+)
 
 #: A direction's worth of work: ``(session, release_dir, **options) -> stats``.
 #: The stats object differs per element type; callers print it rather than
@@ -121,6 +130,13 @@ ENTITY_SPECS: Dict[str, ReleaseEntitySpec] = {
         import_=lemma_audio.import_from_release,
         accepts_categories=True,
         accepts_prune=True,
+    ),
+    "levels": ReleaseEntitySpec(
+        name="levels",
+        subdir=curriculum_level.RELEASE_DIRNAME,
+        noun="curriculum level",
+        export=curriculum_level.export_to_release,
+        import_=curriculum_level.import_from_release,
     ),
     "tombstones": ReleaseEntitySpec(
         name="tombstones",

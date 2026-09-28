@@ -22,6 +22,10 @@ from storage.models.enums import (
     NounSubtype,
     VerbSubtype,
 )
+from storage.models.curriculum_level import (
+    CEFR_LEVELS,
+    CurriculumLevel,
+)
 from storage.models.emoji import (
     EMOJI_STATUS_ASSIGNED,
     EMOJI_STATUS_MISSING_LEMMA,
@@ -102,6 +106,8 @@ from storage.models.imports import (
 )
 
 __all__ = [
+    "CEFR_LEVELS",
+    "CurriculumLevel",
     "EMOJI_STATUSES",
     "EMOJI_STATUS_ASSIGNED",
     "EMOJI_STATUS_MISSING_LEMMA",

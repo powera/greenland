@@ -25,7 +25,7 @@ from storage.translation_helpers import (
 from storage.backend.factory import create_session
 from langtools.dialect_overrides import normalize_language_code
 from exports.wireword.export_manager import WIREWORD_EXPORT_LANGUAGES, TrakaidoExporter
-from exports.wireword.generate_manifest import generate_manifest
+from exports.wireword.generate_manifest import generate_manifest, load_level_metadata
 from exports.wireword.generate_variants import generate_variants
 from exports.wireword.generate_categorychoice import (
     build_reverse_subtype_map,
@@ -414,6 +414,7 @@ class WirewordExportService:
                 include_unreviewed_audio=self.include_unreviewed_audio,
                 source_language=self.source_language,
                 cdn_base=cdn_base,
+                level_metadata=load_level_metadata(self.config),
             )
             if manifest_success:
                 results["manifest_path"] = manifest_path
