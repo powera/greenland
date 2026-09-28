@@ -1,0 +1,98 @@
+{"guid": "N64_001", "forms": [{"grammatical_form": "noun/en_singular", "text": "sun", "is_base_form": true, "ipa": "/sʌn/", "phonetic": "SOON"}]}
+{"guid": "N64_002", "forms": [{"grammatical_form": "noun/en_singular", "text": "moon", "is_base_form": true, "ipa": " /mʊn / ", "phonetic": " MOON "}]}
+{"guid": "N64_003", "forms": [{"grammatical_form": "noun/en_singular", "text": "planet", "is_base_form": true, "ipa": "/ˈplænɪt/", "phonetic": "PLAN-it"}]}
+{"guid": "N64_004", "forms": [{"grammatical_form": "noun/en_singular", "text": "star", "is_base_form": true, "ipa": "/stɑːr/", "phonetic": "STAA-er"}]}
+{"guid": "N64_005", "forms": [{"grammatical_form": "noun/en_singular", "text": "galaxy", "is_base_form": true, "ipa": "/ˈɡæləksi/", "phonetic": "GAL-uk-see"}]}
+{"guid": "N64_006", "forms": [{"grammatical_form": "noun/en_singular", "text": "earth", "is_base_form": true, "ipa": "/ɜːrθ/", "phonetic": "ER-th"}]}
+{"guid": "N64_007", "forms": [{"grammatical_form": "noun/en_singular", "text": "asteroid", "is_base_form": true, "ipa": "/ˈæs.tə.rɔɪd/", "phonetic": "AS-tuh-royd"}]}
+{"guid": "N64_008", "forms": [{"grammatical_form": "noun/en_singular", "text": "solar system", "is_base_form": true}]}
+{"guid": "N64_009", "forms": [{"grammatical_form": "noun/en_singular", "text": "supernova", "is_base_form": true, "ipa": "/ˌsuːpərˈnoʊvə/", "phonetic": "SOO-per-NOH-vuh"}]}
+{"guid": "N64_010", "forms": [{"grammatical_form": "noun/en_singular", "text": "Andromeda", "is_base_form": true, "ipa": "/ænˈdrɑːmədə/", "phonetic": "an-DROM-uh-duh"}]}
+{"guid": "N64_011", "forms": [{"grammatical_form": "noun/en_singular", "text": "Antlia", "is_base_form": true, "ipa": "/ˈæntliə/", "phonetic": "ANT-lee-uh"}]}
+{"guid": "N64_012", "forms": [{"grammatical_form": "noun/en_singular", "text": "Apus", "is_base_form": true, "ipa": "/ˈeɪpəs/", "phonetic": "AY-puhs"}]}
+{"guid": "N64_013", "forms": [{"grammatical_form": "noun/en_singular", "text": "Aquarius", "is_base_form": true, "ipa": "/əˈkwɛriəs/", "phonetic": "uh-KWAIR-ee-us"}]}
+{"guid": "N64_014", "forms": [{"grammatical_form": "noun/en_singular", "text": "Aquila", "is_base_form": true, "ipa": "/ˈækwɪlə/", "phonetic": "AK-wih-luh"}]}
+{"guid": "N64_015", "forms": [{"grammatical_form": "noun/en_singular", "text": "Ara", "is_base_form": true, "ipa": "/ˈɛrə/", "phonetic": "AIR-uh"}]}
+{"guid": "N64_016", "forms": [{"grammatical_form": "noun/en_singular", "text": "Aries", "is_base_form": true, "ipa": "/ˈɛriz/", "phonetic": "AIR-eez"}]}
+{"guid": "N64_017", "forms": [{"grammatical_form": "noun/en_singular", "text": "Auriga", "is_base_form": true, "ipa": "/ɔˈraɪɡə/", "phonetic": "aw-RYE-guh"}]}
+{"guid": "N64_018", "forms": [{"grammatical_form": "noun/en_singular", "text": "Boötes", "is_base_form": true, "ipa": "/boʊˈoʊtiːz/", "phonetic": "boh-OH-teez"}]}
+{"guid": "N64_019", "forms": [{"grammatical_form": "noun/en_singular", "text": "Caelum", "is_base_form": true, "ipa": "/ˈsiːləm/", "phonetic": "SEE-lum"}]}
+{"guid": "N64_020", "forms": [{"grammatical_form": "noun/en_singular", "text": "Camelopardalis", "is_base_form": true, "ipa": "/ˌkæmələˈpɑːrdəlɪs/", "phonetic": "kuh-MEL-uh-PAR-duh-lis"}]}
+{"guid": "N64_021", "forms": [{"grammatical_form": "noun/en_singular", "text": "Cancer", "is_base_form": true, "ipa": "/ˈkænsər/", "phonetic": "KAN-ser"}]}
+{"guid": "N64_022", "forms": [{"grammatical_form": "noun/en_singular", "text": "Canes Venatici", "is_base_form": true, "ipa": "/ˌkeɪniːz vɪˈnætɪsaɪ/", "phonetic": "KAY-neez VEE-nat-ih-sigh"}]}
+{"guid": "N64_023", "forms": [{"grammatical_form": "noun/en_singular", "text": "Canis Major", "is_base_form": true, "ipa": "/ˈkeɪnɪs ˈmeɪdʒər/", "phonetic": "KAY-nis MAY-jer"}]}
+{"guid": "N64_024", "forms": [{"grammatical_form": "noun/en_singular", "text": "Canis Minor", "is_base_form": true, "ipa": "/ˈkeɪnɪs ˈmaɪnɔr/", "phonetic": "KAY-niss MY-nor"}]}
+{"guid": "N64_025", "forms": [{"grammatical_form": "noun/en_singular", "text": "Capricornus", "is_base_form": true, "ipa": "/ˌkæprɪˈkɔrnəs/", "phonetic": "kap-rih-KOR-nus"}]}
+{"guid": "N64_026", "forms": [{"grammatical_form": "noun/en_singular", "text": "Carina", "is_base_form": true, "ipa": "/kəˈriːnə/", "phonetic": "kuh-REE-nuh"}]}
+{"guid": "N64_027", "forms": [{"grammatical_form": "noun/en_singular", "text": "Cassiopeia", "is_base_form": true, "ipa": "/ˌkæsiəˈpiə/", "phonetic": "kas-ee-uh-PEE-uh"}]}
+{"guid": "N64_028", "forms": [{"grammatical_form": "noun/en_singular", "text": "Centaurus", "is_base_form": true, "ipa": "/sɛnˈtɔrəs/", "phonetic": "sen-TAWR-us"}]}
+{"guid": "N64_029", "forms": [{"grammatical_form": "noun/en_singular", "text": "Cepheus", "is_base_form": true, "ipa": "/ˈsiːfiəs/", "phonetic": "SEE-fee-us"}]}
+{"guid": "N64_030", "forms": [{"grammatical_form": "noun/en_singular", "text": "Cetus", "is_base_form": true, "ipa": "/ˈsiːtəs/", "phonetic": "SEE-tus"}]}
+{"guid": "N64_031", "forms": [{"grammatical_form": "noun/en_singular", "text": "Chamaeleon", "is_base_form": true, "ipa": "/kəˈmiːliən/", "phonetic": "kuh-MEE-lee-un"}]}
+{"guid": "N64_032", "forms": [{"grammatical_form": "noun/en_singular", "text": "Circinus", "is_base_form": true, "ipa": "/ˈsɝːsɪnəs/", "phonetic": "SUR-suh-nus"}]}
+{"guid": "N64_033", "forms": [{"grammatical_form": "noun/en_singular", "text": "Columba", "is_base_form": true, "ipa": "/kəˈlʌmbə/", "phonetic": "kuh-LUM-buh"}]}
+{"guid": "N64_034", "forms": [{"grammatical_form": "noun/en_singular", "text": "Coma Berenices", "is_base_form": true, "ipa": "/ˈkoʊmə ˌbɛrəˈnaɪsiːz/", "phonetic": "KOH-muh beh-ruh-NY-seeze"}]}
+{"guid": "N64_035", "forms": [{"grammatical_form": "noun/en_singular", "text": "Corona Australis", "is_base_form": true, "ipa": "/kəˈroʊnə ɔːˈstreɪlɪs/", "phonetic": "kuh-ROH-nuh aw-STRAY-lis"}]}
+{"guid": "N64_036", "forms": [{"grammatical_form": "noun/en_singular", "text": "Corona Borealis", "is_base_form": true, "ipa": "/kəˌroʊnə ˌbɔriˈælɪs/", "phonetic": "kuh-ROH-nuh bor-ee-AL-iss"}]}
+{"guid": "N64_037", "forms": [{"grammatical_form": "noun/en_singular", "text": "Corvus", "is_base_form": true, "ipa": "/ˈkɔrvəs/", "phonetic": "KOR-vuhs"}]}
+{"guid": "N64_038", "forms": [{"grammatical_form": "noun/en_singular", "text": "Crater", "is_base_form": true, "ipa": "/ˈkreɪtər/", "phonetic": "KRAY-ter"}]}
+{"guid": "N64_039", "forms": [{"grammatical_form": "noun/en_singular", "text": "Crux", "is_base_form": true, "ipa": "/krʌks/", "phonetic": "KRUKS"}]}
+{"guid": "N64_040", "forms": [{"grammatical_form": "noun/en_singular", "text": "Cygnus", "is_base_form": true, "ipa": "/ˈsɪɡnəs/", "phonetic": "SIG-nus"}]}
+{"guid": "N64_041", "forms": [{"grammatical_form": "noun/en_singular", "text": "Delphinus", "is_base_form": true, "ipa": "/dɛlˈfaɪnəs/", "phonetic": "del-FY-nus"}]}
+{"guid": "N64_042", "forms": [{"grammatical_form": "noun/en_singular", "text": "Dorado", "is_base_form": true, "ipa": "/dəˈrɑdoʊ/", "phonetic": "duh-RAH-doh"}]}
+{"guid": "N64_043", "forms": [{"grammatical_form": "noun/en_singular", "text": "Draco", "is_base_form": true, "ipa": "/ˈdreɪkoʊ/", "phonetic": "DRAY-koh"}]}
+{"guid": "N64_044", "forms": [{"grammatical_form": "noun/en_singular", "text": "Equuleus", "is_base_form": true, "ipa": "/ɪˈkwuːliəs/", "phonetic": "ih-KWOO-lee-us"}]}
+{"guid": "N64_045", "forms": [{"grammatical_form": "noun/en_singular", "text": "Eridanus", "is_base_form": true, "ipa": "/ɪˈrɪdənəs/", "phonetic": "ih-RID-uh-nus"}]}
+{"guid": "N64_046", "forms": [{"grammatical_form": "noun/en_singular", "text": "Fornax", "is_base_form": true, "ipa": "/ˈfɔr.næks/", "phonetic": "FOR-naks"}]}
+{"guid": "N64_047", "forms": [{"grammatical_form": "noun/en_singular", "text": "Gemini", "is_base_form": true, "ipa": "/ˈdʒɛmɪnaɪ/", "phonetic": "JEM-uh-nye"}]}
+{"guid": "N64_048", "forms": [{"grammatical_form": "noun/en_singular", "text": "Grus", "is_base_form": true, "ipa": "/ɡruːs/", "phonetic": "GROOS"}]}
+{"guid": "N64_049", "forms": [{"grammatical_form": "noun/en_singular", "text": "Hercules", "is_base_form": true, "ipa": "/ˈhɝːkjəˌliz/", "phonetic": "HER-kyuh-leez"}]}
+{"guid": "N64_050", "forms": [{"grammatical_form": "noun/en_singular", "text": "Horologium", "is_base_form": true, "ipa": "/ˌhɔːrəˈloʊdʒiəm/", "phonetic": "hor-uh-LOH-jee-um"}]}
+{"guid": "N64_051", "forms": [{"grammatical_form": "noun/en_singular", "text": "Hydra", "is_base_form": true, "ipa": "/ˈhaɪdrə/", "phonetic": "HY-druh"}]}
+{"guid": "N64_052", "forms": [{"grammatical_form": "noun/en_singular", "text": "Hydrus", "is_base_form": true, "ipa": "/ˈhaɪdrəs/", "phonetic": "HY-drus"}]}
+{"guid": "N64_053", "forms": [{"grammatical_form": "noun/en_singular", "text": "Indus", "is_base_form": true, "ipa": "/ˈɪndəs/", "phonetic": "IN-duhs"}]}
+{"guid": "N64_054", "forms": [{"grammatical_form": "noun/en_singular", "text": "Lacerta", "is_base_form": true, "ipa": "/ləˈsɝːtə/", "phonetic": "luh-SER-tuh"}]}
+{"guid": "N64_055", "forms": [{"grammatical_form": "noun/en_singular", "text": "Leo", "is_base_form": true, "ipa": "/ˈliː.oʊ/", "phonetic": "LEE-oh"}]}
+{"guid": "N64_056", "forms": [{"grammatical_form": "noun/en_singular", "text": "Leo Minor", "is_base_form": true, "ipa": "/ˌliːoʊ ˈmaɪnər/", "phonetic": "LEE-oh MY-nor"}]}
+{"guid": "N64_057", "forms": [{"grammatical_form": "noun/en_singular", "text": "Lepus", "is_base_form": true, "ipa": "/ˈliːpəs/", "phonetic": "LEE-puhs"}]}
+{"guid": "N64_058", "forms": [{"grammatical_form": "noun/en_singular", "text": "Libra", "is_base_form": true, "ipa": "/ˈlaɪ.brə/", "phonetic": "LYE-bruh"}]}
+{"guid": "N64_059", "forms": [{"grammatical_form": "noun/en_singular", "text": "Lupus", "is_base_form": true, "ipa": "/ˈluːpəs/", "phonetic": "LOO-pus"}]}
+{"guid": "N64_060", "forms": [{"grammatical_form": "noun/en_singular", "text": "Lynx", "is_base_form": true, "ipa": "/lɪŋks/", "phonetic": "LINKS"}]}
+{"guid": "N64_061", "forms": [{"grammatical_form": "noun/en_singular", "text": "Lyra", "is_base_form": true, "ipa": "/ˈlaɪrə/", "phonetic": "LYE-ruh"}]}
+{"guid": "N64_062", "forms": [{"grammatical_form": "noun/en_singular", "text": "Mensa", "is_base_form": true, "ipa": "/ˈmɛnsə/", "phonetic": "MEN-suh"}]}
+{"guid": "N64_063", "forms": [{"grammatical_form": "noun/en_singular", "text": "Microscopium", "is_base_form": true, "ipa": "/ˌmaɪkrəˈskoʊpiəm/", "phonetic": "MY-kruh-SKOH-pee-um"}]}
+{"guid": "N64_064", "forms": [{"grammatical_form": "noun/en_singular", "text": "Monoceros", "is_base_form": true, "ipa": "/məˈnɑːsərəs/", "phonetic": "muh-NAH-suh-ruhs"}]}
+{"guid": "N64_065", "forms": [{"grammatical_form": "noun/en_singular", "text": "Musca", "is_base_form": true, "ipa": "/ˈmʌskə/", "phonetic": "MUS-kuh"}]}
+{"guid": "N64_066", "forms": [{"grammatical_form": "noun/en_singular", "text": "Norma", "is_base_form": true, "ipa": "/ˈnɔrmə/", "phonetic": "NOR-muh"}]}
+{"guid": "N64_067", "forms": [{"grammatical_form": "noun/en_singular", "text": "Octans", "is_base_form": true, "ipa": "/ˈɑːktænz/", "phonetic": "OK-tanz"}]}
+{"guid": "N64_068", "forms": [{"grammatical_form": "noun/en_singular", "text": "Ophiuchus", "is_base_form": true, "ipa": "/ˌoʊfiˈuːkəs/", "phonetic": "oh-fee-OO-kus"}]}
+{"guid": "N64_069", "forms": [{"grammatical_form": "noun/en_singular", "text": "Orion", "is_base_form": true, "ipa": "/oʊˈraɪən/", "phonetic": "oh-RYE-un"}]}
+{"guid": "N64_070", "forms": [{"grammatical_form": "noun/en_singular", "text": "Pavo", "is_base_form": true, "ipa": "/ˈpɑːvoʊ/", "phonetic": "PAH-voh"}]}
+{"guid": "N64_071", "forms": [{"grammatical_form": "noun/en_singular", "text": "Pegasus", "is_base_form": true, "ipa": "/ˈpɛɡəsəs/", "phonetic": "PEG-uh-suhs"}]}
+{"guid": "N64_072", "forms": [{"grammatical_form": "noun/en_singular", "text": "Perseus", "is_base_form": true, "ipa": "/ˈpɝːsiəs/", "phonetic": "PUR-see-us"}]}
+{"guid": "N64_073", "forms": [{"grammatical_form": "noun/en_singular", "text": "Phoenix", "is_base_form": true, "ipa": "/ˈfiːnɪks/", "phonetic": "FEE-niks"}]}
+{"guid": "N64_074", "forms": [{"grammatical_form": "noun/en_singular", "text": "Pictor", "is_base_form": true, "ipa": "/ˈpɪktər/", "phonetic": "PIK-ter"}]}
+{"guid": "N64_075", "forms": [{"grammatical_form": "noun/en_singular", "text": "Pisces", "is_base_form": true, "ipa": "/ˈpaɪsiz/", "phonetic": "PIE-seez"}]}
+{"guid": "N64_076", "forms": [{"grammatical_form": "noun/en_singular", "text": "Piscis Austrinus", "is_base_form": true, "ipa": "/ˈpɪsɪs ɔːˈstraɪnəs/", "phonetic": "PIE-sis aw-STRY-nus"}]}
+{"guid": "N64_077", "forms": [{"grammatical_form": "noun/en_singular", "text": "Puppis", "is_base_form": true, "ipa": "/ˈpʌpɪs/", "phonetic": "PUH-pis"}]}
+{"guid": "N64_078", "forms": [{"grammatical_form": "noun/en_singular", "text": "Pyxis", "is_base_form": true, "ipa": "/ˈpɪksɪs/", "phonetic": "PIK-sis"}]}
+{"guid": "N64_079", "forms": [{"grammatical_form": "noun/en_singular", "text": "Reticulum", "is_base_form": true, "ipa": "/rɪˈtɪkjələm/", "phonetic": "ruh-TIK-yuh-lum"}]}
+{"guid": "N64_080", "forms": [{"grammatical_form": "noun/en_singular", "text": "Sagitta", "is_base_form": true, "ipa": "/səˈdʒɪtə/", "phonetic": "suh-JIT-uh"}]}
+{"guid": "N64_081", "forms": [{"grammatical_form": "noun/en_singular", "text": "Sagittarius", "is_base_form": true, "ipa": "/ˌsædʒɪˈtɛriəs/", "phonetic": "saj-uh-TAIR-ee-us"}]}
+{"guid": "N64_082", "forms": [{"grammatical_form": "noun/en_singular", "text": "Scorpius", "is_base_form": true, "ipa": "/ˈskɔrpiəs/", "phonetic": "SKOR-pee-us"}]}
+{"guid": "N64_083", "forms": [{"grammatical_form": "noun/en_singular", "text": "Sculptor", "is_base_form": true, "ipa": "/ˈskʌlptɚ/", "phonetic": "SKULP-ter"}]}
+{"guid": "N64_084", "forms": [{"grammatical_form": "noun/en_singular", "text": "Scutum", "is_base_form": true, "ipa": "/ˈskuːtəm/", "phonetic": "SKOO-tum"}]}
+{"guid": "N64_085", "forms": [{"grammatical_form": "noun/en_singular", "text": "Serpens", "is_base_form": true, "ipa": "/ˈsɝːpənz/", "phonetic": "SUR-penz"}]}
+{"guid": "N64_086", "forms": [{"grammatical_form": "noun/en_singular", "text": "Sextans", "is_base_form": true, "ipa": "/ˈsɛk.stænz/", "phonetic": "SEK-stanz"}]}
+{"guid": "N64_087", "forms": [{"grammatical_form": "noun/en_singular", "text": "Taurus", "is_base_form": true, "ipa": "/ˈtɔrəs/", "phonetic": "TAW-ruhs"}]}
+{"guid": "N64_088", "forms": [{"grammatical_form": "noun/en_singular", "text": "Telescopium", "is_base_form": true, "ipa": "/ˌtɛlɪˈskoʊpiəm/", "phonetic": "tel-uh-SKOH-pee-um"}]}
+{"guid": "N64_089", "forms": [{"grammatical_form": "noun/en_singular", "text": "Triangulum", "is_base_form": true, "ipa": "/traɪˈæŋɡjələm/", "phonetic": "try-ANG-yuh-lum"}]}
+{"guid": "N64_090", "forms": [{"grammatical_form": "noun/en_singular", "text": "Triangulum Australe", "is_base_form": true, "ipa": "/traɪˈæŋɡjələm ɔːˈstreɪli/", "phonetic": "try-ANG-yuh-lum aw-STRAY-lee"}]}
+{"guid": "N64_091", "forms": [{"grammatical_form": "noun/en_singular", "text": "Tucana", "is_base_form": true, "ipa": "/tuːˈkɑːnə/", "phonetic": "too-KAH-nuh"}]}
+{"guid": "N64_092", "forms": [{"grammatical_form": "noun/en_singular", "text": "Ursa Major", "is_base_form": true, "ipa": "/ˈɝːsə ˈmeɪdʒɚ/", "phonetic": "UR-suh MAY-jer"}]}
+{"guid": "N64_093", "forms": [{"grammatical_form": "noun/en_singular", "text": "Ursa Minor", "is_base_form": true, "ipa": "/ˌɝː.sə ˈmaɪ.nɚ/", "phonetic": "UR-suh MY-nor"}]}
+{"guid": "N64_094", "forms": [{"grammatical_form": "noun/en_singular", "text": "Vela", "is_base_form": true, "ipa": "/ˈviːlə/", "phonetic": "VEE-luh"}]}
+{"guid": "N64_095", "forms": [{"grammatical_form": "noun/en_singular", "text": "Virgo", "is_base_form": true, "ipa": "/ˈvɝːɡoʊ/", "phonetic": "VUR-go"}]}
+{"guid": "N64_096", "forms": [{"grammatical_form": "noun/en_singular", "text": "Volans", "is_base_form": true, "ipa": "/ˈvoʊlænz/", "phonetic": "VOH-lanz"}]}
+{"guid": "N64_097", "forms": [{"grammatical_form": "noun/en_singular", "text": "Vulpecula", "is_base_form": true, "ipa": "/vʌlˈpɛkjəlɑ/", "phonetic": "vul-PEK-yuh-luh"}]}
+{"guid": "N64_098", "forms": [{"grammatical_form": "noun/en_singular", "text": "constellation", "is_base_form": true, "ipa": "/ˌkɑnstəˈleɪʃən/", "phonetic": "kon-stuh-LAY-shun"}]}

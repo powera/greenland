@@ -1,0 +1,9 @@
+{"guid": "N64_001", "translations": {"ro": "soare", "pl": "słońce", "th": "ดวงอาทิตย์", "ms": "Matahari", "ta": "சூரியன்", "kn": "ಸೂರ್ಯ", "uk": "сонце", "bn": "সূর্য", "hi": "सूर्य", "tr": "Güneş", "bs": "Sunce"}}
+{"guid": "N64_002", "translations": {"ro": "lună", "pl": "księżyc", "th": "ดวงจันทร์", "ms": "bulan", "ta": "நிலவு", "kn": "ಚಂದ್ರ", "uk": "місяць", "bn": "চাঁদ", "hi": "चन्द्रमा", "tr": "uydu", "bs": "Mjesec"}}
+{"guid": "N64_003", "translations": {"ro": "planetă", "pl": "planeta", "th": "ดาวเคราะห์", "ms": "planet", "ta": "கோள்", "kn": "ಗ್ರಹ", "uk": "планета", "bn": "গ্রহ", "hi": "ग्रह", "tr": "gezegen", "bs": "planeta"}}
+{"guid": "N64_004", "translations": {"ro": "stea", "pl": "gwiazda", "th": "ดาว", "ms": "bintang", "ta": "நட்சத்திரம்", "kn": "ನಕ್ಷತ್ರ", "uk": "зірка", "bn": "তারা", "hi": "तारा", "tr": "yıldız", "bs": "zvijezda"}}
+{"guid": "N64_005", "translations": {"ms": "galaksi", "hi": "आकाशगंगा", "tr": "galaksi"}}
+{"guid": "N64_006", "translations": {"ro": "pământ", "pl": "ziemia", "th": "โลก", "ms": "Bumi", "ta": "பூமி", "kn": "ಭೂಮಿ", "uk": "Земля", "bn": "পৃথিবী", "hi": "पृथ्वी", "tr": "Dünya", "bs": "Zemlja"}}
+{"guid": "N64_007", "translations": {"ms": "asteroid", "hi": "क्षुद्रग्रह", "tr": "asteroit"}}
+{"guid": "N64_008", "translations": {"ms": "sistem suria", "hi": "सौरमंडल", "tr": "Güneş Sistemi"}}
+{"guid": "N64_009", "translations": {"ms": "bintang supernova", "hi": "सुपरनोवा तारा", "tr": "süpernova yıldızı"}}

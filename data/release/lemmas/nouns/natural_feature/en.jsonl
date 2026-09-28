@@ -18,9 +18,6 @@
 {"guid": "N11_018", "forms": [{"grammatical_form": "noun/en_singular", "text": "glacier", "is_base_form": true, "ipa": "/ˈɡlæʃ.ɚ/", "phonetic": "GLAS-er"}]}
 {"guid": "N11_019", "forms": [{"grammatical_form": "noun/en_singular", "text": "volcano", "is_base_form": true, "ipa": "/vɒlˈkeɪnəʊ/", "phonetic": "VOH-lay-kə-noh"}, {"grammatical_form": "noun/en_plural", "text": "volcanoes", "is_base_form": false}]}
 {"guid": "N11_020", "forms": [{"grammatical_form": "noun/en_singular", "text": "sky", "is_base_form": true, "ipa": "/skaɪ/", "phonetic": "SKY"}]}
-{"guid": "N11_021", "forms": [{"grammatical_form": "noun/en_singular", "text": "sun", "is_base_form": true, "ipa": "/sʌn/", "phonetic": "SOON"}]}
-{"guid": "N11_022", "forms": [{"grammatical_form": "noun/en_singular", "text": "moon", "is_base_form": true, "ipa": " /mʊn / ", "phonetic": " MOON "}]}
-{"guid": "N11_023", "forms": [{"grammatical_form": "noun/en_singular", "text": "star", "is_base_form": true, "ipa": "/stɑːr/", "phonetic": "STAA-er"}]}
 {"guid": "N11_024", "forms": [{"grammatical_form": "noun/en_singular", "text": "cloud", "is_base_form": true, "ipa": "/klaʊd/", "phonetic": "KLAW-d"}]}
 {"guid": "N11_025", "forms": [{"grammatical_form": "noun/en_singular", "text": "rain", "is_base_form": true, "ipa": "/reɪn/", "phonetic": "RAY-n"}]}
 {"guid": "N11_026", "forms": [{"grammatical_form": "noun/en_singular", "text": "snow", "is_base_form": true, "ipa": "/snoʊ/", "phonetic": "SNOW"}]}
@@ -41,18 +38,15 @@
 {"guid": "N11_050", "forms": [{"grammatical_form": "noun/en_singular", "text": "path", "is_base_form": true, "ipa": "/pæθ/", "phonetic": "PATH"}]}
 {"guid": "N11_051", "forms": [{"grammatical_form": "noun/en_singular", "text": "field", "is_base_form": true, "ipa": "/fiːld/", "phonetic": "FEE-ld"}]}
 {"guid": "N11_052", "forms": [{"grammatical_form": "noun/en_singular", "text": "ground", "is_base_form": true, "ipa": "/ɡraʊnd/", "phonetic": "GROWND"}]}
-{"guid": "N11_054", "forms": [{"grammatical_form": "noun/en_singular", "text": "earth", "is_base_form": true, "ipa": "/ɜːrθ/", "phonetic": "ER-th"}]}
 {"guid": "N11_055", "forms": [{"grammatical_form": "noun/en_singular", "text": "rock", "is_base_form": true, "ipa": "/rɑːk/", "phonetic": "ROCK"}]}
 {"guid": "N11_056", "forms": [{"grammatical_form": "noun/en_singular", "text": "surface", "is_base_form": true, "ipa": "/sɝːfɪs/", "phonetic": "SUR-fis"}]}
 {"guid": "N11_057", "forms": [{"grammatical_form": "noun/en_singular", "text": "stream", "is_base_form": true, "ipa": "strɪm", "phonetic": "STREAM"}]}
 {"guid": "N11_058", "forms": [{"grammatical_form": "noun/en_singular", "text": "shore", "is_base_form": true, "ipa": "ʃɔːr", "phonetic": "SHOHR"}]}
-{"guid": "N11_059", "forms": [{"grammatical_form": "noun/en_singular", "text": "planet", "is_base_form": true, "ipa": "/ˈplænɪt/", "phonetic": "PLAN-it"}]}
 {"guid": "N11_071", "forms": [{"grammatical_form": "noun/en_singular", "text": "mountain range", "is_base_form": true}]}
 {"guid": "N11_072", "forms": [{"grammatical_form": "noun/en_singular", "text": "coral reef", "is_base_form": true}]}
 {"guid": "N11_073", "forms": [{"grammatical_form": "noun/en_singular", "text": "sand dune", "is_base_form": true}]}
 {"guid": "N11_074", "forms": [{"grammatical_form": "noun/en_singular", "text": "hot spring", "is_base_form": true}]}
 {"guid": "N11_075", "forms": [{"grammatical_form": "noun/en_singular", "text": "shooting star", "is_base_form": true}]}
-{"guid": "N11_076", "forms": [{"grammatical_form": "noun/en_singular", "text": "solar system", "is_base_form": true}]}
 {"guid": "N11_077", "forms": [{"grammatical_form": "noun/en_singular", "text": "atmosphere", "is_base_form": true, "ipa": "/ˈætməsfɪr/", "phonetic": "AT-muh-sfeer"}]}
 {"guid": "N11_078", "forms": [{"grammatical_form": "noun/en_singular", "text": "phase", "is_base_form": true, "ipa": "/feɪz/", "phonetic": "FAYZ"}]}
 {"guid": "N11_079", "forms": [{"grammatical_form": "noun/en_singular", "text": "cyclone", "is_base_form": true, "ipa": "/ˈsaɪkloʊn/", "phonetic": "SY-klone"}]}
@@ -72,11 +66,8 @@
 {"guid": "N11_093", "forms": [{"grammatical_form": "noun/en_singular", "text": "confluence", "is_base_form": true, "ipa": "/ˈkɑnfluəns/", "phonetic": "KON-floo-ents"}]}
 {"guid": "N11_094", "forms": [{"grammatical_form": "noun/en_singular", "text": "snowfall", "is_base_form": true, "ipa": "/ˈsnoʊˌfɔl/", "phonetic": "SNOH-fawl"}]}
 {"guid": "N11_095", "forms": [{"grammatical_form": "noun/en_singular", "text": "shoreline", "is_base_form": true, "ipa": "/ˈʃɔrˌlaɪn/", "phonetic": "SHOR-line"}]}
-{"guid": "N11_096", "forms": [{"grammatical_form": "noun/en_singular", "text": "galaxy", "is_base_form": true, "ipa": "/ˈɡæləksi/", "phonetic": "GAL-uk-see"}]}
 {"guid": "N11_097", "forms": [{"grammatical_form": "noun/en_singular", "text": "supernova", "is_base_form": true, "ipa": "/ˌsuːpərˈnoʊvə/", "phonetic": "SOO-per-NOH-vuh"}]}
-{"guid": "N11_098", "forms": [{"grammatical_form": "noun/en_singular", "text": "supernova", "is_base_form": true, "ipa": "/ˌsuːpərˈnoʊvə/", "phonetic": "SOO-per-NOH-vuh"}]}
 {"guid": "N11_099", "forms": [{"grammatical_form": "noun/en_singular", "text": "magma", "is_base_form": true, "ipa": "/ˈmæɡmə/", "phonetic": "MAG-muh"}]}
-{"guid": "N11_100", "forms": [{"grammatical_form": "noun/en_singular", "text": "asteroid", "is_base_form": true, "ipa": "/ˈæs.tə.rɔɪd/", "phonetic": "AS-tuh-royd"}]}
 {"guid": "N11_101", "forms": [{"grammatical_form": "noun/en_singular", "text": "lithosphere", "is_base_form": true, "ipa": "/ˈlɪθəsfɪr/", "phonetic": "LITH-uh-sfeer"}]}
 {"guid": "N11_102", "forms": [{"grammatical_form": "noun/en_singular", "text": "vortex", "is_base_form": true, "ipa": "/ˈvɔr.tɛks/", "phonetic": "VOR-teks"}]}
 {"guid": "N11_103", "forms": [{"grammatical_form": "noun/en_singular", "text": "jungle", "is_base_form": true, "ipa": "/ˈdʒʌŋɡəl/", "phonetic": "JUNG-gul"}]}
