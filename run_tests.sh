@@ -36,6 +36,13 @@
 # at module scope in anything reachable from src/ breaks *collection*, which no
 # marker or exclusion can recover -- smoke collects the whole tree to find its
 # marked tests and would fail too.
+#
+# The same skip-don't-exclude rule covers tiktoken's encoding data, which it
+# downloads on first use: src/tests/conftest.py turns a failed download into a
+# skip of whichever test needed it, so a sandbox with no network (a cloud agent
+# session) skips those tests rather than failing them.  Tests needing jieba's
+# word segmentation skipif on JIEBA_AVAILABLE rather than testing the
+# char-by-char fallback.
 set -euo pipefail
 
 cd "$(dirname "$0")"

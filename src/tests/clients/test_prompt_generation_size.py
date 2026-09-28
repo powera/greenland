@@ -5,7 +5,7 @@ import os
 import statistics
 import sys
 import unittest
-from typing import Any, Dict, Tuple, cast
+from typing import Any, Dict, Tuple
 
 sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), "../..")))
 
@@ -68,7 +68,6 @@ class PromptGenerationSizeTestCase(unittest.TestCase):
         client.debug = False
         client.api_key = "test-key"
         client.headers = {"Authorization": "Bearer test-key", "Content-Type": "application/json"}
-        client.encoder = cast(Any, None)
 
         def _fake_response(**kwargs: Any) -> Tuple[Dict[str, Any], float]:
             captured.update(kwargs)
@@ -124,7 +123,6 @@ class PromptGenerationSizeTestCase(unittest.TestCase):
         client.debug = False
         client.api_key = "test-key"
         client.headers = {"Content-Type": "application/json"}
-        client.encoder = cast(Any, None)
 
         def _fake_response(model: str, **kwargs: Any) -> Tuple[Dict[str, Any], float]:
             captured["model"] = model

@@ -59,7 +59,10 @@ def test_wrap_unannotated_wraps_every_visible_segment(segment: str) -> None:
 # --- Chinese -----------------------------------------------------------------
 
 
-@pytest.mark.skipif(not PYPINYIN_AVAILABLE, reason="pypinyin not installed")
+@pytest.mark.skipif(
+    not PYPINYIN_AVAILABLE or not JIEBA_AVAILABLE,
+    reason="needs pypinyin, and jieba to keep Ben as one segment",
+)
 def test_latin_word_in_chinese_is_wrapped() -> None:
     """The reported bug: "Ben" floated above the line as a bare text node."""
     html = generate_pinyin_ruby_html("他们是Ben通常很害羞。")
@@ -68,7 +71,10 @@ def test_latin_word_in_chinese_is_wrapped() -> None:
     assert_fully_wrapped(html)
 
 
-@pytest.mark.skipif(not PYPINYIN_AVAILABLE, reason="pypinyin not installed")
+@pytest.mark.skipif(
+    not PYPINYIN_AVAILABLE or not JIEBA_AVAILABLE,
+    reason="needs pypinyin, and jieba to segment 他们 as one word",
+)
 def test_chinese_segments_keep_their_pinyin() -> None:
     """Wrapping unannotated runs must not disturb real annotations."""
     annotations = dict(parse_ruby(generate_pinyin_ruby_html("他们是Ben。")))
