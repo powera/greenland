@@ -15,7 +15,7 @@ import re
 import sys
 from datetime import datetime, timezone
 from pathlib import Path
-from typing import Any, Dict, List, Optional, Tuple
+from typing import Any, Dict, List, Mapping, Optional, Sequence, Set, Tuple
 
 # Add the src directory to the path for imports
 GREENLAND_SRC_PATH = str(Path(__file__).parent.parent.parent)
@@ -24,6 +24,9 @@ if GREENLAND_SRC_PATH not in sys.path:
 
 from langtools.dialect_overrides import get_dialect_override
 from langtools.manifest_grammar import get_manifest_conjugation_config
+from storage.backend.config import DataSourceConfig
+from storage.backend.factory import create_session
+from storage.crud.curriculum_level import list_curriculum_levels, to_manifest_entry
 from storage.translation_helpers import LANGUAGE_NAMES
 from exports.wireword.readings import get_manifest_reading_config
 
@@ -118,12 +121,48 @@ def get_sentence_file_stats(filepath: str) -> Dict[str, Any]:
         return {}
 
 
+def load_level_metadata(config: DataSourceConfig) -> List[Dict[str, Any]]:
+    """Every curriculum level's manifest entry, for ``generate_manifest``."""
+    session = create_session(config)
+    try:
+        return [to_manifest_entry(row) for row in list_curriculum_levels(session)]
+    finally:
+        session.close()
+
+
+def build_manifest_levels(
+    level_metadata: Sequence[Mapping[str, Any]], shipped_levels: Set[int]
+) -> List[Dict[str, Any]]:
+    """Select the ``config.levels`` entries for the levels this export ships.
+
+    Metadata for a level with no words in the bundle is dropped (zh ships no
+    topic band, say), and so is any prerequisite naming such a level: the
+    client could never complete it, so keeping it would lock the unit forever.
+    An unshipped prerequisite is treated as met, which matches what a learner
+    of that bundle has actually been offered.
+    """
+    levels: List[Dict[str, Any]] = []
+    for entry in sorted(level_metadata, key=lambda item: int(item["level"])):
+        if int(entry["level"]) not in shipped_levels:
+            continue
+        shipped_entry = dict(entry)
+        if "prerequisites" in shipped_entry:
+            kept = [level for level in shipped_entry["prerequisites"] if level in shipped_levels]
+            if kept:
+                shipped_entry["prerequisites"] = kept
+            else:
+                del shipped_entry["prerequisites"]
+        levels.append(shipped_entry)
+    return levels
+
+
 def generate_manifest(
     wireword_dir: str,
     language: str,
     include_unreviewed_audio: bool = False,
     source_language: str = "en",
     cdn_base: Optional[str] = None,
+    level_metadata: Optional[Sequence[Mapping[str, Any]]] = None,
 ) -> Tuple[bool, str]:
     """
     Generate wireword_manifest_v2.json for the exported files.
@@ -140,6 +179,10 @@ def generate_manifest(
         cdn_base: Optional CDN base URL (e.g. "https://wireword.trakaido.com").
             When set, non-manifest filenames in the manifest use the file's MD5
             hash so they can be served as immutable cache objects.
+        level_metadata: Manifest entries for named levels, as built by
+            ``storage.crud.curriculum_level.to_manifest_entry``.  Those for
+            levels present in the word files are written to ``config.levels``;
+            the key is omitted when none apply.
 
     Returns:
         Tuple of (success flag, manifest path)
@@ -224,6 +267,7 @@ def generate_manifest(
         return (int(m.group(1)), int(m.group(2))) if m else (0, 0)
 
     level_files = sorted(glob.glob(level_file_pattern), key=_level_sort_key)
+    shipped_levels: Set[int] = set()
 
     for filepath in level_files:
         disk_filename = os.path.basename(filepath)
@@ -242,6 +286,7 @@ def generate_manifest(
         manifest_filename = f"{file_md5}.json" if cdn_base else disk_filename
 
         file_stats = get_word_file_stats(filepath)
+        shipped_levels.update(file_stats.get("levels", []))
         file_entry: Dict[str, Any] = {
             "id": file_id,
             "filename": manifest_filename,
@@ -257,6 +302,11 @@ def generate_manifest(
             file_entry["groups"] = file_stats["groups"]
 
         manifest["word_files"].append(file_entry)
+
+    if level_metadata:
+        manifest_levels = build_manifest_levels(level_metadata, shipped_levels)
+        if manifest_levels:
+            manifest["config"]["levels"] = manifest_levels
 
     # Process sentence files
     sentences_path = os.path.join(wireword_dir, "wireword_sentences.json")

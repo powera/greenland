@@ -54,7 +54,7 @@ from exports.wireword.helpers import (
     normalize_pos_type,
     normalize_translation_text,
 )
-from exports.wireword.generate_manifest import generate_manifest
+from exports.wireword.generate_manifest import generate_manifest, load_level_metadata
 from words.cognates import detect_cognate
 from words.emoji import emoji_values
 
@@ -1191,6 +1191,7 @@ class WirewordExporter:
             include_unreviewed_audio=self.include_unreviewed_audio,
             source_language=self.source_language,
             cdn_base=cdn_base,
+            level_metadata=load_level_metadata(self.config),
         )
         if manifest_success:
             results["files_created"].append(manifest_path)
