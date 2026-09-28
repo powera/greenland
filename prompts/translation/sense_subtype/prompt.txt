@@ -1,0 +1,3 @@
+Classify the {pos_type} '{word}' as a term of {domain}.
+
+Definition: {definition}

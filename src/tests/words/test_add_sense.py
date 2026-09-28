@@ -25,7 +25,7 @@ from storage.models import Base, DerivativeForm, Lemma
 from storage.models.schema import SENSE_PROMINENCE_RARE
 from storage.models.variant_form import VARIANT_KIND_ABBREVIATION, VariantForm
 from storage.translation_helpers import get_translation
-from words.add_sense import add_sense, build_sense_prompt
+from words.add_sense import add_sense, build_sense_prompt, build_subtype_prompt
 
 
 @pytest.fixture()
@@ -163,7 +163,8 @@ class TestCreation:
         client = _FakeClient(_chess_check())
         _add(session, config, client)
 
-        assert len(client.calls) == 1
+        # The sense call, then the subtype call.
+        assert len(client.calls) == 2
         prompt = client.calls[0]["prompt"]
         assert "'check' in chess" in prompt
         assert "an attack on the king" in prompt
@@ -303,11 +304,31 @@ class TestValidation:
         client = _FakeClient(_chess_check())
         _add(session, config, client)
 
-        schema = client.calls[0]["json_schema"]
+        assert "pos_subtype" not in client.calls[0]["json_schema"].properties
+        schema = client.calls[1]["json_schema"]
         assert "other" not in schema.properties["pos_subtype"].enum
-        # Closed classes answer with their bare POS name, which is still offered.
-        assert "preposition" in schema.properties["pos_subtype"].enum
-        assert ", other" not in client.calls[0]["context"]
+        assert "- other:" not in client.calls[1]["context"]
+
+    def test_closed_class_makes_no_subtype_call(
+        self, session: Session, config: DataSourceConfig
+    ) -> None:
+        sense = {**_chess_check(), "pos": "preposition"}
+        sense.pop("pos_subtype")
+        client = _FakeClient(sense)
+        result = _add(session, config, client)
+
+        assert len(client.calls) == 1
+        assert result.status == "created"
+        assert result.pos_subtype == "preposition_other"
+
+    def test_covered_sense_makes_no_subtype_call(
+        self, session: Session, config: DataSourceConfig
+    ) -> None:
+        client = _FakeClient(_chess_check(covered_by=1))
+        result = _add(session, config, client, word="queen", hint=None)
+
+        assert result.status == "covered"
+        assert len(client.calls) == 1
 
     def test_empty_domain_is_rejected_before_the_call(
         self, session: Session, config: DataSourceConfig
@@ -377,13 +398,20 @@ class TestFixedSubtype:
 
 
 class TestSubtypeGuidance:
-    def test_context_describes_noun_subtypes_and_withholds_the_catch_all(self) -> None:
-        context, _prompt, _schema = build_sense_prompt("volley", "tennis", None, [])
+    def test_sense_context_lists_no_subtypes(self) -> None:
+        context, _prompt, schema = build_sense_prompt("volley", "tennis", None, [])
+
+        assert "SUBTYPES" not in context
+        assert "pos_subtype" not in schema.properties
+
+    def test_subtype_call_describes_only_its_part_of_speech(self) -> None:
+        context, prompt, schema = build_subtype_prompt(
+            "volley", "tennis", "In tennis, a shot hit before the ball bounces.", "noun"
+        )
 
         assert "- participant_role: A slot a person fills" in context
-        assert "- occupation: Jobs and professions" in context
         assert "- performance_technique: A named way" in context
         assert "- other:" not in context
-        # Only the nouns are described; the other lists are one line of names.
-        (verb_line,) = [line for line in context.splitlines() if line.startswith("VERB SUBTYPES:")]
-        assert "," in verb_line
+        assert "- physical_action:" not in context  # a verb subtype
+        assert "'volley' as a term of tennis" in prompt
+        assert "other" not in (schema.properties["pos_subtype"].enum or [])
