@@ -61,6 +61,8 @@ class TaskType:
     AUDIO_GENERATE_LEMMA = "audio.generate.lemma"
     AUDIO_GENERATE_SENTENCE = "audio.generate.sentence"
     WIREWORD_EXPORT_DIRECTORY = "wireword.export.directory"
+    LEVELS_NAME_GENERATE = "levels.name.generate"
+    LEVELS_NAME_TRANSLATE = "levels.name.translate"
 
     # Legacy aliases retained for compatibility during migration
     ADD_MISSING_TRANSLATIONS = WORDS_TRANSLATIONS

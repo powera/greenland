@@ -4,8 +4,9 @@ Level metadata is curated by hand -- a name, a CEFR estimate, prerequisites --
 and so has to survive a database rebuild the same way the lemmas do.  One line
 per level, in level order:
 
-    {"level": 120, "names": {"en": "Food & Cooking II"}, "cefr": "B1",
-     "prerequisites": [100], "extra": {"icon": "🍳"}, "notes": "..."}
+    {"level": 120, "name": "Food & Cooking II",
+     "translations": {"es": "Comida y cocina II", "lt": "Maistas ir gaminimas II"},
+     "cefr": "B1", "prerequisites": [100], "extra": {"icon": "🍳"}, "notes": "..."}
 
 Optional fields are omitted rather than written as ``null`` so a hand-edited
 file stays readable and re-exporting an unchanged database is byte-stable.
@@ -28,7 +29,10 @@ RELEASE_FILENAME = "curriculum_levels.jsonl"
 
 def to_release_record(row: CurriculumLevel) -> Dict[str, Any]:
     """Build the release JSONL record for one level."""
-    record: Dict[str, Any] = {"level": row.level, "names": row.get_names()}
+    record: Dict[str, Any] = {"level": row.level, "name": row.name}
+    translations = row.get_translations()
+    if translations:
+        record["translations"] = translations
     if row.cefr:
         record["cefr"] = row.cefr
     prerequisites = row.get_prerequisites()
@@ -70,11 +74,12 @@ def import_release_record(session: Session, record: Dict[str, Any]) -> Curriculu
     return set_curriculum_level(
         session,
         level=int(record["level"]),
-        names=record.get("names") or {},
+        name=str(record.get("name") or ""),
         cefr=record.get("cefr"),
         prerequisites=record.get("prerequisites") or (),
         extra=record.get("extra"),
         notes=record.get("notes"),
+        translations=record.get("translations") or {},
     )
 
 

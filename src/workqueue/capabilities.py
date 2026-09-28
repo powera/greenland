@@ -346,11 +346,36 @@ WORD_CAPABILITIES: Tuple[CapabilityDescriptor, ...] = (
 )
 
 
+LEVEL_CAPABILITIES: Tuple[CapabilityDescriptor, ...] = (
+    CapabilityDescriptor(
+        task_type="levels.name.generate",
+        summary="Name one curriculum level (and estimate its CEFR) from its words.",
+        target_kind="curriculum_level",
+        required_payload=("level",),
+        optional_payload=("overwrite", "translate", "model"),
+        writes=True,
+        produces=("an English level name", "level name translations"),
+        preconditions=("the level has words",),
+    ),
+    CapabilityDescriptor(
+        task_type="levels.name.translate",
+        summary="Translate one curriculum level's name into interface languages.",
+        target_kind="curriculum_level",
+        required_payload=("level",),
+        optional_payload=("languages", "overwrite", "model"),
+        writes=True,
+        produces=("level name translations",),
+        preconditions=("an English level name",),
+    ),
+)
+
+
 CAPABILITY_DESCRIPTORS: Dict[str, CapabilityDescriptor] = {
     descriptor.task_type: descriptor
     for descriptor in (
         *CONVERSATION_CAPABILITIES,
         *IDIOM_CAPABILITIES,
+        *LEVEL_CAPABILITIES,
         *SENTENCE_CAPABILITIES,
         *WORD_CAPABILITIES,
     )

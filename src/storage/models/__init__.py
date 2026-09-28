@@ -25,6 +25,7 @@ from storage.models.enums import (
 from storage.models.curriculum_level import (
     CEFR_LEVELS,
     CurriculumLevel,
+    CurriculumLevelTranslation,
 )
 from storage.models.emoji import (
     EMOJI_STATUS_ASSIGNED,
@@ -108,6 +109,7 @@ from storage.models.imports import (
 __all__ = [
     "CEFR_LEVELS",
     "CurriculumLevel",
+    "CurriculumLevelTranslation",
     "EMOJI_STATUSES",
     "EMOJI_STATUS_ASSIGNED",
     "EMOJI_STATUS_MISSING_LEMMA",

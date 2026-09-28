@@ -73,6 +73,7 @@ from barsukas.routes import (
     guids,
     idioms,
     lemmas,
+    levels,
     llm_api,
     names,
     operation_logs,
@@ -370,6 +371,7 @@ def create_app(
     app.register_blueprint(conversations.bp)
     app.register_blueprint(names.bp)
     app.register_blueprint(categories.bp)
+    app.register_blueprint(levels.bp)
     app.register_blueprint(completeness.bp)
     app.register_blueprint(quality.bp)
     app.register_blueprint(concepts.bp)

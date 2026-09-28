@@ -1,0 +1,145 @@
+{% extends "base.html" %}
+
+{% block title %}Level {{ level }}{% endblock %}
+
+{% block extra_head %}
+<link rel="stylesheet" href="{{ url_for('static', filename='css/levels.css') }}">
+{% endblock %}
+
+{% block content %}
+{% set readonly = config.get('READONLY', False) %}
+<nav aria-label="breadcrumb">
+    <ol class="breadcrumb">
+        <li class="breadcrumb-item"><a href="{{ url_for('index') }}">Home</a></li>
+        <li class="breadcrumb-item"><a href="{{ url_for('levels.list_levels') }}">Levels</a></li>
+        <li class="breadcrumb-item active">{{ level }}</li>
+    </ol>
+</nav>
+
+<h2 class="mb-3">
+    Level {{ level }}
+    <span class="badge bg-light text-dark">{{ band }}</span>
+    {% if meta %}&mdash; {{ meta.name }}{% else %}<span class="text-muted fst-italic">unnamed</span>{% endif %}
+</h2>
+
+<div class="row">
+    <div class="col-lg-7 mb-4">
+        <form method="POST" action="{{ url_for('levels.save_level', level=level) }}" class="card">
+            <div class="card-header"><i class="bi bi-pencil"></i> Metadata</div>
+            <div class="card-body">
+                <div class="mb-3">
+                    <label for="name" class="form-label">English name</label>
+                    <input type="text" class="form-control" id="name" name="name" required
+                           value="{{ meta.name if meta else '' }}" placeholder="e.g. Food &amp; Cooking II">
+                </div>
+                <div class="row">
+                    <div class="col-sm-4 mb-3">
+                        <label for="cefr" class="form-label">CEFR</label>
+                        <select class="form-select" id="cefr" name="cefr">
+                            <option value="">&mdash;</option>
+                            {% for value in cefr_levels %}
+                                <option value="{{ value }}" {% if meta and meta.cefr == value %}selected{% endif %}>{{ value }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    <div class="col-sm-8 mb-3">
+                        <label for="prerequisites" class="form-label">Prerequisites</label>
+                        <input type="text" class="form-control" id="prerequisites" name="prerequisites"
+                               value="{{ prerequisites_text }}" placeholder="e.g. 100, 105">
+                        <div class="form-text">Level numbers to complete first, comma-separated.</div>
+                    </div>
+                </div>
+                <div class="mb-3">
+                    <label for="extra" class="form-label">Extra (JSON object)</label>
+                    <textarea class="form-control font-monospace" id="extra" name="extra" rows="3"
+                              placeholder='{"icon": "🍳"}'>{{ extra_json if extra_json != '{}' else '' }}</textarea>
+                    <div class="form-text">Keys are copied into the manifest entry as-is.</div>
+                </div>
+                <div class="mb-3">
+                    <label for="notes" class="form-label">Notes (not exported to Trakaido)</label>
+                    <textarea class="form-control" id="notes" name="notes" rows="2">{{ meta.notes if meta and meta.notes else '' }}</textarea>
+                </div>
+
+                <h6 class="mt-4">Translations of the name</h6>
+                <p class="form-text mt-0">By interface language. Clear a field to remove it.</p>
+                {% for code in languages %}
+                <div class="row mb-2 align-items-center">
+                    <label for="translation_{{ code }}" class="col-sm-3 col-form-label col-form-label-sm levels-translation-label">
+                        {{ language_names.get(code, code) }} <span class="text-muted">({{ code }})</span>
+                    </label>
+                    <div class="col-sm-9">
+                        <input type="text" class="form-control form-control-sm" id="translation_{{ code }}"
+                               name="translation_{{ code }}" value="{{ translations.get(code, '') }}">
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+            <div class="card-footer">
+                <button type="submit" class="btn btn-primary" {% if readonly %}disabled{% endif %}>
+                    <i class="bi bi-save"></i> Save
+                </button>
+            </div>
+        </form>
+    </div>
+
+    <div class="col-lg-5 mb-4">
+        <div class="card mb-3">
+            <div class="card-header"><i class="bi bi-magic"></i> LLM</div>
+            <div class="card-body">
+                <form method="POST" action="{{ url_for('levels.generate_name', level=level) }}" class="mb-3">
+                    <div class="form-check">
+                        <input class="form-check-input" type="checkbox" id="gen_translate" name="translate" checked>
+                        <label class="form-check-label" for="gen_translate">Also translate the name</label>
+                    </div>
+                    {% if meta %}
+                    <div class="form-check">
+                        <input class="form-check-input" type="checkbox" id="gen_overwrite" name="overwrite">
+                        <label class="form-check-label" for="gen_overwrite">Replace the current name (and its translations)</label>
+                    </div>
+                    {% endif %}
+                    <button type="submit" class="btn btn-outline-primary mt-2"
+                            {% if readonly or not words %}disabled{% endif %}>
+                        {{ 'Suggest a new name' if meta else 'Name this level' }} from its words
+                    </button>
+                    <div class="form-text">Also estimates CEFR when none is set. Queued; reload once the task has run.</div>
+                </form>
+                <form method="POST" action="{{ url_for('levels.translate_name', level=level) }}">
+                    <div class="form-check">
+                        <input class="form-check-input" type="checkbox" id="tr_overwrite" name="overwrite">
+                        <label class="form-check-label" for="tr_overwrite">Re-translate languages that already have a name</label>
+                    </div>
+                    <button type="submit" class="btn btn-outline-primary mt-2"
+                            {% if readonly or not meta %}disabled{% endif %}>
+                        <i class="bi bi-translate"></i> Translate the name
+                    </button>
+                </form>
+            </div>
+        </div>
+
+        {% if meta %}
+        <form method="POST" action="{{ url_for('levels.delete_level', level=level) }}"
+              onsubmit="return confirm('Delete the name, translations and metadata for this level? Its words are not affected.');">
+            <button type="submit" class="btn btn-sm btn-outline-danger" {% if readonly %}disabled{% endif %}>
+                <i class="bi bi-trash"></i> Delete metadata
+            </button>
+        </form>
+        {% endif %}
+    </div>
+</div>
+
+<div class="card mb-4">
+    <div class="card-header"><i class="bi bi-list-ul"></i> {{ words | length }} word(s) at this level, most frequent first</div>
+    <div class="card-body">
+        <ul class="list-unstyled levels-word-list mb-0">
+            {% for lemma in words %}
+            <li>
+                <a href="{{ url_for('lemmas.view_lemma', lemma_id=lemma.id) }}">{{ lemma.lemma_text }}</a>
+                <span class="text-muted small">{{ lemma.pos_type }}{% if lemma.pos_subtype %}/{{ lemma.pos_subtype }}{% endif %}</span>
+            </li>
+            {% else %}
+            <li class="text-muted">No words at this level.</li>
+            {% endfor %}
+        </ul>
+    </div>
+</div>
+{% endblock %}
