@@ -57,6 +57,7 @@ from wordfreq.translation.constants import VALID_POS_TYPES
 from wordfreq.translation.word_processing import determine_default_grammatical_form
 from words.add_word import (
     TRANSLATION_LANGUAGES,
+    _needs_subtype_review,
     _normalize_subtype,
     _store_sense_examples,
     _store_sense_translations,
@@ -73,6 +74,20 @@ DIFFICULTY_LEVEL = -1
 # What the model returns when none of the listed senses is this one. Senses are
 # numbered from 1 in the prompt so that 0 can mean "none" without a nullable.
 NOT_COVERED = 0
+
+# The open-class catch-all as the subtype lists spell it; _normalize_subtype
+# turns it into "<pos>_other".  Withheld from this prompt entirely.  add_word
+# queues a catch-all sense for review, but a domain term always has a real
+# subtype -- the sports import filed layups and bicycle kicks as noun_other
+# when nothing better was on offer -- so here it is not offered at all, and a
+# sense that comes back with one anyway is refused rather than written.  The
+# closed classes are unaffected: they answer with the bare POS name.
+_CATCH_ALL_SUBTYPE = "other"
+
+
+def _offered_subtypes(values: Sequence[str]) -> List[str]:
+    """``values`` without the open-class catch-all."""
+    return [value for value in values if value != _CATCH_ALL_SUBTYPE]
 
 
 @dataclass
@@ -126,7 +141,7 @@ def _sense_schema() -> Schema:
         "pos_subtype": SchemaProperty(
             "string",
             "A subtype for the part of speech",
-            enum=get_all_pos_subtypes(),
+            enum=_offered_subtypes(get_all_pos_subtypes()),
         ),
         "phonetic_spelling": SchemaProperty("string", "Phonetic spelling of the word"),
         "ipa_spelling": SchemaProperty("string", "International Phonetic Alphabet for the word"),
@@ -166,10 +181,10 @@ def build_sense_prompt(
 ) -> tuple[str, str, Schema]:
     """Build the context, prompt and schema for one :func:`add_sense` call."""
     context = util.prompt_loader.get_context("translation", "sense").format(
-        noun_subtypes=", ".join(get_subtype_values_for_pos("noun")),
-        verb_subtypes=", ".join(get_subtype_values_for_pos("verb")),
-        adjective_subtypes=", ".join(get_subtype_values_for_pos("adjective")),
-        adverb_subtypes=", ".join(get_subtype_values_for_pos("adverb")),
+        noun_subtypes=", ".join(_offered_subtypes(get_subtype_values_for_pos("noun"))),
+        verb_subtypes=", ".join(_offered_subtypes(get_subtype_values_for_pos("verb"))),
+        adjective_subtypes=", ".join(_offered_subtypes(get_subtype_values_for_pos("adjective"))),
+        adverb_subtypes=", ".join(_offered_subtypes(get_subtype_values_for_pos("adverb"))),
     )
     prompt = util.prompt_loader.get_prompt("translation", "sense").format(
         word=word,
@@ -382,6 +397,14 @@ def add_sense(
         if pos_error is not None:
             return AddSenseResult(word=normalized, status="error", error=f"LLM gave {pos_error}")
         assert pos_subtype is not None  # _validate_pos rejects None
+        if _needs_subtype_review(pos_type, pos_subtype):
+            # Not offered, but a schema-valid POS/subtype mismatch is normalized
+            # to the catch-all too.  Nothing is written, so a re-run retries it.
+            return AddSenseResult(
+                word=normalized,
+                status="error",
+                error=f"LLM gave the catch-all subtype {pos_subtype!r}; nothing written",
+            )
 
         definition_text = str(sense.get("definition") or "").strip()
         if not definition_text:
