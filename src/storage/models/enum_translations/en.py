@@ -3,6 +3,7 @@
 SUBTYPE_DISPLAY = {
     # People and Living Things
     "occupation": "Occupation",
+    "participant_role": "Participant Role",
     "family_relation": "Family Relation",
     "human": "Humans",
     "honorific": "Honorific",
@@ -40,6 +41,8 @@ SUBTYPE_DISPLAY = {
     "abstract_condition": "Abstract Condition",
     "social_institution": "Social Institution",
     "activity": "Activity",
+    "performance_technique": "Technique",
+    "strategic_tactic": "Tactic",
     "symbolic_element": "Symbolic Element",
     "quality_attribute": "Quality/Attribute",
     "mental_construct": "Mental Construct",
@@ -50,6 +53,7 @@ SUBTYPE_DISPLAY = {
     "shape": "Shape",
     # Processes and Time
     "process_event": "Process/Event",
+    "rule_defined_event": "Rule-Defined Event",
     "time_period": "Time Period",
     # Groups and Collections
     "group_people": "Group of People",

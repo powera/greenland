@@ -79,6 +79,20 @@ SUBTYPE_DEFS: Dict[str, Dict[str, SubtypeDef]] = {
             examples=["teacher", "doctor", "accountant"],
             group="People and Living Things",
         ),
+        "participant_role": SubtypeDef(
+            prefix="N63",
+            comment=(
+                "A slot a person fills in the structure of a game, team, performance "
+                "or event: second baseman, goalkeeper, declarer, understudy, best man. "
+                "The test against occupation is whether the word names a slot inside "
+                "the activity or a job someone holds: second baseman is a slot, a "
+                "referee or a card dealer is a job. Named for the sports and games "
+                "wordlists, but meant for theater roles and ceremonies as well. Left "
+                "without a description or examples on purpose: the name is what the "
+                "classifier sees."
+            ),
+            group="People and Living Things",
+        ),
         "honorific": SubtypeDef(
             prefix="N48",
             description="Titles and forms of address",
@@ -264,6 +278,30 @@ SUBTYPE_DEFS: Dict[str, Dict[str, SubtypeDef]] = {
             examples=["reading", "cooking", "sports", "dancing", "hiking"],
             group="Abstract Concepts and Ideas",
         ),
+        "performance_technique": SubtypeDef(
+            prefix="N61",
+            comment=(
+                "A named way of carrying out an action, defined by its form: layup, "
+                "bicycle kick, uppercut, axel, backstitch, plie, julienne. The test "
+                "against strategic_tactic is form against aim -- a layup is how the "
+                "shot is made, a pick and roll is what the play is for. activity is a "
+                "pursuit (reading, hiking), not one named way of doing something. Left "
+                "without a description or examples on purpose: the name is what the "
+                "classifier sees."
+            ),
+            group="Abstract Concepts and Ideas",
+        ),
+        "strategic_tactic": SubtypeDef(
+            prefix="N62",
+            comment=(
+                "A named move, play or plan defined by what it is meant to achieve, "
+                "and not named in any rules: fork, gambit, pick and roll, bluff, "
+                "anchoring, pincer movement. A move the rules define (castling) is "
+                "rule_defined_event instead. Left without a description or examples on "
+                "purpose: the name is what the classifier sees."
+            ),
+            group="Abstract Concepts and Ideas",
+        ),
         "symbolic_element": SubtypeDef(
             prefix="N18",
             description="Symbols, marks and notational elements",
@@ -316,6 +354,20 @@ SUBTYPE_DEFS: Dict[str, Dict[str, SubtypeDef]] = {
             prefix="N24",
             description="Things that happen or unfold over time",
             examples=["war", "flight", "development", "process", "attempt"],
+            group="Processes and Time",
+        ),
+        "rule_defined_event": SubtypeDef(
+            prefix="N60",
+            comment=(
+                "A move, outcome, state or violation that the formal rules of a game "
+                "or procedure define and name: checkmate, castling, strikeout, "
+                "offside, deuce, quorum, point of order. The test is whether the rules "
+                "themselves use the term; a named plan the rules do not mention is "
+                "strategic_tactic. Carved out of process_event, which had taken "
+                "checkmate and double play for want of anything closer. Left without "
+                "a description or examples on purpose: the name is what the "
+                "classifier sees."
+            ),
             group="Processes and Time",
         ),
         "time_period": SubtypeDef(
