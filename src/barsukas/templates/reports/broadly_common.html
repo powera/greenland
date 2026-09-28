@@ -1,0 +1,110 @@
+{% extends "base.html" %}
+
+{% block title %}Broadly Common Words{% endblock %}
+
+{% block extra_head %}
+<link rel="stylesheet" href="{{ url_for('static', filename='css/reports.css') }}">
+{% endblock %}
+
+{% macro word_table(words) %}
+<div class="table-responsive">
+    <table class="table table-sm table-hover mb-0 align-middle">
+        <thead>
+            <tr>
+                <th class="text-end">#</th>
+                <th>Token</th>
+                <th class="text-end" title="Combined rank across all enabled corpora">Combined rank</th>
+                <th class="text-end" title="Corpora ranking this token in the top {{ report.top_n }}">Top-{{ report.top_n }} in</th>
+                <th class="text-end" title="Best rank in any single corpus">Best rank</th>
+                <th>Top-{{ report.top_n }} corpora (rank)</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for word in words %}
+            <tr>
+                <td class="text-end text-muted">{{ loop.index }}</td>
+                <td>
+                    <a href="{{ url_for('word_tokens.detail', word_token_id=word.word_token_id) }}">{{ word.token }}</a>
+                </td>
+                <td class="text-end">{{ word.combined_rank if word.combined_rank is not none else '—' }}</td>
+                <td class="text-end">{{ word.top_corpora|length }}</td>
+                <td class="text-end">{{ word.best_rank if word.best_rank is not none else '—' }}</td>
+                <td class="small text-muted">
+                    {% for name in word.top_corpora %}{{ name }} {{ word.corpus_ranks[name] }}{% if not loop.last %}, {% endif %}{% endfor %}
+                </td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+{% endmacro %}
+
+{% block content %}
+{% include '_wordfreq_loading.html' %}
+<div class="py-4">
+    <a href="{{ url_for('reports.index') }}" class="text-muted small">
+        <i class="bi bi-arrow-left"></i> Reports
+    </a>
+    <h1 class="h4 mb-1 mt-2"><i class="bi bi-stars"></i> Broadly Common Words</h1>
+    <p class="text-muted small">
+        Tokens in the top {{ report.top_n }} of at least {{ report.min_corpora }} of the
+        {{ report.corpus_names|length }} enabled corpora, ordered by combined rank. Below them,
+        the best combined ranks that did not make the first list: words common across the
+        corpora without leading enough of them to qualify.
+    </p>
+
+    <form method="get" class="row g-2 align-items-end mb-3">
+        <div class="col-auto">
+            <label for="top_n" class="form-label mb-1">Top N per corpus</label>
+            <input type="number" class="form-control form-control-sm" id="top_n" name="top_n"
+                   value="{{ report.top_n }}" min="1">
+        </div>
+        <div class="col-auto">
+            <label for="min_corpora" class="form-label mb-1">In at least N corpora</label>
+            <input type="number" class="form-control form-control-sm" id="min_corpora" name="min_corpora"
+                   value="{{ report.min_corpora }}" min="1" max="{{ report.corpus_names|length }}">
+        </div>
+        <div class="col-auto">
+            <label for="runner_ups" class="form-label mb-1">Runners-up</label>
+            <input type="number" class="form-control form-control-sm" id="runner_ups" name="runner_ups"
+                   value="{{ report.runners_up|length }}" min="0">
+        </div>
+        <div class="col-auto">
+            <label for="language" class="form-label mb-1">Language</label>
+            <input type="text" class="form-control form-control-sm" id="language" name="language"
+                   value="{{ report.language_code }}">
+        </div>
+        <div class="col-auto">
+            <button type="submit" class="btn btn-sm btn-primary">Apply</button>
+        </div>
+    </form>
+
+    <div class="card mb-4">
+        <div class="card-header">
+            Top {{ report.top_n }} in {{ report.min_corpora }}+ corpora
+            <span class="text-muted small">&mdash; {{ report.core|length }} words</span>
+        </div>
+        <div class="card-body p-0">
+            {% if report.core %}
+            {{ word_table(report.core) }}
+            {% else %}
+            <div class="p-3 text-muted small">No token meets this cutoff.</div>
+            {% endif %}
+        </div>
+    </div>
+
+    <div class="card mb-4">
+        <div class="card-header">
+            Next by combined rank
+            <span class="text-muted small">&mdash; {{ report.runners_up|length }} words not in the list above</span>
+        </div>
+        <div class="card-body p-0">
+            {% if report.runners_up %}
+            {{ word_table(report.runners_up) }}
+            {% else %}
+            <div class="p-3 text-muted small">No runners-up requested.</div>
+            {% endif %}
+        </div>
+    </div>
+</div>
+{% endblock %}
