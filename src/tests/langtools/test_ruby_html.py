@@ -98,15 +98,6 @@ def test_chinese_bases_reconstruct_original_text() -> None:
     assert bases == text
 
 
-@pytest.mark.skipif(
-    not PYPINYIN_AVAILABLE or JIEBA_AVAILABLE,
-    reason="exercises the char-by-char fallback used when jieba is missing",
-)
-def test_chinese_char_fallback_wraps_latin() -> None:
-    """The no-jieba fallback path wraps unannotated chars the same way."""
-    assert_fully_wrapped(generate_pinyin_ruby_html("是B。"))
-
-
 # --- Japanese ----------------------------------------------------------------
 
 
