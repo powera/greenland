@@ -79,6 +79,14 @@ CURRICULUM_THEMES: tuple[CurriculumTheme, ...] = (
         (1140, 1150, 1160, 1170),
         description="drugs by generic and brand name, and vaccines",
     ),
+    # One unit per sport or game, interleaved; see scripts/sports_games/levels.py.
+    # The vocabulary shared across sports and across games sits in the general
+    # band (405, 406), where most of it belongs.
+    CurriculumTheme(
+        "sports_games",
+        tuple(range(1200, 1227)),
+        description="the terms of individual sports and games",
+    ),
 )
 
 THEMES_BY_NAME: Mapping[str, CurriculumTheme] = {theme.name: theme for theme in CURRICULUM_THEMES}
