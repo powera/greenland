@@ -93,6 +93,25 @@ Base prefix: `/api`.
     non-deterministic, so it cannot predict what a committing run writes. A
     request still sending `dry_run` is rejected with a 400 rather than written.
 
+- `POST /api/v1/senses/add`
+  - Add the sense an English word has in one field — "check" in chess — beside
+    the headword's existing senses. `/v1/words/add` and `/v1/terms/add` both
+    stop at a headword that already exists; this does not. **Makes an LLM call
+    and costs money**, unless an existing sense already carries the requested
+    `disambiguation` or every one of `tags`.
+  - Body: `{"word": "...", "domain": "chess", "disambiguation": "chess"|null, "model": "<model-name>"}`,
+    optionally `hint` (a short gloss), `difficulty_level`, `tags`,
+    `abbreviation` (recorded as a variant form, e.g. `LBW`) and
+    `relevel_existing`.
+  - One LLM call describes the domain sense and says whether one of the
+    headword's existing senses already is it. A matched sense is tagged
+    (`status: "covered"`); with `relevel_existing` it is also moved to
+    `difficulty_level` and given the disambiguation if it had none
+    (`status: "moved"`). Otherwise one lemma is written, with
+    `sense_prominence` `rare`.
+  - Response `data`: `{word, status, guid, disambiguation, definition_text, pos_type, pos_subtype, translations, missing_languages}`.
+    `status` is one of `created`, `covered`, `moved`, `already_exists`.
+
 - `POST /api/v1/lemma/<main_guid>/merge-synonym/<synonym_guid>`
   - Merge the synonym lemma into the main lemma. Requires the same `pos_type` and at least 3 matching non-empty translations after normalization.
   - Adds the synonym lemma text/translations as per-language `synonym` derivative forms on the main lemma, tombstones `synonym_guid`, repoints sentence/audio references, and deletes the synonym lemma row.

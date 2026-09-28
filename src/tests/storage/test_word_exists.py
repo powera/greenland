@@ -23,7 +23,11 @@ from sqlalchemy.orm import Session, sessionmaker
 from storage.models import Base, DerivativeForm, Lemma
 from storage.models.imports import WordExclusion
 from storage.models.variant_form import VARIANT_KIND_SPELLING, VariantForm
-from storage.queries.lemma import filter_existing_english_words, word_exists_in_english
+from storage.queries.lemma import (
+    filter_existing_english_words,
+    get_english_senses,
+    word_exists_in_english,
+)
 
 
 @pytest.fixture()
@@ -198,3 +202,38 @@ def test_batch_exceeds_sqlite_variable_limit(session: Session) -> None:
     candidates = [f"filler{n}" for n in range(1500)] + ["gray", "grey"]
     found = filter_existing_english_words(session, candidates)
     assert found == {"gray", "grey"}
+
+
+def test_senses_include_disambiguated_and_variant_lemmas(session: Session) -> None:
+    """A headword's senses are its lemmas, disambiguated ones, and variant owners."""
+    assert [lemma.lemma_text for lemma in get_english_senses(session, "Light")] == ["light (color)"]
+    # "grey" is a variant spelling of "gray", so the gray lemma is its sense.
+    assert [lemma.lemma_text for lemma in get_english_senses(session, "grey")] == ["gray"]
+
+
+def test_senses_do_not_follow_inflections(session: Session) -> None:
+    """An inflection is not a sense: "grayer" lists nothing, "lighthouse" neither."""
+    assert get_english_senses(session, "grayer") == []
+    assert get_english_senses(session, "lighthouse") == []
+    assert get_english_senses(session, "  ") == []
+
+
+def test_senses_list_every_lemma_of_a_polyseme(session: Session) -> None:
+    """Each sense of a headword comes back, in creation order."""
+    session.add(
+        Lemma(
+            lemma_text="gray",
+            disambiguation="horse",
+            definition_text="A horse with a gray coat.",
+            pos_type="noun",
+            pos_subtype="animal",
+            guid="N01_900",
+        )
+    )
+    session.commit()
+
+    senses = get_english_senses(session, "gray")
+    assert [(lemma.lemma_text, lemma.disambiguation) for lemma in senses] == [
+        ("gray", None),
+        ("gray", "horse"),
+    ]

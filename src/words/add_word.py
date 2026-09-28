@@ -896,6 +896,44 @@ def _store_sense_translations(
     return stored
 
 
+def attach_english_base_form(
+    session: Session, lemma: Lemma, sense: Dict[str, Any], *, source: str
+) -> None:
+    """Record ``lemma``'s own text as its English base form.
+
+    A lemma's English text is stored on Lemma rather than in LemmaTranslation,
+    but the token-frequency system reaches lemmas only through
+    DerivativeForm/VariantForm attachments. Recording the base form immediately
+    lets the newly claimed token leave the unlinked-token queue, and its
+    frequency roll up to every sense sharing it. ``sense`` is the LLM's answer
+    for this lemma, which carries the pronunciations.
+    """
+    word_token = (
+        session.query(WordToken)
+        .filter(
+            WordToken.token == lemma.lemma_text,
+            WordToken.language_code == "en",
+        )
+        .first()
+    )
+    if word_token is None:
+        word_token = WordToken(token=lemma.lemma_text, language_code="en")
+        session.add(word_token)
+        session.flush()
+    add_derivative_form(
+        session,
+        lemma,
+        lemma.lemma_text,
+        "en",
+        determine_default_grammatical_form(lemma.lemma_text, lemma.pos_type, lemma.lemma_text),
+        word_token=word_token,
+        is_base_form=True,
+        ipa_pronunciation=(sense.get("ipa_spelling") or None),
+        phonetic_pronunciation=(sense.get("phonetic_spelling") or None),
+        source=source,
+    )
+
+
 def _missing_sense_translations(sense: Dict[str, Any]) -> List[str]:
     """Return required target languages with no non-empty translation."""
     by_lang_code = convert_llm_response_to_lang_codes(sense)
@@ -1164,36 +1202,7 @@ def add_word(
             # sense; keep them rather than paying for them and dropping them.
             _store_sense_examples(session, new_lemma, sense, source=source)
 
-            # A lemma's English text is stored on Lemma rather than in
-            # LemmaTranslation, but the token-frequency system reaches lemmas
-            # only through DerivativeForm/VariantForm attachments. Record the
-            # English base form immediately so this newly claimed token leaves
-            # the unlinked-token queue and its frequency can roll up to every
-            # created sense.
-            word_token = (
-                session.query(WordToken)
-                .filter(
-                    WordToken.token == normalized,
-                    WordToken.language_code == "en",
-                )
-                .first()
-            )
-            if word_token is None:
-                word_token = WordToken(token=normalized, language_code="en")
-                session.add(word_token)
-                session.flush()
-            add_derivative_form(
-                session,
-                new_lemma,
-                normalized,
-                "en",
-                determine_default_grammatical_form(normalized, pos_type, normalized),
-                word_token=word_token,
-                is_base_form=True,
-                ipa_pronunciation=(sense.get("ipa_spelling") or None),
-                phonetic_pronunciation=(sense.get("phonetic_spelling") or None),
-                source=source,
-            )
+            attach_english_base_form(session, new_lemma, sense, source=source)
 
             # Record the corpus rank on the lemma itself, not only in the
             # operation log. This runs after the derivative form is attached

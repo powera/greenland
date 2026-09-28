@@ -356,6 +356,50 @@ def word_exists_in_english(
     return False
 
 
+def get_english_senses(session: Session, word: str) -> List[Lemma]:
+    """Every lemma that is a sense of the English headword ``word``, oldest first.
+
+    Where :func:`word_exists_in_english` answers "is this word here at all?",
+    this lists what is there, for a caller that must decide whether one
+    particular *sense* is -- "check" in chess, when "check (examine)" already
+    exists.  A sense is a lemma whose text is the headword, with or without a
+    disambiguation (the ``disambiguation`` column, or the older "light (color)"
+    form carried in ``lemma_text`` itself), or a lemma that lists the headword
+    as an English variant form ("LBW" for "leg before wicket").
+
+    Inflections are deliberately not followed: "checked" is not a sense of
+    "checked", and listing every lemma that owns a matching derivative form
+    would bury the real senses under the verbs a word happens to inflect into.
+
+    Args:
+        session: SQLAlchemy database session
+        word: English headword, matched case-insensitively
+
+    Returns:
+        The matching lemmas, ordered by id
+    """
+    normalized = word.strip().lower()
+    if not normalized:
+        return []
+
+    variant_lemma_ids = session.query(VariantForm.lemma_id).filter(
+        VariantForm.language_code == "en",
+        func.lower(VariantForm.variant_form_text) == normalized,
+    )
+    return (
+        session.query(Lemma)
+        .filter(
+            or_(
+                func.lower(Lemma.lemma_text) == normalized,
+                func.lower(Lemma.lemma_text).startswith(normalized + " ("),
+                Lemma.id.in_(variant_lemma_ids),
+            )
+        )
+        .order_by(Lemma.id)
+        .all()
+    )
+
+
 def filter_existing_english_words(
     session: Session, words: Iterable[str], *, include_exclusions: bool = False
 ) -> Set[str]:
