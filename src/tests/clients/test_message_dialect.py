@@ -8,27 +8,11 @@ Covers:
   it for local backends.
 """
 
-import sys
-import types
-from typing import Any, Dict, Iterator, List, Tuple
+from typing import Any, Dict, List, Tuple
 
 import pytest
 
 from clients.lib import ChatMessage, normalize_alternating_messages
-
-
-@pytest.fixture(autouse=True)
-def _stub_tiktoken(monkeypatch: Any) -> Iterator[None]:
-    """Stub tiktoken so OpenAI/Gemini clients construct without network access.
-
-    Both clients build a ``tiktoken`` encoder in ``__init__``, which otherwise
-    downloads encoding data. Tests here never tokenize, so a no-op encoder is
-    sufficient.
-    """
-    fake = types.ModuleType("tiktoken")
-    fake.get_encoding = lambda name: object()  # type: ignore[attr-defined]
-    monkeypatch.setitem(sys.modules, "tiktoken", fake)
-    yield
 
 
 def _roles(messages: List[ChatMessage]) -> List[str]:

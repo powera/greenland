@@ -71,10 +71,6 @@ class GeminiClient:
         # Use provided api_key if given, otherwise load from file
         self.api_key = api_key if api_key else load_key("google", required=False)
         self.headers = {"Content-Type": "application/json"}
-        # Use the same tokenizer as OpenAI for token counting consistency
-        import tiktoken
-
-        self.encoder = tiktoken.get_encoding("cl100k_base")
 
     @measure_completion
     def _create_completion(self, model: str, **kwargs: Any) -> Dict[str, Any]:

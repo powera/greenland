@@ -139,9 +139,6 @@ class OpenAIClient:
             }
         else:
             self.headers = {}
-        import tiktoken
-
-        self.encoder = tiktoken.get_encoding("cl100k_base")
 
     @measure_completion
     def _create_response(self, **kwargs: Any) -> Dict[str, Any]:
