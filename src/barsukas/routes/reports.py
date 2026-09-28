@@ -21,8 +21,15 @@ its module to ``src/reports/`` and one entry here.
 
 from typing import Any, Dict, List
 
-from flask import Blueprint, render_template
+from flask import Blueprint, g, render_template, request
 from flask.typing import ResponseReturnValue
+
+from reports.broadly_common_words import (
+    DEFAULT_MIN_CORPORA,
+    DEFAULT_RUNNER_UP_COUNT,
+    DEFAULT_TOP_N,
+    build_report,
+)
 
 bp = Blueprint("reports", __name__, url_prefix="/reports")
 
@@ -30,7 +37,28 @@ bp = Blueprint("reports", __name__, url_prefix="/reports")
 # Every module in src/reports/, with the command that runs it.  "arguments"
 # lists the flags worth knowing, not the full argparse surface -- each report
 # supports --help, plus the usual --persona/--backend database selection.
+# "endpoint" names a page that renders the report per request, for the few that
+# are cheap enough to run inside one.
 REPORTS: List[Dict[str, Any]] = [
+    {
+        "name": "broadly_common_words",
+        "display_name": "Broadly Common Words",
+        "subtitle": "Top 150 in several corpora, and the next most common",
+        "description": (
+            "Lists the tokens in the top 150 of at least three corpora, by combined "
+            "rank, then the 50 best combined ranks not in that list: words common "
+            "everywhere without leading enough corpora to qualify."
+        ),
+        "icon": "bi-stars",
+        "command": "PYTHONPATH=src python src/reports/broadly_common_words.py",
+        "arguments": [
+            "--top-n N",
+            "--min-corpora N",
+            "--runner-ups N",
+            "--output report.json",
+        ],
+        "endpoint": "reports.broadly_common",
+    },
     {
         "name": "integrity",
         "display_name": "Database Integrity",
@@ -178,3 +206,29 @@ REPORTS: List[Dict[str, Any]] = [
 def index() -> ResponseReturnValue:
     """Display the list of available reports."""
     return render_template("reports/index.html", reports=REPORTS)
+
+
+def _int_arg(name: str, default: int, minimum: int, maximum: int) -> int:
+    try:
+        value = int(request.args.get(name, default))
+    except ValueError:
+        value = default
+    return max(minimum, min(value, maximum))
+
+
+@bp.route("/broadly-common")
+def broadly_common() -> ResponseReturnValue:
+    """Words in the top N of several corpora, then the next most common words.
+
+    Rendered per request: the core list reads only the annotation rows at or
+    above the cutoff, so the whole report is a fraction of a second.
+    """
+    language_code = request.args.get("language", "en").strip() or "en"
+    report = build_report(
+        g.db,
+        language_code=language_code,
+        top_n=_int_arg("top_n", DEFAULT_TOP_N, 1, 5000),
+        min_corpora=_int_arg("min_corpora", DEFAULT_MIN_CORPORA, 1, 50),
+        runner_up_count=_int_arg("runner_ups", DEFAULT_RUNNER_UP_COUNT, 0, 1000),
+    )
+    return render_template("reports/broadly_common.html", report=report)

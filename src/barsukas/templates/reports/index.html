@@ -48,6 +48,12 @@
                         </ul>
                     </div>
                     {% endif %}
+
+                    {% if report.endpoint %}
+                    <a href="{{ url_for(report.endpoint) }}" class="btn btn-sm btn-outline-primary mt-2">
+                        <i class="bi bi-eye"></i> View report
+                    </a>
+                    {% endif %}
                 </div>
                 <div class="card-footer text-muted">
                     <small><code>src/reports/{{ report.name }}.py</code></small>

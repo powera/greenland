@@ -28,6 +28,9 @@ Reports over the linguistic database. Run each one with
   level (`--per-level`) or listing one language's gaps (`--missing-for`). Use it to plan which
   languages go in a batched translation run.
 - **vocabulary_distribution.py**: coverage per POS subtype and the distribution of difficulty levels.
+- **broadly_common_words.py**: tokens in the top 150 of at least 3 corpora, ordered by combined rank,
+  then the next 50 combined ranks not in that list. It is cheap enough that Barsukas renders it on
+  request at `/reports/broadly-common`.
 - **missing_words.py**: high-frequency English words that are absent from the dictionary.
 - **wordlist_coverage.py**: dictionary coverage for an English word list in wikitext format.
 
