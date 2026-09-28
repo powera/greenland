@@ -307,6 +307,36 @@ CORPUS_CONFIGS = [
         max_unknown_rank=11000,
         enabled=True,
     ),
+    CorpusConfig(
+        name="openstax_science",
+        description="Word frequency data from OpenStax science and computing textbooks",
+        file_path="openstax_science.json",
+        max_words=5500,
+        file_type="json",
+        value_type="auto",
+        # Modern introductory textbook prose -- biology, chemistry, physics,
+        # astronomy, computing -- which defines its terms as it goes.  Weighted
+        # with the topic corpora: wiki_physical_science and wiki_biology cover
+        # much of the same subject matter, and at ~2.6M tokens it is small.
+        corpus_weight=0.5,
+        max_unknown_rank=11000,
+        enabled=True,
+    ),
+    CorpusConfig(
+        name="openstax_society",
+        description="Word frequency data from OpenStax social science and history textbooks",
+        file_path="openstax_society.json",
+        max_words=5500,
+        file_type="json",
+        value_type="auto",
+        # Psychology, sociology, economics, government, history and philosophy
+        # as introductory textbooks explain them.  Weighted with the topic
+        # corpora for now: ~2.7M tokens, and whether it should be merged with
+        # openstax_science is still open.
+        corpus_weight=0.5,
+        max_unknown_rank=11000,
+        enabled=True,
+    ),
 ]
 
 

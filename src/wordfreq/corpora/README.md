@@ -10,6 +10,7 @@ output format are the same for all of them:
 | `build_gutenberg.py` | Project Gutenberg books | the five below |
 | `build_scotus.py` | Supreme Court opinions | `legal_scotus` |
 | `build_wikipedia.py` | A Wikipedia dump snapshot | `wiki_math`, `wiki_geography`, `wiki_biology`, `wiki_modern_life`, `wiki_arts`, `wiki_society`, `wiki_physical_science`, `wiki_history` |
+| `build_openstax.py` | OpenStax textbooks, pinned by commit | `openstax_science`, `openstax_society` |
 
 Five corpora have book lists here:
 
@@ -155,6 +156,75 @@ translations and are counted. The English files cannot identify the speeches
 given in English — `LANGUAGE` tags translations, and is missing for most
 speeches in some years — so there is no native-only variant; one would need a
 second language's files, where the English originals are the tagged ones.
+
+## The OpenStax corpora
+
+`openstax_science` and `openstax_society` are built from OpenStax's
+introductory college textbooks: plain modern expository English that defines
+each term as it introduces it, a register none of the other corpora has.
+Both are registered in `CORPUS_CONFIGS` at weight 0.5, with the other topic
+corpora. At ~2.7M tokens each they are small, and may yet be merged into one.
+
+`openstax_business` has a pinned book list (eight books: Introduction to
+Business, Management, Organizational Behavior, Marketing, Entrepreneurship,
+Business Ethics, Finance, Intellectual Property) and can be downloaded, but is
+not built or registered: its CC BY books come to 1.3M words over 127
+chapters, below the ~2M a corpus here should have. Principles of Accounting
+and Business Law were NC-SA from their first commits. It needs another
+source before it is built.
+
+```bash
+# 1. Check out each book's CNXML at its pinned commit (data/working/openstax,
+#    gitignored; ~130MB).  Verifies every book declares CC BY 4.0 there.
+PYTHONPATH=src python src/wordfreq/corpora/download_openstax.py --corpus all
+
+# 2. Build each corpus JSON from the checkouts.
+PYTHONPATH=src python src/wordfreq/corpora/build_openstax.py --corpus openstax_science --phrases-from-db
+PYTHONPATH=src python src/wordfreq/corpora/build_openstax.py --corpus openstax_society --phrases-from-db
+```
+
+| Corpus | Books | Chapters | Tokens | Contents |
+| --- | --- | --- | --- | --- |
+| `openstax_science` | 10 | 242 | 2.6M | Biology 2e, Microbiology, Anatomy and Physiology 2e, Behavioral Neuroscience, Chemistry 2e, College Physics 2e, Astronomy 2e; Python Programming, Principles of Data Science, Foundations of Information Systems |
+| `openstax_society` | 11 | 217 | 2.7M | Psychology 2e, Lifespan Development, Sociology 3e, Anthropology, Political Science, American Government 4e, Principles of Economics 3e, U.S. History, World History 1-2, Introduction to Philosophy |
+
+**Every book is pinned to a commit, for licensing.** On 2026-04-23 OpenStax
+relicensed nearly its whole catalogue from CC BY 4.0 to CC BY-NC-SA 4.0, and
+this project does not use NC-SA text. A Creative Commons license cannot be
+withdrawn from copies already released under it, so `openstax_books.py` pins
+each book to the parent of its relicensing commit, and the downloader refuses
+a checkout whose collection file does not declare CC BY 4.0. Organic Chemistry
+was NC-SA from its first commit and is left out; Introduction to Philosophy is
+its first edition, since the second was published NC-SA only. Duplicate
+editions (AP Biology, Concepts of Biology, Chemistry: Atoms First, the
+separate Micro/Macroeconomics books) and University Physics are left out
+because they repeat another book's text. Mathematics, nursing and business
+are out of scope.
+
+The downloader fetches only the pinned commit, without history, and sparse-
+checks-out the collection files and each module's `index.cnxml`: the
+repositories are mostly images (Anatomy and Physiology alone is ~400MB).
+
+**The unit of analysis is the chapter** — a `subcollection` that lists
+modules, with its sections' prose joined. Extraction (`openstax_text.py`)
+keeps paragraphs, lists, quotations, captions and feature boxes, and drops:
+every *classed* `section` (the body's sections carry no class; the classed
+ones are review questions, summaries, key terms, learning objectives and
+reference lists), exercises, titles, glossaries, tables, MathML and code (so
+the computing books keep their prose without their listings), citation and
+link-to-website notes, teacher-edition notes, front and back matter, and
+image credits at the end of captions.
+
+**Capitalized entries must spread.** Per-document name detection is off, as
+for Europarl: it would remove "Congress" and "Senate", which are capitalized
+in every chapter of American Government. Instead a capitalized entry must be
+written capitalized in at least 4 chapters spanning at least 2 books
+(`--min-capitalized-chapters`, `--min-capitalized-books`). Lincoln appears in
+24 chapters of 8 books and is kept (rank ~2100 in `openstax_society`); Blaine
+and Conkling appear in one chapter each and are dropped. The cost is on the
+science side, where some names belong to one book only: Uranus, Sirius and
+Orion (Astronomy), Coulomb (Physics) and Krebs (Biology) are dropped as
+capitalized entries.
 
 ## The Wikipedia corpora
 
