@@ -24,6 +24,7 @@ SUBTYPE_DISPLAY = {
     "artwork_artifact": "Œuvre/Artefact",
     "legal_document": "Document juridique",
     "natural_feature": "Élément naturel",
+    "celestial_object": "Objet céleste",
     "tool": "Outil",
     "electronic_device": "Appareil électronique",
     "appliance": "Électroménager",

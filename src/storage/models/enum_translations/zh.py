@@ -24,6 +24,7 @@ SUBTYPE_DISPLAY = {
     "artwork_artifact": "艺术品/文物",
     "legal_document": "法律文件",
     "natural_feature": "自然地貌",
+    "celestial_object": "天体",
     "tool": "工具",
     "electronic_device": "电子设备",
     "appliance": "家用电器",
