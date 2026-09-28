@@ -3,6 +3,7 @@
 SUBTYPE_DISPLAY = {
     # People and Living Things
     "occupation": "职业",
+    "participant_role": "角色",
     "family_relation": "家庭关系",
     "human": "人类",
     "honorific": "尊称",
@@ -40,6 +41,8 @@ SUBTYPE_DISPLAY = {
     "abstract_condition": "抽象状态",
     "social_institution": "社会机构",
     "activity": "活动",
+    "performance_technique": "技法",
+    "strategic_tactic": "战术",
     "symbolic_element": "象征元素",
     "quality_attribute": "性质/属性",
     "mental_construct": "心理构造",
@@ -50,6 +53,7 @@ SUBTYPE_DISPLAY = {
     "shape": "形状",
     # Processes and Time
     "process_event": "过程/事件",
+    "rule_defined_event": "规则术语",
     "time_period": "时间段",
     # Groups and Collections
     "group_people": "人群",
