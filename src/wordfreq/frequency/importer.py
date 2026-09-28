@@ -191,6 +191,46 @@ def _link_wordfreq_annotations_to_lemmas(
     return len(new_links)
 
 
+def _delete_stale_annotations(session: Session, source_name: str, kept_token_ids: set[int]) -> int:
+    """Delete this source's rank rows for tokens the new file no longer lists.
+
+    A reload replaces the corpus rather than merging into it: a word the
+    rebuilt file dropped (a parser fix removing "http", or a word falling past
+    ``max_words``) must lose its old rank, or it keeps counting toward the
+    combined rank forever. Only the plain rows the importer itself writes are
+    touched -- those with no ``pos_hint``/``sense_hint``.
+
+    The lemma links are deleted first and explicitly: SQLite does not enforce
+    the ``ON DELETE CASCADE`` unless ``foreign_keys`` is enabled, and it is not.
+    """
+    rows = (
+        session.query(ExternalLexemeAnnotation.id, ExternalLexemeAnnotation.word_token_id)
+        .filter(
+            ExternalLexemeAnnotation.source == source_name,
+            ExternalLexemeAnnotation.pos_hint.is_(None),
+            ExternalLexemeAnnotation.sense_hint.is_(None),
+        )
+        .all()
+    )
+    stale_ids = [
+        annotation_id
+        for annotation_id, word_token_id in rows
+        if word_token_id not in kept_token_ids
+    ]
+    for start in range(0, len(stale_ids), 500):
+        chunk = stale_ids[start : start + 500]
+        session.query(ExternalLexemeAnnotationLemma).filter(
+            ExternalLexemeAnnotationLemma.annotation_id.in_(chunk)
+        ).delete(synchronize_session=False)
+        session.query(ExternalLexemeAnnotation).filter(
+            ExternalLexemeAnnotation.id.in_(chunk)
+        ).delete(synchronize_session=False)
+    session.commit()
+    if stale_ids:
+        logger.info(f"Deleted {len(stale_ids)} stale {source_name} annotations")
+    return len(stale_ids)
+
+
 def import_frequency_as_annotations(
     session: Session,
     *,
@@ -340,6 +380,8 @@ def import_frequency_as_annotations(
             session.bulk_save_objects(new_rows)
         session.commit()
 
+        stale_deleted = _delete_stale_annotations(session, source_name, set(token_ids))
+
         links_inserted = _link_wordfreq_annotations_to_lemmas(
             session=session,
             source_name=source_name,
@@ -350,7 +392,7 @@ def import_frequency_as_annotations(
         logger.info(
             f"Annotation import complete for {corpus_name}: "
             f"{len(new_rows)} created, {update_count} updated, "
-            f"{links_inserted} lemma links inserted"
+            f"{stale_deleted} stale deleted, {links_inserted} lemma links inserted"
         )
         return (len(new_rows) + update_count, total_count)
     except Exception as e:
