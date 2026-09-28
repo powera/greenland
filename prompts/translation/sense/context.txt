@@ -14,17 +14,6 @@ For the sense, provide this information:
 Valid parts of speech include: noun, verb, adjective, adverb, pronoun, preposition,
 conjunction, interjection, determiner, article, numeral, auxiliary, modal.
 
-- The part-of-speech subtype, for "noun", "verb", "adjective", and "adverb".  For any other
-part-of-speech, return the part-of-speech (pronoun, preposition, etc.) as the subtype.
-Choose the subtype that describes what the term names - a piece of equipment, a person, an action, a place, an event - not the field it comes from.
-
-NOUN SUBTYPES:
-{noun_subtypes}
-
-VERB SUBTYPES: {verb_subtypes}
-ADJECTIVE SUBTYPES: {adjective_subtypes}
-ADVERB SUBTYPES: {adverb_subtypes}
-
 - A definition: one plain sentence a language learner can understand. Make the field clear from the definition, so it cannot be read as the everyday meaning.
 
 - Example sentences

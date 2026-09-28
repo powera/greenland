@@ -55,9 +55,9 @@ from storage.translation_helpers import (
     convert_llm_response_to_lang_codes,
     ensure_english_translation,
 )
-from storage.utils.enums import get_all_pos_subtypes, get_subtype_values_for_pos
+from storage.utils.enums import get_subtype_values_for_pos
 from storage.utils.guid import generate_guid
-from wordfreq.translation.constants import VALID_POS_TYPES
+from wordfreq.translation.constants import MAJOR_POS_TYPES, VALID_POS_TYPES
 from wordfreq.translation.word_processing import determine_default_grammatical_form
 from words.add_word import (
     TRANSLATION_LANGUAGES,
@@ -87,6 +87,11 @@ NOT_COVERED = 0
 # sense that comes back with one anyway is refused rather than written.  The
 # closed classes are unaffected: they answer with the bare POS name.
 _CATCH_ALL_SUBTYPE = "other"
+
+# Parts of speech with a real choice of subtype, which the second call makes.
+# numeral has no catch-all, only cardinal and ordinal; every other closed class
+# has "<pos>_other" as its only subtype and needs no call.
+_SUBTYPED_POS_TYPES = frozenset({*MAJOR_POS_TYPES, "numeral"})
 
 
 def _offered_subtypes(values: Sequence[str]) -> List[str]:
@@ -143,15 +148,12 @@ def _sense_schema(ask_pos: bool = True) -> Schema:
         "definition": SchemaProperty("string", "The definition of the word in this field"),
     }
     if ask_pos:
+        # The subtype is a second call (build_subtype_prompt), which can show
+        # the one part of speech's subtypes with their descriptions.
         properties["pos"] = SchemaProperty(
             "string",
             "The part of speech of this sense",
             enum=list(VALID_POS_TYPES),
-        )
-        properties["pos_subtype"] = SchemaProperty(
-            "string",
-            "A subtype for the part of speech",
-            enum=_offered_subtypes(get_all_pos_subtypes()),
         )
     properties |= {
         "phonetic_spelling": SchemaProperty("string", "Phonetic spelling of the word"),
@@ -203,7 +205,8 @@ def build_sense_prompt(
     """Build the context, prompt and schema for one :func:`add_sense` call.
 
     With ``pos_type`` the caller has fixed the part of speech and subtype: the
-    prompt names the part of speech and leaves out the subtype lists.
+    prompt names the part of speech.  Without it the model returns the part of
+    speech, and :func:`build_subtype_prompt` asks for the subtype afterwards.
     """
     hint_line = f"The meaning intended: {hint}\n" if hint else ""
     if pos_type is not None:
@@ -217,17 +220,7 @@ def build_sense_prompt(
         context = util.prompt_loader.get_context("translation", "sense_known_type")
         return context, prompt, _sense_schema(ask_pos=False)
 
-    # Noun subtypes carry their descriptions and examples: from the names alone
-    # the model filed referee as a participant_role and a volley as noun_other.
-    # A field's terms are overwhelmingly nouns, and describing every POS's
-    # subtypes would put well over a hundred glosses in each call, so the other
-    # lists stay bare names.  The catch-all is withheld, as in the schema.
-    context = util.prompt_loader.get_context("translation", "sense").format(
-        noun_subtypes=render_subtype_list("noun", include_catch_all=False),
-        verb_subtypes=", ".join(_offered_subtypes(get_subtype_values_for_pos("verb"))),
-        adjective_subtypes=", ".join(_offered_subtypes(get_subtype_values_for_pos("adjective"))),
-        adverb_subtypes=", ".join(_offered_subtypes(get_subtype_values_for_pos("adverb"))),
-    )
+    context = util.prompt_loader.get_context("translation", "sense")
     prompt = util.prompt_loader.get_prompt("translation", "sense").format(
         word=word,
         domain=domain,
@@ -235,6 +228,40 @@ def build_sense_prompt(
         existing_senses=_describe_existing(existing),
     )
     return context, prompt, _sense_schema()
+
+
+def build_subtype_prompt(
+    word: str, domain: str, definition: str, pos_type: str
+) -> tuple[str, str, Schema]:
+    """Build the context, prompt and schema for the second, subtype-only call.
+
+    It shows only ``pos_type``'s subtypes, each with its description and
+    examples.  Put in the first call, every part of speech's subtypes had to
+    be listed, and as bare names: well over a hundred glosses would be too
+    much for every call, and from the names alone the model filed referee as a
+    participant_role and gave volley the catch-all.  The catch-all is withheld,
+    as add_sense refuses it for an open-class word anyway.
+    """
+    context = util.prompt_loader.get_context("translation", "sense_subtype").format(
+        pos_type=pos_type,
+        pos_type_upper=pos_type.upper(),
+        subtype_list=render_subtype_list(pos_type, include_catch_all=False),
+    )
+    prompt = util.prompt_loader.get_prompt("translation", "sense_subtype").format(
+        word=word, domain=domain, pos_type=pos_type, definition=definition
+    )
+    schema = Schema(
+        name="SenseSubtype",
+        description="The subtype of one sense's part of speech",
+        properties={
+            "pos_subtype": SchemaProperty(
+                "string",
+                f"The {pos_type} subtype of this sense",
+                enum=_offered_subtypes(get_subtype_values_for_pos(pos_type)),
+            )
+        },
+    )
+    return context, prompt, schema
 
 
 def _already_present(
@@ -446,13 +473,40 @@ def add_sense(
     if covered_by != NOT_COVERED:
         return settle_match(existing[covered_by - 1], "moved" if relevel_existing else "covered")
 
+    definition_text = str(sense.get("definition") or "").strip()
+    if not definition_text:
+        return AddSenseResult(word=normalized, status="error", error="LLM gave no definition")
+
+    if fixed_pos_type is not None:
+        pos_type = fixed_pos_type
+        new_subtype = pos_subtype
+    else:
+        pos_type = str(sense.get("pos") or "").lower()
+        raw_subtype: Optional[str] = pos_type
+        if pos_type in _SUBTYPED_POS_TYPES:
+            # The second call: only a new sense pays for it, not a covered one.
+            subtype_context, subtype_prompt, subtype_schema = build_subtype_prompt(
+                normalized, domain.strip(), definition_text, pos_type
+            )
+            try:
+                subtype_response = llm_client.generate_chat(
+                    prompt=subtype_prompt,
+                    model=config.model,
+                    json_schema=subtype_schema,
+                    context=subtype_context,
+                )
+            except Exception as error:  # noqa: BLE001 - reported, not swallowed
+                logger.error("Subtype call failed for '%s' (%s): %s", normalized, domain, error)
+                return AddSenseResult(word=normalized, status="error", error=str(error))
+            subtype_data = subtype_response.structured_data
+            raw_subtype = (
+                subtype_data.get("pos_subtype") if isinstance(subtype_data, dict) else None
+            )
+        # A closed class answers with its part of speech, which normalizes to
+        # its only subtype, "<pos>_other".
+        new_subtype = _normalize_subtype(pos_type, raw_subtype)
+
     try:
-        if fixed_pos_type is not None:
-            pos_type = fixed_pos_type
-            new_subtype = pos_subtype
-        else:
-            pos_type = str(sense.get("pos") or "").lower()
-            new_subtype = _normalize_subtype(pos_type, sense.get("pos_subtype"))
         pos_error = _validate_pos(pos_type, new_subtype)
         if pos_error is not None:
             return AddSenseResult(word=normalized, status="error", error=f"LLM gave {pos_error}")
@@ -465,10 +519,6 @@ def add_sense(
                 status="error",
                 error=f"LLM gave the catch-all subtype {new_subtype!r}; nothing written",
             )
-
-        definition_text = str(sense.get("definition") or "").strip()
-        if not definition_text:
-            return AddSenseResult(word=normalized, status="error", error="LLM gave no definition")
 
         guid = generate_guid(session, pos_type, new_subtype)
         new_lemma = Lemma(
