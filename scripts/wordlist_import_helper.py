@@ -672,18 +672,39 @@ def execute_senses(sense_list: SenseList, model: str, limit: int | None) -> List
     return failures
 
 
-def run_sense_import(sense_lists: Sequence[SenseList], description: str) -> int:
+def run_sense_import(
+    sense_lists: Sequence[SenseList],
+    description: str,
+    term_groups: Sequence[tuple[int, Sequence[TermEntry]]] = (),
+    term_tags: Sequence[str] | None = None,
+) -> int:
     """Entry point for a domain-sense import script.
 
     The counterpart to :func:`run_import` for a field's vocabulary, driving
     ``api.lemmas.add_sense``.  Same two-step contract: without ``--execute``
     it prints the plan and makes no HTTP request.
+
+    ``term_groups`` are ``(level, entries)`` of fully specified terms, run
+    after the senses through ``add_term`` -- brand names beside the generics
+    they name, where sense discovery would file the brand under its generic.
     """
     _check_sense_lists(sense_lists)
+    sense_terms = {_normalized(entry.term) for sl in sense_lists for entry in sl.entries}
+    term_texts = [entry.term for _level, group in term_groups for entry in group]
+    collisions = sense_terms & {_normalized(term) for term in term_texts}
+    if collisions:
+        raise ValueError(f"Listed both as a sense and as a term: {sorted(collisions)!r}")
+    if len({_normalized(term) for term in term_texts}) != len(term_texts):
+        raise ValueError("A term is listed more than once")
+
     args = parse_args(description)
     print(f"Barsukas: {BASE_URL}")
     for sense_list in sense_lists:
         print_sense_plan(sense_list)
+        print()
+    for level, term_group in term_groups:
+        print("Fully specified terms:")
+        print_term_plan(term_group, level)
         print()
     if not args.execute:
         print("No API calls made. Re-run with --execute only after approval.")
@@ -694,7 +715,13 @@ def run_sense_import(sense_lists: Sequence[SenseList], description: str) -> int:
     try:
         for sense_list in sense_lists:
             failures.extend(execute_senses(sense_list, args.model, args.limit))
-    except (RuntimeError, requests.exceptions.RequestException) as error:
+        if term_groups:
+            queued = pending_queue_words()
+            for level, term_group in term_groups:
+                execute_terms(
+                    term_group, level, args.model, args.limit, tags=term_tags, queued=queued
+                )
+    except (BarsukasAPIError, RuntimeError, requests.exceptions.RequestException) as error:
         print(f"Import stopped: {error}", file=sys.stderr)
         return 1
     if failures:
