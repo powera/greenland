@@ -60,6 +60,7 @@ from storage.queries.lemma import build_lemma_search_query
 from storage.translation_helpers import (
     LANGUAGE_HIERARCHY,
     TRANSLATION_STATUS_VALUES,
+    ensure_english_translation,
     get_all_translations,
     get_translation_pronunciations,
     set_translation,
@@ -969,6 +970,7 @@ def add_lemmas() -> ResponseReturnValue:
             new_lemma.sense_prominence = sense_prominence
         g.db.add(new_lemma)
         g.db.flush()
+        ensure_english_translation(g.db, new_lemma)
 
         log_translation_change(
             session=g.db,

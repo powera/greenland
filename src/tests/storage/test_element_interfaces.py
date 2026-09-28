@@ -90,14 +90,23 @@ def test_lemma_implements_word_and_language_interfaces(session: Session) -> None
     assert _guid(lemma) == "N50_001"
     assert _verified(lemma) is True
     assert _level(lemma) == 3
+    ids = {translation.language_code: translation.id for translation in lemma.translations}
+    # add_lemma seeds the en row from lemma_text before any other translation.
     assert _language_values(lemma) == [
         LanguageValue(
-            id=lemma.translations[0].id,
+            id=ids["en"],
+            language_code="en",
+            text="light",
+            value_kind="headword",
+            verified=False,
+        ),
+        LanguageValue(
+            id=ids["lt"],
             language_code="lt",
             text="šviesa",
             value_kind="headword",
             verified=False,
-        )
+        ),
     ]
 
 
@@ -245,13 +254,13 @@ def test_lemma_projects_definition_and_disambiguation(session: Session) -> None:
         lithuanian_translation="šviesa",
         auto_generate_guid=False,
     )
-    translation = lemma.translations[0]
+    (translation,) = [t for t in lemma.translations if t.language_code == "lt"]
     translation.definition_text = "elektromagnetinė spinduliuotė"
     translation.disambiguation = "radiation"
     translation.translation_status = "needs_review"
     session.flush()
 
-    (value,) = _language_values(lemma)
+    (value,) = [v for v in _language_values(lemma) if v.language_code == "lt"]
     assert value.gloss == "elektromagnetinė spinduliuotė"
     assert value.qualifier == "radiation"
     assert value.status == "needs_review"
