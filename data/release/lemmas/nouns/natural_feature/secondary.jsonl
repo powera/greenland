@@ -18,9 +18,6 @@
 {"guid": "N11_018", "translations": {"ro": "ghețar", "pl": "lodowiec", "th": "ธารน้ำแข็ง", "ms": "glasier", "ta": "பனிப்பாறை", "kn": "ಹಿಮನದಿ", "uk": "льодовик", "bn": "হিমবাহ", "hi": "हिमनद", "tr": "buzul"}}
 {"guid": "N11_019", "translations": {"ro": "vulcan", "pl": "wulkan", "th": "ภูเขาไฟ", "ms": "gunung berapi", "ta": "எரிமலை", "kn": "ಜ್ವಾಲಾಮುಖಿ", "uk": "вулкан", "bn": "আগ্নেয়গিরি", "hi": "ज्वालामुखी", "tr": "yanardağ"}}
 {"guid": "N11_020", "translations": {"ro": "cer", "pl": "niebo", "th": "ท้องฟ้า", "ms": "langit", "ta": "வானம்", "kn": "ಆಕಾಶ", "uk": "небо", "bn": "আকাশ", "hi": "आकाश", "tr": "gökyüzü", "bs": "nebo"}}
-{"guid": "N11_021", "translations": {"ro": "soare", "pl": "słońce", "th": "ดวงอาทิตย์", "ms": "Matahari", "ta": "சூரியன்", "kn": "ಸೂರ್ಯ", "uk": "сонце", "bn": "সূর্য", "hi": "सूर्य", "tr": "Güneş", "bs": "Sunce"}}
-{"guid": "N11_022", "translations": {"ro": "lună", "pl": "księżyc", "th": "ดวงจันทร์", "ms": "bulan", "ta": "நிலவு", "kn": "ಚಂದ್ರ", "uk": "місяць", "bn": "চাঁদ", "hi": "चन्द्रमा", "tr": "uydu", "bs": "Mjesec"}}
-{"guid": "N11_023", "translations": {"ro": "stea", "pl": "gwiazda", "th": "ดาว", "ms": "bintang", "ta": "நட்சத்திரம்", "kn": "ನಕ್ಷತ್ರ", "uk": "зірка", "bn": "তারা", "hi": "तारा", "tr": "yıldız", "bs": "zvijezda"}}
 {"guid": "N11_024", "translations": {"ro": "nor", "pl": "chmura", "th": "เมฆ", "ms": "awan", "ta": "மேகம்", "kn": "ಮೋಡ", "uk": "хмара", "bn": "মেঘ", "hi": "बादल", "tr": "bulut", "bs": "oblak"}}
 {"guid": "N11_025", "translations": {"ro": "ploaie", "pl": "deszcz", "th": "ฝน", "ms": "hujan", "ta": "மழை", "kn": "ಮಳೆ", "uk": "дощ", "bn": "বৃষ্টি", "hi": "बारिश", "tr": "yağmur", "bs": "kiša"}}
 {"guid": "N11_026", "translations": {"ro": "zăpadă", "pl": "śnieg", "th": "หิมะ", "ms": "salji", "ta": "பனி", "kn": "ಹಿಮ", "uk": "сніг", "bn": "তুষার", "hi": "बर्फ", "tr": "kar", "bs": "snijeg"}}
@@ -42,12 +39,10 @@
 {"guid": "N11_050", "translations": {"ro": "cărare", "pl": "ścieżka", "th": "ทางเดิน", "ms": "laluan", "ta": "பாதை", "kn": "ದಾರಿ", "uk": "стежка", "bn": "পথ", "hi": "पगडंडी", "tr": "patika", "bs": "staza"}}
 {"guid": "N11_051", "translations": {"ro": "câmp", "pl": "pole", "th": "ทุ่ง", "ms": "ladang", "ta": "வயல்", "kn": "ಹೊಲ", "uk": "поле", "bn": "খেত", "hi": "खेत", "tr": "tarla"}}
 {"guid": "N11_052", "translations": {"ro": "pământ", "pl": "ziemia", "th": "พื้นดิน", "ms": "tanah", "ta": "நிலம்", "kn": "ನೆಲ", "uk": "ґрунт", "bn": "মাটি", "hi": "मिट्टी", "tr": "toprak", "bs": "zemlja"}}
-{"guid": "N11_054", "translations": {"ro": "pământ", "pl": "ziemia", "th": "โลก", "ms": "Bumi", "ta": "பூமி", "kn": "ಭೂಮಿ", "uk": "Земля", "bn": "পৃথিবী", "hi": "पृथ्वी", "tr": "Dünya", "bs": "Zemlja"}}
 {"guid": "N11_055", "translations": {"ro": "stâncă", "pl": "skała", "th": "หิน", "ms": "tebing batu", "ta": "பாறை", "kn": "ಬಂಡೆ", "uk": "скеля", "bn": "শিলা", "hi": "शिला", "tr": "kaya"}}
 {"guid": "N11_056", "translations": {"ro": "suprafață", "pl": "powierzchnia", "th": "พื้นผิว", "ms": "permukaan", "ta": "மேற்பரப்பு", "kn": "ಮೇಲ್ಮೈ", "uk": "поверхня", "bn": "পৃষ্ঠতল", "hi": "سطح", "tr": "yüzey", "bs": "površina"}}
 {"guid": "N11_057", "translations": {"ro": "pârâu", "pl": "strumień", "th": "ลำธาร", "ms": "anak sungai", "ta": "சிற்றாறு", "kn": "ತೊರೆ", "uk": "струмок", "bn": "নালা", "hi": "नाला", "tr": "dere", "bs": "potok"}}
 {"guid": "N11_058", "translations": {"ro": "țărm", "pl": "brzeg", "th": "ฝั่ง", "ms": "pantai", "ta": "கரை", "kn": "ತೀರ", "uk": "берег", "bn": "তীর", "hi": "किनारा", "tr": "kıyı"}}
-{"guid": "N11_059", "translations": {"ro": "planetă", "pl": "planeta", "th": "ดาวเคราะห์", "ms": "planet", "ta": "கோள்", "kn": "ಗ್ರಹ", "uk": "планета", "bn": "গ্রহ", "hi": "ग्रह", "tr": "gezegen", "bs": "planeta"}}
 {"guid": "N11_060", "translations": {"ro": "mal", "pl": "brzeg", "th": "ตลิ่ง", "ms": "tebing", "ta": "கரை", "kn": "ದಡ", "uk": "берег", "bn": "তীর", "hi": "तट", "tr": "kıyı", "bs": "obala"}}
 {"guid": "N11_061", "translations": {"ro": "iaz", "pl": "staw", "th": "สระน้ำ", "ms": "kolam", "ta": "குளம்", "kn": "ಕೊಳ", "uk": "ставок", "bn": "পুকুর", "hi": "तालाब", "tr": "gölet"}}
 {"guid": "N11_062", "translations": {"ro": "dună", "pl": "wydma", "th": "เนินทราย", "ms": "bukit pasir", "ta": "மணல்மேடு", "kn": "ಮರಳು ದಿಬ್ಬ", "uk": "діна (Incorrect)", "bn": "বালুকামহিষ (Incorrect)", "hi": "रेत टीला (Incorrect)", "tr": "kum tepeciği"}}
@@ -64,7 +59,6 @@
 {"guid": "N11_073", "translations": {"ms": "bukit pasir", "hi": "रेत का टीला", "tr": "kum tepesi", "bs": "pješčana dina"}}
 {"guid": "N11_074", "translations": {"ms": "mata air panas", "hi": "गर्म पानी का झरना", "tr": "kaplıca", "bs": "termalni izvor"}}
 {"guid": "N11_075", "translations": {"ms": "bintang jatuh", "hi": "टूटता तारा", "tr": "kayan yıldız", "bs": "zvijezda padalica"}}
-{"guid": "N11_076", "translations": {"ms": "sistem suria", "hi": "सौरमंडल", "tr": "Güneş Sistemi"}}
 {"guid": "N11_077", "translations": {"ms": "atmosfera", "hi": "वायुमंडल", "tr": "atmosfer"}}
 {"guid": "N11_078", "translations": {"ms": "fasa bulan", "hi": "चंद्रमा की कला", "tr": "Ay evresi"}}
 {"guid": "N11_079", "translations": {"ms": "siklon", "hi": "चक्रवात", "tr": "siklon"}}
@@ -84,11 +78,8 @@
 {"guid": "N11_093", "translations": {"ms": "pertemuan sungai", "hi": "संगम", "tr": "akarsu kavşağı"}}
 {"guid": "N11_094", "translations": {"ms": "jumlah salji", "hi": "हिमपात", "tr": "kar yağışı"}}
 {"guid": "N11_095", "translations": {"ms": "garis pantai", "hi": "तटरेखा", "tr": "kıyı çizgisi"}}
-{"guid": "N11_096", "translations": {"ms": "galaksi", "hi": "आकाशगंगा", "tr": "galaksi"}}
 {"guid": "N11_097", "translations": {"ms": "supernova", "hi": "सुपरनोवा", "tr": "süpernova"}}
-{"guid": "N11_098", "translations": {"ms": "bintang supernova", "hi": "सुपरनोवा तारा", "tr": "süpernova yıldızı"}}
 {"guid": "N11_099", "translations": {"ms": "magma", "hi": "मैग्मा", "tr": "magma"}}
-{"guid": "N11_100", "translations": {"ms": "asteroid", "hi": "क्षुद्रग्रह", "tr": "asteroit"}}
 {"guid": "N11_101", "translations": {"ms": "litosfera", "hi": "स्थलमंडल", "tr": "litosfer"}}
 {"guid": "N11_102", "translations": {"ms": "pusaran", "hi": "भँवर", "tr": "girdap"}}
 {"guid": "N11_103", "translations": {"ms": "hutan rimba", "hi": "जंगल", "tr": "orman"}}
