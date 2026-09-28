@@ -101,8 +101,9 @@ Base prefix: `/api`.
     `disambiguation` or every one of `tags`.
   - Body: `{"word": "...", "domain": "chess", "disambiguation": "chess"|null, "model": "<model-name>"}`,
     optionally `hint` (a short gloss), `difficulty_level`, `tags`,
-    `abbreviation` (recorded as a variant form, e.g. `LBW`) and
-    `relevel_existing`.
+    `abbreviation` (recorded as a variant form, e.g. `LBW`),
+    `relevel_existing` and `pos_subtype` (fixes a new lemma's subtype; the
+    part of speech follows and the model is asked for neither).
   - One LLM call describes the domain sense and says whether one of the
     headword's existing senses already is it. A matched sense is tagged
     (`status: "covered"`); with `relevel_existing` it is also moved to

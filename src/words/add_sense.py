@@ -47,6 +47,7 @@ from storage.backend.config import DataSourceConfig
 from storage.crud.lemma_tags import add_tags, normalize_tags, read_tags
 from storage.crud.operation_log import FieldChange, log_field_changes, log_translation_change
 from storage.crud.variant_form import add_variant_form
+from storage.models.guid_prefixes import SUBTYPE_GUID_PREFIXES
 from storage.models.schema import SENSE_PROMINENCE_RARE, Lemma
 from storage.models.variant_form import VARIANT_KIND_ABBREVIATION
 from storage.queries.lemma import get_english_senses
@@ -118,8 +119,12 @@ class AddSenseResult:
     error: Optional[str] = None
 
 
-def _sense_schema() -> Schema:
-    """The structured answer: the covered_by verdict plus one described sense."""
+def _sense_schema(ask_pos: bool = True) -> Schema:
+    """The structured answer: the covered_by verdict plus one described sense.
+
+    Without ``ask_pos`` the caller has fixed the part of speech and subtype, and
+    the model is not asked for them.
+    """
     translation_fields = {
         "lithuanian_translation": "The Lithuanian term for this sense",
         "spanish_translation": "The Spanish term for this sense",
@@ -133,16 +138,19 @@ def _sense_schema() -> Schema:
             "Number of the listed existing sense that already is this meaning, or 0 if none",
         ),
         "definition": SchemaProperty("string", "The definition of the word in this field"),
-        "pos": SchemaProperty(
+    }
+    if ask_pos:
+        properties["pos"] = SchemaProperty(
             "string",
             "The part of speech of this sense",
             enum=list(VALID_POS_TYPES),
-        ),
-        "pos_subtype": SchemaProperty(
+        )
+        properties["pos_subtype"] = SchemaProperty(
             "string",
             "A subtype for the part of speech",
             enum=_offered_subtypes(get_all_pos_subtypes()),
-        ),
+        )
+    properties |= {
         "phonetic_spelling": SchemaProperty("string", "Phonetic spelling of the word"),
         "ipa_spelling": SchemaProperty("string", "International Phonetic Alphabet for the word"),
         "examples": SchemaProperty(
@@ -176,10 +184,36 @@ def _describe_existing(senses: Sequence[Lemma]) -> str:
     return "\n".join(lines)
 
 
+def pos_type_for_subtype(pos_subtype: str) -> Optional[str]:
+    """The one part of speech ``pos_subtype`` belongs to, or None if not exactly one."""
+    owners = [pos for pos, subtypes in SUBTYPE_GUID_PREFIXES.items() if pos_subtype in subtypes]
+    return owners[0] if len(owners) == 1 else None
+
+
 def build_sense_prompt(
-    word: str, domain: str, hint: Optional[str], existing: Sequence[Lemma]
+    word: str,
+    domain: str,
+    hint: Optional[str],
+    existing: Sequence[Lemma],
+    pos_type: Optional[str] = None,
 ) -> tuple[str, str, Schema]:
-    """Build the context, prompt and schema for one :func:`add_sense` call."""
+    """Build the context, prompt and schema for one :func:`add_sense` call.
+
+    With ``pos_type`` the caller has fixed the part of speech and subtype: the
+    prompt names the part of speech and leaves out the subtype lists.
+    """
+    hint_line = f"The meaning intended: {hint}\n" if hint else ""
+    if pos_type is not None:
+        prompt = util.prompt_loader.get_prompt("translation", "sense_known_type").format(
+            word=word,
+            domain=domain,
+            pos_type=pos_type,
+            hint=hint_line,
+            existing_senses=_describe_existing(existing),
+        )
+        context = util.prompt_loader.get_context("translation", "sense_known_type")
+        return context, prompt, _sense_schema(ask_pos=False)
+
     context = util.prompt_loader.get_context("translation", "sense").format(
         noun_subtypes=", ".join(_offered_subtypes(get_subtype_values_for_pos("noun"))),
         verb_subtypes=", ".join(_offered_subtypes(get_subtype_values_for_pos("verb"))),
@@ -189,7 +223,7 @@ def build_sense_prompt(
     prompt = util.prompt_loader.get_prompt("translation", "sense").format(
         word=word,
         domain=domain,
-        hint=f"The meaning intended: {hint}\n" if hint else "",
+        hint=hint_line,
         existing_senses=_describe_existing(existing),
     )
     return context, prompt, _sense_schema()
@@ -282,6 +316,7 @@ def add_sense(
     tags: Optional[Sequence[str]] = None,
     abbreviation: Optional[str] = None,
     relevel_existing: bool = False,
+    pos_subtype: Optional[str] = None,
     source: str = "add_sense",
     client: Optional[Any] = None,
 ) -> AddSenseResult:
@@ -304,6 +339,10 @@ def add_sense(
             sense.
         relevel_existing: Move a matched existing sense to ``difficulty_level``
             and ``disambiguation`` instead of only tagging it.
+        pos_subtype: The subtype a new lemma is stored under, for a list whose
+            members are all one kind of thing -- a closed set that must share
+            its cohort's subtype. The part of speech follows from it, and the
+            model is asked for neither. A matched existing sense keeps its own.
         source: Provenance recorded in the operation log.
         client: Pre-built LLM client, for tests.
 
@@ -318,6 +357,13 @@ def add_sense(
     if not domain.strip():
         return AddSenseResult(word=normalized, status="error", error="domain must not be empty")
     requested_tags = list(tags or [])
+    fixed_pos_type: Optional[str] = None
+    if pos_subtype is not None:
+        fixed_pos_type = pos_type_for_subtype(pos_subtype)
+        if fixed_pos_type is None or _needs_subtype_review(fixed_pos_type, pos_subtype):
+            return AddSenseResult(
+                word=normalized, status="error", error=f"unusable pos_subtype {pos_subtype!r}"
+            )
 
     def settle_match(matched: Lemma, status: str) -> AddSenseResult:
         """Tag, and on request move, an existing sense that is the one asked for."""
@@ -362,7 +408,9 @@ def add_sense(
     if llm_client is None:
         llm_client = LinguisticClient(config=config).client
 
-    context, prompt, schema = build_sense_prompt(normalized, domain.strip(), hint, existing)
+    context, prompt, schema = build_sense_prompt(
+        normalized, domain.strip(), hint, existing, pos_type=fixed_pos_type
+    )
     try:
         response = llm_client.generate_chat(
             prompt=prompt, model=config.model, json_schema=schema, context=context
@@ -391,32 +439,36 @@ def add_sense(
         return settle_match(existing[covered_by - 1], "moved" if relevel_existing else "covered")
 
     try:
-        pos_type = str(sense.get("pos") or "").lower()
-        pos_subtype = _normalize_subtype(pos_type, sense.get("pos_subtype"))
-        pos_error = _validate_pos(pos_type, pos_subtype)
+        if fixed_pos_type is not None:
+            pos_type = fixed_pos_type
+            new_subtype = pos_subtype
+        else:
+            pos_type = str(sense.get("pos") or "").lower()
+            new_subtype = _normalize_subtype(pos_type, sense.get("pos_subtype"))
+        pos_error = _validate_pos(pos_type, new_subtype)
         if pos_error is not None:
             return AddSenseResult(word=normalized, status="error", error=f"LLM gave {pos_error}")
-        assert pos_subtype is not None  # _validate_pos rejects None
-        if _needs_subtype_review(pos_type, pos_subtype):
+        assert new_subtype is not None  # _validate_pos rejects None
+        if _needs_subtype_review(pos_type, new_subtype):
             # Not offered, but a schema-valid POS/subtype mismatch is normalized
             # to the catch-all too.  Nothing is written, so a re-run retries it.
             return AddSenseResult(
                 word=normalized,
                 status="error",
-                error=f"LLM gave the catch-all subtype {pos_subtype!r}; nothing written",
+                error=f"LLM gave the catch-all subtype {new_subtype!r}; nothing written",
             )
 
         definition_text = str(sense.get("definition") or "").strip()
         if not definition_text:
             return AddSenseResult(word=normalized, status="error", error="LLM gave no definition")
 
-        guid = generate_guid(session, pos_type, pos_subtype)
+        guid = generate_guid(session, pos_type, new_subtype)
         new_lemma = Lemma(
             lemma_text=normalized,
             disambiguation=disambiguation,
             definition_text=definition_text,
             pos_type=pos_type,
-            pos_subtype=pos_subtype,
+            pos_subtype=new_subtype,
             guid=guid,
             difficulty_level=difficulty_level,
             sense_prominence=SENSE_PROMINENCE_RARE,
@@ -437,7 +489,7 @@ def add_sense(
             entity_guid=guid,
             guid=guid,
             pos_type=pos_type,
-            pos_subtype=pos_subtype,
+            pos_subtype=new_subtype,
             definition=definition_text,
             disambiguation=disambiguation,
             domain=domain,
@@ -476,7 +528,7 @@ def add_sense(
         disambiguation=disambiguation,
         definition_text=definition_text,
         pos_type=pos_type,
-        pos_subtype=pos_subtype,
+        pos_subtype=new_subtype,
         translations=stored,
         missing_languages=missing,
     )

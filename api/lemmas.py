@@ -360,6 +360,7 @@ def add_sense(
     tags: Optional[List[str]] = None,
     abbreviation: Optional[str] = None,
     relevel_existing: bool = False,
+    pos_subtype: Optional[str] = None,
     timeout: float = LLM_TIMEOUT_SECONDS,
 ) -> Any:
     """Add the sense an English word has in one field -- "check" in chess.
@@ -376,7 +377,8 @@ def add_sense(
     with no other meaning. ``abbreviation`` ("LBW") is recorded as a variant
     form of the sense. With ``relevel_existing`` a matched existing sense is
     moved to ``difficulty_level`` and given the disambiguation, rather than only
-    tagged.
+    tagged. ``pos_subtype`` fixes the subtype of a new lemma, for a closed set
+    whose members must share one; the model is then not asked for it.
 
     ``data["status"]`` is ``created``, ``covered`` (matched and tagged),
     ``moved`` (matched and moved) or ``already_exists`` (matched without a call).
@@ -396,6 +398,8 @@ def add_sense(
         payload["tags"] = tags
     if abbreviation:
         payload["abbreviation"] = abbreviation
+    if pos_subtype:
+        payload["pos_subtype"] = pos_subtype
     return post_json(f"{API_V1_PREFIX}/senses/add", payload, timeout=timeout)
 
 

@@ -567,6 +567,9 @@ class SenseList(NamedTuple):
     #: Tags for every sense the list creates or matches -- the theme and the field.
     tags: Sequence[str]
     entries: Sequence[SenseEntry]
+    #: The subtype every new lemma is stored under, for a closed set that must
+    #: share one; None lets the model choose per word.
+    pos_subtype: str | None = None
 
 
 def _entry_label(sense_list: SenseList, entry: SenseEntry) -> str | None:
@@ -598,6 +601,8 @@ def _check_sense_lists(sense_lists: Sequence[SenseList]) -> None:
 def print_sense_plan(sense_list: SenseList) -> None:
     print(f"Target level: {sense_list.level}  Domain: {sense_list.domain}")
     print(f"Tags: {', '.join(sense_list.tags)}")
+    if sense_list.pos_subtype:
+        print(f"Subtype: {sense_list.pos_subtype}")
     print(f"Curated senses: {len(sense_list.entries)}")
     for rank, entry in enumerate(sense_list.entries, start=1):
         label = _entry_label(sense_list, entry)
@@ -642,6 +647,7 @@ def execute_senses(sense_list: SenseList, model: str, limit: int | None) -> List
                 tags=list(sense_list.tags),
                 abbreviation=entry.abbreviation,
                 relevel_existing=entry.move,
+                pos_subtype=sense_list.pos_subtype,
             )
         except BarsukasAPIError as error:
             print(f"  failed: {error}")
