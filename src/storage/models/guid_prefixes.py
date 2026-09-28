@@ -195,6 +195,11 @@ SUBTYPE_DEFS: Dict[str, Dict[str, SubtypeDef]] = {
         ),
         "celestial_object": SubtypeDef(
             prefix="N64",
+            description=(
+                "Anything in the sky beyond the atmosphere, as a kind or by name, "
+                "including constellations"
+            ),
+            examples=["star", "planet", "comet", "galaxy", "Mars", "Orion"],
             comment=(
                 "Anything in the sky beyond the atmosphere, as a kind or by name: star, "
                 "planet, moon, asteroid, comet, galaxy, nebula, and Sirius, Mars, "
@@ -203,8 +208,7 @@ SUBTYPE_DEFS: Dict[str, Dict[str, SubtypeDef]] = {
                 "the stars that make it. Weather (cloud, rainbow, aurora) stays "
                 "natural_feature. Carved out of natural_feature, whose examples named "
                 "star; sun, moon, planet and star were stored there before this "
-                "existed. Left without a description or examples on purpose: the name "
-                "is what the classifier sees."
+                "existed."
             ),
             group="Physical Objects and Structures",
         ),
@@ -216,7 +220,8 @@ SUBTYPE_DEFS: Dict[str, Dict[str, SubtypeDef]] = {
         ),
         "electronic_device": SubtypeDef(
             prefix="N57",
-            description="Computers, phones, TVs, radios, cameras",
+            description="Devices that run on electricity to compute, communicate or record",
+            examples=["computer", "telephone", "television", "radio", "camera"],
             group="Physical Objects and Structures",
         ),
         "appliance": SubtypeDef(
@@ -442,6 +447,7 @@ SUBTYPE_DEFS: Dict[str, Dict[str, SubtypeDef]] = {
         "region": SubtypeDef(
             prefix="N45",
             description="Countries, states, and similar political regions",
+            examples=["Italy", "Japan", "California", "Scotland"],
             group="Named Entities",
         ),
         "city": SubtypeDef(
@@ -464,7 +470,8 @@ SUBTYPE_DEFS: Dict[str, Dict[str, SubtypeDef]] = {
         ),
         "temporal_name": SubtypeDef(
             prefix="N32",
-            description="Days of week, months, etc.",
+            description="Named days of the week, months and holidays",
+            examples=["Monday", "January", "Christmas", "New Year"],
             group="Other Categories",
         ),
         "nationality": SubtypeDef(
