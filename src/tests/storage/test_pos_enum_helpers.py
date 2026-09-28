@@ -235,3 +235,10 @@ def test_deprecated_subtypes_are_withheld_from_classification() -> None:
                 assert f"- {subtype}:" not in rendered
             else:
                 assert subtype in offered
+
+
+def test_render_subtype_list_can_withhold_the_catch_all() -> None:
+    assert "- other:" in render_subtype_list("noun")
+    without = render_subtype_list("noun", include_catch_all=False)
+    assert "- other:" not in without
+    assert "- occupation:" in without

@@ -25,7 +25,7 @@ from storage.models import Base, DerivativeForm, Lemma
 from storage.models.schema import SENSE_PROMINENCE_RARE
 from storage.models.variant_form import VARIANT_KIND_ABBREVIATION, VariantForm
 from storage.translation_helpers import get_translation
-from words.add_sense import add_sense
+from words.add_sense import add_sense, build_sense_prompt
 
 
 @pytest.fixture()
@@ -374,3 +374,16 @@ class TestFixedSubtype:
         assert result.status == "covered"
         queen = session.query(Lemma).filter(Lemma.lemma_text == "queen").one()
         assert queen.pos_subtype == "small_movable_object"
+
+
+class TestSubtypeGuidance:
+    def test_context_describes_noun_subtypes_and_withholds_the_catch_all(self) -> None:
+        context, _prompt, _schema = build_sense_prompt("volley", "tennis", None, [])
+
+        assert "- participant_role: A slot a person fills" in context
+        assert "- occupation: Jobs and professions" in context
+        assert "- performance_technique: A named way" in context
+        assert "- other:" not in context
+        # Only the nouns are described; the other lists are one line of names.
+        (verb_line,) = [line for line in context.splitlines() if line.startswith("VERB SUBTYPES:")]
+        assert "," in verb_line

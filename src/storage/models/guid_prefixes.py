@@ -75,21 +75,25 @@ SUBTYPE_DEFS: Dict[str, Dict[str, SubtypeDef]] = {
         ),
         "occupation": SubtypeDef(
             prefix="N36",
-            description="Professions and roles",
-            examples=["teacher", "doctor", "accountant"],
+            description="Jobs and professions a person is employed in",
+            examples=["teacher", "doctor", "accountant", "referee", "telephone lineman"],
             group="People and Living Things",
         ),
         "participant_role": SubtypeDef(
             prefix="N63",
+            description=(
+                "A slot a person fills inside a game, team, performance or event, "
+                "not a job they are employed in"
+            ),
+            examples=["goalkeeper", "second baseman", "football lineman", "captain", "best man"],
             comment=(
-                "A slot a person fills in the structure of a game, team, performance "
-                "or event: second baseman, goalkeeper, declarer, understudy, best man. "
                 "The test against occupation is whether the word names a slot inside "
                 "the activity or a job someone holds: second baseman is a slot, a "
                 "referee or a card dealer is a job. Named for the sports and games "
-                "wordlists, but meant for theater roles and ceremonies as well. Left "
-                "without a description or examples on purpose: the name is what the "
-                "classifier sees."
+                "wordlists, but meant for theater roles and ceremonies as well. It "
+                "first shipped without a description, and the bare name drew referee "
+                "and umpire into it; hence the description and the job examples on "
+                "occupation."
             ),
             group="People and Living Things",
         ),
@@ -295,26 +299,28 @@ SUBTYPE_DEFS: Dict[str, Dict[str, SubtypeDef]] = {
         ),
         "performance_technique": SubtypeDef(
             prefix="N61",
+            description=(
+                "A named way of carrying out an action, defined by its form, such as a "
+                "kind of stroke, shot, kick or stitch"
+            ),
+            examples=["layup", "volley", "topspin", "uppercut", "backstitch"],
             comment=(
                 "A named way of carrying out an action, defined by its form: layup, "
                 "bicycle kick, uppercut, axel, backstitch, plie, julienne. The test "
                 "against strategic_tactic is form against aim -- a layup is how the "
                 "shot is made, a pick and roll is what the play is for. activity is a "
-                "pursuit (reading, hiking), not one named way of doing something. Left "
-                "without a description or examples on purpose: the name is what the "
-                "classifier sees."
+                "pursuit (reading, hiking), not one named way of doing something."
             ),
             group="Abstract Concepts and Ideas",
         ),
         "strategic_tactic": SubtypeDef(
             prefix="N62",
-            comment=(
+            description=(
                 "A named move, play or plan defined by what it is meant to achieve, "
-                "and not named in any rules: fork, gambit, pick and roll, bluff, "
-                "anchoring, pincer movement. A move the rules define (castling) is "
-                "rule_defined_event instead. Left without a description or examples on "
-                "purpose: the name is what the classifier sees."
+                "not by any rules"
             ),
+            examples=["fork", "gambit", "pick and roll", "bluff", "pincer movement"],
+            comment=("A move the rules define (castling) is rule_defined_event instead."),
             group="Abstract Concepts and Ideas",
         ),
         "symbolic_element": SubtypeDef(
@@ -373,15 +379,18 @@ SUBTYPE_DEFS: Dict[str, Dict[str, SubtypeDef]] = {
         ),
         "rule_defined_event": SubtypeDef(
             prefix="N60",
+            description=(
+                "A move, outcome, state or violation that the rules of a game or "
+                "procedure themselves define and name"
+            ),
+            examples=["checkmate", "castling", "strikeout", "offside", "quorum"],
             comment=(
                 "A move, outcome, state or violation that the formal rules of a game "
                 "or procedure define and name: checkmate, castling, strikeout, "
                 "offside, deuce, quorum, point of order. The test is whether the rules "
                 "themselves use the term; a named plan the rules do not mention is "
                 "strategic_tactic. Carved out of process_event, which had taken "
-                "checkmate and double play for want of anything closer. Left without "
-                "a description or examples on purpose: the name is what the "
-                "classifier sees."
+                "checkmate and double play for want of anything closer."
             ),
             group="Processes and Time",
         ),
@@ -426,8 +435,8 @@ SUBTYPE_DEFS: Dict[str, Dict[str, SubtypeDef]] = {
         ),
         "place_name": SubtypeDef(
             prefix="N30",
-            description="Generic place nouns",
-            examples=["room", "street", "etc."],
+            description="Generic place nouns, including areas of play",
+            examples=["room", "street", "park", "playing field", "tennis court"],
             group="Named Entities",
         ),
         "region": SubtypeDef(
@@ -1037,8 +1046,11 @@ NAME_KIND_GUID_PREFIXES = {
 SENTENCE_GUID_PREFIX = "S"
 
 
-def render_subtype_list(pos_type: str) -> str:
+def render_subtype_list(pos_type: str, include_catch_all: bool = True) -> str:
     """Render one POS type's subtypes as the bullet list a prompt shows an LLM.
+
+    ``include_catch_all=False`` leaves out the ``<pos>_other`` line, for a
+    caller (add_sense) whose schema does not offer the catch-all.
 
     The classification schema's enum already comes from this table
     (``get_subtype_values_for_pos``). Rendering the prompt's descriptions from
@@ -1061,6 +1073,8 @@ def render_subtype_list(pos_type: str) -> str:
         # A deprecated subtype keeps its prefix and enum member but is not a
         # choice any more, so offering it would invite new words into it.
         if spec.deprecated:
+            continue
+        if not include_catch_all and subtype == f"{pos_type}_other":
             continue
         # The prompt offers the catch-all under the bare name the enum uses.
         name = "other" if subtype == f"{pos_type}_other" else subtype

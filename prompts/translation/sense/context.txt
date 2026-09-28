@@ -17,7 +17,10 @@ conjunction, interjection, determiner, article, numeral, auxiliary, modal.
 - The part-of-speech subtype, for "noun", "verb", "adjective", and "adverb".  For any other
 part-of-speech, return the part-of-speech (pronoun, preposition, etc.) as the subtype.
 Choose the subtype that describes what the term names - a piece of equipment, a person, an action, a place, an event - not the field it comes from.
-NOUN SUBTYPES: {noun_subtypes}
+
+NOUN SUBTYPES:
+{noun_subtypes}
+
 VERB SUBTYPES: {verb_subtypes}
 ADJECTIVE SUBTYPES: {adjective_subtypes}
 ADVERB SUBTYPES: {adverb_subtypes}
