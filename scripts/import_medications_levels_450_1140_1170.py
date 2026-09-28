@@ -13,8 +13,8 @@ One named-band level and four topic levels:
   morphine, caffeine, ibuprofen, quinine, the hormones (testosterone,
   progesterone, oxytocin, epinephrine) and nitrous oxide.  They join aspirin,
   paracetamol and the other medications already at 450.  Testosterone is
-  already a lemma, as a chemical compound at 1050, so the preflight will skip
-  it; moving it is a separate decision.
+  already a lemma, as a chemical compound at 1050, so the server will report
+  it covered; moving it is a separate decision.
 * 1140, ``WHO_ESSENTIAL`` -- the WHO Model List of Essential Medicines, 24th
   list (2025), as transcribed on the English Wikipedia article "WHO Model List
   of Essential Medicines" (fetched 2026-09-27), in the list's own section order
@@ -49,16 +49,20 @@ aciclovir, rifampicin, cefalexin, salbutamol, glyceryl trinitrate, leuprorelin
 and hyoscine.  (Acetaminophen is deliberately absent: paracetamol is already
 the lemma, and the American name would duplicate it.)
 
-Generic names go through ``add_word``: sense discovery handles a single-sense
-technical noun well, and supplies the definition and translations.  Brand and
+Generic names go through the add-sense path with the subtype fixed to
+``medication_remedy``, so the model is not asked for one, and are marked
+unique: a drug name has no other English meaning to tell it apart from, so no
+"(medication)" label is stored.  The model supplies the definition and
+translations in one call per name.  Brand and
 vaccine names go through ``add_term`` as :class:`TermEntry` rows, because
 asked what "Lipitor" means the model would answer "atorvastatin" and file it
 there.  Each brand is its own lemma -- one per brand, not per product line --
 with a definition naming its generic, and is tagged ``medications``.  Brands
 are proper nouns and keep their capitals.
 
-Not pre-deduplicated against the database; the preflight skips what is already
-accounted for.  When the list was drawn up none of it was.
+Not pre-deduplicated against the database; the server reports a sense it
+already has as covered, and the term preflight skips brands already accounted
+for.  When the list was drawn up none of it was.
 
 Running without ``--execute`` only prints the plan and makes no HTTP requests.
 """
@@ -73,7 +77,9 @@ ROOT = Path(__file__).resolve().parent.parent
 if str(ROOT) not in sys.path:
     sys.path.insert(0, str(ROOT))
 
-from scripts.wordlist_import_helper import TermEntry, run_leveled_import
+from scripts.wordlist_import_helper import SenseEntry, SenseList, TermEntry, run_sense_import
+
+SUBTYPE = "medication_remedy"
 
 COMMON_LEVEL = 450
 ESSENTIAL_LEVEL = 1140
@@ -908,16 +914,27 @@ VACCINES: Sequence[TermEntry] = (
 OTHER_PRESCRIPTION: Sequence[str] = (*US_PRESCRIBED, *TOP_REVENUE)
 
 
+def _generics(level: int, names: Sequence[str]) -> SenseList:
+    return SenseList(
+        level=level,
+        domain="medicine",
+        label="medication",
+        tags=TAGS,
+        pos_subtype=SUBTYPE,
+        entries=tuple(SenseEntry(name, unique=True) for name in names),
+    )
+
+
 if __name__ == "__main__":
     raise SystemExit(
-        run_leveled_import(
+        run_sense_import(
             [
-                (COMMON_LEVEL, COMMON),
-                (ESSENTIAL_LEVEL, WHO_ESSENTIAL),
-                (OTHER_PRESCRIPTION_LEVEL, OTHER_PRESCRIPTION),
+                _generics(COMMON_LEVEL, COMMON),
+                _generics(ESSENTIAL_LEVEL, WHO_ESSENTIAL),
+                _generics(OTHER_PRESCRIPTION_LEVEL, OTHER_PRESCRIPTION),
             ],
-            [(BRAND_LEVEL, BRANDS), (VACCINE_LEVEL, VACCINES)],
             __doc__ or "",
-            tags=TAGS,
+            term_groups=[(BRAND_LEVEL, BRANDS), (VACCINE_LEVEL, VACCINES)],
+            term_tags=TAGS,
         )
     )
