@@ -287,6 +287,28 @@ class TestValidation:
         assert result.status == "error"
         assert session.query(Lemma).filter(Lemma.lemma_text == "check").count() == 1
 
+    @pytest.mark.parametrize("subtype", ["noun_other", "other"])
+    def test_catch_all_subtype_is_refused(
+        self, session: Session, config: DataSourceConfig, subtype: str
+    ) -> None:
+        sense = dict(_chess_check(), pos_subtype=subtype)
+
+        result = _add(session, config, _FakeClient(sense))
+
+        assert result.status == "error"
+        assert "catch-all" in (result.error or "")
+        assert session.query(Lemma).filter(Lemma.lemma_text == "check").count() == 1
+
+    def test_catch_all_is_not_offered(self, session: Session, config: DataSourceConfig) -> None:
+        client = _FakeClient(_chess_check())
+        _add(session, config, client)
+
+        schema = client.calls[0]["json_schema"]
+        assert "other" not in schema.properties["pos_subtype"].enum
+        # Closed classes answer with their bare POS name, which is still offered.
+        assert "preposition" in schema.properties["pos_subtype"].enum
+        assert ", other" not in client.calls[0]["context"]
+
     def test_empty_domain_is_rejected_before_the_call(
         self, session: Session, config: DataSourceConfig
     ) -> None:
