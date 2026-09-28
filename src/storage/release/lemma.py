@@ -296,10 +296,12 @@ def apply_base_fields(lemma: Lemma, record: Dict[str, Any]) -> None:
 def apply_translations(session: Session, lemma: Lemma, record: Dict[str, Any]) -> int:
     """Create or update this lemma's translations from a release record.
 
-    English is the lemma text, not a translation row, so it is skipped. Returns
-    the number of languages written.
+    English is the lemma text: apply_base_fields sets it, and here it only
+    seeds the ``en`` row when the lemma has none, as the whole-database load
+    does. Returns the number of other languages written.
     """
     translations = record.get("translations") or {}
+    translation_helpers.ensure_english_translation(session, lemma)
     # The "en" entry belongs to the lemma row, not here; apply_base_fields
     # takes it. Everything else annotates a translation.
     disambiguations = release_disambiguations(record)

@@ -109,7 +109,8 @@ class TestAdditions:
         assert json.loads(imported.emoji) == [{"type": "unicode", "value": "🦇"}]
         assert get_qid_for_lemma(db_session, imported.id) == "Q28425"
         assert {t.language_code: t.translation for t in imported.translations} == {
-            "lt": "šikšnosparnis"
+            "en": "bat",
+            "lt": "šikšnosparnis",
         }
 
 

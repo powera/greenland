@@ -54,6 +54,7 @@ from words.emoji import (
 )
 from storage.translation_helpers import (
     DEFAULT_GENERATION_LANGUAGES,
+    ensure_english_translation,
     get_supported_languages,
 )
 
@@ -177,6 +178,7 @@ def add_lemma() -> ResponseReturnValue:
 
         g.db.add(new_lemma)
         g.db.flush()  # Get the ID
+        ensure_english_translation(g.db, new_lemma)
 
         # Log the creation
         log_translation_change(

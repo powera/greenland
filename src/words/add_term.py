@@ -39,7 +39,7 @@ from storage.crud.operation_log import log_translation_change
 from storage.models.guid_prefixes import SUBTYPE_GUID_PREFIXES
 from storage.models.schema import Lemma
 from storage.queries.lemma import word_exists_in_english
-from storage.translation_helpers import set_translation
+from storage.translation_helpers import ensure_english_translation, set_translation
 from storage.utils.guid import generate_guid
 from words.translation import build_term_translation_prompt
 
@@ -211,6 +211,7 @@ def add_term(
     )
     session.add(new_lemma)
     session.flush()
+    ensure_english_translation(session, new_lemma)
 
     log_translation_change(
         session=session,

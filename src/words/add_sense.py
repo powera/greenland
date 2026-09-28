@@ -51,7 +51,10 @@ from storage.models.guid_prefixes import SUBTYPE_GUID_PREFIXES
 from storage.models.schema import SENSE_PROMINENCE_RARE, Lemma
 from storage.models.variant_form import VARIANT_KIND_ABBREVIATION
 from storage.queries.lemma import get_english_senses
-from storage.translation_helpers import convert_llm_response_to_lang_codes
+from storage.translation_helpers import (
+    convert_llm_response_to_lang_codes,
+    ensure_english_translation,
+)
 from storage.utils.enums import get_all_pos_subtypes, get_subtype_values_for_pos
 from storage.utils.guid import generate_guid
 from wordfreq.translation.constants import VALID_POS_TYPES
@@ -477,6 +480,7 @@ def add_sense(
         )
         session.add(new_lemma)
         session.flush()
+        ensure_english_translation(session, new_lemma)
 
         log_translation_change(
             session=session,

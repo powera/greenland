@@ -13,7 +13,7 @@ from storage.models.schema import (
     Lemma,
     LemmaTranslation,
 )
-from storage.translation_helpers import set_translation
+from storage.translation_helpers import ensure_english_translation, set_translation
 from storage.utils.guid import generate_guid
 
 
@@ -98,6 +98,7 @@ def add_lemma(
         lemma.sense_prominence = sense_prominence
     session.add(lemma)
     session.flush()
+    ensure_english_translation(session, lemma)
 
     # Translations go to the LemmaTranslation table via set_translation. The
     # legacy Lemma.<language>_translation columns are gone -- that table is the

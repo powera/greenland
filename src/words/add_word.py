@@ -63,7 +63,11 @@ from storage.models.schema import (
 )
 from storage.queries.lemma import word_exists_in_english
 from words.pending_imports.staging import create_pending_import, find_pending_import
-from storage.translation_helpers import convert_llm_response_to_lang_codes, set_translation
+from storage.translation_helpers import (
+    convert_llm_response_to_lang_codes,
+    ensure_english_translation,
+    set_translation,
+)
 from storage.utils.guid import generate_guid
 from wordfreq.translation.client import LinguisticClient
 from wordfreq.translation.constants import MAJOR_POS_TYPES
@@ -1178,6 +1182,7 @@ def add_word(
             )
             session.add(new_lemma)
             session.flush()
+            ensure_english_translation(session, new_lemma)
 
             log_translation_change(
                 session=session,

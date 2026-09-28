@@ -834,6 +834,40 @@ def set_translation(
     return old_translation, translation
 
 
+def ensure_english_translation(session: Session, lemma: Lemma) -> bool:
+    """Write the lemma's ``en`` translation row from ``lemma_text`` if it has none.
+
+    The ``en`` row is the definitive English translation (see
+    :func:`get_translation`), but only the lemmas migrated in August 2026 had
+    one: add_word, add_term, add_sense and the release import all created
+    lemmas without it, leaving English blank in Barsukas.  Every lemma-creating
+    path calls this once the lemma has an id.
+
+    An existing row is left alone, even if it differs from ``lemma_text`` --
+    an English translation may legitimately read differently from the
+    headword.  Returns whether a row was written.
+    """
+    if lemma.id is None:
+        raise ValueError("ensure_english_translation needs a flushed lemma")
+    exists = (
+        session.query(LemmaTranslation.id)
+        .filter(LemmaTranslation.lemma_id == lemma.id, LemmaTranslation.language_code == "en")
+        .first()
+    )
+    if exists is not None:
+        return False
+    session.add(
+        LemmaTranslation(
+            lemma_id=lemma.id,
+            language_code="en",
+            translation=lemma.lemma_text,
+            sort_key=compute_sort_key("en", lemma.lemma_text),
+            verified=False,
+        )
+    )
+    return True
+
+
 def get_translation_disambiguation(session: Session, lemma: Lemma, lang_code: str) -> Optional[str]:
     """Get disambiguation for a lemma's translation in the specified language.
 
