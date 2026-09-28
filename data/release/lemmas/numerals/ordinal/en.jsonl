@@ -8,3 +8,13 @@
 {"guid": "Z02_008", "forms": [{"grammatical_form": "numeral/en_ordinal", "text": "eighth", "is_base_form": true, "ipa": "/eɪtʃ/", "phonetic": "EYCH"}]}
 {"guid": "Z02_009", "forms": [{"grammatical_form": "numeral/en_ordinal", "text": "ninth", "is_base_form": true}]}
 {"guid": "Z02_010", "forms": [{"grammatical_form": "numeral/en_ordinal", "text": "tenth", "is_base_form": true}]}
+{"guid": "Z02_011", "forms": [{"grammatical_form": "numeral/en_cardinal", "text": "eleventh", "is_base_form": true}]}
+{"guid": "Z02_012", "forms": [{"grammatical_form": "numeral/en_cardinal", "text": "twelfth", "is_base_form": true}]}
+{"guid": "Z02_013", "forms": [{"grammatical_form": "numeral/en_cardinal", "text": "thirteenth", "is_base_form": true}]}
+{"guid": "Z02_014", "forms": [{"grammatical_form": "numeral/en_cardinal", "text": "fourteenth", "is_base_form": true}]}
+{"guid": "Z02_015", "forms": [{"grammatical_form": "numeral/en_cardinal", "text": "fifteenth", "is_base_form": true}]}
+{"guid": "Z02_016", "forms": [{"grammatical_form": "numeral/en_cardinal", "text": "sixteenth", "is_base_form": true}]}
+{"guid": "Z02_017", "forms": [{"grammatical_form": "numeral/en_cardinal", "text": "seventeenth", "is_base_form": true}]}
+{"guid": "Z02_018", "forms": [{"grammatical_form": "numeral/en_cardinal", "text": "eighteenth", "is_base_form": true}]}
+{"guid": "Z02_019", "forms": [{"grammatical_form": "numeral/en_cardinal", "text": "nineteenth", "is_base_form": true}]}
+{"guid": "Z02_020", "forms": [{"grammatical_form": "numeral/en_cardinal", "text": "twentieth", "is_base_form": true}]}
