@@ -1,0 +1,114 @@
+{% extends "base.html" %}
+
+{% block title %}Curriculum Levels{% endblock %}
+
+{% block extra_head %}
+<link rel="stylesheet" href="{{ url_for('static', filename='css/levels.css') }}">
+{% endblock %}
+
+{% block content %}
+<div class="row mb-3">
+    <div class="col">
+        <h2 class="mb-2"><i class="bi bi-bar-chart-steps"></i> Curriculum Levels</h2>
+        <p class="text-muted">
+            The names, CEFR estimates and prerequisites Trakaido shows for each level
+            (the wireword manifest's <code>config.levels</code>). Every level with words is
+            listed, named or not. Names are in English; translations are for the learner's
+            interface language.
+        </p>
+    </div>
+</div>
+
+<form method="get" class="row g-2 mb-3">
+    <div class="col-auto">
+        <select class="form-select form-select-sm" name="show" aria-label="Show">
+            <option value="all" {% if show == 'all' %}selected{% endif %}>All levels</option>
+            <option value="unnamed" {% if show == 'unnamed' %}selected{% endif %}>Unnamed only</option>
+            <option value="untranslated" {% if show == 'untranslated' %}selected{% endif %}>Named, missing translations</option>
+        </select>
+    </div>
+    <div class="col-auto">
+        <select class="form-select form-select-sm" name="band" aria-label="Band">
+            <option value="" {% if not band %}selected{% endif %}>All bands</option>
+            <option value="core" {% if band == 'core' %}selected{% endif %}>Core (1&ndash;30)</option>
+            <option value="named" {% if band == 'named' %}selected{% endif %}>Named units (100&ndash;499)</option>
+            <option value="topic" {% if band == 'topic' %}selected{% endif %}>Topic (1000+)</option>
+        </select>
+    </div>
+    <div class="col-auto">
+        <button type="submit" class="btn btn-sm btn-outline-secondary">Filter</button>
+    </div>
+</form>
+
+<table class="table table-sm table-hover levels-table">
+    <thead>
+        <tr>
+            <th>Level</th>
+            <th>Words</th>
+            <th>Name</th>
+            <th>CEFR</th>
+            <th>Prerequisites</th>
+            <th>Translations</th>
+            <th>Sample words</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for row in rows %}
+        <tr>
+            <td>
+                <a href="{{ url_for('levels.edit_level', level=row.level) }}">{{ row.level }}</a>
+                <span class="badge bg-light text-dark">{{ row.band }}</span>
+            </td>
+            <td>{{ row.word_count }}</td>
+            <td>
+                {% if row.meta %}
+                    <a href="{{ url_for('levels.edit_level', level=row.level) }}">{{ row.meta.name }}</a>
+                {% else %}
+                    <span class="text-muted fst-italic">unnamed</span>
+                {% endif %}
+            </td>
+            <td>{{ row.meta.cefr if row.meta and row.meta.cefr else '' }}</td>
+            <td>{{ row.meta.get_prerequisites() | join(', ') if row.meta else '' }}</td>
+            <td>
+                {% if row.meta %}
+                    {{ languages | length - row.missing_languages | length }}/{{ languages | length }}
+                {% endif %}
+            </td>
+            <td class="levels-sample text-muted">{{ row.sample | join(', ') }}</td>
+        </tr>
+        {% else %}
+        <tr><td colspan="7" class="text-muted">No levels match.</td></tr>
+        {% endfor %}
+    </tbody>
+</table>
+
+{# Whole-list actions: each its own form below the table, carrying exactly
+   the levels rendered above. #}
+<div class="row g-3 mb-4">
+    <div class="col-md-6">
+        <form method="POST" action="{{ url_for('levels.generate_missing', show=show, band=band) }}">
+            {% for level in unnamed_levels %}
+                <input type="hidden" name="level" value="{{ level }}">
+            {% endfor %}
+            <button type="submit" class="btn btn-outline-primary"
+                    {% if not unnamed_levels or config.get('READONLY', False) %}disabled{% endif %}>
+                <i class="bi bi-magic"></i> Name {{ unnamed_levels | length }} unnamed level(s) with LLM
+            </button>
+            <div class="form-text">Queues one task per level: an English name and CEFR
+                estimate from its words, then translations.</div>
+        </form>
+    </div>
+    <div class="col-md-6">
+        <form method="POST" action="{{ url_for('levels.translate_missing', show=show, band=band) }}">
+            {% for level in untranslated_levels %}
+                <input type="hidden" name="level" value="{{ level }}">
+            {% endfor %}
+            <button type="submit" class="btn btn-outline-primary"
+                    {% if not untranslated_levels or config.get('READONLY', False) %}disabled{% endif %}>
+                <i class="bi bi-translate"></i> Translate {{ untranslated_levels | length }} level name(s)
+            </button>
+            <div class="form-text">Fills missing languages only; existing translations are kept.</div>
+        </form>
+    </div>
+</div>
+{% endblock %}

@@ -56,6 +56,9 @@
                             <li><a class="dropdown-item" href="{{ url_for('categories.list_categories') }}">
                                 <i class="bi bi-grid-3x3-gap"></i> {{ STRINGS.navigation.get('word_categories', 'Word Categories') }}
                             </a></li>
+                            <li><a class="dropdown-item" href="{{ url_for('levels.list_levels') }}">
+                                <i class="bi bi-bar-chart-steps"></i> {{ STRINGS.navigation.get('levels', 'Levels') }}
+                            </a></li>
                             <li><a class="dropdown-item" href="{{ url_for('concepts.list_concepts_view') }}">
                                 <i class="bi bi-journal-richtext"></i> {{ STRINGS.navigation.get('concepts', 'Concepts') }}
                             </a></li>

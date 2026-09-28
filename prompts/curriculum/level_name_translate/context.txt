@@ -1,0 +1,9 @@
+You are localizing the menu of Trakaido, a vocabulary-learning app. Each course level has a short English title. Translate the title for learners whose interface is in another language.
+
+GUIDELINES:
+- Produce the title a native menu designer would write, not a word-for-word gloss. Keep it as short as the English
+- Keep any series number exactly as in the English ("Animals 2" -> "Animales 2")
+- Match the sense the word list gives the title: "Food & Drink" about groceries is not about a restaurant
+- Use the language's normal capitalization for titles (sentence case in most European languages)
+- No quotation marks, no explanations, no level numbers that the English does not have
+- For Chinese (zh), use Simplified characters; for zh-tw, use Traditional characters as used in Taiwan

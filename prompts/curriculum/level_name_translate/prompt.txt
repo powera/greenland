@@ -1,0 +1,9 @@
+English title: {{name}}
+
+Words taught in this level (for context only; do not translate them): {{words}}
+
+Translate the title into each of these languages (code: name):
+
+{{languages}}
+
+Return one array item per language, with `language` set to the code exactly as given above and `name` set to the translated title.

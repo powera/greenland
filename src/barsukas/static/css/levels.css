@@ -1,0 +1,19 @@
+/* Curriculum levels pages (templates/levels/). */
+
+.levels-table td {
+    vertical-align: middle;
+}
+
+.levels-sample {
+    font-size: 0.85em;
+    max-width: 28rem;
+}
+
+.levels-translation-label {
+    white-space: nowrap;
+}
+
+.levels-word-list {
+    columns: 3 14rem;
+    font-size: 0.9em;
+}

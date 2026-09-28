@@ -1,0 +1,12 @@
+Propose a title for level {{level}}, which teaches these {{word_count}} words (most frequent first; part of speech and subtype in parentheses):
+
+{{words}}
+
+Titles already given to other levels (level number: title):
+
+{{existing_names}}
+
+Return:
+- `name`: the English title
+- `cefr`: your CEFR estimate
+- `rationale`: one sentence for the curator

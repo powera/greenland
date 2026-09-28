@@ -17,6 +17,7 @@ from workqueue.handlers.idioms import (
     handle_idioms_equivalents_validate,
     handle_idioms_generate,
 )
+from workqueue.handlers.levels import handle_levels_name_generate, handle_levels_name_translate
 from workqueue.handlers.sentences import (
     handle_sentences_batch_decompose_submit,
     handle_sentences_batch_translate_submit,
@@ -67,6 +68,8 @@ TASK_HANDLERS = {
     "idioms.generate": handle_idioms_generate,
     "idioms.equivalents.populate": handle_idioms_equivalents_populate,
     "idioms.equivalents.validate": handle_idioms_equivalents_validate,
+    TaskType.LEVELS_NAME_GENERATE: handle_levels_name_generate,
+    TaskType.LEVELS_NAME_TRANSLATE: handle_levels_name_translate,
     "audio.generate.lemma": handle_audio_generate_lemma,
     "audio.generate.sentence": handle_audio_generate_sentence,
     TaskType.CONVERSATIONS_GENERATE: handle_conversations_generate,

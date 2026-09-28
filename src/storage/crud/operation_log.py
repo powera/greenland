@@ -115,6 +115,7 @@ GUID_TOMBSTONE_UPDATE = "guid_tombstone_update"
 CURRICULUM_LEVEL_CREATE = "curriculum_level_create"
 CURRICULUM_LEVEL_UPDATE = "curriculum_level_update"
 CURRICULUM_LEVEL_DELETE = "curriculum_level_delete"
+CURRICULUM_LEVEL_TRANSLATION_UPDATE = "curriculum_level_translation_update"
 
 # Operation types for the name family.
 NAME_CREATE = "name_create"
