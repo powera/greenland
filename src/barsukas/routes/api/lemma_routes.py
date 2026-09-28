@@ -1316,6 +1316,135 @@ def add_term_endpoint() -> ResponseReturnValue:
     )
 
 
+@bp.route("/v1/senses/add", methods=["POST"])
+@mirrored_facade("/api/v1/senses/add", "POST")
+def add_sense_endpoint() -> ResponseReturnValue:
+    """Add the sense an English word has in one field -- "check" in chess.
+
+    The fourth add path. ``/v1/words/add`` and ``/v1/terms/add`` both stop at a
+    headword that already exists, so neither can add the chess "check" beside
+    "check (examine)". This endpoint takes the word, the domain and an optional
+    hint, and makes one LLM call that describes the domain sense and says
+    whether one of the headword's existing senses already is it. **It makes an
+    LLM call and costs money**, unless an existing sense already carries the
+    requested disambiguation or tags.
+
+    JSON body:
+      - ``word``: the English headword, which may be several words (required).
+      - ``domain``: the field, as the prompt should name it (required).
+      - ``disambiguation``: label for a new lemma, e.g. ``"chess"``; omit or
+        null for a headword with no other meaning.
+      - ``hint``: optional short gloss naming the sense.
+      - ``model``: LLM model name (required).
+      - ``difficulty_level``: level to create at, or to move a matched sense
+        to (optional; defaults to -1, unset).
+      - ``tags``: optional list of tags for the new or matched sense.
+      - ``abbreviation``: optional abbreviation recorded as a variant ("LBW").
+      - ``relevel_existing``: when true, a matched existing sense is moved to
+        ``difficulty_level`` and given ``disambiguation`` rather than only
+        tagged.
+
+    ``status`` is ``created``, ``covered`` (an existing sense matched and was
+    tagged), ``moved`` (matched and moved), or ``already_exists`` (matched with
+    no LLM call).
+    """
+    from storage.backend.config import BackendType, DataSourceConfig
+    from words.add_sense import DIFFICULTY_LEVEL as ADD_SENSE_DEFAULT_DIFFICULTY
+    from words.add_sense import add_sense
+
+    model, error = _require_model()
+    if error is not None:
+        return error
+
+    payload = request.get_json(silent=True) or {}
+
+    required_values: Dict[str, str] = {}
+    for field_name in ("word", "domain"):
+        field_value = payload.get(field_name)
+        if not isinstance(field_value, str) or not field_value.strip():
+            return _build_error_response(f"{field_name} is required and must be a non-empty string")
+        required_values[field_name] = field_value.strip()
+
+    optional_values: Dict[str, Optional[str]] = {}
+    for field_name in ("disambiguation", "hint", "abbreviation"):
+        field_value = payload.get(field_name)
+        if field_value is not None and not isinstance(field_value, str):
+            return _build_error_response(f"{field_name} must be a string or null")
+        optional_values[field_name] = field_value.strip() if field_value else None
+
+    relevel_existing = payload.get("relevel_existing", False)
+    if not isinstance(relevel_existing, bool):
+        return _build_error_response("relevel_existing must be a boolean")
+
+    difficulty_value = payload.get("difficulty_level", ADD_SENSE_DEFAULT_DIFFICULTY)
+    try:
+        difficulty_level = int(difficulty_value)
+    except (TypeError, ValueError):
+        return _build_error_response("difficulty_level must be an integer")
+
+    if difficulty_level != Config.EXCLUDE_DIFFICULTY_LEVEL and (
+        difficulty_level < Config.MIN_DIFFICULTY_LEVEL
+        or difficulty_level > Config.MAX_DIFFICULTY_LEVEL
+    ):
+        return _build_error_response(
+            f"difficulty_level must be between {Config.MIN_DIFFICULTY_LEVEL} and "
+            f"{Config.MAX_DIFFICULTY_LEVEL}, or {Config.EXCLUDE_DIFFICULTY_LEVEL}"
+        )
+
+    tags_raw = payload.get("tags")
+    tags: Optional[List[str]] = None
+    if tags_raw is not None:
+        if not isinstance(tags_raw, list):
+            return _build_error_response("tags must be a list of strings")
+        tags = []
+        for tag in tags_raw:
+            if not isinstance(tag, str) or not tag.strip():
+                return _build_error_response("tags entries must be non-empty strings")
+            tags.append(tag.strip())
+
+    config = DataSourceConfig(
+        backend_type=BackendType.SQLITE,
+        sqlite_path=Config.DB_PATH,
+        model=model,
+        debug=Config.DEBUG,
+    )
+    result = add_sense(
+        g.db,
+        required_values["word"],
+        domain=required_values["domain"],
+        disambiguation=optional_values["disambiguation"],
+        hint=optional_values["hint"],
+        abbreviation=optional_values["abbreviation"],
+        config=config,
+        difficulty_level=difficulty_level,
+        tags=tags,
+        relevel_existing=relevel_existing,
+        source=Config.OPERATION_LOG_SOURCE,
+    )
+
+    if result.status == "error":
+        return _build_error_response(result.error or "failed to add sense")
+
+    data = {
+        "word": result.word,
+        "status": result.status,
+        "guid": result.guid,
+        "disambiguation": result.disambiguation,
+        "definition_text": result.definition_text,
+        "pos_type": result.pos_type,
+        "pos_subtype": result.pos_subtype,
+        "translations": result.translations,
+        "missing_languages": result.missing_languages,
+    }
+    return _build_success_response(
+        data,
+        {
+            "model": model,
+            "created": 1 if result.status == "created" else 0,
+        },
+    )
+
+
 @bp.route("/v1/lemma/<main_guid>/merge-synonym/<synonym_guid>", methods=["POST"])
 @mirrored_facade("/api/v1/lemma/<main_guid>/merge-synonym/<synonym_guid>", "POST")
 @mirrored_facade("/api/v1/lemma/<main_guid>/merge-synonym/<synonym_guid>", "POST")

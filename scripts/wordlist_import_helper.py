@@ -26,6 +26,12 @@ the translations only.
 a domain wordlist that is mostly ordinary English plus the few borrowings in
 it that sense discovery would mistranslate.
 
+:func:`run_sense_import` is for a field's vocabulary -- a sport, a game --
+where the words are ordinary English but the meanings are the field's: "check"
+in chess, "single" in baseball.  Both paths above stop at a headword that
+already exists, so these go to ``api.lemmas.add_sense``, whose LLM call
+describes the field's sense and decides whether an existing one already is it.
+
 Without ``--execute`` the run prints its plan and makes no HTTP requests at
 all, which is the state every one of these scripts is committed in.
 """
@@ -46,7 +52,7 @@ if str(ROOT) not in sys.path:
 from api import BarsukasAPIError
 from api.batch_operations import pending_import_words
 from api.constants import BASE_URL
-from api.lemmas import add_term, add_word, words_exist
+from api.lemmas import add_sense, add_term, add_word, words_exist
 
 DEFAULT_MODEL = "gpt-6-luna"
 
@@ -523,6 +529,172 @@ def run_leveled_import(
             execute_terms(term_group, level, args.model, args.limit, tags=tags, queued=queued)
     except (BarsukasAPIError, RuntimeError, requests.exceptions.RequestException) as error:
         print(f"Import stopped: {error}", file=sys.stderr)
+        return 1
+    return 0
+
+
+class SenseEntry(NamedTuple):
+    """One domain sense for :func:`run_sense_import`: a word as a term of a field.
+
+    The field comes from the :class:`SenseList` the entry sits in; the entry
+    carries only what differs word to word.
+
+    ``hint`` is a short gloss for a word that is ambiguous even within the
+    field ("single" in baseball).  ``disambiguation`` overrides the list's
+    label -- "pitch (sports field)" rather than "pitch (football)" -- and
+    ``unique`` stores no label at all, for a headword with no other meaning in
+    English ("checkmate").  ``abbreviation`` ("LBW") is recorded as a variant of
+    the sense.  ``move`` says that if the database already has this sense at
+    another level, it moves here rather than only being tagged.
+    """
+
+    term: str
+    hint: str | None = None
+    disambiguation: str | None = None
+    unique: bool = False
+    abbreviation: str | None = None
+    move: bool = False
+
+
+class SenseList(NamedTuple):
+    """One field's vocabulary at one level, for :func:`run_sense_import`."""
+
+    level: int
+    #: The field as the prompt names it: "chess", "American football".
+    domain: str
+    #: The disambiguation stored on a new lemma unless an entry says otherwise.
+    label: str
+    #: Tags for every sense the list creates or matches -- the theme and the field.
+    tags: Sequence[str]
+    entries: Sequence[SenseEntry]
+
+
+def _entry_label(sense_list: SenseList, entry: SenseEntry) -> str | None:
+    """The disambiguation ``entry`` is stored under."""
+    if entry.unique:
+        if entry.disambiguation is not None:
+            raise ValueError(f"{entry.term!r} is marked unique and also given a label")
+        return None
+    return entry.disambiguation or sense_list.label
+
+
+def _check_sense_lists(sense_lists: Sequence[SenseList]) -> None:
+    """Reject a script that lists one headword twice.
+
+    Even under two labels this is refused: the server recognises a sense a
+    previous run created by its tags, and two senses of one headword sharing
+    a list's tags would be indistinguishable on the re-run.
+    """
+    seen: Set[str] = set()
+    for sense_list in sense_lists:
+        for entry in sense_list.entries:
+            _entry_label(sense_list, entry)
+            key = _normalized(entry.term)
+            if key in seen:
+                raise ValueError(f"{entry.term!r} is listed more than once")
+            seen.add(key)
+
+
+def print_sense_plan(sense_list: SenseList) -> None:
+    print(f"Target level: {sense_list.level}  Domain: {sense_list.domain}")
+    print(f"Tags: {', '.join(sense_list.tags)}")
+    print(f"Curated senses: {len(sense_list.entries)}")
+    for rank, entry in enumerate(sense_list.entries, start=1):
+        label = _entry_label(sense_list, entry)
+        shown = f"{entry.term} ({label})" if label else entry.term
+        notes = []
+        if entry.abbreviation:
+            notes.append(f"abbr {entry.abbreviation}")
+        if entry.move:
+            notes.append("move if present")
+        suffix = f"  [{'; '.join(notes)}]" if notes else ""
+        print(f"{rank:3}. {shown}{suffix}")
+        if entry.hint:
+            print(f"       {entry.hint}")
+
+
+def execute_senses(sense_list: SenseList, model: str, limit: int | None) -> List[str]:
+    """Add every sense in ``sense_list``, returning the ones that failed.
+
+    There is no preflight: whether a sense is present is the server's question
+    to answer, and it answers it for free when a previous run left its label or
+    tags on the sense.  A failed sense is reported and the run carries on, since
+    a re-run skips everything that succeeded without paying for it again.
+    """
+    if limit is not None and limit < 1:
+        raise RuntimeError("--limit must be at least 1")
+
+    entries = list(sense_list.entries)[:limit] if limit is not None else sense_list.entries
+    counts: dict[str, int] = {}
+    failures: List[str] = []
+    for position, entry in enumerate(entries, start=1):
+        label = _entry_label(sense_list, entry)
+        shown = f"{entry.term} ({label})" if label else entry.term
+        print(f"[{position}/{len(entries)}] {shown}: ...", flush=True)
+        try:
+            response = add_sense(
+                entry.term,
+                model,
+                domain=sense_list.domain,
+                disambiguation=label,
+                hint=entry.hint,
+                difficulty_level=sense_list.level,
+                tags=list(sense_list.tags),
+                abbreviation=entry.abbreviation,
+                relevel_existing=entry.move,
+            )
+        except BarsukasAPIError as error:
+            print(f"  failed: {error}")
+            failures.append(f"{shown}: {error}")
+            continue
+
+        data = _response_data(response, operation=f"adding {shown!r}")
+        if not isinstance(data, dict):
+            raise RuntimeError(f"Adding {shown!r} returned invalid data: {data!r}")
+        status = str(data.get("status", "unknown"))
+        counts[status] = counts.get(status, 0) + 1
+        detail = f"{data.get('guid') or '-'} {data.get('pos_type')}/{data.get('pos_subtype')}"
+        print(f"  {status}: {detail}")
+        if status in ("covered", "moved"):
+            print(f"    matched: {data.get('definition_text')}")
+        missing_languages = data.get("missing_languages") or []
+        if missing_languages:
+            print(f"    no translation for: {', '.join(missing_languages)}")
+
+    summary = ", ".join(f"{count} {status}" for status, count in sorted(counts.items()))
+    print(f"Complete at level {sense_list.level}: {summary or 'nothing to do'}.")
+    return failures
+
+
+def run_sense_import(sense_lists: Sequence[SenseList], description: str) -> int:
+    """Entry point for a domain-sense import script.
+
+    The counterpart to :func:`run_import` for a field's vocabulary, driving
+    ``api.lemmas.add_sense``.  Same two-step contract: without ``--execute``
+    it prints the plan and makes no HTTP request.
+    """
+    _check_sense_lists(sense_lists)
+    args = parse_args(description)
+    print(f"Barsukas: {BASE_URL}")
+    for sense_list in sense_lists:
+        print_sense_plan(sense_list)
+        print()
+    if not args.execute:
+        print("No API calls made. Re-run with --execute only after approval.")
+        return 0
+
+    print(f"LIVE MODE: Barsukas will use {args.model!r} for paid calls.")
+    failures: List[str] = []
+    try:
+        for sense_list in sense_lists:
+            failures.extend(execute_senses(sense_list, args.model, args.limit))
+    except (RuntimeError, requests.exceptions.RequestException) as error:
+        print(f"Import stopped: {error}", file=sys.stderr)
+        return 1
+    if failures:
+        print(f"Failed ({len(failures)}); re-run to retry only these:", file=sys.stderr)
+        for failure in failures:
+            print(f"  {failure}", file=sys.stderr)
         return 1
     return 0
 

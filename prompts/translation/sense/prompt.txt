@@ -1,0 +1,4 @@
+Describe the meaning of the English term '{word}' in {domain}.
+{hint}
+Senses the dictionary already has for this headword:
+{existing_senses}

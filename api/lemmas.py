@@ -348,6 +348,57 @@ def add_term(
     return post_json(f"{API_V1_PREFIX}/terms/add", payload, timeout=timeout)
 
 
+@mirrored_route("/api/v1/senses/add", "POST")
+def add_sense(
+    word: str,
+    model: str,
+    *,
+    domain: str,
+    disambiguation: Optional[str],
+    hint: Optional[str] = None,
+    difficulty_level: Optional[int] = None,
+    tags: Optional[List[str]] = None,
+    abbreviation: Optional[str] = None,
+    relevel_existing: bool = False,
+    timeout: float = LLM_TIMEOUT_SECONDS,
+) -> Any:
+    """Add the sense an English word has in one field -- "check" in chess.
+
+    The fourth add path. :func:`add_word` and :func:`add_term` both stop at a
+    headword that already exists, so neither can add the chess "check" beside
+    "check (examine)". This takes the word, its ``domain`` and an optional
+    ``hint``, and one LLM call both describes the domain sense and says whether
+    one of the headword's existing senses already is it. **Makes an LLM call and
+    costs money**, unless an existing sense already carries ``disambiguation``
+    or every one of ``tags`` -- which is what makes re-running a list free.
+
+    ``disambiguation`` labels a new lemma ("chess"); pass None for a headword
+    with no other meaning. ``abbreviation`` ("LBW") is recorded as a variant
+    form of the sense. With ``relevel_existing`` a matched existing sense is
+    moved to ``difficulty_level`` and given the disambiguation, rather than only
+    tagged.
+
+    ``data["status"]`` is ``created``, ``covered`` (matched and tagged),
+    ``moved`` (matched and moved) or ``already_exists`` (matched without a call).
+    """
+    payload: Dict[str, Any] = {
+        "word": word,
+        "model": model,
+        "domain": domain,
+        "disambiguation": disambiguation,
+        "relevel_existing": relevel_existing,
+    }
+    if hint:
+        payload["hint"] = hint
+    if difficulty_level is not None:
+        payload["difficulty_level"] = difficulty_level
+    if tags:
+        payload["tags"] = tags
+    if abbreviation:
+        payload["abbreviation"] = abbreviation
+    return post_json(f"{API_V1_PREFIX}/senses/add", payload, timeout=timeout)
+
+
 @mirrored_route("/api/v1/lemma/<guid>", "GET")
 def get_lemma(guid: str) -> Any:
     """Basic lemma details."""
