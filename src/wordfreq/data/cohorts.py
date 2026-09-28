@@ -42,7 +42,9 @@ CHEMICAL_ELEMENTS = Cohort(
     1100,
 )
 
-COHORTS: tuple[Cohort, ...] = (DAYS_AND_MONTHS, US_STATES, CHEMICAL_ELEMENTS)
+CONSTELLATIONS = Cohort("constellations", "the 88 IAU constellations", "celestial_object", 1055)
+
+COHORTS: tuple[Cohort, ...] = (DAYS_AND_MONTHS, US_STATES, CHEMICAL_ELEMENTS, CONSTELLATIONS)
 
 COHORT_LEVELS: frozenset[int] = frozenset(cohort.level for cohort in COHORTS)
 

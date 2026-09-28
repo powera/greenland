@@ -186,7 +186,22 @@ SUBTYPE_DEFS: Dict[str, Dict[str, SubtypeDef]] = {
         "natural_feature": SubtypeDef(
             prefix="N11",
             description="Natural formations and phenomena",
-            examples=["river", "island", "cloud", "beach", "star"],
+            examples=["river", "island", "cloud", "beach", "volcano"],
+            group="Physical Objects and Structures",
+        ),
+        "celestial_object": SubtypeDef(
+            prefix="N64",
+            comment=(
+                "Anything in the sky beyond the atmosphere, as a kind or by name: star, "
+                "planet, moon, asteroid, comet, galaxy, nebula, and Sirius, Mars, "
+                "Halley's Comet. Constellations are filed here too although strictly "
+                "they are regions of the sky, not objects -- a learner files Orion with "
+                "the stars that make it. Weather (cloud, rainbow, aurora) stays "
+                "natural_feature. Carved out of natural_feature, whose examples named "
+                "star; sun, moon, planet and star were stored there before this "
+                "existed. Left without a description or examples on purpose: the name "
+                "is what the classifier sees."
+            ),
             group="Physical Objects and Structures",
         ),
         "tool": SubtypeDef(
