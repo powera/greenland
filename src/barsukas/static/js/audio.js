@@ -22,7 +22,7 @@
  * @param {Object} config.pollyVoices - Object mapping language codes to Amazon Polly voice arrays
  * @param {Object} config.azureVoices - Object mapping language codes to Azure TTS voice arrays
  * @param {Object} config.googleVoices - Object mapping language codes to Google Cloud TTS voice arrays
- * @param {Object} config.geminiVoices - Object mapping Gemini models and language codes to voice arrays
+ * @param {Object} config.geminiVoices - Object mapping language codes to Gemini TTS voice arrays
  */
 function setupAudioVoiceSelection(config) {
     const ttsEngineSelect = document.getElementById(config.engineSelectId);
@@ -223,27 +223,25 @@ function setupAudioVoiceSelection(config) {
             });
             voicesContainer.appendChild(createTwoColumnLayout(checkboxes));
 
-        } else if (engine.startsWith('gemini-3.8-') && engine.endsWith('-tts')) {
+        } else if (engine === 'gemini') {
             if (!language) {
                 voicesContainer.innerHTML = '<div class="text-muted">Please select a language first</div>';
                 return;
             }
 
-            const modelVoices = config.geminiVoices ? config.geminiVoices[engine] : null;
-            const voices = modelVoices ? modelVoices[language] : null;
+            const voices = config.geminiVoices ? config.geminiVoices[language] : null;
             if (!voices || voices.length === 0) {
                 voicesContainer.innerHTML = '<div class="text-warning">This Gemini TTS model does not support this language</div>';
                 return;
             }
 
-            const isLite = engine.includes('flash-lite');
-            if (voiceHelp) voiceHelp.textContent = 'Select Gemini voices to generate (Kore and Puck selected by default)';
-            if (engineInfo) engineInfo.innerHTML = `<i class="bi bi-info-circle"></i> <strong>Note:</strong> Audio will be generated using Gemini 3.8 ${isLite ? 'Flash-Lite' : 'Flash'} TTS (paid). Review records will be created with status "pending_review".`;
+            if (voiceHelp) voiceHelp.textContent = 'Select Gemini voices to generate (Erinome and Iapetus selected by default)';
+            if (engineInfo) engineInfo.innerHTML = `<i class="bi bi-info-circle"></i> <strong>Note:</strong> Audio will be generated using Gemini TTS (paid). Review records will be created with status "pending_review".`;
 
-            const defaultVoices = ['kore', 'puck'];
+            const defaultVoices = ['erinome', 'iapetus'];
             const checkboxes = voices.map(voice => {
                 const genderBadge = voice.gender === 'f' ? 'F' : 'M';
-                const checked = defaultVoices.some(defaultVoice => voice.name.endsWith(`-${defaultVoice}`));
+                const checked = defaultVoices.includes(voice.name);
                 return createVoiceCheckbox(voice.name, voice.ui_name, genderBadge, checked);
             });
             voicesContainer.appendChild(createTwoColumnLayout(checkboxes));

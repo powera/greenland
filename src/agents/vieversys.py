@@ -50,7 +50,8 @@ from words.lemma_selection import (
 from clients.audio import AudioFormat, AudioGenerationResult, Voice, generate_audio
 from clients.audio.azure_tts import AzureTTSClient, AzureVoice
 from clients.audio.gemini_tts import (
-    GEMINI_TTS_MODELS,
+    DEFAULT_GEMINI_VOICES,
+    GEMINI_ENGINE,
     GeminiTTSClient,
     GeminiTtsVoice,
 )
@@ -961,7 +962,7 @@ class VieversysAgent:
                 language_code=language_code,
             )
 
-        elif self.tts_engine in GEMINI_TTS_MODELS:
+        elif self.tts_engine == GEMINI_ENGINE:
             client_gemini = GeminiTTSClient(debug=self.debug)
             gemini_voice = GeminiTtsVoice.from_identifier(voice_name)
             if not gemini_voice:
@@ -979,7 +980,6 @@ class VieversysAgent:
                 text=text,
                 voice=gemini_voice,
                 language_code=language_code,
-                model=self.tts_engine,
             )
 
         else:
@@ -1014,7 +1014,7 @@ class VieversysAgent:
             Dict with batch generation results
         """
         session = self.get_session()
-        use_cloud = self.tts_engine in ("polly", "azure", "google", *GEMINI_TTS_MODELS)
+        use_cloud = self.tts_engine in ("polly", "azure", "google", GEMINI_ENGINE)
 
         if not use_cloud:
             voices = voices or DEFAULT_GPT_VOICES.get(
@@ -1245,10 +1245,10 @@ def get_argument_parser() -> argparse.ArgumentParser:
     parser.add_argument("--output-dir", help="Output directory for generated audio")
     parser.add_argument(
         "--tts-engine",
-        choices=["openai", "polly", "azure", "google", *GEMINI_TTS_MODELS],
+        choices=["openai", "polly", "azure", "google", GEMINI_ENGINE],
         default="openai",
-        help="TTS engine to use: openai (default), polly, azure, google, "
-        "gemini-3.8-flash-tts, or gemini-3.8-flash-lite-tts",
+        help="TTS engine to use: openai (default), polly (Amazon Polly), azure (Azure Cognitive), "
+        "google (Google Cloud TTS), gemini (Gemini TTS)",
     )
     parser.add_argument(
         "--voices",
@@ -1305,10 +1305,10 @@ def _print_cloud_voices(engine: str) -> None:
             languages.setdefault(gv.language_code, []).append(
                 f"{gv.voice_name} ({gv.gender.upper()})"
             )
-    elif engine in GEMINI_TTS_MODELS:
+    elif engine == GEMINI_ENGINE:
         for gemini_voice in GeminiTtsVoice:
             languages.setdefault("multilingual", []).append(
-                f"{gemini_voice.storage_name(engine)} ({gemini_voice.gender.upper()})"
+                f"{gemini_voice.storage_name} ({gemini_voice.gender.upper()})"
             )
     else:
         return
@@ -1360,7 +1360,7 @@ def main() -> None:
     voices = None
     cloud_voice_names: Optional[List[str]] = None
 
-    if tts_engine in ("polly", "azure", "google", *GEMINI_TTS_MODELS):
+    if tts_engine in ("polly", "azure", "google", GEMINI_ENGINE):
         # For cloud engines, voice names are passed as-is
         if args.voices:
             cloud_voice_names = args.voices
@@ -1376,10 +1376,12 @@ def main() -> None:
             elif tts_engine == "google":
                 defaults_g = GoogleTtsVoice.get_voices_for_language(lang)
                 cloud_voice_names = [v.name.lower() for v in defaults_g] if defaults_g else []
-            elif tts_engine in GEMINI_TTS_MODELS:
-                defaults_gemini = GeminiTtsVoice.get_voices_for_language(lang, tts_engine)
+            elif tts_engine == GEMINI_ENGINE:
+                supported_gemini = GeminiTtsVoice.get_voices_for_language(lang)
                 cloud_voice_names = [
-                    gemini_voice.storage_name(tts_engine) for gemini_voice in defaults_gemini[:2]
+                    gemini_voice.storage_name
+                    for gemini_voice in DEFAULT_GEMINI_VOICES
+                    if gemini_voice in supported_gemini
                 ]
 
             if not cloud_voice_names:
