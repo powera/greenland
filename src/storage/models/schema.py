@@ -193,6 +193,7 @@ class Lemma(Base):
     grammar_facts = relationship(
         "GrammarFact", back_populates="lemma", cascade="all, delete-orphan"
     )
+    lemma_facts = relationship("LemmaFact", back_populates="lemma", cascade="all, delete-orphan")
     translations = relationship(
         "LemmaTranslation", back_populates="lemma", cascade="all, delete-orphan"
     )

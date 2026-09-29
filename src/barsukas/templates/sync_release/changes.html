@@ -84,6 +84,11 @@
                                     {% elif item.qid_differs %}
                                     <br><small class="text-danger"><em>qid:</em> (none)</small>
                                     {% endif %}
+                                    {% if item.db_facts %}
+                                    <br><small class="{% if item.facts_differs %}text-danger{% else %}text-muted{% endif %}"><em>facts:</em> {{ item.db_facts }}</small>
+                                    {% elif item.facts_differs %}
+                                    <br><small class="text-danger"><em>facts:</em> (none)</small>
+                                    {% endif %}
                                 </td>
                                 <td>
                                     <strong class="text-success{% if not item.text_differs and not item.disambig_differs %} text-muted{% endif %}">{{ item.release_lemma_text }}</strong>
@@ -108,6 +113,11 @@
                                     <br><small class="{% if item.qid_differs %}text-success{% else %}text-muted{% endif %}"><em>qid:</em> {{ item.release_qid }}</small>
                                     {% elif item.qid_differs %}
                                     <br><small class="text-success"><em>qid:</em> (none)</small>
+                                    {% endif %}
+                                    {% if item.release_facts %}
+                                    <br><small class="{% if item.facts_differs %}text-success{% else %}text-muted{% endif %}"><em>facts:</em> {{ item.release_facts }}</small>
+                                    {% elif item.facts_differs %}
+                                    <br><small class="text-success"><em>facts:</em> (none)</small>
                                     {% endif %}
                                 </td>
                                 <td>{{ sync.action_select('action_%s' % item.lemma_id) }}</td>

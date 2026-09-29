@@ -1,0 +1,43 @@
+"""Registry of language-independent lemma fact types stored in ``lemma_facts``."""
+
+from dataclasses import dataclass
+from typing import Dict, Optional, Tuple
+
+
+@dataclass(frozen=True)
+class LemmaFactDefinition:
+    fact_type: str
+    allowed_values: Tuple[str, ...]
+    required_pos: Tuple[str, ...]
+    display_label: str
+    description: str
+    generatable: bool = False
+
+
+LEMMA_FACT_DEFINITIONS: Dict[str, LemmaFactDefinition] = {
+    "quantifiable": LemmaFactDefinition(
+        fact_type="quantifiable",
+        allowed_values=("true", "false"),
+        required_pos=("noun",),
+        display_label="Quantifiable",
+        description=(
+            'Would "five X" make sense? bear/atmosphere: true; rice/sugar: false. '
+            "A concept-level property, not grammatical countability."
+        ),
+        generatable=True,
+    ),
+}
+
+
+def get_lemma_fact_definition(fact_type: str) -> Optional[LemmaFactDefinition]:
+    return LEMMA_FACT_DEFINITIONS.get(fact_type)
+
+
+def validate_lemma_fact(fact_type: str, fact_value: Optional[str]) -> Optional[str]:
+    """Return an error message if the type or value is invalid, else None."""
+    definition = LEMMA_FACT_DEFINITIONS.get(fact_type)
+    if definition is None:
+        return f"Unknown lemma fact type: {fact_type}"
+    if fact_value not in definition.allowed_values:
+        return f"Invalid value {fact_value!r} for {fact_type}; allowed: {definition.allowed_values}"
+    return None

@@ -192,6 +192,7 @@ class Lemma:
         default_factory=dict
     )  # lang_code -> [{kind, key, forms: [{grammatical_form, text, ...}]}, ...]
     grammar_facts: List[Dict[str, Any]] = field(default_factory=list)
+    facts: Dict[str, str] = field(default_factory=dict)  # language-independent: type -> value
     audio_hashes: Dict[str, Dict[str, str]] = field(
         default_factory=dict
     )  # lang_code -> {voice -> hash}
@@ -240,6 +241,7 @@ class Lemma:
         data.setdefault("base_forms", {})
         data.setdefault("variants", {})
         data.setdefault("grammar_facts", [])
+        data.setdefault("facts", {})
         data.setdefault("audio_hashes", {})
         data.setdefault("translation_pronunciations", {})
         data.setdefault("translation_disambiguations", {})
@@ -338,6 +340,24 @@ class GrammarFact:
     added_at: Optional[datetime.datetime] = None
 
     # Reference to parent lemma
+    lemma: Optional[Lemma] = None
+
+
+@dataclass
+class LemmaFact:
+    """JSONL model for language-independent lemma facts.
+
+    Note: In JSONL backend, these are stored in Lemma.facts (base.jsonl "facts").
+    """
+
+    id: Optional[int] = None
+    lemma_id: Optional[int] = None
+    fact_type: str = ""
+    fact_value: Optional[str] = None
+    notes: Optional[str] = None
+    verified: bool = False
+    added_at: Optional[datetime.datetime] = None
+
     lemma: Optional[Lemma] = None
 
 
@@ -718,6 +738,7 @@ MODEL_REGISTRY = {
     "LemmaDifficultyOverride": LemmaDifficultyOverride,
     "DerivativeForm": DerivativeForm,
     "GrammarFact": GrammarFact,
+    "LemmaFact": LemmaFact,
     "Sentence": Sentence,
     "SentenceTranslation": SentenceTranslation,
     "SentenceWord": SentenceWord,

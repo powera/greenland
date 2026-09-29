@@ -20,6 +20,7 @@ from storage.models.enums import (
     VerbSubtype,
 )
 from storage.models.grammar_fact import GrammarFact
+from storage.models.lemma_fact import LemmaFact
 from storage.models.guid_tombstone import GuidTombstone
 from storage.models.query_log import QueryLog
 
@@ -75,6 +76,13 @@ from storage.crud.grammar_fact import (
     get_grammar_fact_value,
     get_grammar_facts,
     is_plurale_tantum,
+)
+from storage.crud.lemma_fact import (
+    add_lemma_fact,
+    delete_lemma_fact,
+    get_lemma_fact_value,
+    get_lemma_facts,
+    get_quantifiable,
 )
 from storage.crud.guid_tombstone import (
     create_tombstone,
@@ -211,6 +219,7 @@ __all__ = [
     "Corpus",
     "QueryLog",
     "GrammarFact",
+    "LemmaFact",
     "GuidTombstone",
     # Enums
     "NounSubtype",
@@ -294,6 +303,12 @@ __all__ = [
     "get_grammar_fact_value",
     "is_plurale_tantum",
     "delete_grammar_fact",
+    # Lemma Fact CRUD
+    "add_lemma_fact",
+    "get_lemma_facts",
+    "get_lemma_fact_value",
+    "delete_lemma_fact",
+    "get_quantifiable",
     # GUID Tombstone CRUD
     "create_tombstone",
     "get_tombstone_by_guid",

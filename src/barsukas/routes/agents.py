@@ -772,6 +772,47 @@ def add_grammar_fact_manual(lemma_id: int) -> ResponseReturnValue:
     return redirect(url_for("lemmas.view_lemma", lemma_id=lemma_id))
 
 
+@bp.route("/add-lemma-fact/<int:lemma_id>", methods=["POST"])
+def add_lemma_fact_manual(lemma_id: int) -> ResponseReturnValue:
+    """Add or update a language-independent lemma fact from the lemma page."""
+    from storage.config.lemma_fact_registry import get_lemma_fact_definition
+    from storage.crud.lemma_fact import add_lemma_fact
+
+    lemma = g.db.query(Lemma).get(lemma_id)
+    if not lemma:
+        flash("Lemma not found", "error")
+        return redirect(url_for("lemmas.list_lemmas"))
+
+    fact_type = (request.form.get("fact_type") or "").strip()
+    fact_value = (request.form.get("fact_value") or "").strip()
+    notes = (request.form.get("notes") or "").strip() or None
+
+    definition = get_lemma_fact_definition(fact_type)
+    if definition is None or lemma.pos_type not in definition.required_pos:
+        flash(f"Lemma fact {fact_type!r} does not apply to this lemma", "warning")
+        return redirect(url_for("lemmas.view_lemma_forms", lemma_id=lemma_id))
+
+    result = add_lemma_fact(g.db, lemma_id, fact_type, fact_value, notes=notes, verified=True)
+    if result:
+        flash(f"Saved lemma fact {fact_type}={fact_value}", "success")
+    else:
+        flash(f"Invalid value for {fact_type}: {fact_value!r}", "error")
+    return redirect(url_for("lemmas.view_lemma_forms", lemma_id=lemma_id))
+
+
+@bp.route("/delete-lemma-fact/<int:lemma_id>", methods=["POST"])
+def delete_lemma_fact_manual(lemma_id: int) -> ResponseReturnValue:
+    """Remove a lemma fact from the lemma page."""
+    from storage.crud.lemma_fact import delete_lemma_fact
+
+    fact_type = (request.form.get("fact_type") or "").strip()
+    if delete_lemma_fact(g.db, lemma_id, fact_type):
+        flash(f"Removed lemma fact {fact_type}", "success")
+    else:
+        flash(f"No lemma fact {fact_type!r} to remove", "warning")
+    return redirect(url_for("lemmas.view_lemma_forms", lemma_id=lemma_id))
+
+
 @bp.route("/view-sentences/<int:lemma_id>")
 def view_sentences(lemma_id: int) -> ResponseReturnValue:
     """View all sentences that use a specific lemma."""

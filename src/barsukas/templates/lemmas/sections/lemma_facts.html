@@ -1,0 +1,81 @@
+<!-- Lemma Facts (language-independent) -->
+<div class="row mb-4">
+    <div class="col">
+        <div class="card">
+            <div class="card-header">
+                <span><i class="bi bi-globe"></i> Lemma Facts</span>
+                <small class="text-muted ms-2">apply to the concept in every language</small>
+            </div>
+            <div class="card-body">
+                {% if lemma_facts %}
+                <table class="table table-sm">
+                    <thead>
+                        <tr>
+                            <th>Fact Type</th>
+                            <th>Value</th>
+                            <th>Notes</th>
+                            <th>Verified</th>
+                            <th></th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for fact in lemma_facts %}
+                        <tr>
+                            <td>{{ fact.fact_type|replace('_', ' ')|title }}</td>
+                            <td><strong>{{ fact.fact_value }}</strong></td>
+                            <td><small class="text-muted">{{ fact.notes or '-' }}</small></td>
+                            <td>
+                                {% if fact.verified %}
+                                <i class="bi bi-check-circle-fill text-success"></i>
+                                {% else %}
+                                <i class="bi bi-circle text-muted"></i>
+                                {% endif %}
+                            </td>
+                            <td>
+                                <form method="post" action="{{ url_for('agents.delete_lemma_fact_manual', lemma_id=lemma.id) }}">
+                                    <input type="hidden" name="fact_type" value="{{ fact.fact_type }}">
+                                    <button type="submit" class="btn btn-sm btn-outline-danger">Remove</button>
+                                </form>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+                {% else %}
+                <p class="text-muted"><i class="bi bi-info-circle"></i> No lemma facts recorded for this lemma yet.</p>
+                {% endif %}
+
+                {% if lemma_fact_defs %}
+                <form method="post" action="{{ url_for('agents.add_lemma_fact_manual', lemma_id=lemma.id) }}" class="row g-2 align-items-end">
+                    <div class="col-auto">
+                        <label for="lemma_fact_type" class="form-label">Fact type</label>
+                        <select class="form-select form-select-sm" id="lemma_fact_type" name="fact_type" required>
+                            {% for definition in lemma_fact_defs %}
+                            <option value="{{ definition.fact_type }}">{{ definition.display_label }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    <div class="col-auto">
+                        <label for="lemma_fact_value" class="form-label">Value</label>
+                        <select class="form-select form-select-sm" id="lemma_fact_value" name="fact_value" required>
+                            {% for value in lemma_fact_values %}
+                            <option value="{{ value }}">{{ value }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    <div class="col">
+                        <label for="lemma_fact_notes" class="form-label">Notes</label>
+                        <input class="form-control form-control-sm" id="lemma_fact_notes" name="notes">
+                    </div>
+                    <div class="col-auto">
+                        <button type="submit" class="btn btn-sm btn-primary">Save</button>
+                    </div>
+                </form>
+                <small class="form-text text-muted">
+                    {% for definition in lemma_fact_defs %}<strong>{{ definition.display_label }}:</strong> {{ definition.description }}{% endfor %}
+                </small>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>

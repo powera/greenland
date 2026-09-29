@@ -13,6 +13,7 @@ from storage.models.schema import (
     Sentence,
 )
 from storage.models.grammar_fact import GrammarFact
+from storage.models.lemma_fact import LemmaFact
 from storage.models.guid_tombstone import GuidTombstone
 from storage.models.operation_log import OperationLog
 
@@ -66,3 +67,8 @@ def get_derivative_form_model() -> Type[DerivativeForm]:
 def get_grammar_fact_model() -> Type[GrammarFact]:
     """Get the GrammarFact model class."""
     return GrammarFact
+
+
+def get_lemma_fact_model() -> Type[LemmaFact]:
+    """Get the LemmaFact model class."""
+    return LemmaFact
