@@ -1,0 +1,11 @@
+Decide whether the following noun concept is quantifiable, meaning it makes sense to say "five" followed by the noun.
+
+English word: {english_word}
+Part of speech: {pos_type}
+Subtype: {pos_subtype}
+Definition: {definition}
+English countability (a hint only, it may differ from the concept): {countability}
+
+Provide:
+1. quantifiable: true if "five {english_word}" is a natural way to count individual things or units, false if it is a mass, substance or abstraction.
+2. Brief explanation: Only include if there is something notable. Otherwise leave blank.

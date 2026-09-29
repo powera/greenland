@@ -1034,6 +1034,10 @@ def export_removals_to_release() -> ResponseReturnValue:
 # =============================================================================
 
 
+def _format_facts_for_display(facts: Dict[str, str]) -> str:
+    return ", ".join(f"{fact_type}={value}" for fact_type, value in sorted(facts.items()))
+
+
 def _find_lemma_text_changes(
     release_lemmas: Dict[str, Dict[str, Any]], db_session: Any
 ) -> List[Dict[str, Any]]:
@@ -1076,6 +1080,12 @@ def _find_lemma_text_changes(
             db_lexical_gap_reason = db_lemma.lexical_gap_reason
             db_emoji = _decode_db_emoji(db_lemma.emoji)
             db_qid = get_qid_for_lemma(db_session, db_lemma.id)
+            release_facts: Dict[str, str] = dict(release_data.get("facts") or {})
+            db_facts: Dict[str, str] = {
+                fact.fact_type: fact.fact_value
+                for fact in db_lemma.lemma_facts
+                if fact.fact_value is not None
+            }
 
             text_differs = db_lemma.lemma_text != release_lemma_text
             disambig_differs = db_lemma.disambiguation != release_disambig
@@ -1086,6 +1096,7 @@ def _find_lemma_text_changes(
             )
             emoji_differs = db_emoji != release_emoji
             qid_differs = db_qid != release_qid
+            facts_differs = db_facts != release_facts
 
             if not (
                 text_differs
@@ -1095,6 +1106,7 @@ def _find_lemma_text_changes(
                 or lexical_gap_reason_differs
                 or emoji_differs
                 or qid_differs
+                or facts_differs
             ):
                 continue
 
@@ -1116,6 +1128,9 @@ def _find_lemma_text_changes(
                     "release_emoji": _format_emoji_for_display(release_emoji),
                     "db_qid": db_qid or "",
                     "release_qid": release_qid or "",
+                    "db_facts": _format_facts_for_display(db_facts),
+                    "release_facts": _format_facts_for_display(release_facts),
+                    "facts_differs": facts_differs,
                     "text_differs": text_differs,
                     "disambig_differs": disambig_differs,
                     "definition_differs": definition_differs,
@@ -1259,6 +1274,12 @@ def apply_changes() -> ResponseReturnValue:
                     "notes": lemma.notes or release_io.REMOVE_FIELD,
                     "lexical_gap_reason": (lemma.lexical_gap_reason or release_io.REMOVE_FIELD),
                     "emoji": db_emoji_list or release_io.REMOVE_FIELD,
+                    "facts": {
+                        fact.fact_type: fact.fact_value
+                        for fact in sorted(lemma.lemma_facts, key=lambda fact: fact.fact_type)
+                        if fact.fact_value is not None
+                    }
+                    or release_io.REMOVE_FIELD,
                     # Concept pairing: write the DB's Q-id, or remove the field
                     # when the lemma is unpaired so no stale qid lingers.
                     "qid": get_qid_for_lemma(g.db, lemma.id) or release_io.REMOVE_FIELD,

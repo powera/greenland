@@ -165,6 +165,7 @@ class JSONLSession(BaseSession):
         """
         from storage.models.grammar_fact import GrammarFact as SQLGrammarFact
         from storage.models.guid_tombstone import GuidTombstone as SQLGuidTombstone
+        from storage.models.lemma_fact import LemmaFact as SQLLemmaFact
         from storage.models.lemma_relation import (
             LemmaRelationGroup as SQLLemmaRelationGroup,
         )
@@ -189,6 +190,7 @@ class JSONLSession(BaseSession):
             models.LemmaDifficultyOverride: SQLLemmaDifficultyOverride,
             models.DerivativeForm: SQLDerivativeForm,
             models.GrammarFact: SQLGrammarFact,
+            models.LemmaFact: SQLLemmaFact,
             models.GuidTombstone: SQLGuidTombstone,
             models.LemmaRelationGroup: SQLLemmaRelationGroup,
             models.LemmaRelationMember: SQLLemmaRelationMember,
@@ -204,6 +206,7 @@ class JSONLSession(BaseSession):
         assert self._sqlite_session is not None  # For type checking
         from storage.models.grammar_fact import GrammarFact as SQLGrammarFact
         from storage.models.guid_tombstone import GuidTombstone as SQLGuidTombstone
+        from storage.models.lemma_fact import LemmaFact as SQLLemmaFact
         from storage.models.lemma_relation import (
             LemmaRelationGroup as SQLLemmaRelationGroup,
         )
@@ -233,6 +236,7 @@ class JSONLSession(BaseSession):
         derivative_forms: list[dict] = []
         variant_forms: list[dict] = []
         grammar_facts = []
+        lemma_facts: list[dict] = []
         relation_groups = []
         relation_members = []
         sentences = []
@@ -423,6 +427,15 @@ class JSONLSession(BaseSession):
                     }
                 )
 
+            for fact_type, fact_value in jsonl_lemma.facts.items():
+                lemma_facts.append(
+                    {
+                        "lemma_id": jsonl_lemma.id,
+                        "fact_type": fact_type,
+                        "fact_value": fact_value,
+                        "verified": False,
+                    }
+                )
         # Map lemma GUIDs to their ephemeral SQLite ids. Sentence words and
         # relation members reference lemmas by GUID in JSONL, but the in-memory
         # SQLite rows are keyed by integer id.
@@ -611,6 +624,8 @@ class JSONLSession(BaseSession):
             self._sqlite_session.bulk_insert_mappings(SQLVariantForm, variant_forms)
         if grammar_facts:
             self._sqlite_session.bulk_insert_mappings(SQLGrammarFact, grammar_facts)
+        if lemma_facts:
+            self._sqlite_session.bulk_insert_mappings(SQLLemmaFact, lemma_facts)
         if relation_groups:
             self._sqlite_session.bulk_insert_mappings(SQLLemmaRelationGroup, relation_groups)
         if relation_members:
@@ -858,6 +873,10 @@ class JSONLSession(BaseSession):
             elif isinstance(instance, models.GrammarFact):
                 if instance.lemma:
                     self._update_grammar_fact_in_lemma(instance)
+            elif isinstance(instance, models.LemmaFact):
+                if instance.lemma:
+                    instance.lemma.facts[instance.fact_type] = instance.fact_value or ""
+                    self._storage.save_lemma(instance.lemma)
             elif isinstance(instance, (models.SentenceTranslation, models.SentenceWord)):
                 # These are nested in Sentence
                 if instance.sentence:

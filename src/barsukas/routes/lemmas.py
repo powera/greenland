@@ -29,7 +29,9 @@ from workqueue.task_queue import get_tasks_for_target
 from storage.crud.derivative_form import delete_derivative_form
 from storage.crud.guid_tombstone import create_tombstone, get_tombstones_by_lemma_id
 from storage.crud.difficulty_override import get_all_overrides_for_lemma
+from storage.config.lemma_fact_registry import LEMMA_FACT_DEFINITIONS
 from storage.crud.lemma import handle_lemma_type_subtype_change
+from storage.crud.lemma_fact import get_lemma_facts
 from storage.crud.lemma_tags import parse_tags_input, serialize_tags_for_column
 from storage.crud.operation_log import (
     VARIANT_DELETE,
@@ -504,11 +506,24 @@ def view_lemma_forms(lemma_id: int) -> ResponseReturnValue:
         if context["lemma"].pos_type in definition.required_pos
     ]
 
+    lemma_fact_defs = [
+        definition
+        for definition in LEMMA_FACT_DEFINITIONS.values()
+        if context["lemma"].pos_type in definition.required_pos
+    ]
+    lemma_fact_values = sorted(
+        {value for definition in lemma_fact_defs for value in definition.allowed_values},
+        reverse=True,
+    )
+
     return render_template(
         "lemmas/forms.html",
         active_tab="forms",
         pronunciation_languages=pronunciation_languages,
         generatable_grammar_fact_defs=generatable_grammar_fact_defs,
+        lemma_facts=get_lemma_facts(g.db, lemma_id),
+        lemma_fact_defs=lemma_fact_defs,
+        lemma_fact_values=lemma_fact_values,
         **context,
     )
 

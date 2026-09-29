@@ -86,6 +86,7 @@ def export_sqlalchemy_to_jsonl(source_config: DataSourceConfig, jsonl_dir: str) 
                 selectinload(SQLiteLemma.derivative_forms),
                 selectinload(SQLiteLemma.variant_forms),
                 selectinload(SQLiteLemma.grammar_facts),
+                selectinload(SQLiteLemma.lemma_facts),
             )
             .all()
         )
@@ -356,6 +357,11 @@ def convert_sqlalchemy_lemma_to_jsonl(lemma: Any, session: Any = None) -> Any:
         variants=variants,
         base_forms={},  # Populated when no derivative has is_base_form=true
         grammar_facts=grammar_facts,
+        facts={
+            fact.fact_type: fact.fact_value
+            for fact in lemma.lemma_facts
+            if fact.fact_value is not None
+        },
         audio_hashes={},
     )
 

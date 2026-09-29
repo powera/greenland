@@ -24,6 +24,7 @@ from storage.backend.config import BackendType, DataSourceConfig
 from storage.backend.factory import create_session
 from storage.crud.difficulty_override import bulk_get_effective_difficulty_levels
 from storage.models.grammar_fact import GrammarFact
+from storage.models.lemma_fact import LemmaFact
 from storage.models.variant_form import ACCEPTED_ANSWER_VARIANT_KINDS, VariantForm
 from storage.models.schema import (
     SYNONYM_GRAMMATICAL_FORMS,
@@ -589,6 +590,17 @@ class WirewordExporter:
                 grammar_facts_by_lemma[fact.lemma_id].append(fact)
             logger.info(f"Bulk fetched {len(all_grammar_facts)} grammar facts")
 
+            # Language-independent fact: is "five <noun>" sensible? Absent when
+            # unclassified, so consumers can tell "no" from "not yet judged".
+            quantifiable_by_lemma: Dict[int, bool] = {
+                fact.lemma_id: fact.fact_value == "true"
+                for fact in session.query(LemmaFact).filter(
+                    LemmaFact.lemma_id.in_(lemma_ids),
+                    LemmaFact.fact_type == "quantifiable",
+                    LemmaFact.fact_value.isnot(None),
+                )
+            }
+
             # Build English translation lookup for derivative forms
             # (used for _get_english_translation_from_db)
             english_forms_by_lemma: Dict[int, Dict[str, str]] = {}
@@ -844,6 +856,9 @@ class WirewordExporter:
                         # Store grammar facts as key-value pairs
                         grammar_metadata[fact.fact_type] = fact.fact_value
                     wireword["grammar_metadata"] = grammar_metadata
+
+                if lemma.pos_type == "noun" and lemma_id in quantifiable_by_lemma:
+                    wireword["quantifiable"] = quantifiable_by_lemma[lemma_id]
 
                 if lemma.frequency_rank:
                     wireword["frequency_rank"] = lemma.frequency_rank

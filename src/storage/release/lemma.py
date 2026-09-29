@@ -52,6 +52,7 @@ from typing import Any, Dict, List, Optional, Set, Tuple
 from sqlalchemy.orm import Session
 
 from storage import translation_helpers
+from storage.models.lemma_fact import LemmaFact
 from storage.models.schema import Lemma, LemmaTranslation
 
 #: Per-language translation extras, as (release key, model field). Each is
@@ -262,6 +263,14 @@ def lemma_to_release_record(lemma: Lemma, *, qid: Optional[str] = None) -> Dict[
     if lemma.sense_prominence:
         record["sense_prominence"] = lemma.sense_prominence
 
+    facts = {
+        fact.fact_type: fact.fact_value
+        for fact in sorted(lemma.lemma_facts, key=lambda fact: fact.fact_type)
+        if fact.fact_value is not None
+    }
+    if facts:
+        record["facts"] = facts
+
     emoji = decode_db_emoji(lemma.emoji)
     if emoji:
         record["emoji"] = emoji
@@ -291,6 +300,22 @@ def apply_base_fields(lemma: Lemma, record: Dict[str, Any]) -> None:
     lemma.lexical_gap_reason = record.get("lexical_gap_reason") or None
     lemma.sense_prominence = record.get("sense_prominence") or None
     lemma.emoji = encode_db_emoji(release_emoji(record))
+    apply_lemma_facts(lemma, record)
+
+
+def apply_lemma_facts(lemma: Lemma, record: Dict[str, Any]) -> None:
+    """Make a lemma's language-independent facts match the record's ``facts`` dict."""
+    wanted: Dict[str, str] = record.get("facts") or {}
+    for fact in list(lemma.lemma_facts):
+        if fact.fact_type not in wanted:
+            lemma.lemma_facts.remove(fact)
+    existing = {fact.fact_type: fact for fact in lemma.lemma_facts}
+    for fact_type, fact_value in wanted.items():
+        fact = existing.get(fact_type)
+        if fact is None:
+            lemma.lemma_facts.append(LemmaFact(fact_type=fact_type, fact_value=fact_value))
+        else:
+            fact.fact_value = fact_value
 
 
 def apply_translations(session: Session, lemma: Lemma, record: Dict[str, Any]) -> int:
@@ -351,6 +376,7 @@ def import_release_record(session: Session, record: Dict[str, Any]) -> Lemma:
     session.add(lemma)
     session.flush()  # assign lemma.id before the translations reference it
 
+    apply_lemma_facts(lemma, record)
     apply_translations(session, lemma, record)
     return lemma
 
@@ -403,6 +429,7 @@ def export_to_release(session: Session, release_dir: Path) -> LemmaExportStats:
             selectinload(Lemma.derivative_forms),
             selectinload(Lemma.variant_forms),
             selectinload(Lemma.grammar_facts),
+            selectinload(Lemma.lemma_facts),
             # Read by the base record builder.
             selectinload(Lemma.difficulty_overrides),
         )

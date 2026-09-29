@@ -180,6 +180,7 @@ class JSONLStorage(BaseStorage):
 
                         lemma.difficulty_level = data.get("difficulty_level")
                         lemma.sense_prominence = data.get("sense_prominence")
+                        lemma.facts = dict(data.get("facts") or {})
                         lemma.notes = data.get("notes")
                         lemma.lexical_gap_reason = data.get("lexical_gap_reason")
                         lemma.qid = data.get("qid")
@@ -900,6 +901,9 @@ class JSONLStorage(BaseStorage):
         # written, matching storage.release.lemma.lemma_to_release_record.
         if lemma.sense_prominence:
             data["sense_prominence"] = lemma.sense_prominence
+
+        if lemma.facts:
+            data["facts"] = dict(sorted(lemma.facts.items()))
 
         if lemma.notes:
             data["notes"] = lemma.notes

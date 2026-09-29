@@ -36,6 +36,7 @@ from storage.models.emoji import (
     Emoji,
 )
 from storage.models.grammar_fact import GrammarFact
+from storage.models.lemma_fact import LemmaFact
 from storage.models.idiom import (
     IDIOM_EQUIVALENCE_KINDS,
     Idiom,
@@ -132,6 +133,7 @@ __all__ = [
     "DerivativeForm",
     "INTAKE_DEFERRED_TEXT_TYPES",
     "GrammarFact",
+    "LemmaFact",
     "GuidTombstone",
     "IDIOM_EQUIVALENCE_KINDS",
     "Idiom",
