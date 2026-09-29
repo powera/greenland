@@ -3,4 +3,5 @@ Pronounce this Spanish word or phrase with clear, accurate Latin American Spanis
 - Use seseo: pronounce "c" before e/i and "z" as /s/, never as the Castilian /θ/
 - Pronounce "ll" and "y" as /ʝ/ (yeísmo)
 - Always use Spanish pronunciation rules, even for loanwords or words borrowed from English
+- This is a Spanish word, not an English one. Never carry over English pronunciation habits, even when the word is spelled the same as, or looks like, an English word
 - Maintain proper Spanish vowel sounds
