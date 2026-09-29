@@ -150,3 +150,12 @@
 {"guid": "N24_205", "forms": [{"grammatical_form": "noun/en_singular", "text": "derivation", "is_base_form": true, "ipa": "/ˌdɛrəˈveɪʃən/", "phonetic": "der-uh-VAY-shun"}]}
 {"guid": "N24_206", "forms": [{"grammatical_form": "noun/en_singular", "text": "romanization", "is_base_form": true, "ipa": "/ˌroʊmənəˈzeɪʃən/", "phonetic": "ROH-muh-nuh-ZAY-shun"}]}
 {"guid": "N24_207", "forms": [{"grammatical_form": "noun/en_singular", "text": "adventure", "is_base_form": true, "ipa": "/ədˈvɛntʃər/", "phonetic": "ad-VEN-cher"}]}
+{"guid": "N24_208", "forms": [{"grammatical_form": "noun/en_singular", "text": "substitution", "is_base_form": true, "ipa": "/ˌsʌbstɪˈtuːʃən/", "phonetic": "sub-stuh-TOO-shun"}]}
+{"guid": "N24_209", "forms": [{"grammatical_form": "noun/en_singular", "text": "draft", "is_base_form": true, "ipa": "/dræft/", "phonetic": "DRAFT"}]}
+{"guid": "N24_210", "forms": [{"grammatical_form": "noun/en_singular", "text": "transfer", "is_base_form": true, "ipa": "/ˈtrænsfɚ/", "phonetic": "TRANS-fer"}]}
+{"guid": "N24_211", "forms": [{"grammatical_form": "noun/en_singular", "text": "relegation", "is_base_form": true, "ipa": "/ˌrɛlɪˈɡeɪʃən/", "phonetic": "rel-uh-GAY-shun"}]}
+{"guid": "N24_212", "forms": [{"grammatical_form": "noun/en_singular", "text": "promotion", "is_base_form": true, "ipa": "/prəˈmoʊʃən/", "phonetic": "pruh-MOH-shun"}]}
+{"guid": "N24_213", "forms": [{"grammatical_form": "noun/en_singular", "text": "halftime", "is_base_form": true, "ipa": "/ˈhæfˌtaɪm/", "phonetic": "HALF-time"}]}
+{"guid": "N24_214", "forms": [{"grammatical_form": "noun/en_singular", "text": "interception", "is_base_form": true, "ipa": "/ˌɪntɚˈsɛpʃən/", "phonetic": "in-ter-SEP-shun"}]}
+{"guid": "N24_215", "forms": [{"grammatical_form": "noun/en_singular", "text": "rally", "is_base_form": true, "ipa": "/ˈræli/", "phonetic": "RAL-ee"}]}
+{"guid": "N24_216", "forms": [{"grammatical_form": "noun/en_singular", "text": "lap", "is_base_form": true, "ipa": "/læp/", "phonetic": "LAP"}]}

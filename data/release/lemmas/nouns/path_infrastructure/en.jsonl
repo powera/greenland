@@ -15,3 +15,5 @@
 {"guid": "N13_023", "forms": [{"grammatical_form": "noun/en_singular", "text": "pipeline", "is_base_form": true, "ipa": "/ˈpaɪpˌlaɪn/", "phonetic": "PIPE-line"}]}
 {"guid": "N13_024", "forms": [{"grammatical_form": "noun/en_singular", "text": "motorway", "is_base_form": true, "ipa": "/ˈmoʊtɚˌweɪ/", "phonetic": "MOH-ter-way"}]}
 {"guid": "N13_025", "forms": [{"grammatical_form": "noun/en_singular", "text": "car park", "is_base_form": true, "ipa": "/ˈkɑr ˌpɑrk/", "phonetic": "KAR-park"}]}
+{"guid": "N13_026", "forms": [{"grammatical_form": "noun/en_singular", "text": "goal line", "is_base_form": true, "ipa": "/ˈɡoʊl ˌlaɪn/", "phonetic": "GOHL-lyn"}]}
+{"guid": "N13_027", "forms": [{"grammatical_form": "noun/en_singular", "text": "baseline", "is_base_form": true, "ipa": "/ˈbeɪsˌlaɪn/", "phonetic": "BAYS-line"}]}

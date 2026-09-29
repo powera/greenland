@@ -15,3 +15,8 @@
 {"guid": "N30_055", "variants": [{"kind": "spelling", "key": "north-west", "forms": [{"grammatical_form": "noun/en_base", "text": "north-west", "is_base_form": true}]}]}
 {"guid": "N30_056", "variants": [{"kind": "spelling", "key": "south-east", "forms": [{"grammatical_form": "noun/en_base", "text": "south-east", "is_base_form": true}]}]}
 {"guid": "N30_057", "variants": [{"kind": "spelling", "key": "south-west", "forms": [{"grammatical_form": "noun/en_base", "text": "south-west", "is_base_form": true}]}]}
+{"guid": "N30_058", "forms": [{"grammatical_form": "noun/en_singular", "text": "bench", "is_base_form": true, "ipa": "/bɛntʃ/", "phonetic": "BENCH"}]}
+{"guid": "N30_059", "forms": [{"grammatical_form": "noun/en_singular", "text": "pitch", "is_base_form": true, "ipa": "/pɪtʃ/", "phonetic": "PITCH"}]}
+{"guid": "N30_060", "forms": [{"grammatical_form": "noun/en_singular", "text": "court", "is_base_form": true, "ipa": "/kɔrt/", "phonetic": "KORT"}]}
+{"guid": "N30_061", "forms": [{"grammatical_form": "noun/en_singular", "text": "rink", "is_base_form": true, "ipa": "/rɪŋk/", "phonetic": "RINK"}]}
+{"guid": "N30_062", "forms": [{"grammatical_form": "noun/en_singular", "text": "lane", "is_base_form": true, "ipa": "/leɪn/", "phonetic": "LAYN"}]}

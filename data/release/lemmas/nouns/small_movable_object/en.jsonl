@@ -81,3 +81,6 @@
 {"guid": "N08_158", "forms": [{"grammatical_form": "noun/en_singular", "text": "swing", "is_base_form": true, "ipa": "/swɪŋ/", "phonetic": "SWING"}]}
 {"guid": "N08_159", "forms": [{"grammatical_form": "noun/en_singular", "text": "queen", "is_base_form": true, "ipa": "/kwiːn/", "phonetic": "KWEEN"}]}
 {"guid": "N08_160", "forms": [{"grammatical_form": "noun/en_singular", "text": "queen", "is_base_form": true, "ipa": "/kwiːn/", "phonetic": "KWEEN"}]}
+{"guid": "N08_161", "forms": [{"grammatical_form": "noun/en_singular", "text": "goalpost", "is_base_form": true, "ipa": "/ˈɡoʊlˌpoʊst/", "phonetic": "GOHL-post"}]}
+{"guid": "N08_162", "forms": [{"grammatical_form": "noun/en_singular", "text": "crossbar", "is_base_form": true, "ipa": "/ˈkrɔsˌbɑr/", "phonetic": "KRAWS-bar"}]}
+{"guid": "N08_163", "forms": [{"grammatical_form": "noun/en_singular", "text": "net", "is_base_form": true, "ipa": "/nɛt/", "phonetic": "NET"}]}
