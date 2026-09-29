@@ -12,6 +12,8 @@ builders share the package, one per kind of source:
   ``wiki_biology`` and ``wiki_modern_life``, from a dump snapshot.
 * ``build_openstax`` -- ``openstax_science`` and ``openstax_society``, from
   OpenStax textbooks pinned to their last CC BY commits (``openstax_books``).
+* ``build_wpalh`` -- ``wpa_life_histories``, from the Library of Congress's
+  WPA life-history interviews (``download_wpalh``, ``wpalh_text``).
 
 Each has its own text extraction, and they share everything after it:
 

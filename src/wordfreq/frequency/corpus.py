@@ -337,6 +337,22 @@ CORPUS_CONFIGS = [
         max_unknown_rank=11000,
         enabled=True,
     ),
+    CorpusConfig(
+        name="wpa_life_histories",
+        description="Word frequency data from WPA Federal Writers' Project life-history interviews, 1936-1940",
+        file_path="wpa_life_histories.json",
+        max_words=10000,
+        file_type="json",
+        value_type="auto",
+        # The only conversational corpus here: ordinary Americans talking
+        # about work, family and town -- ranch, critters, gonna, fella, guys.
+        # Weighted with the topic corpora because the text is OCR of 1930s
+        # typescript, and a tail of misreadings survives the correction pass
+        # ("hose" is mostly "those").
+        corpus_weight=0.5,
+        max_unknown_rank=20000,
+        enabled=True,
+    ),
 ]
 
 
