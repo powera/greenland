@@ -91,6 +91,16 @@ logging.basicConfig(
 logger = logging.getLogger(__name__)
 
 
+def _mark_failed_voices(results: Dict[str, Any], voice_results: List[Dict[str, Any]]) -> None:
+    """Fail an item's results when any of its voices failed (skipped voices count as done)."""
+    failed_voices = [
+        voice_result["voice"] for voice_result in voice_results if not voice_result["success"]
+    ]
+    if failed_voices:
+        results["success"] = False
+        results["error"] = f"Audio generation failed for voice(s): {', '.join(failed_voices)}"
+
+
 class VieversysAgent:
     """Agent for generating audio files for lemmas using cloud TTS APIs."""
 
@@ -415,6 +425,7 @@ class VieversysAgent:
                 }
             )
 
+        _mark_failed_voices(results, voices_list)
         return results
 
     def _create_review_record(
@@ -648,6 +659,7 @@ class VieversysAgent:
                 }
             )
 
+        _mark_failed_voices(results, sent_voices_list)
         return results
 
     def _create_sentence_review_record(
@@ -863,6 +875,7 @@ class VieversysAgent:
                 }
             )
 
+        _mark_failed_voices(results, results["voices"])
         return results
 
     def _call_cloud_tts(
