@@ -20,9 +20,9 @@ def test_model_language_support() -> None:
     assert GeminiTtsVoice.get_voices_for_language("zh", GEMINI_38_FLASH_LITE_TTS)
 
 
-def test_model_qualified_voice_round_trip() -> None:
-    storage_name = GeminiTtsVoice.KORE.storage_name(GEMINI_38_FLASH_TTS)
-    assert storage_name == "gemini-3.8-flash-tts-kore"
+def test_engine_qualified_voice_round_trip() -> None:
+    storage_name = GeminiTtsVoice.KORE.storage_name
+    assert storage_name == "kore"
     assert GeminiTtsVoice.from_identifier(storage_name) is GeminiTtsVoice.KORE
 
 

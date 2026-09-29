@@ -197,13 +197,7 @@ def handle_generate_audio(session: Session, payload: Dict) -> str:
         result = _generate_audio_coqui(
             session, lemma, language_code, coqui_voice_enums, audio_output_dir
         )
-    elif tts_engine in (
-        "polly",
-        "azure",
-        "google",
-        "gemini-3.8-flash-tts",
-        "gemini-3.8-flash-lite-tts",
-    ):
+    elif tts_engine in ("polly", "azure", "google", "gemini"):
         # Cloud TTS engines dispatched through VieversysAgent
         vieversys_agent = VieversysAgent(
             config=config, output_dir=audio_output_dir, tts_engine=tts_engine
@@ -510,13 +504,7 @@ def handle_generate_sentence_audio(session: Session, payload: Dict) -> str:
         result = _generate_sentence_audio_coqui(
             session, sentence_id, text, language_code, voice_names, audio_output_dir
         )
-    elif tts_engine in (
-        "polly",
-        "azure",
-        "google",
-        "gemini-3.8-flash-tts",
-        "gemini-3.8-flash-lite-tts",
-    ):
+    elif tts_engine in ("polly", "azure", "google", "gemini"):
         result = _generate_sentence_audio_cloud(
             session, sentence_id, text, language_code, voice_names, audio_output_dir, tts_engine
         )
@@ -895,7 +883,7 @@ def _generate_sentence_audio_cloud(
     import hashlib
 
     from clients.audio.azure_tts import AzureTTSClient, AzureVoice
-    from clients.audio.gemini_tts import GEMINI_TTS_MODELS, GeminiTTSClient, GeminiTtsVoice
+    from clients.audio.gemini_tts import GEMINI_ENGINE, GeminiTTSClient, GeminiTtsVoice
     from clients.audio.google_tts import GoogleTTSClient, GoogleTtsVoice
     from clients.audio.polly_tts import PollyTTSClient, PollyVoice
     from clients.audio.types import AudioFormat
@@ -963,7 +951,7 @@ def _generate_sentence_audio_cloud(
                     result = client_g.generate_audio(
                         text=text, voice=google_voice, language_code=language_code
                     )
-                elif tts_engine in GEMINI_TTS_MODELS:
+                elif tts_engine == GEMINI_ENGINE:
                     client_gemini = GeminiTTSClient()
                     gemini_voice = GeminiTtsVoice.from_identifier(voice_name)
                     if not gemini_voice:
@@ -979,7 +967,6 @@ def _generate_sentence_audio_cloud(
                         text=text,
                         voice=gemini_voice,
                         language_code=language_code,
-                        model=tts_engine,
                         is_sentence=True,
                     )
                 else:

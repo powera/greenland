@@ -70,7 +70,7 @@ def test_generate_post_creates_audio_for_selected_lemmas(
 def test_generate_post_dispatches_gemini_38_tts(
     client: FlaskClient, app: Flask, db_path: str, tmp_path: Any
 ) -> None:
-    """Gemini model-qualified voices reach the Gemini TTS client and review storage."""
+    """Gemini engine voices reach the Gemini TTS client and review storage."""
     app.config["AUDIO_BASE_DIR"] = str(tmp_path / "audio")
     gemini_client = MagicMock()
     gemini_client.generate_audio.side_effect = _fake_audio
@@ -80,8 +80,8 @@ def test_generate_post_dispatches_gemini_38_tts(
             "/audio/generate",
             data={
                 "language": "fr",
-                "tts_engine": "gemini-3.8-flash-tts",
-                "voices": ["gemini-3.8-flash-tts-kore"],
+                "tts_engine": "gemini",
+                "voices": ["kore"],
             },
             follow_redirects=False,
         )
@@ -91,11 +91,11 @@ def test_generate_post_dispatches_gemini_38_tts(
     call_kwargs = gemini_client.generate_audio.call_args.kwargs
     assert call_kwargs["text"] == "manger"
     assert call_kwargs["language_code"] == "fr"
-    assert call_kwargs["model"] == "gemini-3.8-flash-tts"
+    assert "model" not in call_kwargs
 
     rows = _review_rows(db_path)
     assert len(rows) == 1
-    assert rows[0].voice_name == "gemini-3.8-flash-tts-kore"
+    assert rows[0].voice_name == "kore"
 
 
 def test_generate_post_reports_when_no_lemmas_match(

@@ -47,7 +47,7 @@ from barsukas.helpers.audio_helpers import (
 from clients.audio import Voice
 from clients.audio.gpt_voices import GptVoice
 from clients.audio.azure_tts import AzureVoice
-from clients.audio.gemini_tts import GEMINI_TTS_MODELS, GeminiTtsVoice
+from clients.audio.gemini_tts import GEMINI_ENGINE, GeminiTtsVoice
 from clients.audio.google_tts import GoogleTtsVoice
 from clients.audio.polly_tts import PollyVoice
 import constants
@@ -762,21 +762,18 @@ def generate() -> ResponseReturnValue:
                 {"name": v.name, "ui_name": v.ui_name, "gender": v.gender} for v in gv
             ]
 
-        gemini_voices: Dict[str, Dict[str, List[Dict[str, Any]]]] = {}
-        for model in GEMINI_TTS_MODELS:
-            gemini_voices[model] = {}
-            for lang in supported_languages:
-                model_voices = GeminiTtsVoice.get_voices_for_language(lang, model)
-                gemini_voices[model][lang] = [
-                    {
-                        "name": gemini_voice.storage_name(model),
-                        "ui_name": f"{gemini_voice.voice_name} — {gemini_voice.description}",
-                        "gender": gemini_voice.gender,
-                    }
-                    for gemini_voice in model_voices
-                ]
+        gemini_voices: Dict[str, List[Dict[str, Any]]] = {}
+        for lang in supported_languages:
+            gemini_voices[lang] = [
+                {
+                    "name": gemini_voice.storage_name,
+                    "ui_name": f"{gemini_voice.voice_name} — {gemini_voice.description}",
+                    "gender": gemini_voice.gender,
+                }
+                for gemini_voice in GeminiTtsVoice.get_voices_for_language(lang)
+            ]
 
-        tts_engines = ["openai", *GEMINI_TTS_MODELS, "espeak-ng", "polly", "azure", "google"]
+        tts_engines = ["openai", GEMINI_ENGINE, "espeak-ng", "polly", "azure", "google"]
 
         return render_template(
             "audio/generate.html",
@@ -814,7 +811,7 @@ def generate() -> ResponseReturnValue:
             espeak_voice_enums: List[Union[EspeakVoice, QwenVoice]] = [
                 EspeakVoice[v.upper()] for v in voice_names
             ]
-        elif tts_engine in ("polly", "azure", "google", *GEMINI_TTS_MODELS):
+        elif tts_engine in ("polly", "azure", "google", GEMINI_ENGINE):
             pass  # Cloud voice names are passed as-is to vieversys
         else:
             # VieversysAgent works in GptVoice, which pairs an OpenAI voice with
@@ -874,8 +871,7 @@ def generate() -> ResponseReturnValue:
             "polly": "Amazon Polly",
             "azure": "Azure Cognitive TTS",
             "google": "Google Cloud TTS",
-            "gemini-3.8-flash-tts": "Gemini 3.8 Flash TTS",
-            "gemini-3.8-flash-lite-tts": "Gemini 3.8 Flash-Lite TTS",
+            "gemini": "Gemini TTS",
         }
         engine_name = engine_names.get(tts_engine, tts_engine)
 
@@ -887,7 +883,7 @@ def generate() -> ResponseReturnValue:
                 voices=espeak_voice_enums,
                 use_ipa=use_ipa,
             )
-        elif tts_engine in ("polly", "azure", "google", *GEMINI_TTS_MODELS):
+        elif tts_engine in ("polly", "azure", "google", GEMINI_ENGINE):
             vieversys_agent = VieversysAgent(
                 config=config, output_dir=str(audio_base_dir), tts_engine=tts_engine
             )
