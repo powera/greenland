@@ -111,3 +111,29 @@ def test_facts_are_removed_with_their_lemma(session: Session) -> None:
     session.commit()
 
     assert session.query(LemmaFact).count() == 0
+
+
+def test_numeral_accepts_digits_only() -> None:
+    assert validate_lemma_fact("numeral", "1") is None
+    assert validate_lemma_fact("numeral", "1000000") is None
+    assert validate_lemma_fact("numeral", "one") is not None
+    assert validate_lemma_fact("numeral", "1,000") is not None
+    assert validate_lemma_fact("numeral", "") is not None
+    assert validate_lemma_fact("numeral", None) is not None
+
+
+def test_numeral_is_stored_on_a_numeral_lemma(session: Session) -> None:
+    lemma = Lemma(
+        guid="Z01_002",
+        lemma_text="one",
+        definition_text="The cardinal number 1.",
+        pos_type="numeral",
+        pos_subtype="cardinal",
+        difficulty_level=4,
+    )
+    session.add(lemma)
+    session.commit()
+
+    assert add_lemma_fact(session, lemma.id, "numeral", "1") is not None
+    assert add_lemma_fact(session, lemma.id, "numeral", "one") is None
+    assert get_lemma_fact_value(session, lemma.id, "numeral") == "1"

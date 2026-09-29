@@ -601,6 +601,16 @@ class WirewordExporter:
                 )
             }
 
+            # Language-independent: the digits of a numeral ("one" -> "1").
+            numeral_by_lemma: Dict[int, str] = {
+                fact.lemma_id: fact.fact_value
+                for fact in session.query(LemmaFact).filter(
+                    LemmaFact.lemma_id.in_(lemma_ids),
+                    LemmaFact.fact_type == "numeral",
+                    LemmaFact.fact_value.isnot(None),
+                )
+            }
+
             # Build English translation lookup for derivative forms
             # (used for _get_english_translation_from_db)
             english_forms_by_lemma: Dict[int, Dict[str, str]] = {}
@@ -859,6 +869,9 @@ class WirewordExporter:
 
                 if lemma.pos_type == "noun" and lemma_id in quantifiable_by_lemma:
                     wireword["quantifiable"] = quantifiable_by_lemma[lemma_id]
+
+                if lemma.pos_type == "numeral" and lemma_id in numeral_by_lemma:
+                    wireword["numeral"] = numeral_by_lemma[lemma_id]
 
                 if lemma.frequency_rank:
                     wireword["frequency_rank"] = lemma.frequency_rank

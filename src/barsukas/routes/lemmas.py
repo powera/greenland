@@ -509,7 +509,7 @@ def view_lemma_forms(lemma_id: int) -> ResponseReturnValue:
     lemma_fact_defs = [
         definition
         for definition in LEMMA_FACT_DEFINITIONS.values()
-        if context["lemma"].pos_type in definition.required_pos
+        if context["lemma"].pos_type in definition.required_pos and definition.allowed_values
     ]
     lemma_fact_values = sorted(
         {value for definition in lemma_fact_defs for value in definition.allowed_values},
