@@ -44,3 +44,6 @@
 {"guid": "N25_057", "forms": [{"grammatical_form": "noun/en_singular", "text": "holiday", "is_base_form": true, "ipa": "/ˈhɑləˌdeɪ/", "phonetic": "HOL-uh-day"}]}
 {"guid": "N25_058", "forms": [{"grammatical_form": "noun/en_singular", "text": "calendar", "is_base_form": true, "ipa": "/ˈkæləndɚ/", "phonetic": "KAL-un-der"}]}
 {"guid": "N25_059", "forms": [{"grammatical_form": "noun/en_singular", "text": "midday", "is_base_form": true, "ipa": "/ˌmɪdˈdeɪ/", "phonetic": "MID-day"}]}
+{"guid": "N25_060", "forms": [{"grammatical_form": "noun/en_singular", "text": "season", "is_base_form": true, "ipa": "/ˈsiːzən/", "phonetic": "SEE-zuhn"}]}
+{"guid": "N25_061", "forms": [{"grammatical_form": "noun/en_singular", "text": "half", "is_base_form": true, "ipa": "/hæf/", "phonetic": "HAF"}]}
+{"guid": "N25_062", "forms": [{"grammatical_form": "noun/en_singular", "text": "period", "is_base_form": true, "ipa": "/ˈpɪriəd/", "phonetic": "PEER-ee-ud"}]}

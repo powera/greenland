@@ -86,3 +86,7 @@
 {"guid": "N36_136", "forms": [{"grammatical_form": "noun/en_singular", "text": "designer", "is_base_form": true, "ipa": "/dɪˈzaɪnɚ/", "phonetic": "duh-ZY-ner"}]}
 {"guid": "N36_137", "forms": [{"grammatical_form": "noun/en_singular", "text": "fire fighter", "is_base_form": true, "ipa": "/ˈfaɪər ˌfaɪtər/", "phonetic": "FIRE-FY-ter"}]}
 {"guid": "N36_138", "forms": [{"grammatical_form": "noun/en_singular", "text": "singer", "is_base_form": true, "ipa": "/ˈsɪŋər/", "phonetic": "SING-er"}]}
+{"guid": "N36_139", "forms": [{"grammatical_form": "noun/en_singular", "text": "referee", "is_base_form": true, "ipa": "/ˌrɛfəˈri/", "phonetic": "ref-uh-REE"}]}
+{"guid": "N36_140", "forms": [{"grammatical_form": "noun/en_singular", "text": "umpire", "is_base_form": true, "ipa": "/ˈʌmˌpaɪr/", "phonetic": "UM-pyre"}]}
+{"guid": "N36_141", "forms": [{"grammatical_form": "noun/en_singular", "text": "linesman", "is_base_form": true, "ipa": "/ˈlaɪnzˌmæn/", "phonetic": "LINEZ-muhn"}]}
+{"guid": "N36_142", "forms": [{"grammatical_form": "noun/en_singular", "text": "line judge", "is_base_form": true, "ipa": "/ˈlaɪn ˌdʒʌdʒ/", "phonetic": "LINE-juhj"}]}

@@ -80,3 +80,5 @@
 {"guid": "N10_091", "forms": [{"grammatical_form": "noun/en_singular", "text": "snowman", "is_base_form": true, "ipa": "/ˈsnoʊˌmæn/", "phonetic": "SNOH-man"}]}
 {"guid": "N10_092", "forms": [{"grammatical_form": "noun/en_singular", "text": "calendar", "is_base_form": true, "ipa": "/ˈkæləndɚ/", "phonetic": "KAL-un-der"}]}
 {"guid": "N10_093", "forms": [{"grammatical_form": "noun/en_singular", "text": "rocket", "is_base_form": true, "ipa": "/ˈrɑkɪt/", "phonetic": "ROK-it"}]}
+{"guid": "N10_094", "forms": [{"grammatical_form": "noun/en_singular", "text": "trophy", "is_base_form": true, "ipa": "/ˈtroʊfi/", "phonetic": "TROH-fee"}]}
+{"guid": "N10_095", "forms": [{"grammatical_form": "noun/en_singular", "text": "medal", "is_base_form": true, "ipa": "/ˈmɛdəl/", "phonetic": "MED-uhl"}]}

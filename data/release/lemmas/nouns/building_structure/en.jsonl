@@ -96,3 +96,5 @@
 {"guid": "N07_117", "forms": [{"grammatical_form": "noun/en_singular", "text": "elevator", "is_base_form": true, "ipa": "/ˈɛləveɪtɚ/", "phonetic": "EL-uh-vay-ter"}]}
 {"guid": "N07_118", "forms": [{"grammatical_form": "noun/en_singular", "text": "skyscraper", "is_base_form": true, "ipa": "/ˈskaɪˌskreɪpər/", "phonetic": "SKY-skrah-per"}]}
 {"guid": "N07_119", "forms": [{"grammatical_form": "noun/en_singular", "text": "platform", "is_base_form": true, "ipa": "/ˈplæt.fɔrm/", "phonetic": "PLAT-form"}]}
+{"guid": "N07_120", "forms": [{"grammatical_form": "noun/en_singular", "text": "arena", "is_base_form": true, "ipa": "/əˈriːnə/", "phonetic": "uh-REE-nuh"}]}
+{"guid": "N07_121", "forms": [{"grammatical_form": "noun/en_singular", "text": "podium", "is_base_form": true, "ipa": "/ˈpoʊdiəm/", "phonetic": "POH-dee-um"}]}
