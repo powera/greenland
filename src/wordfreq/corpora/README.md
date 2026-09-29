@@ -11,6 +11,7 @@ output format are the same for all of them:
 | `build_scotus.py` | Supreme Court opinions | `legal_scotus` |
 | `build_wikipedia.py` | A Wikipedia dump snapshot | `wiki_math`, `wiki_geography`, `wiki_biology`, `wiki_modern_life`, `wiki_arts`, `wiki_society`, `wiki_physical_science`, `wiki_history` |
 | `build_openstax.py` | OpenStax textbooks, pinned by commit | `openstax_science`, `openstax_society` |
+| `build_wpalh.py` | WPA life-history interviews, Library of Congress | `wpa_life_histories` |
 
 Five corpora have book lists here:
 
@@ -225,6 +226,55 @@ and Conkling appear in one chapter each and are dropped. The cost is on the
 science side, where some names belong to one book only: Uranus, Sirius and
 Orion (Astronomy), Coulomb (Physics) and Krebs (Biology) are dropped as
 capitalized entries.
+
+## The WPA life-histories corpus
+
+`wpa_life_histories` is built from the Library of Congress collection
+"American Life Histories: Manuscripts from the Federal Writers' Project,
+1936-1940": about 2,800 interviews with ordinary Americans about their work,
+families and towns.  It is the only conversational corpus here -- "I" is rank
+7 and "you" rank 19 -- and supplies words no other corpus reaches: ranch,
+critters, gonna, fella, guys, mules, plow, chores, yeah.  The writers were
+federal employees and every item is listed as "No known restrictions on use or
+reproduction."
+
+```bash
+# 1. Download one PDF per interview (~2,830 requests, ~5 hours, ~1.1GB).
+#    Resumable.  The Library asks for at most 10 requests a minute.
+PYTHONPATH=src python src/wordfreq/corpora/download_wpalh.py \
+    --dest "/Volumes/Dorothy Day/wpalh"
+
+# 2. Extract the PDF text once (~5 minutes; needs `pip install pypdf`,
+#    which is not a project dependency), then build.
+PYTHONPATH=src python src/wordfreq/corpora/build_wpalh.py \
+    --source-dir "/Volumes/Dorothy Day/wpalh" --report /tmp/wpalh_report.csv
+```
+
+There is no bulk download.  The PDFs carry the Library's own OCR as a text
+layer; nothing here runs OCR.  The cleanup, in `wpalh_text.py`:
+
+* **Questionnaire pages** (the Folklore Project's Forms A and B, editors'
+  checking sheets) are dropped whole; field labels, credits, page headers,
+  accession stamps and all-capitals title lines are dropped line by line.
+* **Heavy eye-dialect interviews are left out** (`--max-dialect-share`,
+  default 1%: 86 interviews).  The writers rendered some speakers in dialect
+  spelling -- mostly Southern Black interviewees, but also Brooklyn, Italian
+  and French-Canadian accents -- and those spellings recur, so the
+  minimum-document threshold would keep them.  The corpus under-represents
+  those speakers as a result.
+* **Recurring OCR misreadings are corrected** against the collection's own
+  counts: an unknown word one typewriter confusion (c/o, n/h, l/t ...) or one
+  lost first letter away from a common known word ten times as frequent is
+  rewritten, so "tne", "oould" and "fter" count as "the", "could" and "after".
+  "Known" is every word of the other corpus files.  About 10,000 misreadings,
+  80,000 occurrences.  A tail of short OCR noise remains ("hie", "tae",
+  "ler"), and some of it lands on rare real words ("hose" is mostly "those").
+* **Names are pooled across interviews.**  The per-document test needs four
+  mid-sentence uses; an interview names its informant two or three times.
+  Pooling the capitalization evidence catches about 3,000 more names.
+
+The result is ~4.8M tokens from 2,623 interviews.  Registered in
+`CORPUS_CONFIGS` at weight 0.5, with the other topic corpora.
 
 ## The Wikipedia corpora
 
