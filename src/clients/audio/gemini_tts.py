@@ -9,6 +9,8 @@ DEFAULT_GEMINI_TTS_MODEL setting, overridable per call via ``model``.
 import base64
 import binascii
 import logging
+import re
+import subprocess
 import time
 from enum import Enum
 from typing import Any, Dict, List, Optional, Tuple
@@ -71,11 +73,22 @@ GEMINI_38_FLASH_LITE_TTS_LANGUAGES = GEMINI_38_FLASH_TTS_LANGUAGES - {
     "sw",
 }
 
-GEMINI_FORMAT_MAP: Dict[AudioFormat, str] = {
-    AudioFormat.MP3: "audio/mp3",
-    AudioFormat.WAV: "audio/wav",
-    AudioFormat.OPUS: "audio/ogg_opus",
+# The Interactions API documents only WAV and raw PCM output ("audio/mp3" is
+# rejected with a 400 most of the time), so every request asks for WAV and any
+# other format is transcoded locally with ffmpeg.  Values are ffmpeg output args.
+GEMINI_RESPONSE_MIME_TYPE = "audio/wav"
+GEMINI_FORMAT_MAP: Dict[AudioFormat, Optional[List[str]]] = {
+    AudioFormat.WAV: None,
+    AudioFormat.MP3: ["-codec:a", "libmp3lame", "-q:a", "2", "-f", "mp3"],
+    AudioFormat.OPUS: ["-codec:a", "libopus", "-f", "ogg"],
 }
+FFMPEG_TIMEOUT = 60
+
+# Tier 1 allows 10 requests per minute, and a 429 names the wait ("Please retry
+# in 53s").  Batch runs rely on this rather than pacing themselves.
+MAX_RATE_LIMIT_RETRIES = 5
+DEFAULT_RATE_LIMIT_WAIT = 60
+RETRY_AFTER_PATTERN = re.compile(r"retry in (\d+(?:\.\d+)?)s", re.IGNORECASE)
 
 
 class GeminiTtsVoice(Enum):
@@ -150,6 +163,39 @@ def _extract_audio(response_data: Dict[str, Any]) -> Tuple[bytes, Optional[str]]
     raise ValueError("Gemini TTS response did not contain inline audio data")
 
 
+def _rate_limit_wait_seconds(response_text: str) -> float:
+    """Return the wait a 429 body asks for, or a full minute if it names none."""
+    match = RETRY_AFTER_PATTERN.search(response_text)
+    return float(match.group(1)) + 1 if match else DEFAULT_RATE_LIMIT_WAIT
+
+
+def _transcode_wav(wav_data: bytes, ffmpeg_args: List[str]) -> bytes:
+    """Convert WAV bytes to another format by piping them through ffmpeg."""
+    try:
+        completed = subprocess.run(
+            [
+                "ffmpeg",
+                "-hide_banner",
+                "-loglevel",
+                "error",
+                "-i",
+                "pipe:0",
+                *ffmpeg_args,
+                "pipe:1",
+            ],
+            input=wav_data,
+            capture_output=True,
+            timeout=FFMPEG_TIMEOUT,
+            check=False,
+        )
+    except (FileNotFoundError, subprocess.TimeoutExpired) as exc:
+        raise ValueError(f"ffmpeg transcode failed: {exc}") from exc
+    if completed.returncode != 0 or not completed.stdout:
+        stderr_text = completed.stderr.decode("utf-8", errors="replace").strip()
+        raise ValueError(f"ffmpeg transcode failed: {stderr_text}")
+    return completed.stdout
+
+
 class GeminiTTSClient:
     """Generate single-speaker audio with Gemini 3.8 TTS."""
 
@@ -161,7 +207,7 @@ class GeminiTTSClient:
     ) -> None:
         self.timeout = timeout
         self.debug = debug
-        self.api_key = api_key if api_key else load_key("google", required=False)
+        self.api_key = api_key if api_key else load_key("gemini", required=False)
         if debug:
             logger.setLevel(logging.DEBUG)
 
@@ -186,8 +232,7 @@ class GeminiTTSClient:
                 model,
                 f"{model} does not support language '{language_code}'",
             )
-        mime_type = GEMINI_FORMAT_MAP.get(audio_format)
-        if mime_type is None:
+        if audio_format not in GEMINI_FORMAT_MAP:
             return self._error_result(
                 text, language_code, model, f"Unsupported audio format: {audio_format.value}"
             )
@@ -208,7 +253,7 @@ class GeminiTTSClient:
                     ],
                 }
             ],
-            "response_format": {"type": "audio", "mime_type": mime_type},
+            "response_format": {"type": "audio", "mime_type": GEMINI_RESPONSE_MIME_TYPE},
             "generation_config": {"speech_config": [{"voice": voice.voice_name}]},
             "store": False,
         }
@@ -216,6 +261,20 @@ class GeminiTTSClient:
         start_time = time.time()
         try:
             response = requests.post(API_URL, headers=headers, json=payload, timeout=self.timeout)
+            for retry_number in range(1, MAX_RATE_LIMIT_RETRIES + 1):
+                if response.status_code != 429:
+                    break
+                wait_seconds = _rate_limit_wait_seconds(response.text)
+                logger.warning(
+                    "Gemini TTS rate limited; waiting %.0fs (retry %d/%d)",
+                    wait_seconds,
+                    retry_number,
+                    MAX_RATE_LIMIT_RETRIES,
+                )
+                time.sleep(wait_seconds)
+                response = requests.post(
+                    API_URL, headers=headers, json=payload, timeout=self.timeout
+                )
             if response.status_code != 200:
                 return self._error_result(
                     text,
@@ -230,6 +289,9 @@ class GeminiTTSClient:
                     len(audio_data),
                     response_mime_type,
                 )
+            ffmpeg_args = GEMINI_FORMAT_MAP[audio_format]
+            if ffmpeg_args is not None:
+                audio_data = _transcode_wav(audio_data, ffmpeg_args)
             return AudioGenerationResult(
                 audio_data=audio_data,
                 text=text,
