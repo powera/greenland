@@ -369,18 +369,8 @@ _ARTICLE_GENDER_MAP: Dict[str, List[Tuple[str, Optional[str]]]] = {
         ("het ", "neuter"),
         ("de ", "common"),
     ],
-    "fr": [
-        ("le ", "masculine"),
-        ("la ", "feminine"),
-        ("l'", None),  # ambiguous — skip
-        ("les ", None),  # plural — skip
-    ],
-    "es": [
-        ("el ", "masculine"),
-        ("la ", "feminine"),
-        ("los ", "masculine"),  # plural masculine
-        ("las ", "feminine"),  # plural feminine
-    ],
+    # No fr/es entries: their translations are stored without articles, and
+    # their noun gender comes from lape (words.grammar_fact_tasks).
     "pt": [
         ("o ", "masculine"),
         ("a ", "feminine"),

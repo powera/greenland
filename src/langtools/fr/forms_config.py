@@ -17,10 +17,6 @@ NOUN_CONFIG: Dict[str, Any] = {
     "type": "singular_plural",
     "query_type": "french_noun_forms",
     "schema_name": "FrenchNounForms",
-    "schema_description": "French noun forms with gender",
-    "extra_schema": {
-        "gender": ("string", "Gender: 'masculine' or 'feminine'"),
-    },
 }
 
 VERB_CONFIG: Dict[str, Any] = {

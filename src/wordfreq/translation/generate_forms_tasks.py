@@ -77,11 +77,11 @@ _TASK_OVERRIDES: Dict[Tuple[str, str], Dict[str, Any]] = {
         "threshold": 2,
         "client_method": "query_english_adverb_forms",
     },
-    # French — translation fetcher, named client methods, gender on nouns
+    # French — translation fetcher, named client methods.  Noun gender is a
+    # grammar fact from lape, not read off the forms.
     ("fr", "noun"): {
         "fetcher": "translation",
         "threshold": 2,
-        "gender": True,
         "client_method": "query_french_noun_forms",
     },
     ("fr", "verb"): {
@@ -134,11 +134,11 @@ _TASK_OVERRIDES: Dict[Tuple[str, str], Dict[str, Any]] = {
     ("uk", "verb"): {"fetcher": "translation", "threshold": 6},
     ("uk", "adjective"): {"fetcher": "translation", "threshold": 4},
     ("uk", "adverb"): {"fetcher": "translation"},
-    # Spanish — translation fetcher, named client methods, gender on nouns
+    # Spanish — translation fetcher, named client methods.  Noun gender is a
+    # grammar fact from lape, not read off the forms.
     ("es", "noun"): {
         "fetcher": "translation",
         "threshold": 2,
-        "gender": True,
         "client_method": "query_spanish_noun_forms",
     },
     ("es", "verb"): {
@@ -155,7 +155,6 @@ _TASK_OVERRIDES: Dict[Tuple[str, str], Dict[str, Any]] = {
     ("es-419", "noun"): {
         "fetcher": "translation",
         "threshold": 2,
-        "gender": True,
         "client_method": "query_latin_american_spanish_noun_forms",
     },
     ("es-419", "verb"): {

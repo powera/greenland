@@ -63,6 +63,11 @@ class GrammarFactService:
             "genders": ["masculine", "feminine"],
             "description": "2-way system (masculine/feminine)",
         },
+        "es-419": {
+            "name": "Latin American Spanish",
+            "genders": ["masculine", "feminine"],
+            "description": "2-way system (masculine/feminine)",
+        },
         "de": {
             "name": "German",
             "genders": ["masculine", "feminine", "neuter"],

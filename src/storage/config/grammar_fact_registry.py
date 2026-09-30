@@ -148,7 +148,7 @@ GRAMMAR_FACT_DEFINITIONS: Dict[str, GrammarFactDefinition] = {
     ),
     "grammatical_gender": GrammarFactDefinition(
         fact_type="grammatical_gender",
-        languages=("fr", "lt", "es", "de", "pt", "it"),
+        languages=("fr", "lt", "es", "es-419", "de", "pt", "it"),
         required_pos=("noun",),
         display_label="Grammatical Gender",
         description="Determine grammatical gender (masculine, feminine, neuter)",
@@ -373,7 +373,7 @@ EXPORTED_FACT_TYPES: Tuple[str, ...] = (
     # decline_noun() takes gender, and the English form generator takes
     # countability (langtools/en/llm_forms.py:133) and number_type to decide
     # whether a plural slot exists at all.
-    "grammatical_gender",  # fr, lt, es, de, pt, it; feeds decline_noun()
+    "grammatical_gender",  # fr, lt, es, es-419, de, pt, it; feeds decline_noun()
     "countability",  # en; feeds the English form generator
     "animacy",  # en
     "verb_transitivity",  # en
