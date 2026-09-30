@@ -9,9 +9,33 @@ at it.
 Only endings that are right for nearly every noun are listed.  Anything else
 returns ``None`` -- a missing prediction costs nothing, while a wrong one sends
 a correct fact to review.
+
+Gender values
+-------------
+
+``masculine`` and ``feminine``, plus ``common`` for a noun with a single form
+that takes either gender depending on who it refers to: el/la estudiante,
+el/la artista, el/la joven, el/la testigo.  ``common`` is not for a pair of
+different words (actor/actriz, profesor/profesora): the lemma's translation is
+one of those words, and it gets that word's gender.  Nor is it for nouns whose
+meaning changes with gender (el capital "money" / la capital "city"); those are
+separate senses, each with its own gender.  The ending rule never predicts
+``common``.
 """
 
-from typing import Optional, Set, Tuple
+from typing import List, Optional, Set, Tuple
+
+# The grammatical_gender values a Spanish noun may take; see above.
+GENDERS: List[str] = ["masculine", "feminine", "common"]
+
+# Gender-system description given to the LLM (see prompts/grammar/gender).
+GENDER_SYSTEM_DESCRIPTION = (
+    "2-way system (masculine/feminine). Use 'common' only for a noun with a single "
+    "form that takes either gender depending on who it refers to (el/la estudiante, "
+    "el/la artista, el/la joven). Do not use 'common' when there are separate "
+    "masculine and feminine words (actor/actriz, profesor/profesora): give the "
+    "gender of the word provided."
+)
 
 # Feminine suffixes with essentially no exceptions among common nouns.
 _FEMININE_ENDINGS: Tuple[str, ...] = ("ción", "sión", "dad", "tad", "tud", "umbre", "itis")

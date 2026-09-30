@@ -1,5 +1,8 @@
 """Shared registry for grammar fact capabilities and release behavior.
 
+What each fact type's values mean, and the classification/override
+distinction, are documented in docs/grammar_facts.md.
+
 Two independent axes
 --------------------
 
@@ -151,7 +154,9 @@ GRAMMAR_FACT_DEFINITIONS: Dict[str, GrammarFactDefinition] = {
         languages=("fr", "lt", "es", "es-419", "de", "pt", "it"),
         required_pos=("noun",),
         display_label="Grammatical Gender",
-        description="Determine grammatical gender (masculine, feminine, neuter)",
+        # es, es-419 and fr also allow "common": one form that takes either
+        # gender (el/la estudiante).  See langtools/es/gender.py.
+        description="Determine grammatical gender (masculine, feminine, neuter, common)",
         generatable=True,
     ),
     "verb_transitivity": GrammarFactDefinition(

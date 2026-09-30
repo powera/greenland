@@ -8,9 +8,33 @@ at it.
 
 Only endings that are right for nearly every noun are listed, each with its
 common exceptions.  Anything else returns ``None``.
+
+Gender values
+-------------
+
+``masculine`` and ``feminine``, plus ``common`` for a noun with a single form
+that takes either gender depending on who it refers to: un/une élève,
+un/une enfant, un/une artiste, un/une collègue.  ``common`` is not for a pair of
+different words (acteur/actrice, boulanger/boulangère): the lemma's translation
+is one of those words, and it gets that word's gender.  Nor is it for nouns
+whose meaning changes with gender (le livre "book" / la livre "pound"); those
+are separate senses, each with its own gender.  The ending rule never predicts
+``common``.
 """
 
-from typing import Dict, Optional, Set, Tuple
+from typing import Dict, List, Optional, Set, Tuple
+
+# The grammatical_gender values a French noun may take; see above.
+GENDERS: List[str] = ["masculine", "feminine", "common"]
+
+# Gender-system description given to the LLM (see prompts/grammar/gender).
+GENDER_SYSTEM_DESCRIPTION = (
+    "2-way system (masculine/feminine). Use 'common' only for a noun with a single "
+    "form that takes either gender depending on who it refers to (un/une élève, "
+    "un/une enfant, un/une artiste). Do not use 'common' when there are separate "
+    "masculine and feminine words (acteur/actrice, boulanger/boulangère): give the "
+    "gender of the word provided."
+)
 
 # ending -> exceptions (nouns with that ending and the other gender).  Longer
 # endings are checked first, so "-ment" is tested before "-t" would be.

@@ -11,7 +11,8 @@ Word-level LLM helpers (single lemma tasks, not sentence workflows).
   full report Voras prints by default.
 - `inflections.py` and `form_generation.py` — inflection coverage and generation workflows.
 - `pronunciation.py` and `pronunciation_generation.py` — pronunciation coverage and generation workflows.
-- `grammar_facts.py` and `grammar_fact_generation.py` — grammar-fact dispatch and persistence.
+- `grammar_facts.py` and `grammar_fact_generation.py` — grammar-fact dispatch and persistence
+  (fact types and values: `docs/grammar_facts.md`).
 - `validation.py` — lemma form, definition, and disambiguation validation.
 - `lemma_selection.py` — shared lemma query and filtering utilities.
 - `synonyms.py` — synonym-family prompt/query helpers with structured JSON output.
