@@ -68,7 +68,10 @@ class GrammarFact(Base):
     # Specific value for this fact type
     # Examples:
     #   fact_type="number_type" -> "regular", "plurale_tantum", or "singulare_tantum"
-    #   fact_type="grammatical_gender" -> fact_value="masculine", "feminine", "neuter"
+    #   fact_type="grammatical_gender" -> fact_value="masculine", "feminine", "neuter",
+    #       or (es, es-419, fr) "common" for one form that takes either gender
+    #       (el/la estudiante), not for two words (actor/actriz); see
+    #       langtools/es/gender.py
     #   fact_type="declension_class" -> fact_value="1", "2", "3", "4", "5"
     #   fact_type="defective_verb" -> fact_value="no_imperative" or similar
     fact_value: Mapped[Optional[str]] = mapped_column(String, nullable=True)

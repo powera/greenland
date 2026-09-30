@@ -10,6 +10,8 @@ from typing import Any, Dict, List, Optional, Tuple
 
 from sqlalchemy.orm import Session
 
+from langtools.es import gender as es_gender
+from langtools.fr import gender as fr_gender
 from words.grammar_fact_tasks import (
     animacy,
     auxiliary_verb,
@@ -50,8 +52,8 @@ class GrammarFactService:
     GENDER_SYSTEMS = {
         "fr": {
             "name": "French",
-            "genders": ["masculine", "feminine"],
-            "description": "2-way system (masculine/feminine)",
+            "genders": fr_gender.GENDERS,
+            "description": fr_gender.GENDER_SYSTEM_DESCRIPTION,
         },
         "lt": {
             "name": "Lithuanian",
@@ -60,13 +62,13 @@ class GrammarFactService:
         },
         "es": {
             "name": "Spanish",
-            "genders": ["masculine", "feminine"],
-            "description": "2-way system (masculine/feminine)",
+            "genders": es_gender.GENDERS,
+            "description": es_gender.GENDER_SYSTEM_DESCRIPTION,
         },
         "es-419": {
             "name": "Latin American Spanish",
-            "genders": ["masculine", "feminine"],
-            "description": "2-way system (masculine/feminine)",
+            "genders": es_gender.GENDERS,
+            "description": es_gender.GENDER_SYSTEM_DESCRIPTION,
         },
         "de": {
             "name": "German",

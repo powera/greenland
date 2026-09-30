@@ -13,6 +13,8 @@ import constants
 import util.prompt_loader
 from clients.types import Schema, SchemaProperty
 from clients.unified_client import UnifiedLLMClient
+from langtools.es import gender as es_gender
+from langtools.fr import gender as fr_gender
 from sqlalchemy.orm import Session
 from storage.backend.config import DataSourceConfig
 from storage.config.grammar_fact_registry import legacy_supported_fact_types
@@ -32,8 +34,8 @@ logger = logging.getLogger(__name__)
 GENDER_SYSTEMS = {
     "fr": {
         "name": "French",
-        "genders": ["masculine", "feminine"],
-        "description": "2-way system (masculine/feminine)",
+        "genders": fr_gender.GENDERS,
+        "description": fr_gender.GENDER_SYSTEM_DESCRIPTION,
     },
     "lt": {
         "name": "Lithuanian",
@@ -42,13 +44,13 @@ GENDER_SYSTEMS = {
     },
     "es": {
         "name": "Spanish",
-        "genders": ["masculine", "feminine"],
-        "description": "2-way system (masculine/feminine)",
+        "genders": es_gender.GENDERS,
+        "description": es_gender.GENDER_SYSTEM_DESCRIPTION,
     },
     "es-419": {
         "name": "Latin American Spanish",
-        "genders": ["masculine", "feminine"],
-        "description": "2-way system (masculine/feminine)",
+        "genders": es_gender.GENDERS,
+        "description": es_gender.GENDER_SYSTEM_DESCRIPTION,
     },
     "de": {
         "name": "German",

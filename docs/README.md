@@ -9,6 +9,8 @@ Design documents and reference documentation.
 - `dialog_generation.md` — scene-driven dialog generation, vocabulary coverage,
   and the names registry
 - `difficulty_overrides.md` — per-language difficulty level overrides
+- `grammar_facts.md` — grammar fact types, their values (including the
+  `common` gender), and which are classifications vs. overrides
 - `pending_imports.md` — the staged-term review queue: what a term becomes
   (lemma, name, or concept) and how sentences wait on one
 - `sentence_sync_design.md` — design for syncing sentences between SQLite and

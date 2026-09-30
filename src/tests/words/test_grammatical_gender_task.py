@@ -55,6 +55,24 @@ class TestSpanishDialectCopy(unittest.TestCase):
         agent.get_llm_client().generate_chat.assert_called_once()
 
 
+class TestCommonGender(unittest.TestCase):
+    def test_offered_for_spanish_and_french_only(self) -> None:
+        systems = GrammarFactService.GENDER_SYSTEMS
+        for language_code in ("es", "es-419", "fr"):
+            self.assertIn("common", systems[language_code]["genders"])
+        for language_code in ("lt", "de", "it", "pt"):
+            self.assertNotIn("common", systems[language_code]["genders"])
+
+    def test_llm_schema_allows_common_and_answer_is_kept(self) -> None:
+        agent = _agent({"gender": "common", "explanation": "", "confidence": 0.9})
+        gender, _notes, _confidence = grammatical_gender.generate_grammatical_gender(
+            agent, _noun(), "estudiante", "es"
+        )
+        self.assertEqual(gender, "common")
+        schema = agent.get_llm_client().generate_chat.call_args.kwargs["json_schema"]
+        self.assertIn("common", schema.properties["gender"].enum)
+
+
 class TestRuleDisagreementFlag(unittest.TestCase):
     def test_flags_disagreement_in_notes(self) -> None:
         agent = _agent({"gender": "masculine", "explanation": "", "confidence": 0.9})

@@ -1,7 +1,12 @@
 """
 Grammatical Gender Task - Determine grammatical gender for nouns.
 
-The LLM decides the gender.  Two things happen around that call:
+The LLM decides the gender, from the values in the language's GENDER_SYSTEMS
+entry.  Spanish and French add "common" to masculine/feminine, for a noun with
+one form that takes either gender (el/la estudiante); the definition of that
+value lives in langtools.es.gender / langtools.fr.gender.
+
+Two things happen around the LLM call:
 
 * es-419 copies the es fact when both varieties use the same word, since the
   gender of a Spanish word does not change between varieties.  The copy is a
