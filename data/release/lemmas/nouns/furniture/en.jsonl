@@ -1,6 +1,5 @@
 {"guid": "N39_001", "forms": [{"grammatical_form": "noun/en_singular", "text": "chair", "is_base_form": true, "ipa": "/tʃɛər/", "phonetic": "CHAIR"}]}
 {"guid": "N39_002", "forms": [{"grammatical_form": "noun/en_singular", "text": "desk", "is_base_form": true, "ipa": "dɛsk", "phonetic": "DESK"}]}
-{"guid": "N39_003", "forms": [{"grammatical_form": "noun/en_singular", "text": "couch", "is_base_form": true, "ipa": "/kʌtʃ/", "phonetic": "KOTCH"}]}
 {"guid": "N39_004", "forms": [{"grammatical_form": "noun/en_singular", "text": "shelf", "is_base_form": true, "ipa": "ˈʃɛlf", "phonetic": "SHĒLF"}, {"grammatical_form": "noun/en_plural", "text": "shelves", "is_base_form": false}]}
 {"guid": "N39_005", "forms": [{"grammatical_form": "noun/en_singular", "text": "bed", "is_base_form": true, "ipa": "/bɛd/", "phonetic": "BED"}]}
 {"guid": "N39_006", "forms": [{"grammatical_form": "noun/en_singular", "text": "table", "is_base_form": true, "ipa": "/ˈteɪ.bəl/", "phonetic": "TAY-buhl"}]}
@@ -12,4 +11,4 @@
 {"guid": "N39_020", "forms": [{"grammatical_form": "noun/en_singular", "text": "throne", "is_base_form": true, "ipa": "/θroʊn/", "phonetic": "THROHN"}]}
 {"guid": "N39_021", "forms": [{"grammatical_form": "noun/en_singular", "text": "cupboard", "is_base_form": true, "ipa": "/ˈkʌbərd/", "phonetic": "KUP-bord"}]}
 {"guid": "N39_022", "forms": [{"grammatical_form": "noun/en_singular", "text": "rug", "is_base_form": true, "ipa": "/rʌɡ/", "phonetic": "RUG"}]}
-{"guid": "N39_023", "forms": [{"grammatical_form": "noun/en_singular", "text": "sofa", "is_base_form": true, "ipa": "/ˈsoʊfə/", "phonetic": "SOH-fuh"}]}
+{"guid": "N39_023", "forms": [{"grammatical_form": "noun/en_singular", "text": "sofa", "is_base_form": true, "ipa": "/ˈsoʊfə/", "phonetic": "SOH-fuh"}], "variants": [{"kind": "equivalent", "key": "couch", "forms": [{"grammatical_form": "noun/en_singular", "text": "couch", "is_base_form": true, "ipa": "/kʌtʃ/", "phonetic": "KOTCH"}]}]}

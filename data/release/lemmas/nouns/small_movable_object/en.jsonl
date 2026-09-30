@@ -39,7 +39,6 @@
 {"guid": "N08_049", "forms": [{"grammatical_form": "noun/en_singular", "text": "lamp", "is_base_form": true, "ipa": "læmp", "phonetic": "LAM-p"}]}
 {"guid": "N08_050", "forms": [{"grammatical_form": "noun/en_singular", "text": "torch", "is_base_form": true, "ipa": "[ˈtɔːrtʃ]", "phonetic": "TORCH"}]}
 {"guid": "N08_089", "forms": [{"grammatical_form": "noun/en_singular", "text": "canvas", "is_base_form": true}]}
-{"guid": "N08_107", "forms": [{"grammatical_form": "noun/en_singular", "text": "trousers", "is_base_form": true}, {"grammatical_form": "noun/en_plural", "text": "trousers", "is_base_form": false}]}
 {"guid": "N08_120", "forms": [{"grammatical_form": "noun/en_singular", "text": "light bulb", "is_base_form": true}]}
 {"guid": "N08_121", "forms": [{"grammatical_form": "noun/en_singular", "text": "alarm clock", "is_base_form": true}]}
 {"guid": "N08_122", "forms": [{"grammatical_form": "noun/en_singular", "text": "shower curtain", "is_base_form": true}]}

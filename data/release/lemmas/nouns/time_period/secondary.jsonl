@@ -26,7 +26,6 @@
 {"guid": "N25_032", "translations": {"ro": "weekend", "pl": "weekend", "th": "วันหยุดสุดสัปดาห์", "ms": "hujung minggu", "ta": "வாராந்திரம்", "kn": "ವಾರಾಂತ್ಯ", "uk": "вихідні", "bn": "সপ্তাহান্ত", "hi": "सप्ताहांत", "tr": "hafta sonu"}}
 {"guid": "N25_033", "translations": {"ro": "miezul nopții", "pl": "północ", "th": "เที่ยงคืน", "ms": "tengah malam", "ta": "நள்ளிரவு", "kn": "ಅರ್ಧರಾತ್ರಿ", "uk": "опівночі", "bn": "মধ্যরাত", "hi": "मध्यरात्रि", "tr": "gece yarısı"}}
 {"guid": "N25_034", "translations": {"ro": "amiază", "pl": "południe", "th": "เที่ยงวัน", "ms": "tengah hari", "ta": "நடுத்து நண்பகல்", "kn": "ಮಧ್ಯಾಹ್ನ", "uk": "полудень", "bn": "দুপুর", "hi": "दोपहर", "tr": "öğle"}}
-{"guid": "N25_035", "translations": {"ro": "perioadă", "pl": "okres", "th": "ช่วงเวลา", "ms": "tempoh", "ta": "காலத்தொடர்", "kn": "ಕಾಲಾವಧಿ", "uk": "період", "bn": "কালপর্ব", "hi": "अवधि", "tr": "dönem"}}
 {"guid": "N25_036", "translations": {"ro": "dată", "pl": "data", "th": "วันที่", "ms": "tarikh", "ta": "தேதி", "kn": "ತಾರೀಖು", "uk": "дата", "bn": "তথ্য", "hi": "तिथि", "tr": "tarih", "bs": "datum"}}
 {"guid": "N25_037", "translations": {"ms": "tahun persekolahan", "hi": "शैक्षणिक वर्ष", "tr": "öğretim yılı"}}
 {"guid": "N25_038", "translations": {"ms": "waktu konsultasi", "hi": "विद्यार्थियों से मिलने का समय", "tr": "öğretim elemanının öğrenci kabul saatleri"}}

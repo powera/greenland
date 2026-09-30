@@ -1,6 +1,5 @@
 {"guid": "N39_001", "translations": {"ro": "scaun", "pl": "krzesło", "th": "เก้าอี้", "ms": "kerusi", "ta": "நாற்காலி", "kn": "ಕುರ್ಚಿ", "uk": "стілець", "bn": "চেয়ার", "hi": "कुर्सी", "tr": "sandalye", "bs": "stolica"}}
 {"guid": "N39_002", "translations": {"ro": "birou", "pl": "biurko", "th": "โต๊ะทำงาน", "ms": "meja tulis", "ta": "மேசை", "kn": "ಮೇಜು", "uk": "парта", "bn": "ডেস্ক", "hi": "डेस্ক", "tr": "yazı masası", "bs": "radni stol"}}
-{"guid": "N39_003", "translations": {"ro": "canapea", "pl": "kanapa", "th": "โซฟา", "ms": "sofa", "ta": "சோபா", "kn": "ಸೋಫಾ", "uk": "диван", "bn": "সোফা", "hi": "सोफ़ा", "tr": "kanepe", "bs": "sofa"}}
 {"guid": "N39_004", "translations": {"ro": "raft", "pl": "półka", "th": "ชั้นวาง", "ms": "rak", "ta": "அலமாரி", "kn": "ಕಪಾಟು", "uk": "полиця", "bn": "শেলফ|তাক|আলমারি", "hi": "शेल्फ|तराज़ू|अलमारी", "tr": "raf", "bs": "polica"}}
 {"guid": "N39_005", "translations": {"ro": "pat", "pl": "łóżko", "th": "เตียง", "ms": "katil", "ta": "படுக்கை", "kn": "ಹಾಸಿಗೆ", "uk": "ліжко", "bn": "বিছানা", "hi": "बिस्तर", "tr": "yatak", "bs": "krevet"}}
 {"guid": "N39_006", "translations": {"ro": "masă", "pl": "stół", "th": "โต๊ะ", "ms": "meja", "ta": "மேசை", "kn": "ಮೀಸೈ", "uk": "стіл", "bn": "টেবিল", "hi": "मेज़", "tr": "masa", "bs": "sto"}}
@@ -20,4 +19,4 @@
 {"guid": "N39_020", "translations": {"ms": "takhta", "hi": "सिंहासन", "tr": "taht"}}
 {"guid": "N39_021", "translations": {"ms": "almari", "hi": "अलमारी", "tr": "dolap"}}
 {"guid": "N39_022", "translations": {"ms": "permaidani", "hi": "गलीचा", "tr": "halı"}}
-{"guid": "N39_023", "translations": {"ms": "sofa", "hi": "सोफ़ा", "tr": "kanepe"}}
+{"guid": "N39_023", "translations": {"ro": "canapea", "pl": "kanapa", "th": "โซฟา", "ms": "sofa", "ta": "சோபா", "kn": "ಸೋಫಾ", "uk": "диван", "bn": "সোফা", "hi": "सोफ़ा", "tr": "kanepe", "bs": "sofa"}}

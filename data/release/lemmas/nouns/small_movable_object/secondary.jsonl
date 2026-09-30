@@ -95,7 +95,6 @@
 {"guid": "N08_104", "translations": {"ro": "timbru poștal", "pl": "znaczek pocztowy", "th": "แสตมป์ไปรษณีย์", "ms": "setem", "ta": "அஞ்சல் தபால் முத்திரை", "kn": "ಡಾಕುಟಿಗ", "uk": "поштова марка", "bn": "ডাকটিকিট", "hi": "डाक टिकट", "tr": "posta pulu"}}
 {"guid": "N08_105", "translations": {"ro": "șosetă", "pl": "skarpetka", "th": "ถุงเท้า", "ms": "stoking", "ta": "மொழா", "kn": "ಜೇಬು", "uk": "панчоха", "bn": "মোজা", "hi": "मोज़ा", "tr": "çorap"}}
 {"guid": "N08_106", "translations": {"ro": "ață", "pl": "nić", "th": "ด้าย", "ms": "benang", "ta": "நூல்", "kn": "ಉಣ್ಣ", "uk": "нитка", "bn": "সুঁতা", "hi": "सूई", "tr": "iplik"}}
-{"guid": "N08_107", "translations": {"ro": "pantaloni", "pl": "spodnie", "th": "กางเกง", "ms": "seluar", "ta": "சால்வார்", "kn": "ಕಾಲುವೆಗಳ ನೀಪುಗಳು", "uk": "штани", "bn": "ট্রাউজার", "hi": "पतलून", "tr": "pantolon"}}
 {"guid": "N08_108", "translations": {"ro": "recipient", "pl": "naczynie", "th": "ภาชนะ", "ms": "bekas", "ta": "பானை", "kn": "ಬಾಣಲೆ", "uk": "посудина", "bn": "বাটি", "hi": "बर्तन", "tr": "kap", "bs": "posuda"}}
 {"guid": "N08_109", "translations": {"ro": "fluier", "pl": "gwizdek", "th": "นกหวีด", "ms": "wisel", "ta": "ஷிஸ்டில்", "kn": "ಶವ್ಲ್ಪು", "uk": "свисток", "bn": "শিশনি", "hi": "सीटी", "tr": "düdük"}}
 {"guid": "N08_110", "translations": {"ro": "ciomag", "pl": "bat", "th": "แส้", "ms": "cemeti", "ta": "அடித்துப்பிடி", "kn": "ಚಮ್ಮಚಿ", "uk": "плеть", "bn": "চামড়ার ফাঁকা", "hi": "फावड़ा", "tr": "kırbaç"}}
