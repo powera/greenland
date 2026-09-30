@@ -80,7 +80,8 @@ Supported fact types:
 
   Noun facts:
     - measure_words: Chinese measure words/classifiers (languages: zh)
-    - grammatical_gender: Noun gender (languages: fr, lt, es, de, pt, it)
+    - grammatical_gender: Noun gender (languages: fr, lt, es, es-419, de, pt, it;
+      run es before es-419, which copies es's fact when the word is the same)
     - countability: English noun usage (countable/uncountable/both; language: en)
     - declension_class: Declension class 1-5 (languages: lt)
     - animacy: Animate/inanimate (languages: en - base concept)
