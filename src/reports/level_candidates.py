@@ -1,9 +1,10 @@
 """Suggest curriculum levels for a word that has none yet.
 
-This is placement, not rebalancing: ``curriculum_relevel`` reshuffles words
-already in the curriculum, while this ranks the levels a *new* word -- a
-pending import, usually -- could join, without moving anything. It reads
-SQLite only and writes nothing.
+This is placement, not rebalancing: it ranks the levels a *new* word -- a
+pending import, usually -- could join, without moving anything. Words already
+in the curriculum are moved by hand (``reports.curriculum_bands.apply_moves``)
+and checked by ``reports.level_warnings``. It reads SQLite only and writes
+nothing.
 
 A fixed set's level (``wordfreq.data.cohorts``) is never offered: a set is
 completed when it is defined, so a new word does not join one.
@@ -16,13 +17,13 @@ Candidates come from, in order:
    a tag overrides commonness: an untagged common word is general vocabulary
    even if a legal corpus uses it a lot.
 2. **Subtype**: the core and named levels already holding the word's
-   (pos, subtype). The core is offered only to a word with the evidence the
-   rebalancer asks of core words (``curriculum_relevel.spill_from_core``);
+   (pos, subtype). The core is offered only to a common word on a learner
+   list whose subtype is under its core cap (:func:`core_evidence`);
    core levels are ordered by how close their words' ranks are to this one,
    since the core is sequential, and named levels by how many of the subtype
    they hold, since named numbers are not a teaching order.
-3. **Curriculum theme** (``curriculum_relevel.THEME_BY_SUBTYPE``): when no
-   level holds the subtype, named levels holding its broad theme.
+3. **Curriculum theme** (:data:`THEME_BY_SUBTYPE`): when no level holds the
+   subtype, named levels holding its broad theme.
 
 A level at or over its band's maximum is still offered, but after the others,
 and flagged full.
@@ -58,14 +59,6 @@ from reports.curriculum_bands import (
     effective_rank,
     load_rank_evidence,
 )
-from reports.curriculum_relevel import (
-    CORE_LOW_FREQUENCY_RANK,
-    CORE_MAX_CEFR,
-    CORE_RANK_CEILINGS,
-    CORE_SUBTYPE_CAP,
-    CORE_SUBTYPE_CAPS,
-    theme_of,
-)
 from storage.backend import BackendType, DataSourceConfig, create_session
 from storage.crud.lemma_tags import read_pending_import_tags, read_tags
 from storage.models.imports import TARGET_KIND_LEMMA, PendingImport
@@ -77,6 +70,123 @@ from wordfreq.data.curriculum_themes import (
     CurriculumTheme,
     theme_for_subtype,
 )
+
+# Most content words one subtype may hold in the core (levels 1-5 included);
+# a subtype at its cap is not offered a core level. Some subtypes are held far
+# lower: ten drinks is plenty, and medicine is not early vocabulary for high
+# school students.
+CORE_SUBTYPE_CAP = 60
+CORE_SUBTYPE_CAPS: Mapping[str, int] = {
+    "food": 70,
+    "beverage": 10,
+    "disease_condition": 8,
+    "medication_remedy": 2,
+}
+# A subtype listed here is offered the core only for a word common by both
+# measures: ranked better than this ceiling (missing corpus data counts as
+# rare), and on a learner list -- any Cambridge YLE level, or CEFR
+# CORE_MAX_CEFR or easier. A count cap alone kept brown sugar and beet; rank
+# alone keeps turnip and walnut, and a tier alone keeps pancake, which no
+# corpus lists.
+CORE_RANK_CEILINGS: Mapping[str, int] = {
+    "food": 5000,
+    "body_part": 5000,
+}
+CORE_MAX_CEFR = "B1"
+# A word rarer than this (or with no corpus evidence) is not core material:
+# the core should be words a learner meets constantly.
+CORE_LOW_FREQUENCY_RANK = 5000
+
+# Broad curriculum themes, for a subtype no level holds yet. These are not a
+# replacement taxonomy: the stored POS subtype remains the unit kept together.
+THEME_BY_SUBTYPE: Mapping[str, str] = {
+    "food": "food_and_drink",
+    "beverage": "food_and_drink",
+    "emotion": "descriptions_and_feelings",
+    "emotion_feeling": "descriptions_and_feelings",
+    "emotional_state": "descriptions_and_feelings",
+    "color": "descriptions_and_feelings",
+    "shape": "descriptions_and_feelings",
+    "size": "descriptions_and_feelings",
+    "quality": "descriptions_and_feelings",
+    "quality_attribute": "descriptions_and_feelings",
+    "physical_property": "descriptions_and_feelings",
+    "personal_quality": "descriptions_and_feelings",
+    "style": "descriptions_and_feelings",
+    "intensity": "descriptions_and_feelings",
+    "completeness": "descriptions_and_feelings",
+    "body_part": "body_and_health",
+    "disease_condition": "body_and_health",
+    "medication_remedy": "body_and_health",
+    "building_structure": "home_and_buildings",
+    "building_part": "home_and_buildings",
+    "furniture": "home_and_buildings",
+    "appliance": "home_and_buildings",
+    "animal": "nature",
+    "animal_grouping_term": "nature",
+    "plant": "nature",
+    "plant_part": "nature",
+    "natural_feature": "nature",
+    "material_substance": "objects_and_materials",
+    "small_movable_object": "objects_and_materials",
+    "clothing_accessory": "objects_and_materials",
+    "electronic_device": "objects_and_materials",
+    "technology_digital": "objects_and_materials",
+    "tool": "objects_and_materials",
+    "weapon": "objects_and_materials",
+    "vehicle": "objects_and_materials",
+    "artwork_artifact": "objects_and_materials",
+    "region": "places_and_geography",
+    "nationality": "places_and_geography",
+    "city": "places_and_geography",
+    "place_name": "places_and_geography",
+    "geographic_place": "places_and_geography",
+    "location": "places_and_geography",
+    "path_infrastructure": "places_and_geography",
+    "direction": "places_and_geography",
+    "occupation": "people_and_society",
+    "human": "people_and_society",
+    "group_people": "people_and_society",
+    "family_relation": "people_and_society",
+    "honorific": "people_and_society",
+    "social_institution": "people_and_society",
+    "organization_name": "people_and_society",
+    "knowledge_domain": "people_and_society",
+    "physical_action": "actions",
+    "directional_movement": "actions",
+    "change": "actions",
+    "existence": "actions",
+    "possession": "actions",
+    "perception": "actions",
+    "mental_state": "actions",
+    "communication": "actions",
+    "creation_action": "actions",
+    "destruction_action": "actions",
+    "development": "actions",
+    "activity": "ideas_and_events",
+    "concept_idea": "ideas_and_events",
+    "mental_construct": "ideas_and_events",
+    "abstract_condition": "ideas_and_events",
+    "process_event": "ideas_and_events",
+    "communication_information": "ideas_and_events",
+    "quantitative_concept": "numbers_and_time",
+    "unit_of_measurement": "numbers_and_time",
+    "cardinal": "numbers_and_time",
+    "ordinal": "numbers_and_time",
+    "sequence": "numbers_and_time",
+    "time_period": "numbers_and_time",
+    "temporal_name": "numbers_and_time",
+    "relative_time": "numbers_and_time",
+    "specific_time": "numbers_and_time",
+    "duration": "numbers_and_time",
+    "definite_frequency": "numbers_and_time",
+    "preposition_other": "grammar_words",
+    "conjunction_other": "grammar_words",
+    "pronoun_other": "grammar_words",
+    "determiner_other": "grammar_words",
+    "adverb_other": "grammar_words",
+    "interjection_other": "grammar_words",
+}
 
 # Corpora standing for general vocabulary, against which a theme corpus rank
 # is compared.
@@ -92,6 +202,11 @@ THEME_MIN_GENERAL_RANK = CORE_LOW_FREQUENCY_RANK
 TIER_SOURCES = ("cefr", "cambridge_yle", "basic_english")
 CORPUS_SOURCE_PREFIX = "wordfreq_"
 DEFAULT_LIMIT = 3
+
+
+def theme_of(pos_type: str, pos_subtype: Optional[str]) -> str:
+    """Return the broad curriculum theme for a stored subtype."""
+    return THEME_BY_SUBTYPE.get(pos_subtype or pos_type, f"other_{pos_type}")
 
 
 @dataclass(frozen=True)
@@ -265,9 +380,8 @@ def detect_theme(query: PlacementQuery, index: LevelIndex) -> Optional[tuple[Cur
 def core_evidence(query: PlacementQuery, index: LevelIndex) -> Optional[str]:
     """Why the query may not join the core, or None when it may.
 
-    The rebalancer's rules for keeping a word in the core, applied to a new
-    one; both the rank and the learner-list test apply to every subtype,
-    since a new word has no current level to give it the benefit of the doubt.
+    Both the rank and the learner-list test apply to every subtype, since a
+    new word has no current level to give it the benefit of the doubt.
     """
     subtype = query.pos_subtype or query.pos_type
     ceiling = CORE_RANK_CEILINGS.get(subtype, CORE_LOW_FREQUENCY_RANK)

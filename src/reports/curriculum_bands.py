@@ -18,7 +18,6 @@ of another if its rank is in a better power-of-two bucket (roughly twice as
 frequent); inside a bucket the current curriculum order stands.
 """
 
-import json
 import math
 import sqlite3
 from collections import defaultdict
@@ -250,19 +249,6 @@ def family_reserved_level(lemma: Lemma) -> Optional[int]:
         elif "female" in disambiguation:
             lemma_text = "female cousin"
     return FAMILY_LEVEL_BY_TEXT.get(lemma_text)
-
-
-def load_verb_affinity(path: Path) -> dict[str, dict[str, float]]:
-    """Read ``verb -> subtype -> lift`` from the co-occurrence artifact.
-
-    The artifact is built by ``wordfreq/corpora/build_cooccurrence.py``; see
-    ``wordfreq.corpora.cooccurrence`` for why lift rather than raw counts.
-    """
-    artifact = json.loads(path.read_text(encoding="utf-8"))
-    return {
-        verb: {entry["subtype"]: float(entry["lift"]) for entry in payload["subtypes"]}
-        for verb, payload in artifact["verbs"].items()
-    }
 
 
 def backup_database(database_path: Path, label: str) -> Path:

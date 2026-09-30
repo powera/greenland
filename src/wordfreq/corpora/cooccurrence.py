@@ -69,9 +69,9 @@ DEFAULT_MIN_PAIR_COUNT: Final[int] = 5
 # them -- so the levels here are a judgment call to be edited by hand. Do not
 # replace this with a derived value.
 HARDCODED_VERB_LEVELS: Final[Mapping[str, int]] = {
-    "be": 3,
-    "have": 4,
-    "like": 4,
+    "be": 2,
+    "have": 2,
+    "like": 5,
 }
 
 # ``do`` is deliberately *not* here, and not in the lemma table either.

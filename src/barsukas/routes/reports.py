@@ -4,9 +4,8 @@
 
 A single listing of the reports in ``src/reports/``.  These are analysis passes
 over the database -- coverage cross-tabs, vocabulary distribution, term age --
-that answer "what does the data look like right now?".  Nearly all are
-read-only; the exceptions carry ``writes: True`` and are marked in the listing,
-since ``curriculum_sense_fixes --apply`` does change data.
+that answer "what does the data look like right now?".  They are read-only; a
+report that changes data carries ``writes: True`` and is marked in the listing.
 
 Before this page the reports were findable only by listing the directory, and
 the Data Quality (bebras) page mixes a couple of them in among its LLM-backed
@@ -152,22 +151,18 @@ REPORTS: List[Dict[str, Any]] = [
         "arguments": ["--level N / --level 3-8", "--pos-type noun", "--output report.json"],
     },
     {
-        "name": "curriculum_relevel",
-        "display_name": "Curriculum Relevel",
-        "subtitle": "Rebalance the core and named level bands",
+        "name": "level_warnings",
+        "display_name": "Level Warnings",
+        "subtitle": "Problems in the curriculum's level assignments",
         "description": (
-            "Proposes core levels of 30-40 words (2-3 subtypes, 1-5 matching verbs, "
-            "function words spread out) and one-topic named units. Writes a proposal "
-            "by default; --apply backs up the database and writes the levels."
+            "Warns about core levels outside 20-50 words (ideal 25-40), headwords "
+            "with two senses in the core, scattered subtypes, words far rarer than "
+            "their level-mates, and senses taught out of order. Warnings only; "
+            "it moves nothing."
         ),
-        "icon": "bi-sort-numeric-down",
-        "command": "PYTHONPATH=src python src/reports/curriculum_relevel.py --output-dir DIR",
-        "arguments": [
-            "--output-dir DIR (required)",
-            "--bands core,named",
-            "--apply (writes changes)",
-        ],
-        "writes": True,
+        "icon": "bi-exclamation-triangle",
+        "command": "PYTHONPATH=src python src/reports/level_warnings.py",
+        "arguments": ["--language en", "--max-level 30", "--output report.json"],
     },
     {
         "name": "level_words",
@@ -175,29 +170,14 @@ REPORTS: List[Dict[str, Any]] = [
         "subtitle": "Diffable listing of the curriculum",
         "description": (
             "Writes one text file listing every level's words, grouped by subtype, "
-            "for review and diffing. --mapping applies a curriculum_relevel proposal."
+            "for review and diffing."
         ),
         "icon": "bi-list-ol",
         "command": "PYTHONPATH=src python src/reports/level_words.py --output FILE",
         "arguments": [
             "--output FILE (required)",
-            "--mapping DIR/mapping.json",
             "--bands core,named,topic",
         ],
-    },
-    {
-        "name": "curriculum_sense_fixes",
-        "display_name": "Curriculum Sense Fixes",
-        "subtitle": "One sense per headword in the core",
-        "description": (
-            "Moves the lesser senses of a core headword to a named unit, keeping "
-            "noun/adjective pairs, and reports unclear cases. Previews by default; "
-            "--apply writes them, so this one is not read-only."
-        ),
-        "icon": "bi-signpost-split",
-        "command": "PYTHONPATH=src python src/reports/curriculum_sense_fixes.py",
-        "arguments": ["--apply (writes changes)"],
-        "writes": True,
     },
 ]
 

@@ -5,20 +5,15 @@ shows as a changed line in an ordinary ``diff`` -- much easier to review than
 the per-lemma files under ``data/release``. A headword with more than one sense
 carries its disambiguation (or GUID) so the senses can be told apart.
 
-``--mapping`` applies a ``curriculum_relevel`` proposal in memory, so the
-before and after of a rebalance can be diffed without touching the database::
+To review a batch of hand moves, write the listing before and after and diff::
 
     PYTHONPATH=src python src/reports/level_words.py --output /tmp/before.txt
-    PYTHONPATH=src python src/reports/level_words.py --output /tmp/after.txt \\
-        --mapping /tmp/relevel/mapping.json
+    ... make the moves ...
+    PYTHONPATH=src python src/reports/level_words.py --output /tmp/after.txt
     diff /tmp/before.txt /tmp/after.txt
-
-The relevel writes both files itself (``levels-before.txt`` and
-``levels-after.txt``) next to its other artifacts.
 """
 
 import argparse
-import json
 from collections import Counter, defaultdict
 from dataclasses import dataclass
 from pathlib import Path
@@ -114,12 +109,8 @@ def format_level_words(
     return "\n".join(lines)
 
 
-def load_level_words(session: Session, mapping_path: Optional[Path] = None) -> list[LevelWord]:
-    """Every levelled lemma, with a relevel ``mapping.json`` applied if given."""
-    proposed: dict[str, int] = {}
-    if mapping_path is not None:
-        payload = json.loads(mapping_path.read_text(encoding="utf-8"))
-        proposed = {item["guid"]: int(item["proposed_level"]) for item in payload["assignments"]}
+def load_level_words(session: Session) -> list[LevelWord]:
+    """Every levelled lemma."""
     lemmas = (
         session.query(Lemma)
         .filter(Lemma.guid.isnot(None), Lemma.difficulty_level.isnot(None))
@@ -127,7 +118,7 @@ def load_level_words(session: Session, mapping_path: Optional[Path] = None) -> l
     )
     return [
         LevelWord(
-            level=proposed.get(lemma.guid or "", int(lemma.difficulty_level or 0)),
+            level=int(lemma.difficulty_level or 0),
             pos_type=lemma.pos_type,
             pos_subtype=lemma.pos_subtype,
             lemma_text=lemma.lemma_text,
@@ -139,17 +130,12 @@ def load_level_words(session: Session, mapping_path: Optional[Path] = None) -> l
 
 
 def main() -> None:
-    """Write the level listing for the current database or a proposal."""
+    """Write the level listing for the current database."""
     parser = argparse.ArgumentParser(
         description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter
     )
     parser.add_argument("--db-path", type=Path, default=Path(constants.WORDFREQ_DB_PATH))
     parser.add_argument("--output", type=Path, required=True)
-    parser.add_argument(
-        "--mapping",
-        type=Path,
-        help="curriculum_relevel mapping.json to apply before listing",
-    )
     parser.add_argument(
         "--bands",
         default=",".join(BAND_ORDER),
@@ -164,7 +150,7 @@ def main() -> None:
     config = DataSourceConfig(backend_type=BackendType.SQLITE, sqlite_path=str(args.db_path))
     session = create_session(config)
     try:
-        words = load_level_words(session, args.mapping)
+        words = load_level_words(session)
         ambiguous = ambiguous_headwords(session)
     finally:
         session.close()
