@@ -1,5 +1,5 @@
 {"guid": "N09_001", "forms": [{"grammatical_form": "noun/en_singular", "text": "shirt", "is_base_form": true, "ipa": "/ˈʃɝt/", "phonetic": "SHART"}]}
-{"guid": "N09_002", "forms": [{"grammatical_form": "noun/en_singular", "text": "pants", "is_base_form": true, "ipa": "/pænts/", "phonetic": "PAHTNTS"}, {"grammatical_form": "noun/en_plural", "text": "pants", "is_base_form": false}]}
+{"guid": "N09_002", "forms": [{"grammatical_form": "noun/en_singular", "text": "pants", "is_base_form": true, "ipa": "/pænts/", "phonetic": "PAHTNTS"}, {"grammatical_form": "noun/en_plural", "text": "pants", "is_base_form": false}], "variants": [{"kind": "regional", "key": "trousers", "forms": [{"grammatical_form": "noun/en_singular", "text": "trousers", "is_base_form": true}, {"grammatical_form": "noun/en_plural", "text": "trousers", "is_base_form": false}]}]}
 {"guid": "N09_003", "forms": [{"grammatical_form": "noun/en_singular", "text": "dress", "is_base_form": true, "ipa": "/dɹɛs/", "phonetic": "DRES"}]}
 {"guid": "N09_004", "forms": [{"grammatical_form": "noun/en_singular", "text": "coat", "is_base_form": true, "ipa": "/kɑːt/", "phonetic": "KAT"}]}
 {"guid": "N09_005", "forms": [{"grammatical_form": "noun/en_singular", "text": "jacket", "is_base_form": true, "ipa": "/ˈdʒækɪt/", "phonetic": "JACK-it"}]}

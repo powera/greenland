@@ -9,6 +9,7 @@
 {"guid": "N25_023", "grammar_facts": [{"fact_type": "grammatical_gender", "fact_value": "feminine"}]}
 {"guid": "N25_024", "grammar_facts": [{"fact_type": "grammatical_gender", "fact_value": "feminine"}]}
 {"guid": "N25_027", "grammar_facts": [{"fact_type": "grammatical_gender", "fact_value": "masculine"}]}
+{"guid": "N25_029", "synonyms": [{"grammatical_form": "synonym", "text": "laikotarpis"}]}
 {"guid": "N25_030", "grammar_facts": [{"fact_type": "grammatical_gender", "fact_value": "feminine"}]}
 {"guid": "N25_031", "grammar_facts": [{"fact_type": "grammatical_gender", "fact_value": "feminine"}]}
 {"guid": "N25_036", "grammar_facts": [{"fact_type": "grammatical_gender", "fact_value": "feminine"}]}

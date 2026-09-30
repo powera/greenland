@@ -19,7 +19,7 @@
 {"guid": "N25_026", "forms": [{"grammatical_form": "noun/en_singular", "text": "autumn", "is_base_form": true, "ipa": "/ɔːtəm/", "phonetic": "AWT-tuhm"}]}
 {"guid": "N25_027", "forms": [{"grammatical_form": "noun/en_singular", "text": "season", "is_base_form": true, "ipa": "/ˈsiː.ʒən/", "phonetic": "SEE-zhuh-n"}]}
 {"guid": "N25_028", "forms": [{"grammatical_form": "noun/en_singular", "text": "century", "is_base_form": true, "ipa": "/ˈsɛn.tʃə.r̩/", "phonetic": "SEN-chuh-r"}]}
-{"guid": "N25_029", "forms": [{"grammatical_form": "noun/en_singular", "text": "period", "is_base_form": true, "ipa": "/ˈpɪəriːd/", "phonetic": "PEE-rih-d"}]}
+{"guid": "N25_029", "forms": [{"grammatical_form": "noun/en_singular", "text": "period", "is_base_form": true, "ipa": "/ˈpɪəriːd/", "phonetic": "PEE-rih-d"}], "synonyms": [{"grammatical_form": "synonym", "text": "period"}]}
 {"guid": "N25_030", "forms": [{"grammatical_form": "noun/en_singular", "text": "second", "is_base_form": true, "ipa": "/ˈsɛkənd/", "phonetic": "SEK-und"}]}
 {"guid": "N25_037", "forms": [{"grammatical_form": "noun/en_singular", "text": "school year", "is_base_form": true}]}
 {"guid": "N25_038", "forms": [{"grammatical_form": "noun/en_singular", "text": "office hours", "is_base_form": true}]}
