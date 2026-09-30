@@ -11,6 +11,11 @@ AVOIR (most verbs):
 - All reflexive verbs: "je me suis lavé" (I washed myself)
 - State change verbs
 
+EITHER, by sense (passer, monter, descendre, sortir, rentrer, retourner and their re- forms):
+- ÊTRE when intransitive: "elle est sortie" (she went out), "il est monté" (he went up)
+- AVOIR with a direct object: "elle a sorti la poubelle" (she took out the trash), "il a monté les valises" (he carried the suitcases up)
+- Answer for the sense given in the definition, not for the verb in general.
+
 In German, compound tenses (Perfekt, Plusquamperfekt) use either "haben" or "sein":
 
 HABEN (most verbs):

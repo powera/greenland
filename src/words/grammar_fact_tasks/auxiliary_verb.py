@@ -1,5 +1,10 @@
 """
 Auxiliary Verb Task - Determine auxiliary verb for compound tenses.
+
+French is decided by rule (langtools.fr.auxiliary) wherever the rule is
+certain, and every verb gets an explicit value, avoir included.  Only the verbs
+whose auxiliary depends on the sense (sortir, passer, monter, ...) reach the
+LLM, which answers for the sense in the lemma's definition.
 """
 
 import logging
@@ -9,6 +14,7 @@ from sqlalchemy.orm import Session
 
 import util.prompt_loader
 from clients.types import Schema, SchemaProperty
+from langtools.fr.auxiliary import pc_auxiliary
 from storage.models.schema import Lemma
 
 if TYPE_CHECKING:
@@ -44,6 +50,11 @@ def generate_auxiliary_verb(
     if language_code not in agent.AUXILIARY_SYSTEMS:
         logger.error(f"Language '{language_code}' does not have auxiliary verb configuration")
         return None, None, 0.0
+
+    if language_code == "fr" and target_translation:
+        rule_auxiliary = pc_auxiliary(target_translation)
+        if rule_auxiliary:
+            return rule_auxiliary, "rule: langtools.fr.auxiliary", 1.0
 
     aux_config = agent.AUXILIARY_SYSTEMS[language_code]
     language_name = aux_config["name"]
