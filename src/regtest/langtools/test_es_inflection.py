@@ -1,9 +1,9 @@
-"""Tests for rule-based Spanish adjective inflection."""
+"""Tests for rule-based Spanish adjective and noun inflection."""
 
 import unittest
 from typing import Dict, List, Optional, Tuple
 
-from langtools.es.inflection import build_adjective_forms
+from langtools.es.inflection import build_adjective_forms, build_noun_forms
 
 _ORDER = ("singular_m", "singular_f", "plural_m", "plural_f")
 
@@ -142,9 +142,13 @@ class TestInvariantConsonantEndings(unittest.TestCase):
 
 class TestUninflectableInput(unittest.TestCase):
     def test_multiword_phrases_return_none(self) -> None:
-        self.assertIsNone(build_adjective_forms("de mala calidad"))
-        self.assertIsNone(build_adjective_forms("de madera"))
-        self.assertIsNone(build_adjective_forms("con forma"))
+        self.assertIsNone(build_adjective_forms("hecho a mano"))
+        self.assertIsNone(build_adjective_forms("más oriental"))
+
+    def test_prepositional_phrases_are_invariant(self) -> None:
+        self.assertEqual(_table("de madera"), ["de madera"] * 4)
+        self.assertEqual(_table("de mala calidad"), ["de mala calidad"] * 4)
+        self.assertEqual(_table("con forma"), ["con forma"] * 4)
 
     def test_hyphenated_returns_none(self) -> None:
         self.assertIsNone(build_adjective_forms("teórico-práctico"))
@@ -160,6 +164,74 @@ class TestUninflectableInput(unittest.TestCase):
 class TestCaseAndWhitespace(unittest.TestCase):
     def test_input_is_normalised(self) -> None:
         self.assertEqual(_table("  Rojo  "), ["rojo", "roja", "rojos", "rojas"])
+
+
+class TestApocope(unittest.TestCase):
+    def test_masculine_only(self) -> None:
+        forms = build_adjective_forms("bueno")
+        assert forms is not None
+        self.assertEqual(forms["singular_m_apocope"], "buen")
+        self.assertNotIn("singular_f_apocope", forms)
+
+    def test_gran_both_genders(self) -> None:
+        forms = build_adjective_forms("grande")
+        assert forms is not None
+        self.assertEqual(forms["singular_m_apocope"], "gran")
+        self.assertEqual(forms["singular_f_apocope"], "gran")
+
+    def test_most_adjectives_have_none(self) -> None:
+        forms = build_adjective_forms("rojo")
+        assert forms is not None
+        self.assertNotIn("singular_m_apocope", forms)
+
+
+class TestNounPlurals(unittest.TestCase):
+    def _plural(self, noun: str) -> Optional[str]:
+        forms = build_noun_forms(noun)
+        return forms["plural"] if forms else None
+
+    def test_vowel_endings(self) -> None:
+        self.assertEqual(self._plural("casa"), "casas")
+        self.assertEqual(self._plural("sofá"), "sofás")
+        self.assertIsNone(self._plural("rubí"))
+
+    def test_consonant_endings_with_respelling(self) -> None:
+        self.assertEqual(self._plural("camión"), "camiones")
+        self.assertEqual(self._plural("joven"), "jóvenes")
+        self.assertEqual(self._plural("examen"), "exámenes")
+        self.assertEqual(self._plural("lápiz"), "lápices")
+        self.assertEqual(self._plural("ciudad"), "ciudades")
+        self.assertEqual(self._plural("régimen"), "regímenes")
+
+    def test_s_endings(self) -> None:
+        self.assertEqual(self._plural("autobús"), "autobuses")
+        self.assertEqual(self._plural("país"), "países")
+        self.assertEqual(self._plural("mes"), "meses")
+        self.assertEqual(self._plural("crisis"), "crisis")
+        self.assertEqual(self._plural("lunes"), "lunes")
+
+    def test_loanword_endings_are_undecided(self) -> None:
+        self.assertIsNone(self._plural("club"))
+        self.assertIsNone(self._plural("jersey"))
+        self.assertEqual(self._plural("rey"), "reyes")
+
+    def test_compounds_and_names(self) -> None:
+        self.assertEqual(self._plural("tarjeta de crédito"), "tarjetas de crédito")
+        self.assertIsNone(self._plural("polo sur"))
+        self.assertIsNone(self._plural("Madrid"))
+
+    def test_facts(self) -> None:
+        self.assertEqual(
+            build_noun_forms("gafas", number_type="plurale_tantum"),
+            {"singular": "gafas", "plural": "gafas"},
+        )
+        self.assertEqual(
+            build_noun_forms("leche", number_type="uncountable"), {"singular": "leche"}
+        )
+        self.assertEqual(
+            build_noun_forms("carácter", irregular_plural="caracteres")["plural"],  # type: ignore[index]
+            "caracteres",
+        )
 
 
 if __name__ == "__main__":

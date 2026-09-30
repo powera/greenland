@@ -34,7 +34,8 @@ def test_es_419_verb_slots_match_es() -> None:
     peninsular = FORM_SPECS[("es", "verb")]
     latin_american = FORM_SPECS[("es-419", "verb")]
     assert latin_american.form_fields == peninsular.form_fields
-    assert len(latin_american.form_fields) == len(PERSONS) * len(TENSES)
+    # Plus the infinitive, gerund and past participle.
+    assert len(latin_american.form_fields) == len(PERSONS) * len(TENSES) + 3
 
 
 def test_es_419_enum_values_carry_the_dialect_code() -> None:
@@ -92,8 +93,22 @@ def test_mechanical_generator_covers_both_spanish_varieties() -> None:
     )
 
     for language_code in ("es", "es-419"):
+        assert "noun" in SUPPORTED[language_code]
         assert "verb" in SUPPORTED[language_code]
         assert "adjective" in SUPPORTED[language_code]
+        for non_finite in ("infinitive", "gerund", "past_participle"):
+            assert (
+                resolve_grammatical_form(language_code, "verb", non_finite)
+                == f"verb/{language_code}_{non_finite}"
+            )
+        assert (
+            resolve_grammatical_form(language_code, "adjective", "singular_m_apocope")
+            == f"adjective/{language_code}_singular_m_apocope"
+        )
+        assert (
+            resolve_grammatical_form(language_code, "noun", "plural")
+            == f"noun/{language_code}_plural"
+        )
         assert (
             resolve_grammatical_form(language_code, "verb", "1s_present")
             == f"verb/{language_code}_1s_present"

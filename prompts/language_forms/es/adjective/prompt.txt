@@ -1,0 +1,6 @@
+Generate all Spanish adjective forms for the Spanish adjective "{adjective}".
+
+English adjective: {english_adjective}
+Definition: {definition}{subtype_context}
+
+Please provide the 4 agreement forms (singular_m, singular_f, plural_m, plural_f) and the 2 apocope forms (singular_m_apocope, singular_f_apocope), using empty strings for forms that don't exist.

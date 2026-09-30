@@ -22,17 +22,28 @@ NOUN_CONFIG: Dict[str, Any] = {
 }
 
 VERB_CONFIG: Dict[str, Any] = {
-    # TODO: add "infinitive" (citation form) to this verb config; see en/forms_config.py
     "type": "person_tense",
     "persons": ["1s", "2s", "3s", "1p", "2p", "3p"],
     "tenses": ["present", "past", "future"],
+    # Non-finite forms: the citation form, the gerund (estoy hablando) and the
+    # masculine singular past participle (he hablado).
+    "extra_forms": ["infinitive", "gerund", "past_participle"],
     "query_type": "spanish_verb_conjugations",
     "schema_name": "SpanishVerbConjugations",
 }
 
 ADJECTIVE_CONFIG: Dict[str, Any] = {
     "type": "explicit",
-    "forms": ["singular_m", "singular_f", "plural_m", "plural_f"],
+    # The apocope slots hold the short singular used before a noun (buen,
+    # primer, gran) and are empty for every adjective that has none.
+    "forms": [
+        "singular_m",
+        "singular_f",
+        "plural_m",
+        "plural_f",
+        "singular_m_apocope",
+        "singular_f_apocope",
+    ],
     "query_type": "spanish_adjective_forms",
     "schema_name": "SpanishAdjectiveForms",
 }

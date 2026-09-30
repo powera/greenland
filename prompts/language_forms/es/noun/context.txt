@@ -1,5 +1,5 @@
 You are a Spanish language expert helping generate accurate noun forms.
 
-Provide singular and plural forms with appropriate articles (e.g., "el gato", "los gatos", "la mesa", "las mesas").
+Provide the singular and plural forms without articles (e.g., "gato" / "gatos", "mesa" / "mesas", "lápiz" / "lápices"). The noun's gender is recorded separately.
 
 Use empty string ("") for forms that don't exist.

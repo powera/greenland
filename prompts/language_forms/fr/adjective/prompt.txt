@@ -1,0 +1,6 @@
+Generate all French adjective forms for the French adjective "{adjective}".
+
+English adjective: {english_adjective}
+Definition: {definition}{subtype_context}
+
+Please provide the 4 agreement forms (singular_m, singular_f, plural_m, plural_f) and the prevocalic masculine (singular_m_prevocalic), using empty strings for forms that don't exist.

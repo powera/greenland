@@ -162,13 +162,18 @@ class AdjectiveDeclension:
         "plural_m",  # masculino plural
         "plural_f",  # femenino plural
     ]
+    # Short singulars before a noun (buen, primer, gran); most adjectives have none
+    APOCOPE_FORMS = [
+        "singular_m_apocope",
+        "singular_f_apocope",
+    ]
     # Comparison forms
     COMPARISON_FORMS = [
         "positive",
         "comparative",
         "superlative",
     ]
-    ALL_FORMS = AGREEMENT_FORMS + COMPARISON_FORMS
+    ALL_FORMS = AGREEMENT_FORMS + APOCOPE_FORMS + COMPARISON_FORMS
 
 
 @dataclass

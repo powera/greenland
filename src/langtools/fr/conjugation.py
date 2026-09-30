@@ -116,6 +116,46 @@ def _make_forms(
     return forms
 
 
+# Present participles not built from the nous stem (nous avons -> *avant).
+_IRREGULAR_PRESENT_PARTICIPLES: Dict[str, str] = {
+    "être": "étant",
+    "avoir": "ayant",
+    "savoir": "sachant",
+}
+
+
+def _add_non_finite_forms(infinitive: str, forms: Dict[str, str]) -> Dict[str, str]:
+    """Add the infinitive, participle plurals and present participle to *forms*.
+
+    The plurals follow the singulars: +s unless the form already ends in -s
+    (pris), with the circumflex of dû dropped (dus).  A participle whose
+    feminine equals its masculine (été) never agrees, so it is the same in
+    every slot.
+    """
+    completed = dict(forms)
+    completed["infinitive"] = infinitive
+    pp_m = forms["pc_m"]
+    pp_f = forms["pc_f"]
+    if pp_m == pp_f:
+        completed["pc_mp"] = pp_m
+        completed["pc_fp"] = pp_f
+    else:
+        if pp_m.endswith(("s", "x")):
+            completed["pc_mp"] = pp_m
+        elif pp_m.endswith("û"):
+            completed["pc_mp"] = pp_m[:-1] + "us"
+        else:
+            completed["pc_mp"] = pp_m + "s"
+        completed["pc_fp"] = pp_f + "s"
+
+    nous = forms["1p_present"]
+    if infinitive in _IRREGULAR_PRESENT_PARTICIPLES:
+        completed["present_participle"] = _IRREGULAR_PRESENT_PARTICIPLES[infinitive]
+    elif nous.endswith("ons"):
+        completed["present_participle"] = nous[:-3] + "ant"
+    return completed
+
+
 def _future_from_stem(stem: str) -> List[str]:
     return [stem + e for e in _FUTURE]
 
@@ -631,7 +671,7 @@ def conjugate(infinitive: str) -> Optional[Dict[str, str]]:
     conjugation, success = conjugate_detailed(infinitive)
     if not success or not conjugation.forms:
         return None
-    return conjugation.forms
+    return _add_non_finite_forms(conjugation.word, conjugation.forms)
 
 
 def conjugate_detailed(infinitive: str) -> Tuple[VerbConjugation, bool]:

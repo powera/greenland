@@ -14,7 +14,7 @@ from typing import Callable, Dict, Tuple
 
 from clients.unified_client import UnifiedLLMClient
 from langtools.es.conjugation import conjugate_for_dialect
-from langtools.es.inflection import build_adjective_forms
+from langtools.es.inflection import build_adjective_forms, build_noun_forms
 from langtools.form_registry import FORM_SPECS
 from langtools.llm_forms_base import query_forms
 from langtools.verb_overrides import (
@@ -22,7 +22,7 @@ from langtools.verb_overrides import (
     get_complete_verb_form_overrides,
 )
 from sqlalchemy.orm import Session
-from storage.crud.grammar_fact import get_verb_form_overrides
+from storage.crud.grammar_fact import get_grammar_fact_value, get_verb_form_overrides
 from storage import database as linguistic_db
 from storage.models.enums import GrammaticalForm
 from storage.translation_helpers import get_translation
@@ -40,16 +40,24 @@ VERB_FORM_MAPPING: Dict[str, GrammaticalForm] = FORM_SPECS[("es", "verb")].form_
 _DEF_PAST_SOURCE = "preterite"
 
 
+# Registry slots the conjugator fills under the same name.
+_NON_FINITE_FORMS = ("infinitive", "gerund", "past_participle")
+
+
 def _project_spanish_forms_to_registry(forms: Dict[str, str]) -> Dict[str, str]:
     """Project rich Spanish conjugation output to registry-required fields.
 
-    The registry carries present, past and future; the conjugator also returns
-    the imperfect, conditional, subjunctive, imperative and non-finite forms,
-    which have no slot and are dropped here.  "past" is the preterite, which is
-    the simple past both varieties use.
+    The registry carries present, past and future plus the infinitive, gerund
+    and past participle; the conjugator also returns the imperfect,
+    conditional, subjunctive and imperative, which have no slot and are dropped
+    here.  "past" is the preterite, which is the simple past both varieties use.
     """
     projected_forms: Dict[str, str] = {}
     for form_name in VERB_FORM_MAPPING:
+        if form_name in _NON_FINITE_FORMS:
+            if forms.get(form_name):
+                projected_forms[form_name] = forms[form_name]
+            continue
         person, tense = form_name.split("_", 1)
         if tense == "past":
             source_key = f"{person}_{_DEF_PAST_SOURCE}"
@@ -67,7 +75,36 @@ def get_noun_forms(
     get_session_func: Callable[[], Session],
     language_code: str = LANGUAGE_CODE,
 ) -> Tuple[Dict[str, str], bool]:
-    """Query LLM for Spanish noun forms."""
+    """Generate Spanish noun forms mechanically when possible, else use LLM."""
+    session = get_session_func()
+    lemma = session.query(linguistic_db.Lemma).filter(linguistic_db.Lemma.id == lemma_id).first()
+
+    if lemma and lemma.pos_type.lower() == "noun":
+        spanish_noun = get_translation(session, lemma, language_code)
+        if spanish_noun:
+            noun_forms = build_noun_forms(
+                spanish_noun,
+                get_grammar_fact_value(session, lemma.id, language_code, "plural"),
+                get_grammar_fact_value(session, lemma.id, language_code, "number_type"),
+            )
+            if noun_forms:
+                linguistic_db.log_query(
+                    session,
+                    word=spanish_noun,
+                    query_type=FORM_SPECS[(language_code, "noun")].query_type,
+                    prompt="[mechanical langtools.es.inflection]",
+                    response=json.dumps(
+                        {
+                            "forms": noun_forms,
+                            "notes": "mechanical noun plural generation",
+                            "mechanical": True,
+                        }
+                    ),
+                    model=client.default_model,
+                )
+                return noun_forms, True
+            logger.info("Falling back to LLM for %s noun '%s'", language_code, spanish_noun)
+
     return query_forms(FORM_SPECS[(language_code, "noun")], client, lemma_id, get_session_func)
 
 

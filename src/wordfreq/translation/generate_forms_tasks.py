@@ -86,7 +86,8 @@ _TASK_OVERRIDES: Dict[Tuple[str, str], Dict[str, Any]] = {
     },
     ("fr", "verb"): {
         "fetcher": "translation",
-        "threshold": 25,
+        "threshold": 20,
+        "base_form": "infinitive",
         "client_method": "query_french_verb_conjugations",
     },
     ("fr", "adjective"): {
@@ -144,6 +145,7 @@ _TASK_OVERRIDES: Dict[Tuple[str, str], Dict[str, Any]] = {
     ("es", "verb"): {
         "fetcher": "translation",
         "threshold": 10,
+        "base_form": "infinitive",
         "client_method": "query_spanish_verb_conjugations",
     },
     ("es", "adjective"): {
@@ -160,6 +162,7 @@ _TASK_OVERRIDES: Dict[Tuple[str, str], Dict[str, Any]] = {
     ("es-419", "verb"): {
         "fetcher": "translation",
         "threshold": 10,
+        "base_form": "infinitive",
         "client_method": "query_latin_american_spanish_verb_conjugations",
     },
     ("es-419", "adjective"): {

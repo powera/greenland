@@ -86,8 +86,11 @@ class VerbConjugation:
     PARTICIPLE_FORMS = [
         "pc_m",  # masculine past participle (e.g., "allé")
         "pc_f",  # feminine past participle (e.g., "allée")
+        "pc_mp",  # masculine plural past participle (e.g., "allés")
+        "pc_fp",  # feminine plural past participle (e.g., "allées")
+        "present_participle",  # e.g., "allant"
     ]
-    ALL_FORMS = PRESENT_FORMS + IMPF_FORMS + FUTURE_FORMS + PARTICIPLE_FORMS
+    ALL_FORMS = ["infinitive"] + PRESENT_FORMS + IMPF_FORMS + FUTURE_FORMS + PARTICIPLE_FORMS
 
 
 @dataclass
@@ -104,7 +107,8 @@ class AdjectiveDeclension:
     confidence: float = 1.0
     notes: Optional[str] = None
 
-    # French adjectives have 4 agreement forms
+    # French adjectives have 4 agreement forms, plus the prevocalic masculine
+    # (bel, nouvel, vieil) that only five adjectives fill.
     # Form names align with GrammaticalForm enum (ADJ_FR_SINGULAR_M, etc.)
     AGREEMENT_FORMS = [
         "singular_m",
@@ -112,7 +116,7 @@ class AdjectiveDeclension:
         "plural_m",
         "plural_f",
     ]
-    ALL_FORMS = AGREEMENT_FORMS
+    ALL_FORMS = AGREEMENT_FORMS + ["singular_m_prevocalic"]
 
 
 @dataclass

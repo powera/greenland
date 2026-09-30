@@ -8,8 +8,8 @@ stored in ``data/release``; this script puts them back after a release import,
 so the release files only have to carry the ones the rules cannot derive.
 
 Currently covers English (nouns, adjectives, adverbs, verbs), Lithuanian
-(nouns, verbs), French (adjectives, verbs) and both stored Spanish varieties,
-es and es-419 (adjectives, verbs).  For English the lemma text is the word; for
+(nouns, verbs), French (nouns, adjectives, verbs) and both stored Spanish
+varieties, es and es-419 (nouns, adjectives, verbs).  For English the lemma text is the word; for
 the others it is the lemma's translation into that language -- es-419 has its
 own translations, so it is conjugated from its own text rather than from es's.
 
@@ -55,8 +55,10 @@ from langtools.en.inflection import (
 )
 from langtools.es.conjugation import conjugate_for_dialect as es_conjugate
 from langtools.es.inflection import build_adjective_forms as es_build_adjective_forms
+from langtools.es.inflection import build_noun_forms as es_build_noun_forms
 from langtools.fr.conjugation import conjugate as fr_conjugate
 from langtools.fr.inflection import build_adjective_forms as fr_build_adjective_forms
+from langtools.fr.inflection import build_noun_forms as fr_build_noun_forms
 from langtools.lt.conjugation import conjugate as lt_conjugate
 from langtools.lt.declension import decline_noun as lt_decline_noun
 from storage.backend import create_session
@@ -106,11 +108,15 @@ BASE_FORM_KEY: Dict[Tuple[str, str], str] = {
     ("en", "verb"): "infinitive",
     ("lt", "noun"): "nominative_singular",
     ("lt", "verb"): "infinitive",
+    ("fr", "noun"): "singular",
     ("fr", "adjective"): "singular_m",
     ("fr", "verb"): "infinitive",
+    ("es", "noun"): "singular",
     ("es", "adjective"): "singular_m",
+    ("es", "verb"): "infinitive",
+    ("es-419", "noun"): "singular",
     ("es-419", "adjective"): "singular_m",
-    # Spanish has no verb/es_infinitive slot, so no generated form is the base.
+    ("es-419", "verb"): "infinitive",
 }
 
 # decline_noun returns grammatical metadata alongside the case forms; these
@@ -125,8 +131,9 @@ METADATA_FACT_TYPES: Dict[str, str] = {"gender": "grammatical_gender"}
 
 # The Spanish conjugator emits a fuller paradigm than GrammaticalForm models:
 # it returns preterite, imperfect, conditional, subjunctive and imperative
-# forms, while the enum has only present/past/future per person. Present and
-# future map by name; "past" is the preterite, which is how the existing
+# forms, while the enum has only present/past/future per person plus the
+# infinitive, gerund and past participle. Present, future and the non-finite
+# forms map by name; "past" is the preterite, which is how the existing
 # sentence data uses verb/es_*_past ("compró", "encontró", "vio"), and which is
 # also the simple past Latin American Spanish prefers. The tenses with no enum
 # slot are skipped rather than forced into an approximate one.
@@ -148,6 +155,10 @@ def _es_verb_keys(language_code: str) -> Dict[str, str]:
             f"{person}_preterite": f"verb/{language_code}_{person}_past"
             for person in _ES_VERB_PERSONS
         },
+        **{
+            form: f"verb/{language_code}_{form}"
+            for form in ("infinitive", "gerund", "past_participle")
+        },
     }
 
 
@@ -159,23 +170,15 @@ ES_VERB_KEYS: Dict[str, Dict[str, str]] = {code: _es_verb_keys(code) for code in
 # conjugate_for_dialect fills with the ustedes form.
 SPANISH_LANGUAGE_CODES = ("es", "es-419")
 
-# Which (language, POS) pairs have a rule-based builder at all.
-#
-# TODO: enable ("es", "verb"). langtools.es.conjugation.conjugate has an
-# incomplete stem-change table: it handles "querer" -> "quiere" but returns
-# "tene" for "tener" (correct: "tiene"), "rie" for "reír" ("ríe") and
-# "sonriió" for "sonreír" ("sonrió"), and conjugate_safe reports no warning
-# for any of them, so bad output cannot be filtered out at this call site.
-# Checking generated forms against the Spanish already in sentence_words gave
-# 78.8% agreement (182 agree / 49 disagree) versus 99.35% for lt+fr; those 49
-# disagreements are a ready-made test set for fixing the conjugator.  Spanish
-# adjectives are regular and validated, so they are enabled here.
+# Which (language, POS) pairs have a rule-based builder at all.  A builder
+# returns None for input it cannot inflect reliably (multi-word phrases,
+# loanword endings, proper nouns), and that lemma keeps its stored forms.
 SUPPORTED: Dict[str, Tuple[str, ...]] = {
     "en": ("noun", "adjective", "adverb", "verb"),
     "lt": ("noun", "verb"),
-    "fr": ("adjective", "verb"),
-    "es": ("adjective", "verb"),
-    "es-419": ("adjective", "verb"),
+    "fr": ("noun", "adjective", "verb"),
+    "es": ("noun", "adjective", "verb"),
+    "es-419": ("noun", "adjective", "verb"),
 }
 
 
@@ -249,11 +252,19 @@ def _build_non_english(
                 metadata,
             )
 
+    if pos_type == "noun" and (language_code == "fr" or language_code in SPANISH_LANGUAGE_CODES):
+        irregular_plural, number_type = _facts(
+            session, lemma.id, "plural", "number_type", language_code=language_code
+        )
+        noun_builder = fr_build_noun_forms if language_code == "fr" else es_build_noun_forms
+        return noun_builder(word, irregular_plural, number_type), {}
+
     if language_code == "fr":
         if pos_type == "verb":
             return fr_conjugate(word), {}
         if pos_type == "adjective":
-            return fr_build_adjective_forms(word), {}
+            (feminine_form,) = _facts(session, lemma.id, "feminine_form", language_code="fr")
+            return fr_build_adjective_forms(word, feminine_form), {}
 
     if language_code in SPANISH_LANGUAGE_CODES:
         if pos_type == "verb":
