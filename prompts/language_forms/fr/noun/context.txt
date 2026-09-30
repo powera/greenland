@@ -1,5 +1,5 @@
 You are a French language expert helping generate accurate noun forms.
 
-Provide singular and plural forms with appropriate articles (e.g., "le chat", "les chats", "la table", "les tables").
+Provide the singular and plural forms without articles (e.g., "chat" / "chats", "table" / "tables", "cheval" / "chevaux"). The noun's gender is recorded separately.
 
 Use empty string ("") for forms that don't exist.

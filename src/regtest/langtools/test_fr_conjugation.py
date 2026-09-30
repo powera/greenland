@@ -64,9 +64,9 @@ class TestRegularErVerbs(_ConjugationTestBase):
         self.assertEqual(conjugation.notes, "regular -er")
         self.assertEqual(conjugation.confidence, 1.0)
 
-    def test_all_20_forms_present(self) -> None:
+    def test_all_24_forms_present(self) -> None:
         forms = self._forms("parler")
-        self.assertEqual(len(forms), 20)
+        self.assertEqual(len(forms), 24)
         for form_name in VerbConjugation.ALL_FORMS:
             self.assertIn(form_name, forms)
 
@@ -461,16 +461,45 @@ class TestIrregularVerbs(_ConjugationTestBase):
         self.assertTrue(ok)
         self.assertEqual(conjugation.notes, "irregular")
 
-    def test_all_irregulars_have_20_forms(self) -> None:
+    def test_all_irregulars_have_24_forms(self) -> None:
         for verb in list_irregular_verbs():
             forms = conjugate(verb)
             self.assertIsNotNone(forms, f"{verb} should conjugate successfully")
             assert forms is not None  # narrow Optional for type-checkers
             self.assertEqual(
                 len(forms),
-                20,
-                f"{verb} should have 20 forms, got {len(forms)}",
+                24,
+                f"{verb} should have 24 forms, got {len(forms)}",
             )
+
+
+class TestNonFiniteForms(unittest.TestCase):
+    """Infinitive, participle plurals and present participle."""
+
+    def _pick(self, verb: str) -> tuple[str, ...]:
+        forms = conjugate(verb)
+        assert forms is not None
+        keys = ("infinitive", "pc_mp", "pc_fp", "present_participle")
+        return tuple(forms[key] for key in keys)
+
+    def test_regular(self) -> None:
+        self.assertEqual(self._pick("parler"), ("parler", "parlés", "parlées", "parlant"))
+        self.assertEqual(self._pick("finir"), ("finir", "finis", "finies", "finissant"))
+        self.assertEqual(
+            self._pick("commencer"), ("commencer", "commencés", "commencées", "commençant")
+        )
+
+    def test_participle_plurals(self) -> None:
+        self.assertEqual(self._pick("prendre")[1:3], ("pris", "prises"))
+        self.assertEqual(self._pick("devoir")[1:3], ("dus", "dues"))
+        # été never agrees
+        self.assertEqual(self._pick("être")[1:3], ("été", "été"))
+
+    def test_irregular_present_participles(self) -> None:
+        self.assertEqual(self._pick("être")[3], "étant")
+        self.assertEqual(self._pick("avoir")[3], "ayant")
+        self.assertEqual(self._pick("savoir")[3], "sachant")
+        self.assertEqual(self._pick("faire")[3], "faisant")
 
 
 class TestCompoundVerbs(_ConjugationTestBase):

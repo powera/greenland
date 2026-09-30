@@ -9,14 +9,14 @@ from typing import Callable, Dict, Tuple
 from clients.unified_client import UnifiedLLMClient
 from langtools.form_registry import FORM_SPECS
 from langtools.fr.conjugation import conjugate
-from langtools.fr.inflection import build_adjective_forms
+from langtools.fr.inflection import build_adjective_forms, build_noun_forms
 from langtools.llm_forms_base import query_forms
 from langtools.verb_overrides import (
     apply_verb_form_overrides,
     get_complete_verb_form_overrides,
 )
 from sqlalchemy.orm import Session
-from storage.crud.grammar_fact import get_verb_form_overrides
+from storage.crud.grammar_fact import get_grammar_fact_value, get_verb_form_overrides
 from storage import database as linguistic_db
 from storage.models.enums import GrammaticalForm
 from storage.translation_helpers import get_translation
@@ -31,7 +31,36 @@ VERB_FORM_MAPPING: Dict[str, GrammaticalForm] = FORM_SPECS[("fr", "verb")].form_
 def get_noun_forms(
     client: UnifiedLLMClient, lemma_id: int, get_session_func: Callable[[], Session]
 ) -> Tuple[Dict[str, str], bool]:
-    """Query LLM for French noun forms."""
+    """Generate French noun forms mechanically when possible, else use LLM."""
+    session = get_session_func()
+    lemma = session.query(linguistic_db.Lemma).filter(linguistic_db.Lemma.id == lemma_id).first()
+
+    if lemma and lemma.pos_type.lower() == "noun":
+        french_noun = get_translation(session, lemma, "fr")
+        if french_noun:
+            noun_forms = build_noun_forms(
+                french_noun,
+                get_grammar_fact_value(session, lemma.id, "fr", "plural"),
+                get_grammar_fact_value(session, lemma.id, "fr", "number_type"),
+            )
+            if noun_forms:
+                linguistic_db.log_query(
+                    session,
+                    word=french_noun,
+                    query_type="french_noun_forms",
+                    prompt="[mechanical langtools.fr.inflection]",
+                    response=json.dumps(
+                        {
+                            "forms": noun_forms,
+                            "notes": "mechanical noun plural generation",
+                            "mechanical": True,
+                        }
+                    ),
+                    model=client.default_model,
+                )
+                return noun_forms, True
+            logger.info("Falling back to LLM for French noun '%s'", french_noun)
+
     return query_forms(FORM_SPECS[("fr", "noun")], client, lemma_id, get_session_func)
 
 
@@ -99,7 +128,10 @@ def get_adjective_forms(
     if lemma and lemma.pos_type.lower() == "adjective":
         french_adjective = get_translation(session, lemma, "fr")
         if french_adjective:
-            adjective_forms = build_adjective_forms(french_adjective)
+            adjective_forms = build_adjective_forms(
+                french_adjective,
+                get_grammar_fact_value(session, lemma.id, "fr", "feminine_form"),
+            )
             if adjective_forms:
                 linguistic_db.log_query(
                     session,

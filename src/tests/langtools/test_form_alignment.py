@@ -157,6 +157,7 @@ DE_ADJECTIVE_FORMS = ["singular_m", "singular_f", "plural_m", "plural_f"]
 FR_NOUN_FORMS = ["singular", "plural"]
 
 FR_VERB_FORMS = [
+    "infinitive",
     "1s_present",
     "2s_present",
     "3s_present",
@@ -177,9 +178,18 @@ FR_VERB_FORMS = [
     "3p_future",
     "pc_m",
     "pc_f",
+    "pc_mp",
+    "pc_fp",
+    "present_participle",
 ]
 
-FR_ADJECTIVE_FORMS = ["singular_m", "singular_f", "plural_m", "plural_f"]
+FR_ADJECTIVE_FORMS = [
+    "singular_m",
+    "singular_f",
+    "plural_m",
+    "plural_f",
+    "singular_m_prevocalic",
+]
 
 
 class TestLithuanianFormAlignment(unittest.TestCase):

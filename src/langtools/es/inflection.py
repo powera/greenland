@@ -1,4 +1,4 @@
-"""Rule-based Spanish adjective inflection helpers.
+"""Rule-based Spanish adjective and noun inflection helpers.
 
 Spanish adjectives agree with their noun in gender and number.  Three
 patterns cover almost the whole lexicon:
@@ -9,13 +9,28 @@ patterns cover almost the whole lexicon:
   number (``grande``/``grandes``, ``azul``/``azules``).
 * **One form** — unstressed ``-s`` adjectives (``gratis``, ``isósceles``).
 
-Ambiguous input (multiple words, no vowel at all) returns ``None`` so the
-caller can fall back to the LLM.
+A few adjectives also have a shortened (apocopated) singular used before the
+noun: ``un buen día``, ``el primer piso``, ``una gran casa``.  Those fill the
+``singular_m_apocope`` / ``singular_f_apocope`` slots; every other adjective
+leaves them out.  Prepositional phrases standing in for an adjective
+(``de madera``) do not agree at all and repeat one form in every slot.
+
+Noun plurals follow the same spelling rules as adjectives (``camión`` →
+``camiones``, ``lápiz`` → ``lápices``).
+
+Ambiguous input (other multi-word phrases, no vowel at all, stressed ``-í``/
+``-ú`` nouns, foreign consonant endings) returns ``None`` so the caller can
+fall back to the LLM.
 """
 
 from typing import Dict, Optional, Set
 
-from langtools.es.orthography import respell_with_stress, stressed_nucleus, strip_accents
+from langtools.es.orthography import (
+    respell_with_stress,
+    stressed_nucleus,
+    strip_accents,
+    syllable_nuclei,
+)
 
 # Comparatives and Latin-derived ``-or``/``-ior`` adjectives keep one form for
 # both genders: ``el hermano mayor`` / ``la hermana mayor``.
@@ -103,14 +118,66 @@ def _four_form(singular_m: str, singular_f: str, plural_m: str, plural_f: str) -
     }
 
 
+# Apocopated singulars used before the noun.  Masculine only, except gran,
+# which shortens for both genders (un gran día, una gran casa).
+_APOCOPE_M: Dict[str, str] = {
+    "bueno": "buen",
+    "malo": "mal",
+    "primero": "primer",
+    "tercero": "tercer",
+    "postrero": "postrer",
+    "grande": "gran",
+}
+_APOCOPE_F: Dict[str, str] = {"grande": "gran"}
+
+# A phrase opening with one of these is a prepositional phrase (de madera,
+# a mano, sin azúcar), which does not agree with its noun.
+_PREPOSITIONS: Set[str] = {
+    "a",
+    "al",
+    "bajo",
+    "con",
+    "de",
+    "del",
+    "en",
+    "para",
+    "por",
+    "sin",
+    "sobre",
+}
+
+
+def _invariant_phrase(phrase: str) -> Optional[Dict[str, str]]:
+    """Return the one-form table for a prepositional phrase, else None."""
+    words = phrase.split()
+    if len(words) < 2 or words[0] not in _PREPOSITIONS:
+        return None
+    return _four_form(phrase, phrase, phrase, phrase)
+
+
 def build_adjective_forms(adjective: str) -> Optional[Dict[str, str]]:
     """Build m/f × singular/plural agreement forms from the masculine singular.
 
-    Returns ``None`` when the input is not a single inflectable word, leaving
-    those cases to the LLM.
+    Adds the apocopated singulars for the few adjectives that have them.
+    Returns ``None`` when the input is not an inflectable word or an invariant
+    prepositional phrase, leaving those cases to the LLM.
     """
     singular_m = adjective.strip().lower()
-    if not singular_m or " " in singular_m or "-" in singular_m:
+    if " " in singular_m:
+        return _invariant_phrase(singular_m)
+    forms = _agreement_forms(singular_m)
+    if forms is None:
+        return None
+    if singular_m in _APOCOPE_M:
+        forms["singular_m_apocope"] = _APOCOPE_M[singular_m]
+    if singular_m in _APOCOPE_F:
+        forms["singular_f_apocope"] = _APOCOPE_F[singular_m]
+    return forms
+
+
+def _agreement_forms(singular_m: str) -> Optional[Dict[str, str]]:
+    """Build the four agreement forms of a single-word adjective."""
+    if not singular_m or "-" in singular_m:
         return None
     if not any(char in "aeiouáéíóúü" for char in singular_m):
         return None
@@ -157,3 +224,82 @@ def build_adjective_forms(adjective: str) -> Optional[Dict[str, str]]:
     # Remaining consonant endings are invariant for gender and add -es
     # (azul / azules, joven / jóvenes, común / comunes).
     return _two_form(singular_m, _consonant_plural(singular_m))
+
+
+# Native consonant endings that take -es.  Other final consonants (club,
+# robot, álbum, cómic) mark loanwords whose plural varies, and go to the LLM.
+_NOUN_ES_ENDINGS = "lrndj"
+
+# The three nouns whose stress moves in the plural.
+_STRESS_SHIFT_PLURALS: Dict[str, str] = {
+    "régimen": "regímenes",
+    "espécimen": "especímenes",
+    "carácter": "caracteres",
+}
+
+
+def _noun_plural(noun: str) -> Optional[str]:
+    """Return the plural of a single-word noun, or None when it is not regular."""
+    if noun in _STRESS_SHIFT_PLURALS:
+        return _STRESS_SHIFT_PLURALS[noun]
+    if not any(char in "aeiouáéíóúü" for char in noun):
+        return None
+    last = noun[-1]
+
+    # Unstressed vowels and stressed á/é/ó add -s (casa, taxi, sofá, café).
+    if last in "aeiouáéó":
+        return noun + "s"
+    # Stressed -í/-ú vary (rubíes, menús).
+    if last in "íú":
+        return None
+    if last == "z":
+        return _suffix(noun, 1, "ces")
+    if last in "sx":
+        # Stress before the last syllable: invariant (la crisis / las crisis,
+        # el lunes, el tórax).  Stress on it: -es (autobuses, países, meses).
+        nuclei = syllable_nuclei(noun)
+        if stressed_nucleus(noun) != nuclei[-1]:
+            return noun
+        return _suffix(noun, 0, "es") if last == "s" else None
+    if last == "y":
+        # One-syllable -y nouns add -es (rey / reyes, ley / leyes); longer
+        # ones vary (jersey / jerséis).
+        return noun + "es" if len(syllable_nuclei(noun)) == 1 else None
+    if last in _NOUN_ES_ENDINGS:
+        return _suffix(noun, 0, "es")
+    return None
+
+
+def build_noun_forms(
+    noun: str,
+    irregular_plural: Optional[str] = None,
+    number_type: Optional[str] = None,
+) -> Optional[Dict[str, str]]:
+    """Build the singular and plural of a Spanish noun.
+
+    *irregular_plural* is the stored ``plural`` grammar fact, which wins over
+    the rules; *number_type* is the ``number_type`` fact (see the comment in
+    the body for how each value fills the slots).  A "noun de noun" compound
+    pluralises its head (``tarjeta de crédito`` → ``tarjetas de crédito``).
+    Returns ``None`` for capitalised words (proper nouns, brands), other
+    multi-word phrases and endings whose plural varies.
+    """
+    singular = noun.strip()
+    if not singular or singular[0].isupper() or "-" in singular:
+        return None
+    # Same convention as langtools.en.inflection: a plurale tantum repeats the
+    # word in both slots; uncountable and singulare tantum have no plural.
+    if number_type == "plurale_tantum":
+        return {"singular": singular, "plural": singular}
+    if number_type in ("uncountable", "singulare_tantum"):
+        return {"singular": singular}
+    if irregular_plural:
+        return {"singular": singular, "plural": irregular_plural.strip()}
+
+    words = singular.split()
+    if len(words) > 1 and words[1] not in ("de", "del", "a"):
+        return None
+    head_plural = _noun_plural(words[0])
+    if head_plural is None:
+        return None
+    return {"singular": singular, "plural": " ".join([head_plural, *words[1:]])}

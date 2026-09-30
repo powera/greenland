@@ -7,10 +7,17 @@ LANGUAGE_NAME = "French"
 
 _PERSONS: List[str] = ["1s", "2s", "3s", "1p", "2p", "3p"]
 
+# pc_* are the past participle in its four agreement forms (parlé, parlée,
+# parlés, parlées); which auxiliary builds the passé composé is the
+# auxiliary_verb grammar fact.
 VERB_FORMS: List[str] = [
+    "infinitive",
     *(f"{person}_{tense}" for tense in ["present", "impf", "future"] for person in _PERSONS),
     "pc_m",
     "pc_f",
+    "pc_mp",
+    "pc_fp",
+    "present_participle",
 ]
 
 NOUN_CONFIG: Dict[str, Any] = {
@@ -20,7 +27,6 @@ NOUN_CONFIG: Dict[str, Any] = {
 }
 
 VERB_CONFIG: Dict[str, Any] = {
-    # TODO: add "infinitive" (citation form) to this verb config; see en/forms_config.py
     "type": "explicit",
     "forms": VERB_FORMS,
     "query_type": "french_verb_conjugations",
@@ -29,7 +35,9 @@ VERB_CONFIG: Dict[str, Any] = {
 
 ADJECTIVE_CONFIG: Dict[str, Any] = {
     "type": "explicit",
-    "forms": ["singular_m", "singular_f", "plural_m", "plural_f"],
+    # singular_m_prevocalic is the masculine used before a vowel (bel, nouvel,
+    # vieil) and is empty for every adjective that has none.
+    "forms": ["singular_m", "singular_f", "plural_m", "plural_f", "singular_m_prevocalic"],
     "query_type": "french_adjective_forms",
     "schema_name": "FrenchAdjectiveForms",
 }
