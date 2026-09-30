@@ -37,8 +37,8 @@ RELEASE_DIR = os.path.join(PROJECT_ROOT, "data", "release")
 
 # Curriculum bounds, in three bands with deliberate gaps between them:
 #
-#   1-30        the curated general core, taught in order; the rebalancer
-#               fills it from 1 and uses only as many levels as it needs
+#   1-30        the curated general core, taught in order and placed by
+#               hand, filled from 1
 #   100-499     "named" units, each a single pos_subtype (Animals 3, Body
 #               Parts, Appliances 2)
 #   1000-1299   topic-specific extensions, outside the general course

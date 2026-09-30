@@ -3,12 +3,12 @@
 This is the one source of truth for them. A cohort is a closed set -- the
 days and months, every US state, every chemical element -- that owns its level
 outright: whatever is stored at that level is the set, and nothing there is
-ever moved by the rebalancer or offered to a new word by placement. A set in
-the core is numbered around, not packed into.
+ever offered to a new word by placement or held to a level's size range. A
+set in the core is numbered around, not packed into.
 
 A cohort is completed when it is defined, by hand or in the commit adding it,
 so no code recognizes new members. A stored word at the level with some other
-subtype is a data error, reported by ``curriculum_relevel``'s warnings. A
+subtype is a data error, and checking for one is done by hand. A
 member of the set taught earlier -- gold, in a general metals unit -- is not
 at the level, so it is ordinary vocabulary there.
 
