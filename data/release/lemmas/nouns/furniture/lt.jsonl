@@ -6,4 +6,7 @@
 {"guid": "N39_008", "grammar_facts": [{"fact_type": "grammatical_gender", "fact_value": "feminine"}]}
 {"guid": "N39_011", "grammar_facts": [{"fact_type": "grammatical_gender", "fact_value": "feminine"}]}
 {"guid": "N39_012", "grammar_facts": [{"fact_type": "grammatical_gender", "fact_value": "masculine"}]}
+{"guid": "N39_020", "grammar_facts": [{"fact_type": "grammatical_gender", "fact_value": "masculine"}]}
+{"guid": "N39_021", "grammar_facts": [{"fact_type": "grammatical_gender", "fact_value": "feminine"}]}
+{"guid": "N39_022", "grammar_facts": [{"fact_type": "grammatical_gender", "fact_value": "masculine"}]}
 {"guid": "N39_023", "grammar_facts": [{"fact_type": "grammatical_gender", "fact_value": "feminine"}]}

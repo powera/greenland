@@ -5,3 +5,6 @@
 {"guid": "N13_012", "grammar_facts": [{"fact_type": "grammatical_gender", "fact_value": "feminine"}]}
 {"guid": "N13_014", "grammar_facts": [{"fact_type": "grammatical_gender", "fact_value": "feminine"}]}
 {"guid": "N13_017", "grammar_facts": [{"fact_type": "grammatical_gender", "fact_value": "masculine"}]}
+{"guid": "N13_022", "grammar_facts": [{"fact_type": "grammatical_gender", "fact_value": "feminine"}]}
+{"guid": "N13_023", "grammar_facts": [{"fact_type": "grammatical_gender", "fact_value": "masculine"}]}
+{"guid": "N13_024", "grammar_facts": [{"fact_type": "grammatical_gender", "fact_value": "feminine"}]}
