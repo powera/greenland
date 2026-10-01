@@ -6,6 +6,10 @@ Covers Peninsular Spanish (``es``) and its storage dialect, Latin American
 Spanish (``es-419``).  Both read their own translation text and share the same
 mechanical rules; only the 2p slot differs, where es-419 says "ustedes hablan"
 (see :func:`langtools.es.conjugation.conjugate_for_dialect`).
+
+The rules are langtools.es.mechanical.build_paradigm, the same function the
+mechanical-forms pass uses; this module adds verb_form_* overrides and the LLM
+fallback on top.
 """
 
 import json
@@ -13,8 +17,7 @@ import logging
 from typing import Callable, Dict, Tuple
 
 from clients.unified_client import UnifiedLLMClient
-from langtools.es.conjugation import conjugate_for_dialect
-from langtools.es.inflection import build_adjective_forms, build_noun_forms
+from langtools.es.mechanical import build_paradigm
 from langtools.form_registry import FORM_SPECS
 from langtools.llm_forms_base import query_forms
 from langtools.verb_overrides import (
@@ -22,7 +25,7 @@ from langtools.verb_overrides import (
     get_complete_verb_form_overrides,
 )
 from sqlalchemy.orm import Session
-from storage.crud.grammar_fact import get_grammar_fact_value, get_verb_form_overrides
+from storage.crud.grammar_fact import get_verb_form_overrides
 from storage import database as linguistic_db
 from storage.models.enums import GrammaticalForm
 from storage.translation_helpers import get_translation
@@ -35,38 +38,6 @@ DIALECT_LANGUAGE_CODE = "es-419"
 ADJECTIVE_FORM_MAPPING: Dict[str, GrammaticalForm] = FORM_SPECS[("es", "adjective")].form_mapping
 NOUN_FORM_MAPPING: Dict[str, GrammaticalForm] = FORM_SPECS[("es", "noun")].form_mapping
 VERB_FORM_MAPPING: Dict[str, GrammaticalForm] = FORM_SPECS[("es", "verb")].form_mapping
-
-
-_DEF_PAST_SOURCE = "preterite"
-
-
-# Registry slots the conjugator fills under the same name.
-_NON_FINITE_FORMS = ("infinitive", "gerund", "past_participle")
-
-
-def _project_spanish_forms_to_registry(forms: Dict[str, str]) -> Dict[str, str]:
-    """Project rich Spanish conjugation output to registry-required fields.
-
-    The registry carries present, past and future plus the infinitive, gerund
-    and past participle; the conjugator also returns the imperfect,
-    conditional, subjunctive and imperative, which have no slot and are dropped
-    here.  "past" is the preterite, which is the simple past both varieties use.
-    """
-    projected_forms: Dict[str, str] = {}
-    for form_name in VERB_FORM_MAPPING:
-        if form_name in _NON_FINITE_FORMS:
-            if forms.get(form_name):
-                projected_forms[form_name] = forms[form_name]
-            continue
-        person, tense = form_name.split("_", 1)
-        if tense == "past":
-            source_key = f"{person}_{_DEF_PAST_SOURCE}"
-        else:
-            source_key = f"{person}_{tense}"
-        form_value = forms.get(source_key)
-        if form_value:
-            projected_forms[form_name] = form_value
-    return projected_forms
 
 
 def get_noun_forms(
@@ -82,11 +53,7 @@ def get_noun_forms(
     if lemma and lemma.pos_type.lower() == "noun":
         spanish_noun = get_translation(session, lemma, language_code)
         if spanish_noun:
-            noun_forms = build_noun_forms(
-                spanish_noun,
-                get_grammar_fact_value(session, lemma.id, language_code, "plural"),
-                get_grammar_fact_value(session, lemma.id, language_code, "number_type"),
-            )
+            noun_forms, _ = build_paradigm(session, lemma, "noun", language_code, spanish_noun)
             if noun_forms:
                 linguistic_db.log_query(
                     session,
@@ -121,9 +88,8 @@ def get_verb_forms(
     if lemma and lemma.pos_type.lower() == "verb":
         spanish_verb = get_translation(session, lemma, language_code)
         if spanish_verb:
-            conjugation_forms = conjugate_for_dialect(spanish_verb, language_code)
-            if conjugation_forms:
-                projected_forms = _project_spanish_forms_to_registry(conjugation_forms)
+            projected_forms, _ = build_paradigm(session, lemma, "verb", language_code, spanish_verb)
+            if projected_forms:
                 merged_forms = apply_verb_form_overrides(
                     projected_forms,
                     get_verb_form_overrides(session, lemma.id, language_code),
@@ -183,7 +149,9 @@ def get_adjective_forms(
     if lemma and lemma.pos_type.lower() == "adjective":
         spanish_adjective = get_translation(session, lemma, language_code)
         if spanish_adjective:
-            adjective_forms = build_adjective_forms(spanish_adjective)
+            adjective_forms, _ = build_paradigm(
+                session, lemma, "adjective", language_code, spanish_adjective
+            )
             if adjective_forms:
                 linguistic_db.log_query(
                     session,

@@ -32,3 +32,9 @@ GRAMMATICAL_FORM_OVERRIDES: Dict[str, str] = {
     "PRONOUN_ZH_POSSESSIVE": "pronoun/zh_possessive",
     "PRONOUN_ZH_SUBJECTIVE": "pronoun/zh_subjective",
 }
+
+# Form-generation settings per part of speech; see langtools.form_tasks.
+FORM_TASK_SETTINGS: Dict[str, Dict[str, Any]] = {
+    "noun": {"generator": "query_chinese_noun_forms"},
+    "verb": {"threshold": 3, "generator": "query_chinese_verb_forms"},
+}

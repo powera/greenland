@@ -18,6 +18,7 @@ from sqlalchemy.exc import OperationalError
 
 import constants
 from agents.common.common_args import get_data_source_config
+from langtools.form_tasks import generate_forms
 from langtools.wiktionary import WIKTIONARY_TO_TASK_MAPPINGS, get_wiktionary_forms
 from storage import database as linguistic_db
 from storage.backend.config import DataSourceConfig
@@ -45,7 +46,9 @@ class FormGenerationConfig:
     language_name: str  # e.g., 'French', 'Spanish'
     pos_type: str  # e.g., 'noun', 'verb', 'adjective'
     form_mapping: Dict[str, GrammaticalForm]  # Maps form names to GrammaticalForm enums
-    client_method_name: str  # Name of the LinguisticClient method to call
+    # For logs only: the langtools generator that produces the forms (see
+    # langtools.form_tasks), or "query_forms" for a direct LLM query.
+    generator_name: str
     min_forms_threshold: int  # Minimum number of forms to consider complete
     base_form_identifier: str  # Form name that should be marked as base form
     use_legacy_translation: bool = False  # Use old schema (e.g., french_translation column)
@@ -501,14 +504,13 @@ def process_lemma_forms(
             )
             return True
 
-        # Query forms using the specified client method
-        if form_config.client_method_name == "query_language_forms":
-            forms_dict, success = client.query_language_forms(
-                form_config.language_code, form_config.pos_type, lemma_id
-            )
-        else:
-            client_method = getattr(client, form_config.client_method_name)
-            forms_dict, success = client_method(lemma_id)
+        forms_dict, success = generate_forms(
+            form_config.language_code,
+            form_config.pos_type,
+            client.client,
+            lemma_id,
+            client.get_session,
+        )
 
         if not success or not forms_dict:
             logger.error(f"Failed to get forms for lemma ID {lemma_id}")
@@ -615,7 +617,7 @@ def process_lemma_forms(
                     "forms_added": stored,
                     "forms_skipped": skipped,
                     "grammar_facts_added": grammar_facts_added,
-                    "client_method": form_config.client_method_name,
+                    "generator": form_config.generator_name,
                 },
             )
 

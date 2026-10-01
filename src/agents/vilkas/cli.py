@@ -23,33 +23,35 @@ from agents.common.common_args import (
     get_data_source_config,
     validate_cache_args,
 )
+from langtools.form_registry import FORM_SPECS
+from langtools.form_tasks import get_on_demand_pos_types
 from workqueue.task_queue import TaskType, enqueue_task, get_active_task
 
-# Define supported languages and their forms (matches agent.py SUPPORTED_LANGUAGES)
-SUPPORTED_TASKS = {
-    "lt": ["noun", "verb", "adjective", "adverb"],
-    "fr": ["noun", "verb"],
-    "de": ["noun", "verb"],
-    "es": ["noun", "verb"],
-    "pt": ["noun", "verb"],
-    "it": ["noun", "verb"],
-    "sv": ["noun", "verb"],
-    "nl": ["noun", "verb"],
-    "en": ["noun", "verb", "adjective", "adverb"],
-}
+# Supported languages and their POS types, declared per language
+# (``on_demand`` in langtools/<lang>/forms_config.py).
+SUPPORTED_TASKS: Dict[str, List[str]] = get_on_demand_pos_types()
 
 # Language names for display
-LANGUAGE_NAMES = {
-    "lt": "Lithuanian",
-    "fr": "French",
-    "de": "German",
-    "es": "Spanish",
-    "pt": "Portuguese",
-    "it": "Italian",
-    "sv": "Swedish",
-    "nl": "Dutch",
-    "en": "English",
+LANGUAGE_NAMES: Dict[str, str] = {
+    lang: FORM_SPECS[(lang, pos_types[0])].language_name
+    for lang, pos_types in SUPPORTED_TASKS.items()
 }
+
+_TASK_POS_TYPES = ("noun", "verb", "adjective", "adverb")
+
+
+def split_task(task: str) -> tuple[Optional[str], Optional[str]]:
+    """Split a task string ("es-419-noun-forms") into (language, POS type).
+
+    The language code may itself contain a dash, so split at the POS type
+    rather than at the first dash.
+    """
+    for pos in _TASK_POS_TYPES:
+        marker = f"-{pos}-"
+        index = task.find(marker)
+        if index > 0:
+            return task[:index], pos
+    return None, None
 
 
 def parse_task_selection(
@@ -68,11 +70,8 @@ def parse_task_selection(
     inferred_pos_type: Optional[str] = None
     form_type_label = "forms"
 
-    task_parts = task.split("-")
-    if len(task_parts) >= 2:
-        language_code = task_parts[0]
-        form_category = task_parts[1]
-
+    language_code, form_category = split_task(task)
+    if language_code is not None:
         if form_category == "noun":
             inferred_pos_type = "noun"
             if language_code in ["lt", "de"]:
@@ -205,10 +204,10 @@ def enqueue_vilkas_work(
                 tasks_to_run.append((lang, pos))
     else:
         # Parse task string
-        parts = task.split("-")
-        lang = parts[0]
-        pos = parts[1]  # noun, verb, adjective, adverb
-        tasks_to_run = [(lang, pos)]
+        parsed_lang, parsed_pos = split_task(task)
+        if parsed_lang is None or parsed_pos is None:
+            raise ValueError(f"Unrecognised Vilkas task: {task}")
+        tasks_to_run = [(parsed_lang, parsed_pos)]
 
     for lemma in lemmas:
         for lang, pos in tasks_to_run:

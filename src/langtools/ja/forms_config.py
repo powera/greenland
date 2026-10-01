@@ -30,3 +30,9 @@ VERB_CONFIG: Dict[str, Any] = {
         "nai": "plain negative / nai-form (e.g. 食べない)",
     },
 }
+
+# Form-generation settings per part of speech; see langtools.form_tasks.
+FORM_TASK_SETTINGS: Dict[str, Dict[str, Any]] = {
+    "noun": {"generator": "query_japanese_noun_forms"},
+    "verb": {"threshold": 3, "generator": "query_japanese_verb_conjugations"},
+}

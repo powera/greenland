@@ -5,10 +5,8 @@ from types import SimpleNamespace
 from typing import Any, Callable, cast
 from unittest.mock import patch
 
-from langtools.es.llm_forms import (
-    _project_spanish_forms_to_registry,
-    query_spanish_verb_conjugations,
-)
+from langtools.es.llm_forms import query_spanish_verb_conjugations
+from langtools.es.mechanical import project_verb_forms
 
 
 class _FakeQuery:
@@ -32,7 +30,7 @@ class _FakeSession:
 
 class TestSpanishVerbLlmForms(unittest.TestCase):
     def test_projects_preterite_as_past(self) -> None:
-        projected = _project_spanish_forms_to_registry(
+        projected = project_verb_forms(
             {
                 "1s_present": "hablo",
                 "1s_preterite": "hablé",
@@ -50,7 +48,7 @@ class TestSpanishVerbLlmForms(unittest.TestCase):
         with (
             patch("langtools.es.llm_forms.get_translation", return_value="hablar"),
             patch(
-                "langtools.es.llm_forms.conjugate_for_dialect",
+                "langtools.es.mechanical.conjugate_for_dialect",
                 return_value={
                     "1s_present": "hablo",
                     "1s_preterite": "hablé",
@@ -76,7 +74,7 @@ class TestSpanishVerbLlmForms(unittest.TestCase):
 
         with (
             patch("langtools.es.llm_forms.get_translation", return_value="xyz"),
-            patch("langtools.es.llm_forms.conjugate_for_dialect", return_value=None),
+            patch("langtools.es.mechanical.conjugate_for_dialect", return_value=None),
             patch(
                 "langtools.es.llm_forms.query_forms", return_value=({"1s_present": "xyz"}, True)
             ) as mock_query_forms,

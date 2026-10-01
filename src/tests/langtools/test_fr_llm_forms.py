@@ -35,7 +35,7 @@ class TestFrenchVerbLlmForms(unittest.TestCase):
         with (
             patch("langtools.fr.llm_forms.get_translation", return_value="parler"),
             patch(
-                "langtools.fr.llm_forms.conjugate",
+                "langtools.fr.mechanical.conjugate",
                 return_value={"1s_present": "parle"},
             ),
             patch("langtools.fr.llm_forms.query_forms") as mock_query_forms,
@@ -56,7 +56,7 @@ class TestFrenchVerbLlmForms(unittest.TestCase):
         with (
             patch("langtools.fr.llm_forms.get_translation", return_value="xyz"),
             patch(
-                "langtools.fr.llm_forms.conjugate",
+                "langtools.fr.mechanical.conjugate",
                 return_value=None,
             ),
             patch(
@@ -78,8 +78,10 @@ class TestFrenchNounLlmForms(unittest.TestCase):
         with (
             patch("langtools.fr.llm_forms.get_translation", return_value=translation),
             patch(
-                "langtools.fr.llm_forms.get_grammar_fact_value",
-                side_effect=lambda _s, _id, _lang, fact_type: facts.get(fact_type),
+                "langtools.fr.mechanical.read_facts",
+                side_effect=lambda _s, _id, _lang, *fact_types: tuple(
+                    facts.get(fact_type) for fact_type in fact_types
+                ),
             ),
             patch(
                 "langtools.fr.llm_forms.query_forms", return_value=({"plural": "llm"}, True)

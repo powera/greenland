@@ -16,18 +16,13 @@ from storage.models.schema import Lemma, LemmaTranslation
 from storage.translation_helpers import LANGUAGE_FIELDS, get_translation
 from wordfreq.translation.client import LinguisticClient
 from wordfreq.translation.generate_forms_tasks import get_task_key, process_lemma_for_task
+from langtools.form_tasks import get_on_demand_pos_types
 
 logger = logging.getLogger(__name__)
 
-# Supported language/POS combinations for form generation
-SUPPORTED_FORMS = {
-    "lt": ["noun", "verb", "adjective", "adverb"],
-    "fr": ["noun", "verb"],
-    "de": ["noun", "verb"],
-    "es": ["noun", "verb"],
-    "pt": ["noun", "verb"],
-    "en": ["noun", "verb", "adjective", "adverb"],
-}
+# Supported language/POS combinations for form generation, declared per
+# language (``on_demand`` in langtools/<lang>/forms_config.py).
+SUPPORTED_FORMS = get_on_demand_pos_types()
 
 
 def validate_form_generation_request(

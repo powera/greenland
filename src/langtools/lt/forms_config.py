@@ -106,3 +106,30 @@ GRAMMATICAL_FORM_OVERRIDES: Dict[str, str] = {
     "VERB_LT_3S_M_PAST": "verb/lt_3s-m_past",
     "VERB_LT_3S_M_PRESENT": "verb/lt_3s-m_present",
 }
+
+# Form-generation settings per part of speech; see langtools.form_tasks.
+FORM_TASK_SETTINGS: Dict[str, Dict[str, Any]] = {
+    "noun": {
+        "fetcher": "translation",
+        "extract_gender": True,
+        "generator": "query_lithuanian_noun_declensions",
+        "on_demand": True,
+    },
+    "verb": {
+        "fetcher": "translation",
+        "threshold": 6,
+        "generator": "query_lithuanian_verb_conjugations",
+        "on_demand": True,
+    },
+    "adjective": {
+        "fetcher": "translation",
+        "threshold": 4,
+        "generator": "query_lithuanian_adjective_declensions",
+        "on_demand": True,
+    },
+    "adverb": {
+        "fetcher": "translation",
+        "generator": "query_lithuanian_adverb_forms",
+        "on_demand": True,
+    },
+}

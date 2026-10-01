@@ -113,9 +113,9 @@ def test_mechanical_generator_covers_both_spanish_varieties() -> None:
             resolve_grammatical_form(language_code, "verb", "1s_present")
             == f"verb/{language_code}_1s_present"
         )
-        # The conjugator's "past" slot is the preterite.
+        # The builder emits registry slot names ("past" is the preterite).
         assert (
-            resolve_grammatical_form(language_code, "verb", "3s_preterite")
+            resolve_grammatical_form(language_code, "verb", "3s_past")
             == f"verb/{language_code}_3s_past"
         )
         # Tenses with no registry slot are skipped, not approximated.
@@ -126,23 +126,36 @@ def test_mechanical_generator_covers_both_spanish_varieties() -> None:
         )
 
 
-def test_es_419_has_a_form_generation_task() -> None:
-    from wordfreq.translation.generate_forms_tasks import _TASK_OVERRIDES
+def test_es_419_shares_the_spanish_task_settings() -> None:
+    from langtools.form_tasks import get_on_demand_pos_types, get_task_settings
 
     for pos_type in ("noun", "verb", "adjective"):
-        override = _TASK_OVERRIDES[("es-419", pos_type)]
-        assert override["client_method"].startswith("query_latin_american_spanish")
+        assert get_task_settings("es-419", pos_type) == get_task_settings("es", pos_type)
+    assert get_on_demand_pos_types()["es-419"] == ["noun", "verb", "adjective"]
 
 
-def test_task_client_methods_exist() -> None:
-    """The override table names methods by string, so nothing else catches a typo."""
-    from wordfreq.translation.client import LinguisticClient
-    from wordfreq.translation.generate_forms_tasks import _TASK_OVERRIDES
+def test_task_generators_exist() -> None:
+    """Settings name generators by string, so nothing else catches a typo."""
+    import importlib
 
-    for (language_code, pos_type), override in _TASK_OVERRIDES.items():
-        method_name = override.get("client_method")
-        if not method_name or method_name == "query_language_forms":
+    from langtools.form_tasks import _load
+
+    settings, module_language = _load()
+    for (language_code, pos_type), task_settings in settings.items():
+        name = task_settings.get("generator")
+        if not name:
             continue
+        module = importlib.import_module(f"langtools.{module_language[language_code]}.llm_forms")
         assert callable(
-            getattr(LinguisticClient, method_name, None)
-        ), f"{language_code}/{pos_type} names a missing client method: {method_name}"
+            getattr(module, name, None)
+        ), f"{language_code}/{pos_type} names a missing generator: {name}"
+
+
+def test_es_419_generator_gets_its_language_code() -> None:
+    from unittest.mock import patch
+
+    from langtools.form_tasks import generate_forms
+
+    with patch("langtools.es.llm_forms.get_noun_forms", return_value=({}, True)) as generator:
+        generate_forms("es-419", "noun", object(), 7, lambda: None)  # type: ignore[arg-type,return-value]
+    assert generator.call_args.kwargs == {"language_code": "es-419"}

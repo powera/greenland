@@ -59,3 +59,20 @@ GRAMMATICAL_FORM_OVERRIDES: Dict[str, str] = {
     "PRONOUN_EN_REFLEXIVE": "pronoun/en_reflexive",
     "PRONOUN_EN_SUBJECTIVE": "pronoun/en_subjective",
 }
+
+# Form-generation settings per part of speech; see langtools.form_tasks.
+FORM_TASK_SETTINGS: Dict[str, Dict[str, Any]] = {
+    "noun": {"threshold": 1, "generator": "query_english_noun_forms", "on_demand": True},
+    "verb": {
+        "threshold": 5,
+        "base_form": "infinitive",
+        "generator": "query_english_verb_forms",
+        "on_demand": True,
+    },
+    "adjective": {
+        "threshold": 2,
+        "generator": "query_english_adjective_forms",
+        "on_demand": True,
+    },
+    "adverb": {"threshold": 2, "generator": "query_english_adverb_forms", "on_demand": True},
+}

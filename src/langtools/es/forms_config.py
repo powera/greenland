@@ -78,3 +78,27 @@ GRAMMATICAL_FORM_OVERRIDES: Dict[str, str] = {
     "VERB_ES_3S_M_PAST": "verb/es_3s-m_past",
     "VERB_ES_3S_M_PRESENT": "verb/es_3s-m_present",
 }
+
+# Form-generation settings per part of speech; see langtools.form_tasks.  They
+# apply to es-419 too, whose generator is called with language_code="es-419".
+FORM_TASK_SETTINGS: Dict[str, Dict[str, Any]] = {
+    "noun": {
+        "fetcher": "translation",
+        "threshold": 2,
+        "generator": "get_noun_forms",
+        "on_demand": True,
+    },
+    "verb": {
+        "fetcher": "translation",
+        "threshold": 10,
+        "base_form": "infinitive",
+        "generator": "get_verb_forms",
+        "on_demand": True,
+    },
+    "adjective": {
+        "fetcher": "translation",
+        "threshold": 4,
+        "generator": "get_adjective_forms",
+        "on_demand": True,
+    },
+}

@@ -41,3 +41,9 @@ GRAMMATICAL_FORM_OVERRIDES: Dict[str, str] = {
     "ADJ_NL_SINGULAR_M": "adjective/nl_singular_m",
     "ADVERB_NL_BASE": "adverb/nl_base",
 }
+
+# Form-generation settings per part of speech; see langtools.form_tasks.
+FORM_TASK_SETTINGS: Dict[str, Dict[str, Any]] = {
+    "noun": {"fetcher": "translation", "threshold": 2, "extract_gender": True},
+    "verb": {"fetcher": "translation", "threshold": 10},
+}
