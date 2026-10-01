@@ -38,3 +38,14 @@ GRAMMATICAL_FORM_OVERRIDES: Dict[str, str] = {
     "ADJ_IT_SINGULAR_M": "adjective/it_singular_m",
     "ADVERB_IT_BASE": "adverb/it_base",
 }
+
+# Form-generation settings per part of speech; see langtools.form_tasks.
+FORM_TASK_SETTINGS: Dict[str, Dict[str, Any]] = {
+    "noun": {"fetcher": "translation", "threshold": 2, "extract_gender": True},
+    "verb": {"fetcher": "translation", "threshold": 10},
+    "adjective": {
+        "fetcher": "translation",
+        "threshold": 4,
+        "generator": "query_italian_adjective_forms",
+    },
+}

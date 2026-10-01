@@ -1,6 +1,11 @@
 #!/usr/bin/python3
 
-"""French language form generation."""
+"""French language form generation.
+
+The rules are langtools.fr.mechanical.build_paradigm, the same function the
+mechanical-forms pass uses; this module adds verb_form_* overrides and the LLM
+fallback on top.
+"""
 
 import json
 import logging
@@ -8,15 +13,14 @@ from typing import Callable, Dict, Tuple
 
 from clients.unified_client import UnifiedLLMClient
 from langtools.form_registry import FORM_SPECS
-from langtools.fr.conjugation import conjugate
-from langtools.fr.inflection import build_adjective_forms, build_noun_forms
+from langtools.fr.mechanical import build_paradigm
 from langtools.llm_forms_base import query_forms
 from langtools.verb_overrides import (
     apply_verb_form_overrides,
     get_complete_verb_form_overrides,
 )
 from sqlalchemy.orm import Session
-from storage.crud.grammar_fact import get_grammar_fact_value, get_verb_form_overrides
+from storage.crud.grammar_fact import get_verb_form_overrides
 from storage import database as linguistic_db
 from storage.models.enums import GrammaticalForm
 from storage.translation_helpers import get_translation
@@ -38,11 +42,7 @@ def get_noun_forms(
     if lemma and lemma.pos_type.lower() == "noun":
         french_noun = get_translation(session, lemma, "fr")
         if french_noun:
-            noun_forms = build_noun_forms(
-                french_noun,
-                get_grammar_fact_value(session, lemma.id, "fr", "plural"),
-                get_grammar_fact_value(session, lemma.id, "fr", "number_type"),
-            )
+            noun_forms, _ = build_paradigm(session, lemma, "noun", "fr", french_noun)
             if noun_forms:
                 linguistic_db.log_query(
                     session,
@@ -74,7 +74,7 @@ def get_verb_forms(
     if lemma and lemma.pos_type.lower() == "verb":
         french_verb = get_translation(session, lemma, "fr")
         if french_verb:
-            conjugation_forms = conjugate(french_verb)
+            conjugation_forms, _ = build_paradigm(session, lemma, "verb", "fr", french_verb)
             if conjugation_forms:
                 conjugation_forms = apply_verb_form_overrides(
                     conjugation_forms,
@@ -128,10 +128,7 @@ def get_adjective_forms(
     if lemma and lemma.pos_type.lower() == "adjective":
         french_adjective = get_translation(session, lemma, "fr")
         if french_adjective:
-            adjective_forms = build_adjective_forms(
-                french_adjective,
-                get_grammar_fact_value(session, lemma.id, "fr", "feminine_form"),
-            )
+            adjective_forms, _ = build_paradigm(session, lemma, "adjective", "fr", french_adjective)
             if adjective_forms:
                 linguistic_db.log_query(
                     session,

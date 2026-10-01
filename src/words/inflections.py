@@ -39,6 +39,8 @@ from storage.translation_helpers import (
 )
 from wordfreq.translation.client import LinguisticClient
 from wordfreq.translation.generate_forms_tasks import get_task_key, process_lemma_for_task
+from langtools.form_registry import FORM_SPECS
+from langtools.form_tasks import get_on_demand_pos_types
 
 # Configure logging
 logger = logging.getLogger(__name__)
@@ -403,18 +405,9 @@ class InflectionService:
         """
         # Use provided model or fall back to config model
         effective_model = model if model is not None else self.config.model
-        # Define supported languages and their supported POS types
-        SUPPORTED_LANGUAGES = {
-            "lt": ["noun", "verb", "adjective", "adverb"],
-            "fr": ["noun", "verb"],
-            "de": ["noun", "verb"],
-            "es": ["noun", "verb"],
-            "pt": ["noun", "verb"],
-            "it": ["noun", "verb"],
-            "sv": ["noun", "verb"],
-            "nl": ["noun", "verb"],
-            "en": ["noun", "verb", "adjective", "adverb"],
-        }
+        # Which languages and POS types may be generated on demand is declared
+        # per language (``on_demand`` in langtools/<lang>/forms_config.py).
+        SUPPORTED_LANGUAGES = get_on_demand_pos_types()
 
         if language_code not in SUPPORTED_LANGUAGES:
             logger.error(f"Language '{language_code}' is not yet supported for form generation")
@@ -440,25 +433,16 @@ class InflectionService:
         # Route to appropriate handler based on language and POS type
         handler_key = f"{language_code}_{pos_type}"
 
-        # Map language/POS combinations to their process functions and metadata
-        # Format: (process_module, process_func_name, uses_generic_handler, language_display_name)
+        # Map language/POS combinations to their task and display name.
+        # Format: (task_key, language_display_name, uses_generic_handler)
         handler_map = {
-            "lt_noun": (get_task_key("lt", "noun"), "Lithuanian", True),
-            "lt_verb": (get_task_key("lt", "verb"), "Lithuanian", True),
-            "lt_adjective": (get_task_key("lt", "adjective"), "Lithuanian", True),
-            "lt_adverb": (get_task_key("lt", "adverb"), "Lithuanian", True),
-            "fr_noun": (get_task_key("fr", "noun"), "French", True),
-            "fr_verb": (get_task_key("fr", "verb"), "French", True),
-            "de_noun": (get_task_key("de", "noun"), "German", True),
-            "de_verb": (get_task_key("de", "verb"), "German", True),
-            "es_noun": (get_task_key("es", "noun"), "Spanish", True),
-            "es_verb": (get_task_key("es", "verb"), "Spanish", True),
-            "pt_noun": (get_task_key("pt", "noun"), "Portuguese", True),
-            "pt_verb": (get_task_key("pt", "verb"), "Portuguese", True),
-            "en_noun": (get_task_key("en", "noun"), "English", True),
-            "en_verb": (get_task_key("en", "verb"), "English", True),
-            "en_adjective": (get_task_key("en", "adjective"), "English", True),
-            "en_adverb": (get_task_key("en", "adverb"), "English", True),
+            f"{lang}_{pos}": (
+                get_task_key(lang, pos),
+                FORM_SPECS[(lang, pos)].language_name,
+                True,
+            )
+            for lang, pos_types in SUPPORTED_LANGUAGES.items()
+            for pos in pos_types
         }
 
         if handler_key not in handler_map:

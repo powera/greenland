@@ -61,3 +61,14 @@ GRAMMATICAL_FORM_OVERRIDES: Dict[str, str] = {
     "VERB_PT_3S_M_PAST": "verb/pt_3s-m_past",
     "VERB_PT_3S_M_PRESENT": "verb/pt_3s-m_present",
 }
+
+# Form-generation settings per part of speech; see langtools.form_tasks.
+FORM_TASK_SETTINGS: Dict[str, Dict[str, Any]] = {
+    "noun": {"fetcher": "translation", "threshold": 2, "extract_gender": True, "on_demand": True},
+    "verb": {"fetcher": "translation", "threshold": 10, "on_demand": True},
+    "adjective": {
+        "fetcher": "translation",
+        "threshold": 4,
+        "generator": "query_portuguese_adjective_forms",
+    },
+}

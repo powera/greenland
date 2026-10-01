@@ -10,7 +10,7 @@ class TestExtractGenderFromForms(unittest.TestCase):
             language_name="Lithuanian",
             pos_type="noun",
             form_mapping={},
-            client_method_name="query_lithuanian_noun_declensions",
+            generator_name="query_lithuanian_noun_declensions",
             min_forms_threshold=2,
             base_form_identifier="nominative_singular",
             extract_gender=True,

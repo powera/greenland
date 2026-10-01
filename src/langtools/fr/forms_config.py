@@ -66,3 +66,26 @@ GRAMMATICAL_FORM_OVERRIDES: Dict[str, str] = {
     "VERB_FR_3P_PC": "verb/fr_3p_pc",
     "VERB_FR_3S_PC": "verb/fr_3s_pc",
 }
+
+# Form-generation settings per part of speech; see langtools.form_tasks.
+FORM_TASK_SETTINGS: Dict[str, Dict[str, Any]] = {
+    "noun": {
+        "fetcher": "translation",
+        "threshold": 2,
+        "generator": "query_french_noun_forms",
+        "on_demand": True,
+    },
+    "verb": {
+        "fetcher": "translation",
+        "threshold": 20,
+        "base_form": "infinitive",
+        "generator": "query_french_verb_conjugations",
+        "on_demand": True,
+    },
+    "adjective": {
+        "fetcher": "translation",
+        "threshold": 4,
+        "generator": "query_french_adjective_forms",
+        "on_demand": True,
+    },
+}

@@ -6,9 +6,10 @@ scripts.
 """
 
 from dataclasses import dataclass
-from typing import Any, Callable, Dict, List, Optional, Tuple
+from typing import Any, Callable, Dict, List, Optional
 
 from langtools.form_registry import FORM_SPECS, LANG_NAMES
+from langtools.form_tasks import get_generator_name, get_task_settings
 from storage.backend.config import DataSourceConfig
 from wordfreq.translation.client import LinguisticClient
 from wordfreq.translation.generate_forms_base import (
@@ -46,164 +47,6 @@ def _needs_forms_task(
     return FormGenerationTask(config=config, lemma_fetcher=fetcher)
 
 
-# ---------------------------------------------------------------------------
-# Override table: only fields that differ from auto-computed defaults.
-#
-# Keys: (language_code, pos_type)
-# Values: dict with any of:
-#   "fetcher"        – "translation" or "needs_forms" (default: "needs_forms")
-#   "threshold"      – min_forms_threshold override
-#   "base_form"      – base_form_identifier override
-#   "gender"         – extract_gender (default: False)
-#   "client_method"  – client_method_name override (default: "query_language_forms")
-# ---------------------------------------------------------------------------
-
-_TASK_OVERRIDES: Dict[Tuple[str, str], Dict[str, Any]] = {
-    # English — source language, needs_forms fetcher, named client methods
-    ("en", "noun"): {
-        "threshold": 1,
-        "client_method": "query_english_noun_forms",
-    },
-    ("en", "verb"): {
-        "threshold": 5,
-        "base_form": "infinitive",
-        "client_method": "query_english_verb_forms",
-    },
-    ("en", "adjective"): {
-        "threshold": 2,
-        "client_method": "query_english_adjective_forms",
-    },
-    ("en", "adverb"): {
-        "threshold": 2,
-        "client_method": "query_english_adverb_forms",
-    },
-    # French — translation fetcher, named client methods.  Noun gender is a
-    # grammar fact from lape, not read off the forms.
-    ("fr", "noun"): {
-        "fetcher": "translation",
-        "threshold": 2,
-        "client_method": "query_french_noun_forms",
-    },
-    ("fr", "verb"): {
-        "fetcher": "translation",
-        "threshold": 20,
-        "base_form": "infinitive",
-        "client_method": "query_french_verb_conjugations",
-    },
-    ("fr", "adjective"): {
-        "fetcher": "translation",
-        "threshold": 4,
-        "client_method": "query_french_adjective_forms",
-    },
-    # German — translation fetcher, gender on nouns
-    ("de", "noun"): {
-        "fetcher": "translation",
-        "threshold": 3,
-        "gender": True,
-    },
-    ("de", "verb"): {
-        "fetcher": "translation",
-        "threshold": 10,
-    },
-    # Lithuanian — translation fetcher, named client methods
-    ("lt", "noun"): {
-        "fetcher": "translation",
-        "gender": True,
-        "client_method": "query_lithuanian_noun_declensions",
-    },
-    ("lt", "verb"): {
-        "fetcher": "translation",
-        "threshold": 6,
-        "client_method": "query_lithuanian_verb_conjugations",
-    },
-    ("lt", "adjective"): {
-        "fetcher": "translation",
-        "threshold": 4,
-        "client_method": "query_lithuanian_adjective_declensions",
-    },
-    ("lt", "adverb"): {
-        "fetcher": "translation",
-        "client_method": "query_lithuanian_adverb_forms",
-    },
-    # Latvian — translation fetcher
-    ("lv", "noun"): {"fetcher": "translation", "threshold": 3},
-    ("lv", "verb"): {"fetcher": "translation", "threshold": 6},
-    ("lv", "adjective"): {"fetcher": "translation", "threshold": 4},
-    ("lv", "adverb"): {"fetcher": "translation"},
-    # Ukrainian — translation fetcher
-    ("uk", "noun"): {"fetcher": "translation", "threshold": 3},
-    ("uk", "verb"): {"fetcher": "translation", "threshold": 6},
-    ("uk", "adjective"): {"fetcher": "translation", "threshold": 4},
-    ("uk", "adverb"): {"fetcher": "translation"},
-    # Spanish — translation fetcher, named client methods.  Noun gender is a
-    # grammar fact from lape, not read off the forms.
-    ("es", "noun"): {
-        "fetcher": "translation",
-        "threshold": 2,
-        "client_method": "query_spanish_noun_forms",
-    },
-    ("es", "verb"): {
-        "fetcher": "translation",
-        "threshold": 10,
-        "base_form": "infinitive",
-        "client_method": "query_spanish_verb_conjugations",
-    },
-    ("es", "adjective"): {
-        "fetcher": "translation",
-        "threshold": 4,
-        "client_method": "query_spanish_adjective_forms",
-    },
-    # Latin American Spanish — the same paradigms over es-419's own text.
-    ("es-419", "noun"): {
-        "fetcher": "translation",
-        "threshold": 2,
-        "client_method": "query_latin_american_spanish_noun_forms",
-    },
-    ("es-419", "verb"): {
-        "fetcher": "translation",
-        "threshold": 10,
-        "base_form": "infinitive",
-        "client_method": "query_latin_american_spanish_verb_conjugations",
-    },
-    ("es-419", "adjective"): {
-        "fetcher": "translation",
-        "threshold": 4,
-        "client_method": "query_latin_american_spanish_adjective_forms",
-    },
-    # Italian — translation fetcher, gender on nouns
-    ("it", "noun"): {"fetcher": "translation", "threshold": 2, "gender": True},
-    ("it", "verb"): {"fetcher": "translation", "threshold": 10},
-    ("it", "adjective"): {
-        "fetcher": "translation",
-        "threshold": 4,
-        "client_method": "query_italian_adjective_forms",
-    },
-    # Swedish — translation fetcher
-    ("sv", "noun"): {"fetcher": "translation", "threshold": 2},
-    ("sv", "verb"): {"fetcher": "translation", "threshold": 2},
-    # Dutch — translation fetcher, gender on nouns
-    ("nl", "noun"): {"fetcher": "translation", "threshold": 2, "gender": True},
-    ("nl", "verb"): {"fetcher": "translation", "threshold": 10},
-    # Portuguese — translation fetcher, gender on nouns
-    ("pt", "noun"): {"fetcher": "translation", "threshold": 2, "gender": True},
-    ("pt", "verb"): {"fetcher": "translation", "threshold": 10},
-    ("pt", "adjective"): {
-        "fetcher": "translation",
-        "threshold": 4,
-        "client_method": "query_portuguese_adjective_forms",
-    },
-    # Chinese — named client methods
-    ("zh", "noun"): {"client_method": "query_chinese_noun_forms"},
-    ("zh", "verb"): {"threshold": 3, "client_method": "query_chinese_verb_forms"},
-    # Japanese — named client methods
-    ("ja", "noun"): {"client_method": "query_japanese_noun_forms"},
-    ("ja", "verb"): {"threshold": 3, "client_method": "query_japanese_verb_conjugations"},
-    # Korean — named client methods
-    ("ko", "noun"): {"client_method": "query_korean_noun_forms"},
-    ("ko", "verb"): {"threshold": 2, "client_method": "query_korean_verb_conjugations"},
-}
-
-
 def _compute_base_form(spec_fields: List[str]) -> str:
     """Derive base_form_identifier from the spec's form_fields."""
     if spec_fields[0] == "base":
@@ -233,27 +76,30 @@ def _compute_threshold(num_fields: int) -> int:
 
 
 def _build_all_tasks() -> Dict[str, FormGenerationTask]:
-    """Build every task from FORM_SPECS + overrides table."""
+    """Build every task from FORM_SPECS plus each language's FORM_TASK_SETTINGS.
+
+    The per-language settings live in ``langtools/<lang>/forms_config.py``;
+    see :mod:`langtools.form_tasks` for what each key means.
+    """
     tasks: Dict[str, FormGenerationTask] = {}
 
     for (lang_code, pos_type), spec in sorted(FORM_SPECS.items()):
         lang_name = LANG_NAMES.get(lang_code, spec.language_name)
         task_key = f"{lang_name.lower()}_{pos_type}s"
 
-        overrides = _TASK_OVERRIDES.get((lang_code, pos_type), {})
+        settings = get_task_settings(lang_code, pos_type)
 
-        base_form = overrides.get("base_form", _compute_base_form(spec.form_fields))
-        threshold = overrides.get("threshold", _compute_threshold(len(spec.form_fields)))
-        client_method = overrides.get("client_method", "query_language_forms")
-        extract_gender = overrides.get("gender", False)
-        fetcher_type = overrides.get("fetcher", "needs_forms")
+        base_form = settings.get("base_form", _compute_base_form(spec.form_fields))
+        threshold = settings.get("threshold", _compute_threshold(len(spec.form_fields)))
+        extract_gender = settings.get("extract_gender", False)
+        fetcher_type = settings.get("fetcher", "needs_forms")
 
         config = FormGenerationConfig(
             language_code=lang_code,
             language_name=lang_name,
             pos_type=pos_type,
             form_mapping=spec.form_mapping,
-            client_method_name=client_method,
+            generator_name=get_generator_name(lang_code, pos_type),
             min_forms_threshold=threshold,
             base_form_identifier=base_form,
             use_legacy_translation=False,

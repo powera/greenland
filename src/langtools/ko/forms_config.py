@@ -31,3 +31,9 @@ VERB_CONFIG: Dict[str, Any] = {
         "polite_future": "haeyo-che future (e.g. 먹을 거예요)",
     },
 }
+
+# Form-generation settings per part of speech; see langtools.form_tasks.
+FORM_TASK_SETTINGS: Dict[str, Dict[str, Any]] = {
+    "noun": {"generator": "query_korean_noun_forms"},
+    "verb": {"threshold": 2, "generator": "query_korean_verb_conjugations"},
+}
