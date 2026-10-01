@@ -8,7 +8,7 @@ stored in ``data/release``; this script puts them back after a release import,
 so the release files only have to carry the ones the rules cannot derive.
 
 Currently covers English (nouns, adjectives, adverbs, verbs), Lithuanian
-(nouns, verbs), French (nouns, adjectives, verbs) and both stored Spanish
+(nouns, adjectives, adverbs, verbs), French (nouns, adjectives, verbs) and both stored Spanish
 varieties, es and es-419 (nouns, adjectives, verbs).  For English the lemma text is the word; for
 the others it is the lemma's translation into that language -- es-419 has its
 own translations, so it is conjugated from its own text rather than from es's.

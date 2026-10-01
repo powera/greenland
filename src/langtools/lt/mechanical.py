@@ -2,22 +2,26 @@
 
 The word is the lemma's Lithuanian translation.  Verbs need the stored
 principal parts (3s_present, 3s_past); nouns use the stored gender and
-number_type when there are any.
+number_type when there are any; adjectives and adverbs read an optional
+``gradability`` fact, where ``non_gradable`` drops the degree forms.
 """
 
 from typing import Any, Dict, Tuple
 
 from sqlalchemy.orm import Session
 
+from langtools.lt.adjectives import build_adverb_degrees, decline_adjective
 from langtools.lt.conjugation import conjugate
 from langtools.lt.declension import decline_noun
 from langtools.mechanical_forms import Paradigm, read_facts
 
-POS_TYPES: Tuple[str, ...] = ("noun", "verb")
+POS_TYPES: Tuple[str, ...] = ("noun", "verb", "adjective", "adverb")
 
 BASE_FORM_KEYS: Dict[str, str] = {
     "noun": "nominative_singular",
     "verb": "infinitive",
+    "adjective": "nominative_singular_m",
+    "adverb": "positive",
 }
 
 # decline_noun returns grammatical metadata alongside the case forms; these
@@ -55,5 +59,11 @@ def build_paradigm(
             {key: value for key, value in declined.items() if key not in NOUN_METADATA_KEYS},
             metadata,
         )
+
+    if pos_type in ("adjective", "adverb"):
+        (gradability,) = read_facts(session, lemma.id, "lt", "gradability")
+        if pos_type == "adjective":
+            return decline_adjective(word, gradability), {}
+        return build_adverb_degrees(word, gradability), {}
 
     return None, {}
