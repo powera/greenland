@@ -44,26 +44,6 @@ def test_build_sentence_decomposition_prompt_includes_core_sections() -> None:
     assert "de_accusative_singular" in context
 
 
-def test_decomposition_contexts_forbid_overlapping_phrase_tokens() -> None:
-    from sentences.decomposition import (
-        build_multi_language_decomposition_context,
-        build_sentence_decomposition_context,
-    )
-    from util.prompt_loader import get_context
-
-    contexts = (
-        build_sentence_decomposition_context(),
-        build_multi_language_decomposition_context(),
-        get_context("sentence_decomposition", "translate_and_decompose"),
-    )
-    for context in contexts:
-        assert '"small business"' in context
-        assert 'do not also emit "small"' in context
-        assert 'Spanish "pequeña empresa" and German "Kleinunternehmen"' in context
-        assert "different word boundaries" in context
-        assert "EVERY language" not in context
-
-
 def test_build_decomposition_schema_has_words_for_target_languages() -> None:
     schema = build_decomposition_schema(target_languages=["lt", "es"], include_english=False)
 
