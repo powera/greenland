@@ -52,7 +52,7 @@ from storage.models.schema import SENSE_PROMINENCE_RARE, Lemma
 from storage.models.variant_form import VARIANT_KIND_ABBREVIATION
 from storage.queries.lemma import get_english_senses
 from storage.translation_helpers import (
-    convert_llm_response_to_lang_codes,
+    LLM_FIELD_TO_LANG_CODE,
     ensure_english_translation,
 )
 from storage.utils.enums import get_subtype_values_for_pos
@@ -94,6 +94,20 @@ _CATCH_ALL_SUBTYPE = "other"
 _SUBTYPED_POS_TYPES = frozenset({*MAJOR_POS_TYPES, "numeral"})
 
 
+# A translation the model rates below this is dropped, leaving a gap for the
+# translation coverage pass. The model is asked for a confidence per language
+# because its doubt is per language: on chess "skewer" luna was sure of the
+# Chinese and wrong about the Spanish and French ("clavada" is the pin). A
+# literal but non-idiomatic rendering it is sure of is kept; this only catches
+# the terms the model knows it does not know.
+#
+# 0.85 rather than 0.9 after the basketball run: between the two sat mostly real
+# terms (lt "užtvara" for a screen, fr "marcher" for traveling), while the
+# descriptions passed off as terms (lt "atšokusio kamuolio atkovojimas" for a
+# rebound) were rated 0.82 and below.
+TRANSLATION_CONFIDENCE_FLOOR = 0.85
+
+
 def _offered_subtypes(values: Sequence[str]) -> List[str]:
     """``values`` without the open-class catch-all."""
     return [value for value in values if value != _CATCH_ALL_SUBTYPE]
@@ -124,6 +138,10 @@ class AddSenseResult:
     pos_subtype: Optional[str] = None
     translations: Dict[str, str] = field(default_factory=dict)
     missing_languages: List[str] = field(default_factory=list)
+    #: Translations dropped for falling under TRANSLATION_CONFIDENCE_FLOOR, by
+    #: language code: ``{"translation": ..., "confidence": ...}``. Each is also
+    #: in ``missing_languages``.
+    low_confidence: Dict[str, Dict[str, Any]] = field(default_factory=dict)
     error: Optional[str] = None
 
 
@@ -165,7 +183,17 @@ def _sense_schema(ask_pos: bool = True) -> Schema:
         ),
     }
     for field_name, description in translation_fields.items():
-        properties[field_name] = SchemaProperty("string", description)
+        properties[field_name] = SchemaProperty(
+            "object",
+            description,
+            properties={
+                "translation": SchemaProperty("string", description),
+                "confidence": SchemaProperty(
+                    "number",
+                    "Confidence from 0-1 that this is the term the field uses in this language",
+                ),
+            },
+        )
     properties["confidence"] = SchemaProperty("number", "Confidence score from 0-1")
     return Schema(
         name="DomainSense",
@@ -187,6 +215,35 @@ def _describe_existing(senses: Sequence[Lemma]) -> str:
             f"{number}. {label} [{lemma.pos_type}/{lemma.pos_subtype}]: {lemma.definition_text}"
         )
     return "\n".join(lines)
+
+
+def _split_by_confidence(
+    sense: Dict[str, Any],
+) -> tuple[Dict[str, Any], Dict[str, Dict[str, Any]]]:
+    """``sense`` without its low-confidence translations, and those translations.
+
+    A translation whose confidence is missing or not a number counts as low:
+    the floor exists to keep doubtful terms out, so an unrated one stays out.
+
+    Returns:
+        A copy of ``sense`` with each dropped translation field removed, and
+        the dropped ones by language code as ``{"translation", "confidence"}``.
+    """
+    kept = dict(sense)
+    dropped: Dict[str, Dict[str, Any]] = {}
+    for field_name, value in sense.items():
+        lang_code = LLM_FIELD_TO_LANG_CODE.get(field_name)
+        if lang_code is None or not isinstance(value, dict):
+            continue
+        raw_confidence = value.get("confidence")
+        confidence: Optional[float] = None
+        if isinstance(raw_confidence, (int, float)) and not isinstance(raw_confidence, bool):
+            confidence = float(raw_confidence)
+        if confidence is not None and confidence >= TRANSLATION_CONFIDENCE_FLOOR:
+            continue
+        del kept[field_name]
+        dropped[lang_code] = {"translation": value.get("translation"), "confidence": confidence}
+    return kept, dropped
 
 
 def pos_type_for_subtype(pos_subtype: str) -> Optional[str]:
@@ -272,6 +329,10 @@ def _already_present(
     Either it carries exactly the requested disambiguation, or it carries every
     requested tag -- which is what a previous run left on a sense it created,
     matched or moved, so a re-run of a whole list is free.
+
+    ``senses`` is already narrowed to the caller's part of speech when it fixed
+    one: a list may carry the noun and the verb of one headword under the same
+    tags, and the noun's tags must not stand in for the verb.
     """
     wanted_tags = set(normalize_tags(tags))
     for lemma in senses:
@@ -352,6 +413,7 @@ def add_sense(
     abbreviation: Optional[str] = None,
     relevel_existing: bool = False,
     pos_subtype: Optional[str] = None,
+    pos_type: Optional[str] = None,
     source: str = "add_sense",
     client: Optional[Any] = None,
 ) -> AddSenseResult:
@@ -378,6 +440,11 @@ def add_sense(
             members are all one kind of thing -- a closed set that must share
             its cohort's subtype. The part of speech follows from it, and the
             model is asked for neither. A matched existing sense keeps its own.
+        pos_type: The part of speech of the sense, for a headword the field
+            uses as both noun and verb ("dunk"). The model is told it and still
+            chooses the subtype. Only senses of this part of speech are
+            candidates for an existing match. Must agree with ``pos_subtype``
+            when both are given.
         source: Provenance recorded in the operation log.
         client: Pre-built LLM client, for tests.
 
@@ -393,12 +460,25 @@ def add_sense(
         return AddSenseResult(word=normalized, status="error", error="domain must not be empty")
     requested_tags = list(tags or [])
     fixed_pos_type: Optional[str] = None
+    if pos_type is not None:
+        if pos_type not in VALID_POS_TYPES:
+            return AddSenseResult(
+                word=normalized, status="error", error=f"unknown pos_type {pos_type!r}"
+            )
+        fixed_pos_type = pos_type
     if pos_subtype is not None:
-        fixed_pos_type = pos_type_for_subtype(pos_subtype)
-        if fixed_pos_type is None or _needs_subtype_review(fixed_pos_type, pos_subtype):
+        subtype_owner = pos_type_for_subtype(pos_subtype)
+        if subtype_owner is None or _needs_subtype_review(subtype_owner, pos_subtype):
             return AddSenseResult(
                 word=normalized, status="error", error=f"unusable pos_subtype {pos_subtype!r}"
             )
+        if fixed_pos_type is not None and fixed_pos_type != subtype_owner:
+            return AddSenseResult(
+                word=normalized,
+                status="error",
+                error=f"pos_subtype {pos_subtype!r} is not a {fixed_pos_type} subtype",
+            )
+        fixed_pos_type = subtype_owner
 
     def settle_match(matched: Lemma, status: str) -> AddSenseResult:
         """Tag, and on request move, an existing sense that is the one asked for."""
@@ -429,6 +509,8 @@ def add_sense(
         )
 
     existing = get_english_senses(session, normalized)
+    if fixed_pos_type is not None:
+        existing = [lemma for lemma in existing if lemma.pos_type == fixed_pos_type]
     present = _already_present(existing, normalized, disambiguation, requested_tags)
     if present is not None:
         # Still tagged (and moved, if asked): a sense someone labelled "sports"
@@ -477,16 +559,15 @@ def add_sense(
     if not definition_text:
         return AddSenseResult(word=normalized, status="error", error="LLM gave no definition")
 
-    if fixed_pos_type is not None:
-        pos_type = fixed_pos_type
-        new_subtype = pos_subtype
+    new_pos_type = fixed_pos_type or str(sense.get("pos") or "").lower()
+    if pos_subtype is not None:
+        new_subtype: Optional[str] = pos_subtype
     else:
-        pos_type = str(sense.get("pos") or "").lower()
-        raw_subtype: Optional[str] = pos_type
-        if pos_type in _SUBTYPED_POS_TYPES:
+        raw_subtype: Optional[str] = new_pos_type
+        if new_pos_type in _SUBTYPED_POS_TYPES:
             # The second call: only a new sense pays for it, not a covered one.
             subtype_context, subtype_prompt, subtype_schema = build_subtype_prompt(
-                normalized, domain.strip(), definition_text, pos_type
+                normalized, domain.strip(), definition_text, new_pos_type
             )
             try:
                 subtype_response = llm_client.generate_chat(
@@ -504,14 +585,14 @@ def add_sense(
             )
         # A closed class answers with its part of speech, which normalizes to
         # its only subtype, "<pos>_other".
-        new_subtype = _normalize_subtype(pos_type, raw_subtype)
+        new_subtype = _normalize_subtype(new_pos_type, raw_subtype)
 
     try:
-        pos_error = _validate_pos(pos_type, new_subtype)
+        pos_error = _validate_pos(new_pos_type, new_subtype)
         if pos_error is not None:
             return AddSenseResult(word=normalized, status="error", error=f"LLM gave {pos_error}")
         assert new_subtype is not None  # _validate_pos rejects None
-        if _needs_subtype_review(pos_type, new_subtype):
+        if _needs_subtype_review(new_pos_type, new_subtype):
             # Not offered, but a schema-valid POS/subtype mismatch is normalized
             # to the catch-all too.  Nothing is written, so a re-run retries it.
             return AddSenseResult(
@@ -520,12 +601,14 @@ def add_sense(
                 error=f"LLM gave the catch-all subtype {new_subtype!r}; nothing written",
             )
 
-        guid = generate_guid(session, pos_type, new_subtype)
+        confident_sense, low_confidence = _split_by_confidence(sense)
+
+        guid = generate_guid(session, new_pos_type, new_subtype)
         new_lemma = Lemma(
             lemma_text=normalized,
             disambiguation=disambiguation,
             definition_text=definition_text,
-            pos_type=pos_type,
+            pos_type=new_pos_type,
             pos_subtype=new_subtype,
             guid=guid,
             difficulty_level=difficulty_level,
@@ -547,7 +630,7 @@ def add_sense(
             new_translation=normalized,
             entity_guid=guid,
             guid=guid,
-            pos_type=pos_type,
+            pos_type=new_pos_type,
             pos_subtype=new_subtype,
             definition=definition_text,
             disambiguation=disambiguation,
@@ -556,9 +639,9 @@ def add_sense(
         )
         # A missing language is reported rather than fatal, as in add_term:
         # the sense is still worth having, and the gap is visible to the
-        # translation coverage pass.
+        # translation coverage pass. A low-confidence one is left missing too.
         stored = _store_sense_translations(
-            session, new_lemma, sense, source=source, model=config.model
+            session, new_lemma, confident_sense, source=source, model=config.model
         )
         _store_sense_examples(session, new_lemma, sense, source=source)
         attach_english_base_form(session, new_lemma, sense, source=source)
@@ -570,8 +653,7 @@ def add_sense(
         session.rollback()
         raise
 
-    by_lang_code = convert_llm_response_to_lang_codes(sense)
-    missing = [code for code in TRANSLATION_LANGUAGES if not (by_lang_code.get(code) or "").strip()]
+    missing = [code for code in TRANSLATION_LANGUAGES if code not in stored]
     if missing:
         logger.warning(
             "Sense '%s' (%s) created as %s with no translation for: %s",
@@ -580,14 +662,24 @@ def add_sense(
             guid,
             ", ".join(missing),
         )
+    for lang_code, dropped in low_confidence.items():
+        logger.warning(
+            "Sense '%s' (%s): dropped %s translation %r at confidence %s",
+            normalized,
+            domain,
+            lang_code,
+            dropped["translation"],
+            dropped["confidence"],
+        )
     return AddSenseResult(
         word=normalized,
         status="created",
         guid=guid,
         disambiguation=disambiguation,
         definition_text=definition_text,
-        pos_type=pos_type,
+        pos_type=new_pos_type,
         pos_subtype=new_subtype,
         translations=stored,
         missing_languages=missing,
+        low_confidence=low_confidence,
     )

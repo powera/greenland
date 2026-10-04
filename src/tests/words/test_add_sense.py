@@ -92,6 +92,14 @@ class _FakeClient:
         return _FakeResponse(self._structured_data)
 
 
+def _rated(translation: str, confidence: Optional[float] = 0.95) -> Dict[str, Any]:
+    """One translation field as the schema asks for it."""
+    rated: Dict[str, Any] = {"translation": translation}
+    if confidence is not None:
+        rated["confidence"] = confidence
+    return rated
+
+
 def _chess_check(covered_by: int = 0) -> Dict[str, Any]:
     return {
         "covered_by": covered_by,
@@ -101,11 +109,11 @@ def _chess_check(covered_by: int = 0) -> Dict[str, Any]:
         "phonetic_spelling": "CHEK",
         "ipa_spelling": "/tʃɛk/",
         "examples": ["White gave check with the rook."],
-        "lithuanian_translation": "šachas",
-        "spanish_translation": "jaque",
-        "spanish_latam_translation": "jaque",
-        "french_translation": "échec",
-        "chinese_translation": "将军",
+        "lithuanian_translation": _rated("šachas"),
+        "spanish_translation": _rated("jaque"),
+        "spanish_latam_translation": _rated("jaque"),
+        "french_translation": _rated("échec"),
+        "chinese_translation": _rated("将军"),
         "confidence": 0.9,
     }
 
@@ -147,6 +155,59 @@ class TestCreation:
         assert read_tags(lemma) == ["chess", "sports_games"]
         assert get_translation(session, lemma, "lt") == "šachas"
         assert session.query(Lemma).filter(Lemma.lemma_text == "check").count() == 2
+
+    def test_low_confidence_translation_is_left_missing(
+        self, session: Session, config: DataSourceConfig
+    ) -> None:
+        # Chess "skewer" as luna answered it: sure of the Chinese, guessing at
+        # the Spanish and French with the words for neighboring tactics.
+        sense = _chess_check()
+        sense["spanish_translation"] = _rated("clavada", 0.6)
+        sense["french_translation"] = _rated("attaque à la découverte", 0.84)
+
+        result = _add(session, config, _FakeClient(sense))
+
+        assert result.status == "created"
+        assert result.missing_languages == ["es", "fr"]
+        assert result.low_confidence == {
+            "es": {"translation": "clavada", "confidence": 0.6},
+            "fr": {"translation": "attaque à la découverte", "confidence": 0.84},
+        }
+        assert "es" not in result.translations
+        lemma = session.query(Lemma).filter(Lemma.guid == result.guid).one()
+        assert get_translation(session, lemma, "es") is None
+        assert get_translation(session, lemma, "fr") is None
+        assert get_translation(session, lemma, "es-419") == "jaque"
+        assert get_translation(session, lemma, "zh") == "将军"
+
+    def test_translation_at_the_floor_is_kept(
+        self, session: Session, config: DataSourceConfig
+    ) -> None:
+        sense = _chess_check()
+        sense["french_translation"] = _rated("échec", 0.85)
+
+        result = _add(session, config, _FakeClient(sense))
+
+        assert result.low_confidence == {}
+        assert result.translations["fr"] == "échec"
+
+    def test_unrated_translation_is_left_missing(
+        self, session: Session, config: DataSourceConfig
+    ) -> None:
+        sense = _chess_check()
+        sense["lithuanian_translation"] = _rated("šachas", None)
+
+        result = _add(session, config, _FakeClient(sense))
+
+        assert result.missing_languages == ["lt"]
+        assert result.low_confidence == {"lt": {"translation": "šachas", "confidence": None}}
+
+    def test_translations_are_rated_per_language(self) -> None:
+        _context, _prompt, schema = build_sense_prompt("check", "chess", None, [])
+
+        rated = schema.properties["lithuanian_translation"]
+        assert rated.type == "object"
+        assert set(rated.properties or {}) == {"translation", "confidence"}
 
     def test_base_form_is_attached(self, session: Session, config: DataSourceConfig) -> None:
         result = _add(session, config, _FakeClient(_chess_check()))
@@ -395,6 +456,92 @@ class TestFixedSubtype:
         assert result.status == "covered"
         queen = session.query(Lemma).filter(Lemma.lemma_text == "queen").one()
         assert queen.pos_subtype == "small_movable_object"
+
+
+def _basketball_dunk(pos_subtype: str) -> Dict[str, Any]:
+    """The verb "dunk"; the one canned answer serves both calls."""
+    return dict(
+        _chess_check(),
+        definition="In basketball, to score by pushing the ball down through the hoop.",
+        pos_subtype=pos_subtype,
+    )
+
+
+class TestFixedPartOfSpeech:
+    def test_part_of_speech_is_told_and_subtype_still_asked(
+        self, session: Session, config: DataSourceConfig
+    ) -> None:
+        client = _FakeClient(_basketball_dunk("physical_action"))
+
+        result = _add(session, config, client, word="dunk", domain="basketball", pos_type="verb")
+
+        assert result.status == "created"
+        assert (result.pos_type, result.pos_subtype) == ("verb", "physical_action")
+        assert "pos" not in client.calls[0]["json_schema"].properties
+        assert "It is a verb." in client.calls[0]["prompt"]
+        assert len(client.calls) == 2
+
+    def test_noun_tags_do_not_stand_in_for_the_verb(
+        self, session: Session, config: DataSourceConfig
+    ) -> None:
+        # The same list tags both; the verb must still be described and made.
+        noun = _add(session, config, _FakeClient(_chess_check()), word="dunk", pos_type="noun")
+        client = _FakeClient(_basketball_dunk("physical_action"))
+
+        verb = _add(session, config, client, word="dunk", pos_type="verb")
+
+        assert (noun.status, verb.status) == ("created", "created")
+        assert noun.guid != verb.guid
+        assert client.calls
+
+    def test_rerun_of_the_verb_matches_only_the_verb(
+        self, session: Session, config: DataSourceConfig
+    ) -> None:
+        noun = _add(session, config, _FakeClient(_chess_check()), word="dunk", pos_type="noun")
+        verb = _add(
+            session,
+            config,
+            _FakeClient(_basketball_dunk("physical_action")),
+            word="dunk",
+            pos_type="verb",
+        )
+        client = _FakeClient(_chess_check())
+
+        noun_again = _add(session, config, client, word="dunk", pos_type="noun")
+        verb_again = _add(session, config, client, word="dunk", pos_type="verb")
+
+        assert (noun_again.guid, verb_again.guid) == (noun.guid, verb.guid)
+        assert client.calls == []
+
+    def test_other_parts_of_speech_are_not_offered_as_matches(
+        self, session: Session, config: DataSourceConfig
+    ) -> None:
+        # "check (examine)" is a verb; asked for the noun, it is not listed.
+        client = _FakeClient(_chess_check())
+
+        _add(session, config, client, pos_type="noun", disambiguation="chess")
+
+        assert "examine" not in client.calls[0]["prompt"]
+
+    def test_unknown_part_of_speech_is_rejected_before_the_call(
+        self, session: Session, config: DataSourceConfig
+    ) -> None:
+        client = _FakeClient(_chess_check())
+
+        result = _add(session, config, client, pos_type="gerund")
+
+        assert result.status == "error"
+        assert client.calls == []
+
+    def test_subtype_of_another_part_of_speech_is_rejected(
+        self, session: Session, config: DataSourceConfig
+    ) -> None:
+        client = _FakeClient(_chess_check())
+
+        result = _add(session, config, client, pos_type="verb", pos_subtype="strategic_tactic")
+
+        assert result.status == "error"
+        assert client.calls == []
 
 
 class TestSubtypeGuidance:

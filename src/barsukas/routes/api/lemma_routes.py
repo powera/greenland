@@ -1348,6 +1348,9 @@ def add_sense_endpoint() -> ResponseReturnValue:
         tagged.
       - ``pos_subtype``: optional subtype for a new lemma, e.g. ``"region"``.
         The part of speech follows from it and the model is asked for neither.
+      - ``pos_type``: optional part of speech, e.g. ``"verb"``, for a headword
+        the field uses as both noun and verb. The model still chooses the
+        subtype; only senses of this part of speech can match.
 
     ``status`` is ``created``, ``covered`` (an existing sense matched and was
     tagged), ``moved`` (matched and moved), or ``already_exists`` (matched with
@@ -1371,7 +1374,7 @@ def add_sense_endpoint() -> ResponseReturnValue:
         required_values[field_name] = field_value.strip()
 
     optional_values: Dict[str, Optional[str]] = {}
-    for field_name in ("disambiguation", "hint", "abbreviation", "pos_subtype"):
+    for field_name in ("disambiguation", "hint", "abbreviation", "pos_subtype", "pos_type"):
         field_value = payload.get(field_name)
         if field_value is not None and not isinstance(field_value, str):
             return _build_error_response(f"{field_name} must be a string or null")
@@ -1425,6 +1428,7 @@ def add_sense_endpoint() -> ResponseReturnValue:
         tags=tags,
         relevel_existing=relevel_existing,
         pos_subtype=optional_values["pos_subtype"],
+        pos_type=optional_values["pos_type"],
         source=Config.OPERATION_LOG_SOURCE,
     )
 
@@ -1441,6 +1445,7 @@ def add_sense_endpoint() -> ResponseReturnValue:
         "pos_subtype": result.pos_subtype,
         "translations": result.translations,
         "missing_languages": result.missing_languages,
+        "low_confidence": result.low_confidence,
     }
     return _build_success_response(
         data,

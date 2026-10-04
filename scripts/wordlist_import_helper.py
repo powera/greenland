@@ -546,6 +546,11 @@ class SenseEntry(NamedTuple):
     English ("checkmate").  ``abbreviation`` ("LBW") is recorded as a variant of
     the sense.  ``move`` says that if the database already has this sense at
     another level, it moves here rather than only being tagged.
+
+    ``pos`` fixes the part of speech ("verb") and leaves the subtype to the
+    model.  It is what lets one headword appear twice -- "dunk" as the noun and
+    as the verb -- since the server then matches existing senses of that part
+    of speech only.
     """
 
     term: str
@@ -554,6 +559,7 @@ class SenseEntry(NamedTuple):
     unique: bool = False
     abbreviation: str | None = None
     move: bool = False
+    pos: str | None = None
 
 
 class SenseList(NamedTuple):
@@ -582,20 +588,25 @@ def _entry_label(sense_list: SenseList, entry: SenseEntry) -> str | None:
 
 
 def _check_sense_lists(sense_lists: Sequence[SenseList]) -> None:
-    """Reject a script that lists one headword twice.
+    """Reject a script that lists one headword twice, unless by part of speech.
 
     Even under two labels this is refused: the server recognises a sense a
     previous run created by its tags, and two senses of one headword sharing
-    a list's tags would be indistinguishable on the re-run.
+    a list's tags would be indistinguishable on the re-run.  The exception is
+    one entry per part of speech, each with ``pos`` set: the server only
+    matches senses of the given part of speech, so the noun's tags cannot
+    stand in for the verb.  An entry without ``pos`` would match either.
     """
-    seen: Set[str] = set()
+    pos_by_term: dict[str, List[str | None]] = {}
     for sense_list in sense_lists:
         for entry in sense_list.entries:
             _entry_label(sense_list, entry)
-            key = _normalized(entry.term)
-            if key in seen:
-                raise ValueError(f"{entry.term!r} is listed more than once")
-            seen.add(key)
+            pos_by_term.setdefault(_normalized(entry.term), []).append(entry.pos)
+    for term, listed_pos in pos_by_term.items():
+        if len(listed_pos) == 1:
+            continue
+        if None in listed_pos or len(set(listed_pos)) != len(listed_pos):
+            raise ValueError(f"{term!r} is listed more than once; give each entry a different pos")
 
 
 def print_sense_plan(sense_list: SenseList) -> None:
@@ -608,6 +619,8 @@ def print_sense_plan(sense_list: SenseList) -> None:
         label = _entry_label(sense_list, entry)
         shown = f"{entry.term} ({label})" if label else entry.term
         notes = []
+        if entry.pos:
+            notes.append(entry.pos)
         if entry.abbreviation:
             notes.append(f"abbr {entry.abbreviation}")
         if entry.move:
@@ -635,6 +648,8 @@ def execute_senses(sense_list: SenseList, model: str, limit: int | None) -> List
     for position, entry in enumerate(entries, start=1):
         label = _entry_label(sense_list, entry)
         shown = f"{entry.term} ({label})" if label else entry.term
+        if entry.pos:
+            shown = f"{shown} [{entry.pos}]"
         print(f"[{position}/{len(entries)}] {shown}: ...", flush=True)
         try:
             response = add_sense(
@@ -648,6 +663,7 @@ def execute_senses(sense_list: SenseList, model: str, limit: int | None) -> List
                 abbreviation=entry.abbreviation,
                 relevel_existing=entry.move,
                 pos_subtype=sense_list.pos_subtype,
+                pos_type=entry.pos,
             )
         except BarsukasAPIError as error:
             print(f"  failed: {error}")
@@ -666,6 +682,12 @@ def execute_senses(sense_list: SenseList, model: str, limit: int | None) -> List
         missing_languages = data.get("missing_languages") or []
         if missing_languages:
             print(f"    no translation for: {', '.join(missing_languages)}")
+        low_confidence = data.get("low_confidence") or {}
+        for lang_code, dropped in low_confidence.items():
+            print(
+                f"    dropped {lang_code} {dropped.get('translation')!r}"
+                f" at confidence {dropped.get('confidence')}"
+            )
 
     summary = ", ".join(f"{count} {status}" for status, count in sorted(counts.items()))
     print(f"Complete at level {sense_list.level}: {summary or 'nothing to do'}.")
