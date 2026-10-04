@@ -175,7 +175,11 @@ GRAMMAR_FACT_DEFINITIONS: Dict[str, GrammarFactDefinition] = {
         languages=("en",),
         required_pos=("noun",),
         display_label="Countability",
-        description="Classify nouns as countable, uncountable, or both",
+        description=(
+            "Language-specific noun usage: countable, uncountable (mass), or both "
+            "in this language. This does not decide whether the concept has "
+            "individual instances or whether its paradigm lacks a number."
+        ),
         generatable=True,
     ),
     "declension_class": GrammarFactDefinition(
@@ -271,8 +275,9 @@ GRAMMAR_FACT_DEFINITIONS: Dict[str, GrammarFactDefinition] = {
         required_pos=("noun",),
         display_label="Number Type",
         description=(
-            "Exceptional noun number behavior: uncountable, plurale_tantum, "
-            "singulare_tantum, or both"
+            "Language-specific number paradigm: regular (both numbers), "
+            "plurale_tantum (plural only), or singulare_tantum (singular only). "
+            "Store regular when checked; mass/count usage belongs to countability."
         ),
     ),
     "past": GrammarFactDefinition(

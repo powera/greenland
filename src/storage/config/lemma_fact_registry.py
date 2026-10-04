@@ -18,14 +18,16 @@ class LemmaFactDefinition:
 
 
 LEMMA_FACT_DEFINITIONS: Dict[str, LemmaFactDefinition] = {
-    "quantifiable": LemmaFactDefinition(
-        fact_type="quantifiable",
+    "has_individual_instances": LemmaFactDefinition(
+        fact_type="has_individual_instances",
         allowed_values=("true", "false"),
         required_pos=("noun",),
-        display_label="Quantifiable",
+        display_label="Has Individual Instances",
         description=(
-            'Would "five X" make sense? bear/atmosphere: true; rice/sugar: false. '
-            "A concept-level property, not grammatical countability."
+            "Whether this lemma sense naturally denotes separate instances that can "
+            "be counted across languages (horse, leg: true; salt, furniture as a "
+            "collective: false). Independent of grammatical countability and the "
+            "app's choice of which instances to show."
         ),
         generatable=True,
     ),

@@ -10,7 +10,6 @@ from clients.types import Schema, SchemaProperty
 from clients.unified_client import UnifiedLLMClient
 from storage.backend.config import DataSourceConfig
 from storage.config.lemma_fact_registry import LEMMA_FACT_DEFINITIONS
-from storage.crud.grammar_fact import get_grammar_fact_value
 from storage.crud.lemma_fact import add_lemma_fact, get_lemma_fact_value
 from storage.crud.operation_log import log_operation
 from storage.models.schema import Lemma
@@ -18,27 +17,28 @@ from storage.models.schema import Lemma
 logger = logging.getLogger(__name__)
 
 
-def generate_quantifiable(
-    client: UnifiedLLMClient, lemma: Lemma, countability: Optional[str]
+def generate_has_individual_instances(
+    client: UnifiedLLMClient, lemma: Lemma
 ) -> Tuple[Optional[str], Optional[str], float]:
-    """Ask the LLM whether "five <noun>" makes sense; returns (value, notes, confidence)."""
+    """Classify natural individual instances of a lemma sense."""
     if lemma.pos_type != "noun":
-        logger.warning(f"Lemma '{lemma.lemma_text}' is not a noun, skipping quantifiable")
+        logger.warning(f"Lemma '{lemma.lemma_text}' is not a noun, skipping individual instances")
         return None, None, 0.0
 
-    context = util.prompt_loader.get_context("grammar", "quantifiable")
-    prompt_text = util.prompt_loader.get_prompt("grammar", "quantifiable").format(
+    context = util.prompt_loader.get_context("grammar", "has_individual_instances")
+    prompt_text = util.prompt_loader.get_prompt("grammar", "has_individual_instances").format(
         english_word=lemma.lemma_text,
         pos_type=lemma.pos_type,
         pos_subtype=lemma.pos_subtype or "N/A",
         definition=lemma.definition_text or "N/A",
-        countability=countability or "unknown",
     )
     schema = Schema(
-        name="NounQuantifiableClassification",
-        description="Classify whether a noun concept can be counted with a bare number",
+        name="NounIndividualInstancesClassification",
+        description="Classify whether a lemma sense has natural individual instances",
         properties={
-            "quantifiable": SchemaProperty("boolean", "Whether 'five <noun>' makes sense"),
+            "has_individual_instances": SchemaProperty(
+                "boolean", "Whether the sense denotes naturally separate individual instances"
+            ),
             "explanation": SchemaProperty("string", "Brief explanation if notable"),
             "confidence": SchemaProperty(
                 "number", "Confidence score 0.0-1.0", minimum=0.0, maximum=1.0
@@ -49,15 +49,15 @@ def generate_quantifiable(
     try:
         response = client.generate_chat(prompt=prompt_text, json_schema=schema, context=context)
     except Exception as error:
-        logger.error(f"Failed to generate quantifiable for '{lemma.lemma_text}': {error}")
+        logger.error(f"Failed to generate individual instances for '{lemma.lemma_text}': {error}")
         return None, None, 0.0
 
     result = response.structured_data
-    if not result or not isinstance(result.get("quantifiable"), bool):
+    if not result or not isinstance(result.get("has_individual_instances"), bool):
         logger.error(f"No usable structured data for '{lemma.lemma_text}'")
         return None, None, 0.0
 
-    value = "true" if result["quantifiable"] else "false"
+    value = "true" if result["has_individual_instances"] else "false"
     return value, result.get("explanation") or None, float(result.get("confidence", 0.5))
 
 
@@ -84,11 +84,10 @@ def generate_lemma_fact_for_lemma(
         if existing is not None:
             return {**base, "skipped": True, "existing_value": existing}
 
-    if fact_type != "quantifiable":
+    if fact_type != "has_individual_instances":
         return {**base, "error": f"No generator for lemma fact type: {fact_type}"}
 
-    countability = get_grammar_fact_value(session, lemma.id, "en", "countability")
-    value, notes, confidence = generate_quantifiable(client, lemma, countability)
+    value, notes, confidence = generate_has_individual_instances(client, lemma)
     if value is None or confidence < min_confidence:
         return {
             **base,

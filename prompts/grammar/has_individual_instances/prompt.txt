@@ -1,0 +1,8 @@
+Does this noun sense naturally have separate individual instances?
+
+English label: {english_word}
+Part of speech: {pos_type}
+Subtype: {pos_subtype}
+Definition: {definition}
+
+Return has_individual_instances as true or false for the sense, a short explanation if needed, and confidence.

@@ -132,8 +132,9 @@ def build_noun_forms(
         noun: The lemma text.
         countability: The ``countability`` fact (``"countable"``,
             ``"uncountable"`` or ``"both"``).
-        number_type: The ``number_type`` fact (``"uncountable"``,
-            ``"plurale_tantum"``, ``"singulare_tantum"`` or ``"both"``).
+        number_type: The ``number_type`` fact (``"regular"``,
+            ``"plurale_tantum"`` or ``"singulare_tantum"``). Older data may
+            still use ``"uncountable"`` or ``"both"``.
         irregular_plural: The ``plural`` fact, used verbatim when present.
 
     Returns:
@@ -149,7 +150,11 @@ def build_noun_forms(
         # Already plural in form; "a pair of scissors" is the citation form.
         return {"singular": singular, "plural": singular}
 
-    if number_type in _SINGULAR_ONLY_NUMBER_TYPES or countability == "uncountable":
+    # A checked number paradigm is more specific than mass/count noun usage.
+    # Retain countability as a fallback for older rows without number_type.
+    if number_type in _SINGULAR_ONLY_NUMBER_TYPES or (
+        countability == "uncountable" and number_type != "regular"
+    ):
         return {"singular": singular}
 
     if irregular_plural:

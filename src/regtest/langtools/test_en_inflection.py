@@ -162,6 +162,12 @@ class TestNounNumberTypeFact(unittest.TestCase):
             {"singular": "book", "plural": "books"},
         )
 
+    def test_checked_regular_number_type_beats_mass_usage(self) -> None:
+        self.assertEqual(
+            build_noun_forms("coffee", countability="uncountable", number_type="regular"),
+            {"singular": "coffee", "plural": "coffees"},
+        )
+
     def test_countable_fact_does_not_suppress_the_plural(self) -> None:
         """ "iron" the appliance is countable, and pluralizes regularly."""
         self.assertEqual(

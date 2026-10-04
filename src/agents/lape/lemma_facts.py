@@ -1,8 +1,8 @@
 """
 Lape lemma-facts CLI: language-independent facts stored in ``lemma_facts``.
 
-  GREENLAND_DISABLE_LLM=1 PYTHONPATH=src python -m agents.lape.lemma_facts --fact-type quantifiable
-  PYTHONPATH=src python -m agents.lape.lemma_facts --fact-type quantifiable --subtype food --populate
+  GREENLAND_TEST_MODE=1 PYTHONPATH=src python -m agents.lape.lemma_facts --fact-type has_individual_instances
+  PYTHONPATH=src python -m agents.lape.lemma_facts --fact-type has_individual_instances --subtype food --populate
 
 Coverage is the default mode; --populate makes the LLM calls and saves each
 result as it lands.
@@ -34,7 +34,7 @@ logger = logging.getLogger(__name__)
 
 def get_argument_parser() -> argparse.ArgumentParser:
     parser = argparse.ArgumentParser(
-        description="Lape - language-independent lemma facts (e.g. quantifiable)"
+        description="Lape - language-independent lemma facts (e.g. has_individual_instances)"
     )
     add_common_args(parser)
     add_llm_args(parser)

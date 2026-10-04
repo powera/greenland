@@ -81,7 +81,7 @@ Supported fact types:
   Noun facts:
     - measure_words: Chinese measure words/classifiers (languages: zh)
     - grammatical_gender: Noun gender (languages: fr, lt, es, de, pt, it)
-    - countability: Countable/uncountable/both (languages: en - base concept)
+    - countability: English noun usage (countable/uncountable/both; language: en)
     - declension_class: Declension class 1-5 (languages: lt)
     - animacy: Animate/inanimate (languages: en - base concept)
     - fanciful_collective: Ornamental animal collective, e.g. a murder of crows
@@ -97,7 +97,8 @@ Supported fact types:
   one of the others writes data that ships, so a rerun is not free.
 
   Facts that ship but no agent generates (hand-curated overrides): irregular plural,
-  number_type, French feminine_form, comparative, superlative, gradability, and
+  number_type (including a checked regular paradigm), French feminine_form,
+  comparative, superlative, gradability, and
   the Lithuanian/Italian principal parts. English past and past_participle are
   generated together by the english-principal-parts task.
 

@@ -51,10 +51,30 @@ def test_record_omits_facts_when_none() -> None:
 def test_record_carries_facts_dict() -> None:
     session = _make_session()
     lemma = _lemma(session)
-    lemma.lemma_facts.append(LemmaFact(fact_type="quantifiable", fact_value="false"))
+    lemma.lemma_facts.append(LemmaFact(fact_type="has_individual_instances", fact_value="false"))
     session.commit()
 
-    assert _record(lemma)["facts"] == {"quantifiable": "false"}
+    assert _record(lemma)["facts"] == {"has_individual_instances": "false"}
+
+
+def test_legacy_fact_exports_under_new_name() -> None:
+    session = _make_session()
+    lemma = _lemma(session)
+    lemma.lemma_facts.append(LemmaFact(fact_type="quantifiable", fact_value="true"))
+    session.commit()
+
+    assert _record(lemma)["facts"] == {"has_individual_instances": "true"}
+
+
+def test_legacy_release_fact_imports_under_new_name() -> None:
+    session = _make_session()
+    lemma = _lemma(session)
+    apply_lemma_facts(lemma, {"facts": {"quantifiable": "false"}})
+    session.commit()
+
+    assert {fact.fact_type: fact.fact_value for fact in lemma.lemma_facts} == {
+        "has_individual_instances": "false"
+    }
 
 
 def test_import_creates_facts() -> None:
@@ -67,27 +87,27 @@ def test_import_creates_facts() -> None:
         "concept_definition": "a seasoning",
         "translations": {"en": "salt"},
         "difficulty_level": 1,
-        "facts": {"quantifiable": "false"},
+        "facts": {"has_individual_instances": "false"},
     }
 
     lemma = import_release_record(session, record)
     session.commit()
 
     assert {fact.fact_type: fact.fact_value for fact in lemma.lemma_facts} == {
-        "quantifiable": "false"
+        "has_individual_instances": "false"
     }
 
 
 def test_apply_replaces_and_removes_facts() -> None:
     session = _make_session()
     lemma = _lemma(session)
-    lemma.lemma_facts.append(LemmaFact(fact_type="quantifiable", fact_value="false"))
+    lemma.lemma_facts.append(LemmaFact(fact_type="has_individual_instances", fact_value="false"))
     session.commit()
 
-    apply_lemma_facts(lemma, {"facts": {"quantifiable": "true"}})
+    apply_lemma_facts(lemma, {"facts": {"has_individual_instances": "true"}})
     session.commit()
     assert {fact.fact_type: fact.fact_value for fact in lemma.lemma_facts} == {
-        "quantifiable": "true"
+        "has_individual_instances": "true"
     }
 
     apply_lemma_facts(lemma, {})
@@ -99,7 +119,7 @@ def test_apply_replaces_and_removes_facts() -> None:
 def test_export_then_import_is_stable() -> None:
     source = _make_session()
     lemma = _lemma(source)
-    lemma.lemma_facts.append(LemmaFact(fact_type="quantifiable", fact_value="true"))
+    lemma.lemma_facts.append(LemmaFact(fact_type="has_individual_instances", fact_value="true"))
     source.commit()
     record = _record(lemma)
 

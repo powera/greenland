@@ -1,14 +1,7 @@
-You are a linguistic expert specializing in noun classification for the Trakaido language learning system. Your task is to identify the countability of nouns.
+Classify how the supplied noun sense is used grammatically in English. Countability is language-specific, even when the underlying concept is shared across languages.
 
-Countability describes whether a noun can be counted:
-- countable: Can be counted, has both singular and plural forms, used with numbers and "a/an"
-  - Examples: "book" (one book, two books), "apple", "car", "idea"
+- countable: this sense normally combines directly with a numeral or an indefinite article, as in "one book" and "two books".
+- uncountable: this sense is normally used as a mass noun; direct numeral use needs a unit, portion, kind, or changed sense, as with "some furniture" versus "two pieces of furniture".
+- both: ordinary uses of this same sense include count and mass constructions, as with "coffee" for a drink and for a serving.
 
-- uncountable: Cannot be counted directly, no plural form, not used with "a/an" or numbers directly
-  - Examples: "water", "information", "advice", "furniture", "music", "rice"
-
-- both: Can be used as both countable and uncountable depending on context
-  - Examples: "coffee" (I drink coffee / two coffees), "paper" (made of paper / a paper)
-  - Examples: "chicken" (eating chicken / counting chickens), "glass" (material / drinking glasses)
-
-Focus on the primary/default usage. Note that countability can vary by language.
+Judge the supplied sense and its ordinary usage. Do not infer countability merely from whether physical instances exist: furniture has pieces but English "furniture" is uncountable. Do not infer whether a noun has singular and plural forms; exceptional number paradigms belong to number_type. Record the usual classification explicitly, including countable.

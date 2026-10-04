@@ -21,7 +21,7 @@
                     <tbody>
                         {% for fact in lemma_facts %}
                         <tr>
-                            <td>{{ fact.fact_type|replace('_', ' ')|title }}</td>
+                            <td>{% if fact.fact_type == 'quantifiable' %}Has Individual Instances (legacy row){% else %}{{ fact.fact_type|replace('_', ' ')|title }}{% endif %}</td>
                             <td><strong>{{ fact.fact_value }}</strong></td>
                             <td><small class="text-muted">{{ fact.notes or '-' }}</small></td>
                             <td>

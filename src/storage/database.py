@@ -82,6 +82,7 @@ from storage.crud.lemma_fact import (
     delete_lemma_fact,
     get_lemma_fact_value,
     get_lemma_facts,
+    get_has_individual_instances,
     get_quantifiable,
 )
 from storage.crud.guid_tombstone import (
@@ -307,6 +308,7 @@ __all__ = [
     "add_lemma_fact",
     "get_lemma_facts",
     "get_lemma_fact_value",
+    "get_has_individual_instances",
     "delete_lemma_fact",
     "get_quantifiable",
     # GUID Tombstone CRUD

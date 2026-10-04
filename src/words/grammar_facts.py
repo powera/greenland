@@ -299,7 +299,7 @@ class GrammarFactService:
     def generate_countability(
         self, lemma: Lemma, session: Optional[Session] = None
     ) -> Tuple[Optional[str], Optional[str], float]:
-        """Generate noun countability classification using LLM."""
+        """Generate the English noun usage classification using LLM."""
         return countability.generate_countability(self, lemma, session)
 
     def generate_declension_class(
