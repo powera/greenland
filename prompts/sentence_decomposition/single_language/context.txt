@@ -63,7 +63,19 @@ Multi-word units:
 - Split ordinary modifier+noun pairs where the modifier describes rather than
   names: "cold water", "red car", "my dog", "expensive shoes".
 - When unsure, prefer the phrase if a candidate lemma matches it, and the
-  separate words otherwise. Give the unit one english_gloss and one lemma_guid.
+  separate words otherwise. Decide boundaries from the actual target-language
+  wording, not the source-language word count. A one-word translation gets one
+  token; a multi-word expression for one concept gets one token with the whole
+  surface phrase. A descriptive paraphrase can have separate tokens. Give
+  each token one english_gloss and one lemma_guid.
+- Each occurrence of a surface word belongs to exactly ONE token. Candidate
+  lemmas can overlap, but output tokens within a language must not. In "my
+  small business is growing", emit "small business" once with its phrase GUID;
+  do not also emit "small" or link its adjective GUID to those same letters.
+  Spanish "pequeña empresa" and German "Kleinunternehmen" can each carry the
+  phrase GUID as one unit, despite having different word boundaries. If a
+  separate "small" / "pequeña" describes another noun in the sentence, that
+  occurrence may use the adjective GUID.
 
 Candidate lemma selection:
 - Candidate lemmas may be presented either as a flat list or grouped under
