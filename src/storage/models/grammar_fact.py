@@ -30,14 +30,15 @@ class GrammarFact(Base):
 
     Examples:
         - number_type: plurale_tantum (scissors, pants)
-        - number_type: singulare_tantum (information, furniture)
+        - number_type: regular (both singular and plural forms verified)
+        - number_type: singulare_tantum (no ordinary plural forms)
         - grammatical_gender: masculine/feminine/neuter (for gendered languages)
         - declension_class: declension class (1, 2, 3, etc. for Lithuanian/Latin)
         - defective_verb: missing certain conjugations
         - indeclinable: doesn't decline/conjugate
 
-    Design principle: Only store POSITIVE assertions. Absence of a fact means
-    normal/default behavior for that language.
+    Absence of a classification means it has not been recorded. Checked default
+    values such as number_type=regular are stored explicitly.
     """
 
     __tablename__ = "grammar_facts"
@@ -66,7 +67,7 @@ class GrammarFact(Base):
 
     # Specific value for this fact type
     # Examples:
-    #   fact_type="number_type" -> fact_value="plurale_tantum" or "singulare_tantum"
+    #   fact_type="number_type" -> "regular", "plurale_tantum", or "singulare_tantum"
     #   fact_type="grammatical_gender" -> fact_value="masculine", "feminine", "neuter"
     #   fact_type="declension_class" -> fact_value="1", "2", "3", "4", "5"
     #   fact_type="defective_verb" -> fact_value="no_imperative" or similar

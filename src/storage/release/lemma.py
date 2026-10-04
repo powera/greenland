@@ -268,6 +268,9 @@ def lemma_to_release_record(lemma: Lemma, *, qid: Optional[str] = None) -> Dict[
         for fact in sorted(lemma.lemma_facts, key=lambda fact: fact.fact_type)
         if fact.fact_value is not None
     }
+    if "quantifiable" in facts:
+        facts.setdefault("has_individual_instances", facts["quantifiable"])
+        del facts["quantifiable"]
     if facts:
         record["facts"] = facts
 
@@ -305,7 +308,10 @@ def apply_base_fields(lemma: Lemma, record: Dict[str, Any]) -> None:
 
 def apply_lemma_facts(lemma: Lemma, record: Dict[str, Any]) -> None:
     """Make a lemma's language-independent facts match the record's ``facts`` dict."""
-    wanted: Dict[str, str] = record.get("facts") or {}
+    wanted: Dict[str, str] = dict(record.get("facts") or {})
+    if "quantifiable" in wanted:
+        wanted.setdefault("has_individual_instances", wanted["quantifiable"])
+        del wanted["quantifiable"]
     for fact in list(lemma.lemma_facts):
         if fact.fact_type not in wanted:
             lemma.lemma_facts.remove(fact)

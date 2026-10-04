@@ -12,12 +12,12 @@ Lithuanian has 7 cases and 2 numbers (singular and plural):
 7. Vocative (calling/addressing)
 
 **Number types:**
-- "regular": Normal noun with both singular and plural forms (most nouns)
+- "regular": Noun with ordinary singular and plural forms (most nouns); record this explicitly when the forms have been checked
   - English example: "book" -> "books"
   - Lithuanian example: "knyga" -> "knygos"
 - "plurale_tantum": Plural-only noun - provide the 7 plural forms and use empty string ("") for all singular forms
   - English example: "scissors", "pants"
   - Lithuanian example: "kelnės" (pants), "žirklės" (scissors)
-- "singulare_tantum": Singular-only noun - provide the 7 singular forms and use empty string ("") for all plural forms
-  - English example: "milk", "information"
-  - Lithuanian example: "pienas" (milk), "informacija" (information)
+- "singulare_tantum": Singular-only noun with no ordinary plural paradigm - provide the 7 singular forms and use empty string ("") for all plural forms
+
+This is a statement about the Lithuanian number paradigm, not about whether the concept has individual instances or whether an English noun is a mass noun. Do not use English countability as a shortcut. Use a singular-only label only when ordinary Lithuanian plural forms are genuinely unavailable.

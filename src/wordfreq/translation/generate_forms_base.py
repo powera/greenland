@@ -563,9 +563,13 @@ def process_lemma_forms(
 
         # Detect and store grammatical properties
         # Detect number type (plurale_tantum, singulare_tantum) for nouns
-        if form_config.detect_number_type:
+        if form_config.detect_number_type and form_config.pos_type == "noun":
             number_type = detect_number_type_from_forms(forms_dict, form_config)
-            if number_type != "regular":
+            if any(
+                form_text and form_text.strip()
+                for form_name, form_text in forms_dict.items()
+                if "singular" in form_name.lower() or "plural" in form_name.lower()
+            ):
                 grammar_fact = linguistic_db.add_grammar_fact(
                     session,
                     lemma_id=lemma_id,

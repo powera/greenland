@@ -590,16 +590,19 @@ class WirewordExporter:
                 grammar_facts_by_lemma[fact.lemma_id].append(fact)
             logger.info(f"Bulk fetched {len(all_grammar_facts)} grammar facts")
 
-            # Language-independent fact: is "five <noun>" sensible? Absent when
-            # unclassified, so consumers can tell "no" from "not yet judged".
-            quantifiable_by_lemma: Dict[int, bool] = {
-                fact.lemma_id: fact.fact_value == "true"
-                for fact in session.query(LemmaFact).filter(
+            # The concept-level counting fact applies to every language. Read
+            # older quantifiable rows until the database has been migrated.
+            individual_instances_by_lemma: Dict[int, bool] = {}
+            for fact in (
+                session.query(LemmaFact)
+                .filter(
                     LemmaFact.lemma_id.in_(lemma_ids),
-                    LemmaFact.fact_type == "quantifiable",
+                    LemmaFact.fact_type.in_(("quantifiable", "has_individual_instances")),
                     LemmaFact.fact_value.isnot(None),
                 )
-            }
+                .order_by(LemmaFact.fact_type.asc())
+            ):
+                individual_instances_by_lemma[fact.lemma_id] = fact.fact_value == "true"
 
             # Language-independent: the digits of a numeral ("one" -> "1").
             numeral_by_lemma: Dict[int, str] = {
@@ -867,8 +870,10 @@ class WirewordExporter:
                         grammar_metadata[fact.fact_type] = fact.fact_value
                     wireword["grammar_metadata"] = grammar_metadata
 
-                if lemma.pos_type == "noun" and lemma_id in quantifiable_by_lemma:
-                    wireword["quantifiable"] = quantifiable_by_lemma[lemma_id]
+                if lemma.pos_type == "noun" and lemma_id in individual_instances_by_lemma:
+                    wireword["has_individual_instances"] = individual_instances_by_lemma[lemma_id]
+                    # Keep the old field until Trakaido consumes the new name.
+                    wireword["quantifiable"] = individual_instances_by_lemma[lemma_id]
 
                 if lemma.pos_type == "numeral" and lemma_id in numeral_by_lemma:
                     wireword["numeral"] = numeral_by_lemma[lemma_id]

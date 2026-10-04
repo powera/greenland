@@ -2,7 +2,7 @@
 LemmaFact model for storing language-independent facts about a lemma.
 
 GrammarFact is keyed by language; this table holds facts about the concept
-itself, such as whether "five X" makes sense (quantifiable).
+itself, such as whether a noun sense has individual instances.
 """
 
 import datetime
@@ -28,7 +28,7 @@ class LemmaFact(Base):
     Language-independent key-value fact about a lemma.
 
     Examples:
-        - quantifiable: "true" (bear, atmosphere) or "false" (rice, sugar)
+        - has_individual_instances: "true" (horse, leg) or "false" (salt, furniture)
 
     Absence of a row means the fact has not been classified.
     """

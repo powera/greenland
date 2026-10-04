@@ -1,0 +1,5 @@
+Classify the meaning of a noun sense for a language-independent counting activity.
+
+Answer true when the sense naturally denotes separate individual things or events: a horse, a leg, a chair, an idea, or a meeting. Answer false for a substance, undivided mass, or collective whose named parts are different things: salt, water, or furniture as a collective. A grain of salt, a salt shaker, a serving of water, and a piece of furniture are separate concepts; do not use them to turn the original sense into true.
+
+Use the supplied definition to choose the sense. Do not decide by whether an English phrase such as "three furniture" is grammatical: grammatical countability belongs to a language-specific fact. Do not decide whether the app should display an instance; that is an activity decision. For ambiguous senses, use the default meaning described by the definition and lower confidence.

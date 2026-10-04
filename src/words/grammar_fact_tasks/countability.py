@@ -1,5 +1,5 @@
 """
-Countability Task - Classify nouns as countable, uncountable, or both.
+Countability task - classify English noun usage as countable, uncountable, or both.
 """
 
 import logging
@@ -21,7 +21,7 @@ def generate_countability(
     agent: "GrammarFactService", lemma: Lemma, session: Optional[Session] = None
 ) -> Tuple[Optional[str], Optional[str], float]:
     """
-    Generate noun countability classification using LLM.
+    Generate English noun countability classification using LLM.
 
     Args:
         agent: The LapeAgent instance
@@ -53,11 +53,11 @@ def generate_countability(
     # Define JSON schema for response
     schema = Schema(
         name="NounCountabilityClassification",
-        description="Classify noun countability",
+        description="Classify English noun phrase countability for this sense",
         properties={
             "countability": SchemaProperty(
                 "string",
-                "The countability classification",
+                "English count, mass, or both usage; independent of individual instances and number_type",
                 enum=["countable", "uncountable", "both"],
             ),
             "explanation": SchemaProperty("string", "Brief explanation if notable"),

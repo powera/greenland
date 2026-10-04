@@ -40,6 +40,14 @@ def add_lemma_fact(
     fact.fact_value = fact_value
     fact.notes = notes
     fact.verified = verified
+    if fact_type == "has_individual_instances":
+        legacy = (
+            session.query(LemmaFact)
+            .filter(LemmaFact.lemma_id == lemma_id, LemmaFact.fact_type == "quantifiable")
+            .first()
+        )
+        if legacy is not None:
+            session.delete(legacy)
     session.commit()
     return fact
 
@@ -60,11 +68,24 @@ def get_lemma_fact_value(session: Session, lemma_id: int, fact_type: str) -> Opt
         .filter(LemmaFact.lemma_id == lemma_id, LemmaFact.fact_type == fact_type)
         .first()
     )
-    return fact.fact_value if fact else None
+    if fact is not None:
+        return fact.fact_value
+    if fact_type == "has_individual_instances":
+        legacy = (
+            session.query(LemmaFact)
+            .filter(LemmaFact.lemma_id == lemma_id, LemmaFact.fact_type == "quantifiable")
+            .first()
+        )
+        return legacy.fact_value if legacy else None
+    return None
 
 
 def get_lemma_facts_dict(session: Session, lemma_id: int) -> Dict[str, Optional[str]]:
-    return {fact.fact_type: fact.fact_value for fact in get_lemma_facts(session, lemma_id)}
+    facts = {fact.fact_type: fact.fact_value for fact in get_lemma_facts(session, lemma_id)}
+    if "quantifiable" in facts:
+        facts.setdefault("has_individual_instances", facts["quantifiable"])
+        del facts["quantifiable"]
+    return facts
 
 
 def delete_lemma_fact(session: Session, lemma_id: int, fact_type: str) -> bool:
@@ -80,9 +101,14 @@ def delete_lemma_fact(session: Session, lemma_id: int, fact_type: str) -> bool:
     return True
 
 
-def get_quantifiable(session: Session, lemma_id: int) -> Optional[bool]:
+def get_has_individual_instances(session: Session, lemma_id: int) -> Optional[bool]:
     """True/False if classified, None if unclassified."""
-    value = get_lemma_fact_value(session, lemma_id, "quantifiable")
+    value = get_lemma_fact_value(session, lemma_id, "has_individual_instances")
     if value is None:
         return None
     return value == "true"
+
+
+def get_quantifiable(session: Session, lemma_id: int) -> Optional[bool]:
+    """Legacy name for :func:`get_has_individual_instances`."""
+    return get_has_individual_instances(session, lemma_id)
