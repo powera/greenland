@@ -103,15 +103,20 @@ Base prefix: `/api`.
     optionally `hint` (a short gloss), `difficulty_level`, `tags`,
     `abbreviation` (recorded as a variant form, e.g. `LBW`),
     `relevel_existing` and `pos_subtype` (fixes a new lemma's subtype; the
-    part of speech follows and the model is asked for neither).
+    part of speech follows and the model is asked for neither) or `pos_type`
+    (fixes only the part of speech, for a headword used as both noun and verb;
+    only senses of that part of speech can match).
   - One LLM call describes the domain sense and says whether one of the
     headword's existing senses already is it. A matched sense is tagged
     (`status: "covered"`); with `relevel_existing` it is also moved to
     `difficulty_level` and given the disambiguation if it had none
     (`status: "moved"`). Otherwise one lemma is written, with
     `sense_prominence` `rare`.
-  - Response `data`: `{word, status, guid, disambiguation, definition_text, pos_type, pos_subtype, translations, missing_languages}`.
+  - Response `data`: `{word, status, guid, disambiguation, definition_text, pos_type, pos_subtype, translations, missing_languages, low_confidence}`.
     `status` is one of `created`, `covered`, `moved`, `already_exists`.
+    The model rates each translation; one under 0.85 is not stored, and comes
+    back in `low_confidence` as `{lang: {translation, confidence}}` as well as
+    in `missing_languages`.
 
 - `POST /api/v1/lemma/<main_guid>/merge-synonym/<synonym_guid>`
   - Merge the synonym lemma into the main lemma. Requires the same `pos_type` and at least 3 matching non-empty translations after normalization.

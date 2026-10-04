@@ -11,6 +11,7 @@ Fill in every other field whatever you return for covered_by.
 For the sense, provide this information:
 
 - A definition: one plain sentence a language learner can understand. Make the field clear from the definition, so it cannot be read as the everyday meaning.
+  - Write the definition as the part of speech you are given: a noun as a thing or an event ("a shot that...", "the act of..."), a verb beginning with "to". A field often uses one word as both noun and verb ("a dunk", "to dunk"); describe only the given part of speech, and give the definition, examples and translations all for it.
 
 - Example sentences
   - These should use the exact word provided, in the sense of this field.
@@ -22,6 +23,9 @@ For translations:
 - Give the term that players, commentators and rulebooks of that language actually use for it
 - Many languages use an English term of a sport unchanged or respelled ("offside", "penalty"). When that is the usual term, give the loanword as that language writes it rather than inventing a native phrase
 - When the field is little known where a language is spoken, still give the most usual way to say the term there - a loanword or a short descriptive phrase. Every translation must be a non-empty string
+- Give each translation its own confidence (0-1): how sure you are that it is the term the field actually uses in that language
+  - When you are not sure of the established term - you are choosing between candidates, or the word for a neighboring term might be the one you remember - still give your best answer, with a low confidence
+  - A loanword or a plain descriptive phrase you are sure is the usual way to say it deserves a high confidence
 - For Chinese:
   - Use Simplified Chinese characters (简体字) and standard Mandarin
   - Use the established term of the field where one exists

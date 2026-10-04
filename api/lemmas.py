@@ -361,6 +361,7 @@ def add_sense(
     abbreviation: Optional[str] = None,
     relevel_existing: bool = False,
     pos_subtype: Optional[str] = None,
+    pos_type: Optional[str] = None,
     timeout: float = LLM_TIMEOUT_SECONDS,
 ) -> Any:
     """Add the sense an English word has in one field -- "check" in chess.
@@ -379,6 +380,9 @@ def add_sense(
     moved to ``difficulty_level`` and given the disambiguation, rather than only
     tagged. ``pos_subtype`` fixes the subtype of a new lemma, for a closed set
     whose members must share one; the model is then not asked for it.
+    ``pos_type`` fixes only the part of speech, for a headword the field uses
+    as both noun and verb ("dunk"); the model still chooses the subtype, and
+    only senses of that part of speech can match.
 
     ``data["status"]`` is ``created``, ``covered`` (matched and tagged),
     ``moved`` (matched and moved) or ``already_exists`` (matched without a call).
@@ -400,6 +404,8 @@ def add_sense(
         payload["abbreviation"] = abbreviation
     if pos_subtype:
         payload["pos_subtype"] = pos_subtype
+    if pos_type:
+        payload["pos_type"] = pos_type
     return post_json(f"{API_V1_PREFIX}/senses/add", payload, timeout=timeout)
 
 
