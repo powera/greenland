@@ -47,3 +47,6 @@
 {"guid": "N25_060", "forms": [{"grammatical_form": "noun/en_singular", "text": "season", "is_base_form": true, "ipa": "/ˈsiːzən/", "phonetic": "SEE-zuhn"}]}
 {"guid": "N25_061", "forms": [{"grammatical_form": "noun/en_singular", "text": "half", "is_base_form": true, "ipa": "/hæf/", "phonetic": "HAF"}]}
 {"guid": "N25_062", "forms": [{"grammatical_form": "noun/en_singular", "text": "period", "is_base_form": true, "ipa": "/ˈpɪriəd/", "phonetic": "PEER-ee-ud"}]}
+{"guid": "N25_063", "forms": [{"grammatical_form": "noun/en_singular", "text": "opening", "is_base_form": true, "ipa": "/ˈoʊpənɪŋ/", "phonetic": "OH-puh-ning"}]}
+{"guid": "N25_064", "forms": [{"grammatical_form": "noun/en_singular", "text": "middlegame", "is_base_form": true, "ipa": "/ˈmɪdəlˌɡeɪm/", "phonetic": "MID-ul-game"}]}
+{"guid": "N25_065", "forms": [{"grammatical_form": "noun/en_singular", "text": "stoppage time", "is_base_form": true, "ipa": "/ˈstɑpɪdʒ taɪm/", "phonetic": "STOP-ij time"}]}

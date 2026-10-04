@@ -98,3 +98,7 @@
 {"guid": "N07_119", "forms": [{"grammatical_form": "noun/en_singular", "text": "platform", "is_base_form": true, "ipa": "/ˈplæt.fɔrm/", "phonetic": "PLAT-form"}]}
 {"guid": "N07_120", "forms": [{"grammatical_form": "noun/en_singular", "text": "arena", "is_base_form": true, "ipa": "/əˈriːnə/", "phonetic": "uh-REE-nuh"}]}
 {"guid": "N07_121", "forms": [{"grammatical_form": "noun/en_singular", "text": "podium", "is_base_form": true, "ipa": "/ˈpoʊdiəm/", "phonetic": "POH-dee-um"}]}
+{"guid": "N07_122", "forms": [{"grammatical_form": "noun/en_singular", "text": "boards", "is_base_form": true, "ipa": "/bɔrdz/", "phonetic": "BORDZ"}]}
+{"guid": "N07_123", "forms": [{"grammatical_form": "noun/en_singular", "text": "velodrome", "is_base_form": true, "ipa": "/ˈvɛləˌdroʊm/", "phonetic": "VEL-uh-drohm"}]}
+{"guid": "N07_124", "forms": [{"grammatical_form": "noun/en_singular", "text": "ski lift", "is_base_form": true, "ipa": "/ˈskiː ˌlɪft/", "phonetic": "SKEE-LIFT"}]}
+{"guid": "N07_125", "forms": [{"grammatical_form": "noun/en_singular", "text": "dojo", "is_base_form": true, "ipa": "/ˈdoʊdʒoʊ/", "phonetic": "DOH-joh"}]}

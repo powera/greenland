@@ -83,3 +83,64 @@
 {"guid": "N08_161", "forms": [{"grammatical_form": "noun/en_singular", "text": "goalpost", "is_base_form": true, "ipa": "/ˈɡoʊlˌpoʊst/", "phonetic": "GOHL-post"}]}
 {"guid": "N08_162", "forms": [{"grammatical_form": "noun/en_singular", "text": "crossbar", "is_base_form": true, "ipa": "/ˈkrɔsˌbɑr/", "phonetic": "KRAWS-bar"}]}
 {"guid": "N08_163", "forms": [{"grammatical_form": "noun/en_singular", "text": "net", "is_base_form": true, "ipa": "/nɛt/", "phonetic": "NET"}]}
+{"guid": "N08_164", "forms": [{"grammatical_form": "noun/en_singular", "text": "board", "is_base_form": true, "ipa": "/bɔrd/", "phonetic": "BORD"}]}
+{"guid": "N08_165", "forms": [{"grammatical_form": "noun/en_singular", "text": "piece", "is_base_form": true, "ipa": "/piːs/", "phonetic": "PEES"}]}
+{"guid": "N08_166", "forms": [{"grammatical_form": "noun/en_singular", "text": "counter", "is_base_form": true, "ipa": "/ˈkaʊntər/", "phonetic": "KOWN-ter"}]}
+{"guid": "N08_167", "forms": [{"grammatical_form": "noun/en_singular", "text": "token", "is_base_form": true, "ipa": "/ˈtoʊkən/", "phonetic": "TOH-kuhn"}]}
+{"guid": "N08_168", "forms": [{"grammatical_form": "noun/en_singular", "text": "tile", "is_base_form": true, "ipa": "/taɪl/", "phonetic": "TYLE"}]}
+{"guid": "N08_169", "forms": [{"grammatical_form": "noun/en_singular", "text": "domino", "is_base_form": true, "ipa": "/ˈdɑmənoʊ/", "phonetic": "DOM-uh-noh"}]}
+{"guid": "N08_170", "forms": [{"grammatical_form": "noun/en_singular", "text": "die", "is_base_form": true, "ipa": "/daɪ/", "phonetic": "DYE"}]}
+{"guid": "N08_171", "forms": [{"grammatical_form": "noun/en_singular", "text": "dice", "is_base_form": true, "ipa": "/daɪs/", "phonetic": "DICE"}]}
+{"guid": "N08_172", "forms": [{"grammatical_form": "noun/en_singular", "text": "chessboard", "is_base_form": true, "ipa": "/ˈtʃɛsˌbɔrd/", "phonetic": "CHESS-board"}]}
+{"guid": "N08_173", "forms": [{"grammatical_form": "noun/en_singular", "text": "king", "is_base_form": true, "ipa": "/kɪŋ/", "phonetic": "KING"}]}
+{"guid": "N08_174", "forms": [{"grammatical_form": "noun/en_singular", "text": "rook", "is_base_form": true, "ipa": "/rʊk/", "phonetic": "ROOK"}]}
+{"guid": "N08_175", "forms": [{"grammatical_form": "noun/en_singular", "text": "bishop", "is_base_form": true, "ipa": "/ˈbɪʃəp/", "phonetic": "BISH-up"}]}
+{"guid": "N08_176", "forms": [{"grammatical_form": "noun/en_singular", "text": "knight", "is_base_form": true, "ipa": "/naɪt/", "phonetic": "NYTE"}]}
+{"guid": "N08_177", "forms": [{"grammatical_form": "noun/en_singular", "text": "pawn", "is_base_form": true, "ipa": "/pɔːn/", "phonetic": "PAWN"}]}
+{"guid": "N08_178", "forms": [{"grammatical_form": "noun/en_singular", "text": "hoop", "is_base_form": true, "ipa": "/hup/", "phonetic": "HOOP"}]}
+{"guid": "N08_179", "forms": [{"grammatical_form": "noun/en_singular", "text": "rim", "is_base_form": true, "ipa": "/rɪm/", "phonetic": "RIM"}]}
+{"guid": "N08_180", "forms": [{"grammatical_form": "noun/en_singular", "text": "backboard", "is_base_form": true, "ipa": "/ˈbækˌbɔrd/", "phonetic": "BAK-bord"}]}
+{"guid": "N08_181", "forms": [{"grammatical_form": "noun/en_singular", "text": "ace", "is_base_form": true, "ipa": "/eɪs/", "phonetic": "AYS"}]}
+{"guid": "N08_182", "forms": [{"grammatical_form": "noun/en_singular", "text": "king", "is_base_form": true, "ipa": "/kɪŋ/", "phonetic": "KING"}]}
+{"guid": "N08_183", "forms": [{"grammatical_form": "noun/en_singular", "text": "jack", "is_base_form": true, "ipa": "/dʒæk/", "phonetic": "JAK"}]}
+{"guid": "N08_184", "forms": [{"grammatical_form": "noun/en_singular", "text": "joker", "is_base_form": true, "ipa": "/ˈdʒoʊkər/", "phonetic": "JOH-kuhr"}]}
+{"guid": "N08_185", "forms": [{"grammatical_form": "noun/en_singular", "text": "face card", "is_base_form": true, "ipa": "/ˈfeɪs kɑrd/", "phonetic": "FAYS-kard"}]}
+{"guid": "N08_186", "forms": [{"grammatical_form": "noun/en_singular", "text": "deuce", "is_base_form": true, "ipa": "/duːs/", "phonetic": "DOOS"}]}
+{"guid": "N08_187", "forms": [{"grammatical_form": "noun/en_singular", "text": "wild card", "is_base_form": true, "ipa": "/ˈwaɪld ˌkɑrd/", "phonetic": "WYL-KARD"}]}
+{"guid": "N08_188", "forms": [{"grammatical_form": "noun/en_singular", "text": "wicket", "is_base_form": true, "ipa": "/ˈwɪkɪt/", "phonetic": "WIK-it"}]}
+{"guid": "N08_189", "forms": [{"grammatical_form": "noun/en_singular", "text": "stumps", "is_base_form": true, "ipa": "/stʌmps/", "phonetic": "STUMPS"}]}
+{"guid": "N08_190", "forms": [{"grammatical_form": "noun/en_singular", "text": "bail", "is_base_form": true, "ipa": "/beɪl/", "phonetic": "BAYL"}]}
+{"guid": "N08_191", "forms": [{"grammatical_form": "noun/en_singular", "text": "checker", "is_base_form": true, "ipa": "/ˈtʃɛkər/", "phonetic": "CHEK-er"}]}
+{"guid": "N08_192", "forms": [{"grammatical_form": "noun/en_singular", "text": "checkerboard", "is_base_form": true, "ipa": "/ˈtʃɛkərˌbɔrd/", "phonetic": "CHEK-er-bord"}]}
+{"guid": "N08_193", "forms": [{"grammatical_form": "noun/en_singular", "text": "man", "is_base_form": true, "ipa": "/mæn/", "phonetic": "MAN"}]}
+{"guid": "N08_194", "forms": [{"grammatical_form": "noun/en_singular", "text": "king", "is_base_form": true, "ipa": "/kɪŋ/", "phonetic": "KING"}]}
+{"guid": "N08_195", "forms": [{"grammatical_form": "noun/en_singular", "text": "puck", "is_base_form": true, "ipa": "/pʌk/", "phonetic": "PUHK"}]}
+{"guid": "N08_196", "forms": [{"grammatical_form": "noun/en_singular", "text": "flagstick", "is_base_form": true, "ipa": "/ˈflæɡˌstɪk/", "phonetic": "FLAG-stik"}]}
+{"guid": "N08_197", "forms": [{"grammatical_form": "noun/en_singular", "text": "goban", "is_base_form": true, "ipa": "/ˈɡoʊˌbɑn/", "phonetic": "GOH-bahn"}]}
+{"guid": "N08_198", "forms": [{"grammatical_form": "noun/en_singular", "text": "stone", "is_base_form": true, "ipa": "/stoʊn/", "phonetic": "STOHN"}]}
+{"guid": "N08_199", "forms": [{"grammatical_form": "noun/en_singular", "text": "handicap", "is_base_form": true, "ipa": "/ˈhændiˌkæp/", "phonetic": "HAN-dee-kap"}]}
+{"guid": "N08_200", "forms": [{"grammatical_form": "noun/en_singular", "text": "trump", "is_base_form": true, "ipa": "/trʌmp/", "phonetic": "TRUMP"}]}
+{"guid": "N08_201", "forms": [{"grammatical_form": "noun/en_singular", "text": "hurdle", "is_base_form": true, "ipa": "/ˈhɝːdəl/", "phonetic": "HUR-dul"}]}
+{"guid": "N08_202", "forms": [{"grammatical_form": "noun/en_singular", "text": "baton", "is_base_form": true, "ipa": "/bəˈtɑn/", "phonetic": "buh-TAHN"}]}
+{"guid": "N08_203", "forms": [{"grammatical_form": "noun/en_singular", "text": "starting block", "is_base_form": true, "ipa": "/ˈstɑrtɪŋ blɑk/", "phonetic": "STAR-ting blok"}]}
+{"guid": "N08_204", "forms": [{"grammatical_form": "noun/en_singular", "text": "discus", "is_base_form": true, "ipa": "/ˈdɪskəs/", "phonetic": "DIS-kuhs"}]}
+{"guid": "N08_205", "forms": [{"grammatical_form": "noun/en_singular", "text": "kickboard", "is_base_form": true, "ipa": "/ˈkɪkˌbɔrd/", "phonetic": "KIK-board"}]}
+{"guid": "N08_206", "forms": [{"grammatical_form": "noun/en_singular", "text": "platform", "is_base_form": true, "ipa": "/ˈplætˌfɔrm/", "phonetic": "PLAT-form"}]}
+{"guid": "N08_207", "forms": [{"grammatical_form": "noun/en_singular", "text": "general", "is_base_form": true, "ipa": "/ˈdʒɛnərəl/", "phonetic": "JEN-uh-ruhl"}]}
+{"guid": "N08_208", "forms": [{"grammatical_form": "noun/en_singular", "text": "advisor", "is_base_form": true, "ipa": "/ədˈvaɪzər/", "phonetic": "ad-VY-zer"}]}
+{"guid": "N08_209", "forms": [{"grammatical_form": "noun/en_singular", "text": "elephant", "is_base_form": true, "ipa": "/ˈɛləfənt/", "phonetic": "EL-uh-funt"}]}
+{"guid": "N08_210", "forms": [{"grammatical_form": "noun/en_singular", "text": "horse", "is_base_form": true, "ipa": "/hɔrs/", "phonetic": "HORS"}]}
+{"guid": "N08_211", "forms": [{"grammatical_form": "noun/en_singular", "text": "chariot", "is_base_form": true, "ipa": "/ˈtʃɛriət/", "phonetic": "CHAIR-ee-ut"}]}
+{"guid": "N08_212", "forms": [{"grammatical_form": "noun/en_singular", "text": "soldier", "is_base_form": true, "ipa": "/ˈsoʊldʒər/", "phonetic": "SOHL-jer"}]}
+{"guid": "N08_213", "forms": [{"grammatical_form": "noun/en_singular", "text": "derailleur", "is_base_form": true, "ipa": "/ˌdɪˈreɪlər/", "phonetic": "duh-RAY-ler"}]}
+{"guid": "N08_214", "forms": [{"grammatical_form": "noun/en_singular", "text": "antenna", "is_base_form": true, "ipa": "/ænˈtɛnə/", "phonetic": "an-TEN-uh"}]}
+{"guid": "N08_215", "forms": [{"grammatical_form": "noun/en_singular", "text": "kicker", "is_base_form": true, "ipa": "/ˈkɪkər/", "phonetic": "KIK-er"}]}
+{"guid": "N08_216", "forms": [{"grammatical_form": "noun/en_singular", "text": "chip", "is_base_form": true, "ipa": "/tʃɪp/", "phonetic": "CHIP"}]}
+{"guid": "N08_217", "forms": [{"grammatical_form": "noun/en_singular", "text": "button", "is_base_form": true, "ipa": "/ˈbʌtən/", "phonetic": "BUH-tuhn"}]}
+{"guid": "N08_218", "forms": [{"grammatical_form": "noun/en_singular", "text": "gate", "is_base_form": true, "ipa": "/ɡeɪt/", "phonetic": "GAYT"}]}
+{"guid": "N08_219", "forms": [{"grammatical_form": "noun/en_singular", "text": "binding", "is_base_form": true, "ipa": "/ˈbaɪndɪŋ/", "phonetic": "BYN-ding"}]}
+{"guid": "N08_220", "forms": [{"grammatical_form": "noun/en_singular", "text": "honor tile", "is_base_form": true, "ipa": "/ˈɑnər taɪl/", "phonetic": "AH-nur TYL"}]}
+{"guid": "N08_221", "forms": [{"grammatical_form": "noun/en_singular", "text": "dragon", "is_base_form": true, "ipa": "/ˈdræɡən/", "phonetic": "DRAG-uhn"}]}
+{"guid": "N08_222", "forms": [{"grammatical_form": "noun/en_singular", "text": "flower", "is_base_form": true, "ipa": "/ˈflaʊər/", "phonetic": "FLOW-er"}]}
+{"guid": "N08_223", "forms": [{"grammatical_form": "noun/en_singular", "text": "tatami", "is_base_form": true, "ipa": "/təˈtɑːmi/", "phonetic": "tuh-TAH-mee"}]}
+{"guid": "N08_224", "forms": [{"grammatical_form": "noun/en_singular", "text": "doubling cube", "is_base_form": true, "ipa": "/ˈdʌbəlɪŋ kjuːb/", "phonetic": "DUH-buh-ling KYOOB"}]}

@@ -90,3 +90,7 @@
 {"guid": "N36_140", "forms": [{"grammatical_form": "noun/en_singular", "text": "umpire", "is_base_form": true, "ipa": "/ˈʌmˌpaɪr/", "phonetic": "UM-pyre"}]}
 {"guid": "N36_141", "forms": [{"grammatical_form": "noun/en_singular", "text": "linesman", "is_base_form": true, "ipa": "/ˈlaɪnzˌmæn/", "phonetic": "LINEZ-muhn"}]}
 {"guid": "N36_142", "forms": [{"grammatical_form": "noun/en_singular", "text": "line judge", "is_base_form": true, "ipa": "/ˈlaɪn ˌdʒʌdʒ/", "phonetic": "LINE-juhj"}]}
+{"guid": "N36_143", "forms": [{"grammatical_form": "noun/en_singular", "text": "caddie", "is_base_form": true, "ipa": "/ˈkædi/", "phonetic": "KAD-ee"}]}
+{"guid": "N36_144", "forms": [{"grammatical_form": "noun/en_singular", "text": "sensei", "is_base_form": true, "ipa": "/ˈsɛn.seɪ/", "phonetic": "sen-SAY"}]}
+{"guid": "N36_145", "forms": [{"grammatical_form": "noun/en_singular", "text": "assistant referee", "is_base_form": true, "ipa": "/əˈsɪstənt ˌrɛfəˈri/", "phonetic": "uh-SIS-tunt REF-uh-ree"}]}
+{"guid": "N36_146", "forms": [{"grammatical_form": "noun/en_singular", "text": "video assistant referee", "is_base_form": true, "ipa": "/ˈvɪdiˌoʊ əˈsɪstənt ˌrɛvəˈri/", "phonetic": "VID-ee-oh uh-SIS-tunt rev-uh-REE"}], "variants": [{"kind": "abbreviation", "key": "VAR", "forms": [{"grammatical_form": "noun/en_singular", "text": "VAR", "is_base_form": true}]}]}

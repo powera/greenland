@@ -151,3 +151,10 @@
 {"guid": "V01_153", "forms": [{"grammatical_form": "verb/en_infinitive", "text": "dribble", "is_base_form": true, "ipa": "/ˈdrɪbəl/", "phonetic": "DRIB-uhl"}]}
 {"guid": "V01_154", "forms": [{"grammatical_form": "verb/en_infinitive", "text": "serve", "is_base_form": true, "ipa": "/sɝv/", "phonetic": "SURV"}]}
 {"guid": "V01_155", "forms": [{"grammatical_form": "verb/en_infinitive", "text": "spar", "is_base_form": true, "ipa": "/spɑr/", "phonetic": "SPAR"}]}
+{"guid": "V01_156", "forms": [{"grammatical_form": "verb/en_infinitive", "text": "roll", "is_base_form": true, "ipa": "/roʊl/", "phonetic": "ROHL"}]}
+{"guid": "V01_157", "forms": [{"grammatical_form": "verb/en_infinitive", "text": "capture", "is_base_form": true, "ipa": "/ˈkæp.tʃɚ/", "phonetic": "KAP-cher"}]}
+{"guid": "V01_158", "forms": [{"grammatical_form": "verb/en_infinitive", "text": "resign", "is_base_form": true, "ipa": "/rɪˈzaɪn/", "phonetic": "ri-ZINE"}]}
+{"guid": "V01_159", "forms": [{"grammatical_form": "verb/en_infinitive", "text": "dunk", "is_base_form": true, "ipa": "/dʌŋk/", "phonetic": "DUNK"}]}
+{"guid": "V01_160", "forms": [{"grammatical_form": "verb/en_infinitive", "text": "shuffle", "is_base_form": true, "ipa": "/ˈʃʌfəl/", "phonetic": "SHUH-fuhl"}]}
+{"guid": "V01_161", "forms": [{"grammatical_form": "verb/en_infinitive", "text": "tee off", "is_base_form": true, "ipa": "/ˌti ˈɔf/", "phonetic": "TEE-OFF"}]}
+{"guid": "V01_162", "forms": [{"grammatical_form": "verb/en_infinitive", "text": "carve", "is_base_form": true, "ipa": "/kɑrv/", "phonetic": "KARV"}]}

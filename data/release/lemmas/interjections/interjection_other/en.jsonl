@@ -12,3 +12,4 @@
 {"guid": "I99_012", "forms": [{"grammatical_form": "interjection/base", "text": "ouch", "is_base_form": true}]}
 {"guid": "I99_013", "forms": [{"grammatical_form": "interjection/base", "text": "congratulations", "is_base_form": true}]}
 {"guid": "I99_014", "forms": [{"grammatical_form": "interjection/base", "text": "good-bye", "is_base_form": true, "ipa": "/ˌɡʊdˈbaɪ/", "phonetic": "good-BYE"}]}
+{"guid": "I99_015", "forms": [{"grammatical_form": "interjection/base", "text": "fore", "is_base_form": true, "ipa": "/fɔr/", "phonetic": "FOR"}]}

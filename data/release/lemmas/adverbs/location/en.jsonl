@@ -43,3 +43,5 @@
 {"guid": "D07_043", "forms": [{"grammatical_form": "adverb/en_positive", "text": "on-site", "is_base_form": true, "ipa": "/ˈɑnˌsaɪt/", "phonetic": "ON-site"}]}
 {"guid": "D07_044", "forms": [{"grammatical_form": "adverb/en_positive", "text": "on-screen", "is_base_form": true, "ipa": "/ˌɑnˈskrin/", "phonetic": "on-SCREEN"}]}
 {"guid": "D07_045", "forms": [{"grammatical_form": "adverb/en_positive", "text": "downstairs", "is_base_form": true, "ipa": "/ˌdaʊnˈstɛrz/", "phonetic": "DOWN-stairz"}]}
+{"guid": "D07_046", "forms": [{"grammatical_form": "adverb/en_positive", "text": "face up", "is_base_form": true, "ipa": "/ˌfeɪs ˈʌp/", "phonetic": "FAYS-UP"}]}
+{"guid": "D07_047", "forms": [{"grammatical_form": "adverb/en_positive", "text": "off-piste", "is_base_form": true, "ipa": "/ˌɔfˈpiːst/", "phonetic": "awf-PEEST"}]}

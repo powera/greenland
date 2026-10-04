@@ -37,3 +37,6 @@
 {"guid": "N40_050", "forms": [{"grammatical_form": "noun/en_singular", "text": "snowboard", "is_base_form": true, "ipa": "/ˈsnoʊˌbɔrd/", "phonetic": "SNOW-bord"}]}
 {"guid": "N40_051", "forms": [{"grammatical_form": "noun/en_singular", "text": "rocket", "is_base_form": true, "ipa": "/ˈrɑkɪt/", "phonetic": "ROK-it"}]}
 {"guid": "N40_052", "forms": [{"grammatical_form": "noun/en_singular", "text": "spaceship", "is_base_form": true, "ipa": "/ˈspeɪsˌʃɪp/", "phonetic": "SPACE-ship"}]}
+{"guid": "N40_053", "forms": [{"grammatical_form": "noun/en_singular", "text": "broom wagon", "is_base_form": true, "ipa": "/ˈbruːm ˌwæɡən/", "phonetic": "BROOM WAG-uhn"}]}
+{"guid": "N40_054", "forms": [{"grammatical_form": "noun/en_singular", "text": "chairlift", "is_base_form": true, "ipa": "/ˈtʃɛrˌlɪft/", "phonetic": "CHAIR-lift"}]}
+{"guid": "N40_055", "forms": [{"grammatical_form": "noun/en_singular", "text": "gondola", "is_base_form": true, "ipa": "/ˈɡɑːn.də.lə/", "phonetic": "gon-DOH-luh"}]}

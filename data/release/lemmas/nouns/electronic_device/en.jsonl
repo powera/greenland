@@ -32,3 +32,5 @@
 {"guid": "N57_049", "forms": [{"grammatical_form": "noun/en_singular", "text": "keyboard", "is_base_form": true, "ipa": "/ˈkiˌbɔrd/", "phonetic": "KEE-bord"}]}
 {"guid": "N57_050", "forms": [{"grammatical_form": "noun/en_singular", "text": "DVD", "is_base_form": true, "ipa": "/ˌdiː viː ˈdiː/", "phonetic": "DEE-vee-DEE"}]}
 {"guid": "N57_051", "forms": [{"grammatical_form": "noun/en_singular", "text": "scoreboard", "is_base_form": true, "ipa": "/ˈskɔrˌbɔrd/", "phonetic": "SKOR-bord"}]}
+{"guid": "N57_052", "forms": [{"grammatical_form": "noun/en_singular", "text": "shot clock", "is_base_form": true, "ipa": "/ˈʃɑt klɑk/", "phonetic": "SHOT-klok"}]}
+{"guid": "N57_053", "forms": [{"grammatical_form": "noun/en_singular", "text": "touchpad", "is_base_form": true, "ipa": "/ˈtʌtʃˌpæd/", "phonetic": "TUCH-pad"}]}

@@ -77,3 +77,23 @@
 {"guid": "N22_091", "forms": [{"grammatical_form": "noun/en_singular", "text": "cupful", "is_base_form": true, "ipa": "/ˈkʌpfʊl/", "phonetic": "KUP-fool"}]}
 {"guid": "N22_092", "forms": [{"grammatical_form": "noun/en_singular", "text": "score", "is_base_form": true, "ipa": "/skɔr/", "phonetic": "SKOR"}]}
 {"guid": "N22_093", "forms": [{"grammatical_form": "noun/en_singular", "text": "demand", "is_base_form": true, "ipa": "/dɪˈmænd/", "phonetic": "dih-MAND"}]}
+{"guid": "N22_094", "forms": [{"grammatical_form": "noun/en_singular", "text": "tempo", "is_base_form": true, "ipa": "/ˈtɛmpoʊ/", "phonetic": "TEM-poh"}]}
+{"guid": "N22_095", "forms": [{"grammatical_form": "noun/en_singular", "text": "time control", "is_base_form": true, "ipa": "/ˈtaɪm kənˌtroʊl/", "phonetic": "TIME-kuhn-TROHL"}]}
+{"guid": "N22_096", "forms": [{"grammatical_form": "noun/en_singular", "text": "love", "is_base_form": true, "ipa": "/lʌv/", "phonetic": "LUHV"}]}
+{"guid": "N22_097", "forms": [{"grammatical_form": "noun/en_singular", "text": "count", "is_base_form": true, "ipa": "/kaʊnt/", "phonetic": "KOWNT"}]}
+{"guid": "N22_098", "forms": [{"grammatical_form": "noun/en_singular", "text": "batting average", "is_base_form": true, "ipa": "/ˈbætɪŋ ˌævərɪdʒ/", "phonetic": "BAT-ing AV-er-ij"}]}
+{"guid": "N22_099", "forms": [{"grammatical_form": "noun/en_singular", "text": "run", "is_base_form": true, "ipa": "/rʌn/", "phonetic": "RUN"}]}
+{"guid": "N22_100", "forms": [{"grammatical_form": "noun/en_singular", "text": "par", "is_base_form": true, "ipa": "/pɑr/", "phonetic": "PAR"}]}
+{"guid": "N22_101", "forms": [{"grammatical_form": "noun/en_singular", "text": "handicap", "is_base_form": true, "ipa": "/ˈhændiˌkæp/", "phonetic": "HAN-dee-kap"}]}
+{"guid": "N22_102", "forms": [{"grammatical_form": "noun/en_singular", "text": "komi", "is_base_form": true, "ipa": "/ˈkoʊmi/", "phonetic": "KOH-mee"}]}
+{"guid": "N22_103", "forms": [{"grammatical_form": "noun/en_singular", "text": "heavyweight", "is_base_form": true, "ipa": "/ˈhɛviˌweɪt/", "phonetic": "HEV-ee-wayt"}]}
+{"guid": "N22_104", "forms": [{"grammatical_form": "noun/en_singular", "text": "middleweight", "is_base_form": true, "ipa": "/ˈmɪdəlˌweɪt/", "phonetic": "MID-uhl-wayt"}]}
+{"guid": "N22_105", "forms": [{"grammatical_form": "noun/en_singular", "text": "welterweight", "is_base_form": true, "ipa": "/ˈwɛltərˌweɪt/", "phonetic": "WEL-ter-wayt"}]}
+{"guid": "N22_106", "forms": [{"grammatical_form": "noun/en_singular", "text": "featherweight", "is_base_form": true, "ipa": "/ˈfɛðɚˌweɪt/", "phonetic": "FEH-thur-wayt"}]}
+{"guid": "N22_107", "forms": [{"grammatical_form": "noun/en_singular", "text": "bantamweight", "is_base_form": true, "ipa": "/ˈbæn.təmˌweɪt/", "phonetic": "BAN-tuhm-wayt"}]}
+{"guid": "N22_108", "forms": [{"grammatical_form": "noun/en_singular", "text": "flyweight", "is_base_form": true, "ipa": "/ˈflaɪˌweɪt/", "phonetic": "FLY-wayt"}]}
+{"guid": "N22_109", "forms": [{"grammatical_form": "noun/en_singular", "text": "lightweight", "is_base_form": true, "ipa": "/ˈlaɪtˌweɪt/", "phonetic": "LYTE-wayt"}]}
+{"guid": "N22_110", "forms": [{"grammatical_form": "noun/en_singular", "text": "cadence", "is_base_form": true, "ipa": "/ˈkeɪdəns/", "phonetic": "KAY-dens"}]}
+{"guid": "N22_111", "forms": [{"grammatical_form": "noun/en_singular", "text": "dan", "is_base_form": true, "ipa": "/dɑn/", "phonetic": "DAN"}]}
+{"guid": "N22_112", "forms": [{"grammatical_form": "noun/en_singular", "text": "pip", "is_base_form": true, "ipa": "/pɪp/", "phonetic": "PIP"}]}
+{"guid": "N22_113", "forms": [{"grammatical_form": "noun/en_singular", "text": "kyu", "is_base_form": true, "ipa": "/kjuː/", "phonetic": "KYOO"}]}

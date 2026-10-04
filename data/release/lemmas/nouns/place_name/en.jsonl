@@ -20,3 +20,18 @@
 {"guid": "N30_060", "forms": [{"grammatical_form": "noun/en_singular", "text": "court", "is_base_form": true, "ipa": "/kɔrt/", "phonetic": "KORT"}]}
 {"guid": "N30_061", "forms": [{"grammatical_form": "noun/en_singular", "text": "rink", "is_base_form": true, "ipa": "/rɪŋk/", "phonetic": "RINK"}]}
 {"guid": "N30_062", "forms": [{"grammatical_form": "noun/en_singular", "text": "lane", "is_base_form": true, "ipa": "/leɪn/", "phonetic": "LAYN"}]}
+{"guid": "N30_063", "forms": [{"grammatical_form": "noun/en_singular", "text": "square", "is_base_form": true, "ipa": "/skwɛr/", "phonetic": "SKWAIR"}]}
+{"guid": "N30_064", "forms": [{"grammatical_form": "noun/en_singular", "text": "clay court", "is_base_form": true, "ipa": "/ˈkleɪ ˌkɔrt/", "phonetic": "KLAY KORT"}]}
+{"guid": "N30_065", "forms": [{"grammatical_form": "noun/en_singular", "text": "grass court", "is_base_form": true, "ipa": "/ˈɡræs kɔrt/", "phonetic": "GRASS KORT"}]}
+{"guid": "N30_066", "forms": [{"grammatical_form": "noun/en_singular", "text": "hard court", "is_base_form": true, "ipa": "/ˈhɑrd ˌkɔrt/", "phonetic": "HARD KORT"}]}
+{"guid": "N30_067", "forms": [{"grammatical_form": "noun/en_singular", "text": "diamond", "is_base_form": true, "ipa": "/ˈdaɪmənd/", "phonetic": "DYE-mund"}]}
+{"guid": "N30_068", "forms": [{"grammatical_form": "noun/en_singular", "text": "dugout", "is_base_form": true, "ipa": "/ˈdʌɡˌaʊt/", "phonetic": "DUHG-out"}]}
+{"guid": "N30_069", "forms": [{"grammatical_form": "noun/en_singular", "text": "bullpen", "is_base_form": true, "ipa": "/ˈbʊlˌpɛn/", "phonetic": "BOOL-pen"}]}
+{"guid": "N30_070", "forms": [{"grammatical_form": "noun/en_singular", "text": "gridiron", "is_base_form": true, "ipa": "/ˈɡrɪdˌaɪərn/", "phonetic": "GRID-eye-ern"}]}
+{"guid": "N30_071", "forms": [{"grammatical_form": "noun/en_singular", "text": "links", "is_base_form": true, "ipa": "/lɪŋks/", "phonetic": "LINKS"}]}
+{"guid": "N30_072", "forms": [{"grammatical_form": "noun/en_singular", "text": "touch", "is_base_form": true, "ipa": "/tʌtʃ/", "phonetic": "TUCH"}]}
+{"guid": "N30_073", "forms": [{"grammatical_form": "noun/en_singular", "text": "piste", "is_base_form": true, "ipa": "/piːst/", "phonetic": "PEEST"}]}
+{"guid": "N30_074", "forms": [{"grammatical_form": "noun/en_singular", "text": "bunny slope", "is_base_form": true, "ipa": "/ˈbʌni sloʊp/", "phonetic": "BUN-ee SLOHP"}]}
+{"guid": "N30_075", "forms": [{"grammatical_form": "noun/en_singular", "text": "halfpipe", "is_base_form": true, "ipa": "/ˈhæfˌpaɪp/", "phonetic": "HAF-pype"}]}
+{"guid": "N30_076", "forms": [{"grammatical_form": "noun/en_singular", "text": "slopestyle", "is_base_form": true, "ipa": "/ˈsloʊpˌstaɪl/", "phonetic": "SLOHP-style"}]}
+{"guid": "N30_077", "forms": [{"grammatical_form": "noun/en_singular", "text": "kiss and cry", "is_base_form": true, "ipa": "/ˌkɪs ən ˈkraɪ/", "phonetic": "KIS-ən-KRY"}]}
