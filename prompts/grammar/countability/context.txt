@@ -2,6 +2,6 @@ Classify how the supplied noun sense is used grammatically in English. Countabil
 
 - countable: this sense normally combines directly with a numeral or an indefinite article, as in "one book" and "two books".
 - uncountable: this sense is normally used as a mass noun; direct numeral use needs a unit, portion, kind, or changed sense, as with "some furniture" versus "two pieces of furniture".
-- both: ordinary uses of this same sense include count and mass constructions, as with "coffee" for a drink and for a serving.
+- both: this specific sense genuinely has ordinary count and mass constructions without changing the referent or switching to a separately represented sense. Do not use both merely because the headword has another sense elsewhere.
 
-Judge the supplied sense and its ordinary usage. Do not infer countability merely from whether physical instances exist: furniture has pieces but English "furniture" is uncountable. Do not infer whether a noun has singular and plural forms; exceptional number paradigms belong to number_type. Record the usual classification explicitly, including countable.
+Judge the supplied sense and its ordinary usage. For example, chicken meaning the animal is countable (one chicken, two chickens), while chicken meaning the meat is uncountable; these are different lemmas, so neither is both on that basis. Do not infer countability merely from whether physical instances exist: furniture has pieces but English "furniture" is uncountable. Do not infer whether a noun has singular and plural forms; exceptional number paradigms belong to number_type. Record the usual classification explicitly, including countable.

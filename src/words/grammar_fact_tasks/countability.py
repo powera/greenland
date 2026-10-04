@@ -47,6 +47,8 @@ def generate_countability(
     prompt_text = prompt_template.format(
         english_word=lemma.lemma_text,
         pos_type=lemma.pos_type,
+        disambiguation=lemma.disambiguation or "N/A",
+        pos_subtype=lemma.pos_subtype or "N/A",
         definition=lemma.definition_text or "N/A",
     )
 
