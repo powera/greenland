@@ -86,6 +86,7 @@ SUBTYPE_DISPLAY = {
     "change": "变化",
     "directional_movement": "方向性移动",
     "manner_movement": "移动方式",
+    "rule_defined_action": "规则规定的行为",
     # Adjective subtypes
     "size": "大小",
     "color": "颜色",

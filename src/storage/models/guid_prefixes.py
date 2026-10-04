@@ -571,6 +571,18 @@ SUBTYPE_DEFS: Dict[str, Dict[str, SubtypeDef]] = {
             examples=["walk", "run", "swim", "fly", "crawl"],
             group="Movement",
         ),
+        "rule_defined_action": SubtypeDef(
+            prefix="V14",
+            description="Actions or concessions defined by the rules of a game or procedure",
+            examples=["castle", "fold", "call", "forfeit", "resign"],
+            comment=(
+                "Use for a verb sense whose named action depends on formal rules. "
+                "Ordinary physical actions such as kick remain physical_action; "
+                "the corresponding moves, outcomes and violations as nouns belong "
+                "under rule_defined_event."
+            ),
+            group="Rule-Defined Actions",
+        ),
         "verb_other": SubtypeDef(prefix="V99", member_name="OTHER"),
     },
     "adjective": {
