@@ -13,3 +13,68 @@
 {"guid": "N63_013", "forms": [{"grammatical_form": "noun/en_singular", "text": "seed", "is_base_form": true, "ipa": "/siːd/", "phonetic": "SEED"}]}
 {"guid": "N63_014", "forms": [{"grammatical_form": "noun/en_singular", "text": "wild card", "is_base_form": true, "ipa": "/ˈwaɪld ˌkɑrd/", "phonetic": "WYLD-kard"}]}
 {"guid": "N63_015", "forms": [{"grammatical_form": "noun/en_singular", "text": "server", "is_base_form": true, "ipa": "/ˈsɝvər/", "phonetic": "SUR-ver"}]}
+{"guid": "N63_016", "forms": [{"grammatical_form": "noun/en_singular", "text": "grandmaster", "is_base_form": true, "ipa": "/ˈɡrændˌmæstər/", "phonetic": "GRAND-mas-ter"}]}
+{"guid": "N63_017", "forms": [{"grammatical_form": "noun/en_singular", "text": "point guard", "is_base_form": true, "ipa": "/ˈpɔɪnt ˌɡɑrd/", "phonetic": "POINT-gard"}]}
+{"guid": "N63_018", "forms": [{"grammatical_form": "noun/en_singular", "text": "shooting guard", "is_base_form": true, "ipa": "/ˈʃuːtɪŋ ɡɑrd/", "phonetic": "SHOO-ting gard"}]}
+{"guid": "N63_019", "forms": [{"grammatical_form": "noun/en_singular", "text": "center", "is_base_form": true, "ipa": "/ˈsɛntər/", "phonetic": "SEN-ter"}]}
+{"guid": "N63_020", "forms": [{"grammatical_form": "noun/en_singular", "text": "power forward", "is_base_form": true, "ipa": "/ˈpaʊər ˈfɔrwərd/", "phonetic": "POW-er FOR-ward"}]}
+{"guid": "N63_021", "forms": [{"grammatical_form": "noun/en_singular", "text": "small forward", "is_base_form": true, "ipa": "/ˌsmɔl ˈfɔrwərd/", "phonetic": "SMAWL FOR-werd"}]}
+{"guid": "N63_022", "forms": [{"grammatical_form": "noun/en_singular", "text": "ball boy", "is_base_form": true, "ipa": "/ˈbɔl ˌbɔɪ/", "phonetic": "BAWL-boy"}]}
+{"guid": "N63_023", "forms": [{"grammatical_form": "noun/en_singular", "text": "ball girl", "is_base_form": true, "ipa": "/ˈbɔl ˌɡɝl/", "phonetic": "BAWL-gurl"}]}
+{"guid": "N63_024", "forms": [{"grammatical_form": "noun/en_singular", "text": "pitcher", "is_base_form": true, "ipa": "/ˈpɪtʃər/", "phonetic": "PITCH-er"}]}
+{"guid": "N63_025", "forms": [{"grammatical_form": "noun/en_singular", "text": "catcher", "is_base_form": true, "ipa": "/ˈkætʃər/", "phonetic": "KATCH-er"}]}
+{"guid": "N63_026", "forms": [{"grammatical_form": "noun/en_singular", "text": "batter", "is_base_form": true, "ipa": "/ˈbætər/", "phonetic": "BAT-er"}]}
+{"guid": "N63_027", "forms": [{"grammatical_form": "noun/en_singular", "text": "shortstop", "is_base_form": true, "ipa": "/ˈʃɔrtˌstɑp/", "phonetic": "SHORT-stop"}]}
+{"guid": "N63_028", "forms": [{"grammatical_form": "noun/en_singular", "text": "infielder", "is_base_form": true, "ipa": "/ˈɪnˌfiːldər/", "phonetic": "IN-feeld-er"}]}
+{"guid": "N63_029", "forms": [{"grammatical_form": "noun/en_singular", "text": "outfielder", "is_base_form": true, "ipa": "/ˈaʊtˌfiːldər/", "phonetic": "OWT-feel-der"}]}
+{"guid": "N63_030", "forms": [{"grammatical_form": "noun/en_singular", "text": "pinch hitter", "is_base_form": true, "ipa": "/ˈpɪntʃ ˌhɪtər/", "phonetic": "PINCH HIT-er"}]}
+{"guid": "N63_031", "forms": [{"grammatical_form": "noun/en_singular", "text": "designated hitter", "is_base_form": true, "ipa": "/ˈdɛzɪɡˌneɪtɪd ˈhɪtər/", "phonetic": "DEZ-ig-nay-tid HIT-er"}]}
+{"guid": "N63_032", "forms": [{"grammatical_form": "noun/en_singular", "text": "dealer", "is_base_form": true, "ipa": "/ˈdiːlər/", "phonetic": "DEE-ler"}]}
+{"guid": "N63_033", "forms": [{"grammatical_form": "noun/en_singular", "text": "batsman", "is_base_form": true, "ipa": "/ˈbætsmən/", "phonetic": "BATZ-muhn"}]}
+{"guid": "N63_034", "forms": [{"grammatical_form": "noun/en_singular", "text": "bowler", "is_base_form": true, "ipa": "/ˈboʊlər/", "phonetic": "BOH-ler"}]}
+{"guid": "N63_035", "forms": [{"grammatical_form": "noun/en_singular", "text": "wicketkeeper", "is_base_form": true, "ipa": "/ˈwɪkɪtˌkiːpər/", "phonetic": "WIK-it-kee-per"}]}
+{"guid": "N63_036", "forms": [{"grammatical_form": "noun/en_singular", "text": "spinner", "is_base_form": true, "ipa": "/ˈspɪnər/", "phonetic": "SPIN-er"}]}
+{"guid": "N63_037", "forms": [{"grammatical_form": "noun/en_singular", "text": "seamer", "is_base_form": true, "ipa": "/ˈsiːmər/", "phonetic": "SEE-mer"}]}
+{"guid": "N63_038", "forms": [{"grammatical_form": "noun/en_singular", "text": "all-rounder", "is_base_form": true, "ipa": "/ˌɔlˈraʊndər/", "phonetic": "AWL-ROWN-der"}]}
+{"guid": "N63_039", "forms": [{"grammatical_form": "noun/en_singular", "text": "opener", "is_base_form": true, "ipa": "/ˈoʊpənər/", "phonetic": "OH-puh-ner"}]}
+{"guid": "N63_040", "forms": [{"grammatical_form": "noun/en_singular", "text": "tail-ender", "is_base_form": true, "ipa": "/ˈteɪlˌɛndər/", "phonetic": "TAYL-EN-der"}]}
+{"guid": "N63_041", "forms": [{"grammatical_form": "noun/en_singular", "text": "nightwatchman", "is_base_form": true, "ipa": "/ˈnaɪtˌwɑtʃmən/", "phonetic": "NYTE-WOCH-muhn"}]}
+{"guid": "N63_042", "forms": [{"grammatical_form": "noun/en_singular", "text": "quarterback", "is_base_form": true, "ipa": "/ˈkwɔrtərˌbæk/", "phonetic": "KWOR-ter-bak"}]}
+{"guid": "N63_043", "forms": [{"grammatical_form": "noun/en_singular", "text": "running back", "is_base_form": true, "ipa": "/ˈrʌnɪŋ bæk/", "phonetic": "RUN-ing bak"}]}
+{"guid": "N63_044", "forms": [{"grammatical_form": "noun/en_singular", "text": "wide receiver", "is_base_form": true, "ipa": "/ˌwaɪd rɪˈsiːvər/", "phonetic": "WYD-ri-SEE-ver"}]}
+{"guid": "N63_045", "forms": [{"grammatical_form": "noun/en_singular", "text": "tight end", "is_base_form": true, "ipa": "/ˈtaɪt ˌɛnd/", "phonetic": "TYTE-END"}]}
+{"guid": "N63_046", "forms": [{"grammatical_form": "noun/en_singular", "text": "lineman", "is_base_form": true, "ipa": "/ˈlaɪnˌmæn/", "phonetic": "LINE-muhn"}]}
+{"guid": "N63_047", "forms": [{"grammatical_form": "noun/en_singular", "text": "linebacker", "is_base_form": true, "ipa": "/ˈlaɪnˌbækər/", "phonetic": "LINE-bak-er"}]}
+{"guid": "N63_048", "forms": [{"grammatical_form": "noun/en_singular", "text": "cornerback", "is_base_form": true, "ipa": "/ˈkɔrnərˌbæk/", "phonetic": "KOR-ner-bak"}]}
+{"guid": "N63_049", "forms": [{"grammatical_form": "noun/en_singular", "text": "kicker", "is_base_form": true, "ipa": "/ˈkɪkər/", "phonetic": "KIK-er"}]}
+{"guid": "N63_050", "forms": [{"grammatical_form": "noun/en_singular", "text": "punter", "is_base_form": true, "ipa": "/ˈpʌntər/", "phonetic": "PUN-ter"}]}
+{"guid": "N63_051", "forms": [{"grammatical_form": "noun/en_singular", "text": "flying king", "is_base_form": true, "ipa": "/ˈflaɪɪŋ kɪŋ/", "phonetic": "FLY-ing KING"}]}
+{"guid": "N63_052", "forms": [{"grammatical_form": "noun/en_singular", "text": "goaltender", "is_base_form": true, "ipa": "/ˈɡoʊlˌtɛndər/", "phonetic": "GOHL-ten-der"}]}
+{"guid": "N63_053", "forms": [{"grammatical_form": "noun/en_singular", "text": "defenseman", "is_base_form": true, "ipa": "/dɪˈfɛns.mən/", "phonetic": "duh-FENS-muhn"}]}
+{"guid": "N63_054", "forms": [{"grammatical_form": "noun/en_singular", "text": "center", "is_base_form": true, "ipa": "/ˈsɛntər/", "phonetic": "SEN-ter"}]}
+{"guid": "N63_055", "forms": [{"grammatical_form": "noun/en_singular", "text": "enforcer", "is_base_form": true, "ipa": "/ɪnˈfɔrsər/", "phonetic": "en-FOR-ser"}]}
+{"guid": "N63_056", "forms": [{"grammatical_form": "noun/en_singular", "text": "scrum-half", "is_base_form": true, "ipa": "/ˈskrʌmˌhæf/", "phonetic": "SKRUM-haf"}]}
+{"guid": "N63_057", "forms": [{"grammatical_form": "noun/en_singular", "text": "fly-half", "is_base_form": true, "ipa": "/ˈflaɪˌhæf/", "phonetic": "FLY-haf"}]}
+{"guid": "N63_058", "forms": [{"grammatical_form": "noun/en_singular", "text": "hooker", "is_base_form": true, "ipa": "/ˈhʊkər/", "phonetic": "HOOK-er"}]}
+{"guid": "N63_059", "forms": [{"grammatical_form": "noun/en_singular", "text": "prop", "is_base_form": true, "ipa": "/prɑp/", "phonetic": "PROP"}]}
+{"guid": "N63_060", "forms": [{"grammatical_form": "noun/en_singular", "text": "lock", "is_base_form": true, "ipa": "/lɑk/", "phonetic": "LOK"}]}
+{"guid": "N63_061", "forms": [{"grammatical_form": "noun/en_singular", "text": "flanker", "is_base_form": true, "ipa": "/ˈflæŋkər/", "phonetic": "FLANG-ker"}]}
+{"guid": "N63_062", "forms": [{"grammatical_form": "noun/en_singular", "text": "fullback", "is_base_form": true, "ipa": "/ˈfʊlˌbæk/", "phonetic": "FULL-bak"}]}
+{"guid": "N63_063", "forms": [{"grammatical_form": "noun/en_singular", "text": "southpaw", "is_base_form": true, "ipa": "/ˈsaʊθˌpɔ/", "phonetic": "SOUTH-paw"}]}
+{"guid": "N63_064", "forms": [{"grammatical_form": "noun/en_singular", "text": "declarer", "is_base_form": true, "ipa": "/dɪˈklɛrər/", "phonetic": "dih-KLAIR-er"}]}
+{"guid": "N63_065", "forms": [{"grammatical_form": "noun/en_singular", "text": "dummy", "is_base_form": true, "ipa": "/ˈdʌmi/", "phonetic": "DUH-mee"}]}
+{"guid": "N63_066", "forms": [{"grammatical_form": "noun/en_singular", "text": "sprinter", "is_base_form": true, "ipa": "/ˈsprɪntər/", "phonetic": "SPRIN-ter"}]}
+{"guid": "N63_067", "forms": [{"grammatical_form": "noun/en_singular", "text": "anchor", "is_base_form": true, "ipa": "/ˈæŋkər/", "phonetic": "ANG-ker"}]}
+{"guid": "N63_068", "forms": [{"grammatical_form": "noun/en_singular", "text": "pacemaker", "is_base_form": true, "ipa": "/ˈpeɪsˌmeɪkər/", "phonetic": "PACE-may-ker"}]}
+{"guid": "N63_069", "forms": [{"grammatical_form": "noun/en_singular", "text": "cannon", "is_base_form": true, "ipa": "/ˈkænən/", "phonetic": "KAN-un"}]}
+{"guid": "N63_070", "forms": [{"grammatical_form": "noun/en_singular", "text": "domestique", "is_base_form": true, "ipa": "/ˌdoʊmɛˈstiːk/", "phonetic": "doh-mes-TEEK"}]}
+{"guid": "N63_071", "forms": [{"grammatical_form": "noun/en_singular", "text": "setter", "is_base_form": true, "ipa": "/ˈsɛtər/", "phonetic": "SET-er"}]}
+{"guid": "N63_072", "forms": [{"grammatical_form": "noun/en_singular", "text": "libero", "is_base_form": true, "ipa": "/lɪˈbɛroʊ/", "phonetic": "lih-BEAR-oh"}]}
+{"guid": "N63_073", "forms": [{"grammatical_form": "noun/en_singular", "text": "outside hitter", "is_base_form": true, "ipa": "/ˌaʊtˈsaɪd ˈhɪtər/", "phonetic": "OWT-SYD HIT-er"}]}
+{"guid": "N63_074", "forms": [{"grammatical_form": "noun/en_singular", "text": "middle blocker", "is_base_form": true, "ipa": "/ˈmɪdəl ˈblɑkər/", "phonetic": "MID-ul BLAH-ker"}]}
+{"guid": "N63_075", "forms": [{"grammatical_form": "noun/en_singular", "text": "blot", "is_base_form": true, "ipa": "/blɑt/", "phonetic": "BLOT"}]}
+{"guid": "N63_076", "forms": [{"grammatical_form": "noun/en_singular", "text": "midfielder", "is_base_form": true, "ipa": "/ˈmɪdˌfiːldər/", "phonetic": "mid-FEEL-der"}]}
+{"guid": "N63_077", "forms": [{"grammatical_form": "noun/en_singular", "text": "center back", "is_base_form": true, "ipa": "/ˈsɛntɚ bæk/", "phonetic": "SEN-ter bak"}]}
+{"guid": "N63_078", "forms": [{"grammatical_form": "noun/en_singular", "text": "fullback", "is_base_form": true, "ipa": "/ˈfʊlˌbæk/", "phonetic": "FOOL-bak"}]}
+{"guid": "N63_079", "forms": [{"grammatical_form": "noun/en_singular", "text": "sweeper", "is_base_form": true, "ipa": "/ˈswiːpər/", "phonetic": "SWEE-per"}]}
+{"guid": "N63_080", "forms": [{"grammatical_form": "noun/en_singular", "text": "wall", "is_base_form": true, "ipa": "/wɔl/", "phonetic": "WAWL"}]}

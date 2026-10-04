@@ -7,3 +7,99 @@
 {"guid": "N61_007", "forms": [{"grammatical_form": "noun/en_singular", "text": "backhand", "is_base_form": true, "ipa": "/ˈbækˌhænd/", "phonetic": "BAK-hand"}]}
 {"guid": "N61_008", "forms": [{"grammatical_form": "noun/en_singular", "text": "smash", "is_base_form": true, "ipa": "/smæʃ/", "phonetic": "SMASH"}]}
 {"guid": "N61_009", "forms": [{"grammatical_form": "noun/en_singular", "text": "topspin", "is_base_form": true, "ipa": "/ˈtɑpˌspɪn/", "phonetic": "TOP-spin"}]}
+{"guid": "N61_010", "forms": [{"grammatical_form": "noun/en_singular", "text": "layup", "is_base_form": true, "ipa": "/ˈleɪˌʌp/", "phonetic": "LAY-up"}]}
+{"guid": "N61_011", "forms": [{"grammatical_form": "noun/en_singular", "text": "slam dunk", "is_base_form": true, "ipa": "/ˈslæm ˌdʌŋk/", "phonetic": "SLAM-DUNK"}]}
+{"guid": "N61_012", "forms": [{"grammatical_form": "noun/en_singular", "text": "jump shot", "is_base_form": true, "ipa": "/ˈdʒʌmp ˌʃɑt/", "phonetic": "JUMP-SHOT"}]}
+{"guid": "N61_013", "forms": [{"grammatical_form": "noun/en_singular", "text": "hook shot", "is_base_form": true, "ipa": "/ˈhʊk ˌʃɑt/", "phonetic": "HOOK-SHOT"}]}
+{"guid": "N61_014", "forms": [{"grammatical_form": "noun/en_singular", "text": "bank shot", "is_base_form": true, "ipa": "/ˈbæŋk ˌʃɑt/", "phonetic": "BANK-SHOT"}]}
+{"guid": "N61_015", "forms": [{"grammatical_form": "noun/en_singular", "text": "block", "is_base_form": true, "ipa": "/blɑk/", "phonetic": "BLAHK"}]}
+{"guid": "N61_016", "forms": [{"grammatical_form": "noun/en_singular", "text": "crossover", "is_base_form": true, "ipa": "/ˈkrɔsˌoʊvɚ/", "phonetic": "KRAWSS-oh-ver"}]}
+{"guid": "N61_017", "forms": [{"grammatical_form": "noun/en_singular", "text": "lob", "is_base_form": true, "ipa": "/lɑb/", "phonetic": "LOB"}]}
+{"guid": "N61_018", "forms": [{"grammatical_form": "noun/en_singular", "text": "drop shot", "is_base_form": true, "ipa": "/ˈdrɑp ˌʃɑt/", "phonetic": "DROP-shot"}]}
+{"guid": "N61_019", "forms": [{"grammatical_form": "noun/en_singular", "text": "slice", "is_base_form": true, "ipa": "/slaɪs/", "phonetic": "SLICE"}]}
+{"guid": "N61_020", "forms": [{"grammatical_form": "noun/en_singular", "text": "groundstroke", "is_base_form": true, "ipa": "/ˈɡraʊndˌstroʊk/", "phonetic": "GROUND-stroke"}]}
+{"guid": "N61_021", "forms": [{"grammatical_form": "noun/en_singular", "text": "passing shot", "is_base_form": true, "ipa": "/ˈpæsɪŋ ʃɑt/", "phonetic": "PASS-ing shot"}]}
+{"guid": "N61_022", "forms": [{"grammatical_form": "noun/en_singular", "text": "approach shot", "is_base_form": true, "ipa": "/əˈproʊtʃ ˌʃɑt/", "phonetic": "uh-PROHCH-shot"}]}
+{"guid": "N61_023", "forms": [{"grammatical_form": "noun/en_singular", "text": "return", "is_base_form": true, "ipa": "/rɪˈtɝn/", "phonetic": "ri-TURN"}]}
+{"guid": "N61_024", "forms": [{"grammatical_form": "noun/en_singular", "text": "bunt", "is_base_form": true, "ipa": "/bʌnt/", "phonetic": "BUNT"}]}
+{"guid": "N61_025", "forms": [{"grammatical_form": "noun/en_singular", "text": "ground ball", "is_base_form": true, "ipa": "/ˈɡraʊnd ˌbɔl/", "phonetic": "GROUND-bawl"}]}
+{"guid": "N61_026", "forms": [{"grammatical_form": "noun/en_singular", "text": "fastball", "is_base_form": true, "ipa": "/ˈfæstˌbɔl/", "phonetic": "FAST-bawl"}]}
+{"guid": "N61_027", "forms": [{"grammatical_form": "noun/en_singular", "text": "curveball", "is_base_form": true, "ipa": "/ˈkɝvˌbɔl/", "phonetic": "KURV-bawl"}]}
+{"guid": "N61_028", "forms": [{"grammatical_form": "noun/en_singular", "text": "changeup", "is_base_form": true, "ipa": "/ˈtʃeɪndʒˌʌp/", "phonetic": "CHAYNJ-up"}]}
+{"guid": "N61_029", "forms": [{"grammatical_form": "noun/en_singular", "text": "knuckleball", "is_base_form": true, "ipa": "/ˈnʌkəlˌbɔl/", "phonetic": "NUK-uhl-bawl"}]}
+{"guid": "N61_030", "forms": [{"grammatical_form": "noun/en_singular", "text": "googly", "is_base_form": true, "ipa": "/ˈɡuːɡli/", "phonetic": "GOO-glee"}]}
+{"guid": "N61_031", "forms": [{"grammatical_form": "noun/en_singular", "text": "yorker", "is_base_form": true, "ipa": "/ˈjɔrkər/", "phonetic": "YOR-ker"}]}
+{"guid": "N61_032", "forms": [{"grammatical_form": "noun/en_singular", "text": "bouncer", "is_base_form": true, "ipa": "/ˈbaʊnsər/", "phonetic": "BOWN-ser"}]}
+{"guid": "N61_033", "forms": [{"grammatical_form": "noun/en_singular", "text": "punt", "is_base_form": true, "ipa": "/pʌnt/", "phonetic": "PUNT"}]}
+{"guid": "N61_034", "forms": [{"grammatical_form": "noun/en_singular", "text": "Hail Mary", "is_base_form": true, "ipa": "/ˌheɪl ˈmɛri/", "phonetic": "HAYL MAIR-ee"}]}
+{"guid": "N61_035", "forms": [{"grammatical_form": "noun/en_singular", "text": "slap shot", "is_base_form": true, "ipa": "/ˈslæp ˌʃɑt/", "phonetic": "SLAP-shot"}]}
+{"guid": "N61_036", "forms": [{"grammatical_form": "noun/en_singular", "text": "wrist shot", "is_base_form": true, "ipa": "/ˈrɪst ˌʃɑt/", "phonetic": "RIST-SHOT"}]}
+{"guid": "N61_037", "forms": [{"grammatical_form": "noun/en_singular", "text": "one-timer", "is_base_form": true, "ipa": "/ˈwʌnˌtaɪmər/", "phonetic": "WUN-TY-mer"}]}
+{"guid": "N61_038", "forms": [{"grammatical_form": "noun/en_singular", "text": "check", "is_base_form": true, "ipa": "/tʃɛk/", "phonetic": "CHEK"}]}
+{"guid": "N61_039", "forms": [{"grammatical_form": "noun/en_singular", "text": "stickhandling", "is_base_form": true, "ipa": "/ˈstɪkˌhændlɪŋ/", "phonetic": "STIK-HAN-dling"}]}
+{"guid": "N61_040", "forms": [{"grammatical_form": "noun/en_singular", "text": "putt", "is_base_form": true, "ipa": "/pʌt/", "phonetic": "PUT"}]}
+{"guid": "N61_041", "forms": [{"grammatical_form": "noun/en_singular", "text": "drive", "is_base_form": true, "ipa": "/draɪv/", "phonetic": "DRYV"}]}
+{"guid": "N61_042", "forms": [{"grammatical_form": "noun/en_singular", "text": "chip", "is_base_form": true, "ipa": "/tʃɪp/", "phonetic": "CHIP"}]}
+{"guid": "N61_043", "forms": [{"grammatical_form": "noun/en_singular", "text": "slice", "is_base_form": true, "ipa": "/slaɪs/", "phonetic": "SLICE"}]}
+{"guid": "N61_044", "forms": [{"grammatical_form": "noun/en_singular", "text": "hook", "is_base_form": true, "ipa": "/hʊk/", "phonetic": "HOOK"}]}
+{"guid": "N61_045", "forms": [{"grammatical_form": "noun/en_singular", "text": "backswing", "is_base_form": true, "ipa": "/ˈbækˌswɪŋ/", "phonetic": "BAK-swing"}]}
+{"guid": "N61_046", "forms": [{"grammatical_form": "noun/en_singular", "text": "offload", "is_base_form": true, "ipa": "/ˈɔfˌloʊd/", "phonetic": "OFF-load"}]}
+{"guid": "N61_047", "forms": [{"grammatical_form": "noun/en_singular", "text": "grubber", "is_base_form": true, "ipa": "/ˈɡrʌbər/", "phonetic": "GRUB-er"}]}
+{"guid": "N61_048", "forms": [{"grammatical_form": "noun/en_singular", "text": "haka", "is_base_form": true, "ipa": "/ˈhɑːkə/", "phonetic": "HAH-kuh"}]}
+{"guid": "N61_049", "forms": [{"grammatical_form": "noun/en_singular", "text": "jab", "is_base_form": true, "ipa": "/dʒæb/", "phonetic": "JAB"}]}
+{"guid": "N61_050", "forms": [{"grammatical_form": "noun/en_singular", "text": "cross", "is_base_form": true, "ipa": "/krɔs/", "phonetic": "KRAWSS"}]}
+{"guid": "N61_051", "forms": [{"grammatical_form": "noun/en_singular", "text": "hook", "is_base_form": true, "ipa": "/hʊk/", "phonetic": "HOOK"}]}
+{"guid": "N61_052", "forms": [{"grammatical_form": "noun/en_singular", "text": "uppercut", "is_base_form": true, "ipa": "/ˈʌpərˌkʌt/", "phonetic": "UP-er-kut"}]}
+{"guid": "N61_053", "forms": [{"grammatical_form": "noun/en_singular", "text": "combination", "is_base_form": true, "ipa": "/ˌkɑmbəˈneɪʃən/", "phonetic": "kom-buh-NAY-shuhn"}]}
+{"guid": "N61_054", "forms": [{"grammatical_form": "noun/en_singular", "text": "counterpunch", "is_base_form": true, "ipa": "/ˈkaʊntərˌpʌntʃ/", "phonetic": "KOWN-ter-punch"}]}
+{"guid": "N61_055", "forms": [{"grammatical_form": "noun/en_singular", "text": "stroke", "is_base_form": true, "ipa": "/stroʊk/", "phonetic": "STROHK"}]}
+{"guid": "N61_056", "forms": [{"grammatical_form": "noun/en_singular", "text": "front crawl", "is_base_form": true, "ipa": "/ˈfrʌnt ˌkrɔl/", "phonetic": "FRUNT-KRAWL"}]}
+{"guid": "N61_057", "forms": [{"grammatical_form": "noun/en_singular", "text": "backstroke", "is_base_form": true, "ipa": "/ˈbækˌstroʊk/", "phonetic": "BAK-strohk"}]}
+{"guid": "N61_058", "forms": [{"grammatical_form": "noun/en_singular", "text": "breaststroke", "is_base_form": true, "ipa": "/ˈbrɛstˌstroʊk/", "phonetic": "BREST-strohk"}]}
+{"guid": "N61_059", "forms": [{"grammatical_form": "noun/en_singular", "text": "butterfly", "is_base_form": true, "ipa": "/ˈbʌtərˌflaɪ/", "phonetic": "BUH-ter-fly"}]}
+{"guid": "N61_060", "forms": [{"grammatical_form": "noun/en_singular", "text": "flip turn", "is_base_form": true, "ipa": "/ˈflɪp ˌtɝn/", "phonetic": "FLIP-turn"}]}
+{"guid": "N61_061", "forms": [{"grammatical_form": "noun/en_singular", "text": "dive", "is_base_form": true, "ipa": "/daɪv/", "phonetic": "DIVE"}]}
+{"guid": "N61_062", "forms": [{"grammatical_form": "noun/en_singular", "text": "pike", "is_base_form": true, "ipa": "/paɪk/", "phonetic": "PYKE"}]}
+{"guid": "N61_063", "forms": [{"grammatical_form": "noun/en_singular", "text": "tuck", "is_base_form": true, "ipa": "/tʌk/", "phonetic": "TUHK"}]}
+{"guid": "N61_064", "forms": [{"grammatical_form": "noun/en_singular", "text": "twist", "is_base_form": true, "ipa": "/twɪst/", "phonetic": "TWIST"}]}
+{"guid": "N61_065", "forms": [{"grammatical_form": "noun/en_singular", "text": "entry", "is_base_form": true, "ipa": "/ˈɛntri/", "phonetic": "EN-tree"}]}
+{"guid": "N61_066", "forms": [{"grammatical_form": "noun/en_singular", "text": "belly flop", "is_base_form": true, "ipa": "/ˈbɛli flɑp/", "phonetic": "BEL-ee flop"}]}
+{"guid": "N61_067", "forms": [{"grammatical_form": "noun/en_singular", "text": "spike", "is_base_form": true, "ipa": "/spaɪk/", "phonetic": "SPYKE"}]}
+{"guid": "N61_068", "forms": [{"grammatical_form": "noun/en_singular", "text": "set", "is_base_form": true, "ipa": "/sɛt/", "phonetic": "SET"}]}
+{"guid": "N61_069", "forms": [{"grammatical_form": "noun/en_singular", "text": "dig", "is_base_form": true, "ipa": "/dɪɡ/", "phonetic": "DIG"}]}
+{"guid": "N61_070", "forms": [{"grammatical_form": "noun/en_singular", "text": "bump", "is_base_form": true, "ipa": "/bʌmp/", "phonetic": "BUMP"}]}
+{"guid": "N61_071", "forms": [{"grammatical_form": "noun/en_singular", "text": "block", "is_base_form": true, "ipa": "/blɑk/", "phonetic": "BLAHK"}]}
+{"guid": "N61_072", "forms": [{"grammatical_form": "noun/en_singular", "text": "tip", "is_base_form": true, "ipa": "/tɪp/", "phonetic": "TIP"}]}
+{"guid": "N61_073", "forms": [{"grammatical_form": "noun/en_singular", "text": "poker face", "is_base_form": true, "ipa": "/ˈpoʊkər feɪs/", "phonetic": "POH-ker FAYS"}]}
+{"guid": "N61_074", "forms": [{"grammatical_form": "noun/en_singular", "text": "telemark", "is_base_form": true, "ipa": "/ˈtɛlɚˌmɑrk/", "phonetic": "TEL-uh-mark"}]}
+{"guid": "N61_075", "forms": [{"grammatical_form": "noun/en_singular", "text": "schuss", "is_base_form": true, "ipa": "/ʃuːs/", "phonetic": "SHOOS"}]}
+{"guid": "N61_076", "forms": [{"grammatical_form": "noun/en_singular", "text": "snowplow", "is_base_form": true, "ipa": "/ˈsnoʊˌplaʊ/", "phonetic": "SNOH-plow"}]}
+{"guid": "N61_077", "forms": [{"grammatical_form": "noun/en_singular", "text": "axel", "is_base_form": true, "ipa": "/ˈæksəl/", "phonetic": "AK-suhl"}]}
+{"guid": "N61_078", "forms": [{"grammatical_form": "noun/en_singular", "text": "lutz", "is_base_form": true, "ipa": "/lʌts/", "phonetic": "LUTS"}]}
+{"guid": "N61_079", "forms": [{"grammatical_form": "noun/en_singular", "text": "salchow", "is_base_form": true, "ipa": "/ˈsɑlkaʊ/", "phonetic": "SAL-kow"}]}
+{"guid": "N61_080", "forms": [{"grammatical_form": "noun/en_singular", "text": "toe loop", "is_base_form": true, "ipa": "/ˈtoʊˌluːp/", "phonetic": "TOH-loop"}]}
+{"guid": "N61_081", "forms": [{"grammatical_form": "noun/en_singular", "text": "flip", "is_base_form": true, "ipa": "/flɪp/", "phonetic": "FLIP"}]}
+{"guid": "N61_082", "forms": [{"grammatical_form": "noun/en_singular", "text": "quad", "is_base_form": true, "ipa": "/kwɑd/", "phonetic": "KWOD"}]}
+{"guid": "N61_083", "forms": [{"grammatical_form": "noun/en_singular", "text": "spin", "is_base_form": true, "ipa": "/spɪn/", "phonetic": "SPIN"}]}
+{"guid": "N61_084", "forms": [{"grammatical_form": "noun/en_singular", "text": "camel spin", "is_base_form": true, "ipa": "/ˈkæməl spɪn/", "phonetic": "KAM-uhl spin"}]}
+{"guid": "N61_085", "forms": [{"grammatical_form": "noun/en_singular", "text": "sit spin", "is_base_form": true, "ipa": "/ˈsɪt ˌspɪn/", "phonetic": "SIT-spin"}]}
+{"guid": "N61_086", "forms": [{"grammatical_form": "noun/en_singular", "text": "death spiral", "is_base_form": true, "ipa": "/ˈdɛθ ˌspaɪrəl/", "phonetic": "DETH-SPY-rul"}]}
+{"guid": "N61_087", "forms": [{"grammatical_form": "noun/en_singular", "text": "vault", "is_base_form": true, "ipa": "/vɔlt/", "phonetic": "VAWLT"}]}
+{"guid": "N61_088", "forms": [{"grammatical_form": "noun/en_singular", "text": "dismount", "is_base_form": true, "ipa": "/dɪsˈmaʊnt/", "phonetic": "dis-MOUNT"}]}
+{"guid": "N61_089", "forms": [{"grammatical_form": "noun/en_singular", "text": "handspring", "is_base_form": true, "ipa": "/ˈhændˌsprɪŋ/", "phonetic": "HAND-spring"}]}
+{"guid": "N61_090", "forms": [{"grammatical_form": "noun/en_singular", "text": "round-off", "is_base_form": true, "ipa": "/ˈraʊndˌɔf/", "phonetic": "ROUND-off"}]}
+{"guid": "N61_091", "forms": [{"grammatical_form": "noun/en_singular", "text": "salto", "is_base_form": true, "ipa": "/ˈsɑltoʊ/", "phonetic": "SAWL-toh"}]}
+{"guid": "N61_092", "forms": [{"grammatical_form": "noun/en_singular", "text": "splits", "is_base_form": true, "ipa": "/splɪts/", "phonetic": "SPLITS"}]}
+{"guid": "N61_093", "forms": [{"grammatical_form": "noun/en_singular", "text": "kata", "is_base_form": true, "ipa": "/ˈkɑːtə/", "phonetic": "KAH-tuh"}]}
+{"guid": "N61_094", "forms": [{"grammatical_form": "noun/en_singular", "text": "throw", "is_base_form": true, "ipa": "/θroʊ/", "phonetic": "THROH"}]}
+{"guid": "N61_095", "forms": [{"grammatical_form": "noun/en_singular", "text": "takedown", "is_base_form": true, "ipa": "/ˈteɪkˌdaʊn/", "phonetic": "TAKE-down"}]}
+{"guid": "N61_096", "forms": [{"grammatical_form": "noun/en_singular", "text": "armlock", "is_base_form": true, "ipa": "/ˈɑrmˌlɑk/", "phonetic": "ARM-lock"}]}
+{"guid": "N61_098", "forms": [{"grammatical_form": "noun/en_singular", "text": "header", "is_base_form": true, "ipa": "/ˈhɛdər/", "phonetic": "HED-er"}]}
+{"guid": "N61_099", "forms": [{"grammatical_form": "noun/en_singular", "text": "nutmeg", "is_base_form": true, "ipa": "/ˈnʌtˌmɛɡ/", "phonetic": "NUT-meg"}]}
+{"guid": "N61_100", "forms": [{"grammatical_form": "noun/en_singular", "text": "cross", "is_base_form": true, "ipa": "/krɔs/", "phonetic": "KROSS"}]}
+{"guid": "N61_101", "forms": [{"grammatical_form": "noun/en_singular", "text": "through ball", "is_base_form": true, "ipa": "/ˈθruː ˌbɔl/", "phonetic": "THROO-BAWL"}]}
+{"guid": "N61_102", "forms": [{"grammatical_form": "noun/en_singular", "text": "one-two", "is_base_form": true, "ipa": "/ˌwʌnˈtuː/", "phonetic": "WUN-TOO"}]}
+{"guid": "N61_103", "forms": [{"grammatical_form": "noun/en_singular", "text": "chip", "is_base_form": true, "ipa": "/tʃɪp/", "phonetic": "CHIP"}]}
+{"guid": "N61_104", "forms": [{"grammatical_form": "noun/en_singular", "text": "bicycle kick", "is_base_form": true, "ipa": "/ˈbaɪsɪkəl kɪk/", "phonetic": "BYE-sih-kuhl KIK"}]}
+{"guid": "N61_105", "forms": [{"grammatical_form": "noun/en_singular", "text": "slide tackle", "is_base_form": true, "ipa": "/ˈslaɪd ˌtækəl/", "phonetic": "SLIDE TAK-uhl"}]}
+{"guid": "N61_106", "forms": [{"grammatical_form": "noun/en_singular", "text": "clearance", "is_base_form": true, "ipa": "/ˈklɪrəns/", "phonetic": "KLEER-uhns"}]}

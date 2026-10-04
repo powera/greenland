@@ -27,3 +27,224 @@
 {"guid": "N60_027", "forms": [{"grammatical_form": "noun/en_singular", "text": "false start", "is_base_form": true, "ipa": "/ˌfɔls ˈstɑrt/", "phonetic": "FAWLS-START"}]}
 {"guid": "N60_028", "forms": [{"grammatical_form": "noun/en_singular", "text": "photo finish", "is_base_form": true, "ipa": "/ˈfoʊtoʊ ˈfɪnɪʃ/", "phonetic": "FOH-toh FIN-ish"}]}
 {"guid": "N60_029", "forms": [{"grammatical_form": "noun/en_singular", "text": "doping", "is_base_form": true, "ipa": "/ˈdoʊpɪŋ/", "phonetic": "DOH-ping"}]}
+{"guid": "N60_030", "forms": [{"grammatical_form": "noun/en_singular", "text": "turn", "is_base_form": true, "ipa": "/tɝn/", "phonetic": "TURN"}]}
+{"guid": "N60_031", "forms": [{"grammatical_form": "noun/en_singular", "text": "check", "is_base_form": true, "ipa": "/tʃɛk/", "phonetic": "CHEK"}]}
+{"guid": "N60_032", "forms": [{"grammatical_form": "noun/en_singular", "text": "checkmate", "is_base_form": true, "ipa": "/ˈtʃɛkˌmeɪt/", "phonetic": "CHEK-mayt"}]}
+{"guid": "N60_033", "forms": [{"grammatical_form": "noun/en_singular", "text": "mate", "is_base_form": true, "ipa": "/meɪt/", "phonetic": "MAYT"}]}
+{"guid": "N60_034", "forms": [{"grammatical_form": "noun/en_singular", "text": "stalemate", "is_base_form": true, "ipa": "/ˈsteɪlˌmeɪt/", "phonetic": "STAYL-mayt"}]}
+{"guid": "N60_035", "forms": [{"grammatical_form": "noun/en_singular", "text": "castling", "is_base_form": true, "ipa": "/ˈkæslɪŋ/", "phonetic": "KAS-ling"}]}
+{"guid": "N60_036", "forms": [{"grammatical_form": "noun/en_singular", "text": "promotion", "is_base_form": true, "ipa": "/prəˈmoʊʃən/", "phonetic": "pruh-MOH-shun"}]}
+{"guid": "N60_037", "forms": [{"grammatical_form": "noun/en_singular", "text": "endgame", "is_base_form": true, "ipa": "/ˈɛndˌɡeɪm/", "phonetic": "END-gaym"}]}
+{"guid": "N60_038", "forms": [{"grammatical_form": "noun/en_singular", "text": "pin", "is_base_form": true, "ipa": "/pɪn/", "phonetic": "PIN"}]}
+{"guid": "N60_039", "forms": [{"grammatical_form": "noun/en_singular", "text": "discovered check", "is_base_form": true, "ipa": "/dɪˈskʌvərd tʃɛk/", "phonetic": "dis-KUV-erd chek"}]}
+{"guid": "N60_040", "forms": [{"grammatical_form": "noun/en_singular", "text": "perpetual check", "is_base_form": true, "ipa": "/pərˈpɛtʃuəl tʃɛk/", "phonetic": "per-PECH-oo-ul CHEK"}]}
+{"guid": "N60_041", "forms": [{"grammatical_form": "noun/en_singular", "text": "threefold repetition", "is_base_form": true, "ipa": "/ˌθriːfoʊld ˌrɛpəˈtɪʃən/", "phonetic": "THREE-fold rep-uh-TISH-un"}]}
+{"guid": "N60_042", "forms": [{"grammatical_form": "noun/en_singular", "text": "zugzwang", "is_base_form": true, "ipa": "/ˈtsuːktsvɑːŋ/", "phonetic": "TSOOK-tsvahng"}]}
+{"guid": "N60_043", "forms": [{"grammatical_form": "noun/en_singular", "text": "blunder", "is_base_form": true, "ipa": "/ˈblʌndər/", "phonetic": "BLUN-der"}]}
+{"guid": "N60_044", "forms": [{"grammatical_form": "noun/en_singular", "text": "free throw", "is_base_form": true, "ipa": "/ˈfriː ˌθroʊ/", "phonetic": "FREE-throh"}]}
+{"guid": "N60_045", "forms": [{"grammatical_form": "noun/en_singular", "text": "three-pointer", "is_base_form": true, "ipa": "/ˌθriːˈpɔɪntər/", "phonetic": "three-POIN-ter"}]}
+{"guid": "N60_046", "forms": [{"grammatical_form": "noun/en_singular", "text": "jump ball", "is_base_form": true, "ipa": "/ˈdʒʌmp ˌbɔl/", "phonetic": "JUMP-BAWL"}]}
+{"guid": "N60_047", "forms": [{"grammatical_form": "noun/en_singular", "text": "tip-off", "is_base_form": true, "ipa": "/ˈtɪpˌɔf/", "phonetic": "TIP-awf"}]}
+{"guid": "N60_048", "forms": [{"grammatical_form": "noun/en_singular", "text": "rebound", "is_base_form": true, "ipa": "/ˈriˌbaʊnd/", "phonetic": "REE-bownd"}]}
+{"guid": "N60_049", "forms": [{"grammatical_form": "noun/en_singular", "text": "steal", "is_base_form": true, "ipa": "/stiːl/", "phonetic": "STEEL"}]}
+{"guid": "N60_050", "forms": [{"grammatical_form": "noun/en_singular", "text": "traveling", "is_base_form": true, "ipa": "/ˈtrævəlɪŋ/", "phonetic": "TRAV-uh-ling"}]}
+{"guid": "N60_051", "forms": [{"grammatical_form": "noun/en_singular", "text": "double dribble", "is_base_form": true, "ipa": "/ˌdʌbəl ˈdrɪbəl/", "phonetic": "DUH-bul DRIB-ul"}]}
+{"guid": "N60_052", "forms": [{"grammatical_form": "noun/en_singular", "text": "buzzer beater", "is_base_form": true, "ipa": "/ˈbʌzər ˌbiːtər/", "phonetic": "BUZ-er BEE-ter"}]}
+{"guid": "N60_053", "forms": [{"grammatical_form": "noun/en_singular", "text": "air ball", "is_base_form": true, "ipa": "/ˈɛr ˌbɔl/", "phonetic": "AIR bawl"}]}
+{"guid": "N60_054", "forms": [{"grammatical_form": "noun/en_singular", "text": "swish", "is_base_form": true, "ipa": "/swɪʃ/", "phonetic": "SWISH"}]}
+{"guid": "N60_055", "forms": [{"grammatical_form": "noun/en_singular", "text": "personal foul", "is_base_form": true, "ipa": "/ˈpɝsənəl faʊl/", "phonetic": "PER-suh-nuhl FOWL"}]}
+{"guid": "N60_056", "forms": [{"grammatical_form": "noun/en_singular", "text": "technical foul", "is_base_form": true, "ipa": "/ˈtɛknɪkəl faʊl/", "phonetic": "TEK-ni-kul FOWL"}]}
+{"guid": "N60_057", "forms": [{"grammatical_form": "noun/en_singular", "text": "double-double", "is_base_form": true, "ipa": "/ˌdʌbəl ˈdʌbəl/", "phonetic": "DUH-buhl-DUH-buhl"}]}
+{"guid": "N60_058", "forms": [{"grammatical_form": "noun/en_singular", "text": "triple-double", "is_base_form": true, "ipa": "/ˌtrɪpəl ˈdʌbəl/", "phonetic": "TRIP-uhl-DUH-buhl"}]}
+{"guid": "N60_059", "forms": [{"grammatical_form": "noun/en_singular", "text": "deuce", "is_base_form": true, "ipa": "/duːs/", "phonetic": "DOOS"}]}
+{"guid": "N60_060", "forms": [{"grammatical_form": "noun/en_singular", "text": "advantage", "is_base_form": true, "ipa": "/ədˈvæntɪdʒ/", "phonetic": "ad-VAN-tij"}]}
+{"guid": "N60_061", "forms": [{"grammatical_form": "noun/en_singular", "text": "fault", "is_base_form": true, "ipa": "/fɔlt/", "phonetic": "FAWLT"}]}
+{"guid": "N60_062", "forms": [{"grammatical_form": "noun/en_singular", "text": "double fault", "is_base_form": true, "ipa": "/ˌdʌbəl ˈfɔlt/", "phonetic": "DUH-bul FAWLT"}]}
+{"guid": "N60_063", "forms": [{"grammatical_form": "noun/en_singular", "text": "foot fault", "is_base_form": true, "ipa": "/ˈfʊt ˌfɔlt/", "phonetic": "FOOT-fawlt"}]}
+{"guid": "N60_064", "forms": [{"grammatical_form": "noun/en_singular", "text": "let", "is_base_form": true, "ipa": "/lɛt/", "phonetic": "LET"}]}
+{"guid": "N60_065", "forms": [{"grammatical_form": "noun/en_singular", "text": "break point", "is_base_form": true, "ipa": "/ˈbreɪk ˌpɔɪnt/", "phonetic": "BRAYK-point"}]}
+{"guid": "N60_066", "forms": [{"grammatical_form": "noun/en_singular", "text": "unforced error", "is_base_form": true, "ipa": "/ˌʌnˈfɔrst ˈɛrər/", "phonetic": "un-FORST AIR-er"}]}
+{"guid": "N60_067", "forms": [{"grammatical_form": "noun/en_singular", "text": "inning", "is_base_form": true, "ipa": "/ˈɪnɪŋ/", "phonetic": "IN-ing"}]}
+{"guid": "N60_068", "forms": [{"grammatical_form": "noun/en_singular", "text": "strike", "is_base_form": true, "ipa": "/straɪk/", "phonetic": "STRIKE"}]}
+{"guid": "N60_069", "forms": [{"grammatical_form": "noun/en_singular", "text": "ball", "is_base_form": true, "ipa": "/bɔl/", "phonetic": "BAWL"}]}
+{"guid": "N60_070", "forms": [{"grammatical_form": "noun/en_singular", "text": "strikeout", "is_base_form": true, "ipa": "/ˈstraɪkˌaʊt/", "phonetic": "STRIKE-out"}]}
+{"guid": "N60_071", "forms": [{"grammatical_form": "noun/en_singular", "text": "walk", "is_base_form": true, "ipa": "/wɔk/", "phonetic": "WAWK"}]}
+{"guid": "N60_072", "forms": [{"grammatical_form": "noun/en_singular", "text": "single", "is_base_form": true, "ipa": "/ˈsɪŋɡəl/", "phonetic": "SING-guhl"}]}
+{"guid": "N60_073", "forms": [{"grammatical_form": "noun/en_singular", "text": "double", "is_base_form": true, "ipa": "/ˈdʌbəl/", "phonetic": "DUH-buhl"}]}
+{"guid": "N60_074", "forms": [{"grammatical_form": "noun/en_singular", "text": "triple", "is_base_form": true, "ipa": "/ˈtrɪpəl/", "phonetic": "TRIP-uhl"}]}
+{"guid": "N60_075", "forms": [{"grammatical_form": "noun/en_singular", "text": "home run", "is_base_form": true, "ipa": "/ˈhoʊm ˌrʌn/", "phonetic": "HOHM-run"}]}
+{"guid": "N60_076", "forms": [{"grammatical_form": "noun/en_singular", "text": "grand slam", "is_base_form": true, "ipa": "/ˈɡrænd ˌslæm/", "phonetic": "GRAND-SLAM"}]}
+{"guid": "N60_077", "forms": [{"grammatical_form": "noun/en_singular", "text": "run", "is_base_form": true, "ipa": "/rʌn/", "phonetic": "RUN"}]}
+{"guid": "N60_078", "forms": [{"grammatical_form": "noun/en_singular", "text": "run batted in", "is_base_form": true, "ipa": "/ˌrʌn ˈbætɪd ˈɪn/", "phonetic": "RUN BAT-id IN"}], "variants": [{"kind": "abbreviation", "key": "RBI", "forms": [{"grammatical_form": "noun/en_singular", "text": "RBI", "is_base_form": true}]}]}
+{"guid": "N60_079", "forms": [{"grammatical_form": "noun/en_singular", "text": "out", "is_base_form": true, "ipa": "/aʊt/", "phonetic": "OWT"}]}
+{"guid": "N60_080", "forms": [{"grammatical_form": "noun/en_singular", "text": "stolen base", "is_base_form": true, "ipa": "/ˈstoʊlən beɪs/", "phonetic": "STOH-luhn bays"}]}
+{"guid": "N60_081", "forms": [{"grammatical_form": "noun/en_singular", "text": "double play", "is_base_form": true, "ipa": "/ˈdʌbəl ˌpleɪ/", "phonetic": "DUH-bul PLAY"}]}
+{"guid": "N60_082", "forms": [{"grammatical_form": "noun/en_singular", "text": "fly ball", "is_base_form": true, "ipa": "/ˈflaɪ ˌbɔl/", "phonetic": "FLY-BAWL"}]}
+{"guid": "N60_083", "forms": [{"grammatical_form": "noun/en_singular", "text": "foul ball", "is_base_form": true, "ipa": "/ˈfaʊl bɔl/", "phonetic": "FOUL bawl"}]}
+{"guid": "N60_084", "forms": [{"grammatical_form": "noun/en_singular", "text": "error", "is_base_form": true, "ipa": "/ˈɛrɚ/", "phonetic": "AIR-er"}]}
+{"guid": "N60_085", "forms": [{"grammatical_form": "noun/en_singular", "text": "no-hitter", "is_base_form": true, "ipa": "/ˈnoʊˌhɪtər/", "phonetic": "NOH-HIT-er"}]}
+{"guid": "N60_086", "forms": [{"grammatical_form": "noun/en_singular", "text": "innings", "is_base_form": true, "ipa": "/ˈɪnɪŋz/", "phonetic": "IN-ingz"}]}
+{"guid": "N60_087", "forms": [{"grammatical_form": "noun/en_singular", "text": "over", "is_base_form": true, "ipa": "/ˈoʊvər/", "phonetic": "OH-ver"}]}
+{"guid": "N60_088", "forms": [{"grammatical_form": "noun/en_singular", "text": "maiden", "is_base_form": true, "ipa": "/ˈmeɪdən/", "phonetic": "MAY-duhn"}]}
+{"guid": "N60_089", "forms": [{"grammatical_form": "noun/en_singular", "text": "boundary", "is_base_form": true, "ipa": "/ˈbaʊn.dɚ.i/", "phonetic": "BOWN-duh-ree"}]}
+{"guid": "N60_090", "forms": [{"grammatical_form": "noun/en_singular", "text": "century", "is_base_form": true, "ipa": "/ˈsɛntʃəri/", "phonetic": "SEN-chuh-ree"}]}
+{"guid": "N60_091", "forms": [{"grammatical_form": "noun/en_singular", "text": "half-century", "is_base_form": true, "ipa": "/ˌhæfˈsɛntʃəri/", "phonetic": "haf-SEN-chuh-ree"}]}
+{"guid": "N60_092", "forms": [{"grammatical_form": "noun/en_singular", "text": "duck", "is_base_form": true, "ipa": "/dʌk/", "phonetic": "DUHK"}]}
+{"guid": "N60_093", "forms": [{"grammatical_form": "noun/en_singular", "text": "leg before wicket", "is_base_form": true, "ipa": "/ˌlɛɡ bɪˌfɔr ˈwɪkɪt/", "phonetic": "LEG-bi-FOR-WIK-it"}], "variants": [{"kind": "abbreviation", "key": "LBW", "forms": [{"grammatical_form": "noun/en_singular", "text": "LBW", "is_base_form": true}]}]}
+{"guid": "N60_094", "forms": [{"grammatical_form": "noun/en_singular", "text": "run out", "is_base_form": true, "ipa": "/ˈrʌn aʊt/", "phonetic": "RUN-owt"}]}
+{"guid": "N60_095", "forms": [{"grammatical_form": "noun/en_singular", "text": "no-ball", "is_base_form": true, "ipa": "/ˈnoʊˌbɔl/", "phonetic": "NOH-BAWL"}]}
+{"guid": "N60_096", "forms": [{"grammatical_form": "noun/en_singular", "text": "wide", "is_base_form": true, "ipa": "/waɪd/", "phonetic": "WYDE"}]}
+{"guid": "N60_097", "forms": [{"grammatical_form": "noun/en_singular", "text": "bye", "is_base_form": true, "ipa": "/baɪ/", "phonetic": "BYE"}]}
+{"guid": "N60_098", "forms": [{"grammatical_form": "noun/en_singular", "text": "leg bye", "is_base_form": true, "ipa": "/ˈlɛɡ baɪ/", "phonetic": "LEG-BYE"}]}
+{"guid": "N60_099", "forms": [{"grammatical_form": "noun/en_singular", "text": "follow-on", "is_base_form": true, "ipa": "/ˈfɑloʊˌɑn/", "phonetic": "FAH-loh-on"}]}
+{"guid": "N60_100", "forms": [{"grammatical_form": "noun/en_singular", "text": "hat trick", "is_base_form": true, "ipa": "/ˈhæt trɪk/", "phonetic": "HAT-trik"}]}
+{"guid": "N60_101", "forms": [{"grammatical_form": "noun/en_singular", "text": "appeal", "is_base_form": true, "ipa": "/əˈpil/", "phonetic": "uh-PEEL"}]}
+{"guid": "N60_102", "forms": [{"grammatical_form": "noun/en_singular", "text": "test match", "is_base_form": true, "ipa": "/ˈtɛst ˌmætʃ/", "phonetic": "TEST-match"}]}
+{"guid": "N60_103", "forms": [{"grammatical_form": "noun/en_singular", "text": "touchdown", "is_base_form": true, "ipa": "/ˈtʌtʃˌdaʊn/", "phonetic": "TUCH-down"}]}
+{"guid": "N60_104", "forms": [{"grammatical_form": "noun/en_singular", "text": "field goal", "is_base_form": true, "ipa": "/ˈfiːld ˌɡoʊl/", "phonetic": "FEELD-GOHL"}]}
+{"guid": "N60_105", "forms": [{"grammatical_form": "noun/en_singular", "text": "extra point", "is_base_form": true, "ipa": "/ˈɛkstrə pɔɪnt/", "phonetic": "EK-struh-point"}]}
+{"guid": "N60_106", "forms": [{"grammatical_form": "noun/en_singular", "text": "two-point conversion", "is_base_form": true, "ipa": "/ˌtuː pɔɪnt kənˈvɝːʒən/", "phonetic": "TOO-point kuhn-VUR-zhuhn"}]}
+{"guid": "N60_107", "forms": [{"grammatical_form": "noun/en_singular", "text": "safety", "is_base_form": true, "ipa": "/ˈseɪfti/", "phonetic": "SAYF-tee"}]}
+{"guid": "N60_108", "forms": [{"grammatical_form": "noun/en_singular", "text": "snap", "is_base_form": true, "ipa": "/snæp/", "phonetic": "SNAP"}]}
+{"guid": "N60_109", "forms": [{"grammatical_form": "noun/en_singular", "text": "down", "is_base_form": true, "ipa": "/daʊn/", "phonetic": "DOWN"}]}
+{"guid": "N60_110", "forms": [{"grammatical_form": "noun/en_singular", "text": "first down", "is_base_form": true, "ipa": "/ˌfɝst ˈdaʊn/", "phonetic": "FURST DOWN"}]}
+{"guid": "N60_111", "forms": [{"grammatical_form": "noun/en_singular", "text": "sack", "is_base_form": true, "ipa": "/sæk/", "phonetic": "SAK"}]}
+{"guid": "N60_112", "forms": [{"grammatical_form": "noun/en_singular", "text": "fumble", "is_base_form": true, "ipa": "/ˈfʌmbəl/", "phonetic": "FUM-buhl"}]}
+{"guid": "N60_113", "forms": [{"grammatical_form": "noun/en_singular", "text": "fair catch", "is_base_form": true, "ipa": "/ˈfɛr ˌkætʃ/", "phonetic": "FAIR KATCH"}]}
+{"guid": "N60_114", "forms": [{"grammatical_form": "noun/en_singular", "text": "holding", "is_base_form": true, "ipa": "/ˈhoʊldɪŋ/", "phonetic": "HOHL-ding"}]}
+{"guid": "N60_115", "forms": [{"grammatical_form": "noun/en_singular", "text": "pick-six", "is_base_form": true, "ipa": "/ˈpɪk ˌsɪks/", "phonetic": "PIK-SIKS"}]}
+{"guid": "N60_116", "forms": [{"grammatical_form": "noun/en_singular", "text": "audible", "is_base_form": true, "ipa": "/ˈɔːdəbəl/", "phonetic": "AW-duh-bul"}]}
+{"guid": "N60_117", "forms": [{"grammatical_form": "noun/en_singular", "text": "double jump", "is_base_form": true, "ipa": "/ˈdʌbəl ˌdʒʌmp/", "phonetic": "DUH-bul JUMP"}]}
+{"guid": "N60_118", "forms": [{"grammatical_form": "noun/en_singular", "text": "faceoff", "is_base_form": true, "ipa": "/ˈfeɪsˌɔf/", "phonetic": "FAYS-awf"}]}
+{"guid": "N60_119", "forms": [{"grammatical_form": "noun/en_singular", "text": "icing", "is_base_form": true, "ipa": "/ˈaɪsɪŋ/", "phonetic": "EYE-sing"}]}
+{"guid": "N60_120", "forms": [{"grammatical_form": "noun/en_singular", "text": "power play", "is_base_form": true, "ipa": "/ˈpaʊər ˌpleɪ/", "phonetic": "POW-er play"}]}
+{"guid": "N60_121", "forms": [{"grammatical_form": "noun/en_singular", "text": "penalty kill", "is_base_form": true, "ipa": "/ˈpɛnəlti kɪl/", "phonetic": "PEN-uhl-tee KIL"}]}
+{"guid": "N60_122", "forms": [{"grammatical_form": "noun/en_singular", "text": "cross-checking", "is_base_form": true, "ipa": "/ˈkrɔsˌtʃɛkɪŋ/", "phonetic": "KRAWS-CHEK-ing"}]}
+{"guid": "N60_123", "forms": [{"grammatical_form": "noun/en_singular", "text": "high-sticking", "is_base_form": true, "ipa": "/ˈhaɪˌstɪkɪŋ/", "phonetic": "HY-STIK-ing"}]}
+{"guid": "N60_124", "forms": [{"grammatical_form": "noun/en_singular", "text": "tripping", "is_base_form": true, "ipa": "/ˈtrɪpɪŋ/", "phonetic": "TRIP-ing"}]}
+{"guid": "N60_125", "forms": [{"grammatical_form": "noun/en_singular", "text": "boarding", "is_base_form": true, "ipa": "/ˈbɔrdɪŋ/", "phonetic": "BOR-ding"}]}
+{"guid": "N60_126", "forms": [{"grammatical_form": "noun/en_singular", "text": "shootout", "is_base_form": true, "ipa": "/ˈʃuːtˌaʊt/", "phonetic": "SHOOT-out"}]}
+{"guid": "N60_127", "forms": [{"grammatical_form": "noun/en_singular", "text": "birdie", "is_base_form": true, "ipa": "/ˈbɝdi/", "phonetic": "BUR-dee"}]}
+{"guid": "N60_128", "forms": [{"grammatical_form": "noun/en_singular", "text": "eagle", "is_base_form": true, "ipa": "/ˈiːɡəl/", "phonetic": "EE-guhl"}]}
+{"guid": "N60_129", "forms": [{"grammatical_form": "noun/en_singular", "text": "albatross", "is_base_form": true, "ipa": "/ˈæl.bəˌtrɔs/", "phonetic": "AL-buh-tross"}]}
+{"guid": "N60_130", "forms": [{"grammatical_form": "noun/en_singular", "text": "bogey", "is_base_form": true, "ipa": "/ˈboʊɡi/", "phonetic": "BOH-gee"}]}
+{"guid": "N60_131", "forms": [{"grammatical_form": "noun/en_singular", "text": "double bogey", "is_base_form": true, "ipa": "/ˌdʌbəl ˈboʊɡi/", "phonetic": "DUH-buhl BOH-gee"}]}
+{"guid": "N60_132", "forms": [{"grammatical_form": "noun/en_singular", "text": "hole in one", "is_base_form": true, "ipa": "/ˌhoʊl ɪn ˈwʌn/", "phonetic": "HOHL-in-WUN"}]}
+{"guid": "N60_133", "forms": [{"grammatical_form": "noun/en_singular", "text": "stroke", "is_base_form": true, "ipa": "/stroʊk/", "phonetic": "STROHK"}]}
+{"guid": "N60_134", "forms": [{"grammatical_form": "noun/en_singular", "text": "mulligan", "is_base_form": true, "ipa": "/ˈmʌlɪɡən/", "phonetic": "MUH-li-guhn"}]}
+{"guid": "N60_135", "forms": [{"grammatical_form": "noun/en_singular", "text": "match play", "is_base_form": true, "ipa": "/ˈmætʃ pleɪ/", "phonetic": "MATCH-play"}]}
+{"guid": "N60_136", "forms": [{"grammatical_form": "noun/en_singular", "text": "stroke play", "is_base_form": true, "ipa": "/ˈstroʊk ˌpleɪ/", "phonetic": "STROHK-play"}]}
+{"guid": "N60_137", "forms": [{"grammatical_form": "noun/en_singular", "text": "atari", "is_base_form": true, "ipa": "/əˈtɑri/", "phonetic": "uh-TAH-ree"}]}
+{"guid": "N60_138", "forms": [{"grammatical_form": "noun/en_singular", "text": "ko", "is_base_form": true, "ipa": "/koʊ/", "phonetic": "KOH"}]}
+{"guid": "N60_139", "forms": [{"grammatical_form": "noun/en_singular", "text": "life and death", "is_base_form": true, "ipa": "/ˌlaɪf ən ˈdɛθ/", "phonetic": "LYFE-and-DETH"}]}
+{"guid": "N60_140", "forms": [{"grammatical_form": "noun/en_singular", "text": "seki", "is_base_form": true, "ipa": "/ˈsɛki/", "phonetic": "SEH-kee"}]}
+{"guid": "N60_141", "forms": [{"grammatical_form": "noun/en_singular", "text": "sente", "is_base_form": true, "ipa": "/ˈsɛnteɪ/", "phonetic": "SEN-teh"}]}
+{"guid": "N60_142", "forms": [{"grammatical_form": "noun/en_singular", "text": "joseki", "is_base_form": true, "ipa": "/dʒoʊˈsɛki/", "phonetic": "joh-SEK-ee"}]}
+{"guid": "N60_143", "forms": [{"grammatical_form": "noun/en_singular", "text": "try", "is_base_form": true, "ipa": "/traɪ/", "phonetic": "TRY"}]}
+{"guid": "N60_144", "forms": [{"grammatical_form": "noun/en_singular", "text": "conversion", "is_base_form": true, "ipa": "/kənˈvɝʒən/", "phonetic": "kuhn-VUR-zhuhn"}]}
+{"guid": "N60_145", "forms": [{"grammatical_form": "noun/en_singular", "text": "penalty try", "is_base_form": true, "ipa": "/ˈpɛnəlti traɪ/", "phonetic": "PEN-uhl-tee try"}]}
+{"guid": "N60_146", "forms": [{"grammatical_form": "noun/en_singular", "text": "drop goal", "is_base_form": true, "ipa": "/ˈdrɑp ˌɡoʊl/", "phonetic": "DROP GOHL"}]}
+{"guid": "N60_147", "forms": [{"grammatical_form": "noun/en_singular", "text": "scrum", "is_base_form": true, "ipa": "/skrʌm/", "phonetic": "SKRUM"}]}
+{"guid": "N60_148", "forms": [{"grammatical_form": "noun/en_singular", "text": "lineout", "is_base_form": true, "ipa": "/ˈlaɪnˌaʊt/", "phonetic": "LINE-out"}]}
+{"guid": "N60_149", "forms": [{"grammatical_form": "noun/en_singular", "text": "ruck", "is_base_form": true, "ipa": "/rʌk/", "phonetic": "RUK"}]}
+{"guid": "N60_150", "forms": [{"grammatical_form": "noun/en_singular", "text": "maul", "is_base_form": true, "ipa": "/mɔl/", "phonetic": "MAWL"}]}
+{"guid": "N60_151", "forms": [{"grammatical_form": "noun/en_singular", "text": "breakdown", "is_base_form": true, "ipa": "/ˈbreɪkˌdaʊn/", "phonetic": "BRAYK-down"}]}
+{"guid": "N60_152", "forms": [{"grammatical_form": "noun/en_singular", "text": "knock-on", "is_base_form": true, "ipa": "/ˈnɑkˌɑn/", "phonetic": "NOK-ON"}]}
+{"guid": "N60_153", "forms": [{"grammatical_form": "noun/en_singular", "text": "forward pass", "is_base_form": true, "ipa": "/ˈfɔrwərd pæs/", "phonetic": "FOR-werd PASS"}]}
+{"guid": "N60_154", "forms": [{"grammatical_form": "noun/en_singular", "text": "sin bin", "is_base_form": true, "ipa": "/ˈsɪn ˌbɪn/", "phonetic": "SIN-bin"}]}
+{"guid": "N60_155", "forms": [{"grammatical_form": "noun/en_singular", "text": "bout", "is_base_form": true, "ipa": "/baʊt/", "phonetic": "BOWT"}]}
+{"guid": "N60_156", "forms": [{"grammatical_form": "noun/en_singular", "text": "round", "is_base_form": true, "ipa": "/raʊnd/", "phonetic": "ROUND"}]}
+{"guid": "N60_157", "forms": [{"grammatical_form": "noun/en_singular", "text": "clinch", "is_base_form": true, "ipa": "/klɪntʃ/", "phonetic": "KLINCH"}]}
+{"guid": "N60_158", "forms": [{"grammatical_form": "noun/en_singular", "text": "knockout", "is_base_form": true, "ipa": "/ˈnɑkˌaʊt/", "phonetic": "NOK-out"}]}
+{"guid": "N60_159", "forms": [{"grammatical_form": "noun/en_singular", "text": "technical knockout", "is_base_form": true, "ipa": "/ˈtɛknɪkəl ˈnɑːkaʊt/", "phonetic": "TEK-ni-kuhl KNOCK-out"}], "variants": [{"kind": "abbreviation", "key": "TKO", "forms": [{"grammatical_form": "noun/en_singular", "text": "TKO", "is_base_form": true}]}]}
+{"guid": "N60_160", "forms": [{"grammatical_form": "noun/en_singular", "text": "knockdown", "is_base_form": true, "ipa": "/ˈnɑkˌdaʊn/", "phonetic": "NAHK-down"}]}
+{"guid": "N60_161", "forms": [{"grammatical_form": "noun/en_singular", "text": "count", "is_base_form": true, "ipa": "/kaʊnt/", "phonetic": "KOWNT"}]}
+{"guid": "N60_162", "forms": [{"grammatical_form": "noun/en_singular", "text": "split decision", "is_base_form": true, "ipa": "/ˌsplɪt dɪˈsɪʒən/", "phonetic": "SPLIT dih-SIZH-uhn"}]}
+{"guid": "N60_163", "forms": [{"grammatical_form": "noun/en_singular", "text": "weigh-in", "is_base_form": true, "ipa": "/ˈweɪˌɪn/", "phonetic": "WAY-in"}]}
+{"guid": "N60_164", "forms": [{"grammatical_form": "noun/en_singular", "text": "trick", "is_base_form": true, "ipa": "/trɪk/", "phonetic": "TRIK"}]}
+{"guid": "N60_165", "forms": [{"grammatical_form": "noun/en_singular", "text": "bid", "is_base_form": true, "ipa": "/bɪd/", "phonetic": "BID"}]}
+{"guid": "N60_166", "forms": [{"grammatical_form": "noun/en_singular", "text": "no-trump", "is_base_form": true, "ipa": "/ˈnoʊˌtrʌmp/", "phonetic": "NOH-trump"}]}
+{"guid": "N60_167", "forms": [{"grammatical_form": "noun/en_singular", "text": "contract", "is_base_form": true, "ipa": "/ˈkɑnˌtrækt/", "phonetic": "KON-trakt"}]}
+{"guid": "N60_168", "forms": [{"grammatical_form": "noun/en_singular", "text": "rubber", "is_base_form": true, "ipa": "/ˈrʌbər/", "phonetic": "RUH-ber"}]}
+{"guid": "N60_169", "forms": [{"grammatical_form": "noun/en_singular", "text": "grand slam", "is_base_form": true, "ipa": "/ˌɡrænd ˈslæm/", "phonetic": "GRAND-SLAM"}]}
+{"guid": "N60_170", "forms": [{"grammatical_form": "noun/en_singular", "text": "small slam", "is_base_form": true, "ipa": "/ˈsmɔl slæm/", "phonetic": "SMAWL-SLAM"}]}
+{"guid": "N60_171", "forms": [{"grammatical_form": "noun/en_singular", "text": "overtrick", "is_base_form": true, "ipa": "/ˈoʊvərˌtrɪk/", "phonetic": "OH-ver-trik"}]}
+{"guid": "N60_172", "forms": [{"grammatical_form": "noun/en_singular", "text": "undertrick", "is_base_form": true, "ipa": "/ˈʌndərˌtrɪk/", "phonetic": "UN-der-trik"}]}
+{"guid": "N60_173", "forms": [{"grammatical_form": "noun/en_singular", "text": "sprint", "is_base_form": true, "ipa": "/sprɪnt/", "phonetic": "SPRINT"}]}
+{"guid": "N60_174", "forms": [{"grammatical_form": "noun/en_singular", "text": "hurdles", "is_base_form": true, "ipa": "/ˈhɝːdəlz/", "phonetic": "HUR-dulz"}]}
+{"guid": "N60_175", "forms": [{"grammatical_form": "noun/en_singular", "text": "marathon", "is_base_form": true, "ipa": "/ˈmærəˌθɑn/", "phonetic": "MAIR-uh-thon"}]}
+{"guid": "N60_176", "forms": [{"grammatical_form": "noun/en_singular", "text": "half marathon", "is_base_form": true, "ipa": "/ˌhæf ˈmærəˌθɑn/", "phonetic": "HAF MAIR-uh-thon"}]}
+{"guid": "N60_177", "forms": [{"grammatical_form": "noun/en_singular", "text": "cross-country", "is_base_form": true, "ipa": "/ˌkrɔs ˈkʌntri/", "phonetic": "KRAWS-KUN-tree"}]}
+{"guid": "N60_178", "forms": [{"grammatical_form": "noun/en_singular", "text": "race walking", "is_base_form": true, "ipa": "/ˈreɪs ˌwɔkɪŋ/", "phonetic": "RAYS-WAW-king"}]}
+{"guid": "N60_179", "forms": [{"grammatical_form": "noun/en_singular", "text": "field event", "is_base_form": true, "ipa": "/ˈfiːld ɪˌvɛnt/", "phonetic": "FEELD ih-VENT"}]}
+{"guid": "N60_180", "forms": [{"grammatical_form": "noun/en_singular", "text": "high jump", "is_base_form": true, "ipa": "/ˈhaɪ ˌdʒʌmp/", "phonetic": "HY-JUMP"}]}
+{"guid": "N60_181", "forms": [{"grammatical_form": "noun/en_singular", "text": "long jump", "is_base_form": true, "ipa": "/ˈlɔŋ ˌdʒʌmp/", "phonetic": "LONG-jump"}]}
+{"guid": "N60_182", "forms": [{"grammatical_form": "noun/en_singular", "text": "triple jump", "is_base_form": true, "ipa": "/ˈtrɪpəl dʒʌmp/", "phonetic": "TRIP-uhl-jump"}]}
+{"guid": "N60_183", "forms": [{"grammatical_form": "noun/en_singular", "text": "pole vault", "is_base_form": true, "ipa": "/ˈpoʊlˌvɔlt/", "phonetic": "POHL-vawlt"}]}
+{"guid": "N60_184", "forms": [{"grammatical_form": "noun/en_singular", "text": "shot put", "is_base_form": true, "ipa": "/ˈʃɑt ˌpʊt/", "phonetic": "SHOT-put"}]}
+{"guid": "N60_185", "forms": [{"grammatical_form": "noun/en_singular", "text": "hammer throw", "is_base_form": true, "ipa": "/ˈhæmər θroʊ/", "phonetic": "HAM-er throh"}]}
+{"guid": "N60_186", "forms": [{"grammatical_form": "noun/en_singular", "text": "decathlon", "is_base_form": true, "ipa": "/dɪˈkæθˌlɑn/", "phonetic": "dih-KATH-lon"}]}
+{"guid": "N60_187", "forms": [{"grammatical_form": "noun/en_singular", "text": "heptathlon", "is_base_form": true, "ipa": "/hɛpˈθætlɑn/", "phonetic": "hep-TATH-lon"}]}
+{"guid": "N60_188", "forms": [{"grammatical_form": "noun/en_singular", "text": "freestyle", "is_base_form": true, "ipa": "/ˈfriˌstaɪl/", "phonetic": "FREE-style"}]}
+{"guid": "N60_189", "forms": [{"grammatical_form": "noun/en_singular", "text": "medley", "is_base_form": true, "ipa": "/ˈmɛdli/", "phonetic": "MED-lee"}]}
+{"guid": "N60_190", "forms": [{"grammatical_form": "noun/en_singular", "text": "stage", "is_base_form": true, "ipa": "/steɪdʒ/", "phonetic": "STAYJ"}]}
+{"guid": "N60_191", "forms": [{"grammatical_form": "noun/en_singular", "text": "stage race", "is_base_form": true, "ipa": "/ˈsteɪdʒ ˌreɪs/", "phonetic": "STAYJ RAYS"}]}
+{"guid": "N60_192", "forms": [{"grammatical_form": "noun/en_singular", "text": "time trial", "is_base_form": true, "ipa": "/ˈtaɪm ˌtraɪəl/", "phonetic": "TIME TRY-uhl"}]}
+{"guid": "N60_193", "forms": [{"grammatical_form": "noun/en_singular", "text": "prologue", "is_base_form": true, "ipa": "/ˈproʊˌlɔɡ/", "phonetic": "PROH-log"}]}
+{"guid": "N60_194", "forms": [{"grammatical_form": "noun/en_singular", "text": "general classification", "is_base_form": true, "ipa": "/ˈdʒɛnərəl ˌklæsɪfɪˈkeɪʃən/", "phonetic": "JEN-er-uhl kla-suh-fuh-KAY-shuhn"}]}
+{"guid": "N60_195", "forms": [{"grammatical_form": "noun/en_singular", "text": "criterium", "is_base_form": true, "ipa": "/kraɪˈtɪriəm/", "phonetic": "kry-TEER-ee-um"}]}
+{"guid": "N60_196", "forms": [{"grammatical_form": "noun/en_singular", "text": "keirin", "is_base_form": true, "ipa": "/ˈkeɪrɪn/", "phonetic": "KAY-rin"}]}
+{"guid": "N60_197", "forms": [{"grammatical_form": "noun/en_singular", "text": "omnium", "is_base_form": true, "ipa": "/ˈɑːmniəm/", "phonetic": "OM-nee-um"}]}
+{"guid": "N60_198", "forms": [{"grammatical_form": "noun/en_singular", "text": "pursuit", "is_base_form": true, "ipa": "/pərˈsuːt/", "phonetic": "per-SOOT"}]}
+{"guid": "N60_199", "forms": [{"grammatical_form": "noun/en_singular", "text": "madison", "is_base_form": true, "ipa": "/ˈmædɪsən/", "phonetic": "MAD-ih-sun"}]}
+{"guid": "N60_200", "forms": [{"grammatical_form": "noun/en_singular", "text": "kill", "is_base_form": true, "ipa": "/kɪl/", "phonetic": "KIL"}]}
+{"guid": "N60_201", "forms": [{"grammatical_form": "noun/en_singular", "text": "rotation", "is_base_form": true, "ipa": "/roʊˈteɪʃən/", "phonetic": "roh-TAY-shuhn"}]}
+{"guid": "N60_202", "forms": [{"grammatical_form": "noun/en_singular", "text": "side out", "is_base_form": true, "ipa": "/ˈsaɪd ˌaʊt/", "phonetic": "SIDE-OWT"}]}
+{"guid": "N60_203", "forms": [{"grammatical_form": "noun/en_singular", "text": "two pair", "is_base_form": true, "ipa": "/ˌtuː ˈpɛr/", "phonetic": "TOO PAIR"}]}
+{"guid": "N60_204", "forms": [{"grammatical_form": "noun/en_singular", "text": "three of a kind", "is_base_form": true, "ipa": "/ˌθri əv ə ˈkaɪnd/", "phonetic": "THREE-uhv-uh-KYND"}]}
+{"guid": "N60_205", "forms": [{"grammatical_form": "noun/en_singular", "text": "straight", "is_base_form": true, "ipa": "/streɪt/", "phonetic": "STRAYT"}]}
+{"guid": "N60_206", "forms": [{"grammatical_form": "noun/en_singular", "text": "flush", "is_base_form": true, "ipa": "/flʌʃ/", "phonetic": "FLUSH"}]}
+{"guid": "N60_207", "forms": [{"grammatical_form": "noun/en_singular", "text": "full house", "is_base_form": true, "ipa": "/ˌfʊl ˈhaʊs/", "phonetic": "FUL-HOWS"}]}
+{"guid": "N60_208", "forms": [{"grammatical_form": "noun/en_singular", "text": "four of a kind", "is_base_form": true, "ipa": "/ˌfɔr əv ə ˈkaɪnd/", "phonetic": "FOR-uhv-uh-KYND"}]}
+{"guid": "N60_209", "forms": [{"grammatical_form": "noun/en_singular", "text": "straight flush", "is_base_form": true, "ipa": "/ˌstreɪt ˈflʌʃ/", "phonetic": "STRAYT-FLUSH"}]}
+{"guid": "N60_210", "forms": [{"grammatical_form": "noun/en_singular", "text": "royal flush", "is_base_form": true, "ipa": "/ˌrɔɪəl ˈflʌʃ/", "phonetic": "ROY-uhl FLUSH"}]}
+{"guid": "N60_211", "forms": [{"grammatical_form": "noun/en_singular", "text": "high card", "is_base_form": true, "ipa": "/ˈhaɪ ˌkɑrd/", "phonetic": "HY-KARD"}]}
+{"guid": "N60_212", "forms": [{"grammatical_form": "noun/en_singular", "text": "nuts", "is_base_form": true, "ipa": "/nʌts/", "phonetic": "NUTS"}]}
+{"guid": "N60_213", "forms": [{"grammatical_form": "noun/en_singular", "text": "ante", "is_base_form": true, "ipa": "/ˈænti/", "phonetic": "AN-tee"}]}
+{"guid": "N60_214", "forms": [{"grammatical_form": "noun/en_singular", "text": "blind", "is_base_form": true, "ipa": "/blaɪnd/", "phonetic": "BLYND"}]}
+{"guid": "N60_215", "forms": [{"grammatical_form": "noun/en_singular", "text": "all-in", "is_base_form": true, "ipa": "/ˌɔl ˈɪn/", "phonetic": "awl-IN"}]}
+{"guid": "N60_216", "forms": [{"grammatical_form": "noun/en_singular", "text": "showdown", "is_base_form": true, "ipa": "/ˈʃoʊˌdaʊn/", "phonetic": "SHOH-doun"}]}
+{"guid": "N60_217", "forms": [{"grammatical_form": "noun/en_singular", "text": "bad beat", "is_base_form": true, "ipa": "/ˌbæd ˈbit/", "phonetic": "BAD BEET"}]}
+{"guid": "N60_218", "forms": [{"grammatical_form": "noun/en_singular", "text": "slalom", "is_base_form": true, "ipa": "/ˈslɑːləm/", "phonetic": "SLAH-lum"}]}
+{"guid": "N60_219", "forms": [{"grammatical_form": "noun/en_singular", "text": "giant slalom", "is_base_form": true, "ipa": "/ˌdʒaɪənt ˈslɑːləm/", "phonetic": "JY-unt SLOH-lum"}]}
+{"guid": "N60_220", "forms": [{"grammatical_form": "noun/en_singular", "text": "super-G", "is_base_form": true, "ipa": "/ˌsuːpərˈdʒiː/", "phonetic": "SOO-per-JEE"}]}
+{"guid": "N60_221", "forms": [{"grammatical_form": "noun/en_singular", "text": "downhill", "is_base_form": true, "ipa": "/ˈdaʊnˌhɪl/", "phonetic": "DOWN-hil"}]}
+{"guid": "N60_222", "forms": [{"grammatical_form": "noun/en_singular", "text": "ski jumping", "is_base_form": true, "ipa": "/ˈskiː ˌdʒʌmpɪŋ/", "phonetic": "SKEE-JUMP-ing"}]}
+{"guid": "N60_223", "forms": [{"grammatical_form": "noun/en_singular", "text": "big air", "is_base_form": true, "ipa": "/ˌbɪɡ ˈɛr/", "phonetic": "BIG AIR"}]}
+{"guid": "N60_224", "forms": [{"grammatical_form": "noun/en_singular", "text": "pairs", "is_base_form": true, "ipa": "/pɛrz/", "phonetic": "PAIRZ"}]}
+{"guid": "N60_225", "forms": [{"grammatical_form": "noun/en_singular", "text": "short program", "is_base_form": true, "ipa": "/ˈʃɔrt ˌproʊˌɡræm/", "phonetic": "SHORT PRO-gram"}]}
+{"guid": "N60_226", "forms": [{"grammatical_form": "noun/en_singular", "text": "free skate", "is_base_form": true, "ipa": "/ˌfriː ˈskeɪt/", "phonetic": "FREE-SKAYT"}]}
+{"guid": "N60_227", "forms": [{"grammatical_form": "noun/en_singular", "text": "floor exercise", "is_base_form": true, "ipa": "/ˈflɔr ˌɛksərˌsaɪz/", "phonetic": "FLOR EK-ser-size"}]}
+{"guid": "N60_228", "forms": [{"grammatical_form": "noun/en_singular", "text": "all-around", "is_base_form": true, "ipa": "/ˌɔl əˈraʊnd/", "phonetic": "AWL-uh-rownd"}]}
+{"guid": "N60_229", "forms": [{"grammatical_form": "noun/en_singular", "text": "routine", "is_base_form": true, "ipa": "/ruːˈtiːn/", "phonetic": "roo-TEEN"}]}
+{"guid": "N60_230", "forms": [{"grammatical_form": "noun/en_singular", "text": "ippon", "is_base_form": true, "ipa": "/ˈɪpɑn/", "phonetic": "ee-POHN"}]}
+{"guid": "N60_231", "forms": [{"grammatical_form": "noun/en_singular", "text": "submission", "is_base_form": true, "ipa": "/səbˈmɪʃən/", "phonetic": "suhb-MISH-uhn"}]}
+{"guid": "N60_232", "forms": [{"grammatical_form": "noun/en_singular", "text": "pin", "is_base_form": true, "ipa": "/pɪn/", "phonetic": "PIN"}]}
+{"guid": "N60_233", "forms": [{"grammatical_form": "noun/en_singular", "text": "fall", "is_base_form": true, "ipa": "/fɔl/", "phonetic": "FAWL"}]}
+{"guid": "N60_234", "forms": [{"grammatical_form": "noun/en_singular", "text": "gammon", "is_base_form": true, "ipa": "/ˈɡæmən/", "phonetic": "GAM-un"}]}
+{"guid": "N60_235", "forms": [{"grammatical_form": "noun/en_singular", "text": "offside", "is_base_form": true, "ipa": "/ˌɔfˈsaɪd/", "phonetic": "AWF-sाइड"}]}
+{"guid": "N60_236", "forms": [{"grammatical_form": "noun/en_singular", "text": "corner kick", "is_base_form": true, "ipa": "/ˈkɔrnər kɪk/", "phonetic": "KOR-ner kik"}]}
+{"guid": "N60_237", "forms": [{"grammatical_form": "noun/en_singular", "text": "corner", "is_base_form": true, "ipa": "/ˈkɔrnər/", "phonetic": "KOR-ner"}]}
+{"guid": "N60_238", "forms": [{"grammatical_form": "noun/en_singular", "text": "free kick", "is_base_form": true, "ipa": "/ˌfri ˈkɪk/", "phonetic": "FREE-KIK"}]}
+{"guid": "N60_239", "forms": [{"grammatical_form": "noun/en_singular", "text": "penalty kick", "is_base_form": true, "ipa": "/ˈpɛnəlti kɪk/", "phonetic": "PEN-uhl-tee kik"}]}
+{"guid": "N60_240", "forms": [{"grammatical_form": "noun/en_singular", "text": "penalty shootout", "is_base_form": true, "ipa": "/ˈpɛnəlti ˈʃuˌtaʊt/", "phonetic": "PEN-uhl-tee SHOO-towt"}]}
+{"guid": "N60_241", "forms": [{"grammatical_form": "noun/en_singular", "text": "goal kick", "is_base_form": true, "ipa": "/ˈɡoʊl ˌkɪk/", "phonetic": "GOHL-kik"}]}
+{"guid": "N60_242", "forms": [{"grammatical_form": "noun/en_singular", "text": "throw-in", "is_base_form": true, "ipa": "/ˈθroʊˌɪn/", "phonetic": "THROH-in"}]}
+{"guid": "N60_243", "forms": [{"grammatical_form": "noun/en_singular", "text": "extra time", "is_base_form": true, "ipa": "/ˈɛkstrə taɪm/", "phonetic": "EK-struh-TIME"}]}
+{"guid": "N60_244", "forms": [{"grammatical_form": "noun/en_singular", "text": "clean sheet", "is_base_form": true, "ipa": "/ˌklin ˈʃit/", "phonetic": "KLEEN-SHEET"}]}
+{"guid": "N60_245", "forms": [{"grammatical_form": "noun/en_singular", "text": "own goal", "is_base_form": true, "ipa": "/ˌoʊn ˈɡoʊl/", "phonetic": "OHN GOHL"}]}
+{"guid": "N60_246", "forms": [{"grammatical_form": "noun/en_singular", "text": "yellow card", "is_base_form": true, "ipa": "/ˈjɛloʊ kɑrd/", "phonetic": "YEL-oh kard"}]}
+{"guid": "N60_247", "forms": [{"grammatical_form": "noun/en_singular", "text": "red card", "is_base_form": true, "ipa": "/ˌrɛd ˈkɑrd/", "phonetic": "RED-KARD"}]}
+{"guid": "N60_248", "forms": [{"grammatical_form": "noun/en_singular", "text": "booking", "is_base_form": true, "ipa": "/ˈbʊkɪŋ/", "phonetic": "BOOK-ing"}]}
+{"guid": "N60_249", "forms": [{"grammatical_form": "noun/en_singular", "text": "handball", "is_base_form": true, "ipa": "/ˈhændˌbɔl/", "phonetic": "HAND-bawl"}]}
+{"guid": "N60_250", "forms": [{"grammatical_form": "noun/en_singular", "text": "derby", "is_base_form": true, "ipa": "/ˈdɝː.bi/", "phonetic": "DER-bee"}]}

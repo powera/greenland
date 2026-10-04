@@ -47,3 +47,8 @@
 {"guid": "N09_053", "forms": [{"grammatical_form": "noun/en_singular", "text": "sunglasses", "is_base_form": true, "ipa": "/ˈsʌnˌɡlæsɪz/", "phonetic": "SUN-glass-iz"}]}
 {"guid": "N09_054", "forms": [{"grammatical_form": "noun/en_singular", "text": "uniform", "is_base_form": true, "ipa": "/ˈjuːnəfɔrm/", "phonetic": "YOO-nuh-form"}]}
 {"guid": "N09_055", "forms": [{"grammatical_form": "noun/en_singular", "text": "mouthguard", "is_base_form": true, "ipa": "/ˈmaʊθˌɡɑrd/", "phonetic": "MOWTH-gard"}]}
+{"guid": "N09_056", "forms": [{"grammatical_form": "noun/en_singular", "text": "mitt", "is_base_form": true, "ipa": "/mɪt/", "phonetic": "MIT"}]}
+{"guid": "N09_057", "forms": [{"grammatical_form": "noun/en_singular", "text": "boxing glove", "is_base_form": true, "ipa": "/ˈbɑksɪŋ ˌɡlʌv/", "phonetic": "BOK-sing gluv"}]}
+{"guid": "N09_058", "forms": [{"grammatical_form": "noun/en_singular", "text": "gi", "is_base_form": true, "ipa": "/ɡiː/", "phonetic": "GHEE"}]}
+{"guid": "N09_059", "forms": [{"grammatical_form": "noun/en_singular", "text": "belt", "is_base_form": true, "ipa": "/bɛlt/", "phonetic": "BELT"}]}
+{"guid": "N09_060", "forms": [{"grammatical_form": "noun/en_singular", "text": "black belt", "is_base_form": true, "ipa": "/ˌblæk ˈbɛlt/", "phonetic": "BLAK-BELT"}]}
