@@ -86,6 +86,7 @@ SUBTYPE_DISPLAY = {
     "change": "Veränderung",
     "directional_movement": "Gerichtete Bewegung",
     "manner_movement": "Bewegungsart",
+    "rule_defined_action": "Regelgebundene Handlung",
     # Adjective subtypes
     "size": "Größe",
     "color": "Farbe",
