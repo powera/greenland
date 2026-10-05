@@ -76,6 +76,11 @@ Base prefix: `/api`.
   - A word already accounted for — as a lemma, disambiguated lemma, English
     derivative form, or alternate spelling (`variant_forms`) — returns
     `status: "already_exists"` and nothing is written.
+  - Optional `pos_type` (`noun`/`verb`/`adjective`/`adverb`) asks for and keeps
+    only that part of speech's senses, and narrows the existence check to a
+    sense of that part of speech (or an exclusion). This is how to add the verb
+    "place" beside the stored noun, or the verb "found" whose text is already a
+    form of "find".
   - Senses landing on a catch-all `*_other` subtype for an open-class word
     (noun/verb/adjective/adverb) are diverted to the pending-import queue for
     human review instead of being written as lemmas, and are returned in

@@ -1155,6 +1155,13 @@ def add_word_endpoint() -> ResponseReturnValue:
             f"{Config.MAX_DIFFICULTY_LEVEL}, or {Config.EXCLUDE_DIFFICULTY_LEVEL}"
         )
 
+    # Optional: add only this part of speech's senses, for a word whose other
+    # part of speech is stored already (the verb "place" beside the noun).
+    # add_word validates the value.
+    pos_type = payload.get("pos_type")
+    if pos_type is not None and not isinstance(pos_type, str):
+        return _build_error_response("pos_type must be a string")
+
     config = DataSourceConfig(
         backend_type=BackendType.SQLITE,
         sqlite_path=Config.DB_PATH,
@@ -1168,6 +1175,7 @@ def add_word_endpoint() -> ResponseReturnValue:
         model=model,
         source=Config.OPERATION_LOG_SOURCE,
         difficulty_level=difficulty_level,
+        pos_type=pos_type,
     )
 
     if result.status == "error":
