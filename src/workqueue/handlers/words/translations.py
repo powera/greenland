@@ -1,8 +1,18 @@
-"""Capability handlers for word translation tasks."""
+"""Capability handlers for word translation tasks.
+
+``TRANSLATIONS_JOB`` is voras's populate as a staged job for OpenAI batches
+(``voras --populate --batch``), one item per lemma and group of at most 10
+missing languages, built from the same pieces as the live path
+(``words.translation_populate``).
+"""
 
 from __future__ import annotations
 
-from typing import Any, Dict, List, Optional
+from typing import Any, Dict, List, Optional, Sequence, Tuple, Union
+
+from sqlalchemy.orm import Session
+
+from clients.types import LLMCall
 
 import constants
 from barsukas.config import Config
@@ -19,7 +29,15 @@ from storage.translation_helpers import (
     split_llm_language_batches,
 )
 from wordfreq.translation.client import LinguisticClient
+from words.translation_populate import (
+    build_populate_call,
+    missing_translation_languages,
+    populate_groups,
+    populate_reference,
+    store_populated_translations,
+)
 from words.translation_workflow import TranslationWorkflow
+from workqueue.llm_batch import Done, Job, Next, Ready, Stage, StageContext
 from workqueue.tools import workqueue_payload_handler
 
 
@@ -243,3 +261,74 @@ def handle_words_translations_regenerate(session: Any, lemma_id: int, **_: Any) 
     route so it is tolerant of payload changes.
     """
     return do_regenerate_translations(session=session, lemma_id=lemma_id)
+
+
+# ---------------------------------------------------------------------------
+# Staged-job form, for batching (see workqueue.llm_batch)
+# ---------------------------------------------------------------------------
+
+TRANSLATIONS_JOB_NAME = "voras"
+TRANSLATIONS_STAGE = "translations.populate"
+
+
+def translation_populate_states(
+    session: Session, lemmas: Sequence[Lemma], languages: Sequence[str]
+) -> Tuple[List[Dict[str, Any]], int]:
+    """Item states for every lemma's missing languages, at most 10 languages each.
+
+    Returns:
+        ``(states, lemmas with nothing missing)``.
+    """
+    states: List[Dict[str, Any]] = []
+    complete = 0
+    for lemma in lemmas:
+        missing = missing_translation_languages(session, lemma, languages)
+        if not missing:
+            complete += 1
+            continue
+        states.extend(
+            {"lemma_id": lemma.id, "languages": group} for group in populate_groups(missing)
+        )
+    return states, complete
+
+
+def _prepare_populate(
+    session: Session, state: Dict[str, Any], ctx: StageContext
+) -> Union[LLMCall, Ready, Done]:
+    lemma = session.get(Lemma, state["lemma_id"])
+    if lemma is None:
+        return Done("failed", f"Lemma {state['lemma_id']} not found")
+    missing = missing_translation_languages(session, lemma, state["languages"])
+    if not missing:
+        return Done("skipped", "translations already present")
+    reference = populate_reference(session, lemma, missing)
+    if reference is None:
+        return Done("rejected", "no reference translation")
+    call = build_populate_call(lemma, reference, missing)
+    if call is None:
+        return Done("rejected", "could not build a prompt")
+    state["asked"] = missing
+    return call
+
+
+def _apply_populate(
+    session: Session, state: Dict[str, Any], data: Dict[str, Any], ctx: StageContext
+) -> Union[Done, Next]:
+    lemma = session.get(Lemma, state["lemma_id"])
+    if lemma is None:
+        return Done("failed", f"Lemma {state['lemma_id']} not found")
+    written, blank = store_populated_translations(
+        session, lemma, data, state["asked"], source=f"voras-agent/batch/{ctx.model}"
+    )
+    if written:
+        return Done("written", ", ".join(written))
+    if blank:
+        return Done("rejected", f"blank answer for {', '.join(blank)}")
+    return Done("skipped", "translations already present")
+
+
+TRANSLATIONS_JOB = Job(
+    name=TRANSLATIONS_JOB_NAME,
+    stages=(Stage(TRANSLATIONS_STAGE, _prepare_populate, _apply_populate),),
+    item_key=lambda state: f"{state['lemma_id']}:{'+'.join(state['languages'])}",
+)

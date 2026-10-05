@@ -1,4 +1,8 @@
-"""Tests for the OpenAI Batch lemma-translation populate path."""
+"""Tests for voras's populate as a staged batch job, and the legacy batch applier.
+
+New runs go through TRANSLATIONS_JOB (workqueue.llm_batch); rows submitted
+before that are applied by words.translation_batch.apply_populate_results.
+"""
 
 import json
 from pathlib import Path
@@ -15,31 +19,30 @@ from clients.batch_queue import (
     BatchRequestStatus,
     create_batch_database_session,
 )
+from clients.openai.client import build_responses_request
 from storage.models.schema import Base, Lemma
 from storage.translation_helpers import get_translation, lang_code_to_llm_field, set_translation
 from words.translation_batch import (
     AGENT_NAME,
     OPERATION_TYPE,
-    PopulatePlan,
-    PopulateRequest,
     apply_populate_results,
-    build_request_body,
-    chunk_by_lemma,
     find_in_flight_lemma_ids,
-    plan_populate_requests,
-    submit_populate_batches,
 )
 from wordfreq.translation.translations import build_translation_prompt
+from workqueue.handlers.words.translations import TRANSLATIONS_JOB, translation_populate_states
+from workqueue.llm_batch import complete_rows, start_batch_run
+from workqueue.registry import get_llm_job
 
 _MODEL = "gpt-6-luna"
 
 
 class _FakeBatchClient:
-    """Stands in for OpenAIBatchClient: records uploads, returns fixed ids."""
+    """Stands in for OpenAIBatchClient: records uploads and serves set results."""
 
     def __init__(self, fail_on_create: bool = False) -> None:
         self.uploads: List[List[Dict[str, Any]]] = []
         self.fail_on_create = fail_on_create
+        self.results: Dict[str, List[Dict[str, Any]]] = {}
 
     def upload_batch_file(self, requests: List[Dict[str, Any]]) -> str:
         self.uploads.append(requests)
@@ -51,6 +54,28 @@ class _FakeBatchClient:
         if self.fail_on_create:
             raise RuntimeError("upstream unavailable")
         return {"id": f"batch_{file_id}"}
+
+    def get_batch_status(self, batch_id: str) -> Dict[str, Any]:
+        status = "completed" if batch_id in self.results else "in_progress"
+        return {"id": batch_id, "status": status, "output_file_id": batch_id}
+
+    def download_batch_results(self, output_file_id: str) -> List[Dict[str, Any]]:
+        return self.results[output_file_id]
+
+    def finish(self, batch_id: str, upload_index: int, structured: Dict[str, Any]) -> None:
+        self.results[batch_id] = [
+            {
+                "custom_id": line["custom_id"],
+                "response": json.loads(_responses_envelope(structured)),
+            }
+            for line in self.uploads[upload_index]
+        ]
+
+
+@pytest.fixture(autouse=True)
+def _no_schema_size_check(monkeypatch: pytest.MonkeyPatch) -> None:
+    """Request shape only; counting schema tokens needs tiktoken's downloaded data."""
+    monkeypatch.setattr("clients.lib.count_schema_tokens", lambda schema_dict: 0)
 
 
 @pytest.fixture()
@@ -124,90 +149,120 @@ def _field(language_code: str) -> str:
     return field_name
 
 
-def test_plan_asks_each_lemma_only_for_its_missing_languages(session: Session) -> None:
+def test_job_is_registered() -> None:
+    assert get_llm_job("voras") is TRANSLATIONS_JOB
+
+
+def test_states_ask_each_lemma_only_for_its_missing_languages(session: Session) -> None:
     partial = _add_lemma(session, "dog", {"lt": "šuo", "hi": "कुत्ता"})
     _add_lemma(session, "cat", {"lt": "katė", "hi": "बिल्ली", "vi": "mèo", "ms": "kucing"})
 
-    plan = plan_populate_requests(session, session.query(Lemma).all(), ["hi", "vi", "ms"], _MODEL)
+    states, complete = translation_populate_states(
+        session, session.query(Lemma).all(), ["hi", "vi", "ms"]
+    )
 
-    assert plan.lemmas_complete == 1
-    assert [(r.lemma_id, r.languages) for r in plan.requests] == [(partial.id, ["vi", "ms"])]
-    assert plan.missing_by_language() == {"vi": 1, "ms": 1}
+    assert complete == 1
+    assert states == [{"lemma_id": partial.id, "languages": ["vi", "ms"]}]
 
 
-def test_plan_splits_more_than_ten_languages_and_skips_in_flight(session: Session) -> None:
+def test_states_split_more_than_ten_languages(session: Session) -> None:
     languages = ["de", "it", "nl", "pt", "sv", "ja", "ko", "sw", "hi", "vi", "ms"]
     lemma = _add_lemma(session, "dog", {"lt": "šuo"})
-    busy = _add_lemma(session, "cat", {"lt": "katė"})
 
-    plan = plan_populate_requests(
-        session, [lemma, busy], languages, _MODEL, in_flight_lemma_ids={busy.id}
-    )
+    states, _complete = translation_populate_states(session, [lemma], languages)
 
-    assert plan.lemmas_skipped_in_flight == 1
-    assert [len(r.languages) for r in plan.requests] == [10, 1]
-    assert {r.lemma_id for r in plan.requests} == {lemma.id}
+    assert [len(state["languages"]) for state in states] == [10, 1]
 
 
-def test_request_body_mirrors_the_live_responses_call() -> None:
-    prompt = build_translation_prompt("dog", ("lt", "šuo"), "a canine", "noun", languages=["hi"])
-    assert prompt is not None
-
-    body = build_request_body(prompt, _MODEL)
-
-    assert body["model"] == _MODEL
-    assert body["instructions"] == prompt.context
-    assert body["input"] == prompt.prompt
-    assert body["reasoning"] == {"effort": "none"}
-    assert body["text"]["format"]["strict"] is True
-    assert _field("hi") in body["text"]["format"]["schema"]["properties"]
-
-
-def test_chunks_hold_whole_lemmas() -> None:
-    requests = [
-        PopulateRequest(lemma_id=1, languages=["hi"], body={}),
-        PopulateRequest(lemma_id=1, languages=["vi"], body={}),
-        PopulateRequest(lemma_id=2, languages=["hi"], body={}),
-        PopulateRequest(lemma_id=3, languages=["hi"], body={}),
-    ]
-
-    chunks = chunk_by_lemma(requests, lemmas_per_batch=2)
-
-    assert [[r.lemma_id for r in chunk] for chunk in chunks] == [[1, 1, 2], [3]]
-
-
-def test_submit_sends_one_batch_per_chunk(batch_session: Session) -> None:
+def test_batch_request_is_the_live_request(session: Session, batch_session: Session) -> None:
+    lemma = _add_lemma(session, "dog", {"lt": "šuo"})
     client = _FakeBatchClient()
     manager = BatchQueueManager(batch_session, batch_client=client)  # type: ignore[arg-type]
-    plan = PopulatePlan(
-        requests=[
-            PopulateRequest(lemma_id=lemma_id, languages=["hi"], body={"model": _MODEL})
-            for lemma_id in (1, 2, 3)
-        ]
+    states, _complete = translation_populate_states(session, [lemma], ["hi"])
+
+    start_batch_run(session, manager, TRANSLATIONS_JOB, states, _MODEL)
+
+    prompt = build_translation_prompt(
+        "dog", ("lt", "šuo"), "definition of dog", "noun", languages=["hi"]
+    )
+    assert prompt is not None
+    assert client.uploads[0][0]["body"] == build_responses_request(
+        _MODEL, prompt.prompt, context=prompt.context, json_schema=prompt.schema
     )
 
-    submitted = submit_populate_batches(manager, plan, lemmas_per_batch=2)
 
-    assert [(b.batch_id, b.lemma_count) for b in submitted] == [
-        ("batch_file_1", 2),
-        ("batch_file_2", 1),
-    ]
-    assert [len(upload) for upload in client.uploads] == [2, 1]
-    assert find_in_flight_lemma_ids(batch_session) == {1, 2, 3}
+def test_batch_writes_missing_languages_and_keeps_hand_edits(
+    session: Session, batch_session: Session
+) -> None:
+    lemma = _add_lemma(session, "dog", {"lt": "šuo"})
+    client = _FakeBatchClient()
+    manager = BatchQueueManager(batch_session, batch_client=client)  # type: ignore[arg-type]
+    states, _complete = translation_populate_states(session, [lemma], ["hi", "vi"])
+    report = start_batch_run(session, manager, TRANSLATIONS_JOB, states, _MODEL)
+    assert report.calls == 1
+
+    # A hand edit that landed while the batch was running.
+    set_translation(session, lemma, "vi", "con chó")
+    session.commit()
+
+    batch_id = report.batch_ids[0]
+    client.finish(
+        batch_id,
+        0,
+        {_field("hi"): {"translation": "कुत्ता"}, _field("vi"): {"translation": " chó "}},
+    )
+    manager.retrieve_batch_results(batch_id)
+    result = complete_rows(
+        TRANSLATIONS_JOB, manager.get_completed_requests(batch_id=batch_id), session, batch_id
+    )
+
+    assert result["updated"] == 1
+    assert get_translation(session, lemma, "hi") == "कुत्ता"
+    assert get_translation(session, lemma, "vi") == "con chó"
 
 
-def test_failed_submission_cancels_its_rows(batch_session: Session) -> None:
+def test_lemma_without_reference_is_rejected(session: Session, batch_session: Session) -> None:
+    lemma = Lemma(lemma_text="", definition_text="", pos_type="noun", guid="N00_blank")
+    session.add(lemma)
+    session.commit()
+    manager = BatchQueueManager(batch_session, batch_client=_FakeBatchClient())  # type: ignore[arg-type]
+
+    report = start_batch_run(
+        session, manager, TRANSLATIONS_JOB, [{"lemma_id": lemma.id, "languages": ["hi"]}], _MODEL
+    )
+
+    assert report.calls == 0
+    assert report.resolved_without_llm == {"rejected": 1}
+
+
+def test_failed_submission_cancels_its_rows(session: Session, batch_session: Session) -> None:
+    lemma = _add_lemma(session, "dog", {"lt": "šuo"})
     manager = BatchQueueManager(
         batch_session, batch_client=_FakeBatchClient(fail_on_create=True)  # type: ignore[arg-type]
     )
-    plan = PopulatePlan(requests=[PopulateRequest(lemma_id=1, languages=["hi"], body={})])
+    states, _complete = translation_populate_states(session, [lemma], ["hi"])
 
     with pytest.raises(RuntimeError):
-        submit_populate_batches(manager, plan)
+        start_batch_run(session, manager, TRANSLATIONS_JOB, states, _MODEL)
 
     statuses = {row.status for row in batch_session.query(BatchQueue).all()}
     assert statuses == {BatchRequestStatus.CANCELLED.value}
-    assert find_in_flight_lemma_ids(batch_session) == set()
+
+
+def test_legacy_in_flight_lemmas_are_found(batch_session: Session) -> None:
+    manager = BatchQueueManager(batch_session, batch_client=_FakeBatchClient())  # type: ignore[arg-type]
+    manager.queue_request(
+        custom_id="voras_populate_7_x",
+        request_body={},
+        metadata=BatchRequestMetadata(
+            custom_id="voras_populate_7_x",
+            agent_name=AGENT_NAME,
+            operation_type=OPERATION_TYPE,
+            entity_id=7,
+        ),
+    )
+
+    assert find_in_flight_lemma_ids(batch_session) == {7}
 
 
 def test_in_flight_ignores_other_agents(batch_session: Session) -> None:

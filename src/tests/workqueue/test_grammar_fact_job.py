@@ -144,7 +144,7 @@ def _gender(value: str, confidence: float = 0.9) -> Callable[[Dict[str, Any]], D
 
 def test_job_is_registered() -> None:
     assert get_llm_job("lape") is GRAMMAR_FACT_JOB
-    assert get_llm_job("voras") is None
+    assert get_llm_job("barsukas_translate") is None
 
 
 def test_batch_writes_the_fact(

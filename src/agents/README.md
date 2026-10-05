@@ -377,19 +377,24 @@ mechanical paradigm first), run that code in `prepare` with
 the exact call instead of making it, and code in between need only re-raise it.
 A `prepare` that writes as it goes sets `Job.prepare_writes`.
 
-Batched today: lape (grammar facts), vilkas (forms), papuga (pronunciations,
-two stages: forms, then the translation from the filled base form).
+Batched today, all through `workqueue/llm_batch.py`:
+
+- lape (grammar facts);
+- vilkas (forms);
+- papuga (pronunciations, two stages: forms, then the translation from the
+  filled base form);
+- voras (translations);
+- zvirblis and the Barsukas sentence batches (two stages: Phase 1 translation,
+  then Phases 2+3 candidate lookup and decomposition; the optional Phase-4
+  dependency pass is not part of the job).
+
+Rows submitted before an agent moved to a staged job carry no run id; the
+completion dispatchers send those to the agent's legacy applier until none are
+left in flight.
 
 Next candidates, best first:
 
-1. The sentence pipeline (zvirblis, the Barsukas sentence batches): phases 1, 3
-   and 4 as three stages, phase 2 inside stage 2's `prepare`.  Needs `apply` to
-   fan out (one phase-4 item per language), and retires the hand-chained
-   `barsukas_translate` / `barsukas_decompose` batches.
-2. lape lemma facts and `english_principal_parts`; sernas; sense prominence;
+1. lape lemma facts and `english_principal_parts`; sernas; sense prominence;
    dramblys's pending-import classification: one call per item each.
-3. voras: already batched through its own module; moving it would retire the
-   last per-agent branch in the completion dispatchers.
-4. A lemma-review job (all of a lemma's data, "what's wrong?"), which would
+2. A lemma-review job (all of a lemma's data, "what's wrong?"), which would
    also absorb lokys's checks; it needs a findings table to write to first.
-
