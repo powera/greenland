@@ -440,7 +440,7 @@ SUBTYPE_DEFS: Dict[str, Dict[str, SubtypeDef]] = {
         ),
         "place_name": SubtypeDef(
             prefix="N30",
-            description="Generic place nouns, including areas of play",
+            description="Generic place nouns, including whole areas of play",
             examples=["room", "street", "park", "playing field", "tennis court"],
             group="Named Entities",
         ),
@@ -448,6 +448,27 @@ SUBTYPE_DEFS: Dict[str, Dict[str, SubtypeDef]] = {
             prefix="N45",
             description="Countries, states, and similar political regions",
             examples=["Italy", "Japan", "California", "Scotland"],
+            group="Named Entities",
+        ),
+        "spatial_division": SubtypeDef(
+            prefix="N65",
+            description=(
+                "A named part into which a space, surface or grid is divided by rule "
+                "or convention: a line, row, column, cell, zone or section"
+            ),
+            examples=["equator", "border", "aisle", "goal line", "chess file"],
+            comment=(
+                "A named division of a laid-out space: equator, time zone, border, "
+                "lane, aisle, margin, row, column, goal line, penalty area, and the "
+                "file, rank, diagonal and square of a game board. The test is that it "
+                "names a division of a space, not the space and not a thing in it: "
+                "the court is place_name and its baseline is this; a country is "
+                "region and the border between two is this; a net or a curb keeps "
+                "its object subtype. Marks on paper are symbolic_element instead "
+                "(a musical staff). Carved out of place_name, path_infrastructure, "
+                "symbolic_element and concept_idea, which had each taken some of "
+                "these for want of anything closer."
+            ),
             group="Named Entities",
         ),
         "city": SubtypeDef(

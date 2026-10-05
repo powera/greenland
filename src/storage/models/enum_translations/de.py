@@ -64,6 +64,7 @@ SUBTYPE_DISPLAY = {
     "personal_name": "Personenname",
     "place_name": "Ortsname",
     "region": "Region",
+    "spatial_division": "Räumliche Einteilung",
     "city": "Stadt",
     "geographic_place": "Geographischer Ort",
     "organization_name": "Organisationsname",
