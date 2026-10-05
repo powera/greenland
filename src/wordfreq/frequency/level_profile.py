@@ -54,10 +54,11 @@ separates senses only as well as their ``sense_prominence`` ratings do, and a
 
 from __future__ import annotations
 
+import json
 import logging
 import math
 from dataclasses import dataclass, field
-from typing import Callable, Dict, Iterable, List, Optional, Sequence, Tuple
+from typing import Any, Callable, Dict, Iterable, List, Optional, Sequence, Tuple
 
 from sqlalchemy import func
 from sqlalchemy.orm import Session
@@ -85,7 +86,7 @@ class LemmaCorpusProfile:
     lemma_id: int
     lemma_text: str
     disambiguation: Optional[str]
-    level: int
+    level: Optional[int]  # None for a word not yet levelled
     zipf_by_corpus: Dict[str, float]  # floored; every corpus has a value
     attested_corpora: Tuple[str, ...]  # corpora that actually list a form
     skew_by_corpus: Dict[str, float]
@@ -219,7 +220,7 @@ def profile_from_zipfs(
     lemma_id: int,
     lemma_text: str,
     disambiguation: Optional[str],
-    level: int,
+    level: Optional[int],
     zipf_by_corpus: Dict[str, float],
     attested_corpora: Sequence[str],
     min_skew: float = DEFAULT_MIN_SKEW,
@@ -251,13 +252,14 @@ def profile_lemma(
 ) -> Optional[LemmaCorpusProfile]:
     """Measure one lemma against every corpus.
 
-    Returns None when the lemma has no level or no English forms, or when no
-    corpus lists any of its forms (multi-word lemmas, mostly): with nothing
-    attested, every corpus would sit at its floor and the weights would only
-    say which floor is highest.
+    A lemma with no level is measured all the same, so a word waiting for a
+    level can be passed to :func:`suggest_levels`.
+
+    Returns None when the lemma has no English forms, or when no corpus lists
+    any of them (multi-word lemmas, mostly): with nothing attested, every
+    corpus would sit at its floor and the weights would only say which floor is
+    highest.
     """
-    if lemma.difficulty_level is None:
-        return None
     lexeme = get_lexeme(session, lemma.id, "en")
     if lexeme is None:
         return None
@@ -290,11 +292,16 @@ def aggregate_levels(
     lemma_profiles: Iterable[LemmaCorpusProfile],
     unattested_by_level: Optional[Dict[int, int]] = None,
 ) -> Dict[int, LevelProfile]:
-    """Sum lemma weights into one :class:`LevelProfile` per level."""
+    """Sum lemma weights into one :class:`LevelProfile` per level.
+
+    Lemmas without a level are skipped.
+    """
     level_profiles: Dict[int, LevelProfile] = {}
     for level, count in (unattested_by_level or {}).items():
         level_profiles.setdefault(level, LevelProfile(level=level)).unattested_count = count
     for lemma_profile in lemma_profiles:
+        if lemma_profile.level is None:
+            continue
         level_profiles.setdefault(lemma_profile.level, LevelProfile(level=lemma_profile.level)).add(
             lemma_profile
         )
@@ -354,48 +361,103 @@ def build_level_profiles(
     return aggregate_levels(lemma_profiles, unattested_by_level), lemma_profiles
 
 
-def rank_levels_for_corpus(
+def measure_lemma_weights(
+    session: Session,
+    lemma_id: int,
+    min_skew: float = DEFAULT_MIN_SKEW,
+    corpus_names: Optional[Sequence[str]] = None,
+) -> Optional[Dict[str, float]]:
+    """One lemma's corpus weights, read from the database, for :func:`suggest_levels`.
+
+    Works for an unlevelled lemma.  Returns None when the lemma does not exist,
+    has no English forms, or no corpus lists any of them.  Use the same
+    ``min_skew`` the level profiles were scored at.
+    """
+    lemma = session.query(Lemma).filter(Lemma.id == lemma_id).first()
+    if lemma is None:
+        return None
+    names = list(corpus_names) if corpus_names is not None else get_enabled_corpus_names()
+    floors = get_corpus_zipf_floors(session, names)
+    lemma_profile = profile_lemma(session, lemma, names, floors, min_skew)
+    return lemma_profile.weights if lemma_profile is not None else None
+
+
+def suggest_levels(
     level_profiles: Dict[int, LevelProfile],
-    corpus_name: str,
+    word_weights: Dict[str, float],
     min_lemmas: int = 5,
     limit: Optional[int] = None,
-    include_general: bool = True,
+    include_general: bool = False,
 ) -> List[LevelCandidate]:
-    """Levels ordered by how much of their vocabulary leans toward ``corpus_name``.
+    """Levels whose corpus mix best matches a word's, best first.
 
-    This is the "an arts word belongs near 330, 335, 105" lookup.  ``lift``
-    compares a level's share with the corpus's share across every level, so a
-    level that is 20% arts in a collection that is 2% arts reads as 10x.
+    ``word_weights`` says what kind of word it is: ``{"wiki_arts": 1.0}`` for an
+    arts word, ``{"wiki_arts": 0.7, "wiki_history": 0.3}`` for one leaning
+    mostly arts, or the ``weights`` of a :class:`LemmaCorpusProfile` (see
+    :func:`measure_lemma_weights`).  Weights need not sum to 1; they are
+    normalized.
+
+    A level's score (``share``) is the word's weights applied to the level's
+    shares: the fraction of the level that is "the same kind of word".  For a
+    single corpus that is simply the level's share of that corpus.  ``lift``
+    divides the score by what an average level would get, so x1.0 means the
+    level is no better a fit than the collection as a whole.
+
+    By default GENERAL is left out on both sides: weight the word puts on it is
+    dropped, and levels are compared on their topical mix alone, so a level
+    padded with everyday words is not penalized.  A word with only GENERAL
+    weight then has no topic to match and gets no suggestions.  Pass
+    ``include_general=True`` to treat GENERAL as one more corpus.
 
     Args:
-        level_profiles: From :func:`build_level_profiles`.
-        corpus_name: A corpus name (or GENERAL).
+        level_profiles: From :func:`build_level_profiles` or
+            :func:`load_level_profiles`.
+        word_weights: Corpus name (or GENERAL) -> weight.
         min_lemmas: Skip levels with fewer profiled lemmas than this; a level of
             two words is 50% anything.
         limit: Truncate to this many candidates.
-        include_general: Whether shares count GENERAL weight in the denominator;
-            see :meth:`LevelProfile.share`.
+        include_general: See above.
     """
-    corpus_total = sum(
-        profile.weight_totals.get(corpus_name, 0.0) for profile in level_profiles.values()
-    )
+    weights = {
+        name: weight
+        for name, weight in word_weights.items()
+        if weight > 0 and (include_general or name != GENERAL)
+    }
+    weight_sum = sum(weights.values())
+    if weight_sum <= 0:
+        return []
+    weights = {name: weight / weight_sum for name, weight in weights.items()}
+
     if include_general:
         denominator = float(sum(profile.lemma_count for profile in level_profiles.values()))
     else:
         denominator = sum(profile.topical_weight for profile in level_profiles.values())
-    base_share = corpus_total / denominator if denominator > 0 else 0.0
+    if denominator <= 0:
+        return []
+    base_share = sum(
+        weight
+        * sum(profile.weight_totals.get(name, 0.0) for profile in level_profiles.values())
+        / denominator
+        for name, weight in weights.items()
+    )
 
     candidates: List[LevelCandidate] = []
     for profile in level_profiles.values():
-        weight = profile.weight_totals.get(corpus_name, 0.0)
-        if weight <= 0 or profile.lemma_count < min_lemmas:
+        if profile.lemma_count < min_lemmas:
             continue
-        share = profile.share(corpus_name, include_general)
+        matching = sum(
+            weight * profile.weight_totals.get(name, 0.0) for name, weight in weights.items()
+        )
+        if matching <= 0:
+            continue
+        share = sum(
+            weight * profile.share(name, include_general) for name, weight in weights.items()
+        )
         candidates.append(
             LevelCandidate(
                 level=profile.level,
                 share=share,
-                weight=weight,
+                weight=matching,
                 lemma_count=profile.lemma_count,
                 lift=share / base_share if base_share else math.inf,
             )
@@ -406,18 +468,140 @@ def rank_levels_for_corpus(
     return candidates
 
 
+def rank_levels_for_corpus(
+    level_profiles: Dict[int, LevelProfile],
+    corpus_name: str,
+    min_lemmas: int = 5,
+    limit: Optional[int] = None,
+    include_general: bool = True,
+) -> List[LevelCandidate]:
+    """Levels ordered by how much of their vocabulary leans toward ``corpus_name``.
+
+    :func:`suggest_levels` for a word wholly of one corpus.  ``lift`` compares a
+    level's share with the corpus's share across every level, so a level that
+    is 20% arts in a collection that is 2% arts reads as 10x.  Unlike
+    :func:`suggest_levels`, GENERAL counts in the denominator by default, which
+    is what the report prints.
+    """
+    return suggest_levels(
+        level_profiles,
+        {corpus_name: 1.0},
+        min_lemmas,
+        limit,
+        include_general or corpus_name == GENERAL,
+    )
+
+
+#: Bumped when the saved layout changes, so an old file is refused, not misread.
+JSON_FORMAT_VERSION = 1
+
+
+def profiles_to_json(
+    lemma_profiles: Sequence[LemmaCorpusProfile],
+    unattested_by_level: Dict[int, int],
+    corpus_names: Sequence[str],
+    min_skew: float,
+) -> Dict[str, Any]:
+    """The raw measurements, plus the weights they gave at ``min_skew``.
+
+    ``zipf`` and ``attested`` are what :func:`profiles_from_json` re-scores
+    from; ``weights`` is there for a reader that just wants the answer.
+    """
+    return {
+        "format_version": JSON_FORMAT_VERSION,
+        "min_skew": min_skew,
+        "corpora": list(corpus_names),
+        "unattested_by_level": {str(level): count for level, count in unattested_by_level.items()},
+        "lemmas": [
+            {
+                "lemma_id": lemma_profile.lemma_id,
+                "lemma_text": lemma_profile.lemma_text,
+                "disambiguation": lemma_profile.disambiguation,
+                "level": lemma_profile.level,
+                "attested": list(lemma_profile.attested_corpora),
+                "zipf": {
+                    name: round(zipf, 4) for name, zipf in lemma_profile.zipf_by_corpus.items()
+                },
+                "weights": {
+                    name: round(weight, 3) for name, weight in lemma_profile.weights.items()
+                },
+            }
+            for lemma_profile in lemma_profiles
+        ],
+    }
+
+
+def profiles_from_json(
+    data: Dict[str, Any], min_skew: float = DEFAULT_MIN_SKEW, levels: Optional[Sequence[int]] = None
+) -> Tuple[List[LemmaCorpusProfile], Dict[int, int], List[str]]:
+    """Re-score saved measurements at ``min_skew``.
+
+    Returns ``(lemma_profiles, unattested_by_level, corpus_names)``.
+    """
+    version = data.get("format_version")
+    if version != JSON_FORMAT_VERSION:
+        raise ValueError(
+            f"Saved profile has format_version {version!r}, expected {JSON_FORMAT_VERSION}; "
+            "re-measure it with level_corpus_profile.py --json"
+        )
+    wanted = set(levels) if levels is not None else None
+    lemma_profiles = [
+        profile_from_zipfs(
+            row["lemma_id"],
+            row["lemma_text"],
+            row["disambiguation"],
+            row["level"],
+            row["zipf"],
+            row["attested"],
+            min_skew,
+        )
+        for row in data["lemmas"]
+        if wanted is None or row["level"] in wanted
+    ]
+    unattested_by_level = {
+        int(level): count
+        for level, count in data["unattested_by_level"].items()
+        if wanted is None or int(level) in wanted
+    }
+    return lemma_profiles, unattested_by_level, list(data["corpora"])
+
+
+def load_level_profiles(
+    path: str, min_skew: float = DEFAULT_MIN_SKEW, levels: Optional[Sequence[int]] = None
+) -> Tuple[Dict[int, LevelProfile], List[LemmaCorpusProfile]]:
+    """Read a file saved by ``level_corpus_profile.py --json`` and score it.
+
+    The levels are those at the time the file was measured; re-measure after
+    levels or sense prominences change.
+
+    Returns:
+        ``({level: LevelProfile}, [LemmaCorpusProfile, ...])``, as
+        :func:`build_level_profiles` does.
+    """
+    with open(path, "r", encoding="utf-8") as handle:
+        data = json.load(handle)
+    lemma_profiles, unattested_by_level, _corpus_names = profiles_from_json(data, min_skew, levels)
+    return aggregate_levels(lemma_profiles, unattested_by_level), lemma_profiles
+
+
 __all__ = [
     "DEFAULT_MIN_SKEW",
     "GENERAL",
     "LemmaCorpusProfile",
     "LevelCandidate",
     "LevelProfile",
+    "JSON_FORMAT_VERSION",
     "aggregate_levels",
     "build_level_profiles",
     "corpus_weights",
     "get_corpus_zipf_floors",
+    "load_level_profiles",
+    "measure_lemma_weights",
     "profile_from_zipfs",
     "profile_lemma",
+    "profiles_from_json",
+    "profiles_to_json",
     "rank_levels_for_corpus",
     "skew_from_zipfs",
+    "suggest_levels",
 ]

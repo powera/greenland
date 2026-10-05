@@ -21,9 +21,12 @@ from wordfreq.frequency.level_profile import (
     GENERAL,
     build_level_profiles,
     corpus_weights,
+    LevelProfile,
     get_corpus_zipf_floors,
+    measure_lemma_weights,
     rank_levels_for_corpus,
     skew_from_zipfs,
+    suggest_levels,
 )
 
 CORPORA = ["arts", "cooking", "books"]
@@ -230,3 +233,65 @@ def test_levels_filter_and_limit() -> None:
 
     level_profiles, lemma_profiles = build_level_profiles(session, limit=1, corpus_names=CORPORA)
     assert len(lemma_profiles) == 1
+
+
+def _level(level: int, lemma_count: int, totals: Dict[str, float]) -> LevelProfile:
+    return LevelProfile(level=level, lemma_count=lemma_count, weight_totals=dict(totals))
+
+
+SUGGEST_LEVELS = {
+    330: _level(330, 10, {"arts": 8.0, GENERAL: 2.0}),
+    335: _level(335, 10, {"arts": 4.0, "history": 4.0, GENERAL: 2.0}),
+    105: _level(105, 10, {"history": 6.0, GENERAL: 4.0}),
+    7: _level(7, 10, {GENERAL: 10.0}),
+}
+
+
+def test_suggest_levels_for_one_corpus_ranks_by_topical_share() -> None:
+    candidates = suggest_levels(SUGGEST_LEVELS, {"arts": 1.0})
+    assert [candidate.level for candidate in candidates] == [330, 335]
+    # GENERAL left out: 330 is 8 arts of 8 topical.
+    assert candidates[0].share == pytest.approx(1.0)
+    # Collection: 12 arts of 22 topical.
+    assert candidates[0].lift == pytest.approx(1.0 / (12 / 22))
+
+
+def test_suggest_levels_blends_a_mixed_word() -> None:
+    candidates = suggest_levels(SUGGEST_LEVELS, {"arts": 0.5, "history": 0.5})
+    shares = {candidate.level: candidate.share for candidate in candidates}
+    assert shares[330] == pytest.approx(0.5)
+    assert shares[335] == pytest.approx(0.5)
+    assert shares[105] == pytest.approx(0.5)
+    # Weights are normalized, and GENERAL in the word's mix is dropped by default.
+    assert suggest_levels(SUGGEST_LEVELS, {"arts": 3.0, GENERAL: 5.0}) == suggest_levels(
+        SUGGEST_LEVELS, {"arts": 1.0}
+    )
+
+
+def test_suggest_levels_for_a_general_word() -> None:
+    assert suggest_levels(SUGGEST_LEVELS, {GENERAL: 1.0}) == []
+    candidates = suggest_levels(SUGGEST_LEVELS, {GENERAL: 1.0}, include_general=True)
+    assert candidates[0].level == 7
+
+
+def test_suggest_levels_skips_small_levels() -> None:
+    levels = {**SUGGEST_LEVELS, 400: _level(400, 2, {"arts": 2.0})}
+    assert 400 not in [candidate.level for candidate in suggest_levels(levels, {"arts": 1.0})]
+    # A tie on share goes to the level with more matching words.
+    assert [c.level for c in suggest_levels(levels, {"arts": 1.0}, min_lemmas=1)][:2] == [330, 400]
+
+
+def test_rank_levels_for_corpus_matches_suggest_levels_with_general_counted() -> None:
+    assert rank_levels_for_corpus(SUGGEST_LEVELS, "arts") == suggest_levels(
+        SUGGEST_LEVELS, {"arts": 1.0}, include_general=True
+    )
+
+
+def test_measure_lemma_weights_works_for_an_unlevelled_word() -> None:
+    session = _make_session()
+    _floor_tokens(session)
+    fresco = _lemma(session, "fresco", None, _token(session, "fresco", {"arts": 100.0}))
+    session.commit()
+
+    assert measure_lemma_weights(session, fresco.id, corpus_names=CORPORA) == {"arts": 1.0}
+    assert measure_lemma_weights(session, 9999, corpus_names=CORPORA) is None
