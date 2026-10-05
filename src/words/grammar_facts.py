@@ -10,9 +10,8 @@ from typing import Any, Dict, List, Optional, Tuple
 
 from sqlalchemy.orm import Session
 
-from langtools.es import gender as es_gender
-from langtools.fr import gender as fr_gender
 from words.grammar_fact_tasks import (
+    FACT_TASKS,
     animacy,
     auxiliary_verb,
     countability,
@@ -20,9 +19,12 @@ from words.grammar_fact_tasks import (
     fanciful_collective,
     grammatical_gender,
     measure_words,
+    systems,
     verb_reflexivity,
     verb_transitivity,
 )
+from words.grammar_fact_generation import save_generated_fact
+from words.grammar_fact_tasks.common import FactResult, run_live
 from words.grammar_fact_tasks.english_principal_parts import (
     ENGLISH_PRINCIPAL_PARTS_TASK,
     PRINCIPAL_PART_FACT_TYPES,
@@ -32,11 +34,7 @@ from words.grammar_fact_tasks.english_principal_parts import (
 from storage.backend import create_session as create_backend_session
 from storage.backend.config import BackendType, DataSourceConfig
 from storage.config.grammar_fact_registry import legacy_supported_fact_types
-from storage.crud.grammar_fact import (
-    add_grammar_fact,
-    get_grammar_fact_value,
-)
-from storage.crud.operation_log import log_operation
+from storage.crud.grammar_fact import get_grammar_fact_value
 from storage.models.schema import Lemma
 from storage.translation_helpers import get_translation
 from wordfreq.translation.client import LinguisticClient
@@ -48,97 +46,10 @@ logger = logging.getLogger(__name__)
 class GrammarFactService:
     """Service for generating grammar facts for lemmas."""
 
-    # Language-specific gender systems configuration
-    GENDER_SYSTEMS = {
-        "fr": {
-            "name": "French",
-            "genders": fr_gender.GENDERS,
-            "description": fr_gender.GENDER_SYSTEM_DESCRIPTION,
-        },
-        "lt": {
-            "name": "Lithuanian",
-            "genders": ["masculine", "feminine"],
-            "description": "2-way system (masculine/feminine)",
-        },
-        "es": {
-            "name": "Spanish",
-            "genders": es_gender.GENDERS,
-            "description": es_gender.GENDER_SYSTEM_DESCRIPTION,
-        },
-        "es-419": {
-            "name": "Latin American Spanish",
-            "genders": es_gender.GENDERS,
-            "description": es_gender.GENDER_SYSTEM_DESCRIPTION,
-        },
-        "de": {
-            "name": "German",
-            "genders": ["masculine", "feminine", "neuter"],
-            "description": "3-way system (masculine/feminine/neuter)",
-        },
-        "pt": {
-            "name": "Portuguese",
-            "genders": ["masculine", "feminine"],
-            "description": "2-way system (masculine/feminine)",
-        },
-        "it": {
-            "name": "Italian",
-            "genders": ["masculine", "feminine"],
-            "description": "2-way system (masculine/feminine)",
-        },
-    }
-
-    # Language-specific auxiliary verb systems
-    AUXILIARY_SYSTEMS = {
-        "fr": {
-            "name": "French",
-            "auxiliaries": ["avoir", "être"],
-            "description": "avoir (most verbs) or être (motion/reflexive verbs)",
-        },
-        "de": {
-            "name": "German",
-            "auxiliaries": ["haben", "sein"],
-            "description": "haben (most verbs) or sein (motion/state change verbs)",
-        },
-        "it": {
-            "name": "Italian",
-            "auxiliaries": ["avere", "essere"],
-            "description": "avere (most verbs) or essere (motion/reflexive verbs)",
-        },
-        "nl": {
-            "name": "Dutch",
-            "auxiliaries": ["hebben", "zijn"],
-            "description": "hebben (most verbs) or zijn (motion/state change verbs)",
-        },
-    }
-
-    # Language-specific reflexivity systems
-    REFLEXIVITY_SYSTEMS = {
-        "fr": {
-            "name": "French",
-            "values": ["inherently_reflexive", "optionally_reflexive", "non_reflexive"],
-            "description": "se + verb for reflexive forms",
-        },
-        "es": {
-            "name": "Spanish",
-            "values": ["inherently_reflexive", "optionally_reflexive", "non_reflexive"],
-            "description": "se + verb for reflexive forms",
-        },
-        "de": {
-            "name": "German",
-            "values": ["inherently_reflexive", "optionally_reflexive", "non_reflexive"],
-            "description": "sich + verb for reflexive forms",
-        },
-        "lt": {
-            "name": "Lithuanian",
-            "values": ["inherently_reflexive", "optionally_reflexive", "non_reflexive"],
-            "description": "-si/-tis suffix for reflexive forms",
-        },
-        "it": {
-            "name": "Italian",
-            "values": ["inherently_reflexive", "optionally_reflexive", "non_reflexive"],
-            "description": "si + verb for reflexive forms",
-        },
-    }
+    # Language-specific value sets (gender, auxiliary, reflexivity)
+    GENDER_SYSTEMS = systems.GENDER_SYSTEMS
+    AUXILIARY_SYSTEMS = systems.AUXILIARY_SYSTEMS
+    REFLEXIVITY_SYSTEMS = systems.REFLEXIVITY_SYSTEMS
 
     # Supported fact types and their required parameters.
     SUPPORTED_FACT_TYPES = legacy_supported_fact_types()
@@ -234,35 +145,13 @@ class GrammarFactService:
         Returns:
             Tuple of (fact_value, notes, confidence)
         """
-        if fact_type == "measure_words":
-            return measure_words.generate_measure_words(self, lemma, translation, session)
-        elif fact_type == "grammatical_gender":
-            return grammatical_gender.generate_grammatical_gender(
-                self, lemma, translation, language_code, session
-            )
-        elif fact_type == "verb_transitivity":
-            return verb_transitivity.generate_verb_transitivity(self, lemma, session)
-        elif fact_type == "verb_reflexivity":
-            return verb_reflexivity.generate_verb_reflexivity(
-                self, lemma, translation, language_code, session
-            )
-        elif fact_type == "countability":
-            return countability.generate_countability(self, lemma, session)
-        elif fact_type == "declension_class":
-            return declension_class.generate_declension_class(
-                self, lemma, translation, language_code, session
-            )
-        elif fact_type == "auxiliary_verb":
-            return auxiliary_verb.generate_auxiliary_verb(
-                self, lemma, translation, language_code, session
-            )
-        elif fact_type == "animacy":
-            return animacy.generate_animacy(self, lemma, session)
-        elif fact_type == "fanciful_collective":
-            return fanciful_collective.generate_fanciful_collective(self, lemma, session)
-        else:
+        task = FACT_TASKS.get(fact_type)
+        if task is None:
             logger.error(f"Unsupported fact type: {fact_type}")
             return None, None, 0.0
+        return run_live(
+            self, task, session, lemma, translation, language_code, fact_type.replace("_", " ")
+        )
 
     # Backward compatibility methods for Barsukas API
     # These delegate to the task modules
@@ -456,35 +345,21 @@ class GrammarFactService:
                 )
 
                 if fact_value and confidence >= min_confidence:
-                    # Save to database (unless dry run)
                     if not dry_run:
-                        add_grammar_fact(
+                        outcome = save_generated_fact(
                             session,
-                            lemma_id=lemma.id,
-                            language_code=language_code,
-                            fact_type=fact_type,
-                            fact_value=fact_value,
-                            notes=notes,
-                            verified=False,
+                            lemma.id,
+                            language_code,
+                            fact_type,
+                            FactResult(fact_value, notes, confidence),
+                            min_confidence,
+                            self.config.model,
                         )
                         session.commit()
-
-                        # Log operation
-                        log_operation(
-                            session,
-                            operation_type="grammar_fact_generated",
-                            entity_type="grammar_fact",
-                            entity_id=lemma.id,
-                            details={
-                                "fact_type": fact_type,
-                                "language_code": language_code,
-                                "fact_value": fact_value,
-                                "confidence": confidence,
-                                "agent": "lape",
-                                "model": self.config.model,
-                            },
-                        )
-                        session.commit()
+                        if outcome == "exists":
+                            # Added by someone else since the check above.
+                            skipped_count += 1
+                            continue
 
                     success_count += 1
                     results.append(

@@ -3,13 +3,20 @@ Declension Class Task - Determine declension class for nouns.
 """
 
 import logging
-from typing import Optional, Tuple, TYPE_CHECKING
+from typing import TYPE_CHECKING, Any, Dict, Optional, Tuple, Union
 
 from sqlalchemy.orm import Session
 
-import util.prompt_loader
-from clients.types import Schema, SchemaProperty
+from clients.types import LLMCall, Schema, SchemaProperty
 from storage.models.schema import Lemma
+from words.grammar_fact_tasks.common import (
+    NO_FACT,
+    FactResult,
+    FactTask,
+    interpret_field,
+    load_prompt,
+    run_live,
+)
 
 if TYPE_CHECKING:
     from words.grammar_facts import GrammarFactService
@@ -17,51 +24,28 @@ if TYPE_CHECKING:
 logger = logging.getLogger(__name__)
 
 
-def generate_declension_class(
-    agent: "GrammarFactService",
+def prepare_declension_class(
+    session: Optional[Session],
     lemma: Lemma,
     target_translation: Optional[str],
     language_code: str,
-    session: Optional[Session] = None,
-) -> Tuple[Optional[str], Optional[str], float]:
-    """
-    Generate noun declension class using LLM.
-
-    Args:
-        agent: The LapeAgent instance
-        lemma: The Lemma object
-        target_translation: The translation in the target language
-        language_code: Target language code (currently only 'lt' for Lithuanian)
-        session: Database session (optional)
-
-    Returns:
-        Tuple of (declension_class, explanation, confidence)
-    """
+) -> Union[LLMCall, FactResult]:
+    """Build the Lithuanian declension-class request."""
     if lemma.pos_type != "noun":
         logger.warning(f"Lemma '{lemma.lemma_text}' is not a noun, skipping declension class")
-        return None, None, 0.0
+        return NO_FACT
 
     if language_code != "lt":
         logger.error(f"Declension class only supported for Lithuanian, got '{language_code}'")
-        return None, None, 0.0
+        return NO_FACT
 
-    # Load prompts
-    try:
-        context = util.prompt_loader.get_context("grammar", "declension")
-        prompt_template = util.prompt_loader.get_prompt("grammar", "declension")
-    except Exception as e:
-        logger.error(f"Failed to load declension_class prompts: {e}")
-        return None, None, 0.0
-
-    # Format prompt
+    context, prompt_template = load_prompt("declension")
     prompt_text = prompt_template.format(
         english_word=lemma.lemma_text,
         target_translation=target_translation,
         pos_type=lemma.pos_type,
         definition=lemma.definition_text or "N/A",
     )
-
-    # Define JSON schema for response
     schema = Schema(
         name="LithuanianDeclensionClassification",
         description="Classify Lithuanian noun declension class",
@@ -77,29 +61,26 @@ def generate_declension_class(
             ),
         },
     )
+    return LLMCall(prompt=prompt_text, schema=schema, context=context)
 
-    # Query LLM
-    try:
-        client = agent.get_llm_client()
-        response = client.generate_chat(prompt=prompt_text, json_schema=schema, context=context)
 
-        if response.structured_data:
-            result = response.structured_data
-        else:
-            logger.error(f"No structured data received for '{lemma.lemma_text}'")
-            return None, None, 0.0
+interpret_declension_class = interpret_field("declension_class")
 
-        declension_class = result.get("declension_class", None)
-        explanation = result.get("explanation", "")
-        confidence = float(result.get("confidence", 0.5))
+TASK = FactTask(prepare_declension_class, interpret_declension_class)
 
-        logger.info(
-            f"Generated declension class for '{lemma.lemma_text}' ({target_translation}): "
-            f"class {declension_class} (confidence: {confidence:.2f})"
-        )
 
-        return declension_class, explanation, confidence
+def generate_declension_class(
+    agent: "GrammarFactService",
+    lemma: Lemma,
+    target_translation: Optional[str],
+    language_code: str,
+    session: Optional[Session] = None,
+) -> Tuple[Optional[str], Optional[str], float]:
+    """Generate noun declension class using LLM (currently only 'lt').
 
-    except Exception as e:
-        logger.error(f"Failed to generate declension class for '{lemma.lemma_text}': {e}")
-        return None, None, 0.0
+    Returns:
+        Tuple of (declension_class, explanation, confidence)
+    """
+    return run_live(
+        agent, TASK, session, lemma, target_translation, language_code, "declension class"
+    )

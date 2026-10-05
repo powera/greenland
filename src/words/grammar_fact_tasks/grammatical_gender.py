@@ -17,17 +17,24 @@ Two things happen around the LLM call:
 """
 
 import logging
-from typing import Callable, Dict, List, Optional, Tuple, TYPE_CHECKING
+from typing import TYPE_CHECKING, Any, Callable, Dict, Optional, Tuple, Union
 
 from sqlalchemy.orm import Session
 
-import util.prompt_loader
-from clients.types import Schema, SchemaProperty
+from clients.types import LLMCall, Schema, SchemaProperty
 from langtools.es.gender import predict_gender as predict_spanish_gender
 from langtools.fr.gender import predict_gender as predict_french_gender
 from storage.crud.grammar_fact import get_grammatical_gender
 from storage.models.schema import Lemma
 from storage.translation_helpers import get_translation
+from words.grammar_fact_tasks.common import (
+    NO_FACT,
+    FactResult,
+    FactTask,
+    load_prompt,
+    run_live,
+)
+from words.grammar_fact_tasks.systems import GENDER_SYSTEMS
 
 if TYPE_CHECKING:
     from words.grammar_facts import GrammarFactService
@@ -85,54 +92,33 @@ def _with_rule_check(
     return f"{flag} {explanation}" if explanation else flag
 
 
-def generate_grammatical_gender(
-    agent: "GrammarFactService",
+def prepare_grammatical_gender(
+    session: Optional[Session],
     lemma: Lemma,
     target_translation: Optional[str],
     language_code: str,
-    session: Optional[Session] = None,
-) -> Tuple[Optional[str], Optional[str], float]:
-    """
-    Generate grammatical gender for a noun using LLM.
-
-    Args:
-        agent: The LapeAgent instance
-        lemma: The Lemma object
-        target_translation: The translation in the target language
-        language_code: Target language code (e.g., 'fr', 'lt', 'de')
-        session: Database session (optional)
-
-    Returns:
-        Tuple of (gender, explanation, confidence)
-    """
+) -> Union[LLMCall, FactResult]:
+    """Build the gender request, or answer from the source variety's fact."""
     if lemma.pos_type != "noun":
         logger.warning(f"Lemma '{lemma.lemma_text}' is not a noun, skipping gender generation")
-        return None, None, 0.0
+        return NO_FACT
 
-    if language_code not in agent.GENDER_SYSTEMS:
+    if language_code not in GENDER_SYSTEMS:
         logger.error(f"Language '{language_code}' does not have a configured gender system")
-        return None, None, 0.0
+        return NO_FACT
 
     if session is not None:
         copied_gender = _copy_from_same_word(lemma, target_translation, language_code, session)
         if copied_gender:
             source_language = _SAME_WORD_GENDER_SOURCE[language_code]
-            return copied_gender, f"Copied from {source_language} (same word)", 1.0
+            return FactResult(copied_gender, f"Copied from {source_language} (same word)", 1.0)
 
-    gender_config = agent.GENDER_SYSTEMS[language_code]
+    gender_config = GENDER_SYSTEMS[language_code]
     language_name = gender_config["name"]
     valid_genders = ", ".join(gender_config["genders"])
     gender_system = gender_config["description"]
 
-    # Load prompts
-    try:
-        context = util.prompt_loader.get_context("grammar", "gender")
-        prompt_template = util.prompt_loader.get_prompt("grammar", "gender")
-    except Exception as e:
-        logger.error(f"Failed to load grammatical_gender prompts: {e}")
-        return None, None, 0.0
-
-    # Format prompt
+    context, prompt_template = load_prompt("gender")
     prompt_text = prompt_template.format(
         english_word=lemma.lemma_text,
         target_translation=target_translation,
@@ -144,7 +130,6 @@ def generate_grammatical_gender(
         valid_genders=valid_genders,
     )
 
-    # Define JSON schema for response
     schema = Schema(
         name="GrammaticalGenderGeneration",
         description=f"Determine grammatical gender for {language_name} nouns",
@@ -162,31 +147,41 @@ def generate_grammatical_gender(
             ),
         },
     )
+    return LLMCall(prompt=prompt_text, schema=schema, context=context)
 
-    # Query LLM
-    try:
-        client = agent.get_llm_client()
-        response = client.generate_chat(prompt=prompt_text, json_schema=schema, context=context)
 
-        # Extract structured data
-        if response.structured_data:
-            result = response.structured_data
-        else:
-            logger.error(f"No structured data received for '{lemma.lemma_text}'")
-            return None, None, 0.0
+def interpret_grammatical_gender(
+    data: Dict[str, Any], target_translation: Optional[str], language_code: str
+) -> FactResult:
+    """Read the model's answer, flagging a disagreement with the ending rule."""
+    gender = data.get("gender", None)
+    explanation = data.get("explanation", "")
+    confidence = float(data.get("confidence", 0.5))
+    explanation = _with_rule_check(gender, explanation, target_translation, language_code)
+    return FactResult(gender, explanation, confidence)
 
-        gender = result.get("gender", None)
-        explanation = result.get("explanation", "")
-        confidence = float(result.get("confidence", 0.5))
 
-        logger.info(
-            f"Generated gender for '{lemma.lemma_text}' ({target_translation}): "
-            f"{gender} (confidence: {confidence:.2f})"
-        )
+TASK = FactTask(prepare_grammatical_gender, interpret_grammatical_gender)
 
-        explanation = _with_rule_check(gender, explanation, target_translation, language_code)
-        return gender, explanation, confidence
 
-    except Exception as e:
-        logger.error(f"Failed to generate gender for '{lemma.lemma_text}': {e}")
-        return None, None, 0.0
+def generate_grammatical_gender(
+    agent: "GrammarFactService",
+    lemma: Lemma,
+    target_translation: Optional[str],
+    language_code: str,
+    session: Optional[Session] = None,
+) -> Tuple[Optional[str], Optional[str], float]:
+    """
+    Generate grammatical gender for a noun using LLM.
+
+    Args:
+        agent: The GrammarFactService instance (supplies the LLM client)
+        lemma: The Lemma object
+        target_translation: The translation in the target language
+        language_code: Target language code (e.g., 'fr', 'lt', 'de')
+        session: Database session (optional; needed for the es-419 copy)
+
+    Returns:
+        Tuple of (gender, explanation, confidence)
+    """
+    return run_live(agent, TASK, session, lemma, target_translation, language_code, "gender")
