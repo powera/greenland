@@ -16,50 +16,105 @@ capability names such as `words.forms` and `words.pronunciations`.
 
 ## Quick Reference
 
-| Agent | Lithuanian | Purpose |
-|-------|-----------|---------|
-| **bebras** | beaver | Database integrity (orphans, missing fields, duplicates) |
-| **lokys** | bear | English lemma validation (dictionary form, definitions) |
-| **dramblys** | elephant | Missing words detector, JSONL import |
-| **voras** | spider | Translation validator/populator (10 languages) |
-| **vilkas** | wolf | Word forms checker (conjugations, declensions for 6 languages) |
-| **papuga** | parrot | Pronunciation validation/generation (IPA, phonetic) |
-| **sernas** | boar | Synonym and alternative form generator |
-| **lape** | fox | Grammar facts (measure words, gender, declension class) |
-| **zvirblis** | sparrow | Finds translations missing from existing sentences |
-| **buivolas** | buffalo | Finds pattern or LLM example-generation work |
-| **sarka** | magpie | Plans bulk, vocabulary-driven conversations |
-| **povas** | peacock | HTML report generator |
-| **ungurys** | eel | Compatibility wrapper for `exports.wireword` |
-| **elnias** | deer | Bootstrap export (minimal format) |
-| **strazdas** | thrush | Audio generation (eSpeak-NG) |
-| **vieversys** | lark | Audio generation (OpenAI TTS) |
-| **seskas** | ferret | Multi-model verb-conjugation consensus generator |
-| **erelis** | eagle | False lemma match detection in sentences |
-| **gandras** | stork | Audio manifest downloader (S3 staging) |
-| **genys** | woodpecker | Document parser and pending import stager |
-| **ozys** | billy goat | Story-library text generator (retellings, learner conversations) |
-| **gegute** | cuckoo | Idiom generator, equivalent populator, and equivalent auditor |
+"Where" says where the real work happens: **queue** means the CLI finds work and
+enqueues capability-named tasks (Barsukas workers execute them); **inline**
+means the CLI does the work itself; **shim** means the code moved and the
+animal name is only a compatibility wrapper.  "UI" marks agents that Barsukas
+can launch or that back a Barsukas page.
+
+| Agent | Lithuanian | Purpose | Where | UI | LLM |
+|-------|-----------|---------|-------|----|-----|
+| **bebras** | beaver | Integrity checks/fixes; translation verification; sentence-word linking | inline | yes | verify/link only |
+| **lokys** | bear | English lemma/definition/disambiguation validation | inline | yes | yes |
+| **dramblys** | elephant | Missing-word detection, pending-import queue (stage/approve/reject) | inline | yes | `--fix` only |
+| **jonvabalis** | firefly | Reviews pending imports that propose a new head word | inline | no | yes |
+| **voras** | spider | Translation coverage/population | queue, batch | yes | yes |
+| **vilkas** | wolf | Word forms (lt, fr, de, es, es-419, pt, en) | queue, batch | yes | partly (mechanical first) |
+| **papuga** | parrot | Pronunciations (IPA, simplified phonetic) | queue, batch | yes | yes |
+| **sernas** | boar | Synonyms, abbreviations, expanded forms | queue | yes | yes |
+| **lape** | fox | Grammar facts (measure words, gender, declension class, ...) | queue, batch | yes | yes |
+| **gegute** | cuckoo | Idioms: generate, populate equivalents, audit equivalents | queue | yes | yes |
+| **zvirblis** | sparrow | Translate existing sentences linked to lemmas | shim → `sentences/`, queue, batch | yes | yes |
+| **buivolas** | buffalo | English example sentences (pattern / LLM / guided) | shim → `sentences/`, queue | yes | pattern: no |
+| **sarka** | magpie | Bulk vocabulary-driven conversations | shim → `sentences/`, queue | yes | yes |
+| **genys** | woodpecker | Parse a document into sentences and stage unknown words | inline | via workqueue | yes |
+| **erelis** | eagle | False lemma links (lemma's translation absent from sentence translation) | inline | no | no |
+| **ozys** | billy goat | Story-library texts (retellings, learner conversations) | inline | yes (Texts) | yes |
+| **vovere** family | squirrel | Concept encyclopedia: generate / rank red links / create from Q-ids | inline, batch | yes (Concepts) | yes |
+| **vieversys** | lark | Cloud TTS audio (OpenAI, Polly, Azure, Google, Gemini) | inline, queue | yes | TTS |
+| **strazdas** | thrush | Local TTS audio (eSpeak-NG, Qwen3-TTS) | inline | yes | no |
+| **gandras** | stork | Import S3 staging audio manifests into review records | inline | via helpers | no |
+| **seskas** | ferret | Multi-model verb-conjugation consensus (local LM Studio models) | inline | no | yes (local) |
+| **ungurys** | eel | WireWord export | shim → `exports.wireword` | yes | no |
+| **elnias** | deer | Bootstrap export (minimal format) | shim → `exports.bootstrap` | yes | no |
+| **povas** | peacock | POS-subtype HTML reports | shim → `exports.pos_reports` | yes | no |
+| **gyvate** | snake | App string catalog export (import-only, no CLI) | shim → `exports.strings` | via `exports` | no |
+| **veidrodis** | mirror | Template string catalogs (import-only, no CLI) | shim → `exports.strings` | no | no |
+
+`agents/common/batch.py` (`status`, `complete`) checks and applies OpenAI batch
+jobs submitted by any agent's `--batch` path.
+
+## Usefulness review (October 2026)
+
+**Core, actively used.**  voras, vilkas, papuga, lape, sernas, gegute and
+zvirblis are the lemma/sentence enrichment pipeline: all are launched from
+Barsukas, enqueue capability-named tasks, and (except sernas and gegute) have
+a `--batch` path.  dramblys owns the pending-import queue that Barsukas review
+pages and `api.lemmas.add_word` feed.  bebras `--check-integrity` backs the
+Barsukas integrity page.  vieversys is the production audio path.
+
+**Useful, narrower.**
+- jonvabalis automates the slice of the pending-import queue (a few thousand
+  rows) whose proposed head word is new.  Defaults to 10 rows per run on
+  purpose; read the `--output` before raising `--limit`.
+- genys is the document-import path (also run as the
+  `sentences.import.document` task).
+- gandras is needed whenever audio is generated on another machine.
+- strazdas is the free/local audio path; quality is below vieversys.
+- ozys and the vovere family serve the story library and concept
+  encyclopedia; Barsukas Texts/Concepts pages call the same code.
+- lokys's checks are still available, but Barsukas calls the underlying
+  checks per-lemma (`/api/llm/lokys/...`); the bulk CLI is a candidate to be
+  absorbed by a lemma-review batch job (see "Batching an agent").
+
+**Low value / candidates for retirement.**
+- seskas depends on local LM Studio models, which the project no longer
+  expects to run; its only output in the tree is
+  `src/langtools/de/generated_conjugations.py`.
+- erelis has no Barsukas or workqueue integration and no tests; it is a cheap
+  rule-based report, mostly useful for zh.
+- bebras sentence mode (`--sentence`/`--file`) predates the `sentences/`
+  pipeline (genys, zvirblis decomposition) and duplicates it; only
+  `wordfreq/tools/sentence_word_linker.py` still imports it.
+- ungurys, elnias, povas, gyvate, veidrodis, buivolas, sarka and zvirblis are
+  compatibility wrappers (gyvate and veidrodis are imported only by
+  `tests/test_exports_compatibility.py`).  New code should import from `exports/` and
+  `sentences/` directly; the wrappers can go once Barsukas's launcher and the
+  tests stop naming them.
 
 ## Common Arguments
 
-All agents use standardized arguments from `agents/common/common_args.py`:
+Most agents use standardized arguments from `agents/common/common_args.py`
+(each agent adds only the groups it needs; check `--help`):
 
 ```
 --db-path PATH      Database path (default: from environment)
 --debug             Enable debug logging
 --yes, -y           Skip confirmation prompts
 --dry-run           Preview changes without committing
---model MODEL       LLM model (default: gpt-5.4-mini)
+--model MODEL       LLM model (default: constants.DEFAULT_MODEL)
 --throttle SECS     Delay between API calls (default: 1.0)
 --limit N           Maximum items to process
 --sample-rate RATE  Fraction to process (0.0-1.0)
 --guid GUID         Process single item by GUID
 --level N           Filter by difficulty level (single or range like "1-9")
+--pos-type TYPE     Filter by part of speech
 --languages LANG [LANG ...]
                     Filter by one or more language codes
+--barsukas-url URL  Query a Barsukas server for cached translations
+--cache-only        Use only cached translations from --barsukas-url
 --persona NAME      Barsukas persona whose main database to use
-                    (prod, golden, hosted, local, local-sqlite, scholar)
+                    (prod, golden, hosted, local, local-sqlite, scholar, custom)
 --backend TYPE      [requires --persona custom] Storage backend: sqlite, jsonl, postgres
 --data-dir DIR      [requires --persona custom] Data directory for the jsonl backend
 --postgres          [requires --persona custom] Shorthand for --backend postgres
@@ -69,17 +124,45 @@ Select the database with `--persona`; the default (no persona) is the local
 SQLite database. `--persona custom` unlocks the manual backend flags for
 development setups that need to spell out the backend directly.
 
+Lemma agents that enqueue work take `--use-workqueue`; sentence agents
+(zvirblis, buivolas, sarka) enqueue by default and take `--execute-inline` for
+a foreground run.  Run anything exploratory under `GREENLAND_TEST_MODE=1` or
+`GREENLAND_DISABLE_LLM=1` (see the top-level CLAUDE.md).
+
 ## Agent Details
 
-### bebras (Database Integrity)
+### bebras (Integrity, Verification, Sentence Links)
+
+`bebras.py` has three modes, chosen by a leading flag; `--help` shows the
+help for whichever mode is selected (sentence mode by default).
 
 ```bash
-bebras.py --check all                 # Run all integrity checks (default)
-bebras.py --check orphaned            # Find orphaned records
-bebras.py --check missing-fields      # Find missing required fields
-bebras.py --check duplicates          # Find duplicate GUIDs
-bebras.py --check invalid-levels      # Find levels outside 1-199 (except -1)
+# Integrity (no LLM) - backs the Barsukas integrity page
+bebras.py --check-integrity                        # All checks (default)
+bebras.py --check-integrity --check orphaned       # One check
+bebras.py --check-integrity --check invalid-levels # Levels outside 1-199 (except -1)
+bebras.py --check-integrity --check missing-punctuation --fix
 ```
+
+Checks: `orphaned`, `missing-fields`, `english-base-forms`, `no-derivatives`,
+`duplicates`, `duplicate-words`, `invalid-levels`, `missing-punctuation`,
+`sentence-levels`, `audio-mismatches`, `pronunciation-fields`, `all`.  `--fix`
+repairs english-base-forms, missing-punctuation, sentence-levels,
+audio-mismatches and pronunciation-fields.
+
+```bash
+# Translation verification (LLM)
+bebras.py --verify words --limit 100
+bebras.py --verify sentences --limit 50
+bebras.py --verify pronunciations --help
+
+# Sentence-word linking (LLM; legacy - prefer genys / the sentences pipeline)
+bebras.py --sentence "I eat a banana" --languages lt zh
+bebras.py --file sentences.txt --languages lt zh
+```
+
+`submit-batch-words` / `submit-batch-sentences` are deprecated; queue
+verification with `python -m verification words|sentences`.
 
 ### lokys (English Validation)
 
@@ -87,7 +170,11 @@ bebras.py --check invalid-levels      # Find levels outside 1-199 (except -1)
 lokys.py                              # Check all English lemmas
 lokys.py --sample-rate 0.1 --yes      # Check 10% sample
 lokys.py --confidence-threshold 0.8   # Adjust confidence threshold
+lokys.py --check-type definitions --level 1-5 --limit 50
 ```
+
+`--check-type` is one of `lemma`, `definitions`, `disambiguation`, `both`
+(default: all checks).
 
 ### dramblys (Missing Words / Import)
 
@@ -98,8 +185,15 @@ dramblys.py --check orphaned          # Find derivatives without parents
 dramblys.py --check subtypes          # Check POS subtype coverage
 dramblys.py --top-n 10000             # Check top N frequency words
 
+dramblys.py --check-wordlist words.txt  # Which words in a file are missing
+
 # Fix mode (process with LLM)
 dramblys.py --fix --limit 20 --yes    # Process 20 missing words
+
+# Stage instead of creating (no LLM until approval)
+dramblys.py --stage --limit 50
+dramblys.py --stage-words @words.txt  # One word per line, #-comments ignored
+dramblys.py --add-subtype --pos-type noun --pos-subtype animals --stage-only
 
 # Pending import queue (implementation lives in words/pending_imports/)
 dramblys.py --list-pending                    # Everything waiting for review
@@ -114,6 +208,25 @@ A pending import becomes one of three things when approved: a **lemma**
 guessed when the term is staged and can be changed on the Barsukas detail
 page.
 
+### jonvabalis (Pending-Import Review)
+
+Reviews pending imports created by `api.lemmas.add_word` whose proposed
+English head word is not yet a lemma ("world" was queried, the row proposes
+"realm").  For each row the model answers `duplicate` (reject),
+`distinct` (approve with the model's head word, definition, subtype,
+translations and example) or `unsure` (left for a human); verdicts below 0.8
+confidence are left queued.  Approval and rejection go through the same
+`words.pending_imports.approval` path as Barsukas.
+
+```bash
+GREENLAND_TEST_MODE=1 jonvabalis.py --dry-run    # List rows, no LLM calls
+jonvabalis.py --limit 10 --output review.json    # Default batch is 10
+jonvabalis.py --pending-id 2924 --pending-id 2925
+```
+
+Suggested levels are only reported in `--output`; lemmas are stored without a
+level until the anchors are trustworthy.
+
 ### voras (Translations)
 
 ```bash
@@ -121,17 +234,21 @@ voras.py --coverage                    # Report translation coverage (default)
 voras.py --populate --languages fr es --limit 50
 voras.py --populate --guid N07_008 --languages fr
 voras.py --regenerate --use-workqueue --yes
+voras.py --populate --languages fr --batch                   # OpenAI batches
 ```
 
 ### vilkas (Word Forms)
 
-Supports: Lithuanian (lt), French (fr), German (de), Spanish (es), Portuguese (pt), English (en)
+Supports: Lithuanian (lt), French (fr), German (de), Spanish (es, es-419),
+Portuguese (pt), English (en).  `--task` names are `<lang>-<pos>-<forms>`
+(e.g. `lt-adverb-forms`, `es-419-verb-conjugations`) or `all`.
 
 ```bash
 vilkas.py --task all --coverage
 vilkas.py --task lt-noun-declensions --populate --use-workqueue
 vilkas.py --task fr-verb-conjugations --populate --guid V03_007
 vilkas.py --task en-noun-forms --populate --use-wiktionary
+vilkas.py --task fr-verb-conjugations --populate --batch     # OpenAI batches
 ```
 
 ### papuga (Pronunciations)
@@ -141,6 +258,7 @@ papuga.py --coverage                   # Report missing pronunciations (default)
 papuga.py --populate --use-workqueue
 papuga.py --populate --languages fr es --base-forms-only --use-workqueue
 papuga.py --coverage --all-languages
+papuga.py --populate --languages fr --batch                  # OpenAI batches
 ```
 
 ### sernas (Synonyms)
@@ -251,28 +369,54 @@ Output: `{OUTPUT_DIR}/wireword/`
 
 ### elnias (Bootstrap Export)
 
+Wrapper around `exports.bootstrap`.  Languages: fr, ko, lt, zh, zh-tw.
+
 ```bash
 elnias.py                             # Export bootstrap data (Lithuanian)
 elnias.py --language zh               # Export for Chinese
-elnias.py --level 1-5                 # Filter by level range
+elnias.py --include-unverified        # Include unverified translations
 ```
 
-### strazdas (eSpeak Audio)
+### strazdas (Local TTS Audio)
+
+Generates audio locally (no API cost) into `AudioQualityReview` rows with
+`pending_review` status.  `--tts-backend espeak` (default, all languages) or
+`qwen` (Qwen3-TTS, CJK + FIGS + PT).
 
 ```bash
-strazdas.py --language lt             # Generate Lithuanian audio
-strazdas.py --list-voices             # List available voices
-strazdas.py --voices Ona Jonas        # Specify voice names
+strazdas.py --language lt                        # Coverage/generation for lt
+strazdas.py --language lt --mode populate-only   # Generate missing only
+strazdas.py --language zh --tts-backend qwen
+strazdas.py --list-voices                        # List available voices
+strazdas.py --language lt --voices Ona Jonas     # Specify voice names
+strazdas.py --language lt --upload-s3            # Also upload to S3 staging
 ```
 
-### vieversys (OpenAI TTS Audio)
+Modes: `check-existing`, `populate-only`, `regenerate`, `coverage`.
+
+### vieversys (Cloud TTS Audio)
+
+The production audio path.  `--tts-engine` is one of `openai` (default),
+`polly`, `azure`, `google`, `gemini`.  Also runs as a workqueue task
+(`workqueue/handlers/vieversys.py`) from Barsukas's audio pages.
 
 ```bash
-vieversys.py --languages en           # Generate English audio
-vieversys.py --voice alloy            # Specify OpenAI voice
+vieversys.py --languages lt --mode coverage
+vieversys.py --languages lt --mode populate-only --limit 50
+vieversys.py --languages lt --voices alloy nova
+vieversys.py --languages zh --tts-engine azure --upload-s3
+vieversys.py --languages lt --generate-sentences --sentence-limit 20
 ```
+
+`--auto-approve` marks generated audio approved and copies it to prod; leave
+it off when the audio should go through review.  `--generate-manifests` is
+deprecated.
 
 ### seskas (Verb Conjugation Consensus)
+
+Asks several local LM Studio models (default `qwen3.5-9b-lms`, `phi-4-lms`,
+`gemma-3-12b-lms`) for the same conjugation table and writes the consensus to
+a Python module.  Requires those local models to be running.
 
 ```bash
 seskas.py --language lt --verbs-file data/verbs/lt.txt
@@ -283,26 +427,45 @@ seskas.py --language lt --verbs-file /tmp/lt_verbs.txt --on-existing merge
 
 ### erelis (False Lemma Matches)
 
+Rule-based (no LLM): flags sentences whose linked lemma's translation does not
+appear in the sentence's translation.  Read-only report.
+
 ```bash
 erelis.py --language zh               # Detect false lemma matches in Chinese
 erelis.py --language zh --limit 100   # Limit number of sentences checked
 erelis.py --language zh --guid V03_007
+erelis.py --language zh --sentence-id 42 --verbose
+erelis.py --language zh --stats       # Counts only
+erelis.py --language zh --json
 ```
 
-### gandras (Audio Manifest Downloader)
+### gandras (Audio Manifest Import)
+
+Imports S3 staging manifests (audio generated elsewhere) into local review
+records.  No LLM.
 
 ```bash
 gandras.py --mode list                # Show available S3 manifests
-gandras.py --mode report --language lt
-gandras.py --mode download --language lt --voice ruta --output-dir audio/
+gandras.py --mode report --language lt   # Match statistics, no writes
+gandras.py --mode download --language lt --voice ruta
+gandras.py --mode download --language lt --fetch-audio --output-dir audio/
 ```
+
+`download` imports metadata only unless `--fetch-audio` is given (MP3s are
+served from S3).  Manifests marked rejected are skipped unless
+`--import-rejected`.
 
 ### genys (Document Import)
 
 ```bash
 genys.py --input document.txt --language en
 genys.py --input document.txt --language zh --store-sentences
+genys.py --input statute.txt --language en --tags legal
+genys.py --input document.txt --language en --store-sentences --annotate-dependencies
 ```
+
+Unknown words go to the pending-import queue (see dramblys).  The same code
+runs as the `sentences.import.document` workqueue task.
 
 ### gegute (Idioms)
 
@@ -332,16 +495,63 @@ gegute.py --populate --use-workqueue          # Enqueue instead of running inlin
 name an equivalent id for a human to act on, so an unreviewed LLM call cannot
 overwrite curated data.
 
+### ozys (Story Library Texts)
+
+Writes the text of an *authored* text work (fable, folk tale, fairy tale,
+myth, legend, conversation) and stores it as a `TextVersion`.  Refuses
+canonical works (poems, songs, speeches), whose texts are transcribed.  The
+Barsukas Texts page calls the same agent.
+
+```bash
+ozys/ozys.py --slug The_Three_Billy_Goats_Gruff
+ozys/ozys.py --slug At_the_Doctors_Office --difficulty 2 --dry-run
+```
+
+### vovere family (Concept Encyclopedia)
+
+Command lines over `src/concepts/`.  These make live Wikidata/Wikipedia calls;
+confirm before running them.
+
+```bash
+vovere/vovere.py --title "Art Deco" --summary "..." --source URL --model MODEL
+vovere/voverukas.py --limit 30                     # Rank red links (read-only)
+vovere/voverukas.py --limit 10 --resolve-qids      # Also cache Q-ids
+vovere/voverukas.py --limit 10 --batch --model MODEL
+vovere/voveraite.py Q8768 Q8743                    # Report seeds, no writes
+vovere/voveraite.py Q8768 --create --model MODEL   # Create inline
+vovere/voveraite.py Q8768 Q8743 --batch --model MODEL
+vovere/voveraite.py Q103632 --sub --category chess_concept
+```
+
+- **vovere** generates one concept body from a title/summary/sources.
+- **voverukas** ranks `[[wiki links]]` with no concept yet; `--create` /
+  `--batch` turn the top results into concepts.
+- **voveraite** creates concepts (or sub-concepts with `--sub`) from explicit
+  Q-ids.
+
+### common/batch.py (OpenAI Batch Results)
+
+```bash
+python -m agents.common.batch status --help
+python -m agents.common.batch complete --help   # Apply finished batches
+```
+
+The Barsukas batch poller does the same automatically; use this when Barsukas
+is not running.
+
 ## Creating New Agents
 
 See `STYLE.md` for architecture patterns and conventions. Key points:
 
 1. Use Lithuanian animal name that metaphorically represents the function
 2. Use `agents/common/common_args.py` for standardized CLI arguments
-3. Use `agents/common/lemma_selection.py` for database queries
-4. Support `--check` (read-only), `--fix`, and `--dry-run` modes
-5. Be idempotent (safe to run multiple times)
-6. Require confirmation for destructive operations (unless `--yes`)
+3. Use `words/lemma_selection.py` (`get_lemmas_for_agent`) for lemma queries
+4. Put the implementation in a domain package (`words/`, `sentences/`,
+   `exports/`, `concepts/`) and keep the agent a thin CLI over it
+5. Support a read-only/coverage mode, `--dry-run`, and (for LLM work)
+   `--use-workqueue` or `--batch` rather than only inline execution
+6. Be idempotent (safe to run multiple times)
+7. Require confirmation for destructive operations (unless `--yes`)
 
 ## Batching an agent
 
