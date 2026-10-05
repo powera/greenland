@@ -95,10 +95,15 @@ class LinguisticClient:
         if self.debug:
             logger.setLevel(logging.DEBUG)
 
-        # Warm up the model
+        # Warm up the model.  Callers build a client per request, so this runs
+        # once per call: a no-op for the remote backends, a cheap state check
+        # for a local model that is already loaded.  Success is therefore only
+        # worth a DEBUG line; a False return means a local model did not load.
         try:
-            self.client.warm_model(self.model)
-            logger.info(f"Model {self.model} warmed up successfully")
+            if self.client.warm_model(self.model):
+                logger.debug("Model %s warmed up", self.model)
+            else:
+                logger.warning("Model %s did not warm up", self.model)
         except Exception as e:
             logger.warning(f"Failed to warm up model {self.model}: {e}")
 
