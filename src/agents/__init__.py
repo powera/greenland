@@ -16,5 +16,4 @@ __all__ = [
     "papuga",
     "ungurys",
     "zvirblis",
-    "seskas",
 ]
