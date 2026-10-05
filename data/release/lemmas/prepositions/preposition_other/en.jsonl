@@ -29,3 +29,4 @@
 {"guid": "R99_040", "forms": [{"grammatical_form": "preposition/base", "text": "per", "is_base_form": true, "ipa": "/pɚ/", "phonetic": "PUR"}]}
 {"guid": "R99_041", "forms": [{"grammatical_form": "preposition/base", "text": "throughout", "is_base_form": true, "ipa": "/θruˈaʊt/", "phonetic": "throo-OUT"}]}
 {"guid": "R99_042", "forms": [{"grammatical_form": "preposition/base", "text": "half-past", "is_base_form": true, "ipa": "/ˌhæf ˈpæst/", "phonetic": "HAF-past"}]}
+{"guid": "R99_043", "forms": [{"grammatical_form": "preposition/base", "text": "on", "is_base_form": true}]}

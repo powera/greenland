@@ -22,6 +22,7 @@
 {"guid": "N36_035", "forms": [{"grammatical_form": "noun/en_singular", "text": "dentist", "is_base_form": true, "ipa": "/ˈdɛntɪst/", "phonetic": "DEN-tist"}]}
 {"guid": "N36_036", "forms": [{"grammatical_form": "noun/en_singular", "text": "veterinarian", "is_base_form": true, "ipa": "/vɛtəˈnɛriən/", "phonetic": "VET-uh-NAIR-yuhn"}]}
 {"guid": "N36_041", "forms": [{"grammatical_form": "noun/en_singular", "text": "baker", "is_base_form": true, "ipa": "/ˈbeɪkər/", "phonetic": "BAY-ker"}]}
+{"guid": "N36_068", "forms": [{"grammatical_form": "noun/en_singular", "text": "security guard", "is_base_form": true}]}
 {"guid": "N36_075", "forms": [{"grammatical_form": "noun/en_singular", "text": "flight attendant", "is_base_form": true}]}
 {"guid": "N36_076", "forms": [{"grammatical_form": "noun/en_singular", "text": "mail carrier", "is_base_form": true}]}
 {"guid": "N36_077", "forms": [{"grammatical_form": "noun/en_singular", "text": "bus driver", "is_base_form": true}]}

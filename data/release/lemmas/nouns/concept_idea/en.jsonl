@@ -55,6 +55,7 @@
 {"guid": "N17_207", "forms": [{"grammatical_form": "noun/en_singular", "text": "mine", "is_base_form": true, "ipa": "/maɪn/", "phonetic": "MYN"}]}
 {"guid": "N17_208", "forms": [{"grammatical_form": "noun/en_singular", "text": "bottom", "is_base_form": true, "ipa": "/ˈbɑːtəm/", "phonetic": "BOH-tuhm"}]}
 {"guid": "N17_229", "forms": [{"grammatical_form": "noun/en_singular", "text": "sales", "is_base_form": true}, {"grammatical_form": "noun/en_plural", "text": "sales", "is_base_form": false}]}
+{"guid": "N17_264", "variants": [{"kind": "spelling", "key": "Organization", "forms": [{"grammatical_form": "noun/en_singular", "text": "Organization", "is_base_form": true}]}]}
 {"guid": "N17_274", "forms": [{"grammatical_form": "noun/en_singular", "text": "sex", "is_base_form": true}]}
 {"guid": "N17_297", "forms": [{"grammatical_form": "noun/en_singular", "text": "birth control", "is_base_form": true}]}
 {"guid": "N17_298", "forms": [{"grammatical_form": "noun/en_singular", "text": "human right", "is_base_form": true}]}

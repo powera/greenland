@@ -3,7 +3,9 @@
 {"guid": "N56_003", "forms": [{"grammatical_form": "noun/en_singular", "text": "Indian Ocean", "is_base_form": true, "ipa": "/ˌɪndiːən ˈoʊʃən/", "phonetic": "IN-dee-uhn OH-shun"}]}
 {"guid": "N56_004", "forms": [{"grammatical_form": "noun/en_singular", "text": "Baltic Sea", "is_base_form": true, "ipa": "/ˈbaɪ.lɪk siː/", "phonetic": "BYE-lik SEE"}]}
 {"guid": "N56_005", "forms": [{"grammatical_form": "noun/en_singular", "text": "Mediterranean Sea", "is_base_form": true, "ipa": "/ˌmɛdɪtɛˈriːəniən/", "phonetic": "MED-uh-tuh-REE-uh-nee-uhn"}]}
+{"guid": "N56_006", "forms": [{"grammatical_form": "noun/en_singular", "text": "Arctic Ocean", "is_base_form": true}]}
 {"guid": "N56_007", "forms": [{"grammatical_form": "noun/en_singular", "text": "Sahara", "is_base_form": true}]}
+{"guid": "N56_008", "forms": [{"grammatical_form": "noun/en_singular", "text": "Amazon River", "is_base_form": true}]}
 {"guid": "N56_009", "forms": [{"grammatical_form": "noun/en_singular", "text": "Nile", "is_base_form": true}]}
 {"guid": "N56_010", "forms": [{"grammatical_form": "noun/en_singular", "text": "Alps", "is_base_form": true}]}
 {"guid": "N56_011", "forms": [{"grammatical_form": "noun/en_singular", "text": "national park", "is_base_form": true}]}
@@ -13,7 +15,7 @@
 {"guid": "N56_015", "forms": [{"grammatical_form": "noun/en_singular", "text": "downtown", "is_base_form": true, "ipa": "/ˈdaʊnˌtaʊn/", "phonetic": "DOWN-town"}]}
 {"guid": "N56_016", "forms": [{"grammatical_form": "noun/en_singular", "text": "border", "is_base_form": true, "ipa": "/ˈbɔr.dɚ/", "phonetic": "BOR-der"}]}
 {"guid": "N56_017", "forms": [{"grammatical_form": "noun/en_singular", "text": "territory", "is_base_form": true, "ipa": "/ˈtɛrəˌtɔri/", "phonetic": "TER-uh-tor-ee"}]}
-{"guid": "N56_018", "forms": [{"grammatical_form": "noun/en_singular", "text": "district", "is_base_form": true, "ipa": "/ˈdɪstrɪkt/", "phonetic": "DIS-trikt"}]}
+{"guid": "N56_018", "forms": [{"grammatical_form": "noun/en_singular", "text": "district", "is_base_form": true, "ipa": "/ˈdɪstrɪkt/", "phonetic": "DIS-trikt"}], "variants": [{"kind": "spelling", "key": "District", "forms": [{"grammatical_form": "noun/en_singular", "text": "District", "is_base_form": true}]}]}
 {"guid": "N56_019", "forms": [{"grammatical_form": "noun/en_singular", "text": "settlement", "is_base_form": true, "ipa": "/ˈsɛtəlmənt/", "phonetic": "SET-ul-munt"}]}
 {"guid": "N56_020", "forms": [{"grammatical_form": "noun/en_singular", "text": "outskirts", "is_base_form": true, "ipa": "/ˈaʊtˌskɝːts/", "phonetic": "OUT-skerts"}]}
 {"guid": "N56_021", "forms": [{"grammatical_form": "noun/en_singular", "text": "destination", "is_base_form": true, "ipa": "/ˌdɛstəˈneɪʃən/", "phonetic": "des-tuh-NAY-shun"}]}

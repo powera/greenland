@@ -22,6 +22,18 @@
 {"guid": "N35_054", "forms": [{"grammatical_form": "noun/en_singular", "text": "girlfriend", "is_base_form": true, "ipa": "/ɡɝːlˈfɹɛnd/", "phonetic": "GUR-lfrend"}]}
 {"guid": "N35_071", "forms": [{"grammatical_form": "noun/en_singular", "text": "wife", "is_base_form": true, "ipa": "/waɪf/", "phonetic": "WAH-f"}, {"grammatical_form": "noun/en_plural", "text": "wives", "is_base_form": false}]}
 {"guid": "N35_075", "forms": [{"grammatical_form": "noun/en_singular", "text": "husband", "is_base_form": true, "ipa": "/ˈhʌzbənd/", "phonetic": "HUZ-bənd"}]}
+{"guid": "N35_077", "forms": [{"grammatical_form": "noun/en_singular", "text": "older brother", "is_base_form": true}]}
+{"guid": "N35_078", "forms": [{"grammatical_form": "noun/en_singular", "text": "younger brother", "is_base_form": true}]}
+{"guid": "N35_079", "forms": [{"grammatical_form": "noun/en_singular", "text": "older sister", "is_base_form": true}]}
+{"guid": "N35_080", "forms": [{"grammatical_form": "noun/en_singular", "text": "younger sister", "is_base_form": true}]}
+{"guid": "N35_081", "forms": [{"grammatical_form": "noun/en_singular", "text": "maternal grandfather", "is_base_form": true}]}
+{"guid": "N35_082", "forms": [{"grammatical_form": "noun/en_singular", "text": "paternal grandfather", "is_base_form": true}]}
+{"guid": "N35_083", "forms": [{"grammatical_form": "noun/en_singular", "text": "maternal grandmother", "is_base_form": true}]}
+{"guid": "N35_084", "forms": [{"grammatical_form": "noun/en_singular", "text": "paternal grandmother", "is_base_form": true}]}
+{"guid": "N35_085", "forms": [{"grammatical_form": "noun/en_singular", "text": "maternal uncle", "is_base_form": true}]}
+{"guid": "N35_086", "forms": [{"grammatical_form": "noun/en_singular", "text": "paternal uncle", "is_base_form": true}]}
+{"guid": "N35_087", "forms": [{"grammatical_form": "noun/en_singular", "text": "maternal aunt", "is_base_form": true}]}
+{"guid": "N35_088", "forms": [{"grammatical_form": "noun/en_singular", "text": "paternal aunt", "is_base_form": true}]}
 {"guid": "N35_089", "forms": [{"grammatical_form": "noun/en_singular", "text": "father-in-law", "is_base_form": true}]}
 {"guid": "N35_090", "forms": [{"grammatical_form": "noun/en_singular", "text": "mother-in-law", "is_base_form": true}]}
 {"guid": "N35_091", "forms": [{"grammatical_form": "noun/en_singular", "text": "son-in-law", "is_base_form": true}]}

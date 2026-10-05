@@ -19,6 +19,7 @@
 {"guid": "N41_024", "forms": [{"grammatical_form": "noun/en_singular", "text": "tennis", "is_base_form": true}]}
 {"guid": "N41_030", "forms": [{"grammatical_form": "noun/en_singular", "text": "golf", "is_base_form": true}]}
 {"guid": "N41_038", "forms": [{"grammatical_form": "noun/en_singular", "text": "gymnastics", "is_base_form": true}]}
+{"guid": "N41_045", "forms": [{"grammatical_form": "noun/en_singular", "text": "martial arts", "is_base_form": true}]}
 {"guid": "N41_053", "forms": [{"grammatical_form": "noun/en_singular", "text": "field trip", "is_base_form": true}]}
 {"guid": "N41_054", "forms": [{"grammatical_form": "noun/en_singular", "text": "round trip", "is_base_form": true}]}
 {"guid": "N41_055", "forms": [{"grammatical_form": "noun/en_singular", "text": "customer service", "is_base_form": true}]}
@@ -144,3 +145,4 @@
 {"guid": "N41_175", "forms": [{"grammatical_form": "noun/en_singular", "text": "grappling", "is_base_form": true, "ipa": "/ˈɡræplɪŋ/", "phonetic": "GRAP-ling"}]}
 {"guid": "N41_176", "forms": [{"grammatical_form": "noun/en_singular", "text": "backgammon", "is_base_form": true, "ipa": "/ˈbækˌɡæmən/", "phonetic": "BAK-gam-un"}]}
 {"guid": "N41_177", "forms": [{"grammatical_form": "noun/en_singular", "text": "Greco-Roman", "is_base_form": true, "ipa": "/ˌɡriːkoʊ ˈroʊmən/", "phonetic": "GREE-ko ROH-muhn"}]}
+{"guid": "N41_178", "forms": [{"grammatical_form": "noun/en_singular", "text": "treat", "is_base_form": true, "ipa": "/triːt/", "phonetic": "TREET"}]}

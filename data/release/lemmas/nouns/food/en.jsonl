@@ -81,6 +81,7 @@
 {"guid": "N06_088", "forms": [{"grammatical_form": "noun/en_singular", "text": "dinner", "is_base_form": true, "ipa": "/ˈdɪnər/", "phonetic": "DIN-uh-er"}]}
 {"guid": "N06_091", "forms": [{"grammatical_form": "noun/en_singular", "text": "sour cream", "is_base_form": true, "ipa": "/ˈsaʊər kriːm/", "phonetic": "SOO-uh KREE-m"}]}
 {"guid": "N06_092", "forms": [{"grammatical_form": "noun/en_singular", "text": "food", "is_base_form": true, "ipa": "/fuːd/", "phonetic": "FOOD"}]}
+{"guid": "N06_093", "forms": [{"grammatical_form": "noun/en_singular", "text": "bell pepper", "is_base_form": true}]}
 {"guid": "N06_098", "forms": [{"grammatical_form": "noun/en_singular", "text": "groceries", "is_base_form": true}, {"grammatical_form": "noun/en_plural", "text": "groceries", "is_base_form": false}]}
 {"guid": "N06_104", "forms": [{"grammatical_form": "noun/en_singular", "text": "ice cream", "is_base_form": true}]}
 {"guid": "N06_105", "forms": [{"grammatical_form": "noun/en_singular", "text": "whipped cream", "is_base_form": true}]}

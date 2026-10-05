@@ -60,4 +60,5 @@
 {"guid": "A24_060", "forms": [{"grammatical_form": "adjective/en_positive", "text": "theistic", "is_base_form": true, "ipa": "/θiˈɪstɪk/", "phonetic": "thee-IS-tik"}]}
 {"guid": "A24_061", "forms": [{"grammatical_form": "adjective/en_positive", "text": "taboo", "is_base_form": true, "ipa": "/təˈbu/", "phonetic": "tuh-BOO"}]}
 {"guid": "A24_062", "forms": [{"grammatical_form": "adjective/en_positive", "text": "ecumenical", "is_base_form": true, "ipa": "/ˌɛkjəˈmɛnɪkəl/", "phonetic": "ek-yoo-MEN-ih-kul"}]}
+{"guid": "A24_064", "forms": [{"grammatical_form": "adjective/en_positive", "text": "kosher", "is_base_form": true}]}
 {"guid": "A24_067", "forms": [{"grammatical_form": "adjective/en_positive", "text": "furry", "is_base_form": true, "ipa": "/ˈfɝi/", "phonetic": "FUR-ee"}]}

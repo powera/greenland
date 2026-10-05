@@ -8,7 +8,7 @@
 {"guid": "A08_008", "forms": [{"grammatical_form": "adjective/en_positive", "text": "imperial", "is_base_form": true, "ipa": "/ɪmˈpɪriəl/", "phonetic": "im-PEER-ee-ul"}]}
 {"guid": "A08_009", "forms": [{"grammatical_form": "adjective/en_positive", "text": "papal", "is_base_form": true, "ipa": "/ˈpeɪpəl/", "phonetic": "PAY-puhl"}]}
 {"guid": "A08_010", "forms": [{"grammatical_form": "adjective/en_positive", "text": "dynastic", "is_base_form": true, "ipa": "/daɪˈnæstɪk/", "phonetic": "dy-NAS-tik"}]}
-{"guid": "A08_011", "forms": [{"grammatical_form": "adjective/en_positive", "text": "national", "is_base_form": true, "ipa": "/ˈnæʃənəl/", "phonetic": "NASH-uh-nuhl"}]}
+{"guid": "A08_011", "forms": [{"grammatical_form": "adjective/en_positive", "text": "national", "is_base_form": true, "ipa": "/ˈnæʃənəl/", "phonetic": "NASH-uh-nuhl"}], "variants": [{"kind": "spelling", "key": "National", "forms": [{"grammatical_form": "adjective/en_positive", "text": "National", "is_base_form": true}]}]}
 {"guid": "A08_012", "forms": [{"grammatical_form": "adjective/en_positive", "text": "man-made", "is_base_form": true, "ipa": "/ˌmænˈmeɪd/", "phonetic": "man-MADE"}]}
 {"guid": "A08_013", "forms": [{"grammatical_form": "adjective/en_positive", "text": "non-native", "is_base_form": true, "ipa": "/ˌnɑnˈneɪtɪv/", "phonetic": "non-NAY-tiv"}]}
 {"guid": "A08_014", "forms": [{"grammatical_form": "adjective/en_positive", "text": "non-native", "is_base_form": true, "ipa": "/ˌnɑnˈneɪtɪv/", "phonetic": "non-NAY-tiv"}]}
