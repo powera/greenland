@@ -110,6 +110,120 @@ def measure_completion(func: F) -> Callable[..., tuple[Any, float]]:
     return wrapper
 
 
+def build_responses_request(
+    model: str,
+    prompt: str,
+    *,
+    context: Optional[str] = None,
+    json_schema: Optional[Any] = None,
+    brief: bool = False,
+    max_tokens: Optional[int] = None,
+    messages: Optional[List[clients.lib.ChatMessage]] = None,
+) -> Dict[str, Any]:
+    """Build the Responses API request body ``OpenAIClient.generate_chat`` sends.
+
+    Shared with the Batch API path, so a batched request is the live request by
+    construction rather than by a copy kept in step by hand.
+
+    Returns:
+        The request body; ``max_output_tokens`` is the resolved output-token limit.
+    """
+    # gpt-5 and gpt-6 models don't support custom temperature (only default value of 1)
+    is_gpt5_model = model.startswith(("gpt-5", "gpt-6"))
+    is_gpt5_nano_or_mini = is_gpt5_nano_or_mini_model(model)
+
+    token_limit = clients.lib.resolve_output_tokens(
+        model, brief=brief, requested=max_tokens, backend_default=4096
+    )
+    request_kwargs: Dict[str, Any] = {
+        "model": model,
+        # The Responses API accepts either a string or a list of role/content
+        # message items; consecutive same-role messages are permitted.
+        "input": messages if messages else prompt,
+    }
+
+    # Add instructions (system message) if context provided
+    if context:
+        request_kwargs["instructions"] = context
+
+    # Only set temperature for models that support it
+    if not is_gpt5_model:
+        request_kwargs["temperature"] = 0.35
+
+    # The Responses API takes max_output_tokens for every model, reasoning
+    # or not.
+    request_kwargs["max_output_tokens"] = token_limit
+
+    # Set reasoning and text parameters for GPT-5 nano and mini variants
+    if is_gpt5_nano_or_mini:
+        effort = reasoning_effort_for_model(
+            model, "none" if _uses_gpt54_effort_scale(model) else "minimal"
+        )
+        request_kwargs["reasoning"] = {"effort": effort}
+        # Only set text verbosity if not overridden by JSON schema below
+        if not json_schema:
+            request_kwargs["text"] = {"verbosity": "low"}
+
+    # If JSON schema provided, configure for structured response
+    if json_schema:
+        if isinstance(json_schema, clients.lib.Schema):
+            schema_obj = json_schema
+        else:
+            schema_obj = clients.lib.schema_from_dict(json_schema)
+
+        clean_schema = clients.lib.to_openai_schema(schema_obj)
+
+        # Lower temperature for structured output (only for models that support it)
+        if not is_gpt5_model:
+            request_kwargs["temperature"] = 0.15
+
+        # Use text.format for structured outputs in Responses API
+        text_config: Dict[str, Any] = {
+            "format": {
+                "type": "json_schema",
+                "name": "Details",
+                "description": "N/A",
+                "strict": True,
+                "schema": clean_schema,
+            }
+        }
+
+        # For GPT-5 nano and mini variants, also include verbosity
+        if is_gpt5_nano_or_mini:
+            text_config["verbosity"] = "low"
+
+        request_kwargs["text"] = text_config
+
+    return request_kwargs
+
+
+def parse_responses_output(response_data: Dict[str, Any]) -> Tuple[str, Optional[str]]:
+    """Return ``(output_text, reasoning_summary)`` from a Responses API response body.
+
+    Missing pieces come back as ``""`` / ``None``; the caller decides whether an
+    empty or incomplete response is an error.
+    """
+    response_content = ""
+    reasoning_text: Optional[str] = None
+    if response_data.get("output"):
+        for output_item in response_data["output"]:
+            item_type = output_item.get("type")
+            if item_type == "reasoning":
+                # Capture reasoning summary if present
+                summary_parts = []
+                for content_item in output_item.get("summary", []):
+                    if content_item.get("type") == "summary_text":
+                        summary_parts.append(content_item.get("text", ""))
+                if summary_parts:
+                    reasoning_text = "\n".join(summary_parts)
+            elif item_type == "message" and not response_content:
+                for content_item in output_item.get("content", []):
+                    if content_item.get("type") == "output_text":
+                        response_content = content_item.get("text", "")
+                        break
+    return response_content, reasoning_text
+
+
 class OpenAIClient:
     """Client for making direct HTTP requests to OpenAI Responses API."""
 
@@ -212,93 +326,20 @@ class OpenAIClient:
             logger.debug("Context: %s", context)
             logger.debug("JSON schema: %s", json_schema)
 
-        # gpt-5 and gpt-6 models don't support custom temperature (only default value of 1)
-        is_gpt5_model = model.startswith(("gpt-5", "gpt-6"))
-        is_gpt5_nano_or_mini = is_gpt5_nano_or_mini_model(model)
-
-        token_limit = clients.lib.resolve_output_tokens(
-            model, brief=brief, requested=max_tokens, backend_default=4096
+        request_kwargs = build_responses_request(
+            model,
+            prompt,
+            context=context,
+            json_schema=json_schema,
+            brief=brief,
+            max_tokens=max_tokens,
+            messages=messages,
         )
-        request_kwargs: Dict[str, Any] = {
-            "model": model,
-            # The Responses API accepts either a string or a list of role/content
-            # message items; consecutive same-role messages are permitted.
-            "input": messages if messages else prompt,
-        }
-
-        # Add instructions (system message) if context provided
-        if context:
-            request_kwargs["instructions"] = context
-
-        # Only set temperature for models that support it
-        if not is_gpt5_model:
-            request_kwargs["temperature"] = 0.35
-
-        # The Responses API takes max_output_tokens for every model, reasoning
-        # or not.
-        request_kwargs["max_output_tokens"] = token_limit
-
-        # Set reasoning and text parameters for GPT-5 nano and mini variants
-        if is_gpt5_nano_or_mini:
-            effort = reasoning_effort_for_model(
-                model, "none" if _uses_gpt54_effort_scale(model) else "minimal"
-            )
-            request_kwargs["reasoning"] = {"effort": effort}
-            # Only set text verbosity if not overridden by JSON schema below
-            if not json_schema:
-                request_kwargs["text"] = {"verbosity": "low"}
-
-        # If JSON schema provided, configure for structured response
-        if json_schema:
-            if isinstance(json_schema, clients.lib.Schema):
-                schema_obj = json_schema
-            else:
-                schema_obj = clients.lib.schema_from_dict(json_schema)
-
-            clean_schema = clients.lib.to_openai_schema(schema_obj)
-
-            # Lower temperature for structured output (only for models that support it)
-            if not is_gpt5_model:
-                request_kwargs["temperature"] = 0.15
-
-            # Use text.format for structured outputs in Responses API
-            text_config: Dict[str, Any] = {
-                "format": {
-                    "type": "json_schema",
-                    "name": "Details",
-                    "description": "N/A",
-                    "strict": True,
-                    "schema": clean_schema,
-                }
-            }
-
-            # For GPT-5 nano and mini variants, also include verbosity
-            if is_gpt5_nano_or_mini:
-                text_config["verbosity"] = "low"
-
-            request_kwargs["text"] = text_config
+        token_limit = request_kwargs["max_output_tokens"]
 
         response_data, duration_ms = self._create_response(**request_kwargs)
 
-        # Extract response content and reasoning from Responses API structure
-        response_content = ""
-        reasoning_text: Optional[str] = None
-        if response_data.get("output"):
-            for output_item in response_data["output"]:
-                item_type = output_item.get("type")
-                if item_type == "reasoning":
-                    # Capture reasoning summary if present
-                    summary_parts = []
-                    for content_item in output_item.get("summary", []):
-                        if content_item.get("type") == "summary_text":
-                            summary_parts.append(content_item.get("text", ""))
-                    if summary_parts:
-                        reasoning_text = "\n".join(summary_parts)
-                elif item_type == "message" and not response_content:
-                    for content_item in output_item.get("content", []):
-                        if content_item.get("type") == "output_text":
-                            response_content = content_item.get("text", "")
-                            break
+        response_content, reasoning_text = parse_responses_output(response_data)
 
         if self.debug:
             logger.debug("Response content: %s", response_content)

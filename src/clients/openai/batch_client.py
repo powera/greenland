@@ -10,8 +10,10 @@ from typing import Any, Dict, List, Optional
 
 import requests  # type: ignore[import-untyped]
 
+import clients.lib
 import constants
 from clients.keys import load_key
+from clients.openai.client import parse_responses_output
 
 # Configure logging
 logging.basicConfig(
@@ -96,6 +98,9 @@ class OpenAIBatchClient:
         at the limit wastes the entire round trip, and the truncation is only
         visible as ``finish_reason == "length"`` on the returned choice.
         """
+        # Submitting a batch sends prompts to a model, just later; the same
+        # kill switches as a live call apply.
+        clients.lib.assert_llm_calls_enabled("openai-batch")
         # Check if API key is available
         if not self.api_key:
             raise RuntimeError("OpenAI API key not available. Please ensure the key file exists.")
@@ -154,6 +159,9 @@ class OpenAIBatchClient:
         Returns:
             Batch object containing id, status, and other metadata
         """
+        # Submitting a batch sends prompts to a model, just later; the same
+        # kill switches as a live call apply.
+        clients.lib.assert_llm_calls_enabled("openai-batch")
         url = f"{API_BASE}/batches"
 
         payload: Dict[str, Any] = {
@@ -428,3 +436,23 @@ def submit_batch_and_wait(
     return client.submit_batch_and_wait(
         requests_data, endpoint, metadata, poll_interval, max_wait_time
     )
+
+
+def batch_response_text(result: Dict[str, Any]) -> str:
+    """Pull the output text out of one stored ``/v1/responses`` batch result line.
+
+    Args:
+        result: The stored result envelope, ``{"body": <Responses API body>, ...}``.
+
+    Raises:
+        ValueError: If the response was cut off or carries no text.  A truncated
+            JSON answer must not be parsed as if it were complete.
+    """
+    body = result.get("body") or {}
+    if body.get("status") == "incomplete":
+        reason = (body.get("incomplete_details") or {}).get("reason")
+        raise ValueError(f"Response incomplete (reason={reason!r})")
+    text, _reasoning = parse_responses_output(body)
+    if not text:
+        raise ValueError("Response has no output text")
+    return text

@@ -26,8 +26,8 @@ from clients.batch_queue import (
     BatchRequestMetadata,
     BatchRequestStatus,
 )
-from clients.lib import resolve_output_tokens, to_openai_schema
-from clients.openai.client import is_gpt5_nano_or_mini_model, reasoning_effort_for_model
+from clients.openai.batch_client import batch_response_text
+from clients.openai.client import build_responses_request
 from storage.crud.operation_log import log_translation_change
 from storage.models.schema import Lemma
 from storage.translation_helpers import (
@@ -114,34 +114,12 @@ def find_in_flight_lemma_ids(batch_session: Session) -> Set[int]:
 def build_request_body(prompt: TranslationPrompt, model: str) -> Dict[str, Any]:
     """Shape a translation prompt as a Responses API request.
 
-    Mirrors ``OpenAIClient.generate_chat`` for a JSON-schema call: context as
-    ``instructions``, the output-token limit it would pick, and its reasoning
-    effort (``none`` on the models that have it, else ``minimal``).
+    Delegates to ``build_responses_request``, the builder ``OpenAIClient.generate_chat``
+    itself uses, so the batched request is the one a live call would send.
     """
-    body: Dict[str, Any] = {
-        "model": model,
-        "input": prompt.prompt,
-        "instructions": prompt.context,
-        "max_output_tokens": resolve_output_tokens(
-            model, brief=False, requested=None, backend_default=4096
-        ),
-        "text": {
-            "format": {
-                "type": "json_schema",
-                "name": "Details",
-                "description": "N/A",
-                "strict": True,
-                "schema": to_openai_schema(prompt.schema),
-            }
-        },
-    }
-    if is_gpt5_nano_or_mini_model(model):
-        effort = reasoning_effort_for_model(model, "none") or reasoning_effort_for_model(
-            model, "minimal"
-        )
-        body["reasoning"] = {"effort": effort}
-        body["text"]["verbosity"] = "low"
-    return body
+    return build_responses_request(
+        model, prompt.prompt, context=prompt.context, json_schema=prompt.schema
+    )
 
 
 def plan_populate_requests(
@@ -293,17 +271,7 @@ def _response_text(response: Dict[str, Any]) -> str:
     Raises:
         ValueError: If the response was cut off or carries no text.
     """
-    body = response.get("body") or {}
-    if body.get("status") == "incomplete":
-        reason = (body.get("incomplete_details") or {}).get("reason")
-        raise ValueError(f"Response incomplete (reason={reason!r})")
-    for output_item in body.get("output") or []:
-        if output_item.get("type") != "message":
-            continue
-        for content_item in output_item.get("content") or []:
-            if content_item.get("type") == "output_text" and content_item.get("text"):
-                return str(content_item["text"])
-    raise ValueError("Response has no output text")
+    return batch_response_text(response)
 
 
 def apply_populate_results(

@@ -63,6 +63,10 @@ class BatchRequestMetadata:
     entity_type: Optional[str] = None  # "lemma", "word_token", etc.
     language_code: Optional[str] = None
     created_at: Optional[str] = None
+    # Free-form JSON the submitting code needs back at completion time (for
+    # workqueue.llm_batch: run id, item key, stage state).  Read and update it
+    # with request_extra / update_request_extra.
+    extra: Optional[Dict[str, Any]] = None
 
     def to_dict(self) -> Dict[str, Any]:
         """Convert to dictionary."""
@@ -433,6 +437,14 @@ class BatchQueueManager:
 
         return list(query.order_by(BatchQueue.completed_at.desc()).all())
 
+    def get_requests_by_custom_id_prefix(self, prefix: str) -> List[BatchQueue]:
+        """Every request whose ``custom_id`` starts with *prefix*, oldest first."""
+        escaped = prefix.replace("\\", "\\\\").replace("%", "\\%").replace("_", "\\_")
+        query = self.db.query(BatchQueue).filter(
+            BatchQueue.custom_id.like(f"{escaped}%", escape="\\")
+        )
+        return list(query.order_by(BatchQueue.id).all())
+
     def get_failed_requests(
         self, agent_name: Optional[str] = None, batch_id: Optional[str] = None
     ) -> List[BatchQueue]:
@@ -518,7 +530,37 @@ class BatchQueueManager:
             .all()
         )
 
-        return [batch_id for (batch_id,) in result]
+        return [batch_id for (batch_id,) in result if batch_id is not None]
+
+
+def request_extra(request: BatchQueue) -> Dict[str, Any]:
+    """The ``extra`` dict stored with *request* (empty when there is none)."""
+    if not request.additional_metadata:
+        return {}
+    try:
+        metadata = json.loads(request.additional_metadata)
+    except json.JSONDecodeError:
+        return {}
+    extra = metadata.get("extra") if isinstance(metadata, dict) else None
+    return dict(extra) if isinstance(extra, dict) else {}
+
+
+def update_request_extra(request: BatchQueue, **fields: Any) -> None:
+    """Merge *fields* into the ``extra`` dict stored with *request*.
+
+    The caller commits.  Other metadata keys are left as they are.
+    """
+    try:
+        metadata = json.loads(request.additional_metadata or "{}")
+    except json.JSONDecodeError:
+        metadata = {}
+    if not isinstance(metadata, dict):
+        metadata = {}
+    extra = metadata.get("extra")
+    merged = dict(extra) if isinstance(extra, dict) else {}
+    merged.update(fields)
+    metadata["extra"] = merged
+    request.additional_metadata = json.dumps(metadata)
 
 
 def create_batch_database_session(db_path: str = BATCH_DB_PATH) -> Session:
