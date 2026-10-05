@@ -55,14 +55,21 @@ inherits the *word's* frequency rank, which is wrong for a minor sense -- the
 rank-140 "world" carries it into the science-fiction "a distant world" reading --
 so the prompt supplies the levels of semantically comparable lemmas as anchors
 and asks for a level for this sense alone.  That answer is only reported (it is
-in ``--output``); the lemma is stored at the unset level until the anchors are
-good enough to trust it.
+in ``--output``) until the anchors are good enough to trust it; the lemma is
+stored at ``PARKING_LEVEL``, an otherwise empty level above the topic band, to
+be rebalanced lower later.
 
 Acting on a decision goes through the same approval path the Barsukas review
 page uses -- ``words.pending_imports.approve_pending_import`` creates the lemma
 and clears the row, ``reject_pending_import`` clears it -- so an agent-cleared
 row settles exactly as a hand-cleared one does.  A rejection records no word
 exclusion, since only the sense was a duplicate, not the word.
+A duplicate's proposed word is still a token that should belong somewhere, so
+the model also says how it relates to the sense: an ``equivalent`` ("allocate"
+queued from "distribute") is recorded on that lemma as an ``equivalent``
+variant, while a word whose main meaning is elsewhere ("humanity" from
+"world") or a mere paraphrase ("protective measure") is not -- a variant would
+make add_word treat the word as known.
 A ``distinct`` verdict approves, a ``duplicate`` verdict rejects, and ``unsure``
 is left in the queue for a human, as is any verdict below ``MIN_CONFIDENCE``.
 
@@ -74,6 +81,26 @@ whose subtype is still an open-class catch-all (``noun_other``) is left queued,
 as ``add_word`` does.  Translations are asked for on every row, since a changed
 head word needs new ones and older rows were staged with none; a row missing
 any of them is left queued.
+
+Two kinds of row are not headword questions and are handled apart:
+
+* A *spacing variant* -- the queried and proposed words differ only by hyphens
+  or spaces ("high-school" -> "high school") -- is one word written two ways.
+  The model reviews it as usual, told to choose the standard spelling, and the
+  other spelling is recorded as a ``spelling`` variant of the lemma the verdict
+  lands on -- the new lemma, or the existing one it duplicates.  There is no
+  shortcut past the model even when one spelling is already a lemma: add_word
+  queues one row per sense, so "non-linear" arrives as a mathematical and a
+  sequence sense, and only the model can tell whether the second is the
+  first.  These rows are reviewed even when neither spelling is a
+  lemma yet, since the word itself is what was asked about.
+* A *subtype-review* row was queued by add_word only because its subtype was a
+  catch-all ("noun_other needs subtype review").  Its head word is not in
+  question; the model checks it against the word's existing senses and picks a
+  subtype.  These are reviewed even when the word is already a lemma, and
+  ``--only subtype-review`` runs them as their own pass.
+
+``--only spacing-variants`` likewise runs just the spacing variants.
 
 ``--dry-run`` prints the rows a run would review and makes no LLM calls.
 
@@ -95,6 +122,7 @@ from typing import Any, Dict, List, Optional, Sequence
 if str(Path(__file__).parent.parent) not in sys.path:
     sys.path.insert(0, str(Path(__file__).parent.parent))
 
+from sqlalchemy import func
 from sqlalchemy.orm import Session
 
 from agents.common.common_args import (
@@ -111,14 +139,19 @@ from storage.crud.pending_import_senses import (
     serialize_example_sentences,
     serialize_translations,
 )
+from storage.crud.lemma import update_lemma
+from storage.crud.operation_log import log_entity_operation
 from storage.backend import create_session as create_backend_session
 from storage.models.guid_prefixes import classifiable_subtypes, render_subtype_list
 from storage.models.imports import PendingImport
 from storage.models.schema import Lemma
+from storage.models.variant_form import VARIANT_KIND_EQUIVALENT, VARIANT_KIND_SPELLING
 from storage.translation_helpers import LANG_CODE_TO_LLM_FIELD, convert_llm_response_to_lang_codes
 from wordfreq.translation.constants import MAJOR_POS_TYPES
 from words.lemma_creation import TRANSLATION_LANGUAGES
 from words.pending_imports.approval import approve_pending_import, reject_pending_import
+from words.synonyms import store_spelling_variants
+from langtools.en.conjugation import expand_verb_forms
 
 LOGGER = logging.getLogger(__name__)
 
@@ -132,6 +165,34 @@ MIN_CONFIDENCE = 0.8
 VERDICT_DUPLICATE = "duplicate"
 VERDICT_DISTINCT = "distinct"
 VERDICT_UNSURE = "unsure"
+
+# How a duplicate row's proposed word relates to the sense it duplicates.  Only
+# an equivalent is recorded on the lemma: a variant also makes add_word treat
+# the word as known, which is right for "allocate" (distribute) and wrong for
+# "humanity" (world), whose main meaning needs a lemma of its own.
+RELATION_EQUIVALENT = "equivalent"
+RELATION_OWN_WORD = "own_word"
+RELATION_PARAPHRASE = "paraphrase"
+
+# add_word's note on a row queued only for its catch-all subtype reads
+# "add_word: noun_other needs subtype review before import".
+SUBTYPE_REVIEW_NOTE = "needs subtype review"
+
+SOURCE = "jonvabalis"
+
+# Where a new sense is stored until its level is assessed: nothing else sits
+# above the 1000-1299 topic band, so the senses parked here are easy to find
+# and rebalance lower later.
+PARKING_LEVEL = 1399
+
+# Operation-log type of the entry recording where a lemma's queued row came
+# from; see review_fact.
+REVIEW_OPERATION = "pending_import_review"
+
+# Values of --only, each narrowing the scan to one kind of row.
+ONLY_SUBTYPE_REVIEW = "subtype-review"
+ONLY_SPACING_VARIANTS = "spacing-variants"
+ONLY_KINDS = (ONLY_SUBTYPE_REVIEW, ONLY_SPACING_VARIANTS)
 
 RESPONSE_SCHEMA: Dict[str, Any] = {
     "type": "object",
@@ -149,6 +210,14 @@ RESPONSE_SCHEMA: Dict[str, Any] = {
             "description": (
                 "When the verdict is duplicate, the id of the existing lemma that "
                 "already covers this sense. Null otherwise."
+            ),
+        },
+        "proposed_word_relation": {
+            "type": ["string", "null"],
+            "enum": [RELATION_EQUIVALENT, RELATION_OWN_WORD, RELATION_PARAPHRASE, None],
+            "description": (
+                "When the verdict is duplicate, how the proposed head word relates to "
+                "the sense it duplicates. Null otherwise."
             ),
         },
         "definition": {
@@ -236,13 +305,16 @@ def head_word_problem(
     sample_sentence: Any,
     queried_word: Optional[str],
     proposed_word: Optional[str],
+    pos_type: Optional[str] = None,
 ) -> Optional[str]:
     """Why a ``distinct`` verdict's head word cannot be used, or None if it can.
 
     The head word must be the queried word, the proposed word, or a set phrase
     containing one of them -- anything else is the model inventing a word,
     which is a human's call -- and the sample sentence must use it, since that
-    sentence is the evidence the head word was chosen by.
+    sentence is the evidence the head word was chosen by.  A verb is stored
+    under its infinitive, so for a verb row the infinitive of an inflected
+    queried word also counts: "operating" was queried, "operate" is the lemma.
     """
     if not isinstance(head_word, str) or not head_word.strip():
         return "no head word"
@@ -250,6 +322,10 @@ def head_word_problem(
         return f"parenthesised head word {head_word!r}"
     candidates = [word.lower() for word in (queried_word, proposed_word) if word]
     lowered = head_word.lower()
+    if pos_type == "verb" and queried_word:
+        conjugation = expand_verb_forms({"infinitive": lowered}).values()
+        if queried_word.lower() in {form.lower() for form in conjugation}:
+            candidates.append(lowered)
     if not any(re.search(rf"\b{re.escape(word)}\b", lowered) for word in candidates):
         return f"unexpected head word {head_word!r}"
     if not isinstance(sample_sentence, str) or not sample_sentence.strip():
@@ -292,12 +368,47 @@ def decision_translations(decision: Dict[str, Any]) -> Dict[str, str]:
     }
 
 
+def spacing_key(text: str) -> str:
+    """``text`` lowercased with hyphens and whitespace removed.
+
+    Two spellings with the same key ("break-up", "breakup", "break up") are one
+    word written differently.  Plurals are not folded: "ice skates" for "ice
+    skate" is an inflection, not a variant.
+    """
+    return re.sub(r"[-\s]", "", text.lower())
+
+
+def is_spacing_variant(pending: PendingImport) -> bool:
+    """Whether the queried and proposed words differ only by hyphens or spaces."""
+    queried = pending.queried_word
+    proposed = pending.english_word
+    if not queried or not proposed or queried.lower() == proposed.lower():
+        return False
+    return spacing_key(queried) == spacing_key(proposed)
+
+
+def is_subtype_review(pending: PendingImport) -> bool:
+    """Whether add_word queued the row only because its subtype was a catch-all."""
+    return SUBTYPE_REVIEW_NOTE in (pending.notes or "")
+
+
+def _sql_spacing_key(column: Any) -> Any:
+    """SQL counterpart of :func:`spacing_key`, for spaces and hyphens."""
+    return func.replace(func.replace(func.lower(column), "-", ""), " ", "")
+
+
 def select_pending_rows(
     session: Session,
     limit: int,
     pending_ids: Optional[Sequence[int]] = None,
+    only: Optional[str] = None,
 ) -> List[PendingImport]:
-    """Return queued lemma rows whose proposed head word is not yet a lemma.
+    """Return the queued lemma rows this agent can review.
+
+    That is rows whose proposed head word is not yet a lemma and whose queried
+    word is; plus subtype-review rows, whatever the head word; plus spacing
+    variants, whatever either word.  ``only`` (one of ``ONLY_KINDS``) narrows
+    it to one of the latter two kinds.
 
     Explicit ``pending_ids`` are returned as given, so a specific row can be
     re-reviewed after a prompt change without waiting for it to come up in the
@@ -308,17 +419,31 @@ def select_pending_rows(
         return query.filter(PendingImport.id.in_(list(pending_ids))).all()
 
     existing_lemma_texts = session.query(Lemma.lemma_text)
-    return (
-        query.filter(~PendingImport.english_word.in_(existing_lemma_texts))
-        # See queried_word_is_missing: such rows wait for add_word.
-        .filter(
-            PendingImport.queried_word.is_(None)
-            | PendingImport.queried_word.in_(existing_lemma_texts)
-        )
-        .order_by(PendingImport.id)
-        .limit(limit)
-        .all()
+    # See queried_word_is_missing: such rows wait for add_word.
+    queried_word_exists = PendingImport.queried_word.is_(None) | PendingImport.queried_word.in_(
+        existing_lemma_texts
     )
+    subtype_review = PendingImport.notes.contains(SUBTYPE_REVIEW_NOTE)
+    spacing_variant = (
+        PendingImport.queried_word.isnot(None)
+        & (func.lower(PendingImport.queried_word) != func.lower(PendingImport.english_word))
+        & (
+            _sql_spacing_key(PendingImport.queried_word)
+            == _sql_spacing_key(PendingImport.english_word)
+        )
+    )
+
+    if only == ONLY_SUBTYPE_REVIEW:
+        query = query.filter(subtype_review & queried_word_exists)
+    elif only == ONLY_SPACING_VARIANTS:
+        query = query.filter(spacing_variant)
+    else:
+        query = query.filter(
+            (~PendingImport.english_word.in_(existing_lemma_texts) & queried_word_exists)
+            | (subtype_review & queried_word_exists)
+            | spacing_variant
+        )
+    return query.order_by(PendingImport.id).limit(limit).all()
 
 
 def existing_senses_for(session: Session, lemma_text: Optional[str]) -> List[Dict[str, Any]]:
@@ -358,6 +483,8 @@ def brief_senses_for(session: Session, lemma_text: Optional[str]) -> List[Dict[s
     return [
         {
             "lemma_id": lemma.id,
+            # Without it the model takes an adjective for the row's adverb.
+            "pos_type": lemma.pos_type,
             "pos_subtype": lemma.pos_subtype,
             "disambiguation": lemma.disambiguation,
             "definition": lemma.definition_text,
@@ -373,11 +500,97 @@ def queried_word_is_missing(session: Session, pending: PendingImport) -> bool:
     one sense of a word whose main senses have never been added.  Resolving it
     here would make a minor sense the word's first lemma, so it waits until the
     word itself goes through add_word.  A row with no queried word at all has
-    nothing to wait for.
+    nothing to wait for, and nor does a spacing variant: there the queried
+    word is the proposed word, written differently.
     """
-    if not pending.queried_word:
+    if not pending.queried_word or is_spacing_variant(pending):
         return False
     return session.query(Lemma.id).filter(Lemma.lemma_text == pending.queried_word).first() is None
+
+
+def spellings_of(pending: PendingImport) -> List[str]:
+    """The queried and proposed words of a row, read while the row is current."""
+    return [word for word in (pending.queried_word, pending.english_word) if word]
+
+
+def other_spelling(spellings: Sequence[str], head_text: str) -> Optional[str]:
+    """For a spacing variant, the spelling that is not ``head_text``, if either is."""
+    if head_text not in spellings:
+        return None
+    others = [word for word in spellings if word != head_text]
+    return others[0] if others else None
+
+
+def record_variant(session: Session, lemma: Lemma, variant_text: str, variant_kind: str) -> None:
+    """Record ``variant_text`` on ``lemma`` with its paradigm.  Does not commit.
+
+    ``store_spelling_variants`` inflects the variant by rule where that is
+    safe ("break-up" -> "break-ups") and stores the base form alone where it
+    is not -- an irregular lemma, or a verb with stored principal parts.
+    """
+    store_spelling_variants(session, lemma, "en", [variant_text], variant_kind, source=SOURCE)
+
+
+def review_fact(pending: PendingImport, decision: Dict[str, Any], action: str) -> Dict[str, Any]:
+    """What a resolved row was, for the operation log.  Read while the row is current.
+
+    Approval deletes the pending row, and nothing else records that "realm"
+    came from a query for "kingdom".  A later pass placing these senses by the
+    word list that queried them -- or anyone asking where a lemma came from --
+    needs the queried word and the row as it was queued, not as the model
+    rewrote it.
+    """
+    return {
+        "action": action,
+        "pending_id": int(pending.id),
+        "queried_word": pending.queried_word,
+        "proposed_word": pending.english_word,
+        "proposed_definition": pending.definition,
+        "proposed_pos_type": pending.pos_type,
+        "proposed_pos_subtype": pending.pos_subtype,
+        "pending_source": pending.source,
+        "pending_notes": pending.notes,
+        "frequency_rank": pending.frequency_rank,
+        "queued_at": str(pending.added_at) if pending.added_at else None,
+        "verdict": decision.get("verdict"),
+        "confidence": decision.get("confidence"),
+        "reasoning": decision.get("reasoning"),
+        "duplicate_of_lemma_id": decision.get("duplicate_of_lemma_id"),
+        "proposed_word_relation": decision.get("proposed_word_relation"),
+        "suggested_difficulty_level": decision.get("difficulty_level"),
+    }
+
+
+def log_review(session: Session, lemma: Lemma, fact: Dict[str, Any]) -> None:
+    """Record a resolved row against the lemma it became or duplicated.  Does not commit."""
+    log_entity_operation(
+        session,
+        source=SOURCE,
+        operation_type=REVIEW_OPERATION,
+        entity_guid=lemma.guid,
+        fact=fact,
+        lemma_id=lemma.id,
+    )
+
+
+def equivalent_word(session: Session, pending: PendingImport, lemma: Lemma) -> Optional[str]:
+    """The proposed word of a duplicate row, when it should be recorded on ``lemma``.
+
+    A duplicate verdict settles the sense, but the proposed word may still be
+    an ordinary word with no lemma of its own -- "allocate" queued from
+    "distribute" -- and every such token should belong to something.  Only a
+    single token qualifies: a paraphrase like "protective measure" is a
+    description of the sense, not a word anyone reads.  A word that is already
+    a lemma keeps its own entry.
+    """
+    proposed = (pending.english_word or "").strip()
+    if not proposed or re.search(r"\s", proposed):
+        return None
+    if spacing_key(proposed) == spacing_key(lemma.lemma_text):
+        return None
+    if session.query(Lemma.id).filter(func.lower(Lemma.lemma_text) == proposed.lower()).first():
+        return None
+    return proposed
 
 
 def level_anchors_for(session: Session, pos_subtype: Optional[str]) -> List[Dict[str, Any]]:
@@ -439,18 +652,49 @@ def build_prompt(
             f"Subtypes for {pending.pos_type}:\n{render_subtype_list(pending.pos_type)}\n\n"
         )
 
+    if is_subtype_review(pending):
+        opening = (
+            "A word was submitted to a vocabulary database. The server created the senses it "
+            "was confident about and queued this one only because it could not choose a "
+            "subtype for it: the proposed subtype is a catch-all placeholder. The head word "
+            "is not in question -- it is the proposed head word unless that is plainly "
+            "wrong -- so the real work is the duplicate check and the subtype.\n\n"
+        )
+    else:
+        opening = (
+            "A word was submitted to a vocabulary database. The server created the senses it "
+            "was confident about and queued this one, because the sense seems to belong under "
+            "a different English head word than the word that was asked about.\n\n"
+        )
+    if is_spacing_variant(pending):
+        opening += (
+            "Here the queried word and the proposed head word are the same word written "
+            "differently, differing only in hyphens or spaces. If you answer 'distinct', "
+            "head_word must be whichever of the two is the standard modern US spelling for "
+            "this sense; the other is recorded as a spelling variant of it.\n\n"
+        )
+
     return (
-        "A word was submitted to a vocabulary database. The server created the senses it "
-        "was confident about and queued this one, because the sense seems to belong under "
-        "a different English head word than the word that was asked about.\n\n"
+        f"{opening}"
         "Decide what to do with the queued row.\n\n"
         "First, and most importantly: is this sense ALREADY COVERED by one of the existing "
         "senses listed under 'existing_senses_of_queried_word' or "
         "'existing_senses_of_proposed_head_word'? The queried word's senses were often "
         "created by the very same request, so a queued row restating one of them under a "
         "new name is the common failure. Compare meanings and translations, not just "
-        "labels. If it is covered, answer 'duplicate' and name the lemma id; do not assign "
-        "a level.\n\n"
+        "labels. Only an existing sense with the same pos_type as this row can cover it: "
+        "the adverb 'worldwide' (sold worldwide) is not covered by the adjective "
+        "'worldwide' (a worldwide campaign), nor the noun 'firstborn' (their firstborn) by "
+        "the adjective. If it is covered, answer 'duplicate' and name the lemma id; do not "
+        "assign a level. Then say how the proposed head word relates to that sense, in "
+        "proposed_word_relation: 'equivalent' only if it substitutes for the queried word "
+        "in most sentences using this sense, and this is its main meaning ('allocate' for "
+        "'distribute' funds, 'self-reliant' for 'self-sufficient'); 'own_word' if its main "
+        "meaning lies elsewhere, is broader or narrower, or it only overlaps -- 'shortage' "
+        "is not a substitute for 'lack' ('a lack of interest', never 'a shortage of "
+        "interest'), and 'humanity' queried from 'world' needs an entry of its own; "
+        "'paraphrase' if it is a description of the "
+        "sense rather than a word anyone would look up ('protective measure').\n\n"
         "If it is genuinely a sense the database lacks, answer 'distinct' and work in "
         "this order:\n"
         "  1. definition: define this sense in one sentence.\n"
@@ -459,12 +703,20 @@ def build_prompt(
         "dictionary form or with a regular ending (-s, -ed, -ing).\n"
         "  3. head_word: the word or set phrase your sample sentence uses for this sense. "
         "It is one of: the queried word, the proposed head word, or a set phrase "
-        "containing one of them. Strongly prefer the bare word. A set phrase is right "
-        "only when speakers never use the bare word for this meaning: 'bail bond' is "
-        "never just 'bond'. When people say the bare word in context -- a chemist says "
-        "'bond', a university's staff say 'the chancellor' -- the head word is the bare "
-        "word and the context goes in the disambiguation: 'bond' / 'chemical', not "
-        "'chemical bond'; 'chancellor' / 'university', not 'university chancellor'. "
+        "containing one of them. A verb is always its infinitive: if 'operating' was "
+        "queried for a verb sense, the head word is 'operate'. Choose the form that is the ordinary name of this "
+        "meaning, using two tests. First, would a dictionary give the phrase its own "
+        "entry? 'pie chart', 'bail bond', 'high school' and 'ice cream' are entries; "
+        "'chemical bond' and 'university chancellor' are just the word in a context. "
+        "Second, would a reader meeting your sample sentence cold, with nothing said "
+        "before it, understand the bare word in this sense? 'The report includes a pie "
+        "showing expenses' fails: 'pie' for a chart is only a clipping used after 'pie "
+        "chart' has been said, so the head word is 'pie chart'. When people do say the "
+        "bare word on its own in context -- a chemist says 'bond', a university's staff "
+        "say 'the chancellor' -- the head word is the bare word and the context goes in "
+        "the disambiguation: 'bond' / 'chemical', not 'chemical bond'; 'chancellor' / "
+        "'university', not 'university chancellor'. Write the sample sentence as an "
+        "opening sentence, so it passes the second test on its own. "
         "Then ask whether the queried word itself carries this meaning. The proposed word "
         "is often only a near-synonym: a 'brand ambassador' is not simply a "
         "'representative', and 'too much bureaucracy' is not simply 'red tape'. If the "
@@ -526,12 +778,13 @@ class JonvabalisAgent:
         self,
         limit: int = DEFAULT_LIMIT,
         pending_ids: Optional[Sequence[int]] = None,
+        only: Optional[str] = None,
     ) -> List[Dict[str, Any]]:
         """Review a batch of queued rows, one LLM call each, and act on each."""
         results: List[Dict[str, Any]] = []
         session = create_backend_session(self.config)
         try:
-            rows = select_pending_rows(session, limit, pending_ids)
+            rows = select_pending_rows(session, limit, pending_ids, only)
             LOGGER.info("Reviewing %d pending row(s)", len(rows))
             for index, pending in enumerate(rows, start=1):
                 LOGGER.info(
@@ -586,6 +839,25 @@ class JonvabalisAgent:
             if verdict == VERDICT_DISTINCT:
                 return self.approve_distinct(session, pending, decision)
             elif verdict == VERDICT_DUPLICATE:
+                problem = self.duplicate_problem(
+                    session, pending, decision.get("duplicate_of_lemma_id")
+                )
+                if problem is not None:
+                    return self.leave_in_queue(problem)
+                # Variants are flushed here and committed by the rejection below.
+                if is_spacing_variant(pending):
+                    self.record_variant_for(
+                        session, spellings_of(pending), decision.get("duplicate_of_lemma_id")
+                    )
+                elif decision.get("proposed_word_relation") == RELATION_EQUIVALENT:
+                    duplicate = session.get(Lemma, decision["duplicate_of_lemma_id"])
+                    word = equivalent_word(session, pending, duplicate) if duplicate else None
+                    if duplicate is not None and word is not None:
+                        record_variant(session, duplicate, word, VARIANT_KIND_EQUIVALENT)
+                        session.flush()
+                duplicate_lemma = session.get(Lemma, decision["duplicate_of_lemma_id"])
+                if duplicate_lemma is not None:
+                    log_review(session, duplicate_lemma, review_fact(pending, decision, "rejected"))
                 # No exclusion: it would key on the proposed head word and bar
                 # that word from add_word entirely, when only this one sense
                 # was a duplicate -- "humanity" is a real word even though
@@ -611,6 +883,51 @@ class JonvabalisAgent:
             "error": outcome.get("error"),
         }
 
+    @staticmethod
+    def duplicate_problem(session: Session, pending: PendingImport, lemma_id: Any) -> Optional[str]:
+        """Why a ``duplicate`` verdict cannot be acted on, or None if it can.
+
+        The named lemma must exist and share the row's POS.  The model has
+        called an adverb ("sold worldwide") a duplicate of the adjective
+        ("a worldwide campaign"), and a noun ("their firstborn") of the
+        adjective ("firstborn child"); another POS is another lemma, so such a
+        row is left for a human rather than rejected.
+        """
+        if not isinstance(lemma_id, int):
+            return "duplicate verdict names no lemma"
+        lemma = session.get(Lemma, lemma_id)
+        if lemma is None:
+            return f"duplicate of unknown lemma {lemma_id}"
+        if pending.pos_type and lemma.pos_type != pending.pos_type:
+            return f"duplicate of lemma {lemma_id} is a {lemma.pos_type}, not a {pending.pos_type}"
+        return None
+
+    @staticmethod
+    def record_variant_for(session: Session, spellings: Sequence[str], lemma_id: Any) -> bool:
+        """Record the spelling of a spacing-variant row that ``lemma_id`` does not use.
+
+        ``spellings`` comes from :func:`spellings_of`, read before approval
+        rewrites or deletes the row.
+
+        Returns whether a variant was recorded.  Nothing is recorded when the
+        lemma is not under either spelling (the verdict landed on some other
+        sense), or when the other spelling is itself a lemma, since a variant
+        must not make one lemma's text resolve to another.  Does not commit.
+        """
+        if not isinstance(lemma_id, int):
+            return False
+        lemma = session.get(Lemma, lemma_id)
+        if lemma is None:
+            return False
+        variant_text = other_spelling(spellings, lemma.lemma_text)
+        if variant_text is None:
+            return False
+        if session.query(Lemma.id).filter(Lemma.lemma_text == variant_text).first():
+            return False
+        record_variant(session, lemma, variant_text, VARIANT_KIND_SPELLING)
+        session.flush()
+        return True
+
     def approve_distinct(
         self, session: Session, pending: PendingImport, decision: Dict[str, Any]
     ) -> Dict[str, Any]:
@@ -622,8 +939,8 @@ class JonvabalisAgent:
         them back and the row stays queued as it was.  The disambiguation has
         no pending-row column and is passed to approval directly.
 
-        The model's difficulty level is not stored; approval creates the lemma
-        at the unset level until levels are assessed properly.
+        The model's difficulty level is not stored; the new lemma is moved to
+        ``PARKING_LEVEL`` until levels are assessed properly.
 
         An incomplete verdict is left in the queue rather than approved with
         the gaps filled from the queued row.
@@ -635,7 +952,7 @@ class JonvabalisAgent:
         disambiguation = decision.get("disambiguation")
 
         problem = head_word_problem(
-            head_word, sample_sentence, pending.queried_word, pending.english_word
+            head_word, sample_sentence, pending.queried_word, pending.english_word, pending.pos_type
         )
         if problem is not None:
             return self.leave_in_queue(problem)
@@ -664,6 +981,27 @@ class JonvabalisAgent:
         ):
             return self.leave_in_queue(f"{head_word!r} already has a sense; no disambiguation")
 
+        # Approval treats an existing lemma with the same text, POS and subtype
+        # as this very sense: it creates nothing and deletes the row.  The
+        # model has just said the sense is new, so that would silently discard
+        # it -- "phenomenology" the applied method was lost to the
+        # knowledge_domain lemma for the philosophy.  A human picks between a
+        # different subtype and a merge.
+        same_subtype = (
+            session.query(Lemma.id)
+            .filter(
+                func.lower(Lemma.lemma_text) == head_word.lower(),
+                Lemma.pos_type == pending.pos_type,
+                Lemma.pos_subtype == pos_subtype,
+            )
+            .first()
+        )
+        if same_subtype is not None:
+            return self.leave_in_queue(
+                f"lemma {same_subtype[0]} is already {head_word!r} {pending.pos_type}/{pos_subtype}; "
+                "approval would merge into it"
+            )
+
         # The queued examples were written for the proposed word; only those
         # that use the chosen head word illustrate this lemma.
         queued_examples = [
@@ -671,6 +1009,9 @@ class JonvabalisAgent:
             for example in read_pending_import_example_sentences(pending)
             if uses_head_word(example, head_word)
         ]
+        spacing_spellings = spellings_of(pending) if is_spacing_variant(pending) else []
+        # Read before the row is rewritten below and deleted by approval.
+        fact = review_fact(pending, decision, "approved")
         pending.english_word = head_word
         pending.definition = definition.strip()
         pending.example_sentences = serialize_example_sentences([sample_sentence, *queued_examples])
@@ -687,12 +1028,22 @@ class JonvabalisAgent:
         lemma_id = outcome.get("lemma_id")
         if not outcome.get("success"):
             session.rollback()
+        elif lemma_id:
+            update_lemma(session, lemma_id, difficulty_level=PARKING_LEVEL, source=SOURCE)
+            lemma = session.get(Lemma, lemma_id)
+            if lemma is not None:
+                log_review(session, lemma, fact)
+            if spacing_spellings:
+                self.record_variant_for(session, spacing_spellings, lemma_id)
+            session.commit()
 
         return {
-            "action": "approved",
+            # A success with no lemma means approval found the sense already
+            # stored and only removed the row.
+            "action": "approved" if lemma_id or not outcome.get("success") else "dropped",
             "success": bool(outcome.get("success")),
             "lemma_id": lemma_id,
-            "error": outcome.get("error"),
+            "error": outcome.get("error") or outcome.get("message"),
         }
 
     @staticmethod
@@ -700,18 +1051,28 @@ class JonvabalisAgent:
         return {"action": "left_in_queue", "success": True, "reason": reason}
 
 
-def print_dry_run(config: DataSourceConfig, limit: int, pending_ids: Sequence[int]) -> None:
+def print_dry_run(
+    config: DataSourceConfig,
+    limit: int,
+    pending_ids: Sequence[int],
+    only: Optional[str] = None,
+) -> None:
     """Print the rows a run would review, making no LLM calls."""
     session = create_backend_session(config, readonly=True)
     try:
-        rows = select_pending_rows(session, limit, pending_ids)
+        rows = select_pending_rows(session, limit, pending_ids, only)
         print(f"Rows selected for review: {len(rows)}")
         for pending in rows:
             senses = existing_senses_for(session, pending.queried_word)
+            kind = ""
+            if is_spacing_variant(pending):
+                kind = " [spacing variant]"
+            elif is_subtype_review(pending):
+                kind = " [subtype review]"
             print(
                 f"  [{pending.id}] {pending.queried_word or '(no queried word)'} "
                 f"-> {pending.english_word} ({pending.pos_type}/{pending.pos_subtype}); "
-                f"{len(senses)} existing sense(s) of the queried word"
+                f"{len(senses)} existing sense(s) of the queried word{kind}"
             )
     finally:
         session.close()
@@ -739,6 +1100,8 @@ def print_results(results: Sequence[Dict[str, Any]]) -> None:
             applied = f"{applied} FAILED: {outcome.get('error')}"
         elif applied == "approved" and outcome.get("lemma_id"):
             applied = f"approved -> lemma {outcome['lemma_id']}"
+        elif applied == "dropped":
+            applied = f"dropped, no lemma created: {outcome.get('error')}"
         elif outcome.get("reason"):
             applied = f"{applied} ({outcome['reason']})"
         print(
@@ -782,6 +1145,15 @@ def main() -> int:
         help="Review this specific pending row; repeatable. Overrides --limit.",
     )
     parser.add_argument(
+        "--only",
+        choices=ONLY_KINDS,
+        help=(
+            "Review only one kind of row: subtype-review (queued for a catch-all "
+            "subtype such as noun_other) or spacing-variants (queried and proposed "
+            "words differ only by hyphens or spaces)."
+        ),
+    )
+    parser.add_argument(
         "--output",
         type=Path,
         help="Write the full decisions to this path as JSON.",
@@ -792,11 +1164,15 @@ def main() -> int:
     config = get_data_source_config(args)
 
     if args.dry_run:
-        print_dry_run(config, args.limit, args.pending_ids)
+        print_dry_run(config, args.limit, args.pending_ids, args.only)
         return 0
 
     agent = JonvabalisAgent(config)
-    results = agent.review(limit=args.limit, pending_ids=args.pending_ids)
+    results = agent.review(
+        limit=args.limit,
+        pending_ids=args.pending_ids,
+        only=args.only,
+    )
     print_results(results)
 
     if args.output:

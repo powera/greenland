@@ -101,6 +101,13 @@ VARIANT_KIND_SCRIPT: str = "script"
 VARIANT_KIND_ABBREVIATION: str = "abbreviation"
 VARIANT_KIND_EXPANDED: str = "expanded"
 
+# A different everyday word for the same sense, held on the lemma so its
+# tokens are accounted for: "couch" on "sofa", "allocate" on "distribute".
+# This is the further kind the module docstring anticipates, and where its
+# boundary falls is still unsettled.  Not an accepted answer: a learner asked
+# for "distribute" has not answered it with "allocate".
+VARIANT_KIND_EQUIVALENT: str = "equivalent"
+
 # The kinds a learner may type and be right.  Every kind above is currently in
 # this set -- each one is a way of writing the lemma itself -- but naming the
 # set keeps that judgement in one place, so a future kind that is *not* an
