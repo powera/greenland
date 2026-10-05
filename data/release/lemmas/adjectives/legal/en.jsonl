@@ -37,6 +37,29 @@
 {"guid": "A27_037", "forms": [{"grammatical_form": "adjective/en_positive", "text": "per curiam", "is_base_form": true, "ipa": "/pər ˈkjʊriəm/", "phonetic": "per KYOO-ree-um"}]}
 {"guid": "A27_038", "forms": [{"grammatical_form": "adjective/en_positive", "text": "de facto", "is_base_form": true, "ipa": "/də ˈfæktoʊ/", "phonetic": "duh-FAK-toh"}]}
 {"guid": "A27_039", "forms": [{"grammatical_form": "adjective/en_positive", "text": "ultra vires", "is_base_form": true, "ipa": "/ˌʌltrə ˈvaɪriːz/", "phonetic": "UL-truh VY-rees"}]}
+{"guid": "A27_040", "forms": [{"grammatical_form": "adjective/en_positive", "text": "ex post facto", "is_base_form": true}]}
+{"guid": "A27_041", "forms": [{"grammatical_form": "adjective/en_positive", "text": "prima facie", "is_base_form": true}]}
+{"guid": "A27_042", "forms": [{"grammatical_form": "adjective/en_positive", "text": "de jure", "is_base_form": true}]}
+{"guid": "A27_043", "forms": [{"grammatical_form": "adjective/en_positive", "text": "de novo", "is_base_form": true}]}
+{"guid": "A27_044", "forms": [{"grammatical_form": "adjective/en_positive", "text": "sui generis", "is_base_form": true}]}
+{"guid": "A27_045", "forms": [{"grammatical_form": "adjective/en_positive", "text": "bona fide", "is_base_form": true}]}
+{"guid": "A27_046", "forms": [{"grammatical_form": "adjective/en_positive", "text": "pro se", "is_base_form": true}]}
+{"guid": "A27_047", "forms": [{"grammatical_form": "adjective/en_positive", "text": "pro bono", "is_base_form": true}]}
+{"guid": "A27_048", "forms": [{"grammatical_form": "adjective/en_positive", "text": "ab initio", "is_base_form": true}]}
+{"guid": "A27_049", "forms": [{"grammatical_form": "adjective/en_positive", "text": "in personam", "is_base_form": true}]}
+{"guid": "A27_050", "forms": [{"grammatical_form": "adjective/en_positive", "text": "in rem", "is_base_form": true}]}
+{"guid": "A27_051", "forms": [{"grammatical_form": "adjective/en_positive", "text": "malum in se", "is_base_form": true}]}
+{"guid": "A27_052", "forms": [{"grammatical_form": "adjective/en_positive", "text": "malum prohibitum", "is_base_form": true}]}
+{"guid": "A27_053", "forms": [{"grammatical_form": "adjective/en_positive", "text": "ex parte", "is_base_form": true}]}
+{"guid": "A27_054", "forms": [{"grammatical_form": "adjective/en_positive", "text": "in limine", "is_base_form": true}]}
+{"guid": "A27_055", "forms": [{"grammatical_form": "adjective/en_positive", "text": "nunc pro tunc", "is_base_form": true}]}
+{"guid": "A27_056", "forms": [{"grammatical_form": "adjective/en_positive", "text": "in forma pauperis", "is_base_form": true}]}
+{"guid": "A27_057", "forms": [{"grammatical_form": "adjective/en_positive", "text": "pro hac vice", "is_base_form": true}]}
+{"guid": "A27_058", "forms": [{"grammatical_form": "adjective/en_positive", "text": "per stirpes", "is_base_form": true}]}
+{"guid": "A27_059", "forms": [{"grammatical_form": "adjective/en_positive", "text": "per capita", "is_base_form": true}]}
+{"guid": "A27_060", "forms": [{"grammatical_form": "adjective/en_positive", "text": "ad litem", "is_base_form": true}]}
+{"guid": "A27_061", "forms": [{"grammatical_form": "adjective/en_positive", "text": "in re", "is_base_form": true}]}
+{"guid": "A27_063", "forms": [{"grammatical_form": "adjective/en_positive", "text": "void for vagueness", "is_base_form": true}]}
 {"guid": "A27_064", "forms": [{"grammatical_form": "adjective/en_positive", "text": "direct", "is_base_form": true, "ipa": "/dəˈrɛkt/", "phonetic": "duh-REKT"}]}
 {"guid": "A27_065", "forms": [{"grammatical_form": "adjective/en_positive", "text": "state-owned", "is_base_form": true, "ipa": "/ˌsteɪt ˈoʊnd/", "phonetic": "STAYT-OWND"}]}
 {"guid": "A27_066", "forms": [{"grammatical_form": "adjective/en_positive", "text": "non-profit", "is_base_form": true, "ipa": "/ˌnɑnˈprɑfɪt/", "phonetic": "non-PROF-it"}]}

@@ -18,12 +18,95 @@
 {"guid": "N45_018", "forms": [{"grammatical_form": "noun/en_singular", "text": "Sweden", "is_base_form": true, "ipa": "/swuːdɛn/", "phonetic": "SWEED-en"}]}
 {"guid": "N45_019", "forms": [{"grammatical_form": "noun/en_singular", "text": "Norway", "is_base_form": true, "ipa": "/nˈoʊˌweɪ/", "phonetic": "NOH-way"}]}
 {"guid": "N45_020", "forms": [{"grammatical_form": "noun/en_singular", "text": "Finland", "is_base_form": true, "ipa": "/ˈfɪnlænd/", "phonetic": "FIN-land"}]}
+{"guid": "N45_021", "forms": [{"grammatical_form": "noun/en_singular", "text": "South Korea", "is_base_form": true}]}
 {"guid": "N45_022", "forms": [{"grammatical_form": "noun/en_singular", "text": "Thailand", "is_base_form": true}]}
 {"guid": "N45_023", "forms": [{"grammatical_form": "noun/en_singular", "text": "Vietnam", "is_base_form": true}]}
+{"guid": "N45_024", "forms": [{"grammatical_form": "noun/en_singular", "text": "South Africa", "is_base_form": true}]}
 {"guid": "N45_025", "forms": [{"grammatical_form": "noun/en_singular", "text": "Egypt", "is_base_form": true}]}
+{"guid": "N45_026", "forms": [{"grammatical_form": "noun/en_singular", "text": "Alabama", "is_base_form": true}]}
+{"guid": "N45_027", "forms": [{"grammatical_form": "noun/en_singular", "text": "Alaska", "is_base_form": true}]}
+{"guid": "N45_028", "forms": [{"grammatical_form": "noun/en_singular", "text": "Arizona", "is_base_form": true}]}
+{"guid": "N45_029", "forms": [{"grammatical_form": "noun/en_singular", "text": "Arkansas", "is_base_form": true}]}
+{"guid": "N45_030", "forms": [{"grammatical_form": "noun/en_singular", "text": "California", "is_base_form": true}]}
+{"guid": "N45_031", "forms": [{"grammatical_form": "noun/en_singular", "text": "Colorado", "is_base_form": true}]}
+{"guid": "N45_032", "forms": [{"grammatical_form": "noun/en_singular", "text": "Connecticut", "is_base_form": true}]}
+{"guid": "N45_033", "forms": [{"grammatical_form": "noun/en_singular", "text": "Delaware", "is_base_form": true}]}
+{"guid": "N45_034", "forms": [{"grammatical_form": "noun/en_singular", "text": "Florida", "is_base_form": true}]}
+{"guid": "N45_035", "forms": [{"grammatical_form": "noun/en_singular", "text": "Georgia", "is_base_form": true}]}
+{"guid": "N45_036", "forms": [{"grammatical_form": "noun/en_singular", "text": "Hawaii", "is_base_form": true}]}
+{"guid": "N45_037", "forms": [{"grammatical_form": "noun/en_singular", "text": "Idaho", "is_base_form": true}]}
+{"guid": "N45_038", "forms": [{"grammatical_form": "noun/en_singular", "text": "Illinois", "is_base_form": true}]}
+{"guid": "N45_039", "forms": [{"grammatical_form": "noun/en_singular", "text": "Indiana", "is_base_form": true}]}
+{"guid": "N45_040", "forms": [{"grammatical_form": "noun/en_singular", "text": "Iowa", "is_base_form": true}]}
+{"guid": "N45_041", "forms": [{"grammatical_form": "noun/en_singular", "text": "Kansas", "is_base_form": true}]}
+{"guid": "N45_042", "forms": [{"grammatical_form": "noun/en_singular", "text": "Kentucky", "is_base_form": true}]}
+{"guid": "N45_043", "forms": [{"grammatical_form": "noun/en_singular", "text": "Louisiana", "is_base_form": true}]}
+{"guid": "N45_044", "forms": [{"grammatical_form": "noun/en_singular", "text": "Maine", "is_base_form": true}]}
+{"guid": "N45_045", "forms": [{"grammatical_form": "noun/en_singular", "text": "Maryland", "is_base_form": true}]}
+{"guid": "N45_046", "forms": [{"grammatical_form": "noun/en_singular", "text": "Massachusetts", "is_base_form": true}]}
+{"guid": "N45_047", "forms": [{"grammatical_form": "noun/en_singular", "text": "Michigan", "is_base_form": true}]}
+{"guid": "N45_048", "forms": [{"grammatical_form": "noun/en_singular", "text": "Minnesota", "is_base_form": true}]}
+{"guid": "N45_049", "forms": [{"grammatical_form": "noun/en_singular", "text": "Mississippi", "is_base_form": true}]}
+{"guid": "N45_050", "forms": [{"grammatical_form": "noun/en_singular", "text": "Missouri", "is_base_form": true}]}
+{"guid": "N45_051", "forms": [{"grammatical_form": "noun/en_singular", "text": "Montana", "is_base_form": true}]}
+{"guid": "N45_052", "forms": [{"grammatical_form": "noun/en_singular", "text": "Nebraska", "is_base_form": true}]}
+{"guid": "N45_053", "forms": [{"grammatical_form": "noun/en_singular", "text": "Nevada", "is_base_form": true}]}
+{"guid": "N45_054", "forms": [{"grammatical_form": "noun/en_singular", "text": "New Hampshire", "is_base_form": true}]}
+{"guid": "N45_055", "forms": [{"grammatical_form": "noun/en_singular", "text": "New Jersey", "is_base_form": true}]}
+{"guid": "N45_056", "forms": [{"grammatical_form": "noun/en_singular", "text": "New Mexico", "is_base_form": true}]}
+{"guid": "N45_057", "forms": [{"grammatical_form": "noun/en_singular", "text": "North Carolina", "is_base_form": true}]}
+{"guid": "N45_058", "forms": [{"grammatical_form": "noun/en_singular", "text": "North Dakota", "is_base_form": true}]}
+{"guid": "N45_059", "forms": [{"grammatical_form": "noun/en_singular", "text": "Ohio", "is_base_form": true}]}
+{"guid": "N45_060", "forms": [{"grammatical_form": "noun/en_singular", "text": "Oklahoma", "is_base_form": true}]}
+{"guid": "N45_061", "forms": [{"grammatical_form": "noun/en_singular", "text": "Oregon", "is_base_form": true}]}
+{"guid": "N45_062", "forms": [{"grammatical_form": "noun/en_singular", "text": "Pennsylvania", "is_base_form": true}]}
+{"guid": "N45_063", "forms": [{"grammatical_form": "noun/en_singular", "text": "Rhode Island", "is_base_form": true}]}
+{"guid": "N45_064", "forms": [{"grammatical_form": "noun/en_singular", "text": "South Carolina", "is_base_form": true}]}
+{"guid": "N45_065", "forms": [{"grammatical_form": "noun/en_singular", "text": "South Dakota", "is_base_form": true}]}
+{"guid": "N45_066", "forms": [{"grammatical_form": "noun/en_singular", "text": "Tennessee", "is_base_form": true}]}
+{"guid": "N45_067", "forms": [{"grammatical_form": "noun/en_singular", "text": "Texas", "is_base_form": true}]}
+{"guid": "N45_068", "forms": [{"grammatical_form": "noun/en_singular", "text": "Utah", "is_base_form": true}]}
+{"guid": "N45_069", "forms": [{"grammatical_form": "noun/en_singular", "text": "Vermont", "is_base_form": true}]}
+{"guid": "N45_070", "forms": [{"grammatical_form": "noun/en_singular", "text": "Virginia", "is_base_form": true}]}
+{"guid": "N45_071", "forms": [{"grammatical_form": "noun/en_singular", "text": "Washington", "is_base_form": true}]}
+{"guid": "N45_072", "forms": [{"grammatical_form": "noun/en_singular", "text": "West Virginia", "is_base_form": true}]}
+{"guid": "N45_073", "forms": [{"grammatical_form": "noun/en_singular", "text": "Wisconsin", "is_base_form": true}]}
+{"guid": "N45_074", "forms": [{"grammatical_form": "noun/en_singular", "text": "Wyoming", "is_base_form": true}]}
+{"guid": "N45_075", "forms": [{"grammatical_form": "noun/en_singular", "text": "Greece", "is_base_form": true}]}
+{"guid": "N45_076", "forms": [{"grammatical_form": "noun/en_singular", "text": "Turkey", "is_base_form": true}]}
+{"guid": "N45_077", "forms": [{"grammatical_form": "noun/en_singular", "text": "Iran", "is_base_form": true}]}
+{"guid": "N45_078", "forms": [{"grammatical_form": "noun/en_singular", "text": "Iraq", "is_base_form": true}]}
+{"guid": "N45_079", "forms": [{"grammatical_form": "noun/en_singular", "text": "Austria", "is_base_form": true}]}
+{"guid": "N45_080", "forms": [{"grammatical_form": "noun/en_singular", "text": "Switzerland", "is_base_form": true}]}
+{"guid": "N45_081", "forms": [{"grammatical_form": "noun/en_singular", "text": "Portugal", "is_base_form": true}]}
+{"guid": "N45_082", "forms": [{"grammatical_form": "noun/en_singular", "text": "Netherlands", "is_base_form": true}]}
+{"guid": "N45_083", "forms": [{"grammatical_form": "noun/en_singular", "text": "Belgium", "is_base_form": true}]}
+{"guid": "N45_084", "forms": [{"grammatical_form": "noun/en_singular", "text": "Denmark", "is_base_form": true}]}
+{"guid": "N45_085", "forms": [{"grammatical_form": "noun/en_singular", "text": "Ireland", "is_base_form": true}]}
+{"guid": "N45_086", "forms": [{"grammatical_form": "noun/en_singular", "text": "Scotland", "is_base_form": true}]}
+{"guid": "N45_087", "forms": [{"grammatical_form": "noun/en_singular", "text": "Wales", "is_base_form": true}]}
+{"guid": "N45_088", "forms": [{"grammatical_form": "noun/en_singular", "text": "Hungary", "is_base_form": true}]}
+{"guid": "N45_089", "forms": [{"grammatical_form": "noun/en_singular", "text": "Ukraine", "is_base_form": true}]}
+{"guid": "N45_090", "forms": [{"grammatical_form": "noun/en_singular", "text": "Mexico", "is_base_form": true}]}
+{"guid": "N45_091", "forms": [{"grammatical_form": "noun/en_singular", "text": "Argentina", "is_base_form": true}]}
+{"guid": "N45_092", "forms": [{"grammatical_form": "noun/en_singular", "text": "Chile", "is_base_form": true}]}
+{"guid": "N45_093", "forms": [{"grammatical_form": "noun/en_singular", "text": "Peru", "is_base_form": true}]}
+{"guid": "N45_094", "forms": [{"grammatical_form": "noun/en_singular", "text": "Cuba", "is_base_form": true}]}
+{"guid": "N45_095", "forms": [{"grammatical_form": "noun/en_singular", "text": "Israel", "is_base_form": true}]}
+{"guid": "N45_096", "forms": [{"grammatical_form": "noun/en_singular", "text": "Morocco", "is_base_form": true}]}
+{"guid": "N45_097", "forms": [{"grammatical_form": "noun/en_singular", "text": "Ethiopia", "is_base_form": true}]}
+{"guid": "N45_098", "forms": [{"grammatical_form": "noun/en_singular", "text": "Indonesia", "is_base_form": true}]}
+{"guid": "N45_099", "forms": [{"grammatical_form": "noun/en_singular", "text": "Philippines", "is_base_form": true}]}
+{"guid": "N45_100", "forms": [{"grammatical_form": "noun/en_singular", "text": "Europe", "is_base_form": true}]}
+{"guid": "N45_101", "forms": [{"grammatical_form": "noun/en_singular", "text": "Asia", "is_base_form": true}]}
+{"guid": "N45_102", "forms": [{"grammatical_form": "noun/en_singular", "text": "Africa", "is_base_form": true}]}
+{"guid": "N45_103", "forms": [{"grammatical_form": "noun/en_singular", "text": "North America", "is_base_form": true}]}
+{"guid": "N45_104", "forms": [{"grammatical_form": "noun/en_singular", "text": "South America", "is_base_form": true}]}
+{"guid": "N45_105", "forms": [{"grammatical_form": "noun/en_singular", "text": "Antarctica", "is_base_form": true}]}
 {"guid": "N45_106", "forms": [{"grammatical_form": "noun/en_singular", "text": "province", "is_base_form": true, "ipa": "/ˈprɑː.vɪns/", "phonetic": "PROV-ins"}]}
-{"guid": "N45_107", "forms": [{"grammatical_form": "noun/en_singular", "text": "kingdom", "is_base_form": true, "ipa": "/ˈkɪŋdəm/", "phonetic": "KING-duhm"}]}
+{"guid": "N45_107", "forms": [{"grammatical_form": "noun/en_singular", "text": "kingdom", "is_base_form": true, "ipa": "/ˈkɪŋdəm/", "phonetic": "KING-duhm"}], "variants": [{"kind": "spelling", "key": "Kingdom", "forms": [{"grammatical_form": "noun/en_singular", "text": "Kingdom", "is_base_form": true}]}]}
 {"guid": "N45_108", "forms": [{"grammatical_form": "noun/en_singular", "text": "prefecture", "is_base_form": true, "ipa": "/ˈprɛfɪktʃər/", "phonetic": "PREF-ek-cher"}]}
 {"guid": "N45_109", "forms": [{"grammatical_form": "noun/en_singular", "text": "protectorate", "is_base_form": true, "ipa": "/prəˈtɛktərət/", "phonetic": "pro-TEK-tuh-rut"}]}
 {"guid": "N45_110", "forms": [{"grammatical_form": "noun/en_singular", "text": "region", "is_base_form": true, "ipa": "/ˈriːdʒən/", "phonetic": "REE-juhn"}]}
 {"guid": "N45_111", "forms": [{"grammatical_form": "noun/en_singular", "text": "austria-hungary", "is_base_form": true, "ipa": "/ˌɔːstriə ˈhʌŋɡəri/", "phonetic": "AW-stree-uh HUNG-uh-ree"}]}
+{"guid": "N45_112", "forms": [{"grammatical_form": "noun/en_singular", "text": "New York", "is_base_form": true}]}

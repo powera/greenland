@@ -1,7 +1,7 @@
-{"guid": "N13_001", "forms": [{"grammatical_form": "noun/en_singular", "text": "road", "is_base_form": true, "ipa": "/roʊd/", "phonetic": "ROW-d"}]}
+{"guid": "N13_001", "forms": [{"grammatical_form": "noun/en_singular", "text": "road", "is_base_form": true, "ipa": "/roʊd/", "phonetic": "ROW-d"}], "variants": [{"kind": "spelling", "key": "Road", "forms": [{"grammatical_form": "noun/en_singular", "text": "Road", "is_base_form": true}]}]}
 {"guid": "N13_002", "forms": [{"grammatical_form": "noun/en_singular", "text": "bridge", "is_base_form": true, "ipa": "/brɪdʒ/", "phonetic": "BRIDGE"}]}
 {"guid": "N13_003", "forms": [{"grammatical_form": "noun/en_singular", "text": "tunnel", "is_base_form": true, "ipa": "/ˈtʌn.əl/", "phonetic": "TUN-nəl"}]}
-{"guid": "N13_004", "forms": [{"grammatical_form": "noun/en_singular", "text": "street", "is_base_form": true, "ipa": "/striːt/", "phonetic": "STREET"}]}
+{"guid": "N13_004", "forms": [{"grammatical_form": "noun/en_singular", "text": "street", "is_base_form": true, "ipa": "/striːt/", "phonetic": "STREET"}], "variants": [{"kind": "spelling", "key": "Street", "forms": [{"grammatical_form": "noun/en_singular", "text": "Street", "is_base_form": true}]}]}
 {"guid": "N13_013", "forms": [{"grammatical_form": "noun/en_singular", "text": "parking lot", "is_base_form": true}]}
 {"guid": "N13_014", "forms": [{"grammatical_form": "noun/en_singular", "text": "town square", "is_base_form": true}]}
 {"guid": "N13_015", "forms": [{"grammatical_form": "noun/en_singular", "text": "front yard", "is_base_form": true}]}

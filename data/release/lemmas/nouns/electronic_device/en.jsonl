@@ -1,4 +1,6 @@
+{"guid": "N57_002", "forms": [{"grammatical_form": "noun/en_singular", "text": "photo camera", "is_base_form": true}]}
 {"guid": "N57_006", "forms": [{"grammatical_form": "noun/en_singular", "text": "headphones", "is_base_form": true}, {"grammatical_form": "noun/en_plural", "text": "headphones", "is_base_form": false}]}
+{"guid": "N57_011", "forms": [{"grammatical_form": "noun/en_singular", "text": "video camera", "is_base_form": true}]}
 {"guid": "N57_019", "forms": [{"grammatical_form": "noun/en_singular", "text": "remote control", "is_base_form": true}]}
 {"guid": "N57_020", "forms": [{"grammatical_form": "noun/en_singular", "text": "smoke detector", "is_base_form": true}]}
 {"guid": "N57_021", "forms": [{"grammatical_form": "noun/en_singular", "text": "solar panel", "is_base_form": true}]}

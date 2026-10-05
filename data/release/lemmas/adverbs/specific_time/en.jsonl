@@ -2,3 +2,6 @@
 {"guid": "D03_002", "forms": [{"grammatical_form": "adverb/en_positive", "text": "yesterday", "is_base_form": true, "ipa": "/jɛˈstɜːdeɪ/", "phonetic": "YEST-ər-dey"}]}
 {"guid": "D03_003", "forms": [{"grammatical_form": "adverb/en_positive", "text": "tomorrow", "is_base_form": true, "ipa": "/təˈmɒr.oʊ/", "phonetic": "tuh-MOR-uh"}]}
 {"guid": "D03_004", "forms": [{"grammatical_form": "adverb/en_positive", "text": "tonight", "is_base_form": true, "ipa": "/təʊˈnaɪt/", "phonetic": "TOH-nite"}]}
+{"guid": "D03_005", "forms": [{"grammatical_form": "adverb/en_positive", "text": "this morning", "is_base_form": true}]}
+{"guid": "D03_006", "forms": [{"grammatical_form": "adverb/en_positive", "text": "this afternoon", "is_base_form": true}]}
+{"guid": "D03_007", "forms": [{"grammatical_form": "adverb/en_positive", "text": "this evening", "is_base_form": true}]}

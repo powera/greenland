@@ -17,6 +17,8 @@
 {"guid": "N46_017", "forms": [{"grammatical_form": "noun/en_singular", "text": "Cairo", "is_base_form": true}]}
 {"guid": "N46_018", "forms": [{"grammatical_form": "noun/en_singular", "text": "Sydney", "is_base_form": true}]}
 {"guid": "N46_019", "forms": [{"grammatical_form": "noun/en_singular", "text": "Bangkok", "is_base_form": true}]}
+{"guid": "N46_020", "forms": [{"grammatical_form": "noun/en_singular", "text": "Mexico City", "is_base_form": true}]}
+{"guid": "N46_022", "forms": [{"grammatical_form": "noun/en_singular", "text": "São Paulo", "is_base_form": true}]}
 {"guid": "N46_023", "forms": [{"grammatical_form": "noun/en_singular", "text": "Toronto", "is_base_form": true}]}
 {"guid": "N46_024", "forms": [{"grammatical_form": "noun/en_singular", "text": "Amsterdam", "is_base_form": true}]}
 {"guid": "N46_025", "forms": [{"grammatical_form": "noun/en_singular", "text": "Vienna", "is_base_form": true}]}
@@ -31,10 +33,12 @@
 {"guid": "N46_034", "forms": [{"grammatical_form": "noun/en_singular", "text": "Shanghai", "is_base_form": true}]}
 {"guid": "N46_035", "forms": [{"grammatical_form": "noun/en_singular", "text": "Mumbai", "is_base_form": true}]}
 {"guid": "N46_036", "forms": [{"grammatical_form": "noun/en_singular", "text": "Singapore", "is_base_form": true}]}
+{"guid": "N46_037", "forms": [{"grammatical_form": "noun/en_singular", "text": "Hong Kong", "is_base_form": true}]}
 {"guid": "N46_038", "forms": [{"grammatical_form": "noun/en_singular", "text": "Taipei", "is_base_form": true}]}
 {"guid": "N46_039", "forms": [{"grammatical_form": "noun/en_singular", "text": "Jakarta", "is_base_form": true}]}
 {"guid": "N46_040", "forms": [{"grammatical_form": "noun/en_singular", "text": "Lagos", "is_base_form": true}]}
 {"guid": "N46_041", "forms": [{"grammatical_form": "noun/en_singular", "text": "Nairobi", "is_base_form": true}]}
+{"guid": "N46_042", "forms": [{"grammatical_form": "noun/en_singular", "text": "Cape Town", "is_base_form": true}]}
 {"guid": "N46_043", "forms": [{"grammatical_form": "noun/en_singular", "text": "Dubai", "is_base_form": true}]}
 {"guid": "N46_044", "forms": [{"grammatical_form": "noun/en_singular", "text": "Melbourne", "is_base_form": true}]}
 {"guid": "N46_045", "forms": [{"grammatical_form": "noun/en_singular", "text": "metropolis", "is_base_form": true, "ipa": "/məˈtrɑːpəlɪs/", "phonetic": "muh-TROP-uh-lis"}]}

@@ -1,3 +1,45 @@
+{"guid": "N59_001", "forms": [{"grammatical_form": "noun/en_singular", "text": "res judicata", "is_base_form": true}]}
+{"guid": "N59_002", "forms": [{"grammatical_form": "noun/en_singular", "text": "mens rea", "is_base_form": true}]}
+{"guid": "N59_003", "forms": [{"grammatical_form": "noun/en_singular", "text": "actus reus", "is_base_form": true}]}
+{"guid": "N59_004", "forms": [{"grammatical_form": "noun/en_singular", "text": "res ipsa loquitur", "is_base_form": true}]}
+{"guid": "N59_005", "forms": [{"grammatical_form": "noun/en_singular", "text": "respondeat superior", "is_base_form": true}]}
+{"guid": "N59_006", "forms": [{"grammatical_form": "noun/en_singular", "text": "quantum meruit", "is_base_form": true}]}
+{"guid": "N59_007", "forms": [{"grammatical_form": "noun/en_singular", "text": "corpus delicti", "is_base_form": true}]}
+{"guid": "N59_008", "forms": [{"grammatical_form": "noun/en_singular", "text": "ratio decidendi", "is_base_form": true}]}
+{"guid": "N59_009", "forms": [{"grammatical_form": "noun/en_singular", "text": "forum non conveniens", "is_base_form": true}]}
+{"guid": "N59_010", "forms": [{"grammatical_form": "noun/en_singular", "text": "lis pendens", "is_base_form": true}]}
+{"guid": "N59_011", "forms": [{"grammatical_form": "noun/en_singular", "text": "caveat emptor", "is_base_form": true}]}
+{"guid": "N59_012", "forms": [{"grammatical_form": "noun/en_singular", "text": "quid pro quo", "is_base_form": true}]}
+{"guid": "N59_013", "forms": [{"grammatical_form": "noun/en_singular", "text": "laches", "is_base_form": true}]}
+{"guid": "N59_019", "forms": [{"grammatical_form": "noun/en_singular", "text": "promissory estoppel", "is_base_form": true}]}
+{"guid": "N59_020", "forms": [{"grammatical_form": "noun/en_singular", "text": "collateral estoppel", "is_base_form": true}]}
+{"guid": "N59_021", "forms": [{"grammatical_form": "noun/en_singular", "text": "unjust enrichment", "is_base_form": true}]}
+{"guid": "N59_022", "forms": [{"grammatical_form": "noun/en_singular", "text": "fee simple", "is_base_form": true}]}
+{"guid": "N59_023", "forms": [{"grammatical_form": "noun/en_singular", "text": "life estate", "is_base_form": true}]}
+{"guid": "N59_024", "forms": [{"grammatical_form": "noun/en_singular", "text": "tenancy in common", "is_base_form": true}]}
+{"guid": "N59_025", "forms": [{"grammatical_form": "noun/en_singular", "text": "joint tenancy", "is_base_form": true}]}
+{"guid": "N59_026", "forms": [{"grammatical_form": "noun/en_singular", "text": "adverse possession", "is_base_form": true}]}
+{"guid": "N59_027", "forms": [{"grammatical_form": "noun/en_singular", "text": "eminent domain", "is_base_form": true}]}
+{"guid": "N59_028", "forms": [{"grammatical_form": "noun/en_singular", "text": "double jeopardy", "is_base_form": true}]}
+{"guid": "N59_029", "forms": [{"grammatical_form": "noun/en_singular", "text": "due process", "is_base_form": true}]}
+{"guid": "N59_030", "forms": [{"grammatical_form": "noun/en_singular", "text": "equal protection", "is_base_form": true}]}
+{"guid": "N59_031", "forms": [{"grammatical_form": "noun/en_singular", "text": "strict scrutiny", "is_base_form": true}]}
+{"guid": "N59_032", "forms": [{"grammatical_form": "noun/en_singular", "text": "substantive due process", "is_base_form": true}]}
+{"guid": "N59_033", "forms": [{"grammatical_form": "noun/en_singular", "text": "fruit of the poisonous tree", "is_base_form": true}]}
+{"guid": "N59_034", "forms": [{"grammatical_form": "noun/en_singular", "text": "exclusionary rule", "is_base_form": true}]}
+{"guid": "N59_035", "forms": [{"grammatical_form": "noun/en_singular", "text": "probable cause", "is_base_form": true}]}
+{"guid": "N59_036", "forms": [{"grammatical_form": "noun/en_singular", "text": "reasonable suspicion", "is_base_form": true}]}
+{"guid": "N59_037", "forms": [{"grammatical_form": "noun/en_singular", "text": "beyond a reasonable doubt", "is_base_form": true}]}
+{"guid": "N59_038", "forms": [{"grammatical_form": "noun/en_singular", "text": "preponderance of the evidence", "is_base_form": true}]}
+{"guid": "N59_039", "forms": [{"grammatical_form": "noun/en_singular", "text": "clear and convincing evidence", "is_base_form": true}]}
+{"guid": "N59_040", "forms": [{"grammatical_form": "noun/en_singular", "text": "prima facie case", "is_base_form": true}]}
+{"guid": "N59_041", "forms": [{"grammatical_form": "noun/en_singular", "text": "political question", "is_base_form": true}]}
+{"guid": "N59_042", "forms": [{"grammatical_form": "noun/en_singular", "text": "sovereign immunity", "is_base_form": true}]}
+{"guid": "N59_043", "forms": [{"grammatical_form": "noun/en_singular", "text": "qualified immunity", "is_base_form": true}]}
+{"guid": "N59_044", "forms": [{"grammatical_form": "noun/en_singular", "text": "felony murder", "is_base_form": true}]}
+{"guid": "N59_045", "forms": [{"grammatical_form": "noun/en_singular", "text": "plea bargain", "is_base_form": true}]}
+{"guid": "N59_046", "forms": [{"grammatical_form": "noun/en_singular", "text": "statute of limitations", "is_base_form": true}]}
+{"guid": "N59_047", "forms": [{"grammatical_form": "noun/en_singular", "text": "equitable tolling", "is_base_form": true}]}
 {"guid": "N59_048", "forms": [{"grammatical_form": "noun/en_singular", "text": "self-determination", "is_base_form": true, "ipa": "/ˌsɛlf dɪˌtɝməˈneɪʃən/", "phonetic": "self-di-ter-muh-NAY-shun"}]}
 {"guid": "N59_049", "forms": [{"grammatical_form": "noun/en_singular", "text": "self-defense", "is_base_form": true, "ipa": "/ˌsɛlf dɪˈfɛns/", "phonetic": "self-di-FENS"}]}
 {"guid": "N59_050", "forms": [{"grammatical_form": "noun/en_singular", "text": "cross-examination", "is_base_form": true, "ipa": "/ˌkrɔːs ɪɡˌzæməˈneɪʃən/", "phonetic": "KROSS-ig-zam-uh-NAY-shun"}]}

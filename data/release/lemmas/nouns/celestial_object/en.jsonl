@@ -3,7 +3,7 @@
 {"guid": "N64_003", "forms": [{"grammatical_form": "noun/en_singular", "text": "planet", "is_base_form": true, "ipa": "/ˈplænɪt/", "phonetic": "PLAN-it"}]}
 {"guid": "N64_004", "forms": [{"grammatical_form": "noun/en_singular", "text": "star", "is_base_form": true, "ipa": "/stɑːr/", "phonetic": "STAA-er"}]}
 {"guid": "N64_005", "forms": [{"grammatical_form": "noun/en_singular", "text": "galaxy", "is_base_form": true, "ipa": "/ˈɡæləksi/", "phonetic": "GAL-uk-see"}]}
-{"guid": "N64_006", "forms": [{"grammatical_form": "noun/en_singular", "text": "earth", "is_base_form": true, "ipa": "/ɜːrθ/", "phonetic": "ER-th"}]}
+{"guid": "N64_006", "forms": [{"grammatical_form": "noun/en_singular", "text": "earth", "is_base_form": true, "ipa": "/ɜːrθ/", "phonetic": "ER-th"}], "variants": [{"kind": "spelling", "key": "Earth", "forms": [{"grammatical_form": "noun/en_singular", "text": "Earth", "is_base_form": true}]}]}
 {"guid": "N64_007", "forms": [{"grammatical_form": "noun/en_singular", "text": "asteroid", "is_base_form": true, "ipa": "/ˈæs.tə.rɔɪd/", "phonetic": "AS-tuh-royd"}]}
 {"guid": "N64_008", "forms": [{"grammatical_form": "noun/en_singular", "text": "solar system", "is_base_form": true}]}
 {"guid": "N64_009", "forms": [{"grammatical_form": "noun/en_singular", "text": "supernova", "is_base_form": true, "ipa": "/ˌsuːpərˈnoʊvə/", "phonetic": "SOO-per-NOH-vuh"}]}

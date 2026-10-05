@@ -1,4 +1,4 @@
-{"guid": "N24_001", "forms": [{"grammatical_form": "noun/en_singular", "text": "war", "is_base_form": true, "ipa": "/wɔːr/", "phonetic": "WOW-er"}]}
+{"guid": "N24_001", "forms": [{"grammatical_form": "noun/en_singular", "text": "war", "is_base_form": true, "ipa": "/wɔːr/", "phonetic": "WOW-er"}], "variants": [{"kind": "spelling", "key": "War", "forms": [{"grammatical_form": "noun/en_singular", "text": "War", "is_base_form": true}]}]}
 {"guid": "N24_002", "forms": [{"grammatical_form": "noun/en_singular", "text": "end", "is_base_form": true, "ipa": "/ɛnd/", "phonetic": "END"}]}
 {"guid": "N24_003", "forms": [{"grammatical_form": "noun/en_singular", "text": "course", "is_base_form": true, "ipa": "/kɔːrs/", "phonetic": "KORE"}]}
 {"guid": "N24_004", "forms": [{"grammatical_form": "noun/en_singular", "text": "battle", "is_base_form": true, "ipa": "/ˈbætl/", "phonetic": "BAT-tuhl"}]}
@@ -133,6 +133,11 @@
 {"guid": "N24_181", "forms": [{"grammatical_form": "noun/en_singular", "text": "registration", "is_base_form": true, "ipa": "/ˌrɛdʒəˈstreɪʃən/", "phonetic": "rej-uh-STRAY-shun"}]}
 {"guid": "N24_182", "forms": [{"grammatical_form": "noun/en_singular", "text": "mitigation", "is_base_form": true, "ipa": "/ˌmɪtəˈɡeɪʃən/", "phonetic": "mit-uh-GAY-shun"}]}
 {"guid": "N24_183", "forms": [{"grammatical_form": "noun/en_singular", "text": "certification", "is_base_form": true, "ipa": "/ˌsɝːtəfəˈkeɪʃən/", "phonetic": "sur-tuh-fuh-KAY-shun"}]}
+{"guid": "N24_184", "forms": [{"grammatical_form": "noun/en_singular", "text": "voir dire", "is_base_form": true}]}
+{"guid": "N24_187", "forms": [{"grammatical_form": "noun/en_singular", "text": "summary judgment", "is_base_form": true}]}
+{"guid": "N24_188", "forms": [{"grammatical_form": "noun/en_singular", "text": "directed verdict", "is_base_form": true}]}
+{"guid": "N24_189", "forms": [{"grammatical_form": "noun/en_singular", "text": "judgment notwithstanding the verdict", "is_base_form": true}]}
+{"guid": "N24_190", "forms": [{"grammatical_form": "noun/en_singular", "text": "class action", "is_base_form": true}]}
 {"guid": "N24_191", "forms": [{"grammatical_form": "noun/en_singular", "text": "simmer", "is_base_form": true, "ipa": "/ˈsɪmər/", "phonetic": "SIM-er"}]}
 {"guid": "N24_192", "forms": [{"grammatical_form": "noun/en_singular", "text": "shortening", "is_base_form": true, "ipa": "/ˈʃɔrtənɪŋ/", "phonetic": "SHORT-uh-ning"}]}
 {"guid": "N24_193", "forms": [{"grammatical_form": "noun/en_singular", "text": "decision-making", "is_base_form": true, "ipa": "/dɪˈsɪʒən ˌmeɪkɪŋ/", "phonetic": "duh-SIZH-un MAY-king"}]}
@@ -164,3 +169,4 @@
 {"guid": "N24_219", "forms": [{"grammatical_form": "noun/en_singular", "text": "round", "is_base_form": true, "ipa": "/raʊnd/", "phonetic": "ROUND"}]}
 {"guid": "N24_220", "forms": [{"grammatical_form": "noun/en_singular", "text": "fuseki", "is_base_form": true, "ipa": "/fuːˈsɛki/", "phonetic": "FOO-seh-kee"}]}
 {"guid": "N24_221", "forms": [{"grammatical_form": "noun/en_singular", "text": "length", "is_base_form": true, "ipa": "/lɛŋθ/", "phonetic": "LENGTH"}]}
+{"guid": "N24_222", "forms": [{"grammatical_form": "noun/en_singular", "text": "release", "is_base_form": true, "ipa": "/rɪˈlis/", "phonetic": "ri-LEES"}]}

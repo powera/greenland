@@ -6,7 +6,11 @@
 {"guid": "N43_007", "forms": [{"grammatical_form": "noun/en_singular", "text": "dishwasher", "is_base_form": true, "ipa": "/ˈdɪʃwɔːʃər/", "phonetic": "DISH-wosh-er"}]}
 {"guid": "N43_008", "forms": [{"grammatical_form": "noun/en_singular", "text": "toaster", "is_base_form": true, "ipa": "/ˈtoʊstər/", "phonetic": "TOH-stuh"}]}
 {"guid": "N43_009", "forms": [{"grammatical_form": "noun/en_singular", "text": "coffee maker", "is_base_form": true, "ipa": "kəˈfiː ˈmeɪkə(r)", "phonetic": "KOH-fee MAK-uh(r)"}]}
+{"guid": "N43_010", "forms": [{"grammatical_form": "noun/en_singular", "text": "vacuum cleaner", "is_base_form": true}]}
 {"guid": "N43_011", "forms": [{"grammatical_form": "noun/en_singular", "text": "air conditioner", "is_base_form": true, "ipa": "/ˌer ˈkʌndɪʃənər/", "phonetic": "AIR-kun-DIH-shə-nər"}]}
+{"guid": "N43_016", "forms": [{"grammatical_form": "noun/en_singular", "text": "hair dryer", "is_base_form": true}]}
+{"guid": "N43_019", "forms": [{"grammatical_form": "noun/en_singular", "text": "sewing machine", "is_base_form": true}]}
+{"guid": "N43_020", "forms": [{"grammatical_form": "noun/en_singular", "text": "water heater", "is_base_form": true}]}
 {"guid": "N43_021", "forms": [{"grammatical_form": "noun/en_singular", "text": "cash register", "is_base_form": true}]}
 {"guid": "N43_022", "forms": [{"grammatical_form": "noun/en_singular", "text": "tank", "is_base_form": true, "ipa": "/tæŋk/", "phonetic": "TANGK"}]}
 {"guid": "N43_023", "forms": [{"grammatical_form": "noun/en_singular", "text": "toilet", "is_base_form": true, "ipa": "/ˈtɔɪlət/", "phonetic": "TOY-let"}]}

@@ -16,6 +16,8 @@
 {"guid": "N01_079", "forms": [{"grammatical_form": "noun/en_singular", "text": "prisoner", "is_base_form": true, "ipa": "/ˈprɪznər/", "phonetic": "PRIZ-nər"}]}
 {"guid": "N01_080", "forms": [{"grammatical_form": "noun/en_plural", "text": "children", "is_base_form": false}]}
 {"guid": "N01_084", "forms": [{"grammatical_form": "noun/en_singular", "text": "hero", "is_base_form": true}, {"grammatical_form": "noun/en_plural", "text": "heroes", "is_base_form": false}]}
+{"guid": "N01_087", "variants": [{"kind": "spelling", "key": "King", "forms": [{"grammatical_form": "noun/en_singular", "text": "King", "is_base_form": true}]}]}
+{"guid": "N01_088", "variants": [{"kind": "spelling", "key": "Prince", "forms": [{"grammatical_form": "noun/en_singular", "text": "Prince", "is_base_form": true}]}]}
 {"guid": "N01_089", "forms": [{"grammatical_form": "noun/en_singular", "text": "chief", "is_base_form": true}, {"grammatical_form": "noun/en_plural", "text": "chiefs", "is_base_form": false}]}
 {"guid": "N01_099", "forms": [{"grammatical_form": "noun/en_singular", "text": "best friend", "is_base_form": true}]}
 {"guid": "N01_100", "forms": [{"grammatical_form": "noun/en_singular", "text": "observer", "is_base_form": true, "ipa": "/əbˈzɝvɚ/", "phonetic": "ub-ZUR-ver"}]}
@@ -61,6 +63,8 @@
 {"guid": "N01_140", "forms": [{"grammatical_form": "noun/en_singular", "text": "juror", "is_base_form": true, "ipa": "/ˈdʒʊrər/", "phonetic": "JOOR-er"}]}
 {"guid": "N01_141", "forms": [{"grammatical_form": "noun/en_singular", "text": "beneficiary", "is_base_form": true, "ipa": "/ˌbɛnəˈfɪʃiˌɛri/", "phonetic": "ben-uh-FISH-ee-air-ee"}]}
 {"guid": "N01_142", "forms": [{"grammatical_form": "noun/en_singular", "text": "beneficiary", "is_base_form": true, "ipa": "/ˌbɛnəˈfɪʃiˌɛri/", "phonetic": "ben-uh-FISH-ee-air-ee"}]}
+{"guid": "N01_143", "forms": [{"grammatical_form": "noun/en_singular", "text": "guardian ad litem", "is_base_form": true}]}
+{"guid": "N01_144", "forms": [{"grammatical_form": "noun/en_singular", "text": "amicus curiae", "is_base_form": true}]}
 {"guid": "N01_148", "forms": [{"grammatical_form": "noun/en_singular", "text": "individual", "is_base_form": true, "ipa": "/ˌɪndəˈvɪdʒuəl/", "phonetic": "in-duh-VIJ-oo-uhl"}]}
 {"guid": "N01_149", "forms": [{"grammatical_form": "noun/en_singular", "text": "member", "is_base_form": true, "ipa": "/ˈmɛmbɚ/", "phonetic": "MEM-ber"}]}
 {"guid": "N01_150", "forms": [{"grammatical_form": "noun/en_singular", "text": "co-founder", "is_base_form": true, "ipa": "/ˌkoʊˈfaʊndɚ/", "phonetic": "KOH-FOWN-der"}]}

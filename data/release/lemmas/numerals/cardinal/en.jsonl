@@ -28,7 +28,7 @@
 {"guid": "Z01_028", "forms": [{"grammatical_form": "numeral/en_cardinal", "text": "ninety", "is_base_form": true, "ipa": "/ˌnaɪnti/", "phonetic": "NIN-ty"}]}
 {"guid": "Z01_029", "forms": [{"grammatical_form": "numeral/en_cardinal", "text": "one hundred", "is_base_form": true, "ipa": "/wʌn ˈhʌndrəd/", "phonetic": "WOHN HUND-rid"}], "variants": [{"kind": "equivalent", "key": "hundred", "forms": [{"grammatical_form": "numeral/en_cardinal", "text": "hundred", "is_base_form": true}]}]}
 {"guid": "Z01_030", "forms": [{"grammatical_form": "numeral/en_cardinal", "text": "one thousand", "is_base_form": true, "ipa": "/wʌn ˈthaʊzənd/", "phonetic": "WUN thowz-nd"}], "variants": [{"kind": "equivalent", "key": "thousand", "forms": [{"grammatical_form": "numeral/en_cardinal", "text": "thousand", "is_base_form": true}]}]}
-{"guid": "Z01_031", "variants": [{"kind": "equivalent", "key": "million", "forms": [{"grammatical_form": "numeral/en_cardinal", "text": "million", "is_base_form": true}]}]}
+{"guid": "Z01_031", "forms": [{"grammatical_form": "numeral/en_cardinal", "text": "one million", "is_base_form": true}], "variants": [{"kind": "equivalent", "key": "million", "forms": [{"grammatical_form": "numeral/en_cardinal", "text": "million", "is_base_form": true}]}]}
 {"guid": "Z01_032", "forms": [{"grammatical_form": "numeral/en_cardinal", "text": "twenty-one", "is_base_form": true}]}
 {"guid": "Z01_033", "forms": [{"grammatical_form": "numeral/en_cardinal", "text": "twenty-two", "is_base_form": true}]}
 {"guid": "Z01_034", "forms": [{"grammatical_form": "numeral/en_cardinal", "text": "twenty-three", "is_base_form": true}]}
