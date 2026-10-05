@@ -54,6 +54,28 @@ class TestSpanishDialectCopy(unittest.TestCase):
         self.assertEqual(gender, "masculine")
         agent.get_llm_client().generate_chat.assert_called_once()
 
+    def test_asks_llm_for_regional_gender_word_even_when_words_match(self) -> None:
+        agent = _agent({"gender": "masculine", "explanation": "", "confidence": 0.9})
+        with (
+            patch(f"{_TASK}.get_translation", return_value="radio"),
+            patch(f"{_TASK}.get_grammatical_gender", return_value="feminine"),
+        ):
+            gender, notes, _confidence = grammatical_gender.generate_grammatical_gender(
+                agent, _noun(), "radio", "es-419", session=cast(Any, object())
+            )
+        # la radio (Spain) is not copied; el radio is the Latin American answer,
+        # and the ending rule makes no prediction to flag it against.
+        self.assertEqual(gender, "masculine")
+        self.assertEqual(notes, "")
+        agent.get_llm_client().generate_chat.assert_called_once()
+
+    def test_prompt_names_the_region_for_each_variety(self) -> None:
+        for language_code, region in (("es", "Spain"), ("es-419", "Latin America")):
+            agent = _agent({"gender": "feminine", "explanation": "", "confidence": 0.9})
+            grammatical_gender.generate_grammatical_gender(agent, _noun(), "casa", language_code)
+            prompt = agent.get_llm_client().generate_chat.call_args.kwargs["prompt"]
+            self.assertIn(f"Spanish ({region})", prompt)
+
 
 class TestCommonGender(unittest.TestCase):
     def test_offered_for_spanish_and_french_only(self) -> None:

@@ -22,14 +22,14 @@ GENDER_SYSTEMS: Dict[str, Dict[str, Any]] = {
         "description": "2-way system (masculine/feminine)",
     },
     "es": {
-        "name": "Spanish",
+        "name": "Spanish (Spain)",
         "genders": es_gender.GENDERS,
-        "description": es_gender.GENDER_SYSTEM_DESCRIPTION,
+        "description": es_gender.GENDER_SYSTEM_DESCRIPTION_SPAIN,
     },
     "es-419": {
-        "name": "Latin American Spanish",
+        "name": "Spanish (Latin America)",
         "genders": es_gender.GENDERS,
-        "description": es_gender.GENDER_SYSTEM_DESCRIPTION,
+        "description": es_gender.GENDER_SYSTEM_DESCRIPTION_LATIN_AMERICA,
     },
     "de": {
         "name": "German",

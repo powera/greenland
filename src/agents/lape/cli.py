@@ -360,6 +360,16 @@ def main() -> None:
         # otherwise a small batch can be consumed entirely by non-verbs.
         args.pos_type = "verb"
 
+    # Likewise for any set of fact types that all apply to one part of speech
+    # (grammatical_gender: nouns), so --limit 10 means ten nouns.
+    required_pos_types = {
+        pos
+        for fact_type in fact_types_to_run
+        for pos in GrammarFactService.get_fact_config(fact_type)["required_pos"]
+    }
+    if args.pos_type is None and len(required_pos_types) == 1:
+        args.pos_type = next(iter(required_pos_types))
+
     # Build fact_types_by_language map
     fact_types_by_language = {}
     for language_code in languages:
