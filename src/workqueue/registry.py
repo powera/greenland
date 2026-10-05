@@ -48,6 +48,7 @@ from workqueue.handlers.sentences.translation import SENTENCE_TRANSLATION_JOB
 from workqueue.handlers.words.forms import FORMS_JOB
 from workqueue.handlers.words.grammar_facts import GRAMMAR_FACT_JOB
 from workqueue.handlers.words.pronunciations import PRONUNCIATIONS_JOB
+from workqueue.handlers.words.translations import TRANSLATIONS_JOB
 from workqueue.llm_batch import Job
 from workqueue.task_queue import TaskType
 
@@ -114,6 +115,7 @@ LLM_JOBS: Dict[str, Job] = {
     GRAMMAR_FACT_JOB.name: GRAMMAR_FACT_JOB,
     PRONUNCIATIONS_JOB.name: PRONUNCIATIONS_JOB,
     SENTENCE_TRANSLATION_JOB.name: SENTENCE_TRANSLATION_JOB,
+    TRANSLATIONS_JOB.name: TRANSLATIONS_JOB,
 }
 
 

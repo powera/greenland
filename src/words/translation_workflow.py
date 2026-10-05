@@ -32,6 +32,11 @@ from storage.backend import create_session as create_backend_session
 from storage.backend.config import BackendType, DataSourceConfig
 from storage.crud.operation_log import log_translation_change
 from storage.models.schema import Lemma, LemmaTranslation
+from words.translation_populate import (
+    populate_groups,
+    populate_reference,
+    store_translations_by_language,
+)
 from storage.translation_helpers import (
     LANG_CODE_TO_LLM_FIELD,
     LANGUAGE_FIELDS,
@@ -995,9 +1000,8 @@ class TranslationWorkflow:
                     if not translations_by_lang_code:
                         # Find a reference translation using helper function
                         missing_lang_codes = [lc for lc, _ in missing_languages]
-                        reference_lang_code, reference_translation = get_reference_translation(
-                            session, lemma, exclude_languages=missing_lang_codes
-                        )
+                        reference = populate_reference(session, lemma, missing_lang_codes)
+                        reference_lang_code, reference_translation = reference or (None, None)
 
                         if not reference_translation or not reference_lang_code:
                             logger.warning(
@@ -1019,7 +1023,7 @@ class TranslationWorkflow:
 
                         llm_translations: Dict[str, Any] = {}
                         query_failed = False
-                        for language_batch in split_llm_language_batches(missing_lang_codes):
+                        for language_batch in populate_groups(missing_lang_codes):
                             batch_translations, success = client.query_translations(
                                 english_word=lemma.lemma_text,
                                 reference_translation=(reference_lang_code, reference_translation),
@@ -1061,38 +1065,24 @@ class TranslationWorkflow:
 
                     # Apply translations to lemma (translations_by_lang_code now always uses lang_code keys)
                     if translations_by_lang_code:
+                        written, blank = store_translations_by_language(
+                            session,
+                            lemma,
+                            translations_by_lang_code,
+                            translation_metadata_by_lang_code,
+                            [lang_code for lang_code, _ in missing_languages],
+                            source=translation_source or f"voras-agent/{self.config.model}",
+                        )
                         for lang_code, language_name in missing_languages:
-                            translation = translations_by_lang_code.get(lang_code, "").strip()
-                            translation_metadata = translation_metadata_by_lang_code.get(
-                                lang_code, {}
-                            )
-
-                            if translation:
-                                # Update the translation using helper method
-                                self.set_translation(
-                                    session,
-                                    lemma,
-                                    lang_code,
-                                    translation,
-                                    source=translation_source,
-                                    translation_status=translation_metadata.get(
-                                        "translation_status"
-                                    ),
-                                    translation_status_note=translation_metadata.get(
-                                        "translation_status_note"
-                                    ),
-                                )
-                                logger.debug(
-                                    f"  Added {language_name} translation: '{translation}'"
-                                )
-                                results["by_language"][lang_code]["fixed"] += 1
-                                results["total_fixed"] += 1
-                            else:
+                            if lang_code in blank:
                                 logger.warning(
                                     f"  LLM returned empty {language_name} translation for '{lemma.lemma_text}'"
                                 )
                                 results["by_language"][lang_code]["failed"] += 1
                                 results["total_failed"] += 1
+                            elif lang_code in written:
+                                results["by_language"][lang_code]["fixed"] += 1
+                                results["total_fixed"] += 1
 
                         # Commit all updates for this word at once
                         session.commit()

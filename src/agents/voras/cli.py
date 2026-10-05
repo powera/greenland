@@ -33,7 +33,7 @@ from agents.common.common_args import (
     validate_cache_args,
 )
 from words.lemma_selection import get_lemmas_for_agent
-from words.translation_batch import DEFAULT_LEMMAS_PER_BATCH
+from agents.common.batch_run import add_batch_args, check_batch_args, run_batch_populate
 from workqueue.task_queue import TaskType
 
 
@@ -78,19 +78,14 @@ def get_argument_parser() -> argparse.ArgumentParser:
     add_language_args(parser)
 
     # Additional parameters
-    parser.add_argument(
-        "--batch",
-        action="store_true",
-        help=(
-            "With --populate: submit the missing translations as OpenAI batches (half price); "
-            "the Barsukas batch poller writes the results when each batch completes"
-        ),
-    )
+    add_batch_args(parser)
+    # Former name of --items-per-batch, kept so existing commands still work.
     parser.add_argument(
         "--lemmas-per-batch",
+        dest="items_per_batch",
         type=int,
-        default=DEFAULT_LEMMAS_PER_BATCH,
-        help=f"With --batch: lemmas per OpenAI batch (default: {DEFAULT_LEMMAS_PER_BATCH})",
+        default=argparse.SUPPRESS,
+        help=argparse.SUPPRESS,
     )
     parser.add_argument(
         "--batch-submit", action="store_true", help="Submit all pending batch requests to OpenAI"
@@ -285,81 +280,46 @@ def _run_populate(agent: Any, lemmas: List[Any], args: argparse.Namespace) -> No
 
 
 def _run_populate_batch(agent: Any, lemmas: List[Any], args: argparse.Namespace) -> None:
-    """Plan the missing translations as OpenAI batches, confirm, and submit them."""
-    from clients.batch_queue import BatchQueueManager, create_batch_database_session
-    from clients.openai.batch_client import OpenAIBatchClient
+    """Plan the missing translations, confirm, and send them as OpenAI batches."""
+    from clients.batch_queue import create_batch_database_session
     from storage.models.schema import Lemma
-    from words.translation_batch import (
-        chunk_by_lemma,
-        find_in_flight_lemma_ids,
-        plan_populate_requests,
-        submit_populate_batches,
-    )
+    from words.translation_batch import find_in_flight_lemma_ids
     from words.translation_workflow import resolve_generation_languages
+    from workqueue.handlers.words.translations import (
+        TRANSLATIONS_JOB,
+        translation_populate_states,
+    )
 
     languages = resolve_generation_languages(args.languages)
-    lemma_ids = [lemma.id for lemma in lemmas]
     batch_session = create_batch_database_session()
     try:
-        session = agent.get_session()
-        try:
-            # Reload in this session: the selection session is closed, and the
-            # reference lookup walks each lemma's translations.
-            planning_lemmas = (
-                session.query(Lemma).filter(Lemma.id.in_(lemma_ids)).order_by(Lemma.id).all()
-            )
-            plan = plan_populate_requests(
-                session,
-                planning_lemmas,
-                languages,
-                args.model,
-                in_flight_lemma_ids=find_in_flight_lemma_ids(batch_session),
-            )
-        finally:
-            session.close()
-
-        chunks = chunk_by_lemma(plan.requests, args.lemmas_per_batch) if plan.requests else []
-        print("\n" + "=" * 80)
-        print("VORAS AGENT - BATCH POPULATE")
-        print("=" * 80)
-        print(f"Model: {args.model}")
-        print(f"Languages ({len(languages)}): {', '.join(languages)}")
-        print(f"Lemmas considered: {len(lemmas)}")
-        print(f"  already complete: {plan.lemmas_complete}")
-        print(f"  skipped, already in a batch: {plan.lemmas_skipped_in_flight}")
-        print(f"  with gaps: {plan.lemma_count}")
-        print(
-            f"Requests: {len(plan.requests)} in {len(chunks)} batch(es) of up to "
-            f"{args.lemmas_per_batch} lemmas"
-        )
-        for language_code, count in plan.missing_by_language().items():
-            print(f"  {language_code}: {count} missing")
-        print("=" * 80)
-
-        if not plan.requests:
-            print("Nothing to submit.")
-            return
-        if args.dry_run:
-            print("DRY RUN - nothing was queued or submitted")
-            return
-        if not args.yes:
-            response = input("Submit these batches to OpenAI? [y/N]: ").strip().lower()
-            if response not in ["y", "yes"]:
-                print("Aborted.")
-                sys.exit(0)
-
-        manager = BatchQueueManager(batch_session, OpenAIBatchClient())
-        submitted = submit_populate_batches(manager, plan, args.lemmas_per_batch)
-        for batch in submitted:
-            print(
-                f"Submitted {batch.batch_id}: {batch.request_count} request(s), "
-                f"{batch.lemma_count} lemma(s)"
-            )
-        print("\nThe Barsukas batch poller checks every 5 minutes and writes the results.")
-        print("By hand: python -m agents.common.batch status --batch-id <id>")
-        print("         python -m agents.common.batch complete --batch-id <id>")
+        # Lemmas in a batch submitted before voras ran as a staged job.
+        legacy_in_flight = find_in_flight_lemma_ids(batch_session)
     finally:
         batch_session.close()
+    lemma_ids = [lemma.id for lemma in lemmas if lemma.id not in legacy_in_flight]
+    session = agent.get_session()
+    try:
+        # Reload in this session: the selection session is closed, and the
+        # reference lookup walks each lemma's translations.
+        planning_lemmas = (
+            session.query(Lemma).filter(Lemma.id.in_(lemma_ids)).order_by(Lemma.id).all()
+        )
+        states, complete = translation_populate_states(session, planning_lemmas, languages)
+        run_batch_populate(
+            TRANSLATIONS_JOB,
+            states,
+            args,
+            session,
+            "VORAS AGENT - BATCH POPULATE",
+            [
+                f"languages ({len(languages)}): {', '.join(languages)}",
+                f"lemmas: {len(lemmas)} ({complete} already complete, "
+                f"{len(lemmas) - len(lemma_ids)} in an older batch)",
+            ],
+        )
+    finally:
+        session.close()
 
 
 def main() -> None:
@@ -373,16 +333,7 @@ def main() -> None:
     # Validate cache arguments
     validate_cache_args(args)
 
-    # Validate that --batch and --use-workqueue aren't both set
-    if args.batch and args.use_workqueue:
-        print("Error: --batch and --use-workqueue cannot be used together")
-        print("  --batch: Queue requests for OpenAI batch API")
-        print("  --use-workqueue: Queue tasks for barsukas background worker")
-        sys.exit(1)
-
-    if args.batch and not args.populate:
-        print("Error: --batch is only supported with --populate")
-        sys.exit(1)
+    check_batch_args(parser, args)
 
     # Create configuration from args (always returns a valid config with defaults)
     config = get_data_source_config(args)
