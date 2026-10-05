@@ -32,7 +32,7 @@ import argparse
 import contextlib
 import json
 import logging
-from typing import Any, Dict, List, Optional, Sequence, Tuple
+from typing import Dict, List, Optional, Sequence
 
 from storage.backend import create_session
 from storage.backend.config import DataSourceConfig
@@ -44,14 +44,12 @@ from wordfreq.frequency.level_profile import (
     LevelProfile,
     aggregate_levels,
     build_level_profiles,
-    profile_from_zipfs,
+    profiles_from_json,
+    profiles_to_json,
     rank_levels_for_corpus,
 )
 
 logger = logging.getLogger(__name__)
-
-#: Bumped when the saved layout changes, so an old file is refused, not misread.
-JSON_FORMAT_VERSION = 1
 
 
 def format_level_line(
@@ -87,76 +85,6 @@ def _example_words(
         )
     )
     return [lemma_profile.display_text for lemma_profile in matches[:count]]
-
-
-def to_json(
-    lemma_profiles: List[LemmaCorpusProfile],
-    unattested_by_level: Dict[int, int],
-    corpus_names: Sequence[str],
-    min_skew: float,
-) -> Dict[str, Any]:
-    """The raw measurements, plus the weights they gave at ``min_skew``.
-
-    ``zipf`` and ``attested`` are what :func:`from_json` re-scores from;
-    ``weights`` is there for a reader that just wants the answer.
-    """
-    return {
-        "format_version": JSON_FORMAT_VERSION,
-        "min_skew": min_skew,
-        "corpora": list(corpus_names),
-        "unattested_by_level": {str(level): count for level, count in unattested_by_level.items()},
-        "lemmas": [
-            {
-                "lemma_id": lemma_profile.lemma_id,
-                "lemma_text": lemma_profile.lemma_text,
-                "disambiguation": lemma_profile.disambiguation,
-                "level": lemma_profile.level,
-                "attested": list(lemma_profile.attested_corpora),
-                "zipf": {
-                    name: round(zipf, 4) for name, zipf in lemma_profile.zipf_by_corpus.items()
-                },
-                "weights": {
-                    name: round(weight, 3) for name, weight in lemma_profile.weights.items()
-                },
-            }
-            for lemma_profile in lemma_profiles
-        ],
-    }
-
-
-def from_json(
-    data: Dict[str, Any], min_skew: float, levels: Optional[Sequence[int]] = None
-) -> Tuple[List[LemmaCorpusProfile], Dict[int, int], List[str]]:
-    """Re-score saved measurements at ``min_skew``.
-
-    Returns ``(lemma_profiles, unattested_by_level, corpus_names)``.
-    """
-    version = data.get("format_version")
-    if version != JSON_FORMAT_VERSION:
-        raise ValueError(
-            f"Saved profile has format_version {version!r}, expected {JSON_FORMAT_VERSION}; "
-            "re-measure it with --json"
-        )
-    wanted = set(levels) if levels is not None else None
-    lemma_profiles = [
-        profile_from_zipfs(
-            row["lemma_id"],
-            row["lemma_text"],
-            row["disambiguation"],
-            row["level"],
-            row["zipf"],
-            row["attested"],
-            min_skew,
-        )
-        for row in data["lemmas"]
-        if wanted is None or row["level"] in wanted
-    ]
-    unattested_by_level = {
-        int(level): count
-        for level, count in data["unattested_by_level"].items()
-        if wanted is None or int(level) in wanted
-    }
-    return lemma_profiles, unattested_by_level, list(data["corpora"])
 
 
 def print_report(
@@ -235,7 +163,7 @@ def main(argv: Optional[List[str]] = None) -> int:
     if args.from_json:
         with open(args.from_json, "r", encoding="utf-8") as handle:
             saved = json.load(handle)
-        lemma_profiles, unattested_by_level, corpus_names = from_json(
+        lemma_profiles, unattested_by_level, corpus_names = profiles_from_json(
             saved, args.min_skew, args.level
         )
         if args.limit is not None:
@@ -278,7 +206,7 @@ def main(argv: Optional[List[str]] = None) -> int:
     if args.json:
         with open(args.json, "w", encoding="utf-8") as handle:
             json.dump(
-                to_json(lemma_profiles, unattested_by_level, corpus_names, args.min_skew),
+                profiles_to_json(lemma_profiles, unattested_by_level, corpus_names, args.min_skew),
                 handle,
                 ensure_ascii=False,
                 indent=1,
