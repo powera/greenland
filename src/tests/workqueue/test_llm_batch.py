@@ -394,6 +394,34 @@ def test_dry_run_writes_and_submits_nothing(
     assert batch_session.query(BatchQueue).count() == 0
 
 
+def test_dry_run_does_not_prepare_a_job_whose_prepare_writes(
+    manager: BatchQueueManager, batch_client: FakeBatchClient
+) -> None:
+    fake = FakeJob()
+    prepared: List[int] = []
+
+    def prepare(session: Any, state: Dict[str, Any], ctx: StageContext) -> Any:
+        prepared.append(state["lemma_id"])
+        return LLMCall(prompt="x", schema=_SCHEMA)
+
+    job = Job(
+        name="writer",
+        stages=(Stage("writer.one", prepare, fake.apply_one),),
+        item_key=lambda state: str(state["lemma_id"]),
+        prepare_writes=True,
+    )
+    report = start_batch_run(
+        MagicMock(), manager, job, [{"lemma_id": 1}, {"lemma_id": 2}], _MODEL, dry_run=True
+    )
+    assert prepared == []
+    assert report.unprepared == 2
+    assert report.calls == 0
+
+    report = start_batch_run(MagicMock(), manager, job, [{"lemma_id": 1}], _MODEL)
+    assert prepared == [1]
+    assert report.calls == 1
+
+
 def test_submit_failure_cancels_the_chunk(
     manager: BatchQueueManager, batch_client: FakeBatchClient, batch_session: Session
 ) -> None:

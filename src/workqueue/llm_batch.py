@@ -5,7 +5,9 @@ A *job* is up to three *stages*.  Each stage is two plain functions:
 * ``prepare(session, state, ctx)`` reads the database and returns an
   ``LLMCall`` to make, a ``Ready`` answer that needs no model (a copy from a
   sibling language, say), or ``Done`` to stop (nothing to do, or invalid).
-  It never writes.
+  It makes no LLM call, and normally writes nothing; a job whose prepare
+  does write (a mechanical path that records what it inferred) says so with
+  ``Job.prepare_writes``, and a dry run then counts its items unprepared.
 * ``apply(session, state, data, ctx)`` takes the model's structured answer,
   writes what it should, and returns ``Done``, or ``Next(state)`` to carry the
   item on to the following stage.
@@ -145,6 +147,8 @@ class Job:
             ``"123:fr:grammatical_gender"``.
         entity_type / entity_id_key: Recorded on batch rows for browsing; the
             id is read from the item state under ``entity_id_key``.
+        prepare_writes: The first stage's ``prepare`` may write (it runs code
+            that records what it inferred); a dry run must not call it.
     """
 
     name: str
@@ -152,6 +156,7 @@ class Job:
     item_key: Callable[[Dict[str, Any]], str]
     entity_type: str = "lemma"
     entity_id_key: str = "lemma_id"
+    prepare_writes: bool = False
 
     def __post_init__(self) -> None:
         if not 1 <= len(self.stages) <= MAX_STAGES:
@@ -250,6 +255,9 @@ class RunReport:
     items: int = 0
     skipped_in_flight: int = 0
     calls: int = 0
+    # Dry run of a job whose prepare writes: items not prepared, so their
+    # split between model calls and mechanical answers is unknown.
+    unprepared: int = 0
     resolved_without_llm: Counter[str] = field(default_factory=Counter)
     batch_ids: List[str] = field(default_factory=list)
     dry_run: bool = False
@@ -269,7 +277,8 @@ def start_batch_run(
     Items already open in another run of this job are skipped, as are
     duplicate items.  Answers that need no model (``Ready``) are applied at
     once; ``Done`` outcomes are only counted.  With ``dry_run`` nothing is
-    written or submitted, and ``Ready`` answers are counted, not applied.
+    written or submitted, and ``Ready`` answers are counted, not applied; for
+    a job with ``prepare_writes`` the items are counted as ``unprepared``.
 
     Raises:
         Exception: From a failed submission, after that chunk's rows are
@@ -291,6 +300,9 @@ def start_batch_run(
             report.skipped_in_flight += 1
             continue
         seen.add(key)
+        if dry_run and job.prepare_writes:
+            report.unprepared += 1
+            continue
         prepared = stage.prepare(session, state, ctx)
         if isinstance(prepared, LLMCall):
             calls.append((key, state, prepared))
