@@ -518,6 +518,7 @@ def get_argument_parser() -> argparse.ArgumentParser:
         choices=[
             "orphaned",
             "missing-fields",
+            "english-base-forms",
             "no-derivatives",
             "duplicates",
             "duplicate-words",
@@ -536,7 +537,7 @@ def get_argument_parser() -> argparse.ArgumentParser:
         action="store_true",
         help=(
             "Fix issues where possible "
-            "(missing-punctuation, sentence-levels, audio-mismatches, pronunciation-fields)"
+            "(english-base-forms, missing-punctuation, sentence-levels, audio-mismatches, pronunciation-fields)"
         ),
     )
 
@@ -567,6 +568,16 @@ def main() -> None:
             f"\nMissing required fields: {results['total_issues']} "
             + f"(High: {results['high_severity_count']}, Medium: {results['medium_severity_count']})"
         )
+
+    elif args.check == "english-base-forms":
+        results = checker.check_missing_english_base_forms(fix=args.fix)
+        print(f"\nLemmas missing English base forms: {results['missing_count']}")
+        if args.fix:
+            print(f"Fixed: {results['fixed_count']}")
+        else:
+            issues = cast(List[Dict[str, Any]], results["issues"])
+            for issue in issues[:20]:
+                print(f"  {issue['guid'] or issue['id']}: {issue['lemma_text']}")
 
     elif args.check == "no-derivatives":
         results = checker.check_lemmas_without_derivatives()

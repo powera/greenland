@@ -10,9 +10,63 @@ from sqlalchemy import func
 from sqlalchemy.orm import Session
 
 import constants
-from storage.models.schema import DerivativeForm, Lemma
+from storage.models.schema import DerivativeForm, Lemma, WordToken
+from storage.translation_helpers import ensure_english_translation
+from wordfreq.translation.word_processing import determine_default_grammatical_form
 
 logger = logging.getLogger(__name__)
+
+
+def check_missing_english_base_forms(session: Session, *, fix: bool = False) -> Dict[str, Any]:
+    """Find English lemmas with no base form, optionally restoring that form.
+
+    The repair uses the lemma's existing English headword and POS. It creates no
+    translations in other languages and does not alter existing forms. A
+    single-word headword is linked to its exact-case WordToken; multiword forms
+    have no WordToken link, following the DerivativeForm storage convention.
+    """
+    base_ids = session.query(DerivativeForm.lemma_id).filter(
+        DerivativeForm.language_code == "en", DerivativeForm.is_base_form.is_(True)
+    )
+    missing = session.query(Lemma).filter(~Lemma.id.in_(base_ids)).order_by(Lemma.id).all()
+    issues: List[Dict[str, Any]] = []
+    for lemma in missing:
+        headword = lemma.lemma_text.strip()
+        if not headword:
+            continue
+        issues.append({"id": lemma.id, "guid": lemma.guid, "lemma_text": headword})
+        if not fix:
+            continue
+        token = None
+        if len(headword.split()) == 1:
+            token = (
+                session.query(WordToken)
+                .filter(WordToken.token == headword, WordToken.language_code == "en")
+                .first()
+            )
+            if token is None:
+                token = WordToken(token=headword, language_code="en")
+                session.add(token)
+                session.flush()
+        ensure_english_translation(session, lemma)
+        session.add(
+            DerivativeForm(
+                lemma_id=lemma.id,
+                derivative_form_text=headword,
+                word_token_id=token.id if token is not None else None,
+                language_code="en",
+                grammatical_form=determine_default_grammatical_form(
+                    headword, lemma.pos_type, headword
+                ),
+                is_base_form=True,
+                verified=False,
+            )
+        )
+    return {
+        "missing_count": len(issues),
+        "fixed_count": len(issues) if fix else 0,
+        "issues": issues,
+    }
 
 
 def check_missing_required_fields(session: Session) -> Dict[str, Any]:
