@@ -8,8 +8,9 @@ This module handles all CLI argument parsing and the main entry point.
 import argparse
 import logging
 import sys
-from typing import Any, Dict, List, Optional
+from typing import Any, Dict, List, Optional, Tuple
 
+from agents.common.batch_run import add_batch_args, check_batch_args, run_batch_populate
 from agents.common.common_args import (
     add_backend_args,
     add_common_args,
@@ -96,6 +97,8 @@ def get_argument_parser() -> argparse.ArgumentParser:
         help="Enqueue work items for background processing by barsukas worker",
     )
 
+    add_batch_args(parser)
+
     return parser
 
 
@@ -178,12 +181,90 @@ def enqueue_papuga_work(
     }
 
 
+def batch_pronunciation_pairs(
+    session: Any,
+    lemmas: List[Any],
+    only_english: bool,
+    language_codes: Optional[List[str]],
+    base_forms_only: bool,
+    all_forms_pronunciation: bool,
+) -> List[Tuple[int, str]]:
+    """(lemma id, language) pairs a --batch run considers: forms missing a
+    pronunciation, plus lemma translations (which may be missing one too)."""
+    from storage.models.schema import LemmaTranslation
+
+    lemma_ids = [lemma.id for lemma in lemmas]
+    selected_languages = language_codes if language_codes else (["en"] if only_english else None)
+    query = session.query(DerivativeForm.lemma_id, DerivativeForm.language_code).filter(
+        DerivativeForm.lemma_id.in_(lemma_ids),
+        needs_pronunciation_update_filter(),
+        pronunciation_required_filter(include_optional_forms=all_forms_pronunciation),
+    )
+    if selected_languages:
+        query = query.filter(DerivativeForm.language_code.in_(selected_languages))
+    if base_forms_only:
+        query = query.filter(DerivativeForm.is_base_form == True)
+    pairs = {(row[0], row[1]) for row in query.all()}
+
+    translations = session.query(LemmaTranslation.lemma_id, LemmaTranslation.language_code).filter(
+        LemmaTranslation.lemma_id.in_(lemma_ids)
+    )
+    if selected_languages:
+        translations = translations.filter(LemmaTranslation.language_code.in_(selected_languages))
+    pairs.update((row[0], row[1]) for row in translations.all())
+    if selected_languages is None or "en" in selected_languages:
+        # English pronunciations live on the base form, created from the lemma.
+        pairs.update((lemma_id, "en") for lemma_id in lemma_ids)
+    return sorted(pairs)
+
+
+def _run_populate_batch(
+    config: Any,
+    lemmas: List[Any],
+    only_english: bool,
+    selected_languages: Optional[List[str]],
+    args: Any,
+) -> None:
+    """Plan the missing pronunciations, confirm, and send them as OpenAI batches."""
+    from words.pronunciation import PronunciationService
+    from workqueue.handlers.words.pronunciations import PRONUNCIATIONS_JOB, pronunciation_state
+
+    session = PronunciationService(config=config).get_session()
+    try:
+        pairs = batch_pronunciation_pairs(
+            session,
+            lemmas,
+            only_english,
+            selected_languages,
+            args.base_forms_only,
+            args.all_forms_pronunciation,
+        )
+        states = [
+            pronunciation_state(
+                lemma_id, language_code, args.base_forms_only, args.all_forms_pronunciation
+            )
+            for lemma_id, language_code in pairs
+        ]
+        languages = sorted({language_code for _lemma_id, language_code in pairs})
+        run_batch_populate(
+            PRONUNCIATIONS_JOB,
+            states,
+            args,
+            session,
+            "PAPUGA AGENT - BATCH POPULATE",
+            [f"languages: {', '.join(languages) or '(none)'}"],
+        )
+    finally:
+        session.close()
+
+
 def main() -> None:
     """Main entry point for the papuga agent."""
     from words.pronunciation import PronunciationService
 
     parser = get_argument_parser()
     args = parser.parse_args()
+    check_batch_args(parser, args)
     if args.all_languages and args.languages:
         parser.error("--all-languages and --languages cannot be used together")
 
@@ -223,6 +304,11 @@ def main() -> None:
     elif len(lemmas) == 0:
         logger.error("No lemmas found to process")
         sys.exit(1)
+
+    # BATCH MODE: Send the requests as OpenAI batches
+    if getattr(args, "batch", False):
+        _run_populate_batch(config, lemmas, only_english, selected_languages, args)
+        return
 
     # WORKQUEUE MODE: Enqueue work items for barsukas worker
     if args.use_workqueue and mode == "populate":

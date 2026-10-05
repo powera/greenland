@@ -18,7 +18,7 @@ if GREENLAND_SRC_PATH not in sys.path:
 
 import constants
 import util.prompt_loader
-from clients.types import Schema, SchemaProperty
+from clients.types import LLMCall, Schema, SchemaProperty
 from clients.unified_client import UnifiedLLMClient
 
 logger = logging.getLogger(__name__)
@@ -501,48 +501,23 @@ def batch_validate_translations(
     return issues
 
 
-def validate_pronunciation(
+def build_pronunciation_call(
     word: str,
     ipa_pronunciation: Optional[str],
     phonetic_pronunciation: Optional[str],
     pos_type: str,
     example_sentence: Optional[str] = None,
     definition: Optional[str] = None,
-    model: str = constants.DEFAULT_MODEL,
     language_code: str = "en",
     grammatical_form: Optional[str] = None,
     english_translation: Optional[str] = None,
-) -> Dict[str, Any]:
+) -> LLMCall:
+    """The pronunciation request :func:`validate_pronunciation` sends.
+
+    Shared with the batch path (``workqueue.handlers.words.pronunciations``),
+    so a batched request is the live one.  Existing values make it a
+    validation request; none make it a generation request.
     """
-    Validate or generate pronunciations (both IPA and simplified phonetic).
-
-    Args:
-        word: The word to validate/generate pronunciation for
-        ipa_pronunciation: Current IPA pronunciation (or None to generate)
-        phonetic_pronunciation: Current simplified phonetic (or None to generate)
-        pos_type: Part of speech
-        example_sentence: Optional example sentence for context (preferred)
-        definition: Optional definition text for context (used if no example sentence)
-        model: LLM model to use
-        language_code: Language code (e.g., "en", "lt", "ko")
-        grammatical_form: Optional grammatical form (e.g., "dative", "genitive plural") for non-English
-        english_translation: Optional English translation (lemma word) for non-English
-
-    Returns:
-        Dictionary with validation/generation results:
-        - needs_update: bool indicating if current pronunciation needs fixing
-        - suggested_ipa: str with correct IPA pronunciation
-        - suggested_phonetic: str with correct simplified phonetic
-        - alternative_pronunciations: list of dicts with keys:
-            - dialect: str (e.g., "British", "Australian")
-            - ipa: str (IPA pronunciation for this dialect)
-            - phonetic: str (simplified phonetic for this dialect, optional)
-        - issues: list of issues found (if validating existing pronunciation)
-        - confidence: float 0-1
-        - notes: str with additional pronunciation notes
-    """
-    client = UnifiedLLMClient()
-
     # Build schema based on language
     if language_code == "en":
         # Full schema with alternative pronunciations and notes for English
@@ -748,20 +723,78 @@ Return the IPA and simplified phonetic pronunciation, along with any alternative
                     # Fallback prompt if template is unavailable
                     prompt = f"Provide the pronunciation for the word '{word}':\n\n{context_info}"
 
+    return LLMCall(prompt=prompt, schema=schema, context=context)
+
+
+def interpret_pronunciation(data: Dict[str, Any], language_code: str) -> Dict[str, Any]:
+    """Fill the fields the non-English schema leaves out, as callers expect them."""
+    result = dict(data)
+    if language_code != "en":
+        result.setdefault("alternative_pronunciations", [])
+        result.setdefault("notes", "")
+    return result
+
+
+def validate_pronunciation(
+    word: str,
+    ipa_pronunciation: Optional[str],
+    phonetic_pronunciation: Optional[str],
+    pos_type: str,
+    example_sentence: Optional[str] = None,
+    definition: Optional[str] = None,
+    model: str = constants.DEFAULT_MODEL,
+    language_code: str = "en",
+    grammatical_form: Optional[str] = None,
+    english_translation: Optional[str] = None,
+) -> Dict[str, Any]:
+    """
+    Validate or generate pronunciations (both IPA and simplified phonetic).
+
+    Args:
+        word: The word to validate/generate pronunciation for
+        ipa_pronunciation: Current IPA pronunciation (or None to generate)
+        phonetic_pronunciation: Current simplified phonetic (or None to generate)
+        pos_type: Part of speech
+        example_sentence: Optional example sentence for context (preferred)
+        definition: Optional definition text for context (used if no example sentence)
+        model: LLM model to use
+        language_code: Language code (e.g., "en", "lt", "ko")
+        grammatical_form: Optional grammatical form (e.g., "dative", "genitive plural") for non-English
+        english_translation: Optional English translation (lemma word) for non-English
+
+    Returns:
+        Dictionary with validation/generation results:
+        - needs_update: bool indicating if current pronunciation needs fixing
+        - suggested_ipa: str with correct IPA pronunciation
+        - suggested_phonetic: str with correct simplified phonetic
+        - alternative_pronunciations: list of dicts with keys:
+            - dialect: str (e.g., "British", "Australian")
+            - ipa: str (IPA pronunciation for this dialect)
+            - phonetic: str (simplified phonetic for this dialect, optional)
+        - issues: list of issues found (if validating existing pronunciation)
+        - confidence: float 0-1
+        - notes: str with additional pronunciation notes
+    """
+    call = build_pronunciation_call(
+        word=word,
+        ipa_pronunciation=ipa_pronunciation,
+        phonetic_pronunciation=phonetic_pronunciation,
+        pos_type=pos_type,
+        example_sentence=example_sentence,
+        definition=definition,
+        language_code=language_code,
+        grammatical_form=grammatical_form,
+        english_translation=english_translation,
+    )
+    client = UnifiedLLMClient()
+
     logger.debug(f"Validating/generating pronunciation for word: '{word}' (POS: {pos_type})")
 
     try:
-        response = client.generate_chat(
-            prompt=prompt, model=model, json_schema=schema, context=context
-        )
+        response = client.generate_chat(model=model, **call.chat_kwargs())
 
         if response.structured_data:
-            # Add defaults for fields that may not be in non-English schema
-            result = response.structured_data
-            if language_code != "en":
-                result.setdefault("alternative_pronunciations", [])
-                result.setdefault("notes", "")
-            return result
+            return interpret_pronunciation(response.structured_data, language_code)
         else:
             logger.error(f"No structured data received for pronunciation validation of '{word}'")
             return {
@@ -843,48 +876,18 @@ def generate_pronunciation(
     }
 
 
-def batch_generate_pronunciations(
+def build_batch_pronunciation_call(
     lemma: str,
     definition: str,
     pos_type: str,
     forms: List[Dict[str, str]],
-    model: str = constants.DEFAULT_MODEL,
     language_code: str = "en",
     english_translation: Optional[str] = None,
-) -> Dict[str, Dict[str, Any]]:
+) -> LLMCall:
+    """The one-call-for-many-forms request :func:`batch_generate_pronunciations` sends.
+
+    Shared with the OpenAI batch path, so a batched request is the live one.
     """
-    Generate pronunciations for multiple word forms in a single LLM call.
-
-    Args:
-        lemma: The lemma (base form) of the word
-        definition: English definition of the lemma
-        pos_type: Part of speech
-        forms: List of dicts with 'form' (grammatical form name) and 'word' (the text) keys
-               e.g., [{'form': 'verb/en_present', 'word': 'run'}, {'form': 'verb/en_past', 'word': 'ran'}]
-        model: LLM model to use
-        language_code: Language code (e.g., "en", "lt", "ko")
-        english_translation: Optional English translation (lemma word) for non-English
-
-    Returns:
-        Dictionary mapping form names to pronunciation results:
-        {
-            'verb/en_present': {
-                'word': 'run',
-                'ipa_pronunciation': '/rʌn/',
-                'phonetic_pronunciation': 'RUN',
-                'confidence': 0.95
-            },
-            'verb/en_past': {
-                'word': 'ran',
-                'ipa_pronunciation': '/ræn/',
-                'phonetic_pronunciation': 'RAN',
-                'confidence': 0.95
-            },
-            ...
-        }
-    """
-    client = UnifiedLLMClient()
-
     # Get language name from translation_helpers
     from storage.translation_helpers import LANGUAGE_NAMES
 
@@ -935,34 +938,85 @@ def batch_generate_pronunciations(
         num_forms=len(forms),
     )
 
+    return LLMCall(prompt=prompt, schema=schema, context=context)
+
+
+def interpret_batch_pronunciations(
+    data: Dict[str, Any], forms: List[Dict[str, str]]
+) -> Dict[str, Dict[str, Any]]:
+    """Per-form results from a :func:`build_batch_pronunciation_call` answer, keyed by form."""
+    results = {}
+    for form_info in forms:
+        form_key = form_info["form"]
+        safe_key = form_key.replace("/", "_").replace("-", "_")
+        results[form_key] = {
+            "word": form_info["word"],
+            "ipa_pronunciation": data.get(f"{safe_key}_ipa", ""),
+            "phonetic_pronunciation": data.get(f"{safe_key}_phonetic", ""),
+            "confidence": data.get(f"{safe_key}_confidence", 0.0),
+        }
+    return results
+
+
+def batch_generate_pronunciations(
+    lemma: str,
+    definition: str,
+    pos_type: str,
+    forms: List[Dict[str, str]],
+    model: str = constants.DEFAULT_MODEL,
+    language_code: str = "en",
+    english_translation: Optional[str] = None,
+) -> Dict[str, Dict[str, Any]]:
+    """
+    Generate pronunciations for multiple word forms in a single LLM call.
+
+    Args:
+        lemma: The lemma (base form) of the word
+        definition: English definition of the lemma
+        pos_type: Part of speech
+        forms: List of dicts with 'form' (grammatical form name) and 'word' (the text) keys
+               e.g., [{'form': 'verb/en_present', 'word': 'run'}, {'form': 'verb/en_past', 'word': 'ran'}]
+        model: LLM model to use
+        language_code: Language code (e.g., "en", "lt", "ko")
+        english_translation: Optional English translation (lemma word) for non-English
+
+    Returns:
+        Dictionary mapping form names to pronunciation results:
+        {
+            'verb/en_present': {
+                'word': 'run',
+                'ipa_pronunciation': '/rʌn/',
+                'phonetic_pronunciation': 'RUN',
+                'confidence': 0.95
+            },
+            'verb/en_past': {
+                'word': 'ran',
+                'ipa_pronunciation': '/ræn/',
+                'phonetic_pronunciation': 'RAN',
+                'confidence': 0.95
+            },
+            ...
+        }
+    """
+    call = build_batch_pronunciation_call(
+        lemma=lemma,
+        definition=definition,
+        pos_type=pos_type,
+        forms=forms,
+        language_code=language_code,
+        english_translation=english_translation,
+    )
+    client = UnifiedLLMClient()
+
     logger.debug(
-        f"Batch generating pronunciations for {len(forms)} forms of '{lemma}' ({language_name})"
+        f"Batch generating pronunciations for {len(forms)} forms of '{lemma}' ({language_code})"
     )
 
     try:
-        response = client.generate_chat(
-            prompt=prompt, model=model, json_schema=schema, context=context
-        )
+        response = client.generate_chat(model=model, **call.chat_kwargs())
 
         if response.structured_data:
-            # Parse results back into per-form dictionaries
-            results = {}
-            for form_info in forms:
-                form_key = form_info["form"]
-                safe_key = form_key.replace("/", "_").replace("-", "_")
-
-                ipa = response.structured_data.get(f"{safe_key}_ipa", "")
-                phonetic = response.structured_data.get(f"{safe_key}_phonetic", "")
-                confidence = response.structured_data.get(f"{safe_key}_confidence", 0.0)
-
-                results[form_key] = {
-                    "word": form_info["word"],
-                    "ipa_pronunciation": ipa,
-                    "phonetic_pronunciation": phonetic,
-                    "confidence": confidence,
-                }
-
-            return results
+            return interpret_batch_pronunciations(response.structured_data, forms)
         else:
             logger.error(
                 f"No structured data received for batch pronunciation generation of '{lemma}'"

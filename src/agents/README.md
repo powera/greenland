@@ -371,3 +371,25 @@ To batch an agent:
 3. Add a `--batch` path to the CLI that builds item states and calls
    `start_batch_run` (dry run first to show counts, then confirm).
 
+When the LLM call sits deep inside existing code (vilkas's generators try a
+mechanical paradigm first), run that code in `prepare` with
+`clients.deferring_client.DeferringClient`: it raises `DeferLLMCall` carrying
+the exact call instead of making it, and code in between need only re-raise it.
+A `prepare` that writes as it goes sets `Job.prepare_writes`.
+
+Batched today: lape (grammar facts), vilkas (forms), papuga (pronunciations,
+two stages: forms, then the translation from the filled base form).
+
+Next candidates, best first:
+
+1. The sentence pipeline (zvirblis, the Barsukas sentence batches): phases 1, 3
+   and 4 as three stages, phase 2 inside stage 2's `prepare`.  Needs `apply` to
+   fan out (one phase-4 item per language), and retires the hand-chained
+   `barsukas_translate` / `barsukas_decompose` batches.
+2. lape lemma facts and `english_principal_parts`; sernas; sense prominence;
+   dramblys's pending-import classification: one call per item each.
+3. voras: already batched through its own module; moving it would retire the
+   last per-agent branch in the completion dispatchers.
+4. A lemma-review job (all of a lemma's data, "what's wrong?"), which would
+   also absorb lokys's checks; it needs a findings table to write to first.
+

@@ -46,6 +46,7 @@ from workqueue.handlers.words import (
 )
 from workqueue.handlers.words.forms import FORMS_JOB
 from workqueue.handlers.words.grammar_facts import GRAMMAR_FACT_JOB
+from workqueue.handlers.words.pronunciations import PRONUNCIATIONS_JOB
 from workqueue.llm_batch import Job
 from workqueue.task_queue import TaskType
 
@@ -110,6 +111,7 @@ TASK_HANDLERS = {
 LLM_JOBS: Dict[str, Job] = {
     FORMS_JOB.name: FORMS_JOB,
     GRAMMAR_FACT_JOB.name: GRAMMAR_FACT_JOB,
+    PRONUNCIATIONS_JOB.name: PRONUNCIATIONS_JOB,
 }
 
 
