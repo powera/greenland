@@ -15,6 +15,7 @@ from storage.integrity.lemmas import (
     check_duplicate_words,
     check_invalid_difficulty_levels,
     check_lemmas_without_derivatives,
+    check_missing_english_base_forms,
     check_missing_required_fields,
 )
 from storage.integrity.sentences import (
@@ -74,6 +75,12 @@ class IntegrityChecker:
 
     def check_lemmas_without_derivatives(self) -> Dict[str, Any]:
         return self._run(check_lemmas_without_derivatives)
+
+    def check_missing_english_base_forms(self, fix: bool = False) -> Dict[str, Any]:
+        return self._run(
+            lambda session: check_missing_english_base_forms(session, fix=fix),
+            commit_repairs=fix,
+        )
 
     def check_duplicate_guids(self) -> Dict[str, Any]:
         return self._run(check_duplicate_guids)

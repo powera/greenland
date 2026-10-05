@@ -10,6 +10,7 @@ from storage.integrity.lemmas import (
     check_duplicate_words,
     check_invalid_difficulty_levels,
     check_lemmas_without_derivatives,
+    check_missing_english_base_forms,
     check_missing_required_fields,
 )
 from storage.integrity.sentences import (
@@ -27,6 +28,7 @@ __all__ = [
     "check_invalid_difficulty_levels",
     "check_lemmas_without_derivatives",
     "check_missing_required_fields",
+    "check_missing_english_base_forms",
     "check_orphaned_derivative_forms",
     "check_sentence_levels",
     "check_sentences_missing_punctuation",
