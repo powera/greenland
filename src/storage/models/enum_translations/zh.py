@@ -64,6 +64,7 @@ SUBTYPE_DISPLAY = {
     "personal_name": "人名",
     "place_name": "地名",
     "region": "地区",
+    "spatial_division": "空间划分",
     "city": "城市",
     "geographic_place": "地理地点",
     "organization_name": "组织名称",
