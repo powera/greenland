@@ -64,7 +64,6 @@ usage and arguments.
 | erelis | Eagle | False lemma match detection in sentences |
 | gandras | Stork | Audio manifest downloader |
 | genys | Woodpecker | Document parser and pending import stager |
-| seskas | Ferret | Multi-model verb-conjugation consensus |
 
 ---
 

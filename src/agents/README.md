@@ -44,7 +44,6 @@ can launch or that back a Barsukas page.
 | **vieversys** | lark | Cloud TTS audio (OpenAI, Polly, Azure, Google, Gemini) | inline, queue | yes | TTS |
 | **strazdas** | thrush | Local TTS audio (eSpeak-NG, Qwen3-TTS) | inline | yes | no |
 | **gandras** | stork | Import S3 staging audio manifests into review records | inline | via helpers | no |
-| **seskas** | ferret | Multi-model verb-conjugation consensus (local LM Studio models) | inline | no | yes (local) |
 | **ungurys** | eel | WireWord export | shim → `exports.wireword` | yes | no |
 | **elnias** | deer | Bootstrap export (minimal format) | shim → `exports.bootstrap` | yes | no |
 | **povas** | peacock | POS-subtype HTML reports | shim → `exports.pos_reports` | yes | no |
@@ -55,6 +54,9 @@ can launch or that back a Barsukas page.
 jobs submitted by any agent's `--batch` path.
 
 ## Usefulness review (October 2026)
+
+seskas (multi-local-model verb-conjugation consensus) was removed after this
+review, along with its only output, `langtools/de/generated_conjugations.py`.
 
 **Core, actively used.**  voras, vilkas, papuga, lape, sernas, gegute and
 zvirblis are the lemma/sentence enrichment pipeline: all are launched from
@@ -78,11 +80,9 @@ Barsukas integrity page.  vieversys is the production audio path.
   absorbed by a lemma-review batch job (see "Batching an agent").
 
 **Low value / candidates for retirement.**
-- seskas depends on local LM Studio models, which the project no longer
-  expects to run; its only output in the tree is
-  `src/langtools/de/generated_conjugations.py`.
 - erelis has no Barsukas or workqueue integration and no tests; it is a cheap
-  rule-based report, mostly useful for zh.
+  rule-based report, mostly useful for zh.  Due for a rework (parts may be
+  kept).
 - bebras sentence mode (`--sentence`/`--file`) predates the `sentences/`
   pipeline (genys, zvirblis decomposition) and duplicates it; only
   `wordfreq/tools/sentence_word_linker.py` still imports it.
@@ -411,19 +411,6 @@ vieversys.py --languages lt --generate-sentences --sentence-limit 20
 `--auto-approve` marks generated audio approved and copies it to prod; leave
 it off when the audio should go through review.  `--generate-manifests` is
 deprecated.
-
-### seskas (Verb Conjugation Consensus)
-
-Asks several local LM Studio models (default `qwen3.5-9b-lms`, `phi-4-lms`,
-`gemma-3-12b-lms`) for the same conjugation table and writes the consensus to
-a Python module.  Requires those local models to be running.
-
-```bash
-seskas.py --language lt --verbs-file data/verbs/lt.txt
-seskas.py --language es --verbs-file /tmp/es_verbs.txt --output src/langtools/es/generated_conjugations.py
-seskas.py --language pl --verbs-file /tmp/pl_verbs.txt --model-paths qwen3-4b-lms phi-4-lms gemma-3-12b-lms
-seskas.py --language lt --verbs-file /tmp/lt_verbs.txt --on-existing merge
-```
 
 ### erelis (False Lemma Matches)
 
