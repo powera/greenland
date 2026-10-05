@@ -2,19 +2,24 @@
 
 """Report the corpus mix of each Trakaido level.
 
-Read-only.  For every levelled English lemma, finds the corpus it leans toward
-(see ``wordfreq.frequency.level_profile``), then prints:
+Read-only.  For every levelled English lemma, splits one unit of weight between
+the corpora it leans toward (see ``wordfreq.frequency.level_profile``), then
+prints:
 
   * per level: "330 (n=42): 81% wiki_arts, 12% general, 7% wiki_history"
   * per corpus: the levels with the largest share of that corpus's words --
     "wiki_arts: 330 (81%), 335 (55%), 105 (20%)"
 
-The full run touches every levelled lemma against every corpus and takes a few
-minutes; --json saves the result (per-lemma rows included) so later work can
-read it instead of recomputing.
+Measuring every levelled lemma against every corpus takes a few minutes.
+--json saves the raw measurements (each lemma's Zipf per corpus), and
+--from-json re-scores a saved file in seconds, which is the way to try other
+--min-skew values.  A saved file keeps the levels it was measured at: re-measure
+after levels or sense prominences change.
 
     GREENLAND_TEST_MODE=1 PYTHONPATH=src python src/wordfreq/tools/level_corpus_profile.py \
         --json /tmp/level_profiles.json
+    GREENLAND_TEST_MODE=1 PYTHONPATH=src python src/wordfreq/tools/level_corpus_profile.py \
+        --from-json /tmp/level_profiles.json --min-skew 0.7 --exclude-general
 """
 
 import sys
@@ -27,7 +32,7 @@ import argparse
 import contextlib
 import json
 import logging
-from typing import Any, Dict, List, Optional
+from typing import Any, Dict, List, Optional, Sequence, Tuple
 
 from storage.backend import create_session
 from storage.backend.config import DataSourceConfig
@@ -37,80 +42,81 @@ from wordfreq.frequency.level_profile import (
     GENERAL,
     LemmaCorpusProfile,
     LevelProfile,
+    aggregate_levels,
     build_level_profiles,
+    profile_from_zipfs,
     rank_levels_for_corpus,
 )
 
 logger = logging.getLogger(__name__)
 
+#: Bumped when the saved layout changes, so an old file is refused, not misread.
+JSON_FORMAT_VERSION = 1
 
-def format_level_line(profile: LevelProfile, max_corpora: int = 4) -> str:
+
+def format_level_line(
+    profile: LevelProfile, include_general: bool = True, max_corpora: int = 4
+) -> str:
     """One line summarising a level's corpus mix."""
-    ranked = profile.ranked_corpora()
+    ranked = profile.ranked_corpora(include_general)
     parts = [f"{share:.0%} {name}" for name, share in ranked[:max_corpora]]
     if len(ranked) > max_corpora:
         rest = sum(share for _name, share in ranked[max_corpora:])
         parts.append(f"{rest:.0%} other")
-    unattested = f", {profile.unattested_count} unattested" if profile.unattested_count else ""
-    return f"{profile.level:>4} (n={profile.lemma_count}{unattested}): " + ", ".join(parts)
+    notes = ""
+    if not include_general:
+        notes += f", {profile.share(GENERAL):.0%} general omitted"
+    if profile.unattested_count:
+        notes += f", {profile.unattested_count} unattested"
+    return f"{profile.level:>4} (n={profile.lemma_count}{notes}): " + ", ".join(parts)
 
 
 def _example_words(
     lemma_profiles: List[LemmaCorpusProfile], level: int, corpus_name: str, count: int
 ) -> List[str]:
-    """The level's words leaning hardest toward this corpus."""
+    """The level's words putting the most weight on this corpus."""
     matches = [
         lemma_profile
         for lemma_profile in lemma_profiles
-        if lemma_profile.level == level and lemma_profile.top_corpus == corpus_name
+        if lemma_profile.level == level and corpus_name in lemma_profile.weights
     ]
-    matches.sort(key=lambda lemma_profile: -lemma_profile.top_skew)
+    matches.sort(
+        key=lambda lemma_profile: (
+            -lemma_profile.weights[corpus_name],
+            -lemma_profile.skew_by_corpus.get(corpus_name, 0.0),
+        )
+    )
     return [lemma_profile.display_text for lemma_profile in matches[:count]]
 
 
 def to_json(
-    level_profiles: Dict[int, LevelProfile],
     lemma_profiles: List[LemmaCorpusProfile],
-    corpus_names: List[str],
+    unattested_by_level: Dict[int, int],
+    corpus_names: Sequence[str],
     min_skew: float,
-    min_lemmas: int,
 ) -> Dict[str, Any]:
-    """Serializable form of the whole report."""
+    """The raw measurements, plus the weights they gave at ``min_skew``.
+
+    ``zipf`` and ``attested`` are what :func:`from_json` re-scores from;
+    ``weights`` is there for a reader that just wants the answer.
+    """
     return {
+        "format_version": JSON_FORMAT_VERSION,
         "min_skew": min_skew,
-        "corpora": corpus_names,
-        "levels": {
-            str(level): {
-                "lemma_count": profile.lemma_count,
-                "unattested_count": profile.unattested_count,
-                "top_corpus_counts": dict(sorted(profile.top_corpus_counts.items())),
-                "mean_skew": {name: round(profile.mean_skew(name), 3) for name in corpus_names},
-            }
-            for level, profile in sorted(level_profiles.items())
-        },
-        "levels_by_corpus": {
-            name: [
-                {
-                    "level": candidate.level,
-                    "share": round(candidate.share, 3),
-                    "count": candidate.count,
-                    "lemma_count": candidate.lemma_count,
-                    "lift": round(candidate.lift, 2),
-                }
-                for candidate in rank_levels_for_corpus(level_profiles, name, min_lemmas)
-            ]
-            for name in corpus_names + [GENERAL]
-        },
+        "corpora": list(corpus_names),
+        "unattested_by_level": {str(level): count for level, count in unattested_by_level.items()},
         "lemmas": [
             {
                 "lemma_id": lemma_profile.lemma_id,
-                "text": lemma_profile.display_text,
+                "lemma_text": lemma_profile.lemma_text,
+                "disambiguation": lemma_profile.disambiguation,
                 "level": lemma_profile.level,
-                "top_corpus": lemma_profile.top_corpus,
-                "top_skew": round(lemma_profile.top_skew, 3),
                 "attested": list(lemma_profile.attested_corpora),
-                "skew": {
-                    name: round(skew, 3) for name, skew in lemma_profile.skew_by_corpus.items()
+                "zipf": {
+                    name: round(zipf, 4) for name, zipf in lemma_profile.zipf_by_corpus.items()
+                },
+                "weights": {
+                    name: round(weight, 3) for name, weight in lemma_profile.weights.items()
                 },
             }
             for lemma_profile in lemma_profiles
@@ -118,14 +124,87 @@ def to_json(
     }
 
 
+def from_json(
+    data: Dict[str, Any], min_skew: float, levels: Optional[Sequence[int]] = None
+) -> Tuple[List[LemmaCorpusProfile], Dict[int, int], List[str]]:
+    """Re-score saved measurements at ``min_skew``.
+
+    Returns ``(lemma_profiles, unattested_by_level, corpus_names)``.
+    """
+    version = data.get("format_version")
+    if version != JSON_FORMAT_VERSION:
+        raise ValueError(
+            f"Saved profile has format_version {version!r}, expected {JSON_FORMAT_VERSION}; "
+            "re-measure it with --json"
+        )
+    wanted = set(levels) if levels is not None else None
+    lemma_profiles = [
+        profile_from_zipfs(
+            row["lemma_id"],
+            row["lemma_text"],
+            row["disambiguation"],
+            row["level"],
+            row["zipf"],
+            row["attested"],
+            min_skew,
+        )
+        for row in data["lemmas"]
+        if wanted is None or row["level"] in wanted
+    ]
+    unattested_by_level = {
+        int(level): count
+        for level, count in data["unattested_by_level"].items()
+        if wanted is None or int(level) in wanted
+    }
+    return lemma_profiles, unattested_by_level, list(data["corpora"])
+
+
+def print_report(
+    level_profiles: Dict[int, LevelProfile],
+    lemma_profiles: List[LemmaCorpusProfile],
+    corpus_names: Sequence[str],
+    min_skew: float,
+    include_general: bool,
+    min_lemmas: int,
+    top_levels: int,
+    examples: int,
+) -> None:
+    print(f"== Corpus mix by level (min skew {min_skew}) ==")
+    for _level, profile in sorted(level_profiles.items()):
+        print(format_level_line(profile, include_general))
+
+    print()
+    print("== Levels by corpus (share of level, weight/lemmas, lift vs. all levels) ==")
+    names = list(corpus_names) + ([GENERAL] if include_general else [])
+    for corpus_name in names:
+        candidates = rank_levels_for_corpus(
+            level_profiles, corpus_name, min_lemmas, top_levels, include_general
+        )
+        if not candidates:
+            continue
+        print(f"{corpus_name}:")
+        for candidate in candidates:
+            words = _example_words(lemma_profiles, candidate.level, corpus_name, examples)
+            print(
+                f"  {candidate.level:>4}  {candidate.share:>4.0%} "
+                f"({candidate.weight:.1f}/{candidate.lemma_count}, x{candidate.lift:.1f})  "
+                + ", ".join(words)
+            )
+
+
 def main(argv: Optional[List[str]] = None) -> int:
-    parser = argparse.ArgumentParser(description=__doc__.split("\n\n")[0])
+    parser = argparse.ArgumentParser(description=(__doc__ or "").split("\n\n")[0])
     parser.add_argument("--db-path", type=str, default=None, help="SQLite database path")
     parser.add_argument(
         "--min-skew",
         type=float,
         default=DEFAULT_MIN_SKEW,
-        help=f"Zipf skew a lemma needs to count toward a corpus (default {DEFAULT_MIN_SKEW})",
+        help=f"Zipf skew a corpus needs to get any of a lemma's weight (default {DEFAULT_MIN_SKEW})",
+    )
+    parser.add_argument(
+        "--exclude-general",
+        action="store_true",
+        help="Leave general words out of each level's shares, showing its topical mix alone",
     )
     parser.add_argument("--level", type=int, action="append", help="Only these levels")
     parser.add_argument("--limit", type=int, default=None, help="Profile at most N lemmas")
@@ -141,55 +220,65 @@ def main(argv: Optional[List[str]] = None) -> int:
     parser.add_argument(
         "--examples", type=int, default=3, help="Example words per corpus/level pairing"
     )
-    parser.add_argument("--json", type=str, default=None, help="Write the full result here")
+    parser.add_argument("--json", type=str, default=None, help="Save the measurements here")
+    parser.add_argument(
+        "--from-json",
+        type=str,
+        default=None,
+        help="Re-score measurements saved by --json instead of reading the database",
+    )
     parser.add_argument("--debug", action="store_true")
     args = parser.parse_args(argv)
 
     logging.basicConfig(level=logging.DEBUG if args.debug else logging.WARNING)
-    config = DataSourceConfig(sqlite_path=args.db_path, debug=args.debug)
-    corpus_names = get_enabled_corpus_names()
 
-    def progress(done: int, total: int) -> None:
-        if done % 250 == 0 or done == total:
-            print(f"  profiled {done}/{total} lemmas", file=sys.stderr)
-
-    with contextlib.closing(create_session(config, readonly=True)) as session:
-        level_profiles, lemma_profiles = build_level_profiles(
-            session,
-            min_skew=args.min_skew,
-            levels=args.level,
-            corpus_names=corpus_names,
-            limit=args.limit,
-            progress=progress,
+    if args.from_json:
+        with open(args.from_json, "r", encoding="utf-8") as handle:
+            saved = json.load(handle)
+        lemma_profiles, unattested_by_level, corpus_names = from_json(
+            saved, args.min_skew, args.level
         )
+        if args.limit is not None:
+            lemma_profiles = lemma_profiles[: args.limit]
+        level_profiles = aggregate_levels(lemma_profiles, unattested_by_level)
+    else:
+        config = DataSourceConfig(sqlite_path=args.db_path, debug=args.debug)
+        corpus_names = get_enabled_corpus_names()
 
-    print(f"== Corpus mix by level (min skew {args.min_skew}) ==")
-    for _level, profile in sorted(level_profiles.items()):
-        print(format_level_line(profile))
+        def progress(done: int, total: int) -> None:
+            if done % 250 == 0 or done == total:
+                print(f"  profiled {done}/{total} lemmas", file=sys.stderr)
 
-    print()
-    print("== Levels by corpus (share of level, lift vs. all levels) ==")
-    for corpus_name in corpus_names + [GENERAL]:
-        candidates = rank_levels_for_corpus(
-            level_profiles, corpus_name, args.min_lemmas, args.top_levels
-        )
-        if not candidates:
-            continue
-        print(f"{corpus_name}:")
-        for candidate in candidates:
-            examples = _example_words(lemma_profiles, candidate.level, corpus_name, args.examples)
-            print(
-                f"  {candidate.level:>4}  {candidate.share:>4.0%} "
-                f"({candidate.count}/{candidate.lemma_count}, x{candidate.lift:.1f})  "
-                + ", ".join(examples)
+        with contextlib.closing(create_session(config, readonly=True)) as session:
+            level_profiles, lemma_profiles = build_level_profiles(
+                session,
+                min_skew=args.min_skew,
+                levels=args.level,
+                corpus_names=corpus_names,
+                limit=args.limit,
+                progress=progress,
             )
+        unattested_by_level = {
+            level: profile.unattested_count
+            for level, profile in level_profiles.items()
+            if profile.unattested_count
+        }
+
+    print_report(
+        level_profiles,
+        lemma_profiles,
+        corpus_names,
+        args.min_skew,
+        not args.exclude_general,
+        args.min_lemmas,
+        args.top_levels,
+        args.examples,
+    )
 
     if args.json:
         with open(args.json, "w", encoding="utf-8") as handle:
             json.dump(
-                to_json(
-                    level_profiles, lemma_profiles, corpus_names, args.min_skew, args.min_lemmas
-                ),
+                to_json(lemma_profiles, unattested_by_level, corpus_names, args.min_skew),
                 handle,
                 ensure_ascii=False,
                 indent=1,
