@@ -159,7 +159,12 @@ lape.py --fact-type measure_words --languages zh --populate --use-workqueue
 lape.py --fact-type grammatical_gender --languages de --populate
 lape.py --fact-type declension_class --languages lt --coverage
 lape.py --task verbs --languages en fr --populate --use-workqueue
+lape.py --task nouns --languages fr de --populate --batch      # OpenAI batches, half price
 ```
+
+`--batch` sends every fact type except `english_principal_parts` through the
+OpenAI Batch API; results are written as each batch completes (see "Batching
+an agent" below).
 
 Lemma task payloads use `lemma_id` as their target identifier. A task acting on
 one language uses `language_code`; a task acting on a language set uses
@@ -337,3 +342,32 @@ See `STYLE.md` for architecture patterns and conventions. Key points:
 4. Support `--check` (read-only), `--fix`, and `--dry-run` modes
 5. Be idempotent (safe to run multiple times)
 6. Require confirmation for destructive operations (unless `--yes`)
+
+## Batching an agent
+
+`workqueue/llm_batch.py` runs an LLM job either live or as OpenAI batches with
+the same code.  A job is one to three stages; each stage is two functions:
+
+* `prepare(session, state, ctx)` returns an `LLMCall` (prompt, context,
+  schema), a `Ready` answer that needs no model, or `Done` to stop.  It never
+  writes.
+* `apply(session, state, data, ctx)` writes from the model's answer and
+  returns `Done`, or `Next(state)` to carry the item to the next stage.
+
+Stages are barriers: stage N+1 is prepared and submitted, automatically, only
+after every item of the run has finished stage N, so a stage-2 prompt can read
+what stage 1 wrote for all items.  Progress lives on the `BatchQueue` rows in
+the batch-tracking database.
+
+To batch an agent:
+
+1. Split its LLM step into prepare/apply functions in the domain module
+   (`words/grammar_fact_tasks/` is the example), keeping its live path working
+   on top of the same functions.
+2. Declare a `Job` beside the agent's workqueue handler
+   (`workqueue/handlers/words/grammar_facts.py`: `GRAMMAR_FACT_JOB`) and add it
+   to `LLM_JOBS` in `workqueue/registry.py`.  The Barsukas batch poller and
+   `python -m agents.common.batch complete` find it there; no dispatcher edits.
+3. Add a `--batch` path to the CLI that builds item states and calls
+   `start_batch_run` (dry run first to show counts, then confirm).
+

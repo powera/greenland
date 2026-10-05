@@ -4,15 +4,20 @@ Runs inside the unified Barsukas server (alongside the workqueue worker
 thread). Every 5 minutes it:
 
 1. Scans the batch-tracking DB for ``BatchQueue`` rows submitted by the
-   sentence translate/decompose agents or the ``voras`` lemma-populate
-   agent (``words.translation_batch``) that are still in flight
+   sentence translate/decompose agents, the ``voras`` lemma-populate
+   agent (``words.translation_batch``), or a staged job registered in
+   ``workqueue.registry.LLM_JOBS`` (``lape``) that are still in flight
    (``submitted`` / ``processing``).
 2. For each unique ``batch_id``, calls ``BatchQueueManager.check_batch_status``
    so the local state mirrors OpenAI.
 3. If a batch has reached ``completed`` on OpenAI, downloads results via
    ``retrieve_batch_results`` and applies them to the main database with
    the agent's applier (``apply_results_for_agent`` for sentences,
-   ``apply_populate_results`` for lemma translations).
+   ``apply_populate_results`` for lemma translations,
+   ``workqueue.llm_batch.complete_rows`` for staged jobs, which also
+   submits a job's next stage once the whole run is through this one).
+   A staged job's batch that failed or expired is marked finished so the
+   rest of its run can move on.
 
 If no batches are in flight the poller does nothing and goes back to sleep.
 """
@@ -44,7 +49,21 @@ from words.translation_batch import apply_populate_results
 logger = logging.getLogger(__name__)
 
 DEFAULT_POLL_INTERVAL_SECONDS = 300
-_AGENT_NAMES = (DECOMPOSE_AGENT_NAME, TRANSLATE_AGENT_NAME, LEMMA_TRANSLATE_AGENT_NAME)
+_LEGACY_AGENT_NAMES = (DECOMPOSE_AGENT_NAME, TRANSLATE_AGENT_NAME, LEMMA_TRANSLATE_AGENT_NAME)
+_TERMINAL_FAILED_STATUSES = (
+    BatchStatus.FAILED.value,
+    BatchStatus.EXPIRED.value,
+    BatchStatus.CANCELLED.value,
+)
+
+
+def _agent_names() -> tuple[str, ...]:
+    """Legacy batch agents plus every staged job in workqueue.registry.LLM_JOBS."""
+    from workqueue.registry import LLM_JOBS
+
+    return _LEGACY_AGENT_NAMES + tuple(LLM_JOBS)
+
+
 _IN_FLIGHT_STATUSES = (
     BatchRequestStatus.SUBMITTED.value,
     BatchRequestStatus.PROCESSING.value,
@@ -55,7 +74,7 @@ def _collect_active_batch_ids(batch_session: Session) -> list[tuple[str, str]]:
     """Return ``(batch_id, agent_name)`` for every in-flight Barsukas batch."""
     rows = (
         batch_session.query(BatchQueue.batch_id, BatchQueue.agent_name)
-        .filter(BatchQueue.agent_name.in_(_AGENT_NAMES))
+        .filter(BatchQueue.agent_name.in_(_agent_names()))
         .filter(BatchQueue.batch_id.isnot(None))
         .filter(BatchQueue.status.in_(_IN_FLIGHT_STATUSES))
         .distinct()
@@ -73,12 +92,51 @@ def apply_completed_requests(
     batch page's "check and finish" both come through here, so an agent the
     poller knows is one the page knows too.
 
+    Staged jobs (``workqueue.registry.LLM_JOBS``) are applied by
+    ``workqueue.llm_batch.complete_rows``, which also submits the job's next
+    stage once every item of the run has finished this one.
+
     Raises:
         ValueError: For an agent with no applier here.
     """
+    from workqueue.llm_batch import complete_rows
+    from workqueue.registry import get_llm_job
+
+    job = get_llm_job(agent_name)
+    if job is not None:
+        return complete_rows(job, requests, main_session, batch_id)
     if agent_name == LEMMA_TRANSLATE_AGENT_NAME:
         return apply_populate_results(requests, main_session, batch_id)
     return apply_results_for_agent(agent_name, requests, main_session, batch_id)
+
+
+def _fail_staged_job_batch(
+    agent_name: str,
+    batch_id: str,
+    manager: BatchQueueManager,
+    main_session_factory: Callable[[], Session],
+) -> None:
+    """Let a staged job's run move on past a batch that will never complete."""
+    from workqueue.llm_batch import fail_batch
+    from workqueue.registry import get_llm_job
+
+    job = get_llm_job(agent_name)
+    if job is None:
+        return
+    main_session = main_session_factory()
+    try:
+        submitted = fail_batch(job, batch_id, manager, main_session)
+        logger.warning(
+            "Batch %s (%s) did not complete; %s next-stage call(s) submitted",
+            batch_id,
+            agent_name,
+            submitted,
+        )
+    except Exception:
+        main_session.rollback()
+        logger.exception("Failed to handle failed batch %s", batch_id)
+    finally:
+        main_session.close()
 
 
 def poll_once(main_session_factory: Callable[[], Session]) -> None:
@@ -102,6 +160,9 @@ def poll_once(main_session_factory: Callable[[], Session]) -> None:
             status = info.get("status")
             logger.info("Batch %s (%s) status: %s", batch_id, agent_name, status)
 
+            if status in _TERMINAL_FAILED_STATUSES:
+                _fail_staged_job_batch(agent_name, batch_id, manager, main_session_factory)
+                continue
             if status != BatchStatus.COMPLETED.value:
                 continue
 

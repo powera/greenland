@@ -25,6 +25,8 @@ from concepts.generate.batch import complete_concept_body_batch
 from util.telemetry import CostConfig
 from storage.backend import create_session as create_backend_session
 from sentences.batch_completion import apply_sentence_translation_results
+from workqueue.llm_batch import complete_rows
+from workqueue.registry import get_llm_job
 
 logger = logging.getLogger(__name__)
 
@@ -303,7 +305,11 @@ def main() -> int:
         session = create_backend_session(config)
         try:
             for agent_name, requests in grouped.items():
-                if agent_name in ("zvirblis", "barsukas_decompose"):
+                job = get_llm_job(agent_name)
+                if job is not None:
+                    result = complete_rows(job, requests, session, args.batch_id, manager)
+                    logger.info("Staged job %s applied: %s", agent_name, result)
+                elif agent_name in ("zvirblis", "barsukas_decompose"):
                     result = _apply_sentence_translations(requests, session, args.batch_id)
                     logger.info(
                         "Sentence translations applied: %s updated, %s failed",

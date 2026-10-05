@@ -3,13 +3,20 @@ Measure Words Task - Generate Chinese measure words/classifiers for nouns.
 """
 
 import logging
-from typing import Optional, Tuple, TYPE_CHECKING
+from typing import TYPE_CHECKING, Any, Dict, Optional, Tuple, Union
 
 from sqlalchemy.orm import Session
 
-import util.prompt_loader
-from clients.types import Schema, SchemaProperty
+from clients.types import LLMCall, Schema, SchemaProperty
 from storage.models.schema import Lemma
+from words.grammar_fact_tasks.common import (
+    NO_FACT,
+    FactResult,
+    FactTask,
+    interpret_field,
+    load_prompt,
+    run_live,
+)
 
 if TYPE_CHECKING:
     from words.grammar_facts import GrammarFactService
@@ -17,47 +24,26 @@ if TYPE_CHECKING:
 logger = logging.getLogger(__name__)
 
 
-def generate_measure_words(
-    agent: "GrammarFactService",
+def prepare_measure_words(
+    session: Optional[Session],
     lemma: Lemma,
     chinese_translation: Optional[str],
-    session: Optional[Session] = None,
-) -> Tuple[Optional[str], Optional[str], float]:
-    """
-    Generate Chinese measure word(s) for a noun using LLM.
-
-    Args:
-        agent: The LapeAgent instance
-        lemma: The Lemma object
-        chinese_translation: The Chinese translation of the word
-        session: Database session (optional)
-
-    Returns:
-        Tuple of (measure_word, explanation, confidence)
-    """
+    language_code: str,
+) -> Union[LLMCall, FactResult]:
+    """Build the Chinese measure-word request."""
     if lemma.pos_type != "noun":
         logger.warning(
             f"Lemma '{lemma.lemma_text}' is not a noun, skipping measure word generation"
         )
-        return None, None, 0.0
+        return NO_FACT
 
-    # Load prompts
-    try:
-        context = util.prompt_loader.get_context("grammar", "measure_words")
-        prompt_template = util.prompt_loader.get_prompt("grammar", "measure_words")
-    except Exception as e:
-        logger.error(f"Failed to load measure_words prompts: {e}")
-        return None, None, 0.0
-
-    # Format prompt
+    context, prompt_template = load_prompt("measure_words")
     prompt_text = prompt_template.format(
         english_word=lemma.lemma_text,
         chinese_translation=chinese_translation,
         pos_type=lemma.pos_type,
         definition=lemma.definition_text or "N/A",
     )
-
-    # Define JSON schema for response
     schema = Schema(
         name="MeasureWordGeneration",
         description="Generate Chinese measure words/classifiers for nouns",
@@ -78,37 +64,32 @@ def generate_measure_words(
             ),
         },
     )
+    return LLMCall(prompt=prompt_text, schema=schema, context=context)
 
-    # Query LLM
-    try:
-        client = agent.get_llm_client()
-        response = client.generate_chat(prompt=prompt_text, json_schema=schema, context=context)
 
-        # Extract structured data
-        if response.structured_data:
-            result = response.structured_data
-        else:
-            logger.error(f"No structured data received for '{lemma.lemma_text}'")
-            return None, None, 0.0
+def interpret_measure_words(
+    data: Dict[str, Any], chinese_translation: Optional[str], language_code: str
+) -> FactResult:
+    """The primary measure word is the value; alternatives are only logged."""
+    measure_word = data.get("primary_measure_word", None)
+    alternatives = data.get("alternative_measure_words", [])
+    if alternatives:
+        logger.info(f"Measure word {measure_word} (alt: {', '.join(alternatives)})")
+    return FactResult(measure_word, data.get("explanation", ""), float(data.get("confidence", 0.5)))
 
-        measure_word = result.get("primary_measure_word", None)
-        alternatives = result.get("alternative_measure_words", [])
-        explanation = result.get("explanation", "")
-        confidence = float(result.get("confidence", 0.5))
 
-        # Combine primary and alternatives for logging
-        if alternatives:
-            all_measure_words: Optional[str] = f"{measure_word} (alt: {', '.join(alternatives)})"
-        else:
-            all_measure_words = str(measure_word) if measure_word else None
+TASK = FactTask(prepare_measure_words, interpret_measure_words)
 
-        logger.info(
-            f"Generated measure word for '{lemma.lemma_text}': {all_measure_words} "
-            f"(confidence: {confidence:.2f})"
-        )
 
-        return measure_word, explanation, confidence
+def generate_measure_words(
+    agent: "GrammarFactService",
+    lemma: Lemma,
+    chinese_translation: Optional[str],
+    session: Optional[Session] = None,
+) -> Tuple[Optional[str], Optional[str], float]:
+    """Generate Chinese measure word(s) for a noun using LLM.
 
-    except Exception as e:
-        logger.error(f"Failed to generate measure word for '{lemma.lemma_text}': {e}")
-        return None, None, 0.0
+    Returns:
+        Tuple of (measure_word, explanation, confidence)
+    """
+    return run_live(agent, TASK, session, lemma, chinese_translation, "zh", "measure word")

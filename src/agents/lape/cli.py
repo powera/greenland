@@ -24,6 +24,7 @@ from agents.common.common_args import (
     add_pos_type_args,
     get_data_source_config,
 )
+from words.grammar_fact_tasks import FACT_TASKS
 from words.grammar_facts import GrammarFactService
 from words.grammar_fact_tasks.english_principal_parts import (
     ENGLISH_PRINCIPAL_PARTS_TASK,
@@ -31,6 +32,7 @@ from words.grammar_fact_tasks.english_principal_parts import (
     principal_parts_coverage,
 )
 from words.lemma_selection import get_lemmas_for_agent
+from workqueue.llm_batch import DEFAULT_ITEMS_PER_BATCH
 from workqueue.task_queue import TaskStatus, TaskType, enqueue_task, get_active_task
 from storage.models.schema import BarsukasTask
 
@@ -70,6 +72,9 @@ Examples:
 
   # Dry run to see what would be generated
   python lape.py --fact-type grammatical_gender --languages fr --limit 5 --dry-run
+
+  # Send French genders as OpenAI batches (half price, results within 24h)
+  python lape.py --fact-type grammatical_gender --languages fr --populate --batch
 
   # Use grouped tasks to process multiple fact types
   python lape.py --task all --languages fr es --limit 10
@@ -175,6 +180,20 @@ Task presets:
         default=False,
         help="Enqueue work items for background processing by barsukas worker instead of immediate processing",
     )
+    parser.add_argument(
+        "--batch",
+        action="store_true",
+        help=(
+            "With --populate: send the requests as OpenAI batches (half price); the "
+            "Barsukas batch poller writes the results when each batch completes"
+        ),
+    )
+    parser.add_argument(
+        "--items-per-batch",
+        type=int,
+        default=DEFAULT_ITEMS_PER_BATCH,
+        help=f"With --batch: requests per OpenAI batch (default: {DEFAULT_ITEMS_PER_BATCH})",
+    )
 
     return parser
 
@@ -265,6 +284,83 @@ def enqueue_grammar_fact_work(
     }
 
 
+def _is_openai_model(model: str) -> bool:
+    """Whether *model* is served by OpenAI, whose Batch API --batch uses."""
+    return model.startswith(("gpt-", "o1", "o3", "o4"))
+
+
+def _run_populate_batch(
+    agent: GrammarFactService,
+    lemmas: List[Lemma],
+    fact_types_by_language: Dict[str, List[str]],
+    args: argparse.Namespace,
+) -> None:
+    """Plan the missing facts, confirm, and send them as OpenAI batches."""
+    from clients.batch_queue import BatchQueueManager, create_batch_database_session
+    from clients.openai.batch_client import OpenAIBatchClient
+    from workqueue.handlers.words.grammar_facts import GRAMMAR_FACT_JOB, grammar_fact_state
+    from workqueue.llm_batch import start_batch_run
+
+    states = [
+        grammar_fact_state(lemma.id, language_code, fact_type, args.min_confidence)
+        for language_code, fact_types in fact_types_by_language.items()
+        for fact_type in fact_types
+        for lemma in lemmas
+        if lemma.pos_type in GrammarFactService.get_fact_config(fact_type)["required_pos"]
+    ]
+
+    batch_session = create_batch_database_session()
+    session = agent.get_session()
+    try:
+        manager = BatchQueueManager(batch_session, OpenAIBatchClient())
+        # Plan first without writing anything, so the counts can be confirmed.
+        plan = start_batch_run(session, manager, GRAMMAR_FACT_JOB, states, args.model, dry_run=True)
+        batches = -(-plan.calls // args.items_per_batch) if plan.calls else 0
+        print("\n" + "=" * 80)
+        print("LAPE AGENT - BATCH POPULATE")
+        print("=" * 80)
+        print(f"Model: {args.model}")
+        for language_code, fact_types in fact_types_by_language.items():
+            print(f"  {language_code}: {', '.join(fact_types)}")
+        print(f"Items considered: {plan.items}")
+        print(f"  already in a batch run: {plan.skipped_in_flight}")
+        for outcome, count in sorted(plan.resolved_without_llm.items()):
+            print(f"  {outcome} without a model call: {count}")
+        print(f"Requests: {plan.calls} in {batches} batch(es) of up to {args.items_per_batch}")
+        print("=" * 80)
+
+        if not plan.calls and not plan.resolved_without_llm.get("answered"):
+            print("Nothing to submit.")
+            return
+        if args.dry_run:
+            print("DRY RUN - nothing was written, queued or submitted")
+            return
+        if plan.calls and not args.yes:
+            response = input("Submit these batches to OpenAI? [y/N]: ").strip().lower()
+            if response not in ["y", "yes"]:
+                print("Aborted.")
+                sys.exit(0)
+
+        report = start_batch_run(
+            session,
+            manager,
+            GRAMMAR_FACT_JOB,
+            states,
+            args.model,
+            items_per_batch=args.items_per_batch,
+        )
+        print(f"Run {report.run_id}: {report.calls} request(s)")
+        for batch_id in report.batch_ids:
+            print(f"  submitted {batch_id}")
+        if report.batch_ids:
+            print("\nThe Barsukas batch poller checks every 5 minutes and writes the results.")
+            print("By hand: python -m agents.common.batch status --batch-id <id>")
+            print("         python -m agents.common.batch complete --batch-id <id>")
+    finally:
+        session.close()
+        batch_session.close()
+
+
 def get_lape_queue_stats(session: Session) -> Dict[str, int]:
     """Get statistics for lape tasks in the queue."""
     task_type = "words.grammar_facts"
@@ -298,6 +394,15 @@ def main() -> None:
     # Check required arguments
     if not args.languages:
         parser.error("At least one --languages value is required")
+
+    if args.batch and not args.populate:
+        parser.error("--batch only applies with --populate")
+    if args.batch and args.use_workqueue:
+        parser.error("--batch and --use-workqueue cannot be used together")
+    if args.batch and not _is_openai_model(args.model):
+        parser.error(
+            f"--batch uses the OpenAI Batch API; --model {args.model} is not an OpenAI model"
+        )
 
     # Normalize language list while preserving order
     languages = list(dict.fromkeys(args.languages))
@@ -337,6 +442,18 @@ def main() -> None:
     if not fact_types_by_language:
         logger.error("No applicable fact types for the selected languages")
         sys.exit(1)
+
+    if args.batch:
+        unbatchable = sorted(
+            {
+                fact_type
+                for fact_types in fact_types_by_language.values()
+                for fact_type in fact_types
+                if fact_type not in FACT_TASKS
+            }
+        )
+        if unbatchable:
+            parser.error(f"--batch does not support: {', '.join(unbatchable)}")
 
     # Get lemmas to process (either single lemma from --guid or batch)
     session = agent.get_session()
@@ -400,6 +517,11 @@ def main() -> None:
         finally:
             session.close()
 
+        return
+
+    # BATCH MODE: Send the requests as OpenAI batches
+    if args.batch:
+        _run_populate_batch(agent, lemmas, fact_types_by_language, args)
         return
 
     # WORKQUEUE MODE: Enqueue work items for barsukas worker to process

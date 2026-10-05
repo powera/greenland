@@ -9,12 +9,6 @@ import logging
 from typing import Any, Dict, Optional, Tuple
 
 from words.workflow_support import build_default_config, get_lemma_or_raise
-import constants
-import util.prompt_loader
-from clients.types import Schema, SchemaProperty
-from clients.unified_client import UnifiedLLMClient
-from langtools.es import gender as es_gender
-from langtools.fr import gender as fr_gender
 from sqlalchemy.orm import Session
 from storage.backend.config import DataSourceConfig
 from storage.config.grammar_fact_registry import legacy_supported_fact_types
@@ -22,6 +16,7 @@ from storage.crud.grammar_fact import add_grammar_fact, get_grammar_fact_value
 from storage.crud.operation_log import log_operation
 from storage.models.schema import Lemma
 from storage.translation_helpers import get_translation
+from words.grammar_fact_tasks.common import FactResult
 from words.grammar_fact_tasks.english_principal_parts import (
     ENGLISH_PRINCIPAL_PARTS_TASK,
     PRINCIPAL_PART_FACT_TYPES,
@@ -30,206 +25,62 @@ from words.grammar_fact_tasks.english_principal_parts import (
 
 logger = logging.getLogger(__name__)
 
-# Language-specific gender systems configuration
-GENDER_SYSTEMS = {
-    "fr": {
-        "name": "French",
-        "genders": fr_gender.GENDERS,
-        "description": fr_gender.GENDER_SYSTEM_DESCRIPTION,
-    },
-    "lt": {
-        "name": "Lithuanian",
-        "genders": ["masculine", "feminine"],
-        "description": "2-way system (masculine/feminine)",
-    },
-    "es": {
-        "name": "Spanish",
-        "genders": es_gender.GENDERS,
-        "description": es_gender.GENDER_SYSTEM_DESCRIPTION,
-    },
-    "es-419": {
-        "name": "Latin American Spanish",
-        "genders": es_gender.GENDERS,
-        "description": es_gender.GENDER_SYSTEM_DESCRIPTION,
-    },
-    "de": {
-        "name": "German",
-        "genders": ["masculine", "feminine", "neuter"],
-        "description": "3-way system (masculine/feminine/neuter)",
-    },
-    "pt": {
-        "name": "Portuguese",
-        "genders": ["masculine", "feminine"],
-        "description": "2-way system (masculine/feminine)",
-    },
-    "it": {
-        "name": "Italian",
-        "genders": ["masculine", "feminine"],
-        "description": "2-way system (masculine/feminine)",
-    },
-}
-
 # Supported fact types and their configuration. Keep this historical name for
 # Barsukas imports, but source it from the shared registry.
 SUPPORTED_FACT_TYPES = legacy_supported_fact_types()
 
 
-def _get_llm_client(config: DataSourceConfig) -> UnifiedLLMClient:
-    """Get LLM client for queries."""
-    client = UnifiedLLMClient.from_config(config)
-    if config.model:
-        client.warm_model(config.model)
-    return client
-
-
-def generate_measure_words(
-    lemma: Lemma,
-    chinese_translation: str,
-    config: DataSourceConfig,
-) -> Tuple[Optional[str], Optional[str], float]:
-    """
-    Generate Chinese measure word(s) for a noun using LLM.
-
-    Returns:
-        Tuple of (measure_word, explanation, confidence)
-    """
-    if lemma.pos_type != "noun":
-        return None, None, 0.0
-
-    try:
-        context = util.prompt_loader.get_context("grammar", "measure_words")
-        prompt_template = util.prompt_loader.get_prompt("grammar", "measure_words")
-    except Exception as e:
-        logger.error(f"Failed to load measure_words prompts: {e}")
-        return None, None, 0.0
-
-    prompt_text = prompt_template.format(
-        english_word=lemma.lemma_text,
-        chinese_translation=chinese_translation,
-        pos_type=lemma.pos_type,
-        definition=lemma.definition_text or "N/A",
-    )
-
-    schema = Schema(
-        name="MeasureWordGeneration",
-        description="Generate Chinese measure words/classifiers for nouns",
-        properties={
-            "primary_measure_word": SchemaProperty(
-                "string", "The primary/most common measure word"
-            ),
-            "alternative_measure_words": SchemaProperty(
-                "array",
-                "List of alternative measure words that can also be used",
-                items={"type": "string"},
-            ),
-            "explanation": SchemaProperty(
-                "string", "Brief explanation of why this measure word is appropriate"
-            ),
-            "confidence": SchemaProperty(
-                "number", "Confidence score 0.0-1.0", minimum=0.0, maximum=1.0
-            ),
-        },
-    )
-
-    try:
-        client = _get_llm_client(config)
-        response = client.generate_chat(prompt=prompt_text, json_schema=schema, context=context)
-
-        if not response.structured_data:
-            return None, None, 0.0
-
-        result = response.structured_data
-        measure_word = result.get("primary_measure_word")
-        alternatives = result.get("alternative_measure_words", [])
-        explanation = result.get("explanation", "")
-        confidence = float(result.get("confidence", 0.5))
-
-        if alternatives:
-            measure_word = f"{measure_word} (alt: {', '.join(alternatives)})"
-
-        return measure_word, explanation, confidence
-
-    except Exception as e:
-        logger.error(f"Failed to generate measure word for '{lemma.lemma_text}': {e}")
-        return None, None, 0.0
-
-
-def generate_grammatical_gender(
-    lemma: Lemma,
-    target_translation: str,
+def save_generated_fact(
+    session: Session,
+    lemma_id: int,
     language_code: str,
-    config: DataSourceConfig,
-) -> Tuple[Optional[str], Optional[str], float]:
-    """
-    Generate grammatical gender for a noun using LLM.
+    fact_type: str,
+    result: FactResult,
+    min_confidence: float,
+    model: Optional[str],
+    via: str = "inline",
+) -> str:
+    """Store a generated fact if it is good enough and still missing.
+
+    The one writer for generated grammar facts, used by the live path and by
+    batch completion alike.  A fact already present -- including one added or
+    edited by hand while a batch was out -- is left alone.
 
     Returns:
-        Tuple of (gender, explanation, confidence)
+        ``"written"``, ``"rejected"`` (no value, or below *min_confidence*), or
+        ``"exists"``.
     """
-    if lemma.pos_type != "noun":
-        return None, None, 0.0
-
-    if language_code not in GENDER_SYSTEMS:
-        return None, None, 0.0
-
-    gender_config = GENDER_SYSTEMS[language_code]
-    language_name = gender_config["name"]
-    valid_genders = ", ".join(gender_config["genders"])
-    gender_system = gender_config["description"]
-
-    try:
-        context = util.prompt_loader.get_context("grammar", "gender")
-        prompt_template = util.prompt_loader.get_prompt("grammar", "gender")
-    except Exception as e:
-        logger.error(f"Failed to load grammatical_gender prompts: {e}")
-        return None, None, 0.0
-
-    prompt_text = prompt_template.format(
-        english_word=lemma.lemma_text,
-        target_translation=target_translation,
-        pos_type=lemma.pos_type,
-        definition=lemma.definition_text or "N/A",
-        language_name=language_name,
+    if not result.value or result.confidence < min_confidence:
+        return "rejected"
+    if get_grammar_fact_value(session, lemma_id, language_code, fact_type) is not None:
+        return "exists"
+    stored = add_grammar_fact(
+        session,
+        lemma_id=lemma_id,
         language_code=language_code,
-        gender_system=gender_system,
-        valid_genders=valid_genders,
+        fact_type=fact_type,
+        fact_value=result.value,
+        notes=result.notes,
+        verified=False,
     )
-
-    schema = Schema(
-        name="GrammaticalGenderGeneration",
-        description=f"Determine grammatical gender for {language_name} nouns",
-        properties={
-            "gender": SchemaProperty(
-                "string",
-                f"The grammatical gender: {valid_genders}",
-                enum=list(gender_config["genders"]),
-            ),
-            "explanation": SchemaProperty(
-                "string", "Brief explanation of why this gender is correct"
-            ),
-            "confidence": SchemaProperty(
-                "number", "Confidence score 0.0-1.0", minimum=0.0, maximum=1.0
-            ),
+    if stored is None:
+        return "exists"
+    log_operation(
+        session,
+        operation_type="grammar_fact_generated",
+        entity_type="grammar_fact",
+        entity_id=lemma_id,
+        details={
+            "fact_type": fact_type,
+            "language_code": language_code,
+            "fact_value": result.value,
+            "confidence": result.confidence,
+            "agent": "lape",
+            "model": model,
+            "via": via,
         },
     )
-
-    try:
-        client = _get_llm_client(config)
-        response = client.generate_chat(prompt=prompt_text, json_schema=schema, context=context)
-
-        if not response.structured_data:
-            return None, None, 0.0
-
-        result = response.structured_data
-        gender = result.get("gender")
-        explanation = result.get("explanation", "")
-        confidence = float(result.get("confidence", 0.5))
-
-        return gender, explanation, confidence
-
-    except Exception as e:
-        logger.error(f"Failed to generate gender for '{lemma.lemma_text}': {e}")
-        return None, None, 0.0
+    return "written"
 
 
 def validate_grammar_fact_request(
@@ -362,7 +213,16 @@ def generate_grammar_fact_for_lemma(
         session=session,
     )
 
-    if not fact_value or confidence < min_confidence:
+    outcome = save_generated_fact(
+        session,
+        lemma.id,
+        language_code,
+        fact_type,
+        FactResult(fact_value, notes, confidence),
+        min_confidence,
+        config.model,
+    )
+    if outcome == "rejected":
         return {
             "error": f"Could not generate {fact_type} with sufficient confidence (got {confidence:.2f}, need >= {min_confidence})",
             "lemma_id": lemma.id,
@@ -370,33 +230,15 @@ def generate_grammar_fact_for_lemma(
             "language_code": language_code,
             "confidence": confidence,
         }
-
-    # Save to database
-    add_grammar_fact(
-        session,
-        lemma_id=lemma.id,
-        language_code=language_code,
-        fact_type=fact_type,
-        fact_value=fact_value,
-        notes=notes,
-        verified=False,
-    )
-
-    # Log operation
-    log_operation(
-        session,
-        operation_type="grammar_fact_generated",
-        entity_type="grammar_fact",
-        entity_id=lemma.id,
-        details={
+    if outcome == "exists":
+        return {
+            "skipped": True,
+            "reason": "existing",
+            "existing_value": get_grammar_fact_value(session, lemma.id, language_code, fact_type),
+            "lemma_id": lemma.id,
             "fact_type": fact_type,
             "language_code": language_code,
-            "fact_value": fact_value,
-            "confidence": confidence,
-            "agent": "lape",
-            "model": config.model,
-        },
-    )
+        }
 
     return {
         "success": True,
