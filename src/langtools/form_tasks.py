@@ -76,6 +76,57 @@ def get_task_settings(language_code: str, pos_type: str) -> TaskSettings:
     return dict(_load()[0].get((language_code, pos_type), {}))
 
 
+# Slots tried, in order, when a language declares no ``base_form`` setting.
+_DEFAULT_BASE_FORM_CANDIDATES: Tuple[str, ...] = (
+    "singular",
+    "nominative_singular",
+    "1s_present",
+    "present",
+    "polite_present",
+    "masu",
+    "positive",
+)
+
+
+def compute_default_base_form(form_fields: List[str]) -> str:
+    """The base slot for a spec whose language declares no ``base_form``."""
+    if form_fields[0] == "base":
+        return "base"
+    for candidate in _DEFAULT_BASE_FORM_CANDIDATES:
+        if candidate in form_fields:
+            return candidate
+    return form_fields[0]
+
+
+def get_base_form_field(language_code: str, pos_type: str) -> Optional[str]:
+    """The spec field marked ``is_base_form`` for this language and POS.
+
+    None when the language has no form spec for *pos_type*.
+    """
+    from langtools.form_registry import FORM_SPECS
+
+    spec = FORM_SPECS.get((language_code, pos_type))
+    if spec is None or not spec.form_fields:
+        return None
+    base_field = get_task_settings(language_code, pos_type).get("base_form")
+    return str(base_field) if base_field else compute_default_base_form(spec.form_fields)
+
+
+def get_base_grammatical_form(language_code: str, pos_type: str) -> Optional[str]:
+    """The GrammaticalForm value of the base slot, e.g. ``adjective/es_singular_m``.
+
+    This is the label the forms workflow stores on the ``is_base_form`` row,
+    i.e. the specific name of the form that ``base_target`` holds.
+    """
+    from langtools.form_registry import FORM_SPECS
+
+    base_field = get_base_form_field(language_code, pos_type)
+    if base_field is None:
+        return None
+    form = FORM_SPECS[(language_code, pos_type)].form_mapping.get(base_field)
+    return str(form.value) if form is not None else None
+
+
 def get_on_demand_pos_types() -> Dict[str, List[str]]:
     """Language -> parts of speech that may be generated for a chosen lemma."""
     pos_types: Dict[str, List[str]] = {}

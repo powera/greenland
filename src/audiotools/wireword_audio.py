@@ -485,10 +485,15 @@ def _load_derivative_forms_from_wireword(wireword_files: List[Path]) -> Dict[str
 
                 # Check for grammatical_forms field
                 grammatical_forms = word.get("grammatical_forms", {})
+                base_target = (word.get("base_target") or "").strip().lower()
                 for form_key, form_data in grammatical_forms.items():
                     # Extract target text
                     target_text = form_data.get("target")
                     if not target_text:
+                        continue
+                    # grammatical_forms includes the base form under its slot
+                    # name; its audio file is the word's own, not a derivative.
+                    if target_text.strip().lower() == base_target:
                         continue
 
                     # Normalize text for matching (lowercase, remove extra spaces)

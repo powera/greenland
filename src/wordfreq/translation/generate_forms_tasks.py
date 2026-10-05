@@ -9,7 +9,11 @@ from dataclasses import dataclass
 from typing import Any, Callable, Dict, List, Optional
 
 from langtools.form_registry import FORM_SPECS, LANG_NAMES
-from langtools.form_tasks import get_generator_name, get_task_settings
+from langtools.form_tasks import (
+    compute_default_base_form,
+    get_generator_name,
+    get_task_settings,
+)
 from storage.backend.config import DataSourceConfig
 from wordfreq.translation.client import LinguisticClient
 from wordfreq.translation.generate_forms_base import (
@@ -47,24 +51,6 @@ def _needs_forms_task(
     return FormGenerationTask(config=config, lemma_fetcher=fetcher)
 
 
-def _compute_base_form(spec_fields: List[str]) -> str:
-    """Derive base_form_identifier from the spec's form_fields."""
-    if spec_fields[0] == "base":
-        return "base"
-    for candidate in [
-        "singular",
-        "nominative_singular",
-        "1s_present",
-        "present",
-        "polite_present",
-        "masu",
-        "positive",
-    ]:
-        if candidate in spec_fields:
-            return candidate
-    return spec_fields[0]
-
-
 def _compute_threshold(num_fields: int) -> int:
     """Compute a reasonable default min_forms_threshold from field count."""
     if num_fields <= 3:
@@ -89,7 +75,7 @@ def _build_all_tasks() -> Dict[str, FormGenerationTask]:
 
         settings = get_task_settings(lang_code, pos_type)
 
-        base_form = settings.get("base_form", _compute_base_form(spec.form_fields))
+        base_form = settings.get("base_form", compute_default_base_form(spec.form_fields))
         threshold = settings.get("threshold", _compute_threshold(len(spec.form_fields)))
         extract_gender = settings.get("extract_gender", False)
         fetcher_type = settings.get("fetcher", "needs_forms")
