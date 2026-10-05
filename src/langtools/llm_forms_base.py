@@ -9,10 +9,11 @@ boilerplate from each language module.
 import json
 import logging
 from dataclasses import dataclass, field
-from typing import Callable, Dict, List, Optional, Tuple
+from typing import Any, Callable, Dict, List, Optional, Tuple
 
 import util.prompt_loader
 from words import query_verb_forms
+from clients.deferring_client import DeferLLMCall
 from clients.types import Schema, SchemaProperty
 from clients.unified_client import UnifiedLLMClient
 from sqlalchemy.orm import Session
@@ -44,6 +45,14 @@ class LanguageFormSpec:
     def __post_init__(self) -> None:
         if not self.word_variable:
             self.word_variable = self.pos_type
+
+
+def parse_forms_response(response_data: Dict[str, Any]) -> Dict[str, str]:
+    """The ``forms`` mapping of a form-generation answer, or ``{}``."""
+    forms = response_data.get("forms")
+    if isinstance(forms, dict):
+        return forms
+    return {}
 
 
 def query_forms(
@@ -162,9 +171,11 @@ def query_forms(
             response=json.dumps(response_data),
             model=client.default_model,
         )
-        if "forms" in response_data and isinstance(response_data["forms"], dict):
-            return response_data["forms"], True
-        return {}, False
+        forms = parse_forms_response(response_data)
+        return forms, bool(forms)
+    except DeferLLMCall:
+        # A batch is collecting this call (see clients.deferring_client).
+        raise
     except Exception as e:
         logger.error(
             f"Error querying {spec.language_name} {spec.pos_type} forms "

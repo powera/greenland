@@ -44,6 +44,7 @@ from workqueue.handlers.words import (
     handle_words_translations_regenerate,
     handle_words_translations_verify,
 )
+from workqueue.handlers.words.forms import FORMS_JOB
 from workqueue.handlers.words.grammar_facts import GRAMMAR_FACT_JOB
 from workqueue.llm_batch import Job
 from workqueue.task_queue import TaskType
@@ -107,6 +108,7 @@ TASK_HANDLERS = {
 # ``agents.common.batch complete`` look completed rows up here, so a new job
 # needs only an entry in this table.
 LLM_JOBS: Dict[str, Job] = {
+    FORMS_JOB.name: FORMS_JOB,
     GRAMMAR_FACT_JOB.name: GRAMMAR_FACT_JOB,
 }
 
