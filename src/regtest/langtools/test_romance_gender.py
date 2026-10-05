@@ -25,6 +25,11 @@ class TestSpanishGender(unittest.TestCase):
         for noun in ("problema", "cama", "artista", "leche", "papel", "Keytruda"):
             self.assertIsNone(es_gender(noun), noun)
 
+    def test_no_prediction_for_regional_gender_words(self) -> None:
+        # la radio (Spain) / el radio; el pijama / la pijama (Mexico)
+        for noun in ("radio", "pijama", "sartén"):
+            self.assertIsNone(es_gender(noun), noun)
+
     def test_multiword_uses_head(self) -> None:
         self.assertEqual(es_gender("polo sur"), "masculine")
         self.assertEqual(es_gender("tarjeta de crédito"), "feminine")

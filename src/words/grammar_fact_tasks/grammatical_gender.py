@@ -9,8 +9,9 @@ value lives in langtools.es.gender / langtools.fr.gender.
 Two things happen around the LLM call:
 
 * es-419 copies the es fact when both varieties use the same word, since the
-  gender of a Spanish word does not change between varieties.  The copy is a
-  row of es-419's own, not a runtime fallback to es; run es first.
+  gender of a Spanish word rarely changes between varieties.  The copy is a
+  row of es-419's own, not a runtime fallback to es; run es first.  Words in
+  langtools.es.gender.REGIONAL_GENDER_WORDS (la/el radio) are not copied.
 * For languages with an ending rule (``langtools.<lang>.gender``), an LLM answer
   that contradicts the rule is kept but flagged in the fact's notes, so review
   can find it.
@@ -22,6 +23,7 @@ from typing import TYPE_CHECKING, Any, Callable, Dict, Optional, Tuple, Union
 from sqlalchemy.orm import Session
 
 from clients.types import LLMCall, Schema, SchemaProperty
+from langtools.es.gender import has_regional_gender as has_regional_spanish_gender
 from langtools.es.gender import predict_gender as predict_spanish_gender
 from langtools.fr.gender import predict_gender as predict_french_gender
 from storage.crud.grammar_fact import get_grammatical_gender
@@ -61,6 +63,8 @@ def _copy_from_same_word(
     """Return the source variety's gender when it uses the same word, else None."""
     source_language = _SAME_WORD_GENDER_SOURCE.get(language_code)
     if source_language is None or not target_translation:
+        return None
+    if has_regional_spanish_gender(target_translation):
         return None
     source_translation = get_translation(session, lemma, source_language)
     if not source_translation or source_translation.strip() != target_translation.strip():
