@@ -8,6 +8,8 @@ A *job* is up to three *stages*.  Each stage is two plain functions:
   It makes no LLM call, and normally writes nothing; a job whose prepare
   does write (a mechanical path that records what it inferred) says so with
   ``Job.prepare_writes``, and a dry run then counts its items unprepared.
+  It may add keys to ``state`` that ``apply`` will need (which forms a request
+  covers, say); the state is stored with the call.
 * ``apply(session, state, data, ctx)`` takes the model's structured answer,
   writes what it should, and returns ``Done``, or ``Next(state)`` to carry the
   item on to the following stage.
