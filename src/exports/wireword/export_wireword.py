@@ -56,6 +56,7 @@ from exports.wireword.helpers import (
     normalize_translation_text,
 )
 from exports.wireword.generate_manifest import generate_manifest, load_level_metadata
+from langtools.form_tasks import get_base_grammatical_form
 from words.cognates import detect_cognate
 from words.emoji import emoji_values
 
@@ -117,6 +118,16 @@ def _minimum_level_for_form(grammatical_form: str) -> int:
     if "_comparative" in grammatical_form or "_superlative" in grammatical_form:
         return DEGREE_FORM_MIN_LEVEL
     return GENERIC_FORM_MIN_LEVEL
+
+
+def _is_language_slot(grammatical_form: str, language: str) -> bool:
+    """Whether *grammatical_form* names a slot of *language*'s paradigm.
+
+    ``adjective/es_singular_m`` and ``noun/es-419_singular`` do; the generic
+    labels some older base rows carry (``lemma``, ``verb/infinitive``) do not.
+    """
+    _, _, slot = grammatical_form.partition("/")
+    return slot.startswith(f"{language}_")
 
 
 class WirewordExporter:
@@ -637,11 +648,22 @@ class WirewordExporter:
                 target_alternatives = []
                 english_synonyms = []
                 target_synonyms = []
-                grammatical_forms = {}
+                grammatical_forms: Dict[str, Dict[str, Any]] = {}
+                stored_base_slot: Optional[str] = None
 
                 for form in derivative_forms:
-                    if form.is_base_form:
-                        # Skip base forms as they're already in base_target/base_english
+                    if form.is_base_form and form.language_code == self.language:
+                        if _is_language_slot(form.grammatical_form, self.language):
+                            stored_base_slot = form.grammatical_form
+                    if form.is_base_form and not (
+                        form.language_code == self.language
+                        and _is_language_slot(form.grammatical_form, self.language)
+                    ):
+                        # A base row without a slot name (or an English headword)
+                        # is only base_target/base_english again. A target base row
+                        # that names its slot is exported under that name below,
+                        # like every other form, so grammatical_forms holds the
+                        # whole paradigm instead of everything but its base.
                         continue
 
                     # Every way of writing the lemma itself -- alternate
@@ -714,41 +736,51 @@ class WirewordExporter:
                             # Legacy synonym rows are collected above and are not
                             # grammatical slots, so they never become entries here.
                             if form.grammatical_form not in SYNONYM_GRAMMATICAL_FORMS:
-                                form_level = max(
-                                    entry["trakaido_level"],
-                                    _minimum_level_for_form(form.grammatical_form),
-                                )
-
-                                gram_form = {
-                                    "level": form_level,
-                                    "target": form.derivative_form_text,
-                                }
-                                # Noun declensions are identified by their form key and the
-                                # lemma's base info, so no English label is exported for them.
-                                if lemma.pos_type != "noun":
-                                    english_label = self._get_english_translation_from_prefetched(
-                                        english_forms_by_lemma, lemma.id, form.grammatical_form
-                                    )
-                                    if not english_label:
-                                        english_label = generate_simple_grammatical_form_label(
-                                            form.grammatical_form, entry["source_word"]
-                                        )
-                                    gram_form["english"] = english_label
-                                gram_form.update(
-                                    build_target_reading_fields(
-                                        self.language,
+                                grammatical_forms[form.grammatical_form] = (
+                                    self._build_generic_gram_form(
+                                        lemma,
+                                        entry,
+                                        form.grammatical_form,
                                         form.derivative_form_text,
+                                        english_forms_by_lemma,
+                                        audio_by_guid_form,
                                     )
                                 )
 
-                                # Add audio MD5 hashes for this grammatical form (from pre-fetched data)
-                                form_audio = audio_by_guid_form.get(
-                                    (entry["GUID"], form.grammatical_form)
-                                )
-                                if form_audio:
-                                    gram_form["audio"] = form_audio
-
-                                grammatical_forms[form.grammatical_form] = gram_form
+                # The base form belongs in grammatical_forms under its own slot
+                # name ("adjective/es_singular_m", "noun/lt_nominative_singular"),
+                # so a consumer never has to know which slot base_target fills.
+                # A paradigm whose base row is missing or carries a generic label
+                # gets the slot the forms workflow marks as base, holding
+                # base_target. A word whose only form is its base (every
+                # noun/zh_base) has no paradigm, and stays without one.
+                base_slot = stored_base_slot or get_base_grammatical_form(
+                    self.language, lemma.pos_type
+                )
+                if set(grammatical_forms) <= {base_slot}:
+                    grammatical_forms = {}
+                if grammatical_forms:
+                    if base_slot and base_slot not in grammatical_forms:
+                        grammatical_forms[base_slot] = self._build_generic_gram_form(
+                            lemma,
+                            entry,
+                            base_slot,
+                            entry["target_language"],
+                            english_forms_by_lemma,
+                            audio_by_guid_form,
+                        )
+                    if base_slot in grammatical_forms:
+                        base_gram_form = grammatical_forms[base_slot]
+                        # The base form is the card itself, so it is due at the
+                        # word's own level and may borrow the word's audio.
+                        base_gram_form["level"] = entry["trakaido_level"]
+                        word_audio = audio_by_guid_form.get((entry["GUID"], None))
+                        if (
+                            "audio" not in base_gram_form
+                            and word_audio
+                            and base_gram_form["target"] == entry["target_language"]
+                        ):
+                            base_gram_form["audio"] = word_audio
 
                 # Variants are the other ways of writing the same word -- an
                 # alternate spelling ("grey"), an abbreviation ("TV"), an
@@ -938,6 +970,39 @@ class WirewordExporter:
             return False, None
         finally:
             session.close()
+
+    def _build_generic_gram_form(
+        self,
+        lemma: Lemma,
+        entry: Dict[str, Any],
+        grammatical_form: str,
+        target_text: str,
+        english_forms_by_lemma: Dict[int, Dict[str, str]],
+        audio_by_guid_form: Dict[Tuple[str, Optional[str]], Dict[str, str]],
+    ) -> Dict[str, Any]:
+        """Build one non-verb grammatical_forms entry (declension, degree, ...)."""
+        gram_form: Dict[str, Any] = {
+            "level": max(entry["trakaido_level"], _minimum_level_for_form(grammatical_form)),
+            "target": target_text,
+        }
+        # Noun declensions are identified by their form key and the
+        # lemma's base info, so no English label is exported for them.
+        if lemma.pos_type != "noun":
+            english_label = self._get_english_translation_from_prefetched(
+                english_forms_by_lemma, lemma.id, grammatical_form
+            )
+            if not english_label:
+                english_label = generate_simple_grammatical_form_label(
+                    grammatical_form, entry["source_word"]
+                )
+            gram_form["english"] = english_label
+        gram_form.update(build_target_reading_fields(self.language, target_text))
+
+        # Add audio MD5 hashes for this grammatical form (from pre-fetched data)
+        form_audio = audio_by_guid_form.get((entry["GUID"], grammatical_form))
+        if form_audio:
+            gram_form["audio"] = form_audio
+        return gram_form
 
     def _get_english_translation_from_prefetched(
         self,
@@ -1434,7 +1499,7 @@ class WirewordExporter:
                     continue
 
                 # Build grammatical forms (conjugations)
-                grammatical_forms = {}
+                grammatical_forms: Dict[str, Dict[str, Any]] = {}
                 conjugation_mode_tables: Dict[str, Dict[str, Dict[str, str]]] = {}
                 english_alternatives: List[str] = []
                 target_alternatives: List[str] = []
@@ -1451,8 +1516,14 @@ class WirewordExporter:
                             target_alternatives.append(variant_text)
 
                 for form in derivative_forms:
-                    if form.is_base_form:
-                        # Skip base forms as they're already in base_target/base_english
+                    if form.is_base_form and not (
+                        form.language_code == self.language
+                        and _is_language_slot(form.grammatical_form, self.language)
+                    ):
+                        # Only a base row that names its slot is exported; see the
+                        # noun/adjective loop. (The Lithuanian forms task marks
+                        # 1s_present as base, so skipping every base row used to
+                        # drop that conjugation.)
                         continue
 
                     # Handle different types of derivative forms
@@ -1559,6 +1630,26 @@ class WirewordExporter:
                                     "source": source_label.strip(),
                                     "target": form.derivative_form_text.strip(),
                                 }
+
+                # base_target is the infinitive; export it under that name so
+                # grammatical_forms holds the whole paradigm. It is no
+                # person/number slot, so it never enters conjugation_mode. A
+                # verb with no other form has no paradigm, and stays without one.
+                if set(grammatical_forms) <= {"infinitive"}:
+                    grammatical_forms = {}
+                if grammatical_forms and "infinitive" not in grammatical_forms:
+                    infinitive_form: Dict[str, Any] = {
+                        "level": effective_lemma_level,
+                        "target": base_target,
+                        "source": base_source or "",
+                    }
+                    infinitive_form.update(build_target_reading_fields(self.language, base_target))
+                    infinitive_audio = audio_by_guid_form.get(
+                        (lemma.guid, "infinitive")
+                    ) or audio_by_guid_form.get((lemma.guid, None))
+                    if infinitive_audio:
+                        infinitive_form["audio"] = infinitive_audio
+                    grammatical_forms["infinitive"] = infinitive_form
 
                 # Create WireWord object
                 wireword: Dict[str, Any] = {
