@@ -3,6 +3,7 @@ from pathlib import Path
 import constants
 from storage.backend.config import BackendType, DataSourceConfig
 from exports.wireword.export_wireword import (
+    DEFAULT_EXPORT_MAX_LEVEL,
     LANGUAGE_EXPORT_MAX_LEVELS,
     WirewordExporter,
     decoy_pool_name,
@@ -11,11 +12,9 @@ from exports.wireword.export_wireword import (
 
 def test_language_export_max_levels_cover_full_curricula() -> None:
     assert LANGUAGE_EXPORT_MAX_LEVELS == {
-        "lt": 64,
-        "es": 30,
-        "fr": 30,
         "zh": constants.TOPIC_DIFFICULTY_LEVEL_MIN - 1,
     }
+    assert DEFAULT_EXPORT_MAX_LEVEL == 30
 
 
 def test_level_ranges_for_zh_stop_below_topic_band() -> None:
@@ -33,7 +32,7 @@ def test_level_ranges_for_zh_stop_below_topic_band() -> None:
     assert ranges[-1] == (975, 999)
 
 
-def test_level_ranges_for_lt_stay_five_wide() -> None:
+def test_level_ranges_for_lt_stop_at_core_max() -> None:
     exporter = WirewordExporter(
         config=DataSourceConfig(backend_type=BackendType.SQLITE),
         language="lt",
@@ -42,7 +41,7 @@ def test_level_ranges_for_lt_stay_five_wide() -> None:
     ranges = exporter._get_level_ranges()
 
     assert ranges[0] == (1, 5)
-    assert ranges[-1] == (61, 64)
+    assert ranges[-1] == (26, 30)
     assert all(end - start < 5 for start, end in ranges)
 
 

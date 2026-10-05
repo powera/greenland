@@ -63,14 +63,11 @@ from words.emoji import emoji_values
 logger = logging.getLogger(__name__)
 
 # zh exports the core and the named units (everything below the topic band);
-# the others still stop at the core.
+# every other language stops at the top of the core.
 LANGUAGE_EXPORT_MAX_LEVELS: Dict[str, int] = {
-    "lt": 64,
-    "es": 30,
-    "fr": 30,
     "zh": constants.TOPIC_DIFFICULTY_LEVEL_MIN - 1,
 }
-DEFAULT_EXPORT_MAX_LEVEL = 10
+DEFAULT_EXPORT_MAX_LEVEL = constants.CORE_DIFFICULTY_LEVEL_MAX
 
 # Number of difficulty levels per split file (e.g. levels 1-5, 6-10, …)
 LEVEL_RANGE_SIZE = 5
