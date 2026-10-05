@@ -161,11 +161,19 @@ class LinguisticClient:
 
     # Definition queries
     def query_definitions(
-        self, word: str, example_sentence: Optional[str] = None
+        self,
+        word: str,
+        example_sentence: Optional[str] = None,
+        pos_type: Optional[str] = None,
     ) -> Tuple[List[Dict[str, Any]], bool]:
         """Query LLM for definitions, POS, and lemma information."""
         return definitions.query_definitions(
-            self.client, word, self.get_session, self.model, example_sentence=example_sentence
+            self.client,
+            word,
+            self.get_session,
+            self.model,
+            example_sentence=example_sentence,
+            pos_type=pos_type,
         )
 
     # Translation queries

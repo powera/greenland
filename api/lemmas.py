@@ -258,6 +258,7 @@ def add_word(
     model: str,
     difficulty_level: Optional[int] = None,
     *,
+    pos_type: Optional[str] = None,
     timeout: float = LLM_TIMEOUT_SECONDS,
 ) -> Any:
     """Add a single English word to the database, from just the word.
@@ -284,6 +285,10 @@ def add_word(
     committed, leaving it at -1 where :func:`words_exist` counts it as done and
     no later run revisits it.
 
+    ``pos_type`` adds only that part of speech's senses, and the existence check
+    then looks only for a sense of that part of speech: the verb "place" can be
+    added beside the stored noun, which otherwise returns ``"already_exists"``.
+
     There is no preview mode: a preview needs the LLM call, and that call is
     non-deterministic, so it cannot predict what a committing run writes.
 
@@ -295,6 +300,8 @@ def add_word(
     payload: Dict[str, Any] = {"word": word, "model": model}
     if difficulty_level is not None:
         payload["difficulty_level"] = difficulty_level
+    if pos_type is not None:
+        payload["pos_type"] = pos_type
     return post_json(f"{API_V1_PREFIX}/words/add", payload, timeout=timeout)
 
 

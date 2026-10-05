@@ -1,0 +1,121 @@
+past_form	rank	verb	verb_rank	past_form_other_pos	verb_other_pos	pending_verb_ids	pending_from_past_form	level
+based	208	base	716		noun			455
+related	378	relate	4014					455
+published	454	publish	8020	adjective		516<released	426:announced;427:professionally published	485
+named	468	name	170	adjective	noun	725<title		485
+placed	489	place	127		noun			415
+included	506	include	270	adjective		768<included	768:include;769:provided	415
+associated	527	associate	5490	adjective		3096<relate	1064:affiliated;1065:joined	455
+referred	543	refer	1094					485
+introduced	564	introduce	3798					475
+applied	594	apply	1270					475
+divided	745	divide	2837			2082<portion		475
+proposed	781	propose	5418			49<postulate;56<postulate;1043<posited		485
+involved	819	involve	2454					415
+determined	825	determine	1250					455
+adopted	879	adopt	3498					475
+derived	914	derive	5477					455
+intended	917	intend	5711					455
+located	921	locate	10980	adjective			315:found	415
+presented	922	present	247		adjective	477<pitch;509<performed		485
+expressed	932	express	1435		adjective			485
+stated	949	state	142		noun			485
+reduced	997	reduce	1378			2189<pare		475
+represented	1011	represent	1067			689<defended;3085<portray		485
+noted	1064	note	697		noun	3099<remark		485
+performed	1083	perform	1681			401<dance;742<executed;1250<enacted;3081<interpret	508:carry out;509:present;510:function;511:administer	475
+reported	1096	report	778		noun			485
+released	1127	release	1390	adjective		515<released;947<emitted;1147<dismiss;1349<discharge;1352<discharge	512:freed;513:launch;514:discharged;515:release;516:publish;517:free	475
+obtained	1149	obtain	1523			2910<score		475
+regarded	1161	regard	1156					455
+forced	1182	force	333		noun	1112<impose;1187<compel	758:coerced;759:artificial;760:compelled	415
+extended	1196	extend	2544					475
+employed	1213	employ	3507					475
+founded	1219	found	108				330:establish;331:established;332:justified;622:establish;623:based	475
+recorded	1222	record	874		noun	711<film;2793<register;2912<video		485
+combined	1230	combine	3900			243<;956<compound		475
+marked	1244	mark	1466		noun			415
+married	1251	marry	2691	adjective				415
+supported	1256	support	337	adjective	noun	687<defended;1988<provide	756:backed;757:compatible	415
+offered	1257	offer	1292		noun	1990<provide		415
+influenced	1298	influence	488	adjective		468<influenced	468:influence	455
+concerned	1328	concern	1687					455
+treated	1348	treat	2440					415
+failed	1382	fail	2734					475
+completed	1407	complete	593		adjective			475
+estimated	1434	estimate	2780					455
+affected	1437	affect	1675					455
+ordered	1473	order	172		noun			485
+separated	1500	separate	560		adjective	2799<isolate		415
+shaped	1516	shape	622	adjective	noun	3056<determine		475
+attached	1556	attach	7111			2747<affix		415
+gained	1606	gain	1475					475
+controlled	1660	control	355		noun	1334<suppress;2034<contain		415
+concluded	1685	conclude	3688					455
+desired	1708	desire	1358		noun			455
+claimed	1710	claim	830			746<claimed;747<claimed;748<claimed;749<claimed	746:claim;747:claim;748:claim;749:claim	485
+constructed	1725	construct	4835					475
+distinguished	1740	distinguish	2080			1913<discriminate		455
+settled	1783	settle	3436					475
+conducted	1803	conduct	1454			353<administered;632<administered		475
+reflected	1817	reflect	2235					455
+adapted	1820	adapt	9250	adjective		469<adapted	469:adapt	475
+preserved	1885	preserve	2396					475
+achieved	1898	achieve	1868			735<succeeded		475
+engaged	1912	engage	3070					415
+indicated	1927	indicate	1450			856<signal;1058<argue		485
+arranged	1947	arrange	4037					475
+organized	1948	organize	7915			882<mounted;2983<tidy		475
+viewed	1965	view	409		noun			455
+experienced	1966	experience	615		noun	245<undergo;958<undergo;2951<explore		455
+resulted	2001	result	257		noun			475
+appointed	2035	appoint	13506	adjective			691:scheduled	485
+issued	2048	issue	748			196<emitted;946<emitted		485
+refused	2068	refuse	4424				733:declined;734:rejected	485
+acquired	2069	acquire	4653					475
+accompanied	2076	accompany	7014					415
+attempted	2092	attempt	973		noun			475
+occupied	2098	occupy	5764					415
+selected	2101	select	3603					455
+maintained	2109	maintain	1499			1057<argue		475
+inspired	2125	inspire	23645	adjective			472:brilliant	455
+charged	2136	charge	877		noun	1496<billed		485
+exposed	2162	expose	12058					415
+interested	2164	interest	412	adjective	noun			455
+classified	2210	classify	9634			851<file;3031<categorize;3070<identify		455
+linked	2229	link	2771					415
+committed	2258	commit	4790					415
+distributed	2259	distribute	16310					415
+rejected	2291	reject	4599			1145<dismiss		485
+pronounced	2312	pronounce	10965					485
+characterized	2317	characterize	14950					485
+entitled	2319	entitle	20771	adjective			1260:self-important;1261:named	485
+managed	2320	manage	3396			352<administered;631<administered;1054<managing		475
+faced	2330	face	411		noun	3039<confront		415
+attributed	2336	attribute	8771					485
+converted	2342	convert	4360					475
+printed	2420	print	3235		noun			475
+modified	2428	modify	8238					475
+listed	2435	list	839		noun			485
+succeeded	2445	succeed	4408			1055<managing	735:achieve;736:prosper;737:replace	475
+surrounded	2446	surround	9223					415
+assigned	2486	assign	11982					485
+armed	2497	arm	1674		noun			415
+elected	2523	elect	7734					485
+detailed	2525	detail	2134		noun			485
+informed	2533	inform	6118					485
+ruled	2546	rule	402		noun	639<reign	679:govern;680:decide;681:dominate	485
+buried	2550	bury	8929			1594<interred		415
+permitted	2552	permit	2961					485
+gathered	2578	gather	3694			223<cluster		415
+abandoned	2608	abandon	6617					415
+focused	2611	focus	1368			339<;629<centre		455
+varied	2639	vary	1560					475
+demonstrated	2667	demonstrate	3658			3075<illustrate		485
+satisfied	2699	satisfy	3717					455
+launched	2702	launch	5134			513<released		475
+originated	2730	originate	12896					475
+colored	2731	color	648		noun			415
+delivered	2759	deliver	3923					415
+approved	2784	approve	6819					485
+dried	2820	dry	915		adjective	939<drying		415

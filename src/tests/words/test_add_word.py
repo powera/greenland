@@ -27,7 +27,7 @@ from storage.crud.pending_import_senses import (
 )
 from storage.models.operation_log import OperationLog
 from storage.models import Base, Lemma, WordToken
-from storage.models.schema import Sentence, SentenceWordHint
+from storage.models.schema import DerivativeForm, Sentence, SentenceWordHint
 from storage.models.imports import PendingImport
 from storage.models.variant_form import VARIANT_KIND_SPELLING, VariantForm
 from words import add_word as add_word_module
@@ -83,9 +83,11 @@ class _FakeClient:
         self._definitions = definitions
         self.model = "test-model"
         self.calls = 0
+        self.last_kwargs: Dict[str, Any] = {}
 
     def query_definitions(self, word: str, **kwargs: Any) -> Tuple[List[Dict[str, Any]], bool]:
         self.calls += 1
+        self.last_kwargs = kwargs
         return self._definitions, bool(self._definitions)
 
 
@@ -744,6 +746,108 @@ def test_add_word_rejects_a_selected_sense_with_a_missing_target_translation(
     assert "es-419" in result.error
     assert session.query(Lemma).filter(Lemma.lemma_text == "dog").count() == 0
     assert result.senses == []
+
+
+# --- pos_type: add one part of speech beside another -------------------------
+
+
+def test_pos_type_adds_the_verb_beside_a_stored_noun(
+    session: Session, config: DataSourceConfig, patch_client: Any
+) -> None:
+    session.add(
+        Lemma(lemma_text="place", definition_text="a location", pos_type="noun", guid="N01_010")
+    )
+    session.commit()
+    fake = patch_client(
+        [
+            _def("to put something somewhere", pos="verb", pos_subtype="change"),
+            # Asked for verbs only, but the model may still return the noun.
+            _def("a particular position", pos="noun", pos_subtype="concept_idea"),
+        ]
+    )
+
+    result = add_word(session, "place", config=config, pos_type="verb")
+
+    assert result.status == "created"
+    assert fake.last_kwargs.get("pos_type") == "verb"
+    assert [sense.pos_type for sense in result.senses] == ["verb"]
+    stored = session.query(Lemma).filter(Lemma.lemma_text == "place").all()
+    assert sorted(lemma.pos_type for lemma in stored) == ["noun", "verb"]
+
+
+def test_pos_type_stops_at_a_stored_sense_of_that_pos(
+    session: Session, config: DataSourceConfig, patch_client: Any
+) -> None:
+    session.add(
+        Lemma(
+            lemma_text="place",
+            definition_text="to put",
+            pos_type="verb",
+            pos_subtype="change",
+            guid="V01_010",
+        )
+    )
+    session.commit()
+    fake = patch_client([_def("to put something somewhere", pos="verb", pos_subtype="change")])
+
+    result = add_word(session, "place", config=config, pos_type="verb")
+
+    assert result.status == "already_exists"
+    assert fake.calls == 0
+
+
+def test_pos_type_ignores_another_lemmas_inflection(
+    session: Session, config: DataSourceConfig, patch_client: Any
+) -> None:
+    """ "found" is a past form of "find"; that must not block the verb "found"."""
+    find = Lemma(
+        lemma_text="find",
+        definition_text="to discover",
+        pos_type="verb",
+        pos_subtype="change",
+        guid="V01_011",
+    )
+    session.add(find)
+    session.flush()
+    session.add(
+        DerivativeForm(
+            lemma_id=find.id,
+            derivative_form_text="found",
+            language_code="en",
+            grammatical_form="verb/en_3s_past",
+            is_base_form=False,
+            verified=False,
+        )
+    )
+    session.commit()
+    patch_client([_def("to establish an institution", pos="verb", pos_subtype="change")])
+
+    assert add_word(session, "found", config=config).status == "already_exists"
+    result = add_word(session, "found", config=config, pos_type="verb")
+
+    assert result.status == "created"
+
+
+def test_pos_type_with_no_senses_of_that_pos_adds_nothing(
+    session: Session, config: DataSourceConfig, patch_client: Any
+) -> None:
+    patch_client([_def("a domesticated carnivore", pos="noun", pos_subtype="animal")])
+
+    result = add_word(session, "dog", config=config, pos_type="verb")
+
+    assert result.status == "no_definitions"
+    assert session.query(Lemma).count() == 0
+
+
+def test_pos_type_must_be_open_class(
+    session: Session, config: DataSourceConfig, patch_client: Any
+) -> None:
+    fake = patch_client([_def("in front of", pos="preposition", pos_subtype="preposition")])
+
+    result = add_word(session, "before", config=config, pos_type="preposition")
+
+    assert result.status == "error"
+    assert fake.calls == 0
 
 
 # --- Frequency rank falls back to inflected forms ---------------------------

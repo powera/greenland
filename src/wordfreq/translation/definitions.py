@@ -103,6 +103,7 @@ def query_definitions(
     get_session_func: Callable,
     model: Optional[str] = None,
     example_sentence: Optional[str] = None,
+    pos_type: Optional[str] = None,
 ) -> Tuple[List[Dict[str, Any]], bool]:
     """
     Query LLM for definitions, POS, and lemma information.
@@ -112,6 +113,9 @@ def query_definitions(
         model: Model name to use (optional, uses client.model if available)
         word: Word to analyze
         get_session_func: Function to get database session
+        pos_type: Ask only for the senses of this part of speech ("verb" for
+            "place", whose noun is already stored). A request, not a filter:
+            callers that need one POS must still drop what else comes back.
 
     Returns:
         Tuple of (list of definition data, success flag)
@@ -239,6 +243,8 @@ def query_definitions(
     )
     prompt_template = util.prompt_loader.get_prompt("translation", "definitions")
     prompt = prompt_template.format(word=word)
+    if pos_type:
+        prompt += f"\n\nList only the senses in which '{word}' is used as a {pos_type}."
     if example_sentence:
         prompt += f'\n\nContext: this word appears in the sentence: "{example_sentence}"'
 

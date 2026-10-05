@@ -33,6 +33,7 @@ import logging
 from dataclasses import dataclass, field
 from typing import Any, Dict, List, Optional, Tuple
 
+from sqlalchemy import func
 from sqlalchemy.orm import Session
 
 from langtools.en.utils import (
@@ -61,7 +62,8 @@ from storage.models.schema import (
     SentenceWordHint,
     WordToken,
 )
-from storage.queries.lemma import word_exists_in_english
+from storage.models.imports import WordExclusion
+from storage.queries.lemma import get_english_senses, word_exists_in_english
 from words.pending_imports.staging import create_pending_import, find_pending_import
 from storage.translation_helpers import (
     convert_llm_response_to_lang_codes,
@@ -740,18 +742,49 @@ def _extend_for_prominence_ties(
     return extended
 
 
-def _query_senses(client: LinguisticClient, word: str) -> List[Dict[str, Any]]:
-    """Ask the LLM for every sense of the word. One LLM call, no filtering.
+def _query_senses(
+    client: LinguisticClient, word: str, pos_type: Optional[str] = None
+) -> List[Dict[str, Any]]:
+    """Ask the LLM for every sense of the word. One LLM call.
 
     Split from :func:`_select_senses` because selection is frequency-sized and
     the frequency lookup is POS-directed -- so the POS has to come back from
     this call before the rank can be looked up. Nothing about the call itself
     depends on the rank.
+
+    With ``pos_type`` the prompt asks for that part of speech only, and any
+    sense of another part of speech that comes back anyway is dropped: the
+    model treats the request as a preference, and a stray noun sense of "place"
+    would otherwise be written beside the noun already stored.
     """
-    definitions_list, success = client.query_definitions(word)
+    definitions_list, success = client.query_definitions(word, pos_type=pos_type)
     if not success or not definitions_list:
         return []
-    return list(definitions_list)
+    if pos_type is None:
+        return list(definitions_list)
+    return [sense for sense in definitions_list if (sense.get("pos") or "").lower() == pos_type]
+
+
+def _pos_already_present(session: Session, word: str, pos_type: str) -> bool:
+    """The existence guard for an add restricted to one part of speech.
+
+    ``word_exists_in_english`` cannot serve here: it answers whether the word
+    is present in *any* form, and that is exactly what blocks the verb "place"
+    behind the noun, and the verb "found" behind the past tense of "find".
+    Only a sense of the same part of speech, or an exclusion, means there is
+    nothing to add.
+    """
+    if any(lemma.pos_type == pos_type for lemma in get_english_senses(session, word)):
+        return True
+    excluded = (
+        session.query(WordExclusion.id)
+        .filter(
+            WordExclusion.language_code == "en",
+            func.lower(WordExclusion.excluded_word) == word.strip().lower(),
+        )
+        .first()
+    )
+    return excluded is not None
 
 
 def _leading_pos_type(definitions_list: List[Dict[str, Any]]) -> str:
@@ -956,6 +989,7 @@ def add_word(
     model: Optional[str] = None,
     source: str = "add_word",
     difficulty_level: int = DIFFICULTY_LEVEL,
+    pos_type: Optional[str] = None,
 ) -> AddWordResult:
     """Add a single English word to the database, from just the word.
 
@@ -991,6 +1025,11 @@ def add_word(
             wants: a human adding a word has not decided its level yet. A
             curated import that already knows the level passes it here so the
             lemma is never written at -1.
+        pos_type: Add only this part of speech's senses (one of
+            ``MAJOR_POS_TYPES``). For a word whose other part of speech is
+            already stored: the verb "place" beside the noun. The existence
+            guard then asks only whether a sense of this POS is present, so the
+            noun no longer stops the add.
 
     Returns:
         An :class:`AddWordResult` describing what was created.
@@ -999,10 +1038,20 @@ def add_word(
     if not normalized:
         return AddWordResult(word=word, status="error", error="word must be non-empty")
 
+    if pos_type is not None and pos_type not in MAJOR_POS_TYPES:
+        return AddWordResult(
+            word=normalized,
+            status="error",
+            error=f"pos_type must be one of {sorted(MAJOR_POS_TYPES)!r}, not {pos_type!r}",
+        )
+
     # Existence guard: lemmas, disambiguated lemmas, en derivative forms and
     # alternate spellings. include_exclusions=True because this gates an import
     # -- a word rejected once should not be re-added.
-    if word_exists_in_english(session, normalized, include_exclusions=True):
+    if pos_type is not None:
+        if _pos_already_present(session, normalized, pos_type):
+            return AddWordResult(word=normalized, status="already_exists")
+    elif word_exists_in_english(session, normalized, include_exclusions=True):
         return AddWordResult(word=normalized, status="already_exists")
 
     client_config = config.with_model(model) if model else config
@@ -1013,12 +1062,12 @@ def add_word(
     # word's POS to know which inflections to look for, and only the LLM knows
     # the POS. Sense *selection* then consumes the rank, so the order is
     # definitions -> POS -> rank -> selection.
-    definitions_list = _query_senses(client, normalized)
+    definitions_list = _query_senses(client, normalized, pos_type)
     if not definitions_list:
         return AddWordResult(word=normalized, status="no_definitions")
 
     frequency_rank, rank_source, corpus_info = _lookup_frequency(
-        session, normalized, _leading_pos_type(definitions_list)
+        session, normalized, pos_type or _leading_pos_type(definitions_list)
     )
     best_corpus_rank = min((c["rank"] for c in corpus_info if c["rank"] is not None), default=None)
 
