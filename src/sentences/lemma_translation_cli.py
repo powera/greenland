@@ -14,14 +14,6 @@ if GREENLAND_SRC_PATH not in sys.path:
 
 import constants
 from sentences.translation_coverage import ensure_translations
-from clients.batch_queue import (
-    BatchQueueManager,
-    BatchRequestMetadata,
-    create_batch_database_session,
-)
-from clients.lib import schema_from_dict, to_openai_schema
-from clients.openai.batch_client import OpenAIBatchClient
-from clients.openai.client import is_gpt5_nano_or_mini_model, reasoning_effort_for_model
 from clients.translategemma_client import TranslateGemmaClient
 from agents.common.common_args import (
     add_backend_args,
@@ -33,7 +25,6 @@ from agents.common.common_args import (
 )
 from storage.backend import create_session as create_backend_session
 from storage.backend.config import DataSourceConfig
-from storage.models.imports import SentencePendingImport
 from storage.models.schema import (
     Lemma,
     Sentence,
@@ -43,7 +34,6 @@ from storage.models.schema import (
 )
 from sentences.analysis import discover_and_store_lemmas
 from sentences.translation_coverage import find_sentences_needing_translations
-from sentences.translation import build_response_schema, build_translation_prompt
 from workqueue.task_queue import TaskType, enqueue_task
 
 logging.basicConfig(
@@ -68,12 +58,6 @@ class LemmaSentenceTranslationService:
 
         if self.debug:
             logger.setLevel(logging.DEBUG)
-
-        self.batch_client = OpenAIBatchClient(debug=self.debug)
-        self.batch_session = create_batch_database_session()
-        self.batch_manager = BatchQueueManager(
-            self.batch_session, self.batch_client, debug=self.debug
-        )
 
     def get_session(self) -> Any:
         return create_backend_session(self.config)
@@ -405,139 +389,43 @@ class LemmaSentenceTranslationService:
         pattern_id: Optional[str] = None,
         exclude_pending_imports: bool = False,
     ) -> tuple[Optional[str], int]:
+        """Send English-only sentences through the sentence job as OpenAI batches.
+
+        The same run ``sentences.translate.batch_submit`` starts: Phase 1 now,
+        Phases 2+3 once every sentence has its translations.
+
+        Returns:
+            ``(first batch id or None, requests submitted)``.
+        """
+        from workqueue.handlers.sentences.batch_submit import _discover_batch_sentence_ids
+        from workqueue.handlers.sentences.translation import (
+            describe_run,
+            sentence_translation_state,
+            submit_sentence_translation_batch,
+        )
+
         session = self.get_session()
         try:
-            from sqlalchemy import func as sql_func
-
-            sentences_with_only_en = (
-                session.query(Sentence.id, sql_func.count(SentenceTranslation.id))
-                .join(SentenceTranslation)
-                .group_by(Sentence.id)
-                .having(sql_func.count(SentenceTranslation.id) == 1)
-                .subquery()
+            sentence_ids = _discover_batch_sentence_ids(
+                session,
+                limit=limit,
+                pattern_id=pattern_id,
+                exclude_pending_imports=exclude_pending_imports,
             )
-
-            query = (
-                session.query(Sentence)
-                .join(SentenceTranslation)
-                .filter(SentenceTranslation.language_code == "en")
-                .filter(Sentence.id.in_(session.query(sentences_with_only_en.c.id)))
-                .order_by(Sentence.id)
-            )
-
-            if pattern_id:
-                query = query.filter(Sentence.source_filename == f"pattern:{pattern_id}")
-
-            if exclude_pending_imports:
-                # Exclude sentences waiting on a staged word. Legacy hint rows
-                # count too, for databases staged before the link table existed.
-                sentences_with_pending = (
-                    session.query(SentencePendingImport.sentence_id).distinct().subquery()
-                )
-                sentences_with_legacy_hints = (
-                    session.query(SentenceWordHint.sentence_id)
-                    .filter(SentenceWordHint.pending_import_id.isnot(None))
-                    .distinct()
-                    .subquery()
-                )
-                query = query.filter(
-                    ~Sentence.id.in_(session.query(sentences_with_pending.c.sentence_id)),
-                    ~Sentence.id.in_(session.query(sentences_with_legacy_hints.c.sentence_id)),
-                )
-
-            if limit:
-                query = query.limit(limit)
-
-            sentences = query.all()
-
-            if not sentences:
+            if not sentence_ids:
                 logger.warning("No untranslated sentences found")
                 return None, 0
-
-            requests_queued = 0
-            for sentence in sentences:
-                # Check if English word breakdown already exists
-                # If not, include English in the translation request
-                english_words = (
-                    session.query(SentenceWord)
-                    .filter_by(sentence_id=sentence.id, language_code="en")
-                    .all()
+            states = [
+                sentence_translation_state(
+                    sentence_id, target_languages, log_source="agents.zvirblis/batch"
                 )
-                include_english = len(english_words) == 0
-
-                try:
-                    context, prompt = build_translation_prompt(
-                        sentence, target_languages, session, include_english
-                    )
-                except ValueError:
-                    continue
-
-                custom_id = f"sentence_{sentence.id}"
-                full_prompt = f"{context}\n\n{prompt}"
-                inner_schema = build_response_schema(target_languages, include_english)
-
-                response_format = {
-                    "type": "json_schema",
-                    "json_schema": {
-                        "name": "SentenceTranslations",
-                        "strict": True,
-                        "schema": to_openai_schema(schema_from_dict(inner_schema)),
-                    },
-                }
-
-                request_body = {
-                    "model": self.config.model,
-                    "messages": [{"role": "user", "content": full_prompt}],
-                    "response_format": response_format,
-                }
-
-                # Minimize reasoning tokens for gpt-5 nano/mini variants (translation doesn't need deep reasoning)
-                if self.config.model and is_gpt5_nano_or_mini_model(self.config.model):
-                    effort = reasoning_effort_for_model(self.config.model, "minimal")
-                    if effort is not None:
-                        request_body["reasoning_effort"] = effort
-
-                metadata = BatchRequestMetadata(
-                    custom_id=custom_id,
-                    agent_name="zvirblis",
-                    operation_type="translate_sentence",
-                    entity_id=sentence.id,
-                    entity_type="sentence",
-                )
-
-                try:
-                    self.batch_manager.queue_request(
-                        custom_id=custom_id,
-                        request_body=request_body,
-                        metadata=metadata,
-                        endpoint="/v1/chat/completions",
-                    )
-                    requests_queued += 1
-                except ValueError as e:
-                    logger.debug("Skipping sentence %s: %s", sentence.id, e)
-
-            logger.info("Queued %s translation requests", requests_queued)
-
-            if requests_queued > 0:
-                pending_requests = self.batch_manager.get_pending_requests(
-                    agent_name="zvirblis", operation_type="translate_sentence"
-                )
-                batch_id, _ = self.batch_manager.submit_batch(
-                    pending_requests,
-                    batch_metadata={
-                        "agent": "zvirblis",
-                        "operation": "translate_sentences",
-                    },
-                )
-                logger.info(
-                    "Submitted batch %s with %s requests",
-                    batch_id,
-                    len(pending_requests),
-                )
-                return batch_id, len(pending_requests)
-
-            return None, 0
-
+                for sentence_id in sentence_ids
+            ]
+            report = submit_sentence_translation_batch(
+                session, states, self.config.model or constants.DEFAULT_MODEL
+            )
+            logger.info(describe_run(report))
+            return (report.batch_ids[0] if report.batch_ids else None), report.calls
         finally:
             session.close()
 

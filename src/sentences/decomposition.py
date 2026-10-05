@@ -4,8 +4,9 @@
 
 import json
 import logging
-from typing import Any, Dict, List, Optional, Tuple
+from typing import Any, Dict, List, Optional, Tuple, Union
 
+from clients.types import Schema
 from clients.unified_client import UnifiedLLMClient
 from langtools.dialect_overrides import get_dialect_display_name, get_llm_prompt_note
 from langtools.directions import get_language_direction_note
@@ -499,7 +500,7 @@ def query_sentence_decomposition(
     prompt: str,
     client: UnifiedLLMClient,
     model: str,
-    json_schema: Dict[str, Any],
+    json_schema: Union[Dict[str, Any], Schema],
     context: Optional[str] = None,
     max_tokens: Optional[int] = None,
 ) -> Dict[str, Any]:
