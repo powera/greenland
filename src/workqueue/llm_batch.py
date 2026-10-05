@@ -569,6 +569,12 @@ def complete_rows(
     return results
 
 
+def is_staged_row(row: BatchQueue) -> bool:
+    """Whether *row* belongs to a staged-job run (rather than an older batch
+    submitted under the same agent name, which its legacy applier handles)."""
+    return "run_id" in request_extra(row)
+
+
 def _is_last_stage(job: Job, row: BatchQueue) -> bool:
     return job.stage_index(row.operation_type) == len(job.stages) - 1
 

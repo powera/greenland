@@ -38,7 +38,8 @@ from typing import TYPE_CHECKING, Any, Dict, List, Optional, Sequence, Tuple
 from sqlalchemy.orm import Session
 
 import constants
-from clients.lib import limit_from_estimate
+from clients.lib import limit_from_estimate, schema_from_dict
+from clients.types import LLMCall
 from clients.unified_client import UnifiedLLMClient
 from langtools.dialect_overrides import get_dialect_display_name, get_llm_prompt_note
 from langtools.directions import get_language_direction_note
@@ -407,6 +408,43 @@ def format_conversation_context(context: "ConversationContext") -> str:
     return "This sentence is one line of a dialog.\n\n" + "\n\n".join(sections)
 
 
+def build_phase1_call(
+    *,
+    sentence_text: str,
+    source_language: str,
+    target_languages: Sequence[str],
+    conversation_context: Optional[str] = None,
+) -> Optional[Tuple[LLMCall, List[str]]]:
+    """The Phase-1 request, and the normalized target languages it asks for.
+
+    Shared by the live path (:func:`translate_sentence_text`) and the batch job
+    (``workqueue.handlers.sentences.translation``).  None when no target survives
+    normalization.
+    """
+    built = build_phase1_prompt(
+        sentence_text=sentence_text,
+        source_language=source_language,
+        target_languages=target_languages,
+        conversation_context=conversation_context,
+    )
+    if built is None:
+        return None
+    context, prompt, _full_prompt, schema, normalized_targets = built
+    return LLMCall(prompt=prompt, schema=schema_from_dict(schema), context=context), list(
+        normalized_targets
+    )
+
+
+def interpret_phase1(data: Dict[str, Any], target_languages: Sequence[str]) -> Dict[str, str]:
+    """Language -> translation from a Phase-1 answer; blank or missing ones dropped."""
+    translations: Dict[str, str] = {}
+    for lang in target_languages:
+        value = data.get(lang)
+        if isinstance(value, str) and value.strip():
+            translations[lang] = value.strip()
+    return translations
+
+
 def translate_sentence_text(
     *,
     sentence_text: str,
@@ -447,13 +485,7 @@ def translate_sentence_text(
     if not result.get("success"):
         logger.warning("Phase 1 translation failed: %s", result.get("error", "unknown"))
         return {}
-
-    translations: Dict[str, str] = {}
-    for lang in normalized_targets:
-        value = result.get(lang)
-        if isinstance(value, str) and value.strip():
-            translations[lang] = value.strip()
-    return translations
+    return interpret_phase1(result, normalized_targets)
 
 
 # --------------------------------------------------------------------------- #
@@ -616,28 +648,36 @@ def decompose_language(
     )
 
 
-def decompose_languages_combined(
+def build_phase3_request(
     *,
     source_sentence: str,
     source_language: str,
     target_translations: Dict[str, str],
     helper_translations: List[Dict[str, str]],
     candidate_lemmas: List[CandidateLemma],
-    client: UnifiedLLMClient,
-    model: str = DEFAULT_MODEL,
-) -> Dict[str, DecomposedLanguage]:
-    """Phase 3 (combined): decompose every provided translation in a single LLM call.
+) -> LLMCall:
+    """The combined Phase-3 request for already-known translations."""
+    prompt, context, schema, max_tokens = _phase3_request_parts(
+        source_sentence=source_sentence,
+        source_language=source_language,
+        target_translations=target_translations,
+        helper_translations=helper_translations,
+        candidate_lemmas=candidate_lemmas,
+    )
+    return LLMCall(
+        prompt=prompt, schema=schema_from_dict(schema), context=context, max_tokens=max_tokens
+    )
 
-    ``target_translations`` maps language_code -> already-known translation; the
-    LLM is instructed not to retranslate. Returns one ``DecomposedLanguage`` per
-    requested language. On LLM failure every language is returned with
-    ``success=False`` and the same error string.
-    """
-    if not target_translations:
-        return {}
 
-    target_languages = list(target_translations.keys())
-
+def _phase3_request_parts(
+    *,
+    source_sentence: str,
+    source_language: str,
+    target_translations: Dict[str, str],
+    helper_translations: List[Dict[str, str]],
+    candidate_lemmas: List[CandidateLemma],
+) -> Tuple[str, str, Dict[str, Any], int]:
+    """``(prompt, context, schema dict, max_tokens)`` of the combined Phase-3 request."""
     prompt = build_multi_language_decomposition_prompt(
         source_sentence=source_sentence,
         source_language=source_language,
@@ -646,32 +686,24 @@ def decompose_languages_combined(
         candidate_lemmas=_candidates_for_prompt(candidate_lemmas),
     )
     context = build_multi_language_decomposition_context()
-    schema = build_multi_language_decomposition_schema(target_languages=target_languages)
-
+    schema = build_multi_language_decomposition_schema(
+        target_languages=list(target_translations.keys())
+    )
     # Size the request from the work it asks for: the response carries one word
     # object per token per language, so a long sentence in several languages
     # overruns the backend default and comes back truncated.
     estimated_tokens = estimate_decomposition_output_tokens(target_translations=target_translations)
-    result = query_sentence_decomposition(
-        prompt=prompt,
-        client=client,
-        model=model,
-        json_schema=schema,
-        context=context,
-        max_tokens=limit_from_estimate(estimated_tokens),
-    )
-    if not result.get("success"):
-        error = str(result.get("error", "unknown error"))
-        return {
-            lang: DecomposedLanguage(
-                language_code=lang,
-                translation=text,
-                success=False,
-                error=error,
-            )
-            for lang, text in target_translations.items()
-        }
+    return prompt, context, schema, limit_from_estimate(estimated_tokens)
 
+
+def interpret_phase3(
+    result: Dict[str, Any], target_translations: Dict[str, str], model: str = ""
+) -> Dict[str, DecomposedLanguage]:
+    """One ``DecomposedLanguage`` per target from a combined Phase-3 answer.
+
+    A language whose words do not cover its translation is returned with
+    ``success=False``.
+    """
     decompositions: Dict[str, DecomposedLanguage] = {}
     for lang, target_translation in target_translations.items():
         raw_words = result.get(f"words_{lang}")
@@ -723,6 +755,55 @@ def decompose_languages_combined(
             missing_surface_forms=missing_tokens,
         )
     return decompositions
+
+
+def decompose_languages_combined(
+    *,
+    source_sentence: str,
+    source_language: str,
+    target_translations: Dict[str, str],
+    helper_translations: List[Dict[str, str]],
+    candidate_lemmas: List[CandidateLemma],
+    client: UnifiedLLMClient,
+    model: str = DEFAULT_MODEL,
+) -> Dict[str, DecomposedLanguage]:
+    """Phase 3 (combined): decompose every provided translation in a single LLM call.
+
+    ``target_translations`` maps language_code -> already-known translation; the
+    LLM is instructed not to retranslate. Returns one ``DecomposedLanguage`` per
+    requested language. On LLM failure every language is returned with
+    ``success=False`` and the same error string.
+    """
+    if not target_translations:
+        return {}
+
+    prompt, context, schema, max_tokens = _phase3_request_parts(
+        source_sentence=source_sentence,
+        source_language=source_language,
+        target_translations=target_translations,
+        helper_translations=helper_translations,
+        candidate_lemmas=candidate_lemmas,
+    )
+    result = query_sentence_decomposition(
+        prompt=prompt,
+        client=client,
+        model=model,
+        json_schema=schema,
+        context=context,
+        max_tokens=max_tokens,
+    )
+    if not result.get("success"):
+        error = str(result.get("error", "unknown error"))
+        return {
+            lang: DecomposedLanguage(
+                language_code=lang,
+                translation=text,
+                success=False,
+                error=error,
+            )
+            for lang, text in target_translations.items()
+        }
+    return interpret_phase3(result, target_translations, model)
 
 
 def annotate_language_dependencies(
@@ -950,6 +1031,131 @@ def translate_and_decompose(
 PHASE3_MIN_LANGUAGES: int = 3
 
 
+@dataclass
+class Phase3Plan:
+    """Phase 2's candidates and what Phase 3 should be asked, for one sentence.
+
+    ``target_translations`` is empty when Phase 3 should not run; ``failures``
+    holds the languages that cannot be decomposed and why.
+    """
+
+    candidate_lemmas: List[CandidateLemma] = field(default_factory=list)
+    target_translations: Dict[str, str] = field(default_factory=dict)
+    anchor_text: str = ""
+    anchor_language: str = ""
+    helper_translations: List[Dict[str, str]] = field(default_factory=list)
+    failures: Dict[str, DecomposedLanguage] = field(default_factory=dict)
+
+
+def plan_phase3(
+    *,
+    session: Session,
+    sentence_text: str,
+    source_language: str,
+    translations: Dict[str, str],
+    decompose_languages: Optional[Sequence[str]] = None,
+) -> Phase3Plan:
+    """Run Phase 2 and decide what Phase 3 asks for.
+
+    Shared by :func:`decompose_with_existing_translations` and the batch job.
+    ``translations`` must not include the source language.  See
+    :func:`decompose_with_existing_translations` for the preconditions.
+    """
+    normalized_source = source_language.strip().lower()
+    failures: Dict[str, DecomposedLanguage] = {}
+
+    # ── Phase 2 ────────────────────────────────────────────────────────────
+    lookup_translations: Dict[str, str] = dict(translations)
+    if normalized_source not in lookup_translations:
+        lookup_translations[normalized_source] = sentence_text
+    source_language_pool: List[str] = list(lookup_translations.keys())
+    candidate_lemmas = lookup_candidate_lemmas(
+        session=session,
+        translations=lookup_translations,
+        source_languages=source_language_pool,
+    )
+    english_for_lookup = sentence_text if normalized_source == "en" else translations.get("en", "")
+
+    # ── Phase 3 ────────────────────────────────────────────────────────────
+    if decompose_languages is None:
+        languages_to_decompose: List[str] = ["en"]
+    else:
+        languages_to_decompose = [lang.strip().lower() for lang in decompose_languages if lang]
+
+    available_language_count = len(lookup_translations)
+    precondition_error: Optional[str] = None
+    if available_language_count < PHASE3_MIN_LANGUAGES:
+        precondition_error = (
+            f"Phase 3 requires at least {PHASE3_MIN_LANGUAGES} languages; "
+            f"only {available_language_count} available "
+            f"({sorted(lookup_translations.keys())})"
+        )
+    elif not candidate_lemmas:
+        precondition_error = (
+            "Phase 3 requires at least one candidate lemma from Phase 2; "
+            "none of the sentence tokens matched any known lemma"
+        )
+
+    if precondition_error is not None:
+        logger.warning("Skipping Phase 3: %s", precondition_error)
+        for skipped_language in languages_to_decompose:
+            skipped_translation = (
+                sentence_text
+                if skipped_language == normalized_source
+                else translations.get(skipped_language, "")
+            )
+            failures[skipped_language] = DecomposedLanguage(
+                language_code=skipped_language,
+                translation=skipped_translation,
+                success=False,
+                error=precondition_error,
+            )
+        return Phase3Plan(candidate_lemmas=candidate_lemmas, failures=failures)
+
+    all_known: Dict[str, str] = dict(translations)
+    if normalized_source not in all_known:
+        all_known[normalized_source] = sentence_text
+
+    # Anchor sentence is the English text when available, else the source.
+    anchor_text = english_for_lookup or sentence_text
+    anchor_language = "en" if english_for_lookup else normalized_source
+
+    target_translations: Dict[str, str] = {}
+    for target_language in languages_to_decompose:
+        target_translation = all_known.get(target_language)
+        if not target_translation:
+            failures[target_language] = DecomposedLanguage(
+                language_code=target_language,
+                translation="",
+                success=False,
+                error=f"No Phase 1 translation available for '{target_language}'",
+            )
+            continue
+        if not anchor_text:
+            failures[target_language] = DecomposedLanguage(
+                language_code=target_language,
+                translation=target_translation,
+                success=False,
+                error="No anchor English text available for decomposition",
+            )
+            continue
+        target_translations[target_language] = target_translation
+
+    helper_translations = [
+        {"language_code": lang, "translation": text}
+        for lang, text in all_known.items()
+        if lang not in target_translations and lang != anchor_language
+    ]
+    return Phase3Plan(
+        candidate_lemmas=candidate_lemmas,
+        target_translations=target_translations,
+        anchor_text=anchor_text,
+        anchor_language=anchor_language,
+        helper_translations=helper_translations,
+        failures=failures,
+    )
+
+
 def decompose_with_existing_translations(
     *,
     sentence_text: str,
@@ -998,96 +1204,23 @@ def decompose_with_existing_translations(
         )
         result.translations = dict(translations)
 
-    # ── Phase 2 ────────────────────────────────────────────────────────────
-    lookup_translations: Dict[str, str] = dict(translations)
-    if normalized_source not in lookup_translations:
-        lookup_translations[normalized_source] = sentence_text
-    source_language_pool: List[str] = list(lookup_translations.keys())
-    result.candidate_lemmas = lookup_candidate_lemmas(
+    plan = plan_phase3(
         session=session,
-        translations=lookup_translations,
-        source_languages=source_language_pool,
+        sentence_text=sentence_text,
+        source_language=normalized_source,
+        translations=translations,
+        decompose_languages=decompose_languages,
     )
-    english_for_lookup = sentence_text if normalized_source == "en" else translations.get("en", "")
+    result.candidate_lemmas = plan.candidate_lemmas
+    result.decompositions.update(plan.failures)
 
-    # ── Phase 3 ────────────────────────────────────────────────────────────
-    if decompose_languages is None:
-        languages_to_decompose: List[str] = ["en"]
-    else:
-        languages_to_decompose = [lang.strip().lower() for lang in decompose_languages if lang]
-
-    available_language_count = len(lookup_translations)
-    precondition_error: Optional[str] = None
-    if available_language_count < PHASE3_MIN_LANGUAGES:
-        precondition_error = (
-            f"Phase 3 requires at least {PHASE3_MIN_LANGUAGES} languages; "
-            f"only {available_language_count} available "
-            f"({sorted(lookup_translations.keys())})"
-        )
-    elif not result.candidate_lemmas:
-        precondition_error = (
-            "Phase 3 requires at least one candidate lemma from Phase 2; "
-            "none of the sentence tokens matched any known lemma"
-        )
-
-    if precondition_error is not None:
-        logger.warning("Skipping Phase 3: %s", precondition_error)
-        for skipped_language in languages_to_decompose:
-            skipped_translation = (
-                sentence_text
-                if skipped_language == normalized_source
-                else translations.get(skipped_language, "")
-            )
-            result.decompositions[skipped_language] = DecomposedLanguage(
-                language_code=skipped_language,
-                translation=skipped_translation,
-                success=False,
-                error=precondition_error,
-            )
-        return result
-
-    all_known: Dict[str, str] = dict(translations)
-    if normalized_source not in all_known:
-        all_known[normalized_source] = sentence_text
-
-    # Anchor sentence is the English text when available, else the source.
-    anchor_text = english_for_lookup or sentence_text
-    anchor_language = "en" if english_for_lookup else normalized_source
-
-    target_translations: Dict[str, str] = {}
-    for target_language in languages_to_decompose:
-        target_translation = all_known.get(target_language)
-        if not target_translation:
-            result.decompositions[target_language] = DecomposedLanguage(
-                language_code=target_language,
-                translation="",
-                success=False,
-                error=f"No Phase 1 translation available for '{target_language}'",
-            )
-            continue
-        if not anchor_text:
-            result.decompositions[target_language] = DecomposedLanguage(
-                language_code=target_language,
-                translation=target_translation,
-                success=False,
-                error="No anchor English text available for decomposition",
-            )
-            continue
-        target_translations[target_language] = target_translation
-
-    if target_translations:
-        helper_translations = [
-            {"language_code": lang, "translation": text}
-            for lang, text in all_known.items()
-            if lang not in target_translations and lang != anchor_language
-        ]
-
+    if plan.target_translations:
         combined = decompose_languages_combined(
-            source_sentence=anchor_text,
-            source_language=anchor_language,
-            target_translations=target_translations,
-            helper_translations=helper_translations,
-            candidate_lemmas=result.candidate_lemmas,
+            source_sentence=plan.anchor_text,
+            source_language=plan.anchor_language,
+            target_translations=plan.target_translations,
+            helper_translations=plan.helper_translations,
+            candidate_lemmas=plan.candidate_lemmas,
             client=client,
             model=model,
         )

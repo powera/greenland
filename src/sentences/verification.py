@@ -269,7 +269,7 @@ def build_sentence_link_verification_prompt(
 
 
 def build_sentence_link_verification_schema(
-    links_by_language: Dict[str, List[Dict[str, Any]]]
+    links_by_language: Dict[str, List[Dict[str, Any]]],
 ) -> Schema:
     """Build a schema containing explicit fields for every stored link."""
     properties: Dict[str, SchemaProperty] = {}

@@ -42,6 +42,7 @@ from sentences.batch_completion import (
     DECOMPOSE_AGENT_NAME,
     TRANSLATE_AGENT_NAME,
     apply_results_for_agent,
+    apply_sentence_translation_results,
 )
 from words.translation_batch import AGENT_NAME as LEMMA_TRANSLATE_AGENT_NAME
 from words.translation_batch import apply_populate_results
@@ -49,6 +50,8 @@ from words.translation_batch import apply_populate_results
 logger = logging.getLogger(__name__)
 
 DEFAULT_POLL_INTERVAL_SECONDS = 300
+# zvirblis's one-shot combined batches, from before it ran as a staged job.
+LEGACY_ZVIRBLIS_AGENT_NAME = "zvirblis"
 _LEGACY_AGENT_NAMES = (DECOMPOSE_AGENT_NAME, TRANSLATE_AGENT_NAME, LEMMA_TRANSLATE_AGENT_NAME)
 _TERMINAL_FAILED_STATUSES = (
     BatchStatus.FAILED.value,
@@ -99,14 +102,32 @@ def apply_completed_requests(
     Raises:
         ValueError: For an agent with no applier here.
     """
-    from workqueue.llm_batch import complete_rows
+    from workqueue.llm_batch import complete_rows, is_staged_row
     from workqueue.registry import get_llm_job
 
     job = get_llm_job(agent_name)
-    if job is not None:
-        return complete_rows(job, requests, main_session, batch_id)
+    staged = [row for row in requests if job is not None and is_staged_row(row)]
+    legacy = [row for row in requests if not (job is not None and is_staged_row(row))]
+    totals: dict[str, int] = {"updated": 0, "failed": 0}
+    results = []
+    if job is not None and staged:
+        results.append(complete_rows(job, staged, main_session, batch_id))
+    if legacy:
+        results.append(_apply_legacy_requests(agent_name, legacy, main_session, batch_id))
+    for result in results:
+        for key, value in result.items():
+            totals[key] = totals.get(key, 0) + value
+    return totals
+
+
+def _apply_legacy_requests(
+    agent_name: str, requests: list[BatchQueue], main_session: Session, batch_id: str
+) -> dict[str, int]:
+    """Rows submitted before an agent moved to a staged job (or never moved)."""
     if agent_name == LEMMA_TRANSLATE_AGENT_NAME:
         return apply_populate_results(requests, main_session, batch_id)
+    if agent_name == LEGACY_ZVIRBLIS_AGENT_NAME:
+        return apply_sentence_translation_results(requests, main_session, batch_id)
     return apply_results_for_agent(agent_name, requests, main_session, batch_id)
 
 

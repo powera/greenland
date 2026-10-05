@@ -24,8 +24,8 @@ from clients.batch_queue import BatchQueue, get_batch_manager
 from concepts.generate.batch import complete_concept_body_batch
 from util.telemetry import CostConfig
 from storage.backend import create_session as create_backend_session
-from sentences.batch_completion import apply_sentence_translation_results
-from workqueue.llm_batch import complete_rows
+from sentences.batch_completion import apply_results_for_agent, apply_sentence_translation_results
+from workqueue.llm_batch import complete_rows, is_staged_row
 from workqueue.registry import get_llm_job
 
 logger = logging.getLogger(__name__)
@@ -304,13 +304,25 @@ def main() -> int:
         grouped = _group_completed_by_agent(completed_requests)
         session = create_backend_session(config)
         try:
-            for agent_name, requests in grouped.items():
+            for agent_name, agent_requests in grouped.items():
                 job = get_llm_job(agent_name)
-                if job is not None:
-                    result = complete_rows(job, requests, session, args.batch_id, manager)
+                staged = [r for r in agent_requests if job is not None and is_staged_row(r)]
+                if job is not None and staged:
+                    result = complete_rows(job, staged, session, args.batch_id, manager)
                     logger.info("Staged job %s applied: %s", agent_name, result)
-                elif agent_name in ("zvirblis", "barsukas_decompose"):
+                # Rows submitted before the agent became a staged job.
+                requests = [r for r in agent_requests if r not in staged]
+                if not requests:
+                    continue
+                if agent_name in ("zvirblis", "barsukas_decompose"):
                     result = _apply_sentence_translations(requests, session, args.batch_id)
+                    logger.info(
+                        "Sentence translations applied: %s updated, %s failed",
+                        result["updated"],
+                        result["failed"],
+                    )
+                elif agent_name == "barsukas_translate":
+                    result = apply_results_for_agent(agent_name, requests, session, args.batch_id)
                     logger.info(
                         "Sentence translations applied: %s updated, %s failed",
                         result["updated"],
