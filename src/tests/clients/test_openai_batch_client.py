@@ -18,6 +18,11 @@ class OpenAIBatchClientTestCase(unittest.TestCase):
 
     def setUp(self) -> None:
         """Set up test fixtures."""
+        # The HTTP layer is mocked throughout, so the kill-switch guard (tested in
+        # test_openai_batch_shared.py) is stubbed for these request-shaping tests.
+        guard = patch("clients.openai.batch_client.clients.lib.assert_llm_calls_enabled")
+        guard.start()
+        self.addCleanup(guard.stop)
         # Create client without API key for testing
         with patch("clients.openai.batch_client.load_key", return_value=None):
             self.client = OpenAIBatchClient(debug=False)

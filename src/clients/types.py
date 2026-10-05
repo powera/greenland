@@ -112,6 +112,30 @@ class Schema:
         return list(self.properties.keys())
 
 
+@dataclass(frozen=True)
+class LLMCall:
+    """One structured ``generate_chat`` call, described rather than made.
+
+    Domain code returns this from a "prepare" step so the same call can be sent
+    live (``UnifiedLLMClient.generate_chat(**call.chat_kwargs())``) or queued for
+    the OpenAI Batch API (``workqueue.llm_batch``) without the two drifting.
+    """
+
+    prompt: str
+    schema: Schema
+    context: Optional[str] = None
+    max_tokens: Optional[int] = None
+
+    def chat_kwargs(self) -> Dict[str, Any]:
+        """Keyword arguments for ``generate_chat``."""
+        return {
+            "prompt": self.prompt,
+            "json_schema": self.schema,
+            "context": self.context,
+            "max_tokens": self.max_tokens,
+        }
+
+
 @dataclass
 class Response:
     """Container for response data."""
