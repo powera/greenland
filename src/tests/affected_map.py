@@ -36,7 +36,7 @@ DIRECTORY_MAP: dict[str, tuple[str, ...]] = {
     "audiotools": ("audiotools", "workqueue"),
     "barsukas": ("barsukas",),
     "benchmarks": ("benchmarks", "lib"),
-    "clients": ("clients", "barsukas", "audiotools"),
+    "clients": ("clients", "barsukas", "audiotools", "workqueue"),
     "concepts": ("concepts", "storage"),
     "exports": ("exports", "storage"),
     "idioms": ("storage", "words"),
