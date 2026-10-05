@@ -10,6 +10,12 @@ import sys
 from pathlib import Path
 from typing import Any, Dict, List, Optional
 
+from agents.common.batch_run import (
+    add_batch_args,
+    batch_summary,
+    check_batch_args,
+    run_batch_populate,
+)
 from agents.common.common_args import (
     add_backend_args,
     add_common_args,
@@ -175,6 +181,7 @@ def get_argument_parser() -> argparse.ArgumentParser:
         default=False,
         help="Use Wiktionary instead of LLM for form generation (no API cost, supports en/es/fr/lt)",
     )
+    add_batch_args(parser)
 
     return parser
 
@@ -252,6 +259,46 @@ def enqueue_vilkas_work(
     }
 
 
+def batch_form_tasks(task: str, selected_languages: List[str]) -> List[tuple[str, str]]:
+    """The (language, pos) pairs a --batch run covers for *task*."""
+    if task == "all":
+        return [(lang, pos) for lang in selected_languages for pos in SUPPORTED_TASKS[lang]]
+    parsed_lang, parsed_pos = split_task(task)
+    if parsed_lang is None or parsed_pos is None:
+        raise ValueError(f"Unrecognised Vilkas task: {task}")
+    return [(parsed_lang, parsed_pos)]
+
+
+def _run_populate_batch(
+    agent: Any, lemmas: List[Any], task: str, selected_languages: List[str], args: Any
+) -> None:
+    """Plan the missing forms, confirm, and send them as OpenAI batches."""
+    from workqueue.handlers.words.forms import FORMS_JOB, forms_state
+
+    tasks = batch_form_tasks(task, selected_languages)
+    states = [
+        forms_state(lemma.id, lang, pos)
+        for lang, pos in tasks
+        for lemma in lemmas
+        if lemma.pos_type == pos
+    ]
+    by_language: Dict[str, List[str]] = {}
+    for lang, pos in tasks:
+        by_language.setdefault(lang, []).append(pos)
+    session = agent.get_session()
+    try:
+        run_batch_populate(
+            FORMS_JOB,
+            states,
+            args,
+            session,
+            "VILKAS AGENT - BATCH POPULATE",
+            batch_summary(by_language),
+        )
+    finally:
+        session.close()
+
+
 def main() -> None:
     """Main entry point for the vilkas agent."""
     # Import here to avoid circular imports
@@ -262,6 +309,9 @@ def main() -> None:
 
     parser = get_argument_parser()
     args = parser.parse_args()
+    check_batch_args(parser, args)
+    if getattr(args, "batch", False) and args.use_wiktionary:
+        parser.error("--batch and --use-wiktionary cannot be used together")
 
     selected_languages = list(SUPPORTED_TASKS.keys())
     if args.languages:
@@ -340,6 +390,11 @@ def main() -> None:
                 f"{', '.join(selected_languages)}"
             )
             sys.exit(1)
+
+        # BATCH MODE: Send the requests as OpenAI batches
+        if getattr(args, "batch", False):
+            _run_populate_batch(agent, lemmas, args.task, selected_languages, args)
+            return
 
         # WORKQUEUE MODE: Enqueue work items for barsukas worker
         if args.use_workqueue:

@@ -6,6 +6,7 @@ import json
 import logging
 from typing import Any, Dict, Optional
 
+from clients.deferring_client import DeferLLMCall
 from clients.types import Schema
 from clients.unified_client import UnifiedLLMClient
 from storage.backend.config import DataSourceConfig
@@ -83,6 +84,9 @@ def query_verb_forms(
             json_schema=json_schema,
             context=context,
         )
+    except DeferLLMCall:
+        # A batch is collecting this call (see clients.deferring_client).
+        raise
     except Exception as error:
         logger.error("Error querying verb forms for '%s' (%s): %s", word, language_code, error)
         return {"success": False, "error": str(error)}
