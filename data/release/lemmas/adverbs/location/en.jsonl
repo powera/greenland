@@ -45,3 +45,5 @@
 {"guid": "D07_045", "forms": [{"grammatical_form": "adverb/en_positive", "text": "downstairs", "is_base_form": true, "ipa": "/ˌdaʊnˈstɛrz/", "phonetic": "DOWN-stairz"}]}
 {"guid": "D07_046", "forms": [{"grammatical_form": "adverb/en_positive", "text": "face up", "is_base_form": true, "ipa": "/ˌfeɪs ˈʌp/", "phonetic": "FAYS-UP"}]}
 {"guid": "D07_047", "forms": [{"grammatical_form": "adverb/en_positive", "text": "off-piste", "is_base_form": true, "ipa": "/ˌɔfˈpiːst/", "phonetic": "awf-PEEST"}]}
+{"guid": "D07_048", "forms": [{"grammatical_form": "adverb/en_positive", "text": "halfway", "is_base_form": true}], "variants": [{"kind": "spelling", "key": "half-way", "forms": [{"grammatical_form": "adverb/en_positive", "text": "half-way", "is_base_form": true}]}]}
+{"guid": "D07_049", "forms": [{"grammatical_form": "adverb/en_positive", "text": "worldwide", "is_base_form": true}], "variants": [{"kind": "spelling", "key": "world-wide", "forms": [{"grammatical_form": "adverb/en_positive", "text": "world-wide", "is_base_form": true}]}]}

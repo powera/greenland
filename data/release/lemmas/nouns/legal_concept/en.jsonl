@@ -47,3 +47,4 @@
 {"guid": "N59_052", "forms": [{"grammatical_form": "noun/en_singular", "text": "cease-fire", "is_base_form": true, "ipa": "/ˈsisˌfaɪr/", "phonetic": "SEES-fyre"}]}
 {"guid": "N59_053", "forms": [{"grammatical_form": "noun/en_singular", "text": "euthanasia", "is_base_form": true, "ipa": "/ˌjuːθəˈneɪʒə/", "phonetic": "yoo-thuh-NAY-zhuh"}]}
 {"guid": "N59_054", "forms": [{"grammatical_form": "noun/en_singular", "text": "search", "is_base_form": true, "ipa": "/sɝtʃ/", "phonetic": "SURCH"}]}
+{"guid": "N59_055", "forms": [{"grammatical_form": "noun/en_singular", "text": "state law", "is_base_form": true}], "variants": [{"kind": "spelling", "key": "state-law", "forms": [{"grammatical_form": "noun/en_singular", "text": "state-law", "is_base_form": true}]}]}

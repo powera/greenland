@@ -43,7 +43,6 @@
 {"guid": "N24_091", "forms": [{"grammatical_form": "noun/en_singular", "text": "regression", "is_base_form": true, "ipa": "/rɪˈɡrɛʃən/", "phonetic": "rih-GRESH-un"}]}
 {"guid": "N24_092", "forms": [{"grammatical_form": "noun/en_singular", "text": "recursion", "is_base_form": true, "ipa": "/rɪˈkɝːʒən/", "phonetic": "rih-KUR-zhun"}]}
 {"guid": "N24_093", "forms": [{"grammatical_form": "noun/en_singular", "text": "closure", "is_base_form": true, "ipa": "/ˈkloʊʒɚ/", "phonetic": "KLOH-zher"}]}
-{"guid": "N24_094", "forms": [{"grammatical_form": "noun/en_singular", "text": "factorization", "is_base_form": true, "ipa": "/ˌfæk.tɚ.əˈzeɪ.ʃən/", "phonetic": "fak-ter-uh-ZAY-shun"}]}
 {"guid": "N24_095", "forms": [{"grammatical_form": "noun/en_singular", "text": "recurrence", "is_base_form": true, "ipa": "/rɪˈkɝəns/", "phonetic": "ree-KUR-uhns"}]}
 {"guid": "N24_096", "forms": [{"grammatical_form": "noun/en_singular", "text": "scattering", "is_base_form": true, "ipa": "/ˈskætərɪŋ/", "phonetic": "SKAT-er-ing"}]}
 {"guid": "N24_097", "forms": [{"grammatical_form": "noun/en_singular", "text": "decay", "is_base_form": true, "ipa": "/dɪˈkeɪ/", "phonetic": "duh-KAY"}]}
@@ -170,3 +169,8 @@
 {"guid": "N24_220", "forms": [{"grammatical_form": "noun/en_singular", "text": "fuseki", "is_base_form": true, "ipa": "/fuːˈsɛki/", "phonetic": "FOO-seh-kee"}]}
 {"guid": "N24_221", "forms": [{"grammatical_form": "noun/en_singular", "text": "length", "is_base_form": true, "ipa": "/lɛŋθ/", "phonetic": "LENGTH"}]}
 {"guid": "N24_222", "forms": [{"grammatical_form": "noun/en_singular", "text": "release", "is_base_form": true, "ipa": "/rɪˈlis/", "phonetic": "ri-LEES"}]}
+{"guid": "N24_223", "variants": [{"kind": "spelling", "key": "break-up", "forms": [{"grammatical_form": "noun/en_singular", "text": "break-up", "is_base_form": true}]}]}
+{"guid": "N24_224", "variants": [{"kind": "spelling", "key": "cut-off", "forms": [{"grammatical_form": "noun/en_singular", "text": "cut-off", "is_base_form": true}]}]}
+{"guid": "N24_225", "variants": [{"kind": "spelling", "key": "counter-attack", "forms": [{"grammatical_form": "noun/en_singular", "text": "counter-attack", "is_base_form": true}]}]}
+{"guid": "N24_227", "forms": [{"grammatical_form": "noun/en_singular", "text": "qualifying round", "is_base_form": true}]}
+{"guid": "N24_230", "variants": [{"kind": "equivalent", "key": "multiplication", "forms": [{"grammatical_form": "noun/en_singular", "text": "multiplication", "is_base_form": true}]}]}

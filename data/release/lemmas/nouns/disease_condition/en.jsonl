@@ -24,3 +24,4 @@
 {"guid": "N04_030", "forms": [{"grammatical_form": "noun/en_singular", "text": "ill-health", "is_base_form": true, "ipa": "/ˌɪl ˈhɛlθ/", "phonetic": "IL-helth"}]}
 {"guid": "N04_031", "forms": [{"grammatical_form": "noun/en_singular", "text": "earache", "is_base_form": true, "ipa": "/ˈɪrˌeɪk/", "phonetic": "EER-ayk"}]}
 {"guid": "N04_032", "forms": [{"grammatical_form": "noun/en_singular", "text": "toothache", "is_base_form": true, "ipa": "/ˈtuːθeɪk/", "phonetic": "TOOTH-ayk"}]}
+{"guid": "N04_033", "variants": [{"kind": "spelling", "key": "stomach-ache", "forms": [{"grammatical_form": "noun/en_singular", "text": "stomach-ache", "is_base_form": true}]}]}

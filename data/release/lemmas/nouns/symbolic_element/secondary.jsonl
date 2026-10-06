@@ -16,13 +16,9 @@
 {"guid": "N18_016", "translations": {"ms": "abjad", "hi": "वर्णमाला", "tr": "alfabe"}}
 {"guid": "N18_017", "translations": {"ms": "koma", "hi": "अल्पविराम", "tr": "virgül"}}
 {"guid": "N18_018", "translations": {"ms": "apostrof", "hi": "अपोस्ट्रॉफ़", "tr": "kesme işareti"}}
-{"guid": "N18_019", "translations": {"ms": "awalan", "hi": "उपसर्ग", "tr": "önek"}}
 {"guid": "N18_020", "translations": {"ms": "awalan", "hi": "उपसर्ग", "tr": "ön ek"}}
-{"guid": "N18_021", "translations": {"ms": "akhiran", "hi": "प्रत्यय", "tr": "sonek"}}
 {"guid": "N18_022", "translations": {"ms": "julukan", "hi": "विशेषण", "tr": "lakap"}}
 {"guid": "N18_023", "translations": {"ms": "lambang diftong", "hi": "द्विस्वर का लिखित चिह्न", "tr": "difton gösterimi"}}
-{"guid": "N18_024", "translations": {"ms": "imbuhan", "hi": "उपसर्ग या प्रत्यय", "tr": "ek"}}
-{"guid": "N18_025", "translations": {"ms": "infiks", "hi": "अंतःसर्ग", "tr": "iç ek"}}
 {"guid": "N18_026", "translations": {"ms": "anafora", "hi": "अनाफ़ोरा", "tr": "anafora"}}
 {"guid": "N18_027", "translations": {"ms": "metonimia", "hi": "लक्षणा", "tr": "ad aktarması"}}
 {"guid": "N18_028", "translations": {"ms": "logogram", "hi": "लोगोग्राम", "tr": "logogram"}}

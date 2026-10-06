@@ -38,3 +38,4 @@
 {"guid": "A06_038", "forms": [{"grammatical_form": "adjective/en_positive", "text": "ugly", "is_base_form": true, "ipa": "/ˈʌɡli/", "phonetic": "UG-lee"}]}
 {"guid": "A06_039", "forms": [{"grammatical_form": "adjective/en_positive", "text": "delicious", "is_base_form": true, "ipa": "/dɪˈlɪʃəs/", "phonetic": "duh-LISH-us"}]}
 {"guid": "A06_040", "forms": [{"grammatical_form": "adjective/en_positive", "text": "lovely", "is_base_form": true, "ipa": "/ˈlʌvli/", "phonetic": "LUHV-lee"}]}
+{"guid": "A06_041", "forms": [{"grammatical_form": "adjective/en_positive", "text": "divine", "is_base_form": true}]}

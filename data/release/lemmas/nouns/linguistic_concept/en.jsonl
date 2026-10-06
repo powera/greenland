@@ -1,0 +1,30 @@
+{"guid": "N67_001", "forms": [{"grammatical_form": "noun/en_singular", "text": "adverb", "is_base_form": true, "ipa": "/ˈædˌvɝːb/", "phonetic": "AD-vurb"}]}
+{"guid": "N67_002", "forms": [{"grammatical_form": "noun/en_singular", "text": "copula", "is_base_form": true, "ipa": "/ˈkɑpjələ/", "phonetic": "KOP-yuh-luh"}]}
+{"guid": "N67_003", "forms": [{"grammatical_form": "noun/en_singular", "text": "dative", "is_base_form": true, "ipa": "/ˈdeɪtɪv/", "phonetic": "DAY-tiv"}]}
+{"guid": "N67_004", "forms": [{"grammatical_form": "noun/en_singular", "text": "determiner", "is_base_form": true, "ipa": "/dɪˈtɝːmənɚ/", "phonetic": "duh-TER-muh-ner"}]}
+{"guid": "N67_005", "forms": [{"grammatical_form": "noun/en_singular", "text": "dialect", "is_base_form": true, "ipa": "/ˈdaɪəˌlɛkt/", "phonetic": "DYE-uh-lekt"}]}
+{"guid": "N67_006", "forms": [{"grammatical_form": "noun/en_singular", "text": "diphthong", "is_base_form": true, "ipa": "/ˈdɪfθɔŋ/", "phonetic": "DIF-thong"}]}
+{"guid": "N67_007", "forms": [{"grammatical_form": "noun/en_singular", "text": "homonym", "is_base_form": true, "ipa": "/ˈhɑːmənɪm/", "phonetic": "HOM-uh-nim"}]}
+{"guid": "N67_008", "forms": [{"grammatical_form": "noun/en_singular", "text": "lexeme", "is_base_form": true, "ipa": "/ˈlɛk.siːm/", "phonetic": "LEK-seem"}]}
+{"guid": "N67_009", "forms": [{"grammatical_form": "noun/en_singular", "text": "lexicon", "is_base_form": true, "ipa": "/ˈlɛksɪkɑn/", "phonetic": "LEK-si-kon"}]}
+{"guid": "N67_010", "forms": [{"grammatical_form": "noun/en_singular", "text": "locative case", "is_base_form": true}]}
+{"guid": "N67_011", "forms": [{"grammatical_form": "noun/en_singular", "text": "noun", "is_base_form": true, "ipa": "/naʊn/", "phonetic": "NOWN"}]}
+{"guid": "N67_012", "forms": [{"grammatical_form": "noun/en_singular", "text": "sonorant", "is_base_form": true, "ipa": "/ˈsɑnər ənt/", "phonetic": "SON-uh-runt"}]}
+{"guid": "N67_013", "forms": [{"grammatical_form": "noun/en_singular", "text": "valency", "is_base_form": true, "ipa": "/ˈveɪlənsi/", "phonetic": "VAY-len-see"}]}
+{"guid": "N67_014", "forms": [{"grammatical_form": "noun/en_singular", "text": "verb", "is_base_form": true, "ipa": "/vɝb/", "phonetic": "VURB"}]}
+{"guid": "N67_015", "forms": [{"grammatical_form": "noun/en_singular", "text": "affix", "is_base_form": true, "ipa": "/ˈæfɪks/", "phonetic": "AF-iks"}]}
+{"guid": "N67_016", "forms": [{"grammatical_form": "noun/en_singular", "text": "infix", "is_base_form": true, "ipa": "/ˈɪnfɪks/", "phonetic": "IN-fiks"}]}
+{"guid": "N67_017", "forms": [{"grammatical_form": "noun/en_singular", "text": "prefix", "is_base_form": true, "ipa": "/ˈpriːfɪks/", "phonetic": "PREE-fiks"}]}
+{"guid": "N67_018", "forms": [{"grammatical_form": "noun/en_singular", "text": "suffix", "is_base_form": true, "ipa": "/ˈsʌfɪks/", "phonetic": "SUF-iks"}]}
+{"guid": "N67_019", "forms": [{"grammatical_form": "noun/en_singular", "text": "clitic", "is_base_form": true, "ipa": "/ˈklɪtɪk/", "phonetic": "KLI-tik"}]}
+{"guid": "N67_020", "forms": [{"grammatical_form": "noun/en_singular", "text": "first person", "is_base_form": true}], "variants": [{"kind": "spelling", "key": "first-person", "forms": [{"grammatical_form": "noun/en_singular", "text": "first-person", "is_base_form": true}]}]}
+{"guid": "N67_022", "forms": [{"grammatical_form": "noun/en_singular", "text": "singular", "is_base_form": true, "ipa": "/ˈsɪŋɡjələr/", "phonetic": "SING-yuh-ler"}]}
+{"guid": "N67_023", "forms": [{"grammatical_form": "noun/en_singular", "text": "tense", "is_base_form": true, "ipa": "/tɛns/", "phonetic": "TENS"}]}
+{"guid": "N67_024", "forms": [{"grammatical_form": "noun/en_singular", "text": "third person", "is_base_form": true}], "variants": [{"kind": "spelling", "key": "third-person", "forms": [{"grammatical_form": "noun/en_singular", "text": "third-person", "is_base_form": true}]}]}
+{"guid": "N67_025", "forms": [{"grammatical_form": "noun/en_singular", "text": "vocative", "is_base_form": true, "ipa": "/ˈvɑkətɪv/", "phonetic": "VOK-uh-tiv"}]}
+{"guid": "N67_026", "forms": [{"grammatical_form": "noun/en_singular", "text": "cognate", "is_base_form": true, "ipa": "/ˈkɑːɡneɪt/", "phonetic": "KOG-nate"}]}
+{"guid": "N67_028", "forms": [{"grammatical_form": "noun/en_singular", "text": "modifier", "is_base_form": true, "ipa": "/ˈmɑdəˌfaɪər/", "phonetic": "MOD-uh-fy-er"}]}
+{"guid": "N67_029", "forms": [{"grammatical_form": "noun/en_singular", "text": "morpheme", "is_base_form": true, "ipa": "/ˈmɔr.fim/", "phonetic": "MOR-feem"}]}
+{"guid": "N67_030", "forms": [{"grammatical_form": "noun/en_singular", "text": "plosive", "is_base_form": true, "ipa": "/ˈploʊsɪv/", "phonetic": "PLOH-siv"}]}
+{"guid": "N67_031", "forms": [{"grammatical_form": "noun/en_singular", "text": "reduplication", "is_base_form": true, "ipa": "/ˌriːduːplɪˈkeɪʃən/", "phonetic": "ree-doo-pli-KAY-shun"}]}
+{"guid": "N67_032", "forms": [{"grammatical_form": "noun/en_singular", "text": "sibilant", "is_base_form": true, "ipa": "/ˈsɪbələnt/", "phonetic": "SIB-uh-lunt"}]}

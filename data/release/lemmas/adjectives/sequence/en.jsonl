@@ -12,3 +12,5 @@
 {"guid": "A15_027", "forms": [{"grammatical_form": "adjective/en_positive", "text": "highest-ranking", "is_base_form": true, "ipa": "/ˌhaɪəst ˈræŋkɪŋ/", "phonetic": "HY-est-RANG-king"}]}
 {"guid": "A15_028", "forms": [{"grammatical_form": "adjective/en_positive", "text": "third-most", "is_base_form": true, "ipa": "/ˌθɝdˈmoʊst/", "phonetic": "THURD-most"}]}
 {"guid": "A15_029", "forms": [{"grammatical_form": "adjective/en_positive", "text": "third-highest", "is_base_form": true, "ipa": "/ˌθɝd ˈhaɪəst/", "phonetic": "THURD-HY-ist"}]}
+{"guid": "A15_030", "variants": [{"kind": "spelling", "key": "non-linear", "forms": [{"grammatical_form": "adjective/en_positive", "text": "non-linear", "is_base_form": true}]}]}
+{"guid": "A15_031", "forms": [{"grammatical_form": "adjective/en_positive", "text": "firstborn", "is_base_form": true}], "variants": [{"kind": "spelling", "key": "first-born", "forms": [{"grammatical_form": "adjective/en_positive", "text": "first-born", "is_base_form": true}]}]}

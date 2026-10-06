@@ -119,22 +119,15 @@
 {"guid": "N50_119", "translations": {"ms": "hadis", "hi": "हदीस", "tr": "hadis"}}
 {"guid": "N50_120", "translations": {"ms": "mantera", "hi": "मंत्र", "tr": "mantra"}}
 {"guid": "N50_121", "translations": {"ms": "konsonan geseran", "hi": "घर्षी व्यंजन", "tr": "sürtünmeli ünsüz"}}
-{"guid": "N50_122", "translations": {"ms": "konsonan letupan", "hi": "स्पर्श व्यंजन", "tr": "patlamalı ünsüz"}}
-{"guid": "N50_123", "translations": {"ms": "konsonan desis", "hi": "ऊष्म ध्वनि", "tr": "ıslıklı ünsüz"}}
 {"guid": "N50_124", "translations": {"ms": "prosodi", "hi": "स्वराघात", "tr": "prozodi"}}
-{"guid": "N50_125", "translations": {"ms": "morfem", "hi": "रूपिम", "tr": "morfem"}}
-{"guid": "N50_126", "translations": {"ms": "pengulangan", "hi": "द्विरुक्ति", "tr": "ikileme"}}
-{"guid": "N50_127", "translations": {"ms": "penerang", "hi": "विशेषक", "tr": "niteleyici"}}
 {"guid": "N50_128", "translations": {"ms": "konotasi", "hi": "लक्षणा", "tr": "yan anlam"}}
 {"guid": "N50_129", "translations": {"ms": "denotasi", "hi": "अभिधा", "tr": "düz anlam"}}
-{"guid": "N50_130", "translations": {"ms": "kata serumpun", "hi": "सजातीय शब्द", "tr": "kökendaş sözcük"}}
 {"guid": "N50_131", "translations": {"ms": "transliterasi", "hi": "लिप्यंतरण", "tr": "transliterasyon"}}
 {"guid": "N50_132", "translations": {"ms": "kata pinjaman", "hi": "आगंतुक शब्द", "tr": "ödünç kelime"}}
 {"guid": "N50_133", "translations": {"ms": "bahasa vernakular", "hi": "बोलचाल की भाषा", "tr": "yerel dil"}}
 {"guid": "N50_134", "translations": {"ms": "daftar", "hi": "रजिस्टर", "tr": "kayıt"}}
 {"guid": "N50_135", "translations": {"ms": "korpus", "hi": "भाषा-संग्रह", "tr": "derlem"}}
 {"guid": "N50_136", "translations": {"ms": "terjemahan pinjam", "hi": "अनुवादानुवाद", "tr": "öyküntü"}}
-{"guid": "N50_137", "translations": {"ms": "koine", "hi": "कोइने", "tr": "koine"}}
 {"guid": "N50_138", "translations": {"ms": "bahasa kreol", "hi": "क्रियोल भाषा", "tr": "kreol dili"}}
 {"guid": "N50_139", "translations": {"ms": "bahasa pijin", "hi": "पिजिन भाषा", "tr": "pidgin dili"}}
 {"guid": "N50_140", "translations": {"ms": "substratum", "hi": "अधःस्तर", "tr": "alt katman"}}

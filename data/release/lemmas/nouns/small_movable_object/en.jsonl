@@ -145,3 +145,5 @@
 {"guid": "N08_223", "forms": [{"grammatical_form": "noun/en_singular", "text": "tatami", "is_base_form": true, "ipa": "/təˈtɑːmi/", "phonetic": "tuh-TAH-mee"}]}
 {"guid": "N08_224", "forms": [{"grammatical_form": "noun/en_singular", "text": "doubling cube", "is_base_form": true, "ipa": "/ˈdʌbəlɪŋ kjuːb/", "phonetic": "DUH-buh-ling KYOOB"}]}
 {"guid": "N08_225", "forms": [{"grammatical_form": "noun/en_singular", "text": "treat", "is_base_form": true, "ipa": "/triːt/", "phonetic": "TREET"}]}
+{"guid": "N08_226", "variants": [{"kind": "spelling", "key": "make-up", "forms": [{"grammatical_form": "noun/en_singular", "text": "make-up", "is_base_form": true}]}]}
+{"guid": "N08_227", "forms": [{"grammatical_form": "noun/en_singular", "text": "second hand", "is_base_form": true}]}

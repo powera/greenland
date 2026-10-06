@@ -61,7 +61,6 @@
 {"guid": "N17_298", "forms": [{"grammatical_form": "noun/en_singular", "text": "human right", "is_base_form": true}]}
 {"guid": "N17_299", "forms": [{"grammatical_form": "noun/en_singular", "text": "free speech", "is_base_form": true}]}
 {"guid": "N17_300", "forms": [{"grammatical_form": "noun/en_singular", "text": "public opinion", "is_base_form": true}]}
-{"guid": "N17_301", "forms": [{"grammatical_form": "noun/en_singular", "text": "axiom", "is_base_form": true, "ipa": "/ˈæk.si.əm/", "phonetic": "AK-see-um"}]}
 {"guid": "N17_302", "forms": [{"grammatical_form": "noun/en_singular", "text": "fractal", "is_base_form": true, "ipa": "/ˈfræk.təl/", "phonetic": "FRAK-tuhl"}]}
 {"guid": "N17_303", "forms": [{"grammatical_form": "noun/en_singular", "text": "bond", "is_base_form": true, "ipa": "/bɑnd/", "phonetic": "BOND"}]}
 {"guid": "N17_304", "forms": [{"grammatical_form": "noun/en_singular", "text": "synthesis", "is_base_form": true, "ipa": "/ˈsɪnθəsɪs/", "phonetic": "SIN-thuh-sis"}]}
@@ -84,16 +83,15 @@
 {"guid": "N17_321", "forms": [{"grammatical_form": "noun/en_singular", "text": "origin", "is_base_form": true, "ipa": "/ˈɔrədʒɪn/", "phonetic": "OR-uh-jin"}]}
 {"guid": "N17_322", "forms": [{"grammatical_form": "noun/en_singular", "text": "element", "is_base_form": true, "ipa": "/ˈɛləmənt/", "phonetic": "EL-uh-munt"}]}
 {"guid": "N17_323", "forms": [{"grammatical_form": "noun/en_singular", "text": "trade-off", "is_base_form": true, "ipa": "/ˈtreɪdˌɔf/", "phonetic": "TRAYD-awf"}]}
-{"guid": "N17_324", "forms": [{"grammatical_form": "noun/en_singular", "text": "tense", "is_base_form": true, "ipa": "/tɛns/", "phonetic": "TENS"}]}
-{"guid": "N17_325", "forms": [{"grammatical_form": "noun/en_singular", "text": "singular", "is_base_form": true, "ipa": "/ˈsɪŋɡjələr/", "phonetic": "SING-yuh-ler"}]}
 {"guid": "N17_326", "forms": [{"grammatical_form": "noun/en_singular", "text": "gender", "is_base_form": true, "ipa": "/ˈdʒɛndɚ/", "phonetic": "JEN-der"}]}
 {"guid": "N17_327", "forms": [{"grammatical_form": "noun/en_singular", "text": "definition", "is_base_form": true, "ipa": "/ˌdɛfəˈnɪʃən/", "phonetic": "def-uh-NISH-un"}]}
 {"guid": "N17_328", "forms": [{"grammatical_form": "noun/en_singular", "text": "synonym", "is_base_form": true, "ipa": "/ˈsɪnənɪm/", "phonetic": "SIN-uh-nim"}]}
 {"guid": "N17_329", "forms": [{"grammatical_form": "noun/en_singular", "text": "monism", "is_base_form": true, "ipa": "/ˈmɑːnɪzəm/", "phonetic": "MON-iz-um"}]}
 {"guid": "N17_330", "forms": [{"grammatical_form": "noun/en_singular", "text": "causality", "is_base_form": true, "ipa": "/kɔːˈzælət̬i/", "phonetic": "kaw-ZAL-uh-tee"}]}
 {"guid": "N17_331", "forms": [{"grammatical_form": "noun/en_singular", "text": "fallacy", "is_base_form": true, "ipa": "/ˈfæləsi/", "phonetic": "FAL-uh-see"}]}
-{"guid": "N17_332", "forms": [{"grammatical_form": "noun/en_singular", "text": "clitic", "is_base_form": true, "ipa": "/ˈklɪtɪk/", "phonetic": "KLI-tik"}]}
 {"guid": "N17_333", "forms": [{"grammatical_form": "noun/en_singular", "text": "paradigm", "is_base_form": true, "ipa": "/ˈpærəˌdaɪm/", "phonetic": "PAIR-uh-dाइम"}]}
-{"guid": "N17_334", "forms": [{"grammatical_form": "noun/en_singular", "text": "vocative", "is_base_form": true, "ipa": "/ˈvɑkətɪv/", "phonetic": "VOK-uh-tiv"}]}
 {"guid": "N17_335", "forms": [{"grammatical_form": "noun/en_singular", "text": "aspect", "is_base_form": true, "ipa": "/ˈæsˌpɛkt/", "phonetic": "AS-pekt"}]}
 {"guid": "N17_339", "forms": [{"grammatical_form": "noun/en_singular", "text": "goal", "is_base_form": true, "ipa": "/ɡoʊl/", "phonetic": "GOHL"}]}
+{"guid": "N17_343", "forms": [{"grammatical_form": "noun/en_singular", "text": "subject matter", "is_base_form": true}], "variants": [{"kind": "spelling", "key": "subject-matter", "forms": [{"grammatical_form": "noun/en_singular", "text": "subject-matter", "is_base_form": true}]}]}
+{"guid": "N17_344", "variants": [{"kind": "spelling", "key": "non-violence", "forms": [{"grammatical_form": "noun/en_singular", "text": "non-violence", "is_base_form": true}]}]}
+{"guid": "N17_346", "forms": [{"grammatical_form": "noun/en_singular", "text": "number one", "is_base_form": true}], "variants": [{"kind": "spelling", "key": "number-one", "forms": [{"grammatical_form": "noun/en_singular", "text": "number-one", "is_base_form": true}]}]}

@@ -31,7 +31,7 @@
 {"guid": "A17_031", "forms": [{"grammatical_form": "adjective/en_positive", "text": "re-established", "is_base_form": true, "ipa": "/ˌriː əˈstæblɪʃt/", "phonetic": "ree-uh-STAB-lisht"}]}
 {"guid": "A17_032", "forms": [{"grammatical_form": "adjective/en_positive", "text": "semi-arid", "is_base_form": true, "ipa": "/ˌsɛmiˈærɪd/", "phonetic": "SEM-ee-AR-id"}]}
 {"guid": "A17_033", "forms": [{"grammatical_form": "adjective/en_positive", "text": "non-existent", "is_base_form": true, "ipa": "/ˌnɑnɪɡˈzɪstənt/", "phonetic": "non-eg-ZIST-ent"}]}
-{"guid": "A17_034", "forms": [{"grammatical_form": "adjective/en_positive", "text": "self-sufficient", "is_base_form": true, "ipa": "/ˌsɛlf səˈfɪʃənt/", "phonetic": "self-suh-FISH-unt"}]}
+{"guid": "A17_034", "forms": [{"grammatical_form": "adjective/en_positive", "text": "self-sufficient", "is_base_form": true, "ipa": "/ˌsɛlf səˈfɪʃənt/", "phonetic": "self-suh-FISH-unt"}], "variants": [{"kind": "equivalent", "key": "self-reliant", "forms": [{"grammatical_form": "adjective/en_positive", "text": "self-reliant", "is_base_form": true}]}]}
 {"guid": "A17_035", "forms": [{"grammatical_form": "adjective/en_positive", "text": "built-in", "is_base_form": true, "ipa": "/ˈbɪltˌɪn/", "phonetic": "BILT-in"}]}
 {"guid": "A17_036", "forms": [{"grammatical_form": "adjective/en_positive", "text": "self-contained", "is_base_form": true, "ipa": "/ˌsɛlf kənˈteɪnd/", "phonetic": "self-kun-TAYND"}]}
 {"guid": "A17_037", "forms": [{"grammatical_form": "adjective/en_positive", "text": "high-pressure", "is_base_form": true, "ipa": "/ˌhaɪˈprɛʃər/", "phonetic": "HY-PRESH-er"}]}

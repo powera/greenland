@@ -14,13 +14,9 @@
 {"guid": "N18_016", "forms": [{"grammatical_form": "noun/en_singular", "text": "alphabet", "is_base_form": true, "ipa": "/ˈælfəˌbɛt/", "phonetic": "AL-fuh-bet"}]}
 {"guid": "N18_017", "forms": [{"grammatical_form": "noun/en_singular", "text": "comma", "is_base_form": true, "ipa": "/ˈkɑmə/", "phonetic": "KOM-uh"}]}
 {"guid": "N18_018", "forms": [{"grammatical_form": "noun/en_singular", "text": "apostrophe", "is_base_form": true, "ipa": "/əˈpɑstrəfi/", "phonetic": "uh-POS-truh-fee"}]}
-{"guid": "N18_019", "forms": [{"grammatical_form": "noun/en_singular", "text": "prefix", "is_base_form": true, "ipa": "/ˈpriːfɪks/", "phonetic": "PREE-fiks"}]}
 {"guid": "N18_020", "forms": [{"grammatical_form": "noun/en_singular", "text": "prefix", "is_base_form": true, "ipa": "/ˈpriːfɪks/", "phonetic": "PREE-fiks"}]}
-{"guid": "N18_021", "forms": [{"grammatical_form": "noun/en_singular", "text": "suffix", "is_base_form": true, "ipa": "/ˈsʌfɪks/", "phonetic": "SUF-iks"}]}
 {"guid": "N18_022", "forms": [{"grammatical_form": "noun/en_singular", "text": "epithet", "is_base_form": true, "ipa": "/ˈɛpəθɛt/", "phonetic": "EP-uh-thet"}]}
 {"guid": "N18_023", "forms": [{"grammatical_form": "noun/en_singular", "text": "diphthong", "is_base_form": true, "ipa": "/ˈdɪfθɔŋ/", "phonetic": "DIF-thong"}]}
-{"guid": "N18_024", "forms": [{"grammatical_form": "noun/en_singular", "text": "affix", "is_base_form": true, "ipa": "/ˈæfɪks/", "phonetic": "AF-iks"}]}
-{"guid": "N18_025", "forms": [{"grammatical_form": "noun/en_singular", "text": "infix", "is_base_form": true, "ipa": "/ˈɪnfɪks/", "phonetic": "IN-fiks"}]}
 {"guid": "N18_026", "forms": [{"grammatical_form": "noun/en_singular", "text": "anaphora", "is_base_form": true, "ipa": "/əˈnæfərə/", "phonetic": "uh-NAF-er-uh"}]}
 {"guid": "N18_027", "forms": [{"grammatical_form": "noun/en_singular", "text": "metonymy", "is_base_form": true, "ipa": "/məˈtɑːnəmi/", "phonetic": "meh-TAH-nuh-mee"}]}
 {"guid": "N18_028", "forms": [{"grammatical_form": "noun/en_singular", "text": "logogram", "is_base_form": true, "ipa": "/ˈlɑːɡəˌɡræm/", "phonetic": "LOG-uh-gram"}]}
@@ -37,3 +33,5 @@
 {"guid": "N18_045", "forms": [{"grammatical_form": "noun/en_singular", "text": "bamboo", "is_base_form": true, "ipa": "/bæmˈbuː/", "phonetic": "bam-BOO"}]}
 {"guid": "N18_046", "forms": [{"grammatical_form": "noun/en_singular", "text": "circle", "is_base_form": true, "ipa": "/ˈsɝkəl/", "phonetic": "SUR-kuhl"}]}
 {"guid": "N18_047", "forms": [{"grammatical_form": "noun/en_singular", "text": "wind", "is_base_form": true, "ipa": "/wɪnd/", "phonetic": "WIND"}]}
+{"guid": "N18_049", "forms": [{"grammatical_form": "noun/en_singular", "text": "pie chart", "is_base_form": true}]}
+{"guid": "N18_050", "forms": [{"grammatical_form": "noun/en_singular", "text": "tenor part", "is_base_form": true}]}

@@ -48,23 +48,14 @@
 {"guid": "N22_048", "translations": {"ms": "gaji minimum", "hi": "न्यूनतम वेतन", "tr": "asgari ücret"}}
 {"guid": "N22_049", "translations": {"ms": "pendaraban", "hi": "गुणा", "tr": "çarpma"}}
 {"guid": "N22_050", "translations": {"ms": "nombor perpuluhan", "hi": "दशमलव संख्या", "tr": "ondalık sayı"}}
-{"guid": "N22_051", "translations": {"ms": "tangen", "hi": "स्पर्शज्या", "tr": "tanjant"}}
-{"guid": "N22_052", "translations": {"ms": "hasil bahagi", "hi": "भागफल", "tr": "bölüm"}}
 {"guid": "N22_053", "translations": {"ms": "ketakterhinggaan", "hi": "अनंतता", "tr": "sonsuzluk"}}
 {"guid": "N22_054", "translations": {"ms": "ketakterhinggaan", "hi": "अनंत", "tr": "sonsuzluk"}}
-{"guid": "N22_055", "translations": {"ms": "logaritma", "hi": "लघुगणक", "tr": "logaritma"}}
 {"guid": "N22_056", "translations": {"ms": "penolakan", "hi": "घटाव", "tr": "çıkarma"}}
-{"guid": "N22_057", "translations": {"ms": "eksponen", "hi": "घातांक", "tr": "üs"}}
 {"guid": "N22_058", "translations": {"ms": "faktorial", "hi": "गुणनफल क्रमगुणित", "tr": "faktöriyel"}}
-{"guid": "N22_059", "translations": {"ms": "permutasi", "hi": "क्रमचय", "tr": "permütasyon"}}
-{"guid": "N22_060", "translations": {"ms": "pemangkatan", "hi": "घातांक", "tr": "üs alma"}}
-{"guid": "N22_061", "translations": {"ms": "pembahagi", "hi": "भाजक", "tr": "bölen"}}
 {"guid": "N22_062", "translations": {"ms": "infinitesimal", "hi": "अतिसूक्ष्म राशि", "tr": "sonsuz küçük"}}
 {"guid": "N22_063", "translations": {"ms": "kardinaliti", "hi": "संख्या", "tr": "kardinalite"}}
 {"guid": "N22_064", "translations": {"ms": "nilai eigen", "hi": "आइगेन मान", "tr": "özdeğer"}}
 {"guid": "N22_065", "translations": {"ms": "kovarians", "hi": "सहप्रसरण", "tr": "kovaryans"}}
-{"guid": "N22_066", "translations": {"ms": "anti terbitan", "hi": "प्रतिअवकलज", "tr": "belirsiz integral"}}
-{"guid": "N22_067", "translations": {"ms": "kodomain", "hi": "प्रतिक्षेत्र", "tr": "kodomen"}}
 {"guid": "N22_068", "translations": {"ms": "kuantum", "hi": "क्वांटम", "tr": "kuantum"}}
 {"guid": "N22_069", "translations": {"ms": "magnitud", "hi": "परिमाण", "tr": "büyüklük"}}
 {"guid": "N22_070", "translations": {"ms": "halaju", "hi": "वेग", "tr": "hız"}}
@@ -81,7 +72,6 @@
 {"guid": "N22_081", "translations": {"ms": "jumlah", "hi": "योग", "tr": "toplam"}}
 {"guid": "N22_082", "translations": {"ms": "purata", "hi": "औसत", "tr": "ortalama"}}
 {"guid": "N22_083", "translations": {"ms": "purata", "hi": "औसत", "tr": "ortalama"}}
-{"guid": "N22_084", "translations": {"ms": "hasil darab", "hi": "गुणनफल", "tr": "çarpım"}}
 {"guid": "N22_085", "translations": {"ms": "majoriti", "hi": "बहुमत", "tr": "çoğunluk"}}
 {"guid": "N22_086", "translations": {"ms": "majoriti", "hi": "बहुमत", "tr": "çoğunluk"}}
 {"guid": "N22_087", "translations": {"ms": "kos", "hi": "लागत", "tr": "maliyet"}}
