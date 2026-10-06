@@ -90,7 +90,6 @@
 {"guid": "N24_091", "translations": {"ms": "kemunduran", "hi": "प्रतिगमन", "tr": "gerileme"}}
 {"guid": "N24_092", "translations": {"ms": "rekursi", "hi": "पुनरावर्तन", "tr": "özyineleme"}}
 {"guid": "N24_093", "translations": {"ms": "penutupan", "hi": "बंद करना", "tr": "kapatma"}}
-{"guid": "N24_094", "translations": {"ms": "pemfaktoran", "hi": "गुणनखंडन", "tr": "çarpanlara ayırma"}}
 {"guid": "N24_095", "translations": {"ms": "pengulangan", "hi": "पुनरावृत्ति", "tr": "tekrarlanma"}}
 {"guid": "N24_096", "translations": {"ms": "penyebaran", "hi": "बिखेरना", "tr": "dağıtma"}}
 {"guid": "N24_097", "translations": {"ms": "pereputan", "hi": "क्षय", "tr": "bozunma"}}

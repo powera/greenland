@@ -1,0 +1,29 @@
+{"guid": "N67_001", "translations": {"ms": "kata keterangan", "hi": "क्रिया विशेषण", "tr": "zarf"}}
+{"guid": "N67_002", "translations": {"ms": "kata kerja penghubung", "hi": "संबंधसूचक क्रिया", "tr": "bağ fiil"}}
+{"guid": "N67_003", "translations": {"ms": "kasus datif", "hi": "संप्रदान कारक", "tr": "yönelme hâli"}}
+{"guid": "N67_004", "translations": {"ms": "penentu", "hi": "निर्धारक", "tr": "belirleyici"}}
+{"guid": "N67_005", "translations": {"ms": "dialek", "hi": "बोली", "tr": "lehçe"}}
+{"guid": "N67_006", "translations": {"ms": "diftong", "hi": "संयुक्त स्वर", "tr": "diftong"}}
+{"guid": "N67_007", "translations": {"ms": "homonim", "hi": "समनाम", "tr": "eş adlı sözcük"}}
+{"guid": "N67_008", "translations": {"ms": "leksem", "hi": "लेक्सीम", "tr": "biçimbirim"}}
+{"guid": "N67_009", "translations": {"ms": "leksikon", "hi": "शब्दावली", "tr": "söz varlığı"}}
+{"guid": "N67_011", "translations": {"ms": "kata nama", "hi": "संज्ञा", "tr": "isim"}}
+{"guid": "N67_012", "translations": {"ms": "sonoran", "hi": "सोनोरेंट", "tr": "sonorant"}}
+{"guid": "N67_013", "translations": {"ms": "valensi", "hi": "संयोजकता", "tr": "valans"}}
+{"guid": "N67_014", "translations": {"ms": "kata kerja", "hi": "क्रिया", "tr": "fiil"}}
+{"guid": "N67_015", "translations": {"ms": "imbuhan", "hi": "उपसर्ग या प्रत्यय", "tr": "ek"}}
+{"guid": "N67_016", "translations": {"ms": "infiks", "hi": "अंतःसर्ग", "tr": "iç ek"}}
+{"guid": "N67_017", "translations": {"ms": "awalan", "hi": "उपसर्ग", "tr": "önek"}}
+{"guid": "N67_018", "translations": {"ms": "akhiran", "hi": "प्रत्यय", "tr": "sonek"}}
+{"guid": "N67_019", "translations": {"ms": "klitik", "hi": "क्लिटिक", "tr": "klitik"}}
+{"guid": "N67_021", "translations": {"ms": "garis isoglos", "hi": "समभाषा रेखा", "tr": "izoglos"}}
+{"guid": "N67_022", "translations": {"ms": "bentuk tunggal", "hi": "एकवचन", "tr": "tekil"}}
+{"guid": "N67_023", "translations": {"ms": "kala", "hi": "काल", "tr": "zaman"}}
+{"guid": "N67_025", "translations": {"ms": "kasus vokatif", "hi": "संबोधन कारक", "tr": "seslenme hâli"}}
+{"guid": "N67_026", "translations": {"ms": "kata serumpun", "hi": "सजातीय शब्द", "tr": "kökendaş sözcük"}}
+{"guid": "N67_027", "translations": {"ms": "koine", "hi": "कोइने", "tr": "koine"}}
+{"guid": "N67_028", "translations": {"ms": "penerang", "hi": "विशेषक", "tr": "niteleyici"}}
+{"guid": "N67_029", "translations": {"ms": "morfem", "hi": "रूपिम", "tr": "morfem"}}
+{"guid": "N67_030", "translations": {"ms": "konsonan letupan", "hi": "स्पर्श व्यंजन", "tr": "patlamalı ünsüz"}}
+{"guid": "N67_031", "translations": {"ms": "pengulangan", "hi": "द्विरुक्ति", "tr": "ikileme"}}
+{"guid": "N67_032", "translations": {"ms": "konsonan desis", "hi": "ऊष्म ध्वनि", "tr": "ıslıklı ünsüz"}}

@@ -1,0 +1,26 @@
+{"guid": "N66_001", "forms": [{"grammatical_form": "noun/en_singular", "text": "polynomial", "is_base_form": true, "ipa": "/ˌpɑːliˈnoʊmiəl/", "phonetic": "pol-ee-NOH-mee-uhl"}]}
+{"guid": "N66_002", "forms": [{"grammatical_form": "noun/en_singular", "text": "sine", "is_base_form": true, "ipa": "/saɪn/", "phonetic": "SINE"}]}
+{"guid": "N66_003", "forms": [{"grammatical_form": "noun/en_singular", "text": "cosine", "is_base_form": true, "ipa": "/ˈkoʊsaɪn/", "phonetic": "KOH-sine"}]}
+{"guid": "N66_005", "forms": [{"grammatical_form": "noun/en_singular", "text": "isomorphism", "is_base_form": true, "ipa": "/ˌaɪsəˈmɔrfɪzəm/", "phonetic": "eye-suh-MOR-fiz-um"}]}
+{"guid": "N66_006", "forms": [{"grammatical_form": "noun/en_singular", "text": "homomorphism", "is_base_form": true, "ipa": "/ˌhɑməˈmɔrfɪzəm/", "phonetic": "HAH-muh-MOR-fiz-um"}]}
+{"guid": "N66_007", "forms": [{"grammatical_form": "noun/en_singular", "text": "morphism", "is_base_form": true, "ipa": "/ˈmɔr.fɪz.əm/", "phonetic": "MOR-fiz-um"}]}
+{"guid": "N66_008", "forms": [{"grammatical_form": "noun/en_singular", "text": "automorphism", "is_base_form": true, "ipa": "/ˌɔːtəmɔrˈfɪzəm/", "phonetic": "aw-tuh-MOR-fiz-um"}]}
+{"guid": "N66_009", "forms": [{"grammatical_form": "noun/en_singular", "text": "functor", "is_base_form": true, "ipa": "/ˈfʌŋktər/", "phonetic": "FUNK-ter"}]}
+{"guid": "N66_010", "forms": [{"grammatical_form": "noun/en_singular", "text": "subspace", "is_base_form": true, "ipa": "/ˈsʌbˌspeɪs/", "phonetic": "SUB-space"}]}
+{"guid": "N66_011", "forms": [{"grammatical_form": "noun/en_singular", "text": "homotopy", "is_base_form": true, "ipa": "/hoʊˈmɑtəpi/", "phonetic": "hoh-MOT-uh-pee"}]}
+{"guid": "N66_012", "forms": [{"grammatical_form": "noun/en_singular", "text": "exponent", "is_base_form": true, "ipa": "/ɪkˈspoʊnənt/", "phonetic": "ik-SPOH-nent"}]}
+{"guid": "N66_013", "forms": [{"grammatical_form": "noun/en_singular", "text": "logarithm", "is_base_form": true, "ipa": "/ˈlɔːɡəˌrɪðəm/", "phonetic": "LOG-uh-rith-um"}]}
+{"guid": "N66_014", "forms": [{"grammatical_form": "noun/en_singular", "text": "quotient", "is_base_form": true, "ipa": "/ˈkwoʊʃənt/", "phonetic": "KWOH-shunt"}]}
+{"guid": "N66_015", "forms": [{"grammatical_form": "noun/en_singular", "text": "product", "is_base_form": true, "ipa": "/ˈprɑːdʌkt/", "phonetic": "PROD-ukt"}]}
+{"guid": "N66_016", "forms": [{"grammatical_form": "noun/en_singular", "text": "divisor", "is_base_form": true, "ipa": "/dɪˈvaɪzɚ/", "phonetic": "duh-VY-zur"}]}
+{"guid": "N66_017", "forms": [{"grammatical_form": "noun/en_singular", "text": "antiderivative", "is_base_form": true, "ipa": "/ˌænti dɪˈrɪvətɪv/", "phonetic": "AN-tee-duh-RIV-uh-tiv"}]}
+{"guid": "N66_018", "forms": [{"grammatical_form": "noun/en_singular", "text": "codomain", "is_base_form": true, "ipa": "/ˈkoʊdəmeɪn/", "phonetic": "KOH-duh-mayn"}]}
+{"guid": "N66_019", "forms": [{"grammatical_form": "noun/en_singular", "text": "permutation", "is_base_form": true, "ipa": "/ˌpɝːmjəˈteɪʃən/", "phonetic": "pur-myoo-TAY-shun"}]}
+{"guid": "N66_020", "forms": [{"grammatical_form": "noun/en_singular", "text": "tangent", "is_base_form": true, "ipa": "/ˈtændʒənt/", "phonetic": "TAN-jent"}]}
+{"guid": "N66_021", "forms": [{"grammatical_form": "noun/en_singular", "text": "exponentiation", "is_base_form": true, "ipa": "/ˌɛkspoʊnənʃiˈeɪʃən/", "phonetic": "ek-spoh-nen-shee-AY-shun"}]}
+{"guid": "N66_022", "forms": [{"grammatical_form": "noun/en_singular", "text": "axiom", "is_base_form": true, "ipa": "/ˈæk.si.əm/", "phonetic": "AK-see-um"}]}
+{"guid": "N66_023", "forms": [{"grammatical_form": "noun/en_singular", "text": "quadratic equation", "is_base_form": true}], "variants": [{"kind": "equivalent", "key": "quadratic", "forms": [{"grammatical_form": "noun/en_singular", "text": "quadratic", "is_base_form": true}]}]}
+{"guid": "N66_024", "forms": [{"grammatical_form": "noun/en_singular", "text": "factorization", "is_base_form": true, "ipa": "/ˌfæk.tɚ.əˈzeɪ.ʃən/", "phonetic": "fak-ter-uh-ZAY-shun"}]}
+{"guid": "N66_025", "forms": [{"grammatical_form": "noun/en_singular", "text": "homology", "is_base_form": true, "ipa": "/həˈmɑlədʒi/", "phonetic": "huh-MOL-uh-jee"}]}
+{"guid": "N66_026", "forms": [{"grammatical_form": "noun/en_singular", "text": "cohomology", "is_base_form": true, "ipa": "/ˌkoʊhoʊˈmɑːlədʒi/", "phonetic": "koh-hoh-MOL-uh-jee"}]}
+{"guid": "N66_027", "forms": [{"grammatical_form": "noun/en_singular", "text": "vertex", "is_base_form": true}]}

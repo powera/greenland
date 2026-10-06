@@ -33,3 +33,4 @@
 {"guid": "N47_042", "forms": [{"grammatical_form": "noun/en_singular", "text": "classroom", "is_base_form": true, "ipa": "/ˈklæsˌrum/", "phonetic": "KLASS-room"}]}
 {"guid": "N47_043", "forms": [{"grammatical_form": "noun/en_singular", "text": "entrance", "is_base_form": true, "ipa": "/ˈɛntrəns/", "phonetic": "EN-truhns"}]}
 {"guid": "N47_044", "forms": [{"grammatical_form": "noun/en_singular", "text": "basket", "is_base_form": true, "ipa": "/ˈbæs.kɪt/", "phonetic": "BAS-kit"}]}
+{"guid": "N47_045", "forms": [{"grammatical_form": "noun/en_singular", "text": "drawing room", "is_base_form": true}], "variants": [{"kind": "spelling", "key": "drawing-room", "forms": [{"grammatical_form": "noun/en_singular", "text": "drawing-room", "is_base_form": true}]}]}

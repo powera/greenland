@@ -49,3 +49,4 @@
 {"guid": "N35_108", "forms": [{"grammatical_form": "noun/en_singular", "text": "grandma", "is_base_form": true, "ipa": "/ˈɡrænˌmɑ/", "phonetic": "GRAND-mah"}]}
 {"guid": "N35_109", "forms": [{"grammatical_form": "noun/en_singular", "text": "grandpa", "is_base_form": true, "ipa": "/ˈɡrænˌpɑ/", "phonetic": "GRAND-paw"}]}
 {"guid": "N35_110", "forms": [{"grammatical_form": "noun/en_singular", "text": "surname", "is_base_form": true, "ipa": "/ˈsɝːˌneɪm/", "phonetic": "SUR-name"}]}
+{"guid": "N35_111", "variants": [{"kind": "spelling", "key": "first-born", "forms": [{"grammatical_form": "noun/en_singular", "text": "first-born", "is_base_form": true}]}]}

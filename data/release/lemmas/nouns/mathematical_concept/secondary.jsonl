@@ -1,0 +1,24 @@
+{"guid": "N66_001", "translations": {"ms": "polinomial", "hi": "बहुपद", "tr": "polinom"}}
+{"guid": "N66_002", "translations": {"ms": "sinus", "hi": "ज्या", "tr": "sinüs"}}
+{"guid": "N66_003", "translations": {"ms": "kosinus", "hi": "कोसाइन", "tr": "kosinüs"}}
+{"guid": "N66_005", "translations": {"ms": "isomorfisme", "hi": "समरूपता", "tr": "izomorfizm"}}
+{"guid": "N66_006", "translations": {"ms": "homomorfisme", "hi": "समरूपता", "tr": "homomorfizma"}}
+{"guid": "N66_007", "translations": {"ms": "morfisme", "hi": "रूपवाद", "tr": "morfizma"}}
+{"guid": "N66_008", "translations": {"ms": "automorfisme", "hi": "स्वरूपसमरूपता", "tr": "otomorfizm"}}
+{"guid": "N66_009", "translations": {"ms": "funktor", "hi": "फलनक", "tr": "funktör"}}
+{"guid": "N66_010", "translations": {"ms": "subruang", "hi": "उपसमष्टि", "tr": "alt uzay"}}
+{"guid": "N66_011", "translations": {"ms": "homotopi", "hi": "समरूपता", "tr": "homotopi"}}
+{"guid": "N66_012", "translations": {"ms": "eksponen", "hi": "घातांक", "tr": "üs"}}
+{"guid": "N66_013", "translations": {"ms": "logaritma", "hi": "लघुगणक", "tr": "logaritma"}}
+{"guid": "N66_014", "translations": {"ms": "hasil bahagi", "hi": "भागफल", "tr": "bölüm"}}
+{"guid": "N66_015", "translations": {"ms": "hasil darab", "hi": "गुणनफल", "tr": "çarpım"}}
+{"guid": "N66_016", "translations": {"ms": "pembahagi", "hi": "भाजक", "tr": "bölen"}}
+{"guid": "N66_017", "translations": {"ms": "anti terbitan", "hi": "प्रतिअवकलज", "tr": "belirsiz integral"}}
+{"guid": "N66_018", "translations": {"ms": "kodomain", "hi": "प्रतिक्षेत्र", "tr": "kodomen"}}
+{"guid": "N66_019", "translations": {"ms": "permutasi", "hi": "क्रमचय", "tr": "permütasyon"}}
+{"guid": "N66_020", "translations": {"ms": "tangen", "hi": "स्पर्शज्या", "tr": "tanjant"}}
+{"guid": "N66_021", "translations": {"ms": "pemangkatan", "hi": "घातांक", "tr": "üs alma"}}
+{"guid": "N66_022", "translations": {"ms": "aksiom", "hi": "स्वयंसिद्ध", "tr": "aksiyom"}}
+{"guid": "N66_024", "translations": {"ms": "pemfaktoran", "hi": "गुणनखंडन", "tr": "çarpanlara ayırma"}}
+{"guid": "N66_025", "translations": {"ms": "homologi", "hi": "समरूपता", "tr": "homoloji"}}
+{"guid": "N66_026", "translations": {"ms": "kohomologi", "hi": "सहसमरूपता", "tr": "kohomoloji"}}

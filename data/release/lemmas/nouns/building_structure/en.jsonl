@@ -34,7 +34,7 @@
 {"guid": "N07_036", "forms": [{"grammatical_form": "noun/en_singular", "text": "bathroom", "is_base_form": true, "ipa": "/ˈbæθruːm/", "phonetic": "BATH-room"}]}
 {"guid": "N07_037", "forms": [{"grammatical_form": "noun/en_singular", "text": "patio", "is_base_form": true, "ipa": "/ˈpæti.oʊ/", "phonetic": "PAH-tee-OH"}]}
 {"guid": "N07_038", "forms": [{"grammatical_form": "noun/en_singular", "text": "attic", "is_base_form": true, "ipa": "/ˈætɪk/", "phonetic": "AT-tik"}]}
-{"guid": "N07_039", "forms": [{"grammatical_form": "noun/en_singular", "text": "dining room", "is_base_form": true}]}
+{"guid": "N07_039", "forms": [{"grammatical_form": "noun/en_singular", "text": "dining room", "is_base_form": true}], "variants": [{"kind": "spelling", "key": "dining-room", "forms": [{"grammatical_form": "noun/en_singular", "text": "dining-room", "is_base_form": true}]}]}
 {"guid": "N07_040", "forms": [{"grammatical_form": "noun/en_singular", "text": "laundry room", "is_base_form": true, "ipa": "/lɔːndri ruːm/", "phonetic": "LAH-ndry ROOM"}]}
 {"guid": "N07_041", "forms": [{"grammatical_form": "noun/en_singular", "text": "home", "is_base_form": true, "ipa": "/hoʊm/", "phonetic": "HOH-m"}]}
 {"guid": "N07_042", "forms": [{"grammatical_form": "noun/en_singular", "text": "hall", "is_base_form": true, "ipa": "/hɔːl/", "phonetic": "HAW-uhl"}], "variants": [{"kind": "spelling", "key": "Hall", "forms": [{"grammatical_form": "noun/en_singular", "text": "Hall", "is_base_form": true}]}]}
@@ -49,7 +49,7 @@
 {"guid": "N07_055", "variants": [{"kind": "spelling", "key": "Temple", "forms": [{"grammatical_form": "noun/en_singular", "text": "Temple", "is_base_form": true}]}]}
 {"guid": "N07_057", "forms": [{"grammatical_form": "noun/en_singular", "text": "stadium", "is_base_form": true}, {"grammatical_form": "noun/en_plural", "text": "stadiums", "is_base_form": false}]}
 {"guid": "N07_058", "variants": [{"kind": "spelling", "key": "Palace", "forms": [{"grammatical_form": "noun/en_singular", "text": "Palace", "is_base_form": true}]}]}
-{"guid": "N07_070", "forms": [{"grammatical_form": "noun/en_singular", "text": "high school", "is_base_form": true}]}
+{"guid": "N07_070", "forms": [{"grammatical_form": "noun/en_singular", "text": "high school", "is_base_form": true}], "variants": [{"kind": "spelling", "key": "high-school", "forms": [{"grammatical_form": "noun/en_singular", "text": "high-school", "is_base_form": true}]}]}
 {"guid": "N07_071", "forms": [{"grammatical_form": "noun/en_singular", "text": "middle school", "is_base_form": true}]}
 {"guid": "N07_072", "forms": [{"grammatical_form": "noun/en_singular", "text": "elementary school", "is_base_form": true}]}
 {"guid": "N07_073", "forms": [{"grammatical_form": "noun/en_singular", "text": "boarding school", "is_base_form": true}]}

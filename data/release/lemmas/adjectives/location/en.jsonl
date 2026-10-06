@@ -68,3 +68,4 @@
 {"guid": "A20_068", "forms": [{"grammatical_form": "adjective/en_positive", "text": "inner-city", "is_base_form": true, "ipa": "/ˌɪnɚˈsɪti/", "phonetic": "IN-er-SIT-ee"}]}
 {"guid": "A20_069", "forms": [{"grammatical_form": "adjective/en_positive", "text": "west-central", "is_base_form": true, "ipa": "/ˌwɛstˈsɛntrəl/", "phonetic": "WEST-SEN-truhl"}]}
 {"guid": "A20_070", "forms": [{"grammatical_form": "adjective/en_positive", "text": "downstairs", "is_base_form": true, "ipa": "/ˌdaʊnˈstɛrz/", "phonetic": "DOWN-stairz"}]}
+{"guid": "A20_071", "forms": [{"grammatical_form": "adjective/en_positive", "text": "worldwide", "is_base_form": true}], "variants": [{"kind": "spelling", "key": "world-wide", "forms": [{"grammatical_form": "adjective/en_positive", "text": "world-wide", "is_base_form": true}]}]}

@@ -155,7 +155,7 @@
 {"guid": "A05_291", "forms": [{"grammatical_form": "adjective/en_positive", "text": "high-level", "is_base_form": true, "ipa": "/ˌhaɪ ˈlɛvəl/", "phonetic": "HIGH-LEV-uhl"}]}
 {"guid": "A05_292", "forms": [{"grammatical_form": "adjective/en_positive", "text": "real-world", "is_base_form": true, "ipa": "/ˈriːl ˌwɝːld/", "phonetic": "REEL-WURLD"}]}
 {"guid": "A05_293", "forms": [{"grammatical_form": "adjective/en_positive", "text": "self-governing", "is_base_form": true, "ipa": "/ˌsɛlf ˈɡʌvərnɪŋ/", "phonetic": "self-GUV-er-ning"}]}
-{"guid": "A05_294", "forms": [{"grammatical_form": "adjective/en_positive", "text": "non-standard", "is_base_form": true, "ipa": "/ˌnɑnˈstændɚd/", "phonetic": "non-STAR-durd"}]}
+{"guid": "A05_294", "forms": [{"grammatical_form": "adjective/en_positive", "text": "non-standard", "is_base_form": true, "ipa": "/ˌnɑnˈstændɚd/", "phonetic": "non-STAR-durd"}], "variants": [{"kind": "spelling", "key": "nonstandard", "forms": [{"grammatical_form": "adjective/en_positive", "text": "nonstandard", "is_base_form": true}]}]}
 {"guid": "A05_295", "forms": [{"grammatical_form": "adjective/en_positive", "text": "middle-aged", "is_base_form": true, "ipa": "/ˌmɪdəlˈeɪdʒd/", "phonetic": "MID-uhl-AYJD"}]}
 {"guid": "A05_296", "forms": [{"grammatical_form": "adjective/en_positive", "text": "non-zero", "is_base_form": true, "ipa": "/ˌnɑnˈzɪroʊ/", "phonetic": "non-ZEER-oh"}]}
 {"guid": "A05_297", "forms": [{"grammatical_form": "adjective/en_positive", "text": "first-class", "is_base_form": true, "ipa": "/ˌfɝst ˈklæs/", "phonetic": "FURST-KLASS"}]}
@@ -206,3 +206,4 @@
 {"guid": "A05_342", "forms": [{"grammatical_form": "adjective/en_positive", "text": "untidy", "is_base_form": true, "ipa": "/ʌnˈtaɪdi/", "phonetic": "un-TY-dee"}]}
 {"guid": "A05_343", "forms": [{"grammatical_form": "adjective/en_positive", "text": "unusual", "is_base_form": true, "ipa": "/ʌnˈjuːʒuəl/", "phonetic": "un-YOO-zhoo-uhl"}]}
 {"guid": "A05_344", "forms": [{"grammatical_form": "adjective/en_positive", "text": "vulnerable", "is_base_form": true, "ipa": "/ˈvʌlnɚəbəl/", "phonetic": "VUL-ner-uh-bul"}]}
+{"guid": "A05_346", "forms": [{"grammatical_form": "adjective/en_positive", "text": "bona fide", "is_base_form": true}]}

@@ -101,15 +101,9 @@
 {"guid": "N50_117", "forms": [{"grammatical_form": "noun/en_singular", "text": "proverb", "is_base_form": true, "ipa": "/ˈprɑːvɝːb/", "phonetic": "PROV-urb"}]}
 {"guid": "N50_118", "forms": [{"grammatical_form": "noun/en_singular", "text": "syntax", "is_base_form": true, "ipa": "/ˈsɪntæks/", "phonetic": "SIN-taks"}]}
 {"guid": "N50_121", "forms": [{"grammatical_form": "noun/en_singular", "text": "fricative", "is_base_form": true, "ipa": "/ˈfrɪkətɪv/", "phonetic": "FRIK-uh-tiv"}]}
-{"guid": "N50_122", "forms": [{"grammatical_form": "noun/en_singular", "text": "plosive", "is_base_form": true, "ipa": "/ˈploʊsɪv/", "phonetic": "PLOH-siv"}]}
-{"guid": "N50_123", "forms": [{"grammatical_form": "noun/en_singular", "text": "sibilant", "is_base_form": true, "ipa": "/ˈsɪbələnt/", "phonetic": "SIB-uh-lunt"}]}
 {"guid": "N50_124", "forms": [{"grammatical_form": "noun/en_singular", "text": "prosody", "is_base_form": true, "ipa": "/ˈprɑːsədi/", "phonetic": "PROS-uh-dee"}]}
-{"guid": "N50_125", "forms": [{"grammatical_form": "noun/en_singular", "text": "morpheme", "is_base_form": true, "ipa": "/ˈmɔr.fim/", "phonetic": "MOR-feem"}]}
-{"guid": "N50_126", "forms": [{"grammatical_form": "noun/en_singular", "text": "reduplication", "is_base_form": true, "ipa": "/ˌriːduːplɪˈkeɪʃən/", "phonetic": "ree-doo-pli-KAY-shun"}]}
-{"guid": "N50_127", "forms": [{"grammatical_form": "noun/en_singular", "text": "modifier", "is_base_form": true, "ipa": "/ˈmɑdəˌfaɪər/", "phonetic": "MOD-uh-fy-er"}]}
 {"guid": "N50_128", "forms": [{"grammatical_form": "noun/en_singular", "text": "connotation", "is_base_form": true, "ipa": "/ˌkɑːnəˈteɪʃən/", "phonetic": "kon-uh-TAY-shun"}]}
 {"guid": "N50_129", "forms": [{"grammatical_form": "noun/en_singular", "text": "denotation", "is_base_form": true, "ipa": "/ˌdiːnoʊˈteɪʃən/", "phonetic": "dee-noh-TAY-shun"}]}
-{"guid": "N50_130", "forms": [{"grammatical_form": "noun/en_singular", "text": "cognate", "is_base_form": true, "ipa": "/ˈkɑːɡneɪt/", "phonetic": "KOG-nate"}]}
 {"guid": "N50_131", "forms": [{"grammatical_form": "noun/en_singular", "text": "transliteration", "is_base_form": true, "ipa": "/ˌtrænzˌlɪtəˈreɪʃən/", "phonetic": "trans-lit-uh-RAY-shun"}]}
 {"guid": "N50_132", "forms": [{"grammatical_form": "noun/en_singular", "text": "loanword", "is_base_form": true, "ipa": "/ˈloʊnˌwɝːd/", "phonetic": "LOHN-wurd"}]}
 {"guid": "N50_133", "forms": [{"grammatical_form": "noun/en_singular", "text": "vernacular", "is_base_form": true, "ipa": "/vəˈnækjələr/", "phonetic": "vuh-NAK-yuh-ler"}]}
@@ -136,3 +130,7 @@
 {"guid": "N50_159", "forms": [{"grammatical_form": "noun/en_singular", "text": "praise", "is_base_form": true, "ipa": "/preɪz/", "phonetic": "PRAYZ"}]}
 {"guid": "N50_160", "forms": [{"grammatical_form": "noun/en_singular", "text": "playbook", "is_base_form": true, "ipa": "/ˈpleɪˌbʊk/", "phonetic": "PLAY-book"}]}
 {"guid": "N50_161", "forms": [{"grammatical_form": "noun/en_singular", "text": "tell", "is_base_form": true, "ipa": "/tɛl/", "phonetic": "TEL"}]}
+{"guid": "N50_162", "forms": [{"grammatical_form": "noun/en_singular", "text": "compound word", "is_base_form": true}]}
+{"guid": "N50_163", "forms": [{"grammatical_form": "noun/en_singular", "text": "press release", "is_base_form": true}]}
+{"guid": "N50_165", "forms": [{"grammatical_form": "noun/en_singular", "text": "oral translation", "is_base_form": true}]}
+{"guid": "N50_166", "forms": [{"grammatical_form": "noun/en_singular", "text": "background music", "is_base_form": true}]}

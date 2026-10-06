@@ -25,3 +25,4 @@
 {"guid": "A08_025", "forms": [{"grammatical_form": "adjective/en_positive", "text": "cognate", "is_base_form": true, "ipa": "/ˈkɑːɡneɪt/", "phonetic": "KOG-nate"}]}
 {"guid": "A08_026", "forms": [{"grammatical_form": "adjective/en_positive", "text": "vernacular", "is_base_form": true, "ipa": "/vəˈnækjələr/", "phonetic": "vuh-NAK-yuh-ler"}]}
 {"guid": "A08_027", "forms": [{"grammatical_form": "adjective/en_positive", "text": "English", "is_base_form": true, "ipa": "/ˈɪŋɡlɪʃ/", "phonetic": "ING-glish"}]}
+{"guid": "A08_028", "variants": [{"kind": "spelling", "key": "multi-national", "forms": [{"grammatical_form": "adjective/en_positive", "text": "multi-national", "is_base_form": true}]}]}

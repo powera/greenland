@@ -34,7 +34,7 @@
 {"guid": "A09_034", "forms": [{"grammatical_form": "adjective/en_positive", "text": "second-class", "is_base_form": true, "ipa": "/ˈsɛkənd ˌklæs/", "phonetic": "SEK-und-KLASS"}]}
 {"guid": "A09_035", "forms": [{"grammatical_form": "adjective/en_positive", "text": "for-profit", "is_base_form": true, "ipa": "/ˌfɔr ˈprɑfɪt/", "phonetic": "for-PRAH-fit"}]}
 {"guid": "A09_036", "forms": [{"grammatical_form": "adjective/en_positive", "text": "anti-aircraft", "is_base_form": true, "ipa": "/ˌænti ˈɛrˌkræft/", "phonetic": "AN-tee AIR-kraft"}]}
-{"guid": "A09_037", "forms": [{"grammatical_form": "adjective/en_positive", "text": "multi-purpose", "is_base_form": true, "ipa": "/ˌmʌltiˈpɝːpəs/", "phonetic": "MUL-tee-PUR-pus"}]}
+{"guid": "A09_037", "forms": [{"grammatical_form": "adjective/en_positive", "text": "multi-purpose", "is_base_form": true, "ipa": "/ˌmʌltiˈpɝːpəs/", "phonetic": "MUL-tee-PUR-pus"}], "variants": [{"kind": "spelling", "key": "multipurpose", "forms": [{"grammatical_form": "adjective/en_positive", "text": "multipurpose", "is_base_form": true}]}]}
 {"guid": "A09_038", "forms": [{"grammatical_form": "adjective/en_positive", "text": "non-commercial", "is_base_form": true, "ipa": "/ˌnɑnˈkɝːʃəl/", "phonetic": "non-kuh-MER-shul"}]}
 {"guid": "A09_039", "forms": [{"grammatical_form": "adjective/en_positive", "text": "post-secondary", "is_base_form": true, "ipa": "/ˌpoʊst ˈsɛkənˌdɛri/", "phonetic": "pohst-SEK-un-DAIR-ee"}]}
 {"guid": "A09_040", "forms": [{"grammatical_form": "adjective/en_positive", "text": "organizational", "is_base_form": true, "ipa": "/ˌɔrɡənəˈzeɪʃənəl/", "phonetic": "OR-guh-nuh-ZAY-shuh-nuhl"}]}

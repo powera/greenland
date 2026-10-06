@@ -38,3 +38,4 @@
 {"guid": "N56_038", "forms": [{"grammatical_form": "noun/en_singular", "text": "countryside", "is_base_form": true, "ipa": "/ˈkʌntriˌsaɪd/", "phonetic": "KUN-tree-side"}]}
 {"guid": "N56_039", "forms": [{"grammatical_form": "noun/en_singular", "text": "village", "is_base_form": true, "ipa": "/ˈvɪlɪdʒ/", "phonetic": "VIL-ij"}]}
 {"guid": "N56_040", "forms": [{"grammatical_form": "noun/en_singular", "text": "world", "is_base_form": true, "ipa": "/wɝld/", "phonetic": "WORLD"}]}
+{"guid": "N56_041", "forms": [{"grammatical_form": "noun/en_singular", "text": "land use", "is_base_form": true}], "variants": [{"kind": "spelling", "key": "land-use", "forms": [{"grammatical_form": "noun/en_singular", "text": "land-use", "is_base_form": true}]}]}

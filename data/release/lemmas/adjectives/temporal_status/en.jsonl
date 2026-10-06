@@ -58,3 +58,4 @@
 {"guid": "A25_058", "forms": [{"grammatical_form": "adjective/en_positive", "text": "archaic", "is_base_form": true, "ipa": "/ɑrˈkeɪɪk/", "phonetic": "ar-KAY-ik"}]}
 {"guid": "A25_059", "forms": [{"grammatical_form": "adjective/en_positive", "text": "archaic", "is_base_form": true, "ipa": "/ɑrˈkeɪɪk/", "phonetic": "ar-KAY-ik"}]}
 {"guid": "A25_060", "forms": [{"grammatical_form": "adjective/en_positive", "text": "midday", "is_base_form": true, "ipa": "/ˌmɪdˈdeɪ/", "phonetic": "MID-day"}]}
+{"guid": "A25_061", "forms": [{"grammatical_form": "adjective/en_positive", "text": "newfound", "is_base_form": true}], "variants": [{"kind": "spelling", "key": "new-found", "forms": [{"grammatical_form": "adjective/en_positive", "text": "new-found", "is_base_form": true}]}]}

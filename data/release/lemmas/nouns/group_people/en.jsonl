@@ -30,3 +30,5 @@
 {"guid": "N26_036", "forms": [{"grammatical_form": "noun/en_singular", "text": "peloton", "is_base_form": true, "ipa": "/ˈpɛləˌtɑn/", "phonetic": "PEL-uh-tahn"}]}
 {"guid": "N26_037", "forms": [{"grammatical_form": "noun/en_singular", "text": "breakaway", "is_base_form": true, "ipa": "/ˈbreɪkəˌweɪ/", "phonetic": "BRAY-kuh-way"}]}
 {"guid": "N26_038", "forms": [{"grammatical_form": "noun/en_singular", "text": "echelon", "is_base_form": true, "ipa": "/ˈɛʃəˌlɑn/", "phonetic": "ESH-uh-lon"}]}
+{"guid": "N26_039", "forms": [{"grammatical_form": "noun/en_singular", "text": "left wing", "is_base_form": true}]}
+{"guid": "N26_040", "forms": [{"grammatical_form": "noun/en_singular", "text": "third party", "is_base_form": true}], "variants": [{"kind": "spelling", "key": "third-party", "forms": [{"grammatical_form": "noun/en_singular", "text": "third-party", "is_base_form": true}]}]}

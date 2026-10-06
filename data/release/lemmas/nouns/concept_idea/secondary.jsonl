@@ -145,7 +145,6 @@
 {"guid": "N17_298", "translations": {"ms": "hak asasi manusia", "hi": "मानवाधिकार", "tr": "insan hakkı"}}
 {"guid": "N17_299", "translations": {"ms": "kebebasan bersuara", "hi": "अभिव्यक्ति की स्वतंत्रता", "tr": "ifade özgürlüğü"}}
 {"guid": "N17_300", "translations": {"ms": "pendapat umum", "hi": "जनमत", "tr": "kamuoyu"}}
-{"guid": "N17_301", "translations": {"ms": "aksiom", "hi": "स्वयंसिद्ध", "tr": "aksiyom"}}
 {"guid": "N17_302", "translations": {"ms": "fraktal", "hi": "फ्रैक्टल", "tr": "fraktal"}}
 {"guid": "N17_303", "translations": {"ms": "ikatan", "hi": "संबंध", "tr": "bağ"}}
 {"guid": "N17_304", "translations": {"ms": "sintesis", "hi": "संश्लेषण", "tr": "sentez"}}
@@ -168,20 +167,15 @@
 {"guid": "N17_321", "translations": {"ms": "asal usul", "hi": "उद्गम", "tr": "köken"}}
 {"guid": "N17_322", "translations": {"ms": "unsur", "hi": "तत्व", "tr": "unsur"}}
 {"guid": "N17_323", "translations": {"ms": "kompromi", "hi": "समझौता", "tr": "ödünleşim"}}
-{"guid": "N17_324", "translations": {"ms": "kala", "hi": "काल", "tr": "zaman"}}
-{"guid": "N17_325", "translations": {"ms": "bentuk tunggal", "hi": "एकवचन", "tr": "tekil"}}
 {"guid": "N17_326", "translations": {"ms": "gender", "hi": "लिंग पहचान", "tr": "toplumsal cinsiyet"}}
 {"guid": "N17_327", "translations": {"ms": "takrif", "hi": "परिभाषा", "tr": "tanım"}}
 {"guid": "N17_328", "translations": {"ms": "sinonim", "hi": "पर्यायवाची", "tr": "eş anlamlı sözcük"}}
 {"guid": "N17_329", "translations": {"ms": "monisme", "hi": "अद्वैतवाद", "tr": "monizm"}}
 {"guid": "N17_330", "translations": {"ms": "sebab-akibat", "hi": "कार्य-कारण संबंध", "tr": "nedensellik"}}
 {"guid": "N17_331", "translations": {"ms": "kesilapan logik", "hi": "तर्कदोष", "tr": "mantık safsatası"}}
-{"guid": "N17_332", "translations": {"ms": "klitik", "hi": "क्लिटिक", "tr": "klitik"}}
 {"guid": "N17_333", "translations": {"ms": "model", "hi": "प्रतिमान", "tr": "örnek"}}
-{"guid": "N17_334", "translations": {"ms": "kasus vokatif", "hi": "संबोधन कारक", "tr": "seslenme hâli"}}
 {"guid": "N17_335", "translations": {"ms": "aspek", "hi": "पहलू", "tr": "yön"}}
 {"guid": "N17_336", "translations": {"ms": "diglosia", "hi": "द्विरूपता", "tr": "diglosi"}}
-{"guid": "N17_337", "translations": {"ms": "garis isoglos", "hi": "समभाषा रेखा", "tr": "izoglos"}}
 {"guid": "N17_338", "translations": {"ms": "kawasan linguistik", "hi": "भाषा संघ", "tr": "dil birliği"}}
 {"guid": "N17_339", "translations": {"ms": "matlamat", "hi": "लक्ष्य", "tr": "hedef"}}
 {"guid": "N17_340", "translations": {"ms": "kepentingan", "hi": "ख़ातिर", "tr": "hatır"}}

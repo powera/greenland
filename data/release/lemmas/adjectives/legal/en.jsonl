@@ -56,7 +56,7 @@
 {"guid": "A27_056", "forms": [{"grammatical_form": "adjective/en_positive", "text": "in forma pauperis", "is_base_form": true}]}
 {"guid": "A27_057", "forms": [{"grammatical_form": "adjective/en_positive", "text": "pro hac vice", "is_base_form": true}]}
 {"guid": "A27_058", "forms": [{"grammatical_form": "adjective/en_positive", "text": "per stirpes", "is_base_form": true}]}
-{"guid": "A27_059", "forms": [{"grammatical_form": "adjective/en_positive", "text": "per capita", "is_base_form": true}]}
+{"guid": "A27_059", "forms": [{"grammatical_form": "adjective/en_positive", "text": "per capita", "is_base_form": true}], "variants": [{"kind": "spelling", "key": "per-capita", "forms": [{"grammatical_form": "adjective/en_positive", "text": "per-capita", "is_base_form": true}]}]}
 {"guid": "A27_060", "forms": [{"grammatical_form": "adjective/en_positive", "text": "ad litem", "is_base_form": true}]}
 {"guid": "A27_061", "forms": [{"grammatical_form": "adjective/en_positive", "text": "in re", "is_base_form": true}]}
 {"guid": "A27_063", "forms": [{"grammatical_form": "adjective/en_positive", "text": "void for vagueness", "is_base_form": true}]}

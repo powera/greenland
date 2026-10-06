@@ -36,3 +36,4 @@
 {"guid": "N28_036", "forms": [{"grammatical_form": "noun/en_singular", "text": "flop", "is_base_form": true, "ipa": "/flɑp/", "phonetic": "FLOP"}]}
 {"guid": "N28_037", "forms": [{"grammatical_form": "noun/en_singular", "text": "wall", "is_base_form": true, "ipa": "/wɔl/", "phonetic": "WAWL"}]}
 {"guid": "N28_038", "forms": [{"grammatical_form": "noun/en_singular", "text": "character", "is_base_form": true, "ipa": "/ˈkɛrɪktɚ/", "phonetic": "KAIR-ik-ter"}]}
+{"guid": "N28_039", "variants": [{"kind": "spelling", "key": "set-up", "forms": [{"grammatical_form": "noun/en_singular", "text": "set-up", "is_base_form": true}]}]}

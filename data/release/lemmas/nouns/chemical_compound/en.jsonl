@@ -148,3 +148,4 @@
 {"guid": "N15_154", "forms": [{"grammatical_form": "noun/en_singular", "text": "livermorium", "is_base_form": true, "ipa": "/ˌlɪvərˈmɔriəm/", "phonetic": "liv-er-MOR-ee-um"}]}
 {"guid": "N15_155", "forms": [{"grammatical_form": "noun/en_singular", "text": "tennessine", "is_base_form": true, "ipa": "/ˈtɛnəsiːn/", "phonetic": "TEN-uh-seen"}]}
 {"guid": "N15_156", "forms": [{"grammatical_form": "noun/en_singular", "text": "oganesson", "is_base_form": true, "ipa": "/ˌoʊɡəˈnɛsɑn/", "phonetic": "oh-guh-NESS-on"}]}
+{"guid": "N15_157", "forms": [{"grammatical_form": "noun/en_singular", "text": "gamma ray", "is_base_form": true}], "variants": [{"kind": "spelling", "key": "gamma-ray", "forms": [{"grammatical_form": "noun/en_singular", "text": "gamma-ray", "is_base_form": true}]}]}

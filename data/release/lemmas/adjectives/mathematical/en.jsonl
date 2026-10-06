@@ -57,3 +57,4 @@
 {"guid": "A26_057", "forms": [{"grammatical_form": "adjective/en_positive", "text": "nominative", "is_base_form": true, "ipa": "/ˈnɑmənətɪv/", "phonetic": "NOM-uh-nuh-tiv"}]}
 {"guid": "A26_058", "forms": [{"grammatical_form": "adjective/en_positive", "text": "dative", "is_base_form": true, "ipa": "/ˈdeɪtɪv/", "phonetic": "DAY-tiv"}]}
 {"guid": "A26_059", "forms": [{"grammatical_form": "adjective/en_positive", "text": "ablative", "is_base_form": true, "ipa": "/ˈæblətɪv/", "phonetic": "AB-luh-tiv"}]}
+{"guid": "A26_060", "variants": [{"kind": "spelling", "key": "non-linear", "forms": [{"grammatical_form": "adjective/en_positive", "text": "non-linear", "is_base_form": true}]}]}

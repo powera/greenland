@@ -12,22 +12,11 @@
 {"guid": "N21_012", "translations": {"ms": "kecerdasan buatan", "hi": "कृत्रिम बुद्धिमत्ता", "tr": "yapay zekâ"}}
 {"guid": "N21_013", "translations": {"ms": "pembelajaran mesin", "hi": "मशीन लर्निंग", "tr": "makine öğrenimi"}}
 {"guid": "N21_014", "translations": {"ms": "fiksyen sains", "hi": "विज्ञान कथा", "tr": "bilim kurgu"}}
-{"guid": "N21_015", "translations": {"ms": "polinomial", "hi": "बहुपद", "tr": "polinom"}}
-{"guid": "N21_016", "translations": {"ms": "sinus", "hi": "ज्या", "tr": "sinüs"}}
-{"guid": "N21_017", "translations": {"ms": "kosinus", "hi": "कोसाइन", "tr": "kosinüs"}}
 {"guid": "N21_018", "translations": {"ms": "trigonometri", "hi": "त्रिकोणमिति", "tr": "trigonometri"}}
 {"guid": "N21_019", "translations": {"ms": "topologi", "hi": "टोपोलॉजी", "tr": "topoloji"}}
-{"guid": "N21_020", "translations": {"ms": "isomorfisme", "hi": "समरूपता", "tr": "izomorfizm"}}
 {"guid": "N21_021", "translations": {"ms": "homologi", "hi": "समजातता", "tr": "homoloji"}}
-{"guid": "N21_022", "translations": {"ms": "homologi", "hi": "समरूपता", "tr": "homoloji"}}
-{"guid": "N21_023", "translations": {"ms": "homotopi", "hi": "समरूपता", "tr": "homotopi"}}
 {"guid": "N21_024", "translations": {"ms": "kombinatorik", "hi": "संयोजनिकी", "tr": "kombinatorik"}}
-{"guid": "N21_025", "translations": {"ms": "homomorfisme", "hi": "समरूपता", "tr": "homomorfizma"}}
-{"guid": "N21_026", "translations": {"ms": "subruang", "hi": "उपसमष्टि", "tr": "alt uzay"}}
-{"guid": "N21_027", "translations": {"ms": "kohomologi", "hi": "सहसमरूपता", "tr": "kohomoloji"}}
-{"guid": "N21_028", "translations": {"ms": "morfisme", "hi": "रूपवाद", "tr": "morfizma"}}
 {"guid": "N21_029", "translations": {"ms": "lema", "hi": "प्रविष्टि शीर्षक", "tr": "lemma"}}
-{"guid": "N21_030", "translations": {"ms": "automorfisme", "hi": "स्वरूपसमरूपता", "tr": "otomorfizm"}}
 {"guid": "N21_031", "translations": {"ms": "homeomorfisme", "hi": "होमियोमॉर्फ़िज़्म", "tr": "homeomorfizm"}}
 {"guid": "N21_032", "translations": {"ms": "kriptografi", "hi": "कूटलेखन", "tr": "kriptografi"}}
 {"guid": "N21_033", "translations": {"ms": "genre", "hi": "शैली", "tr": "tür"}}
@@ -48,7 +37,6 @@
 {"guid": "N21_048", "translations": {"ms": "ideologi", "hi": "विचारधारा", "tr": "ideoloji"}}
 {"guid": "N21_049", "translations": {"ms": "pemahaman mendalam", "hi": "अंतर्दृष्टि", "tr": "kavrayış"}}
 {"guid": "N21_050", "translations": {"ms": "mitologi", "hi": "पौराणिकी", "tr": "mitoloji"}}
-{"guid": "N21_051", "translations": {"ms": "funktor", "hi": "फलनक", "tr": "funktör"}}
 {"guid": "N21_052", "translations": {"ms": "muzik blues", "hi": "ब्लूज़", "tr": "blues"}}
 {"guid": "N21_053", "translations": {"ms": "muzik punk", "hi": "पंक रॉक", "tr": "punk rock"}}
 {"guid": "N21_054", "translations": {"ms": "muzik disko", "hi": "डिस्को संगीत", "tr": "disko müziği"}}
@@ -72,12 +60,8 @@
 {"guid": "N21_072", "translations": {"ms": "avant-garde", "hi": "अवाँ-गार्द", "tr": "avangart"}}
 {"guid": "N21_073", "translations": {"ms": "bahasa Proto-Jermanik", "hi": "आद्य-जर्मनिक भाषा", "tr": "Proto-Cermence"}}
 {"guid": "N21_074", "translations": {"ms": "meta-analisis", "hi": "मेटा-विश्लेषण", "tr": "meta-analiz"}}
-{"guid": "N21_075", "translations": {"ms": "kata nama", "hi": "संज्ञा", "tr": "isim"}}
-{"guid": "N21_076", "translations": {"ms": "kata kerja", "hi": "क्रिया", "tr": "fiil"}}
 {"guid": "N21_077", "translations": {"ms": "kata adjektif", "hi": "विशेषण", "tr": "sıfat"}}
-{"guid": "N21_078", "translations": {"ms": "kata keterangan", "hi": "क्रिया विशेषण", "tr": "zarf"}}
 {"guid": "N21_079", "translations": {"ms": "tatabahasa", "hi": "व्याकरण", "tr": "dilbilgisi"}}
-{"guid": "N21_080", "translations": {"ms": "dialek", "hi": "बोली", "tr": "lehçe"}}
 {"guid": "N21_081", "translations": {"ms": "celik huruf", "hi": "साक्षरता", "tr": "okuryazarlık"}}
 {"guid": "N21_082", "translations": {"ms": "sintaksis", "hi": "वाक्यविन्यास", "tr": "sözdizimi"}}
 {"guid": "N21_083", "translations": {"ms": "sintaksis", "hi": "वाक्यविन्यास", "tr": "sözdizimi"}}
@@ -106,20 +90,11 @@
 {"guid": "N21_106", "translations": {"ms": "leksikografi", "hi": "शब्दकोशविद्या", "tr": "sözlükçülük"}}
 {"guid": "N21_107", "translations": {"ms": "fonem", "hi": "स्वनिम", "tr": "fonem"}}
 {"guid": "N21_108", "translations": {"ms": "alofon", "hi": "स्वनिमपरक ध्वनिरूप", "tr": "alofon"}}
-{"guid": "N21_109", "translations": {"ms": "diftong", "hi": "संयुक्त स्वर", "tr": "diftong"}}
-{"guid": "N21_110", "translations": {"ms": "sonoran", "hi": "सोनोरेंट", "tr": "sonorant"}}
 {"guid": "N21_111", "translations": {"ms": "prosodi", "hi": "छंदशास्त्र", "tr": "prozodi"}}
 {"guid": "N21_112", "translations": {"ms": "penggabungan kata", "hi": "समास", "tr": "birleşik kelime yapımı"}}
-{"guid": "N21_113", "translations": {"ms": "leksem", "hi": "लेक्सीम", "tr": "biçimbirim"}}
 {"guid": "N21_114", "translations": {"ms": "golongan deklinasi", "hi": "शब्दरूप-परिवर्तन वर्ग", "tr": "çekim sınıfı"}}
-{"guid": "N21_115", "translations": {"ms": "leksikon", "hi": "शब्दावली", "tr": "söz varlığı"}}
-{"guid": "N21_116", "translations": {"ms": "kasus datif", "hi": "संप्रदान कारक", "tr": "yönelme hâli"}}
-{"guid": "N21_117", "translations": {"ms": "valensi", "hi": "संयोजकता", "tr": "valans"}}
-{"guid": "N21_118", "translations": {"ms": "kata kerja penghubung", "hi": "संबंधसूचक क्रिया", "tr": "bağ fiil"}}
-{"guid": "N21_119", "translations": {"ms": "penentu", "hi": "निर्धारक", "tr": "belirleyici"}}
 {"guid": "N21_120", "translations": {"ms": "deiksis", "hi": "निर्देशात्मकता", "tr": "deiksis"}}
 {"guid": "N21_121", "translations": {"ms": "polisemi", "hi": "अनेकार्थकता", "tr": "çok anlamlılık"}}
-{"guid": "N21_122", "translations": {"ms": "homonim", "hi": "समनाम", "tr": "eş adlı sözcük"}}
 {"guid": "N21_123", "translations": {"ms": "hiponim", "hi": "अधिशब्द", "tr": "alt anlamlı sözcük"}}
 {"guid": "N21_124", "translations": {"ms": "ortografi", "hi": "वर्तनी", "tr": "yazım"}}
 {"guid": "N21_125", "translations": {"ms": "muzik rock", "hi": "रॉक संगीत", "tr": "rock müzik"}}
