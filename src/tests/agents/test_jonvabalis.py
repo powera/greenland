@@ -9,7 +9,7 @@ branch a subtype-review row gets.
 
 import json
 import unittest
-from typing import Any
+from typing import Any, Dict
 
 from sqlalchemy import create_engine
 from sqlalchemy.orm import Session
@@ -18,9 +18,11 @@ from agents.jonvabalis import (
     ONLY_SPACING_VARIANTS,
     ONLY_SUBTYPE_REVIEW,
     JonvabalisAgent,
+    build_context,
     build_prompt,
     head_word_problem,
     is_spacing_variant,
+    queried_word_variant,
     is_subtype_review,
     queried_word_is_missing,
     select_pending_rows,
@@ -89,23 +91,31 @@ class JonvabalisTestCase(unittest.TestCase):
 
 
 class TestHeadWordProblem(unittest.TestCase):
-    def test_a_verb_row_may_use_the_infinitive_of_the_queried_word(self) -> None:
-        sentence = "The company operates in several countries."
+    def test_a_head_word_sharing_no_word_with_the_row_is_accepted(self) -> None:
+        """'place value' was queued as 'numerical place' from 'digit'."""
         self.assertIsNone(
-            head_word_problem("operate", sentence, "operating", "conducting business", "verb")
-        )
-        self.assertIsNone(head_word_problem("run", "They run the shop.", "ran", "manage", "verb"))
-
-    def test_only_a_verb_row_gets_the_infinitive(self) -> None:
-        sentence = "The company operates in several countries."
-        self.assertIsNotNone(
-            head_word_problem("operate", sentence, "operating", "conducting business", "noun")
+            head_word_problem("place value", "In 4,582, the 5 has a place value of hundreds.")
         )
 
-    def test_an_unrelated_word_is_still_refused(self) -> None:
-        self.assertIsNotNone(
-            head_word_problem("manage", "They manage the shop.", "operating", "run", "verb")
+    def test_a_parenthesised_head_word_is_refused(self) -> None:
+        self.assertIsNotNone(head_word_problem("world (realm)", "A world of magic."))
+
+    def test_the_sample_sentence_must_use_the_head_word(self) -> None:
+        self.assertIsNotNone(head_word_problem("manage", "They run the shop."))
+
+
+class TestQueriedWordVariant(unittest.TestCase):
+    def test_an_equivalent_queried_word_is_recorded(self) -> None:
+        self.assertEqual(
+            queried_word_variant("exponent", "advocate", "equivalent", "noun"), "exponent"
         )
+
+    def test_a_queried_word_of_its_own_is_not(self) -> None:
+        self.assertIsNone(queried_word_variant("digit", "place value", "own_word", "noun"))
+
+    def test_a_spelling_or_verb_form_of_the_head_word_is_not(self) -> None:
+        self.assertIsNone(queried_word_variant("break-up", "breakup", "equivalent", "noun"))
+        self.assertIsNone(queried_word_variant("operating", "operate", "equivalent", "verb"))
 
 
 class TestRowKinds(JonvabalisTestCase):
@@ -267,40 +277,97 @@ class TestDuplicateVerdict(JonvabalisTestCase):
 
 
 class TestDistinctVerdict(JonvabalisTestCase):
-    def test_a_sense_sharing_text_and_subtype_stays_queued(self) -> None:
-        """Approval would have merged it into the existing lemma and deleted the row."""
-        self.add_lemma("phenomenology", pos_subtype="knowledge_domain")
+    @staticmethod
+    def distinct(head_word: str, sample_sentence: str, **fields: Any) -> Dict[str, Any]:
+        return {
+            "verdict": "distinct",
+            "confidence": 0.95,
+            "head_word": head_word,
+            "definition": f"A new sense of {head_word}.",
+            "sample_sentence": sample_sentence,
+            "translations": {LANG_CODE_TO_LLM_FIELD[code]: "x" for code in TRANSLATION_LANGUAGES},
+            **fields,
+        }
+
+    def test_a_sense_sharing_text_and_subtype_is_created_beside_it(self) -> None:
+        """Approval alone would have merged it into the existing lemma and deleted the row."""
+        existing = self.add_lemma("phenomenology", pos_subtype="knowledge_domain")
         pending = self.stage(
             "phenomenological description", "phenomenology", pos_subtype="knowledge_domain"
         )
-        decision = {
-            "verdict": "distinct",
-            "confidence": 0.95,
-            "head_word": "phenomenology",
-            "definition": "The description of subjective experience in applied fields.",
-            "sample_sentence": "The clinician recorded the phenomenology of the symptoms.",
-            "disambiguation": "subjective experience",
-            "pos_subtype": "knowledge_domain",
-            "translations": {LANG_CODE_TO_LLM_FIELD[code]: "x" for code in TRANSLATION_LANGUAGES},
-        }
+        decision = self.distinct(
+            "phenomenology",
+            "The clinician recorded the phenomenology of the symptoms.",
+            disambiguation="subjective experience",
+            pos_subtype="knowledge_domain",
+        )
+
+        outcome = self.agent().apply_decision(self.session, pending, decision)
+
+        self.assertEqual(outcome["action"], "approved")
+        self.assertNotEqual(outcome["lemma_id"], existing.id)
+        created = self.session.get(Lemma, outcome["lemma_id"])
+        assert created is not None
+        self.assertEqual(created.lemma_text, "phenomenology")
+        self.assertEqual(created.disambiguation, "subjective experience")
+        self.assertEqual(self.session.query(PendingImport).count(), 0)
+
+    def test_an_existing_head_word_the_model_was_not_shown_stays_queued(self) -> None:
+        """Its senses were not in the prompt, so one may already be this sense."""
+        self.add_lemma("place value")
+        pending = self.stage("numerical place", "digit")
+        decision = self.distinct(
+            "place value",
+            "In 4,582, the 5 has a place value of hundreds.",
+            disambiguation="position",
+            pos_subtype="quantitative_concept",
+        )
 
         outcome = self.agent().apply_decision(self.session, pending, decision)
 
         self.assertEqual(outcome["action"], "left_in_queue")
-        self.assertIn("approval would merge", outcome["reason"])
+        self.assertIn("not shown", outcome["reason"])
         self.assertEqual(self.session.query(PendingImport).count(), 1)
+
+    def test_an_equivalent_queried_word_is_recorded_on_the_new_lemma(self) -> None:
+        self.add_lemma("exponent", pos_subtype="quantitative_concept")
+        pending = self.stage("advocate", "exponent", pos_subtype="human")
+        decision = self.distinct(
+            "advocate",
+            "She is a leading advocate for renewable energy.",
+            pos_subtype="human",
+            queried_word_relation="equivalent",
+        )
+
+        outcome = self.agent().apply_decision(self.session, pending, decision)
+
+        self.assertEqual(outcome["action"], "approved")
+        # The paradigm may store "exponents" beside "exponent".
+        variants = self.session.query(VariantForm).all()
+        self.assertTrue(variants)
+        self.assertEqual({variant.lemma_id for variant in variants}, {outcome["lemma_id"]})
+        self.assertEqual({variant.variant_kind for variant in variants}, {VARIANT_KIND_EQUIVALENT})
 
 
 class TestPromptBranches(JonvabalisTestCase):
     def test_subtype_review_row_is_not_framed_as_a_headword_question(self) -> None:
         pending = self.stage("capital", notes=SUBTYPE_REVIEW_NOTE, pos_subtype="noun_other")
-        prompt = build_prompt(pending, [], [], [])
+        prompt = build_prompt(pending, [], [])
         self.assertIn("could not choose a subtype", prompt)
         self.assertNotIn("belong under a different English head word", prompt)
 
     def test_spacing_variant_row_asks_for_the_standard_spelling(self) -> None:
-        prompt = build_prompt(self.stage("breakup", "break-up"), [], [], [])
+        prompt = build_prompt(self.stage("breakup", "break-up"), [], [])
         self.assertIn("standard modern US spelling", prompt)
+
+    def test_context_holds_no_row_data(self) -> None:
+        # The context is the cached prefix, so nothing from a row may leak into it.
+        context = build_context("noun")
+        self.assertIn("Subtypes for noun:", context)
+        self.assertTrue(build_context("adjective").startswith(context.split("\n\nSubtypes")[0]))
+        prompt = build_prompt(self.stage("capital"), [], [])
+        self.assertNotIn("Subtypes for", prompt)
+        self.assertNotIn("capital", context)
 
 
 if __name__ == "__main__":
