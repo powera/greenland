@@ -392,6 +392,7 @@ def handle_lemma_type_subtype_change(
     new_pos_subtype: Optional[str],
     source: str = "barsukas",
     notes: Optional[str] = None,
+    drop_forms_on_subtype_change: bool = False,
 ) -> Dict[str, Any]:
     """
     Handle type/subtype changes for a lemma.
@@ -399,8 +400,13 @@ def handle_lemma_type_subtype_change(
     When a lemma's type or subtype changes:
     1. Create a tombstone entry for the old GUID
     2. Generate a new GUID based on the new subtype
-    3. Clear/invalidate translations
-    4. Delete derivative forms (they're tied to the specific POS)
+    3. Clear/invalidate translations, when the type changed
+    4. Delete derivative forms, when the type changed (they're tied to the
+       specific POS) or when the caller asks for it on a subtype change
+
+    A subtype change alone keeps the forms by default: a plural is the same
+    whether "polynomial" is a knowledge_domain or a mathematical_concept, and
+    regenerating English noun forms costs an LLM call.
 
     Args:
         session: Database session
@@ -409,6 +415,8 @@ def handle_lemma_type_subtype_change(
         new_pos_subtype: The new POS subtype
         source: Source of the change (for logging)
         notes: Optional notes about why the change was made
+        drop_forms_on_subtype_change: Delete the derivative forms even when
+            only the subtype changed
 
     Returns:
         Dictionary with details about what was changed:
@@ -577,8 +585,11 @@ def handle_lemma_type_subtype_change(
                 session.delete(translation_obj)
 
     # Step 4: Delete derivative forms
+    drop_forms = type_changed or drop_forms_on_subtype_change
     derivative_forms = (
         session.query(DerivativeForm).filter(DerivativeForm.lemma_id == lemma.id).all()
+        if drop_forms
+        else []
     )
 
     for form in derivative_forms:

@@ -89,6 +89,8 @@ NON_OBJECT_SUBTYPES = frozenset(
         "duration",
         "unit_of_measurement",
         "quantitative_concept",
+        "mathematical_concept",
+        "linguistic_concept",
         "abstract_condition",
         "concept_idea",
         "mental_construct",

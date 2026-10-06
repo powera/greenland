@@ -50,6 +50,8 @@ SUBTYPE_DISPLAY = {
     "legal_concept": "法律概念",
     "knowledge_domain": "知识领域",
     "quantitative_concept": "数量概念",
+    "mathematical_concept": "数学概念",
+    "linguistic_concept": "语言学概念",
     "emotion_feeling": "情感",
     "shape": "形状",
     # Processes and Time
