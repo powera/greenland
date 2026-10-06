@@ -304,10 +304,19 @@ class AnthropicClient:
             logger.error("Unexpected response format from Anthropic API")
             structured_data = {"error": "Unexpected response format"}
 
+        # Anthropic's input_tokens counts only the uncached part of the prompt;
+        # cache reads and writes are reported beside it, not within it.
+        usage_data = completion_data["usage"]
+        cache_read_tokens = usage_data.get("cache_read_input_tokens") or 0
+        cache_write_tokens = usage_data.get("cache_creation_input_tokens") or 0
         usage = LLMUsage.from_api_response(
             {
-                "prompt_tokens": completion_data["usage"]["input_tokens"],
-                "completion_tokens": completion_data["usage"]["output_tokens"],
+                "prompt_tokens": usage_data["input_tokens"]
+                + cache_read_tokens
+                + cache_write_tokens,
+                "completion_tokens": usage_data["output_tokens"],
+                "cached_tokens": cache_read_tokens,
+                "cache_write_tokens": cache_write_tokens,
                 "total_duration": duration_ms,
             },
             model=model,
