@@ -257,6 +257,7 @@ def approve_as_lemma(
     model: str = constants.DEFAULT_MODEL,
     debug: bool = False,
     disambiguation: Optional[str] = None,
+    known_distinct: bool = False,
 ) -> Dict[str, Any]:
     """Convert a staged term into a full Lemma/DerivativeForm entry.
 
@@ -266,6 +267,13 @@ def approve_as_lemma(
     lemma at the unset difficulty level, through the same
     :func:`words.lemma_creation.create_sense_lemma` that ``add_word`` uses.
     ``disambiguation`` is stored on every lemma created. Commits.
+
+    "Already exists" means a lemma with the same text, POS and subtype -- a
+    stand-in for comparing meanings, which a blind approval cannot do.  A
+    caller that has compared them (jonvabalis, shown the word's senses) passes
+    ``known_distinct`` to skip it, so a second sense sharing a subtype --
+    convergence the meeting point, convergence the growing similarity -- is
+    created rather than discarded.
     """
     pending_import_id = int(pending.id)
     word = pending.english_word
@@ -342,7 +350,11 @@ def approve_as_lemma(
     for def_data in definitions_list:
         llm_pos_type = def_data.get("pos")
         llm_pos_subtype = def_data.get("pos_subtype")
-        existing = _find_duplicate_lemma(session, word, llm_pos_type, llm_pos_subtype)
+        existing = (
+            None
+            if known_distinct
+            else _find_duplicate_lemma(session, word, llm_pos_type, llm_pos_subtype)
+        )
         if existing:
             logger.info(
                 f"Skipping duplicate: '{word}' already exists as "
@@ -444,6 +456,7 @@ def approve_pending_import(
     model: str = constants.DEFAULT_MODEL,
     debug: bool = False,
     disambiguation: Optional[str] = None,
+    known_distinct: bool = False,
 ) -> Dict[str, Any]:
     """
     Approve a pending import, creating whatever its ``target_kind`` says it is.
@@ -458,6 +471,9 @@ def approve_pending_import(
         model: LLM model to use for processing (lemma path only)
         debug: Debug flag
         disambiguation: Disambiguation tag for the created lemma (lemma path only)
+        known_distinct: The caller has compared this sense against the word's
+            existing senses and found it new (lemma path only); see
+            :func:`approve_as_lemma`
 
     Returns:
         Dictionary with approval results. ``target_kind`` names the path taken.
@@ -509,6 +525,7 @@ def approve_pending_import(
             model=model,
             debug=debug,
             disambiguation=disambiguation,
+            known_distinct=known_distinct,
         )
 
     except Exception as e:
