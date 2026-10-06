@@ -354,7 +354,7 @@ SUBTYPE_DEFS: Dict[str, Dict[str, SubtypeDef]] = {
         ),
         "knowledge_domain": SubtypeDef(
             prefix="N21",
-            description="Fields of study and bodies of knowledge",
+            description="Broad fields of study and bodies of knowledge",
             examples=["biology", "history", "philosophy", "mathematics", "machine learning"],
             group="Abstract Concepts and Ideas",
         ),
@@ -362,6 +362,43 @@ SUBTYPE_DEFS: Dict[str, Dict[str, SubtypeDef]] = {
             prefix="N22",
             description="Amounts, measures and magnitudes as concepts",
             examples=["number", "distance", "size", "level", "half"],
+            group="Abstract Concepts and Ideas",
+        ),
+        "mathematical_concept": SubtypeDef(
+            prefix="N66",
+            description=(
+                "Constructs and terms of mathematics: equations, functions, operations, "
+                "theorems and the objects they act on"
+            ),
+            examples=["equation", "polynomial", "sine", "theorem", "matrix"],
+            comment=(
+                "Math terms had been scattered across knowledge_domain (polynomial, "
+                "sine), quantitative_concept (logarithm, quotient) and concept_idea "
+                "(axiom), none of which fits. The field is still knowledge_domain "
+                "(mathematics, algebra), a plain amount is still quantitative_concept "
+                "(number, half), and a figure keeps shape (parabola). Numbers "
+                "themselves are numerals: Z01 cardinals, Z02 ordinals."
+            ),
+            group="Abstract Concepts and Ideas",
+        ),
+        "linguistic_concept": SubtypeDef(
+            prefix="N67",
+            description=(
+                "Technical terms for the units, categories and features of language: "
+                "word classes, grammatical categories, sound classes, word parts, "
+                "relations between words, and language varieties"
+            ),
+            examples=["noun", "tense", "morpheme", "suffix", "dialect"],
+            comment=(
+                "Linguistics terms had been scattered across knowledge_domain (noun, "
+                "dative, dialect), concept_idea (tense, vocative), "
+                "communication_information (morpheme, plosive) and symbolic_element "
+                "(affix, suffix). The fields stay knowledge_domain (grammar, phonology, "
+                "semantics); everyday language things stay communication_information "
+                "(word, sentence, question); written marks stay symbolic_element "
+                "(comma, grapheme). vowel, consonant and syllable were left where "
+                "they were for now."
+            ),
             group="Abstract Concepts and Ideas",
         ),
         "emotion_feeling": SubtypeDef(

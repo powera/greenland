@@ -90,10 +90,17 @@
                         Changing the POS type or subtype will:
                         <ul class="mb-0 mt-2">
                             <li>Generate a new GUID and tombstone the old one</li>
-                            <li>Clear all translations</li>
-                            <li>Delete all derivative forms (conjugations, declensions)</li>
                             <li>Mark the lemma as unverified</li>
+                            <li>On a POS type change only: clear all translations and delete all
+                                derivative forms (conjugations, declensions)</li>
                         </ul>
+                        <div class="form-check mt-2">
+                            <input class="form-check-input" type="checkbox" id="drop_forms_on_subtype_change"
+                                   name="drop_forms_on_subtype_change">
+                            <label class="form-check-label" for="drop_forms_on_subtype_change">
+                                Also delete the derivative forms on a subtype-only change
+                            </label>
+                        </div>
                     </div>
 
                     <!-- GUID -->

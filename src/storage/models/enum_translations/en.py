@@ -50,6 +50,8 @@ SUBTYPE_DISPLAY = {
     "legal_concept": "Legal Concept",
     "knowledge_domain": "Knowledge Domain",
     "quantitative_concept": "Quantitative Concept",
+    "mathematical_concept": "Mathematical Concept",
+    "linguistic_concept": "Linguistic Concept",
     "emotion_feeling": "Emotion/Feeling",
     "shape": "Shape",
     # Processes and Time

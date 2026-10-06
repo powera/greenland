@@ -816,7 +816,8 @@ def edit_lemma(lemma_id: int) -> ResponseReturnValue:
 
         if type_changed or subtype_changed:
             # Use the special handler for type/subtype changes
-            # This will create tombstone, regenerate GUID, and invalidate translations/forms
+            # This will create tombstone and regenerate GUID; translations and
+            # forms go only on a type change, or forms on request.
             result = handle_lemma_type_subtype_change(
                 session=g.db,
                 lemma=lemma,
@@ -824,6 +825,7 @@ def edit_lemma(lemma_id: int) -> ResponseReturnValue:
                 new_pos_subtype=new_pos_subtype,
                 source=Config.OPERATION_LOG_SOURCE,
                 notes=f"Type/subtype changed via BARSUKAS edit form",
+                drop_forms_on_subtype_change=bool(request.form.get("drop_forms_on_subtype_change")),
             )
 
             # Add changes to track for user feedback

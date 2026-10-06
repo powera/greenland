@@ -37,7 +37,7 @@ from storage.models.guid_tombstone import (
     TOMBSTONE_REASONS,
     GuidTombstone,
 )
-from storage.models.schema import Base, Lemma
+from storage.models.schema import Base, DerivativeForm, Lemma
 from storage.utils.guid import generate_guid
 
 
@@ -316,6 +316,65 @@ class TestTypeSubtypeChange:
         tombstone = get_tombstone_by_guid(session, old_guid)
         assert tombstone is not None
         assert tombstone.reason == TOMBSTONE_REASON_SUBTYPE_CHANGE
+
+    def _lemma_with_a_form(self, session: Session, pos_subtype: str) -> Lemma:
+        lemma = Lemma(
+            lemma_text="polynomial",
+            definition_text="a sum of terms",
+            pos_type="noun",
+            pos_subtype=pos_subtype,
+            guid=generate_guid(session, "noun", pos_subtype),
+        )
+        session.add(lemma)
+        session.flush()
+        session.add(
+            DerivativeForm(
+                lemma_id=lemma.id,
+                derivative_form_text="polynomials",
+                language_code="en",
+                grammatical_form="noun/en_plural",
+            )
+        )
+        session.flush()
+        return lemma
+
+    def test_a_subtype_change_keeps_the_forms_by_default(self, session: Session) -> None:
+        noun_subtype, _ = self._noun_and_verb_subtypes()
+        other_subtype, _ = sorted(SUBTYPE_GUID_PREFIXES["noun"].items())[1]
+        lemma = self._lemma_with_a_form(session, noun_subtype)
+
+        result = handle_lemma_type_subtype_change(
+            session=session, lemma=lemma, new_pos_type="noun", new_pos_subtype=other_subtype
+        )
+
+        assert result["derivative_forms_deleted"] == 0
+        assert session.query(DerivativeForm).count() == 1
+
+    def test_a_subtype_change_drops_the_forms_when_asked(self, session: Session) -> None:
+        noun_subtype, _ = self._noun_and_verb_subtypes()
+        other_subtype, _ = sorted(SUBTYPE_GUID_PREFIXES["noun"].items())[1]
+        lemma = self._lemma_with_a_form(session, noun_subtype)
+
+        result = handle_lemma_type_subtype_change(
+            session=session,
+            lemma=lemma,
+            new_pos_type="noun",
+            new_pos_subtype=other_subtype,
+            drop_forms_on_subtype_change=True,
+        )
+
+        assert result["derivative_forms_deleted"] == 1
+        assert session.query(DerivativeForm).count() == 0
+
+    def test_a_type_change_always_drops_the_forms(self, session: Session) -> None:
+        noun_subtype, verb_subtype = self._noun_and_verb_subtypes()
+        lemma = self._lemma_with_a_form(session, noun_subtype)
+
+        handle_lemma_type_subtype_change(
+            session=session, lemma=lemma, new_pos_type="verb", new_pos_subtype=verb_subtype
+        )
+
+        assert session.query(DerivativeForm).count() == 0
 
     def test_an_unchanged_lemma_is_not_tombstoned(self, session: Session) -> None:
         noun_subtype, _ = self._noun_and_verb_subtypes()
