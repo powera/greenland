@@ -347,10 +347,14 @@ class OpenAIClient:
         # Calculate token usage
         usage_data = response_data.get("usage", {})
         output_tokens = usage_data.get("output_tokens", 0)
+        # Unlike Anthropic's, these are a breakdown of input_tokens, not beside it.
+        input_details = usage_data.get("input_tokens_details") or {}
         usage = LLMUsage.from_api_response(
             {
                 "prompt_tokens": usage_data.get("input_tokens", 0),
                 "completion_tokens": output_tokens,
+                "cached_tokens": input_details.get("cached_tokens", 0),
+                "cache_write_tokens": input_details.get("cache_write_tokens", 0),
                 "total_duration": duration_ms,
             },
             model=model,

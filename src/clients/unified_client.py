@@ -459,12 +459,18 @@ class UnifiedLLMClient:
             # Always log token usage for all LLM queries
             response_type = "JSON" if json_schema else "text"
             if result.usage:
+                # Cache counts are a breakdown of In; the write count appears
+                # only when the provider reports one.
+                cache_note = f"Cached: {result.usage.cached_tokens_in}"
+                if result.usage.cache_write_tokens_in:
+                    cache_note += f", Cache write: {result.usage.cache_write_tokens_in}"
                 logger.info(
-                    "LLM Query Complete [%s] - Model: %s, Type: %s, In: %d, Out: %d, Total: %d, Cost: $%.6f",
+                    "LLM Query Complete [%s] - Model: %s, Type: %s, In: %d (%s), Out: %d, Total: %d, Cost: $%.6f",
                     normalized_model,
                     model,
                     response_type,
                     result.usage.tokens_in,
+                    cache_note,
                     result.usage.tokens_out,
                     result.usage.total_tokens,
                     result.usage.cost,

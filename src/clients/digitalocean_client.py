@@ -243,6 +243,9 @@ class DigitalOceanClient:
             {
                 "prompt_tokens": usage_data.get("prompt_tokens", 0),
                 "completion_tokens": completion_tokens,
+                "cached_tokens": (usage_data.get("prompt_tokens_details") or {}).get(
+                    "cached_tokens", 0
+                ),
                 "total_duration": duration_ms,
             },
             model=model,

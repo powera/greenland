@@ -210,6 +210,7 @@ class GeminiClient:
                 "prompt_tokens": completion_data["usageMetadata"].get("promptTokenCount", 0),
                 "completion_tokens": completion_data["usageMetadata"].get("candidatesTokenCount", 0)
                 + completion_data["usageMetadata"].get("thoughtsTokenCount", 0),
+                "cached_tokens": completion_data["usageMetadata"].get("cachedContentTokenCount", 0),
                 "total_duration": duration_ms,
             },
             model=model,

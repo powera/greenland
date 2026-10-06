@@ -53,26 +53,48 @@ class ModelTier(Enum):
 class CostConfig:
     """Cost configurations for different model tiers."""
 
-    # OpenAI costs per million tokens
+    # Every table is USD per million tokens.  "input" prices an uncached input
+    # token; "cached_input" a cache read and "cache_write" a token written to
+    # the cache, each charged at "input" when the entry leaves it out.
+
+    # OpenAI costs per million tokens.  OpenAI caches prompt prefixes on its
+    # own; from gpt-5.6 a cache write costs 1.25x the input rate, while older
+    # models write for free.
     GPT4_COSTS = {
-        ModelTier.GPT4_MINI: {"input": 0.15, "output": 0.6},
-        ModelTier.GPT4: {"input": 2.5, "output": 10.0},
-        ModelTier.GPT_41_NANO: {"input": 0.1, "output": 0.4},
-        ModelTier.GPT_41_MINI: {"input": 0.4, "output": 1.6},
-        ModelTier.GPT_5_NANO: {"input": 0.05, "output": 0.4},
-        ModelTier.GPT_5_MINI: {"input": 0.25, "output": 2.0},
-        ModelTier.GPT_52: {"input": 1.75, "output": 14.0},
-        ModelTier.GPT_54_NANO: {"input": 0.20, "output": 1.25},
-        ModelTier.GPT_54_MINI: {"input": 0.75, "output": 4.50},
-        # Short-context rates; long-context is $2.00 in / $9.00 out.
-        ModelTier.GPT_56_LUNA: {"input": 1.00, "output": 6.00},
-        # Short-context rates; over 272K input is 2x input and 1.5x output.
-        ModelTier.GPT_6_LUNA: {"input": 0.10, "output": 0.50},
+        ModelTier.GPT4_MINI: {"input": 0.15, "cached_input": 0.075, "output": 0.6},
+        ModelTier.GPT4: {"input": 2.5, "cached_input": 1.25, "output": 10.0},
+        ModelTier.GPT_41_NANO: {"input": 0.1, "cached_input": 0.025, "output": 0.4},
+        ModelTier.GPT_41_MINI: {"input": 0.4, "cached_input": 0.10, "output": 1.6},
+        ModelTier.GPT_5_NANO: {"input": 0.05, "cached_input": 0.005, "output": 0.4},
+        ModelTier.GPT_5_MINI: {"input": 0.25, "cached_input": 0.025, "output": 2.0},
+        ModelTier.GPT_52: {"input": 1.75, "cached_input": 0.175, "output": 14.0},
+        ModelTier.GPT_54_NANO: {"input": 0.20, "cached_input": 0.02, "output": 1.25},
+        ModelTier.GPT_54_MINI: {"input": 0.75, "cached_input": 0.075, "output": 4.50},
+        # Short-context rates for the Luna models; over 272K input is 2x the
+        # input and cache rates and 1.5x output.
+        ModelTier.GPT_56_LUNA: {
+            "input": 0.20,
+            "cached_input": 0.02,
+            "cache_write": 0.25,
+            "output": 1.20,
+        },
+        ModelTier.GPT_6_LUNA: {
+            "input": 0.10,
+            "cached_input": 0.01,
+            "cache_write": 0.125,
+            "output": 0.50,
+        },
     }
 
-    # Anthropic costs per million tokens
+    # Anthropic costs per million tokens.  A cache write costs more than an
+    # ordinary input token, so a prompt read only once loses money by caching.
     CLAUDE_COSTS = {
-        ModelTier.CLAUDE_HAIKU: {"input": 0.8, "output": 4},
+        ModelTier.CLAUDE_HAIKU: {
+            "input": 0.8,
+            "cached_input": 0.08,
+            "cache_write": 1.0,
+            "output": 4,
+        },
     }
 
     GEMINI_COSTS = {
@@ -178,15 +200,19 @@ class CostConfig:
         tokens_out: int = 0,
         compute_ms: float = 0,
         model: Optional[str] = None,
+        cached_tokens_in: int = 0,
+        cache_write_tokens_in: int = 0,
     ) -> float:
         """
         Estimate cost based on usage and model tier.
 
         Args:
-            tokens_in: Number of input tokens
+            tokens_in: Number of input tokens, cached and cache-write ones included
             tokens_out: Number of output tokens
             compute_ms: Compute time in milliseconds (for Ollama)
             model: Model name/identifier
+            cached_tokens_in: Input tokens read from the provider's prompt cache
+            cache_write_tokens_in: Input tokens written to the prompt cache
 
         Returns:
             Estimated cost in USD
@@ -213,37 +239,31 @@ class CostConfig:
             compute_seconds = compute_ms / 1000
             return compute_seconds * cls.OLLAMA_COST_PER_SEC
 
-        # Handle OpenAI models
-        elif tier in cls.GPT4_COSTS:
-            costs = cls.GPT4_COSTS[tier]
-            return (tokens_in * costs["input"] / 1_000_000) + (
-                tokens_out * costs["output"] / 1_000_000
-            )
+        for table in (cls.GPT4_COSTS, cls.CLAUDE_COSTS, cls.GEMINI_COSTS, cls.DIGITALOCEAN_COSTS):
+            if tier in table:
+                return cls._token_cost(
+                    table[tier], tokens_in, tokens_out, cached_tokens_in, cache_write_tokens_in
+                )
 
-        # Handle Anthropic models
-        elif tier in cls.CLAUDE_COSTS:
-            costs = cls.CLAUDE_COSTS[tier]
-            return (tokens_in * costs["input"] / 1_000_000) + (
-                tokens_out * costs["output"] / 1_000_000
-            )
+        logger.warning(f"Unknown model tier for {model}, cannot estimate cost")
+        return 0.0
 
-        # Handle Google Gemini models
-        elif tier in cls.GEMINI_COSTS:
-            costs = cls.GEMINI_COSTS[tier]
-            return (tokens_in * costs["input"] / 1_000_000) + (
-                tokens_out * costs["output"] / 1_000_000
-            )
-
-        # Handle DigitalOcean Gradient models
-        elif tier in cls.DIGITALOCEAN_COSTS:
-            costs = cls.DIGITALOCEAN_COSTS[tier]
-            return (tokens_in * costs["input"] / 1_000_000) + (
-                tokens_out * costs["output"] / 1_000_000
-            )
-
-        else:
-            logger.warning(f"Unknown model tier for {model}, cannot estimate cost")
-            return 0.0
+    @staticmethod
+    def _token_cost(
+        costs: Dict[str, float],
+        tokens_in: int,
+        tokens_out: int,
+        cached_tokens_in: int,
+        cache_write_tokens_in: int,
+    ) -> float:
+        """Price one call from a per-million-token rate table."""
+        uncached_tokens_in = max(tokens_in - cached_tokens_in - cache_write_tokens_in, 0)
+        input_cost = (
+            uncached_tokens_in * costs["input"]
+            + cached_tokens_in * costs.get("cached_input", costs["input"])
+            + cache_write_tokens_in * costs.get("cache_write", costs["input"])
+        )
+        return (input_cost + tokens_out * costs["output"]) / 1_000_000
 
 
 @dataclass
@@ -256,6 +276,10 @@ class LLMUsage:
     - cost: Cost in USD
     - total_msec: Total latency in milliseconds
 
+    The prompt-cache counts are a breakdown of tokens_in, not an addition to it:
+    - cached_tokens_in: Input tokens read from the provider's prompt cache
+    - cache_write_tokens_in: Input tokens written to it (Anthropic, OpenAI gpt-5.6+)
+
     Optional fields can be passed as kwargs and will be stored in metadata dict.
     """
 
@@ -264,6 +288,8 @@ class LLMUsage:
     cost: float
     total_msec: float
     metadata: Dict[str, Any] = field(default_factory=dict)
+    cached_tokens_in: int = 0
+    cache_write_tokens_in: int = 0
 
     @classmethod
     def from_api_response(
@@ -277,6 +303,8 @@ class LLMUsage:
         # Extract required fields with reasonable fallbacks
         tokens_in = response_data.get("prompt_tokens", response_data.get("prompt_eval_count", 0))
         tokens_out = response_data.get("completion_tokens", response_data.get("eval_count", 0))
+        cached_tokens_in = response_data.get("cached_tokens", 0) or 0
+        cache_write_tokens_in = response_data.get("cache_write_tokens", 0) or 0
 
         # Convert duration from API format (if present)
         duration = response_data.get("total_duration", 0)
@@ -288,7 +316,12 @@ class LLMUsage:
         cost = response_data.get(
             "cost",
             CostConfig.estimate_cost(
-                tokens_in=tokens_in, tokens_out=tokens_out, compute_ms=duration, model=model
+                tokens_in=tokens_in,
+                tokens_out=tokens_out,
+                compute_ms=duration,
+                model=model,
+                cached_tokens_in=cached_tokens_in,
+                cache_write_tokens_in=cache_write_tokens_in,
             ),
         )
 
@@ -304,6 +337,8 @@ class LLMUsage:
                 "prompt_eval_count",
                 "eval_count",
                 "cost",
+                "cached_tokens",
+                "cache_write_tokens",
             ]:
                 metadata[key] = value
                 logger.debug(f"Storing extra API response field in metadata: {key}")
@@ -319,6 +354,8 @@ class LLMUsage:
             cost=cost,
             total_msec=duration,
             metadata=metadata,
+            cached_tokens_in=cached_tokens_in,
+            cache_write_tokens_in=cache_write_tokens_in,
         )
 
     def combine(self, other: "LLMUsage") -> "LLMUsage":
@@ -332,6 +369,8 @@ class LLMUsage:
             cost=self.cost + other.cost,
             total_msec=self.total_msec + other.total_msec,
             metadata=combined_metadata,
+            cached_tokens_in=self.cached_tokens_in + other.cached_tokens_in,
+            cache_write_tokens_in=self.cache_write_tokens_in + other.cache_write_tokens_in,
         )
 
     @property
@@ -352,6 +391,8 @@ class LLMUsage:
             "tokens_in": self.tokens_in,
             "tokens_out": self.tokens_out,
             "total_tokens": self.total_tokens,
+            "cached_tokens_in": self.cached_tokens_in,
+            "cache_write_tokens_in": self.cache_write_tokens_in,
             "cost": self.cost,
             "total_msec": self.total_msec,
             **self.metadata,
