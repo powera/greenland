@@ -109,7 +109,7 @@ PYTHONPATH=src python src/agents/sernas.py --dry-run
 
 ```bash
 PYTHONPATH=src python -i src/interactive.py
-# Provides: cl (LinguisticClient), session, prcs (WordProcessor)
+# Provides: cl (LinguisticClient), session
 ```
 
 ## Code Style

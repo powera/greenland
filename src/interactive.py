@@ -10,10 +10,6 @@ get_session = cl.get_session
 session = get_session()
 
 import storage.database
-import wordfreq.translation.processor
-
-prcs = wordfreq.translation.processor.WordProcessor(model=MODEL)
-
 import benchmarks.lib.utils.registry
 
 # imports for benchmarks
