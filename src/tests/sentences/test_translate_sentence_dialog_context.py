@@ -12,6 +12,7 @@ from unittest.mock import patch
 
 from sqlalchemy.orm import Session
 
+from sentences.translate_and_decompose import Phase1Answer
 from sentences.translation import translate_sentence
 from storage.crud.conversation import add_conversation, add_conversation_sentence
 from tests.sentences.candidate_lookup_fixture import (
@@ -25,15 +26,15 @@ def _capture_phase1_context(session: Session, sentence_id: int) -> Optional[str]
     """Run translate_sentence with both LLM phases stubbed; return the context."""
     captured: Dict[str, Optional[str]] = {"conversation_context": None}
 
-    def fake_translate(**kwargs: Any) -> Dict[str, str]:
+    def fake_translate(**kwargs: Any) -> Phase1Answer:
         captured["conversation_context"] = kwargs.get("conversation_context")
-        return {lang: f"[{lang}]" for lang in kwargs["target_languages"]}
+        return Phase1Answer({lang: f"[{lang}]" for lang in kwargs["target_languages"]})
 
     def fake_decompose(**kwargs: Any) -> Any:
         return kwargs["result"]
 
     with (
-        patch("sentences.translate_and_decompose.translate_sentence_text", fake_translate),
+        patch("sentences.translate_and_decompose.translate_sentence_text_rated", fake_translate),
         patch(
             "sentences.translate_and_decompose.decompose_with_existing_translations", fake_decompose
         ),

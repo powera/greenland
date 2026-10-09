@@ -5,3 +5,7 @@ Translation style:
 - Maintain the tense, aspect, and mood of the source sentence.
 - Preserve proper nouns as-is unless a standard translation exists in the target language.
 - Apply any per-language notes listed in the prompt when they apply to the requested target language.
+
+Confidence:
+- Give each translation its own confidence (0-1): how sure you are that it is natural in that language and says what the source sentence says.
+- When you are not sure - an idiom you cannot render, a word whose sense here you cannot pin down, or a construction the language handles in a way you do not know - still give your best translation, with a low confidence.

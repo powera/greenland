@@ -16,6 +16,7 @@ from sqlalchemy.orm import Session
 import constants
 from clients.unified_client import UnifiedLLMClient
 from sentences.candidate_lookup import find_candidate_lemmas_for_sentence
+from storage.crud.sentence_translation import uncertain_sentence_languages
 from storage.database import Sentence
 from storage.models.schema import (
     Lemma,
@@ -43,11 +44,14 @@ def find_sentences_needing_translations(
     target_languages: Sequence[str],
     limit: Optional[int] = None,
     require_english_source: bool = False,
+    retry_uncertain: bool = False,
 ) -> List[int]:
     """Return linked sentence IDs that still need one of the target languages.
 
     ``limit`` is the desired number of fully translated sentences for the
-    lemma, so already-complete sentences count toward it.
+    lemma, so already-complete sentences count toward it.  A language a model
+    was uncertain of counts as done unless ``retry_uncertain``: asking again
+    would only skip it (see sentences.translation.plan_sentence_translation).
     """
     sentence_word_ids = (
         session.query(SentenceWord.sentence_id).filter(SentenceWord.lemma_id == lemma_id).distinct()
@@ -75,6 +79,12 @@ def find_sentences_needing_translations(
             .filter(SentenceTranslation.sentence_id == sentence_id)
             .all()
         }
+        if not retry_uncertain:
+            existing_languages.update(
+                uncertain_sentence_languages(
+                    session, sentence_id, required_languages - existing_languages
+                )
+            )
         if required_languages.issubset(existing_languages):
             complete_count += 1
         elif not require_english_source or "en" in existing_languages:

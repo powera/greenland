@@ -265,6 +265,7 @@ _LLM_ANSWER_MODULES = (
     "src/wordfreq/translation/generate_forms_base.py",
     "src/workqueue/handlers/words/forms.py",
     "src/words/translation_populate.py",
+    "src/sentences/translation.py",
 )
 
 
@@ -272,6 +273,7 @@ _LLM_ANSWER_MODULES = (
 def test_llm_code_passes_a_confidence_to_gated_writers(path: str) -> None:
     import storage.crud.grammar_fact  # noqa: F401 -- register the gated writers
     import storage.crud.lemma_fact  # noqa: F401
+    import storage.crud.sentence_translation  # noqa: F401
     import words.grammar_fact_tasks.english_principal_parts  # noqa: F401
     import words.lemma_creation  # noqa: F401
     import words.pronunciation_generation  # noqa: F401

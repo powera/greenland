@@ -26,6 +26,10 @@ from storage.crud.operation_log import (
     log_batch_operation,
     log_entity_operation,
 )
+from storage.crud.sentence_translation import (
+    set_sentence_translation,
+    uncertain_sentence_languages,
+)
 from storage.models.schema import (
     Lemma,
     Sentence,
@@ -134,6 +138,7 @@ def plan_sentence_translation(
     *,
     source_language: Optional[str] = None,
     skip_existing_translations: bool = False,
+    retry_uncertain: bool = False,
 ) -> SentenceTranslationPlan:
     """Plan Phase 1 and Phase 3 for one stored sentence.
 
@@ -146,6 +151,9 @@ def plan_sentence_translation(
             :func:`pick_source_language` when None.
         skip_existing_translations: Leave out of Phase 1 the languages the
             sentence already has (the live path retranslates them).
+        retry_uncertain: Also ask for languages a model was uncertain of
+            before.  By default they are left out of Phase 1, and out of
+            Phase 3 too unless the sentence has a translation to decompose.
 
     Raises:
         ValueError: If the sentence, or its source translation, is missing.
@@ -206,6 +214,17 @@ def plan_sentence_translation(
     decompose_languages: List[str] = list(normalized_targets_all)
     if include_english and "en" not in decompose_languages:
         decompose_languages.append("en")
+
+    if not retry_uncertain:
+        uncertain = set(
+            uncertain_sentence_languages(
+                session, sentence_id, {*phase1_languages, *decompose_languages}
+            )
+        )
+        phase1_languages = [lang for lang in phase1_languages if lang not in uncertain]
+        decompose_languages = [
+            lang for lang in decompose_languages if lang not in uncertain or lang in existing
+        ]
 
     # A dialog line translated in isolation loses what it is answering, which
     # is what turns an elliptical reply into a stranded copula in every
@@ -273,6 +292,7 @@ def translate_sentence(
     *,
     source_language: str = "en",
     log_source: Optional[str] = None,
+    retry_uncertain: bool = False,
 ) -> Dict[str, Any]:
     """Translate a stored sentence into target languages using the 3-phase pipeline.
 
@@ -291,6 +311,9 @@ def translate_sentence(
             as the prompt's source sentence (default: "en").
         log_source: Who is running this, for the operation log. None skips
             logging. Named to keep it distinct from ``source_language``.
+        retry_uncertain: Also ask for languages a model was uncertain of
+            before; see :func:`plan_sentence_translation`.  Each Phase-1
+            answer is gated on its confidence either way.
 
     Returns:
         Dict of language_code -> translation_text for the languages that were
@@ -300,29 +323,56 @@ def translate_sentence(
     from sentences.translate_and_decompose import (
         TranslateAndDecomposeResult,
         decompose_with_existing_translations,
-        translate_sentence_text,
+        translate_sentence_text_rated,
     )
 
     plan = plan_sentence_translation(
-        session, sentence_id, target_languages, source_language=source_language
+        session,
+        sentence_id,
+        target_languages,
+        source_language=source_language,
+        retry_uncertain=retry_uncertain,
     )
     client = UnifiedLLMClient()
 
     # ── Phase 1: translate, then PERSIST before Phase 3 ────────────────────
-    phase1_translations = translate_sentence_text(
-        sentence_text=plan.source_text,
-        source_language=plan.source_language,
-        target_languages=plan.phase1_languages,
-        client=client,
-        model=model,
-        conversation_context=plan.conversation_context,
-    )
-    if not phase1_translations:
-        raise ValueError("Phase 1 translation produced no results")
+    phase1_translations: Dict[str, str] = {}
+    if plan.phase1_languages:
+        answer = translate_sentence_text_rated(
+            sentence_text=plan.source_text,
+            source_language=plan.source_language,
+            target_languages=plan.phase1_languages,
+            client=client,
+            model=model,
+            conversation_context=plan.conversation_context,
+        )
+        if not answer.translations:
+            raise ValueError("Phase 1 translation produced no results")
 
-    # Persist Phase 1 translations (SentenceTranslation rows only) and commit
-    # before Phase 3, so a Phase-3 failure doesn't lose the Phase-1 work.
-    persist_phase1_translations(sentence_id, phase1_translations, session, source=log_source)
+        # Persist Phase 1 translations (SentenceTranslation rows only) and commit
+        # before Phase 3, so a Phase-3 failure doesn't lose the Phase-1 work.
+        uncertain = persist_phase1_translations(
+            sentence_id,
+            answer.translations,
+            session,
+            source=log_source,
+            confidences=answer.confidences,
+            model=model,
+        )
+        # An uncertain answer was not stored, so Phase 3 must not decompose
+        # it, nor store_decomposition_results write it after all.
+        phase1_translations = {
+            lang: text for lang, text in answer.translations.items() if lang not in uncertain
+        }
+    # A language left out of Phase 1 as uncertain is still decomposed from the
+    # translation it already has.
+    for row in session.query(SentenceTranslation).filter_by(sentence_id=sentence_id).all():
+        if (
+            row.language_code in plan.decompose_languages
+            and row.language_code != plan.source_language
+            and row.language_code not in phase1_translations
+        ):
+            phase1_translations[row.language_code] = row.translation_text
 
     # ── Phase 2 + Phase 3 ─────────────────────────────────────────────────
     pipeline_result = TranslateAndDecomposeResult(
@@ -359,39 +409,49 @@ def persist_phase1_translations(
     translations: Dict[str, str],
     session: Session,
     source: Optional[str] = None,
-) -> None:
+    *,
+    confidences: Optional[Dict[str, float]] = None,
+    model: Optional[str] = None,
+) -> List[str]:
     """Insert/update SentenceTranslation rows for Phase-1 outputs and commit.
 
     Used by the synchronous decompose path so Phase-1 work survives a Phase-3
     failure and so the DB state matches what the explicit two-phase OpenAI
     Batch flow produces.
 
+    A language in ``confidences`` is gated on it through
+    storage.crud.sentence_translation.set_sentence_translation: below the
+    floor it is recorded as uncertain and not written, and an existing
+    translation stays.  One absent from it (an answer from before the schema
+    asked) is written as it is.
+
     Args:
         sentence_id: Sentence being translated.
         translations: Phase-1 output, language code -> text.
         session: Database session.
         source: Who produced these, for the operation log. None skips logging.
+        confidences: The model's confidence per language.
+        model: The model that answered, for an uncertain record's note.
+
+    Returns:
+        The languages recorded as uncertain instead of written.
     """
     persisted: List[str] = []
+    uncertain: List[str] = []
     for lang_code, translation_text in translations.items():
         if not isinstance(translation_text, str) or not translation_text.strip():
             continue
-        existing = (
-            session.query(SentenceTranslation)
-            .filter_by(sentence_id=sentence_id, language_code=lang_code)
-            .first()
+        written = set_sentence_translation(
+            session,
+            sentence_id,
+            lang_code,
+            translation_text,
+            confidence=confidences.get(lang_code) if confidences is not None else None,
+            model=model,
         )
-        if existing:
-            existing.translation_text = translation_text
-        else:
-            session.add(
-                SentenceTranslation(
-                    sentence_id=sentence_id,
-                    language_code=lang_code,
-                    translation_text=translation_text,
-                    verified=False,
-                )
-            )
+        if written is None:
+            uncertain.append(lang_code)
+            continue
         persisted.append(lang_code)
 
     if source is not None and persisted:
@@ -405,11 +465,12 @@ def persist_phase1_translations(
         )
 
     session.commit()
-    logger.info(
-        "Persisted Phase-1 translations for sentence %d: %s",
-        sentence_id,
-        sorted(translations.keys()),
-    )
+    logger.info("Persisted Phase-1 translations for sentence %d: %s", sentence_id, persisted)
+    if uncertain:
+        logger.warning(
+            "Sentence %d: below confidence, recorded as uncertain: %s", sentence_id, uncertain
+        )
+    return uncertain
 
 
 def _clean_word_field(value: Any) -> str:

@@ -466,6 +466,14 @@ def get_argument_parser() -> argparse.ArgumentParser:
         action="store_true",
         help="Execute immediately instead of enqueueing work (debugging only)",
     )
+    parser.add_argument(
+        "--retry-uncertain",
+        action="store_true",
+        help=(
+            "Also ask for sentence translations a model answered below the 0.7 "
+            "confidence floor before (uncertain_llm_results); by default they are skipped"
+        ),
+    )
 
     parser.add_argument(
         "--level",
@@ -566,6 +574,8 @@ def enqueue_translation_work(
                 target_languages=args.languages,
                 limit=args.translation_limit,
                 require_english_source=args.use_translategemma,
+                # TranslateGemma rates nothing, so has no uncertainty to skip.
+                retry_uncertain=args.retry_uncertain or args.use_translategemma,
             )
             for sentence_id in sentence_ids:
                 if args.dry_run:
@@ -583,6 +593,7 @@ def enqueue_translation_work(
                         "selected_languages": args.languages,
                         "model": service.config.model or constants.DEFAULT_MODEL,
                         "source_component": "agents.zvirblis",
+                        "retry_uncertain": args.retry_uncertain,
                     },
                     dedup_key=f"{task_type}:{sentence_id}:{language_key}",
                 )

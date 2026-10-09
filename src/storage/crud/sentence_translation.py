@@ -1,6 +1,6 @@
 """CRUD operations for SentenceTranslation model."""
 
-from typing import Optional
+from typing import Iterable, List, Optional
 
 from sqlalchemy.exc import IntegrityError
 from sqlalchemy.orm import Session
@@ -13,7 +13,13 @@ from storage.crud.operation_log import (
     log_entity_operation,
     log_field_changes,
 )
+from storage.crud.uncertain_llm_result import (
+    LLMQuestion,
+    clear_uncertain_llm_result,
+    confidence_gated,
+)
 from storage.models.schema import Sentence, SentenceTranslation
+from storage.models.uncertain_llm_result import TOPIC_TRANSLATION
 
 
 def add_sentence_translation(
@@ -48,6 +54,8 @@ def add_sentence_translation(
     )
     session.add(translation)
     session.flush()
+    # A stored translation, however written, answers the question.
+    clear_uncertain_llm_result(session, TOPIC_TRANSLATION, language_code, sentence_id=sentence.id)
 
     if source is not None:
         log_entity_operation(
@@ -116,6 +124,12 @@ def update_sentence_translation(
 
     if translation_text is not None:
         translation.translation_text = translation_text
+        clear_uncertain_llm_result(
+            session,
+            TOPIC_TRANSLATION,
+            translation.language_code,
+            sentence_id=translation.sentence_id,
+        )
     if verified is not None:
         translation.verified = verified
 
@@ -190,3 +204,58 @@ def get_or_create_sentence_translation(
         session, sentence, language_code, translation_text, verified, source=source
     )
     return translation, True
+
+
+@confidence_gated(
+    question=lambda a: LLMQuestion(
+        TOPIC_TRANSLATION, a["language_code"], sentence_id=a["sentence_id"]
+    ),
+    value="translation_text",
+)
+def set_sentence_translation(
+    session: Session,
+    sentence_id: int,
+    language_code: str,
+    translation_text: str,
+    *,
+    confidence: Optional[float] = None,
+    min_confidence: Optional[float] = None,
+    model: Optional[str] = None,
+) -> Optional[SentenceTranslation]:
+    """Create or replace one sentence's translation in ``language_code``.
+
+    The writer for a model's sentence translations.  ``confidence``,
+    ``min_confidence`` and ``model`` are for an answer rated per language; see
+    storage.crud.uncertain_llm_result.confidence_gated.  One below
+    min_confidence is recorded as uncertain and not written, so an existing
+    translation stays as it is.  Does not log; the caller logs the batch of
+    languages it wrote.
+
+    Returns:
+        The translation row, or None for an answer below min_confidence.
+    """
+    existing = get_sentence_translation(session, sentence_id, language_code)
+    if existing is not None:
+        existing.translation_text = translation_text
+        return existing
+    translation = SentenceTranslation(
+        sentence_id=sentence_id,
+        language_code=language_code,
+        translation_text=translation_text,
+        verified=False,
+    )
+    session.add(translation)
+    return translation
+
+
+def uncertain_sentence_languages(
+    session: Session, sentence_id: int, language_codes: Iterable[str]
+) -> List[str]:
+    """The languages among ``language_codes`` a model was uncertain of for this sentence."""
+    return [
+        language_code
+        for language_code in language_codes
+        if set_sentence_translation.is_uncertain(
+            session, sentence_id=sentence_id, language_code=language_code
+        )
+    ]
