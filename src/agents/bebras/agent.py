@@ -350,7 +350,7 @@ class BebrasAgent:
 
             # Step 5: Add target language translations if requested
             if target_languages:
-                from .translation import ensure_translations
+                from sentences.translation_coverage import ensure_translations
 
                 translation_result = ensure_translations(
                     session=session,
