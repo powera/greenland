@@ -8,7 +8,7 @@ from __future__ import annotations
 import logging
 from typing import Any, Dict, Optional, Tuple
 
-from words.workflow_support import build_default_config, get_lemma_or_raise
+from words.workflow_support import build_default_config
 from sqlalchemy.orm import Session
 from storage.backend.config import DataSourceConfig
 from storage.config.grammar_fact_registry import legacy_supported_fact_types
@@ -257,34 +257,3 @@ def generate_grammar_fact_for_lemma(
         "confidence": confidence,
         "translation": translation,
     }
-
-
-def handle_generate_grammar_fact(session: Session, payload: Dict) -> str:
-    """
-    Handle grammar fact generation task (workqueue entry point).
-
-    Payload schema:
-        lemma_id: int - ID of the lemma to generate fact for
-        fact_type: str - Type of grammar fact (e.g., "measure_words", "grammatical_gender")
-        language_code: str - Target language code
-
-    Returns:
-        str: Result message describing what was generated
-    """
-    lemma_id = payload["lemma_id"]
-    fact_type = payload["fact_type"]
-    language_code = payload["language_code"]
-
-    lemma = get_lemma_or_raise(session, lemma_id)
-
-    result = generate_grammar_fact_for_lemma(session, lemma, fact_type, language_code)
-
-    session.commit()
-
-    if result.get("skipped"):
-        return f"Skipped: {fact_type} already exists ({result.get('existing_value')})"
-
-    if result.get("error"):
-        raise RuntimeError(result["error"])
-
-    return f"Generated {fact_type}: {result['fact_value']} (confidence: {result['confidence']:.2f})"

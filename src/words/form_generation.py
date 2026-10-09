@@ -6,11 +6,11 @@ This module implements reusable word-form generation logic.
 from __future__ import annotations
 
 import logging
-from typing import Dict, List, Optional, Tuple
+from typing import List, Optional, Tuple
 
 from sqlalchemy.orm import Session
 
-from words.workflow_support import build_default_config, get_lemma_or_raise
+from words.workflow_support import build_default_config
 from storage.backend.config import DataSourceConfig
 from storage.models.schema import Lemma, LemmaTranslation
 from storage.translation_helpers import LANGUAGE_FIELDS, get_translation
@@ -115,28 +115,3 @@ def generate_forms_for_lemma(
         f"Could not generate {lang_code} {pos_type} forms "
         "(or the model was below confidence; see uncertain_llm_results)"
     )
-
-
-def handle_generate_forms(session: Session, payload: Dict) -> str:
-    """
-    Handle grammatical forms generation task (workqueue entry point).
-
-    Payload schema:
-        lemma_id: int - ID of the lemma to generate forms for
-        lang_code: str - Language code (default: "lt")
-
-    Returns:
-        str: Result message describing what was generated
-    """
-    lemma_id = payload["lemma_id"]
-    lang_code = payload.get("lang_code", "lt")
-
-    lemma = get_lemma_or_raise(session, lemma_id)
-
-    success, error = generate_forms_for_lemma(session, lemma, lang_code)
-
-    session.commit()
-
-    if success:
-        return f"Generated {lang_code} {lemma.pos_type} forms"
-    raise RuntimeError(error)

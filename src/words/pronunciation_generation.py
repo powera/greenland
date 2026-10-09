@@ -12,7 +12,7 @@ from typing import Any, Dict, List, Optional, Tuple, cast
 from sqlalchemy import case
 from sqlalchemy.orm import Session
 
-from words.workflow_support import build_default_config, get_lemma_or_raise
+from words.workflow_support import build_default_config
 import constants
 from langtools.form_registry import FORM_SPECS
 from storage.backend.config import DataSourceConfig
@@ -535,40 +535,3 @@ def generate_pronunciations_for_lemma(
             )
 
     return generated_count, errors
-
-
-def handle_generate_pronunciations(session: Session, payload: Dict) -> str:
-    """
-    Handle pronunciation generation task (workqueue entry point).
-
-    Payload schema:
-        lemma_id: int - ID of the lemma to generate pronunciations for
-        language_code: str - Language code (default: "en")
-        base_forms_only: bool - Restrict generation to base forms
-
-    Returns:
-        str: Result message describing what was generated
-    """
-    lemma_id = payload["lemma_id"]
-    language_code = payload.get("language_code", payload.get("lang_code", "en"))
-    base_forms_only = payload.get("base_forms_only", False)
-    all_forms_pronunciation = payload.get("all_forms_pronunciation", False)
-
-    lemma = get_lemma_or_raise(session, lemma_id)
-
-    generated_count, errors = generate_pronunciations_for_lemma(
-        session,
-        lemma,
-        language_code,
-        base_forms_only=base_forms_only,
-        all_forms_pronunciation=all_forms_pronunciation,
-    )
-
-    session.commit()
-
-    if generated_count == 0 and not errors:
-        return f"No missing pronunciations for {language_code} forms"
-    if generated_count == 0 and errors:
-        raise RuntimeError("; ".join(errors))
-
-    return f"Generated pronunciations for {generated_count} form(s)"
