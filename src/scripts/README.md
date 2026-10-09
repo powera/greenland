@@ -37,3 +37,4 @@ use `GREENLAND_DISABLE_LLM=1` and back up the database before risky changes.
 - `apply_family_relation_overrides.py`: preview, apply, inspect or clear kinship exclusions.
 - `manage_difficulty_overrides.py`: manage individual overrides and CSV import/export.
 - `import_ancient_translations.py`: import ancient translations from release files.
+- `level_corpus_profile.py`: report the corpus mix of each Trakaido level (read-only).
