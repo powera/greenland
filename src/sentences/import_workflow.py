@@ -41,6 +41,7 @@ from sqlalchemy.orm import Session
 from langtools.grammatical_words import is_function_word, is_grammatical_word
 from sentences.translate_and_decompose import DEFAULT_MODEL, PHASE3_MIN_LANGUAGES
 from storage.crud.concept import get_concept_by_slug
+from storage.crud.sentence_translation import uncertain_sentence_languages
 from storage.models.concept import normalize_concept_slug
 from storage.models.imports import SentencePendingImport
 from storage.models.schema import Sentence, SentenceTranslation, SentenceWord
@@ -301,7 +302,21 @@ def _evaluate_translate(
     session: Session, sentence_id: int, spec: SentenceImportSpec
 ) -> StageStatus:
     have = _translated_languages(session, sentence_id)
-    missing = [lang for lang in spec.target_languages if lang not in have]
+    missing_all = [lang for lang in spec.target_languages if lang not in have]
+    # translate_sentence skips a language a model was uncertain of, so asking
+    # again would never fill it: settle the stage as blocked on it instead.
+    uncertain = uncertain_sentence_languages(session, sentence_id, missing_all)
+    missing = [lang for lang in missing_all if lang not in uncertain]
+    if not missing and uncertain:
+        return StageStatus(
+            stage=SentenceImportStage.TRANSLATE,
+            complete=False,
+            blocked_reason=(
+                f"a model was uncertain of the {', '.join(uncertain)} translation; "
+                "translate by hand or retry"
+            ),
+            detail={"missing_languages": [], "uncertain_languages": uncertain},
+        )
     return StageStatus(
         stage=SentenceImportStage.TRANSLATE,
         complete=not missing,

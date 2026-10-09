@@ -816,7 +816,15 @@ def accept_sentence(sentence_id: int) -> Response:
         if not has_all_translations:
             from sentences.translation import translate_sentence
 
-            translate_sentence(sentence_id, target_languages, g.db, model=constants.DEFAULT_MODEL)
+            # Asked for by hand: ask again where a model was uncertain before;
+            # each answer is still gated on its confidence.
+            translate_sentence(
+                sentence_id,
+                target_languages,
+                g.db,
+                model=constants.DEFAULT_MODEL,
+                retry_uncertain=True,
+            )
 
         # Auto-populate the level if not set (reuse already-loaded lemmas)
         if sentence.minimum_level is None:

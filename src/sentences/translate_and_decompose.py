@@ -281,8 +281,20 @@ class TranslateAndDecomposeResult:
 def _phase1_schema(target_languages: Sequence[str]) -> Dict[str, Any]:
     properties: Dict[str, Any] = {
         lang: {
-            "type": "string",
-            "description": f"{LANGUAGE_NAMES.get(lang, lang)} translation",
+            "type": "object",
+            "properties": {
+                "translation": {
+                    "type": "string",
+                    "description": f"{LANGUAGE_NAMES.get(lang, lang)} translation",
+                },
+                "confidence": {
+                    "type": "number",
+                    "description": "Confidence from 0-1 that this translation is natural "
+                    "and says what the source sentence says",
+                },
+            },
+            "required": ["translation", "confidence"],
+            "additionalProperties": False,
         }
         for lang in target_languages
     }
@@ -435,17 +447,60 @@ def build_phase1_call(
     )
 
 
+def _phase1_text(value: Any) -> Optional[str]:
+    """One language's text from a Phase-1 answer: ``{"translation": ...}`` or a bare string.
+
+    The bare string is the shape before the schema asked for a confidence, which
+    a batch submitted earlier still returns.
+    """
+    if isinstance(value, dict):
+        value = value.get("translation")
+    if isinstance(value, str) and value.strip():
+        return value.strip()
+    return None
+
+
 def interpret_phase1(data: Dict[str, Any], target_languages: Sequence[str]) -> Dict[str, str]:
     """Language -> translation from a Phase-1 answer; blank or missing ones dropped."""
     translations: Dict[str, str] = {}
     for lang in target_languages:
-        value = data.get(lang)
-        if isinstance(value, str) and value.strip():
-            translations[lang] = value.strip()
+        text = _phase1_text(data.get(lang))
+        if text is not None:
+            translations[lang] = text
     return translations
 
 
-def translate_sentence_text(
+def interpret_phase1_confidences(
+    data: Dict[str, Any], target_languages: Sequence[str]
+) -> Dict[str, float]:
+    """Language -> confidence for the rated languages of a Phase-1 answer.
+
+    A language answered as an object is rated, and a missing or non-numeric
+    confidence counts as 0.0.  A language answered with a bare string (a batch
+    submitted before the schema asked) is left out, so it is stored ungated.
+    """
+    confidences: Dict[str, float] = {}
+    for lang in target_languages:
+        value = data.get(lang)
+        if not isinstance(value, dict):
+            continue
+        raw_confidence = value.get("confidence")
+        if isinstance(raw_confidence, (int, float)) and not isinstance(raw_confidence, bool):
+            confidences[lang] = float(raw_confidence)
+        else:
+            confidences[lang] = 0.0
+    return confidences
+
+
+@dataclass
+class Phase1Answer:
+    """Phase-1 translations, and the model's confidence in each it rated."""
+
+    translations: Dict[str, str] = field(default_factory=dict)
+    confidences: Dict[str, float] = field(default_factory=dict)
+
+
+def translate_sentence_text_rated(
     *,
     sentence_text: str,
     source_language: str,
@@ -453,12 +508,11 @@ def translate_sentence_text(
     client: UnifiedLLMClient,
     model: str = DEFAULT_MODEL,
     conversation_context: Optional[str] = None,
-) -> Dict[str, str]:
-    """Phase 1: ask the LLM for sentence-level translations only.
+) -> Phase1Answer:
+    """Phase 1: ask the LLM for sentence-level translations only, with confidences.
 
-    Returns a dict mapping language_code -> translated sentence string. Languages
-    the LLM omits or returns empty are dropped silently. On LLM failure returns
-    an empty dict and logs a warning.
+    Languages the LLM omits or returns empty are dropped silently. On LLM
+    failure returns an empty answer and logs a warning.
 
     Args:
         conversation_context: Optional dialog context block (see
@@ -472,7 +526,7 @@ def translate_sentence_text(
         conversation_context=conversation_context,
     )
     if built is None:
-        return {}
+        return Phase1Answer()
     context, prompt, _full_prompt, schema, normalized_targets = built
 
     result = query_sentence_decomposition(
@@ -484,8 +538,35 @@ def translate_sentence_text(
     )
     if not result.get("success"):
         logger.warning("Phase 1 translation failed: %s", result.get("error", "unknown"))
-        return {}
-    return interpret_phase1(result, normalized_targets)
+        return Phase1Answer()
+    return Phase1Answer(
+        translations=interpret_phase1(result, normalized_targets),
+        confidences=interpret_phase1_confidences(result, normalized_targets),
+    )
+
+
+def translate_sentence_text(
+    *,
+    sentence_text: str,
+    source_language: str,
+    target_languages: Sequence[str],
+    client: UnifiedLLMClient,
+    model: str = DEFAULT_MODEL,
+    conversation_context: Optional[str] = None,
+) -> Dict[str, str]:
+    """Phase 1 without the confidences: language_code -> translated sentence.
+
+    For callers that write new sentences rather than fill an existing one's
+    gaps; see :func:`translate_sentence_text_rated`.
+    """
+    return translate_sentence_text_rated(
+        sentence_text=sentence_text,
+        source_language=source_language,
+        target_languages=target_languages,
+        client=client,
+        model=model,
+        conversation_context=conversation_context,
+    ).translations
 
 
 # --------------------------------------------------------------------------- #

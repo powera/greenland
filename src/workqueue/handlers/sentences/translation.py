@@ -31,6 +31,7 @@ from sentences.translate_and_decompose import (
     build_phase1_call,
     build_phase3_request,
     interpret_phase1,
+    interpret_phase1_confidences,
     interpret_phase3,
     plan_phase3,
 )
@@ -62,9 +63,15 @@ def do_translate_sentence(
     sentence_id: int,
     selected_languages: List[str],
     model: str = constants.DEFAULT_MODEL,
+    retry_uncertain: bool = False,
     **_: Any,
 ) -> str:
     """Translate a sentence into selected target languages.
+
+    Languages a model was uncertain of are skipped unless ``retry_uncertain``
+    (see sentences.translation.plan_sentence_translation).  This queue serves
+    zvirblis's bulk runs, so it skips them by default, unlike the per-item
+    forms and pronunciation queues.
 
     The sentence must already have at least one SentenceTranslation row; that
     row's language is used as the source language for the LLM prompt. English
@@ -102,6 +109,7 @@ def do_translate_sentence(
         session,
         model=model,
         source_language=source_language,
+        retry_uncertain=retry_uncertain,
     )
 
     language_names = [
@@ -122,6 +130,7 @@ def handle_sentences_translate(
     selected_languages: Optional[List[str]] = None,
     model: str = constants.DEFAULT_MODEL,
     batch: bool = False,
+    retry_uncertain: bool = False,
     **_: Any,
 ) -> str:
     """Workqueue wrapper for sentence translation.
@@ -140,6 +149,7 @@ def handle_sentences_translate(
                 sentence_id=sid,
                 selected_languages=languages,
                 model=model,
+                retry_uncertain=retry_uncertain,
             )
             for sid in sentence_ids
         ]
@@ -151,6 +161,7 @@ def handle_sentences_translate(
         sentence_id=sentence_id,
         selected_languages=languages,
         model=model,
+        retry_uncertain=retry_uncertain,
     )
 
 
@@ -197,6 +208,7 @@ def sentence_translation_state(
     decompose_languages: Optional[List[str]] = None,
     skip_existing_translations: bool = False,
     log_source: Optional[str] = None,
+    retry_uncertain: bool = False,
 ) -> Dict[str, Any]:
     """The item state the sentence job works on.
 
@@ -209,6 +221,7 @@ def sentence_translation_state(
         skip_existing_translations: Leave out of Phase 1 the languages the
             sentence already has.
         log_source: Who is running this, for the operation log.
+        retry_uncertain: Also ask for languages a model was uncertain of before.
     """
     return {
         "sentence_id": sentence_id,
@@ -218,6 +231,7 @@ def sentence_translation_state(
         "decompose_languages": decompose_languages,
         "skip_existing_translations": skip_existing_translations,
         "log_source": log_source,
+        "retry_uncertain": retry_uncertain,
     }
 
 
@@ -227,6 +241,7 @@ def _plan(session: Session, state: Dict[str, Any]) -> SentenceTranslationPlan:
         state["sentence_id"],
         state["target_languages"],
         skip_existing_translations=bool(state.get("skip_existing_translations")),
+        retry_uncertain=bool(state.get("retry_uncertain")),
     )
 
 
@@ -259,17 +274,28 @@ def _apply_translate(
     session: Session, state: Dict[str, Any], data: Dict[str, Any], ctx: StageContext
 ) -> Union[Done, Next]:
     translated = 0
+    uncertain: List[str] = []
     if not data.get(_NO_PHASE1):
-        translations = interpret_phase1(data, state.get("phase1_languages") or [])
+        phase1_languages = state.get("phase1_languages") or []
+        translations = interpret_phase1(data, phase1_languages)
         if not translations:
             return Done("failed", "Phase 1 translation produced no results")
-        # Persisted before Phase 3, as the live path does.
-        persist_phase1_translations(
-            state["sentence_id"], translations, session, source=state.get("log_source")
+        # Persisted before Phase 3, as the live path does.  Stage 2 reads the
+        # stored rows, so an uncertain answer is not decomposed either.
+        uncertain = persist_phase1_translations(
+            state["sentence_id"],
+            translations,
+            session,
+            source=state.get("log_source"),
+            confidences=interpret_phase1_confidences(data, phase1_languages),
+            model=ctx.model,
         )
-        translated = len(translations)
+        translated = len(translations) - len(uncertain)
     if not state.get("decompose", True):
-        return Done("written", f"{translated} translation(s)")
+        if translated == 0 and uncertain:
+            return Done("rejected", f"below confidence: {', '.join(uncertain)}")
+        suffix = f"; uncertain: {', '.join(uncertain)}" if uncertain else ""
+        return Done("written", f"{translated} translation(s){suffix}")
     return Next({key: value for key, value in state.items() if key != "phase1_languages"})
 
 

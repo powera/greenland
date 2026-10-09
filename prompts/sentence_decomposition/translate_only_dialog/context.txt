@@ -9,3 +9,7 @@ Translation style:
 These sentences are lines of dialog, so two more rules apply:
 - A line that depends on the previous turn must be translated as a natural reply in the target language, not as a literal rendering of the English words. English can strand an auxiliary or copula in an answer where most languages cannot, and some languages answer by repeating the main verb or by omitting it entirely.
 - Pronouns, honorifics, kinship terms, and politeness level must fit the characters described in the prompt. Where the target language forces a choice English does not make, use the scene and the characters' ages and relationships to make it; do not fall back to a default form.
+
+Confidence:
+- Give each translation its own confidence (0-1): how sure you are that it is natural in that language and says what the source sentence says.
+- When you are not sure - an idiom you cannot render, a word whose sense here you cannot pin down, or a construction the language handles in a way you do not know - still give your best translation, with a low confidence.
