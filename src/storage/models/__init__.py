@@ -88,6 +88,7 @@ from storage.models.schema import (
     WordToken,
 )
 from storage.models.translations import Translation, TranslationSet
+from storage.models.uncertain_llm_result import UncertainLLMResult
 from storage.models.variant_form import (
     VARIANT_KIND_SCRIPT,
     VARIANT_KIND_SPELLING,
@@ -180,6 +181,7 @@ __all__ = [
     "SentenceWord",
     "Translation",
     "TranslationSet",
+    "UncertainLLMResult",
     "VARIANT_KIND_SCRIPT",
     "VARIANT_KIND_SPELLING",
     "VariantForm",
