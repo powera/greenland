@@ -17,15 +17,18 @@ words appearing together every 5 or so levels.
 
 from typing import Dict, List, Optional, Set
 
+from langtools.dialect_overrides import get_translation_language
+from words.difficulty.geography_catalog import MAIN_COUNTRY_NAMES
+
 # =============================================================================
 # LEVEL GROUPINGS
 # =============================================================================
 # Countries are grouped at specific levels to batch them together.
 # Each tier maps to a specific difficulty level.
 # These anchors are spread across the expanded general curriculum.
-TIER_1_LEVEL = 10  # Home country + immediate neighbors/cultural significance
-TIER_2_LEVEL = 18  # Major world powers + culturally relevant countries
-TIER_3_LEVEL = 145  # Remaining countries (lowest priority); old L30 after the band renumbering
+TIER_1_LEVEL = 15  # Target-language home countries and close neighbors
+TIER_2_LEVEL = 231  # Main geography batch
+TIER_3_LEVEL = 1031  # Extended countries, languages and related senses
 
 # Exact stored region lemmas that are countries.  ``region`` also contains US
 # states and continents. States do not receive country-priority overrides;
@@ -97,7 +100,7 @@ CONTINENT_NAMES: Set[str] = {
 # COUNTRY PRIORITY CONFIGURATION BY TARGET LANGUAGE
 # =============================================================================
 # Each language defines which countries belong to which tier.
-# Countries not listed use TIER_3_LEVEL.
+# Countries not listed use the main batch when recognized, otherwise TIER_3_LEVEL.
 #
 # Key: target language code (the language being learned)
 # Value: dict mapping tier level -> list of country concept_labels
@@ -110,7 +113,7 @@ COUNTRY_PRIORITIES: Dict[str, Dict[int, List[str]]] = {
     # LITHUANIAN (lt) - Baltic focus, European neighbors
     # NOTE: English-speaking countries (England, America, Canada, Australia)
     # are always in Tier 1 since we target English speakers.
-    # Countries not listed here use Tier 3.
+    # Other recognized countries stay in the main batch.
     # -------------------------------------------------------------------------
     "lt": {
         TIER_1_LEVEL: [
@@ -135,7 +138,7 @@ COUNTRY_PRIORITIES: Dict[str, Dict[int, List[str]]] = {
             "Japan",
             "China",
         ],
-        # India, Brazil use Tier 3 (145)
+        # India, Brazil use the main batch (231)
         # Not relevant enough to prioritize for Lithuanian learners
     },
     # -------------------------------------------------------------------------
@@ -164,7 +167,7 @@ COUNTRY_PRIORITIES: Dict[str, Dict[int, List[str]]] = {
             "Italy",
             "Spain",
         ],
-        # Baltic countries, Nordic countries use Tier 3 (145)
+        # Baltic countries, Nordic countries use the main batch (231)
     },
     # -------------------------------------------------------------------------
     # FRENCH (fr) - European focus, Francophone world
@@ -188,7 +191,7 @@ COUNTRY_PRIORITIES: Dict[str, Dict[int, List[str]]] = {
             "Brazil",  # Ties
             "India",
         ],
-        # Nordic and Baltic countries use Tier 3 (145)
+        # Nordic and Baltic countries use the main batch (231)
     },
     # -------------------------------------------------------------------------
     # SPANISH (es) - European (Peninsular) context
@@ -216,7 +219,7 @@ COUNTRY_PRIORITIES: Dict[str, Dict[int, List[str]]] = {
             "Russia",
             "India",
         ],
-        # Nordic and Baltic countries use Tier 3 (145)
+        # Nordic and Baltic countries use the main batch (231)
     },
     # -------------------------------------------------------------------------
     # LATIN AMERICAN SPANISH (es-419) - Latin American context
@@ -242,7 +245,7 @@ COUNTRY_PRIORITIES: Dict[str, Dict[int, List[str]]] = {
             "China",  # Major trade partner
             "Japan",  # Economic ties
         ],
-        # European countries other than Spain use Tier 3 (145)
+        # European countries other than Spain use the main batch (231)
     },
     # -------------------------------------------------------------------------
     # BRAZILIAN PORTUGUESE (pt-br) - Latin American context
@@ -268,7 +271,7 @@ COUNTRY_PRIORITIES: Dict[str, Dict[int, List[str]]] = {
             "China",  # Major trade partner
             "Japan",  # Economic ties, largest diaspora outside Japan
         ],
-        # European countries other than Portugal use Tier 3 (145)
+        # European countries other than Portugal use the main batch (231)
     },
     # -------------------------------------------------------------------------
     # GERMAN (de) - Central European focus
@@ -294,7 +297,7 @@ COUNTRY_PRIORITIES: Dict[str, Dict[int, List[str]]] = {
             "India",
             "Brazil",
         ],
-        # Baltic countries, Finland use Tier 3 (145)
+        # Baltic countries, Finland use the main batch (231)
     },
     # -------------------------------------------------------------------------
     # ITALIAN (it) - Mediterranean and European focus
@@ -318,7 +321,7 @@ COUNTRY_PRIORITIES: Dict[str, Dict[int, List[str]]] = {
             "Brazil",  # Italian diaspora
             "India",
         ],
-        # Nordic and Baltic countries use Tier 3 (145)
+        # Nordic and Baltic countries use the main batch (231)
     },
     # -------------------------------------------------------------------------
     # PORTUGUESE (pt) - Lusophone world, Brazilian focus
@@ -342,7 +345,7 @@ COUNTRY_PRIORITIES: Dict[str, Dict[int, List[str]]] = {
             "India",
             "Russia",
         ],
-        # Nordic and Baltic countries use Tier 3 (145)
+        # Nordic and Baltic countries use the main batch (231)
     },
     # -------------------------------------------------------------------------
     # DUTCH (nl) - European and colonial history focus
@@ -366,7 +369,7 @@ COUNTRY_PRIORITIES: Dict[str, Dict[int, List[str]]] = {
             "Brazil",
             "India",
         ],
-        # Nordic and Baltic countries use Tier 3 (145)
+        # Nordic and Baltic countries use the main batch (231)
     },
     # -------------------------------------------------------------------------
     # SWEDISH (sv) - Nordic and European focus
@@ -393,7 +396,7 @@ COUNTRY_PRIORITIES: Dict[str, Dict[int, List[str]]] = {
             "India",
             "Brazil",
         ],
-        # Baltic countries use Tier 3 (145)
+        # Baltic countries use the main batch (231)
     },
     # -------------------------------------------------------------------------
     # VIETNAMESE (vi) - Southeast Asian and French colonial ties
@@ -420,7 +423,7 @@ COUNTRY_PRIORITIES: Dict[str, Dict[int, List[str]]] = {
             "Brazil",
             "Poland",
         ],
-        # Nordic and Baltic countries use Tier 3 (145)
+        # Nordic and Baltic countries use the main batch (231)
     },
     # -------------------------------------------------------------------------
     # JAPANESE (ja) - East Asian focus
@@ -448,7 +451,7 @@ COUNTRY_PRIORITIES: Dict[str, Dict[int, List[str]]] = {
             "Spain",
             "Poland",
         ],
-        # Nordic and Baltic countries use Tier 3 (145)
+        # Nordic and Baltic countries use the main batch (231)
     },
     # -------------------------------------------------------------------------
     # KOREAN (ko) - East Asian focus
@@ -476,7 +479,7 @@ COUNTRY_PRIORITIES: Dict[str, Dict[int, List[str]]] = {
             "Spain",
             "Poland",
         ],
-        # Nordic and Baltic countries use Tier 3 (145)
+        # Nordic and Baltic countries use the main batch (231)
     },
     # -------------------------------------------------------------------------
     # SWAHILI (sw) - East African focus
@@ -503,13 +506,32 @@ COUNTRY_PRIORITIES: Dict[str, Dict[int, List[str]]] = {
             "Spain",
             "Poland",
         ],
-        # Nordic and Baltic countries use Tier 3 (145)
+        # Nordic and Baltic countries use the main batch (231)
     },
 }
 
-# Taiwan Mandarin takes Mandarin's country emphasis unchanged. Aliased rather
-# than copied so the two cannot drift apart.
-COUNTRY_PRIORITIES["zh-tw"] = COUNTRY_PRIORITIES["zh"]
+# Include home countries that the older, smaller inventory did not contain.
+for _language_code, _home_countries in {
+    "nl": ["Netherlands"],
+    "vi": ["Vietnam"],
+    "sw": ["Tanzania", "Kenya"],
+    "pt": ["Portugal"],
+}.items():
+    for _home_country in _home_countries:
+        if _home_country not in COUNTRY_PRIORITIES[_language_code][TIER_1_LEVEL]:
+            COUNTRY_PRIORITIES[_language_code][TIER_1_LEVEL].insert(0, _home_country)
+
+# England and the United Kingdom are separate concepts. Both belong early
+# wherever the existing English-speaking-country priority applies.
+for _priorities in COUNTRY_PRIORITIES.values():
+    if "England" in _priorities[TIER_1_LEVEL]:
+        _priorities[TIER_1_LEVEL].append("United Kingdom")
+
+# Taiwan Mandarin shares the regional emphasis, with Taiwan itself early too.
+COUNTRY_PRIORITIES["zh-tw"] = {
+    level: list(countries) for level, countries in COUNTRY_PRIORITIES["zh"].items()
+}
+COUNTRY_PRIORITIES["zh-tw"][TIER_1_LEVEL].insert(0, "Taiwan")
 
 
 # =============================================================================
@@ -566,6 +588,7 @@ def get_country_level_for_language(country_label: str, target_language: str) -> 
         The difficulty level to use, or None if no override needed
         (use default level from lemma)
     """
+    target_language = get_translation_language(target_language)
     if target_language not in COUNTRY_PRIORITIES:
         return None
 
@@ -578,7 +601,11 @@ def get_country_level_for_language(country_label: str, target_language: str) -> 
         if country_label in countries:
             return level
 
-    # Every other recognized country is the language's lowest-priority tier.
+    # Main-batch membership is curated, not a population/frequency ranking.
+    # A country need not be explicitly listed for every target language to
+    # remain in the main batch; only the early promotions are language-specific.
+    if country_label in COUNTRY_NAMES or country_label in MAIN_COUNTRY_NAMES:
+        return TIER_2_LEVEL
     return TIER_3_LEVEL
 
 
@@ -602,7 +629,7 @@ def validate_configuration() -> List[str]:
     issues: List[str] = []
 
     # Known countries from the data file
-    known_countries = COUNTRY_NAMES
+    known_countries = COUNTRY_NAMES | MAIN_COUNTRY_NAMES
 
     for lang_code, priorities in COUNTRY_PRIORITIES.items():
         mentioned_countries: Set[str] = set()
