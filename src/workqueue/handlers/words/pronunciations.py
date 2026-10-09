@@ -50,7 +50,11 @@ def do_generate_pronunciations(
     all_forms_pronunciation: bool = False,
     **_: Any,
 ) -> str:
-    """Generate pronunciations for all missing forms on a lemma."""
+    """Generate pronunciations for all missing forms on a lemma.
+
+    Like the forms and translations queue handlers, it asks again for words a
+    model was uncertain of; a new answer is still gated on its confidence.
+    """
     effective_language_code = lang_code or language_code
     lemma = get_lemma_or_raise(session, lemma_id)
     generated_count, errors = generate_pronunciations_for_lemma(
@@ -59,6 +63,7 @@ def do_generate_pronunciations(
         effective_language_code,
         base_forms_only=base_forms_only,
         all_forms_pronunciation=all_forms_pronunciation,
+        retry_uncertain=True,
     )
     session.commit()
 

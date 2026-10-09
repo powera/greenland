@@ -474,11 +474,14 @@ def api_generate_pronunciations() -> ResponseReturnValue:
         service = PronunciationService(config=config)
 
         # Generate pronunciations for the lemma using populate_missing_pronunciations
+        # Asked for one lemma by hand: ask again where a model was uncertain
+        # before; a new answer is still gated on its confidence.
         result = service.populate_missing_pronunciations(
             lemma_id=lemma.id,
             only_english=only_english,
             only_base_forms=False,
             dry_run=False,
+            retry_uncertain=True,
         )
 
         g.db.commit()
