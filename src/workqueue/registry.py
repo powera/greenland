@@ -32,6 +32,7 @@ from workqueue.handlers.sentences import (
     handle_sentences_links_verify,
     handle_sentences_translations_verify,
 )
+from workqueue.handlers.jonvabalis import JONVABALIS_JOB
 from workqueue.handlers.wireword import handle_wireword_export_directory
 from workqueue.handlers.words import (
     handle_words_embeddings,
@@ -111,6 +112,7 @@ TASK_HANDLERS = {
 LLM_JOBS: Dict[str, Job] = {
     FORMS_JOB.name: FORMS_JOB,
     GRAMMAR_FACT_JOB.name: GRAMMAR_FACT_JOB,
+    JONVABALIS_JOB.name: JONVABALIS_JOB,
     PRONUNCIATIONS_JOB.name: PRONUNCIATIONS_JOB,
     SENTENCE_TRANSLATION_JOB.name: SENTENCE_TRANSLATION_JOB,
     TRANSLATIONS_JOB.name: TRANSLATIONS_JOB,

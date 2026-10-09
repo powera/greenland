@@ -564,6 +564,8 @@ A `prepare` that writes as it goes sets `Job.prepare_writes`.
 
 Batched today, all through `workqueue/llm_batch.py`:
 
+- jonvabalis (pending-import review; a verdict whose head word gained a lemma
+  after its prompt was built is left queued for the next run);
 - lape (grammar facts);
 - vilkas (forms);
 - papuga (pronunciations, two stages: forms, then the translation from the

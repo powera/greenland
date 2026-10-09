@@ -108,6 +108,17 @@ Two kinds of row are not headword questions and are handled apart:
 ``--only spacing-variants`` likewise runs just the spacing variants.
 
 ``--dry-run`` prints the rows a run would review and makes no LLM calls.
+``--pos`` narrows any run to one part of speech.
+
+``--batch`` sends the reviews as OpenAI batches instead (``JONVABALIS_JOB`` in
+``workqueue.handlers.jonvabalis``); the Barsukas batch poller applies each
+verdict through the same :meth:`JonvabalisAgent.apply_decision` when its batch
+completes.  Every prompt of a batch is built before any verdict is applied, so
+two rows can each judge a head word new -- "ancestry" queued from both
+"heritage" and "descent" -- where a sequential run would have shown the second
+row the lemma the first created.  The lemma ids a prompt showed travel with
+the row, and a ``distinct`` verdict whose head word has since gained a lemma
+of the row's POS is left queued for the next run to review with it in view.
 
 Usage::
 
@@ -123,7 +134,7 @@ import logging
 import re
 import sys
 from pathlib import Path
-from typing import Any, Dict, List, Optional, Sequence
+from typing import Any, Collection, Dict, List, Optional, Sequence, Tuple
 
 if str(Path(__file__).parent.parent) not in sys.path:
     sys.path.insert(0, str(Path(__file__).parent.parent))
@@ -398,13 +409,14 @@ def select_pending_rows(
     limit: int,
     pending_ids: Optional[Sequence[int]] = None,
     only: Optional[str] = None,
+    pos_type: Optional[str] = None,
 ) -> List[PendingImport]:
     """Return the queued lemma rows this agent can review.
 
     That is rows whose proposed head word is not yet a lemma and whose queried
     word is; plus subtype-review rows, whatever the head word; plus spacing
     variants, whatever either word.  ``only`` (one of ``ONLY_KINDS``) narrows
-    it to one of the latter two kinds.
+    it to one of the latter two kinds, and ``pos_type`` to one part of speech.
 
     Explicit ``pending_ids`` are returned as given, so a specific row can be
     re-reviewed after a prompt change without waiting for it to come up in the
@@ -439,6 +451,8 @@ def select_pending_rows(
             | (subtype_review & queried_word_exists)
             | spacing_variant
         )
+    if pos_type:
+        query = query.filter(PendingImport.pos_type == pos_type)
     return query.order_by(PendingImport.id).limit(limit).all()
 
 
@@ -486,6 +500,21 @@ def brief_senses_for(session: Session, lemma_text: Optional[str]) -> List[Dict[s
         }
         for lemma in lemmas
     ]
+
+
+def prompt_senses(
+    session: Session, pending: PendingImport
+) -> Tuple[List[Dict[str, Any]], List[Dict[str, Any]]]:
+    """The queried word's and the proposed head word's senses, as the prompt shows them."""
+    return (
+        existing_senses_for(session, pending.queried_word),
+        brief_senses_for(session, pending.english_word),
+    )
+
+
+def shown_lemma_ids(*sense_lists: Sequence[Dict[str, Any]]) -> List[int]:
+    """The ids of every lemma a prompt showed, for :meth:`JonvabalisAgent.approve_distinct`."""
+    return sorted({sense["lemma_id"] for senses in sense_lists for sense in senses})
 
 
 def queried_word_is_missing(session: Session, pending: PendingImport) -> bool:
@@ -756,12 +785,19 @@ class JonvabalisAgent:
 
     def __init__(self, config: DataSourceConfig, timeout: int = 120) -> None:
         self.config = config
-        self.client = UnifiedLLMClient.from_config(config, timeout=timeout)
+        self.timeout = timeout
+        self._client: Optional[UnifiedLLMClient] = None
+
+    @property
+    def client(self) -> UnifiedLLMClient:
+        # Built on first use: applying a batched verdict makes no model call.
+        if self._client is None:
+            self._client = UnifiedLLMClient.from_config(self.config, timeout=self.timeout)
+        return self._client
 
     def review_row(self, session: Session, pending: PendingImport) -> Dict[str, Any]:
         """Ask the model what to do with one queued row."""
-        existing_senses = existing_senses_for(session, pending.queried_word)
-        proposed_senses = brief_senses_for(session, pending.english_word)
+        existing_senses, proposed_senses = prompt_senses(session, pending)
         prompt = build_prompt(pending, existing_senses, proposed_senses)
 
         response = self.client.generate_chat(
@@ -775,6 +811,7 @@ class JonvabalisAgent:
             "proposed_head_word": pending.english_word,
             "proposed_pos_subtype": pending.pos_subtype,
             "existing_sense_count": len(existing_senses),
+            "shown_lemma_ids": shown_lemma_ids(existing_senses, proposed_senses),
             "decision": decision,
         }
 
@@ -783,12 +820,13 @@ class JonvabalisAgent:
         limit: int = DEFAULT_LIMIT,
         pending_ids: Optional[Sequence[int]] = None,
         only: Optional[str] = None,
+        pos_type: Optional[str] = None,
     ) -> List[Dict[str, Any]]:
         """Review a batch of queued rows, one LLM call each, and act on each."""
         results: List[Dict[str, Any]] = []
         session = create_backend_session(self.config)
         try:
-            rows = select_pending_rows(session, limit, pending_ids, only)
+            rows = select_pending_rows(session, limit, pending_ids, only, pos_type)
             LOGGER.info("Reviewing %d pending row(s)", len(rows))
             for index, pending in enumerate(rows, start=1):
                 LOGGER.info(
@@ -816,20 +854,29 @@ class JonvabalisAgent:
                     )
                     continue
                 result = self.review_row(session, pending)
-                result["outcome"] = self.apply_decision(session, pending, result["decision"])
+                result["outcome"] = self.apply_decision(
+                    session, pending, result["decision"], result["shown_lemma_ids"]
+                )
                 results.append(result)
         finally:
             session.close()
         return results
 
     def apply_decision(
-        self, session: Session, pending: PendingImport, decision: Dict[str, Any]
+        self,
+        session: Session,
+        pending: PendingImport,
+        decision: Dict[str, Any],
+        shown_lemma_ids: Optional[Collection[int]] = None,
     ) -> Dict[str, Any]:
         """Clear one reviewed row through the ordinary approval path.
 
         ``distinct`` approves, creating the lemma; ``duplicate`` rejects.  Anything
         else -- ``unsure``, a missing verdict, a low-confidence call -- is left
         in the queue, because those are exactly the rows a human should see.
+
+        ``shown_lemma_ids`` are the lemmas the verdict's prompt showed; see
+        :meth:`approve_distinct`.
         """
         # Read before applying: a successful approval or rejection deletes the
         # row, so the ORM object is stale after.
@@ -841,7 +888,7 @@ class JonvabalisAgent:
 
         try:
             if verdict == VERDICT_DISTINCT:
-                return self.approve_distinct(session, pending, decision)
+                return self.approve_distinct(session, pending, decision, shown_lemma_ids)
             elif verdict == VERDICT_DUPLICATE:
                 problem = self.duplicate_problem(
                     session, pending, decision.get("duplicate_of_lemma_id")
@@ -933,7 +980,11 @@ class JonvabalisAgent:
         return True
 
     def approve_distinct(
-        self, session: Session, pending: PendingImport, decision: Dict[str, Any]
+        self,
+        session: Session,
+        pending: PendingImport,
+        decision: Dict[str, Any],
+        shown_lemma_ids: Optional[Collection[int]] = None,
     ) -> Dict[str, Any]:
         """Approve a ``distinct`` row as the model described it, not as it was queued.
 
@@ -948,6 +999,10 @@ class JonvabalisAgent:
 
         An incomplete verdict is left in the queue rather than approved with
         the gaps filled from the queued row.
+
+        With ``shown_lemma_ids``, a head word that has gained a lemma of the
+        row's POS the prompt did not show -- another row of the same batch
+        created it -- leaves the row queued: the verdict never compared the two.
         """
         pending_id = int(pending.id)
         head_word = decision.get("head_word")
@@ -1001,6 +1056,21 @@ class JonvabalisAgent:
                 return self.leave_in_queue(
                     f"lemma {unseen[0]} is already {head_word!r} {pending.pos_type}; "
                     "the model was not shown its senses"
+                )
+        elif shown_lemma_ids is not None:
+            newer = (
+                session.query(Lemma.id)
+                .filter(
+                    func.lower(Lemma.lemma_text) == head_word.lower(),
+                    Lemma.pos_type == pending.pos_type,
+                    Lemma.id.notin_(list(shown_lemma_ids)),
+                )
+                .first()
+            )
+            if newer is not None:
+                return self.leave_in_queue(
+                    f"lemma {newer[0]} for {head_word!r} {pending.pos_type} was created "
+                    "after the prompt was built; review again"
                 )
 
         # The queued examples were written for the proposed word; only those
@@ -1064,16 +1134,45 @@ class JonvabalisAgent:
         return {"action": "left_in_queue", "success": True, "reason": reason}
 
 
+def submit_batch(config: DataSourceConfig, args: argparse.Namespace) -> None:
+    """Send the selected rows' reviews as OpenAI batches; the poller applies them."""
+    # Imported here, as everything under workqueue is: its registry imports
+    # the job module, which imports this one.
+    from agents.common.batch_run import run_batch_populate
+    from workqueue.handlers.jonvabalis import JONVABALIS_JOB, review_state
+
+    args.model = config.model or constants.DEFAULT_MODEL
+    session = create_backend_session(config)
+    try:
+        rows = select_pending_rows(session, args.limit, args.pending_ids, args.only, args.pos)
+        summary = [f"Rows selected: {len(rows)}"]
+        if args.pos:
+            summary.append(f"POS: {args.pos}")
+        if args.only:
+            summary.append(f"Only: {args.only}")
+        run_batch_populate(
+            JONVABALIS_JOB,
+            [review_state(pending) for pending in rows],
+            args,
+            session,
+            "JONVABALIS - BATCH REVIEW",
+            summary,
+        )
+    finally:
+        session.close()
+
+
 def print_dry_run(
     config: DataSourceConfig,
     limit: int,
     pending_ids: Sequence[int],
     only: Optional[str] = None,
+    pos_type: Optional[str] = None,
 ) -> None:
     """Print the rows a run would review, making no LLM calls."""
     session = create_backend_session(config, readonly=True)
     try:
-        rows = select_pending_rows(session, limit, pending_ids, only)
+        rows = select_pending_rows(session, limit, pending_ids, only, pos_type)
         print(f"Rows selected for review: {len(rows)}")
         for pending in rows:
             senses = existing_senses_for(session, pending.queried_word)
@@ -1134,6 +1233,10 @@ def print_results(results: Sequence[Dict[str, Any]]) -> None:
 
 
 def main() -> int:
+    # Imported here; see submit_batch.
+    from agents.common.batch_run import is_openai_model
+    from workqueue.llm_batch import DEFAULT_ITEMS_PER_BATCH
+
     parser = argparse.ArgumentParser(
         description=(
             "Review pending imports whose proposed head word is not yet a lemma, "
@@ -1167,17 +1270,49 @@ def main() -> int:
         ),
     )
     parser.add_argument(
+        "--pos",
+        choices=sorted(MAJOR_POS_TYPES),
+        help="Review only rows of this part of speech.",
+    )
+    parser.add_argument(
         "--output",
         type=Path,
         help="Write the full decisions to this path as JSON.",
+    )
+    parser.add_argument(
+        "--batch",
+        action="store_true",
+        help=(
+            "Send the reviews as OpenAI batches (half price); the Barsukas batch "
+            "poller applies each verdict when its batch completes. With --dry-run, "
+            "shows the plan without submitting."
+        ),
+    )
+    parser.add_argument(
+        "--items-per-batch",
+        type=int,
+        default=DEFAULT_ITEMS_PER_BATCH,
+        help=f"With --batch: requests per OpenAI batch (default: {DEFAULT_ITEMS_PER_BATCH})",
     )
     args = parser.parse_args()
 
     logging.basicConfig(level=logging.INFO, format="%(message)s")
     config = get_data_source_config(args)
 
+    if args.batch:
+        if not is_openai_model(config.model or constants.DEFAULT_MODEL):
+            parser.error(
+                f"--batch uses the OpenAI Batch API; {config.model} is not an OpenAI model"
+            )
+        if args.output:
+            parser.error("--output does not apply with --batch: verdicts are applied later")
+        if args.items_per_batch < 1:
+            parser.error("--items-per-batch must be at least 1")
+        submit_batch(config, args)
+        return 0
+
     if args.dry_run:
-        print_dry_run(config, args.limit, args.pending_ids, args.only)
+        print_dry_run(config, args.limit, args.pending_ids, args.only, args.pos)
         return 0
 
     agent = JonvabalisAgent(config)
@@ -1185,6 +1320,7 @@ def main() -> int:
         limit=args.limit,
         pending_ids=args.pending_ids,
         only=args.only,
+        pos_type=args.pos,
     )
     print_results(results)
 
