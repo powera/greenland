@@ -80,10 +80,11 @@ def test_existing_demonym_headwords_are_recognized(session: Session) -> None:
 
 
 def test_shared_language_emits_one_change_using_earliest_association(session: Session) -> None:
-    french = _add(session, "French", "communication_information", level=400)
-    summary = CountryOverrideManager(session).preview_changes("lt")
+    # Portuguese is associated with Portugal (main batch) and Brazil (tier 1).
+    portuguese = _add(session, "Portuguese", "communication_information", level=400)
+    summary = CountryOverrideManager(session).preview_changes("es-419")
     assert [(change.guid, change.proposed_level) for change in summary.changes] == [
-        (french.guid, 15)
+        (portuguese.guid, 15)
     ]
     assert summary.total_words_analyzed == 1
 

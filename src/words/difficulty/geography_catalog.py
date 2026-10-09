@@ -98,7 +98,7 @@ def _build_senses() -> tuple[GeographySense, ...]:
         if language is not None:
             associated = {
                 "English": ("England", "United Kingdom", "United States", "Canada"),
-                "French": ("France", "Canada"),
+                "Spanish": ("Spain", "Mexico", "Argentina", "Chile"),
                 "Portuguese": ("Portugal", "Brazil"),
                 "Chinese": ("China", "Taiwan"),
                 "Swahili": ("Tanzania", "Kenya"),
