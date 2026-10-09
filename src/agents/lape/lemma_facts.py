@@ -23,7 +23,7 @@ from agents.common.common_args import (
     get_data_source_config,
 )
 from storage.config.lemma_fact_registry import LEMMA_FACT_DEFINITIONS
-from storage.crud.lemma_fact import get_lemma_fact_value
+from storage.crud.lemma_fact import add_lemma_fact, get_lemma_fact_value
 from storage.models.schema import Lemma
 from words.grammar_facts import GrammarFactService
 from words.lemma_fact_generation import generate_lemma_fact_for_lemma
@@ -67,6 +67,14 @@ def get_argument_parser() -> argparse.ArgumentParser:
         help="Minimum confidence score to save the fact (default: 0.7)",
     )
     parser.add_argument(
+        "--retry-uncertain",
+        action="store_true",
+        help=(
+            "Ask again where a model answered below --min-confidence before "
+            "(uncertain_llm_results); by default those lemmas are skipped"
+        ),
+    )
+    parser.add_argument(
         "--populate",
         action="store_true",
         help="Generate missing facts (default: report coverage only)",
@@ -103,7 +111,11 @@ def main() -> None:
             for lemma in lemmas
             if get_lemma_fact_value(session, lemma.id, args.fact_type) is None
         ]
-        print(f"{args.fact_type}: {len(missing)}/{len(lemmas)} missing")
+        uncertain = sum(
+            add_lemma_fact.is_uncertain(session, lemma_id=lemma.id, fact_type=args.fact_type)
+            for lemma in missing
+        )
+        print(f"{args.fact_type}: {len(missing)}/{len(lemmas)} missing ({uncertain} uncertain)")
         if not args.populate:
             return
 
@@ -125,6 +137,7 @@ def main() -> None:
                 args.fact_type,
                 min_confidence=args.min_confidence,
                 skip_existing=args.skip_existing,
+                retry_uncertain=args.retry_uncertain,
             )
             if result.get("success"):
                 counts["success"] += 1

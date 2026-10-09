@@ -69,8 +69,14 @@ def generate_lemma_fact_for_lemma(
     fact_type: str,
     min_confidence: float = 0.7,
     skip_existing: bool = True,
+    retry_uncertain: bool = False,
 ) -> Dict[str, Any]:
-    """Generate and store one lemma fact; returns a result dict like the grammar-fact path."""
+    """Generate and store one lemma fact; returns a result dict like the grammar-fact path.
+
+    A question a model was uncertain of before (uncertain_llm_results) is
+    skipped unless ``retry_uncertain``; an answer below ``min_confidence`` is
+    recorded there.
+    """
     base: Dict[str, Any] = {"lemma_id": lemma.id, "fact_type": fact_type}
 
     definition = LEMMA_FACT_DEFINITIONS.get(fact_type)
@@ -83,20 +89,37 @@ def generate_lemma_fact_for_lemma(
         existing = get_lemma_fact_value(session, lemma.id, fact_type)
         if existing is not None:
             return {**base, "skipped": True, "existing_value": existing}
+    if not retry_uncertain and add_lemma_fact.is_uncertain(
+        session, lemma_id=lemma.id, fact_type=fact_type
+    ):
+        return {**base, "skipped": True, "reason": "uncertain"}
 
     if fact_type != "has_individual_instances":
         return {**base, "error": f"No generator for lemma fact type: {fact_type}"}
 
     value, notes, confidence = generate_has_individual_instances(client, lemma)
+    stored = None
+    if value is not None:
+        stored = add_lemma_fact(
+            session,
+            lemma.id,
+            fact_type,
+            value,
+            notes=notes,
+            verified=False,
+            confidence=confidence,
+            min_confidence=min_confidence,
+            model=config.model,
+        )
     if value is None or confidence < min_confidence:
+        session.commit()  # the uncertain row, if one was recorded
         return {
             **base,
             "error": f"Could not generate {fact_type} with sufficient confidence "
             f"(got {confidence:.2f}, need >= {min_confidence})",
             "confidence": confidence,
         }
-
-    if add_lemma_fact(session, lemma.id, fact_type, value, notes=notes, verified=False) is None:
+    if stored is None:
         return {**base, "error": f"Rejected value {value!r} for {fact_type}"}
 
     log_operation(

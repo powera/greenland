@@ -438,8 +438,7 @@ def main() -> None:
 
     # COVERAGE MODE: Report what grammar facts are missing
     if mode == "coverage":
-        from storage.crud.grammar_fact import get_grammar_fact_value
-        from storage.crud.uncertain_llm_result import get_uncertain_llm_result
+        from storage.crud.grammar_fact import add_grammar_fact, get_grammar_fact_value
 
         logger.info("=" * 80)
         logger.info("LAPE AGENT - COVERAGE REPORT")
@@ -470,8 +469,11 @@ def main() -> None:
                         )
                         if existing is None:
                             missing_count += 1
-                            if get_uncertain_llm_result(
-                                session, fact_type, language_code, lemma_id=lemma.id
+                            if add_grammar_fact.is_uncertain(
+                                session,
+                                lemma_id=lemma.id,
+                                language_code=language_code,
+                                fact_type=fact_type,
                             ):
                                 uncertain_count += 1
 

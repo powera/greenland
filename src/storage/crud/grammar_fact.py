@@ -7,12 +7,17 @@ from sqlalchemy.exc import IntegrityError
 from sqlalchemy.orm import Session
 
 from storage.config.grammar_fact_registry import VERB_FORM_OVERRIDE_PREFIX
-from storage.crud.uncertain_llm_result import clear_uncertain_llm_result
+from storage.crud.uncertain_llm_result import LLMQuestion, confidence_gated
 from storage.models.grammar_fact import GrammarFact
 
 logger = logging.getLogger(__name__)
 
 
+@confidence_gated(
+    question=lambda a: LLMQuestion(a["fact_type"], a["language_code"], lemma_id=a["lemma_id"]),
+    value="fact_value",
+    notes_arg="notes",
+)
 def add_grammar_fact(
     session: Session,
     lemma_id: int,
@@ -21,6 +26,10 @@ def add_grammar_fact(
     fact_value: Optional[str] = None,
     notes: Optional[str] = None,
     verified: bool = False,
+    *,
+    confidence: Optional[float] = None,
+    min_confidence: Optional[float] = None,
+    model: Optional[str] = None,
 ) -> Optional[GrammarFact]:
     """
     Add a grammar fact to a lemma.
@@ -34,9 +43,13 @@ def add_grammar_fact(
         fact_value: Value for the fact (e.g., "plurale_tantum", "masculine", "1")
         notes: Optional notes
         verified: Whether this fact has been verified
+        confidence, min_confidence, model: For an LLM's answer; see
+            storage.crud.uncertain_llm_result.confidence_gated.  An answer
+            below min_confidence is recorded as uncertain, not added.
 
     Returns:
-        The created GrammarFact, or None if creation failed
+        The created GrammarFact, or None if creation failed or the answer
+        was not confident enough
 
     Examples:
         # Mark "scissors" as plurale tantum in English
@@ -61,8 +74,6 @@ def add_grammar_fact(
             verified=verified,
         )
         session.add(grammar_fact)
-        # The question now has an answer, whoever gave it.
-        clear_uncertain_llm_result(session, fact_type, language_code, lemma_id=lemma_id)
         session.commit()
         logger.info(
             f"Added grammar fact: lemma_id={lemma_id}, {fact_type}={fact_value} ({language_code})"

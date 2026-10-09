@@ -34,8 +34,7 @@ from words.grammar_fact_tasks.english_principal_parts import (
 from storage.backend import create_session as create_backend_session
 from storage.backend.config import BackendType, DataSourceConfig
 from storage.config.grammar_fact_registry import legacy_supported_fact_types
-from storage.crud.grammar_fact import get_grammar_fact_value
-from storage.crud.uncertain_llm_result import get_uncertain_llm_result
+from storage.crud.grammar_fact import add_grammar_fact, get_grammar_fact_value
 from storage.models.schema import Lemma
 from storage.translation_helpers import get_translation
 from wordfreq.translation.client import LinguisticClient
@@ -268,6 +267,7 @@ class GrammarFactService:
                 skip_existing=skip_existing,
                 min_confidence=min_confidence,
                 dry_run=dry_run,
+                retry_uncertain=retry_uncertain,
             )
 
         # Validate fact type
@@ -331,8 +331,8 @@ class GrammarFactService:
                         skipped_count += 1
                         continue
 
-                if not retry_uncertain and get_uncertain_llm_result(
-                    session, fact_type, language_code, lemma_id=lemma.id
+                if not retry_uncertain and add_grammar_fact.is_uncertain(
+                    session, lemma_id=lemma.id, language_code=language_code, fact_type=fact_type
                 ):
                     skipped_count += 1
                     continue
@@ -424,6 +424,7 @@ class GrammarFactService:
         skip_existing: bool = True,
         min_confidence: float = 0.7,
         dry_run: bool = False,
+        retry_uncertain: bool = False,
     ) -> Dict[str, Any]:
         """Generate the paired English verb principal parts for selected lemmas."""
         selected = [lemma for lemma in (lemmas or []) if lemma.pos_type == "verb"]
@@ -452,6 +453,7 @@ class GrammarFactService:
                     min_confidence=min_confidence,
                     skip_existing=skip_existing,
                     dry_run=dry_run,
+                    retry_uncertain=retry_uncertain,
                 )
                 if result.get("error"):
                     failed += 1

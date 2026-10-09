@@ -13,8 +13,7 @@ from typing import Any, Dict, Optional, Union
 from sqlalchemy.orm import Session
 
 from clients.types import LLMCall
-from storage.crud.grammar_fact import get_grammar_fact_value
-from storage.crud.uncertain_llm_result import get_uncertain_llm_result
+from storage.crud.grammar_fact import add_grammar_fact, get_grammar_fact_value
 from storage.models.schema import Lemma
 from storage.translation_helpers import get_translation
 from words.grammar_fact_generation import (
@@ -121,8 +120,8 @@ def _prepare_grammar_fact(
         return Done("failed", f"{fact_type} cannot run as a staged job")
     if get_grammar_fact_value(session, lemma.id, language_code, fact_type) is not None:
         return Done("skipped", "already present")
-    if not state.get("retry_uncertain") and get_uncertain_llm_result(
-        session, fact_type, language_code, lemma_id=lemma.id
+    if not state.get("retry_uncertain") and add_grammar_fact.is_uncertain(
+        session, lemma_id=lemma.id, language_code=language_code, fact_type=fact_type
     ):
         return Done("skipped", "model was uncertain before")
     is_valid, error, translation = validate_grammar_fact_request(
