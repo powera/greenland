@@ -14,7 +14,6 @@ if GREENLAND_SRC_PATH not in sys.path:
 
 import constants
 from sentences.translation_coverage import ensure_translations
-from clients.translategemma_client import TranslateGemmaClient
 from agents.common.common_args import (
     add_backend_args,
     add_common_args,
@@ -210,178 +209,6 @@ class LemmaSentenceTranslationService:
         finally:
             session.close()
 
-    def translate_sentences_simple(
-        self,
-        lemma: Lemma,
-        target_languages: List[str],
-        limit: Optional[int] = None,
-    ) -> Dict[str, Any]:
-        """Translate sentences using TranslateGemma (simple text-only translations).
-
-        This method provides fast, simple translations without word-by-word breakdown.
-        It's suitable for basic sentence translation when detailed linguistic analysis
-        isn't needed.
-
-        Args:
-            lemma: Lemma to find sentences for
-            target_languages: Languages to translate to (e.g., ["fr", "de", "es"])
-            limit: Maximum number of sentences to translate
-
-        Returns:
-            Dictionary with translation results
-        """
-        session = self.get_session()
-        try:
-            required_languages = set(target_languages)
-            if "en" not in required_languages:
-                required_languages.add("en")
-
-            # Find sentences linked via SentenceWord OR SentenceWordHint
-            sentence_word_ids = (
-                session.query(SentenceWord.sentence_id)
-                .filter(SentenceWord.lemma_id == lemma.id)
-                .distinct()
-            )
-            word_hint_ids = (
-                session.query(SentenceWordHint.sentence_id)
-                .filter(SentenceWordHint.lemma_id == lemma.id)
-                .distinct()
-            )
-
-            sentence_query = (
-                session.query(Sentence)
-                .filter((Sentence.id.in_(sentence_word_ids)) | (Sentence.id.in_(word_hint_ids)))
-                .order_by(Sentence.id)
-            )
-
-            sentences = sentence_query.all()
-            if not sentences:
-                logger.warning("No sentences found linked to lemma %s", lemma.guid)
-                return {"success": False, "translated": 0, "errors": ["No sentences found"]}
-
-            already_complete = 0
-            for sentence in sentences:
-                existing_languages = self._get_sentence_languages(session, sentence.id)
-                if required_languages.issubset(existing_languages):
-                    already_complete += 1
-
-            if limit is not None and already_complete >= limit:
-                logger.info(
-                    "Already have %s sentences translated for %s; limit is %s",
-                    already_complete,
-                    lemma.guid,
-                    limit,
-                )
-                return {
-                    "success": True,
-                    "translated": 0,
-                    "already_translated": already_complete,
-                    "errors": [],
-                }
-
-            needed = None if limit is None else max(0, limit - already_complete)
-            translated_sentences = 0
-            translations_added = 0
-            errors = []
-
-            # Create TranslateGemma client (uses default Ollama backend)
-            translategemma = TranslateGemmaClient(debug=self.debug)
-
-            for sentence in sentences:
-                if needed is not None and translated_sentences >= needed:
-                    break
-
-                existing_languages = self._get_sentence_languages(session, sentence.id)
-                if required_languages.issubset(existing_languages):
-                    continue
-
-                # Get English source text
-                en_translation = (
-                    session.query(SentenceTranslation.translation_text)
-                    .filter(
-                        SentenceTranslation.sentence_id == sentence.id,
-                        SentenceTranslation.language_code == "en",
-                    )
-                    .scalar()
-                )
-
-                if not en_translation:
-                    logger.warning(
-                        "Sentence %s has no English source; skipping translation",
-                        sentence.id,
-                    )
-                    continue
-
-                # Translate to each target language
-                for lang in target_languages:
-                    if lang in existing_languages or lang == "en":
-                        continue
-
-                    try:
-                        response = translategemma.generate_translation(
-                            text=en_translation,
-                            source_lang="en",
-                            target_lang=lang,
-                        )
-
-                        if not response.response_text:
-                            logger.error(
-                                "Empty translation for sentence %s to %s",
-                                sentence.id,
-                                lang,
-                            )
-                            errors.append(f"Empty translation for sentence {sentence.id} to {lang}")
-                            continue
-
-                        # Store translation
-                        new_translation = SentenceTranslation(
-                            sentence_id=sentence.id,
-                            language_code=lang,
-                            translation_text=response.response_text,
-                            verified=False,
-                        )
-                        session.add(new_translation)
-                        translations_added += 1
-
-                        logger.info(
-                            "Translated sentence %s to %s: %s",
-                            sentence.id,
-                            lang,
-                            response.response_text,
-                        )
-
-                    except Exception as e:
-                        logger.error(
-                            "Failed to translate sentence %s to %s: %s",
-                            sentence.id,
-                            lang,
-                            e,
-                        )
-                        errors.append(f"Failed to translate sentence {sentence.id} to {lang}: {e}")
-
-                session.flush()
-
-                updated_languages = self._get_sentence_languages(session, sentence.id)
-                if required_languages.issubset(updated_languages):
-                    translated_sentences += 1
-
-            if translations_added:
-                session.commit()
-
-            return {
-                "success": True,
-                "translated": translated_sentences,
-                "translations_added": translations_added,
-                "already_translated": already_complete,
-                "errors": errors,
-            }
-
-        except Exception as e:
-            logger.error("Error translating sentences for %s: %s", lemma.guid, e, exc_info=True)
-            return {"success": False, "translated": 0, "errors": [str(e)]}
-        finally:
-            session.close()
-
     def submit_batch_translation(
         self,
         target_languages: List[str],
@@ -453,14 +280,6 @@ def get_argument_parser() -> argparse.ArgumentParser:
         ),
     )
 
-    parser.add_argument(
-        "--use-translategemma",
-        action="store_true",
-        help=(
-            "Use TranslateGemma for simple text-only translations (faster, cheaper, "
-            "but no word-by-word breakdown). Default uses GPT-5 with full linguistic analysis."
-        ),
-    )
     parser.add_argument(
         "--execute-inline",
         action="store_true",
@@ -560,11 +379,7 @@ def enqueue_translation_work(
             logger.error("No matching lemmas found")
             return 1
 
-        task_type = (
-            TaskType.SENTENCES_TRANSLATE_SIMPLE
-            if args.use_translategemma
-            else TaskType.SENTENCES_TRANSLATE
-        )
+        task_type = TaskType.SENTENCES_TRANSLATE
         language_key = ":".join(sorted(args.languages))
         enqueued_count = 0
         for lemma in lemmas:
@@ -573,9 +388,7 @@ def enqueue_translation_work(
                 lemma_id=lemma.id,
                 target_languages=args.languages,
                 limit=args.translation_limit,
-                require_english_source=args.use_translategemma,
-                # TranslateGemma rates nothing, so has no uncertainty to skip.
-                retry_uncertain=args.retry_uncertain or args.use_translategemma,
+                retry_uncertain=args.retry_uncertain,
             )
             for sentence_id in sentence_ids:
                 if args.dry_run:
@@ -725,19 +538,11 @@ def main() -> int:
         for i, lemma in enumerate(lemmas, 1):
             logger.info("Processing lemma %s/%s: %s", i, len(lemmas), lemma.guid)
 
-            # Choose translation method based on --use-translategemma flag
-            if args.use_translategemma:
-                translation_result = service.translate_sentences_simple(
-                    lemma=lemma,
-                    target_languages=args.languages,
-                    limit=args.translation_limit,
-                )
-            else:
-                translation_result = service.translate_sentences_for_lemma(
-                    lemma=lemma,
-                    target_languages=args.languages,
-                    limit=args.translation_limit,
-                )
+            translation_result = service.translate_sentences_for_lemma(
+                lemma=lemma,
+                target_languages=args.languages,
+                limit=args.translation_limit,
+            )
 
             if translation_result.get("success"):
                 total_translated += translation_result.get("translated", 0)
@@ -766,21 +571,11 @@ def main() -> int:
             logger.error("Lemma %s not found", args.guid)
             return 1
 
-        # Choose translation method based on --use-translategemma flag
-        if args.use_translategemma:
-            logger.info("Using TranslateGemma for simple text-only translations")
-            translation_result = service.translate_sentences_simple(
-                lemma=lemma,
-                target_languages=args.languages,
-                limit=args.translation_limit,
-            )
-        else:
-            logger.info("Using GPT-5 for translations with word-by-word breakdown")
-            translation_result = service.translate_sentences_for_lemma(
-                lemma=lemma,
-                target_languages=args.languages,
-                limit=args.translation_limit,
-            )
+        translation_result = service.translate_sentences_for_lemma(
+            lemma=lemma,
+            target_languages=args.languages,
+            limit=args.translation_limit,
+        )
 
         if translation_result.get("success"):
             logger.info(

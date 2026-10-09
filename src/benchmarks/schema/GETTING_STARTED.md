@@ -22,7 +22,7 @@ PYTHONPATH=src python src/benchmarks/schema/load_schema.py
 ### 2. Register models
 
 This populates the model table with remote API models (OpenAI, Anthropic,
-Gemini) and local models (TranslateGemma). To add or change models, edit
+Gemini) and local models (LM Studio, Ollama). To add or change models, edit
 `src/benchmarks/schema/create_models.py`.
 
 ```bash
@@ -92,7 +92,6 @@ Note: this will discard all previous run results.
    - `claude-*` routes to Anthropic
    - `gemini-*` routes to Gemini
    - `lmstudio/*` routes to LM Studio
-   - `translategemma/*` routes to TranslateGemma
    - Everything else routes to Ollama
 
 ## Current registered models
@@ -101,6 +100,3 @@ Note: this will discard all previous run results.
 - `gpt-5.2`, `gpt-5.4-mini`, `gpt-5-mini`, `gpt-5-nano` (OpenAI)
 - `claude-opus-4-6`, `claude-sonnet-4-5`, `claude-haiku-4-5` (Anthropic)
 - `gemini-2.5-pro`, `gemini-2.5-flash`, `gemini-2.5-flash-lite` (Google)
-
-**Local:**
-- `translategemma-3-4b` (TranslateGemma)

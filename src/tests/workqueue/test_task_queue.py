@@ -60,7 +60,6 @@ class TestTaskType(unittest.TestCase):
             "conversations.definitions.generate",
         )
         self.assertEqual(TaskType.SENTENCES_TRANSLATE, "sentences.translate")
-        self.assertEqual(TaskType.SENTENCES_TRANSLATE_SIMPLE, "sentences.translate.simple")
         self.assertEqual(
             TaskType.SENTENCES_PATTERNS_GENERATE,
             "sentences.patterns.generate",

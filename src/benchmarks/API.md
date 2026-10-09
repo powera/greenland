@@ -42,7 +42,7 @@ Run all benchmark/model combinations that don't have results yet.
 
 ```bash
 PYTHONPATH=src python src/benchmarks/run_benchmark.py missing
-PYTHONPATH=src python src/benchmarks/run_benchmark.py missing --blacklist-models translategemma-3-4b --blacklist-benchmarks 0062_sentence_decomposition
+PYTHONPATH=src python src/benchmarks/run_benchmark.py missing --blacklist-models gemini-2.5-pro --blacklist-benchmarks 0062_sentence_decomposition
 ```
 
 ### rescore
@@ -115,4 +115,3 @@ Use codenames (not full model paths) when running benchmarks:
 | `gemini-2.5-pro` | Google |
 | `gemini-2.5-flash` | Google |
 | `gemini-2.5-flash-lite` | Google |
-| `translategemma-3-4b` | Local |

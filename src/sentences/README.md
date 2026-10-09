@@ -56,7 +56,6 @@ Canonical tasks owned here include:
 - `sentences.patterns.generate`
 - `sentences.examples.generate`
 - `sentences.translate`
-- `sentences.translate.simple`
 - `sentences.import`
 - `conversations.generate`
 - `conversations.definitions.generate`

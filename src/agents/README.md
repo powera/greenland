@@ -294,13 +294,11 @@ persisted legacy tasks, but new producers must not emit it.
 ```bash
 zvirblis.py --guid N07_008 --languages lt zh fr
 zvirblis.py --level 3 --translation-limit 5
-zvirblis.py --guid N07_008 --use-translategemma
 zvirblis.py submit-batch --languages lt zh fr --limit 100
 ```
 
 Žvirblis does not create examples. It finds existing sentences linked to the
-selected lemmas and queues `sentences.translate` (rich structured output) or
-`sentences.translate.simple` (text-only TranslateGemma output). Batch discovery
+selected lemmas and queues `sentences.translate`. Batch discovery
 queues `sentences.translate.batch_submit`. Add `--execute-inline` only for an
 intentional foreground run.
 

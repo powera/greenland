@@ -117,7 +117,7 @@ intentionally excluded.
 #### Žvirblis (Sparrow)
 - **Animal**: Sparrow
 - **Purpose**: Find existing linked sentences that lack requested translations
-- **Outputs**: Queued `sentences.translate` or `sentences.translate.simple` tasks
+- **Outputs**: Queued `sentences.translate` tasks
 - **Key Functions**:
   - Select a lemma by GUID or difficulty level
   - Count already-complete sentences toward a requested limit
