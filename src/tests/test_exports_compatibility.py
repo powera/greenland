@@ -3,14 +3,11 @@
 from __future__ import annotations
 
 from agents.elnias import ElniasAgent, get_argument_parser as get_elnias_parser
-from agents.povas import PovasAgent, get_argument_parser as get_povas_parser
 from exports.bootstrap import BootstrapExporter
-from exports.pos_reports import POSSubtypeReportGenerator
 
 
 def test_legacy_agent_imports_are_aliases_for_export_capabilities() -> None:
     assert ElniasAgent is BootstrapExporter
-    assert PovasAgent is POSSubtypeReportGenerator
 
 
 def test_elnias_parser_preserves_export_arguments() -> None:
@@ -30,9 +27,3 @@ def test_elnias_parser_still_accepts_the_legacy_zh_hant_spelling() -> None:
     args = get_elnias_parser().parse_args(["--language", "zh-Hant"])
 
     assert normalize_language_code(args.language) == "zh-tw"
-
-
-def test_povas_parser_preserves_index_only_argument() -> None:
-    args = get_povas_parser().parse_args(["--index-only"])
-
-    assert args.index_only is True

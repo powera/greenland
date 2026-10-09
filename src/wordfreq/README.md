@@ -30,10 +30,6 @@ LLM-based linguistic analysis: word translation, definitions, pronunciation,
 POS subtype classification, and form generation (`client.py`,
 `processor.py`, `generate_forms_*.py`, `wiktionary_forms.py`).
 
-### `dictionary/`
-Word list export tooling (`export_wordlist.py`). Interactive review is handled
-by Barsukas.
-
 ### `tools/`
 CLI utilities: difficulty override management, release reports,
 sentence/word linking, vocabulary budgets, country and family-relation
@@ -42,9 +38,6 @@ overrides, Chinese conversion, word categorization.
 ### `data/`
 Python data modules and corpus comparison helpers (`compare.py`,
 family-relations generators).
-
-### `templates/`
-HTML templates for web-based POS browsing.
 
 ### Top-level modules
 - `golden_loader.py` — load frequency and tier data into the JSONL backend's

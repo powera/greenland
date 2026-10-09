@@ -1,6 +1,6 @@
 #!/usr/bin/python3
 
-"""Routes for data export functionality (POVAS HTML generation and UNGURYS WireWord exports)."""
+"""Routes for the export landing page and bootstrap JSON exports."""
 
 import logging
 import os
@@ -33,71 +33,11 @@ bp = Blueprint("exports", __name__, url_prefix="/exports")
 
 @bp.route("/")
 def exports_page() -> ResponseReturnValue:
-    """Display the exports landing page with POVAS and UNGURYS options."""
+    """Display the available data exports."""
     if not current_app.config.get("ALLOW_EXPORTS", True):
         flash("Exports are disabled in this deployment.", "error")
         return redirect(url_for("lemmas.index"))
     return render_template("exports/index.html")
-
-
-@bp.route("/povas")
-def povas_form() -> ResponseReturnValue:
-    """Display the POVAS HTML generation form."""
-    return render_template("exports/povas.html")
-
-
-@bp.route("/povas/generate", methods=["POST"])
-def povas_generate() -> Union[Response, Tuple[Response, int]]:
-    """Execute POVAS to generate HTML files."""
-    generation_mode = request.form.get("generation_mode", "all")  # 'all' or 'index-only'
-    dry_run = request.form.get("dry_run") == "true"
-
-    # Build command
-    script_path = Path(constants.AGENTS_DIR) / "povas.py"
-
-    if not script_path.exists():
-        return jsonify({"success": False, "error": f"Script not found: {script_path}"}), 404
-
-    # Build arguments
-    args = ["python3", str(script_path)]
-
-    if generation_mode == "index-only":
-        args.append("--index-only")
-
-    if dry_run:
-        args.append("--dry-run")
-
-    # Add database configuration
-    args.extend(agent_db_args())
-
-    try:
-        # Execute
-        logger.info("Launching agent subprocess: %s", " ".join(args))
-        process = subprocess.Popen(args, stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True)
-
-        stdout, stderr = process.communicate(timeout=300)  # 5 min timeout
-
-        success = process.returncode == 0
-
-        return jsonify(
-            {
-                "success": success,
-                "stdout": stdout,
-                "stderr": stderr,
-                "returncode": process.returncode,
-            }
-        )
-
-    except subprocess.TimeoutExpired:
-        process.kill()
-        return (
-            jsonify(
-                {"success": False, "error": "Generation timed out (5 minutes)", "timeout": True}
-            ),
-            408,
-        )
-    except Exception as e:
-        return jsonify({"success": False, "error": str(e)}), 500
 
 
 @bp.route("/elnias")

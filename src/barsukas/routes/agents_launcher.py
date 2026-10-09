@@ -205,15 +205,6 @@ AGENTS = [
         "icon": "bi-file-earmark-arrow-down",
         "use_dynamic_form": True,
     },
-    {
-        "name": "POVAS",
-        "display_name": "Povas",
-        "subtitle": "HTML Generation",
-        "description": "Generates static HTML pages for POS subtypes with comprehensive linguistic information.",
-        "script": "povas.py",
-        "icon": "bi-file-earmark-code",
-        "use_dynamic_form": True,
-    },
 ]
 
 # Define the standard pipeline for populating a word from English lemma+definition to fully populated

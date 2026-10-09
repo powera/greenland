@@ -58,7 +58,6 @@ usage and arguments.
 | sarka | Magpie | Plans vocabulary-driven conversation work |
 | strazdas | Thrush | eSpeak-NG audio generation |
 | vieversys | Lark | OpenAI TTS audio generation |
-| povas | Peacock | HTML report generator |
 | ungurys | Eel | Compatibility wrapper for `exports.wireword` |
 | elnias | Deer | WireWord bootstrap export |
 | erelis | Eagle | False lemma match detection in sentences |

@@ -16,7 +16,6 @@ digraph barsukas_agents {
   vieversys [label="Vieversys\n(Audio)", shape=box, style="rounded,filled", fillcolor=pink];
   ungurys [label="Ungurys\n(WireWord Export)", shape=box, style="rounded,filled", fillcolor=lightcoral];
   elnias [label="Elnias\n(Bootstrap Export)", shape=box, style="rounded,filled", fillcolor=lightcoral];
-  povas [label="Povas\n(HTML Export)", shape=box, style="rounded,filled", fillcolor=lightcoral];
   kiskis [label="Kiškis\n(Sentence Export)", shape=box, style="rounded,filled", fillcolor=lightcoral];
 
   // Logical dependencies (workflow order)
@@ -45,16 +44,13 @@ digraph barsukas_agents {
   // Phase 6: Export pipeline (all exports depend on complete data)
   voras -> ungurys [label="6. translations ready"];
   voras -> elnias [label="6. translations ready"];
-  voras -> povas [label="6. translations ready"];
 
   vilkas -> ungurys [label="6. forms ready"];
-  vilkas -> povas [label="6. forms ready"];
 
   lape -> ungurys [label="6. grammar ready"];
 
   sernas -> ungurys [label="6. synonyms ready"];
 
-  papuga -> povas [label="6. pronunciations ready"];
 
   vieversys -> ungurys [label="6. audio ready"];
 

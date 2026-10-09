@@ -12,7 +12,6 @@ __all__ = [
     "dramblys",
     "bebras",
     "voras",
-    "povas",
     "papuga",
     "ungurys",
     "zvirblis",
