@@ -6,11 +6,17 @@ from typing import Dict, List, Optional
 from sqlalchemy.orm import Session
 
 from storage.config.lemma_fact_registry import validate_lemma_fact
+from storage.crud.uncertain_llm_result import LLMQuestion, confidence_gated
 from storage.models.lemma_fact import LemmaFact
 
 logger = logging.getLogger(__name__)
 
 
+@confidence_gated(
+    question=lambda a: LLMQuestion(a["fact_type"], None, lemma_id=a["lemma_id"]),
+    value="fact_value",
+    notes_arg="notes",
+)
 def add_lemma_fact(
     session: Session,
     lemma_id: int,
@@ -18,11 +24,19 @@ def add_lemma_fact(
     fact_value: str,
     notes: Optional[str] = None,
     verified: bool = False,
+    *,
+    confidence: Optional[float] = None,
+    min_confidence: Optional[float] = None,
+    model: Optional[str] = None,
 ) -> Optional[LemmaFact]:
     """Set a lemma fact, replacing any existing value of the same type.
 
+    ``confidence``, ``min_confidence`` and ``model`` are for an LLM's answer;
+    see storage.crud.uncertain_llm_result.confidence_gated.  An answer below
+    min_confidence is recorded as uncertain, not set.
+
     Returns None (and writes nothing) if the type or value fails registry
-    validation.
+    validation, or the answer was not confident enough.
     """
     error = validate_lemma_fact(fact_type, fact_value)
     if error is not None:

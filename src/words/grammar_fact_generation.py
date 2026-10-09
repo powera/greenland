@@ -14,8 +14,6 @@ from storage.backend.config import DataSourceConfig
 from storage.config.grammar_fact_registry import legacy_supported_fact_types
 from storage.crud.grammar_fact import add_grammar_fact, get_grammar_fact_value
 from storage.crud.operation_log import log_operation
-from storage.crud.uncertain_llm_result import record_uncertain_llm_result
-from storage.models.uncertain_llm_result import REASON_LOW_CONFIDENCE
 from storage.models.schema import Lemma
 from storage.translation_helpers import get_translation
 from words.grammar_fact_tasks.common import FactResult
@@ -30,12 +28,6 @@ logger = logging.getLogger(__name__)
 # Supported fact types and their configuration. Keep this historical name for
 # Barsukas imports, but source it from the shared registry.
 SUPPORTED_FACT_TYPES = legacy_supported_fact_types()
-
-
-def _uncertain_note(model: Optional[str], result: FactResult) -> str:
-    """``"gpt-6-luna leaned masculine (0.55): <the model's notes>"``."""
-    note = f"{model or 'unknown model'} leaned {result.value} ({result.confidence:.2f})"
-    return f"{note}: {result.notes}" if result.notes else note
 
 
 def save_generated_fact(
@@ -54,10 +46,9 @@ def save_generated_fact(
     batch completion alike.  A fact already present -- including one added or
     edited by hand while a batch was out -- is left alone.
 
-    An answer with a value but below *min_confidence* is recorded in
-    uncertain_llm_results, so later runs skip the question; the caller
-    commits that row.  An answer with no value is not: it is also what a
-    failed call looks like, and that is worth retrying.
+    The confidence check is add_grammar_fact's (confidence_gated): an answer
+    below *min_confidence* is recorded in uncertain_llm_results, so later
+    runs skip the question, and the caller commits that row.
 
     Returns:
         ``"written"``, ``"rejected"`` (no value, or below *min_confidence*), or
@@ -67,16 +58,6 @@ def save_generated_fact(
         return "rejected"
     if get_grammar_fact_value(session, lemma_id, language_code, fact_type) is not None:
         return "exists"
-    if result.confidence < min_confidence:
-        record_uncertain_llm_result(
-            session,
-            fact_type,
-            language_code,
-            REASON_LOW_CONFIDENCE,
-            note=_uncertain_note(model, result),
-            lemma_id=lemma_id,
-        )
-        return "rejected"
     stored = add_grammar_fact(
         session,
         lemma_id=lemma_id,
@@ -85,9 +66,12 @@ def save_generated_fact(
         fact_value=result.value,
         notes=result.notes,
         verified=False,
+        confidence=result.confidence,
+        min_confidence=min_confidence,
+        model=model,
     )
     if stored is None:
-        return "exists"
+        return "rejected" if result.confidence < min_confidence else "exists"
     log_operation(
         session,
         operation_type="grammar_fact_generated",
