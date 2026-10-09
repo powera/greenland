@@ -272,22 +272,28 @@ TRANSLATIONS_STAGE = "translations.populate"
 
 
 def translation_populate_states(
-    session: Session, lemmas: Sequence[Lemma], languages: Sequence[str]
+    session: Session,
+    lemmas: Sequence[Lemma],
+    languages: Sequence[str],
+    retry_uncertain: bool = False,
 ) -> Tuple[List[Dict[str, Any]], int]:
     """Item states for every lemma's missing languages, at most 10 languages each.
 
+    A language a model was uncertain of is not asked unless ``retry_uncertain``.
+
     Returns:
-        ``(states, lemmas with nothing missing)``.
+        ``(states, lemmas with nothing to ask)``.
     """
     states: List[Dict[str, Any]] = []
     complete = 0
     for lemma in lemmas:
-        missing = missing_translation_languages(session, lemma, languages)
+        missing = missing_translation_languages(session, lemma, languages, retry_uncertain)
         if not missing:
             complete += 1
             continue
         states.extend(
-            {"lemma_id": lemma.id, "languages": group} for group in populate_groups(missing)
+            {"lemma_id": lemma.id, "languages": group, "retry_uncertain": retry_uncertain}
+            for group in populate_groups(missing)
         )
     return states, complete
 
@@ -298,9 +304,11 @@ def _prepare_populate(
     lemma = session.get(Lemma, state["lemma_id"])
     if lemma is None:
         return Done("failed", f"Lemma {state['lemma_id']} not found")
-    missing = missing_translation_languages(session, lemma, state["languages"])
+    missing = missing_translation_languages(
+        session, lemma, state["languages"], bool(state.get("retry_uncertain"))
+    )
     if not missing:
-        return Done("skipped", "translations already present")
+        return Done("skipped", "translations already present or uncertain")
     reference = populate_reference(session, lemma, missing)
     if reference is None:
         return Done("rejected", "no reference translation")

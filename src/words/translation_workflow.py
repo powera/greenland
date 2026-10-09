@@ -33,9 +33,11 @@ from storage.backend.config import BackendType, DataSourceConfig
 from storage.crud.operation_log import log_translation_change
 from storage.models.schema import Lemma, LemmaTranslation
 from words.translation_populate import (
+    missing_translation_languages,
     populate_groups,
     populate_reference,
     store_translations_by_language,
+    uncertain_translation_languages,
 )
 from storage.translation_helpers import (
     LANG_CODE_TO_LLM_FIELD,
@@ -858,6 +860,7 @@ class TranslationWorkflow:
         limit: Optional[int] = None,
         dry_run: bool = False,
         lemmas: Optional[List[Lemma]] = None,
+        retry_uncertain: bool = False,
     ) -> Dict[str, Any]:
         """
         Generate missing translations using LLM and update the database.
@@ -868,6 +871,8 @@ class TranslationWorkflow:
             limit: Maximum number of words to process
             dry_run: If True, only report what would be fixed without making changes
             lemmas: Optional pre-filtered list of lemmas to process (if None, queries all curated)
+            retry_uncertain: Also ask for languages a model was uncertain of
+                before (uncertain_llm_results); by default they are skipped
 
         Returns:
             Dictionary with fix results
@@ -896,6 +901,7 @@ class TranslationWorkflow:
         results: Dict[str, Any] = {
             "total_fixed": 0,
             "total_failed": 0,
+            "total_uncertain_skipped": 0,
             "llm_cost_usd": 0.0,
             "by_language": {
                 lang_code: {
@@ -923,40 +929,44 @@ class TranslationWorkflow:
 
                 all_lemmas = query.all()
 
-            # Filter to lemmas missing at least one target translation
-            words_to_process = []
+            # The languages to ask for, by lemma: missing, and not ones a model
+            # was uncertain of unless retry_uncertain.
+            missing_by_lemma_id: Dict[int, List[str]] = {}
             for lemma in all_lemmas:
-                has_missing = False
-                for lang_code in languages_to_fix:
-                    translation = self.get_translation(session, lemma, lang_code)
-                    if not translation or not translation.strip():
-                        has_missing = True
-                        break
-                if has_missing:
-                    words_to_process.append(lemma)
+                all_missing = missing_translation_languages(
+                    session, lemma, languages_to_fix, retry_uncertain=True
+                )
+                uncertain = (
+                    []
+                    if retry_uncertain
+                    else uncertain_translation_languages(session, lemma, all_missing)
+                )
+                results["total_uncertain_skipped"] += len(uncertain)
+                lemma_missing = [code for code in all_missing if code not in uncertain]
+                if lemma_missing:
+                    missing_by_lemma_id[lemma.id] = lemma_missing
+                for lang_code in lemma_missing:
+                    results["by_language"][lang_code]["total_missing"] += 1
+            words_to_process = [lemma for lemma in all_lemmas if lemma.id in missing_by_lemma_id]
 
             total_words = len(words_to_process)
             logger.info(f"Found {total_words} words with missing translations in target languages")
-
-            # Count missing translations per language
-            for lemma in words_to_process:
-                for lang_code in languages_to_fix:
-                    translation = self.get_translation(session, lemma, lang_code)
-                    if not translation or not translation.strip():
-                        results["by_language"][lang_code]["total_missing"] += 1
+            if results["total_uncertain_skipped"]:
+                logger.info(
+                    "Skipped %d missing translation(s) a model was uncertain of "
+                    "(--retry-uncertain to ask again)",
+                    results["total_uncertain_skipped"],
+                )
 
             # Process each word once
             for i, lemma in enumerate(words_to_process, 1):
                 if i % 10 == 0:
                     logger.info(f"Progress: {i}/{total_words} words processed")
 
-                # Find which languages are missing for this word
-                missing_languages = []
-                for lang_code in languages_to_fix:
-                    language_name = get_language_name(lang_code)
-                    translation = self.get_translation(session, lemma, lang_code)
-                    if not translation or not translation.strip():
-                        missing_languages.append((lang_code, language_name))
+                missing_languages = [
+                    (lang_code, get_language_name(lang_code))
+                    for lang_code in missing_by_lemma_id[lemma.id]
+                ]
 
                 if not missing_languages:
                     continue

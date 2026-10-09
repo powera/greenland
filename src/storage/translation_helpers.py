@@ -21,7 +21,9 @@ from typing import Any, Dict, List, Optional, Tuple
 
 from sqlalchemy.orm import Session
 
+from storage.crud.uncertain_llm_result import clear_uncertain_llm_result
 from storage.models.schema import AudioQualityReview, Lemma, LemmaTranslation
+from storage.models.uncertain_llm_result import TOPIC_TRANSLATION
 
 logger = logging.getLogger(__name__)
 
@@ -771,6 +773,9 @@ def set_translation(
     """
     Set translation for a lemma in the specified language.
 
+    Also clears any uncertain_llm_results row for this translation: once a
+    translation is stored, by hand or by a model, the question is answered.
+
     Args:
         session: Database session
         lemma: Lemma object
@@ -825,6 +830,8 @@ def set_translation(
             verified=False,
         )
         session.add(translation_obj)
+
+    clear_uncertain_llm_result(session, TOPIC_TRANSLATION, lang_code, lemma_id=lemma.id)
 
     # Invalidate any audio records whose expected_text no longer matches
     invalidate_audio_for_translation_change(

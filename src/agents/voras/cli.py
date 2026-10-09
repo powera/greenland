@@ -76,6 +76,15 @@ def get_argument_parser() -> argparse.ArgumentParser:
     )
 
     add_language_args(parser)
+    parser.add_argument(
+        "--retry-uncertain",
+        action="store_true",
+        help=(
+            "With --populate, also ask for translations a model was uncertain of "
+            "before (uncertain_llm_results, e.g. from add_sense); by default "
+            "they are left missing"
+        ),
+    )
 
     # Additional parameters
     add_batch_args(parser)
@@ -117,10 +126,19 @@ def _handle_single_lemma_populate(
         True if successful, False otherwise
     """
     from agents.voras import cli_display
+    from words.translation_populate import uncertain_translation_languages
 
     translations = agent.collect_translations(session, lemma)
     cli_display.display_lemma_translations(lemma, translations)
     missing_langs = [lang_code for lang_code, value in translations.items() if not value]
+    if not args.retry_uncertain:
+        uncertain = uncertain_translation_languages(session, lemma, missing_langs)
+        if uncertain:
+            print(
+                f"\nSkipping {', '.join(uncertain)}: a model was uncertain before "
+                "(--retry-uncertain to ask again)"
+            )
+            missing_langs = [code for code in missing_langs if code not in uncertain]
 
     if not missing_langs:
         print("\n✓ No missing translations")
@@ -274,7 +292,11 @@ def _run_populate(agent: Any, lemmas: List[Any], args: argparse.Namespace) -> No
 
     # IMMEDIATE MODE: Process directly (default behavior)
     results = agent.fix_missing_translations(
-        language_code=args.languages, limit=args.limit, dry_run=args.dry_run, lemmas=lemmas
+        language_code=args.languages,
+        limit=args.limit,
+        dry_run=args.dry_run,
+        lemmas=lemmas,
+        retry_uncertain=args.retry_uncertain,
     )
     cli_display.display_population_summary(results)
 
@@ -305,7 +327,9 @@ def _run_populate_batch(agent: Any, lemmas: List[Any], args: argparse.Namespace)
         planning_lemmas = (
             session.query(Lemma).filter(Lemma.id.in_(lemma_ids)).order_by(Lemma.id).all()
         )
-        states, complete = translation_populate_states(session, planning_lemmas, languages)
+        states, complete = translation_populate_states(
+            session, planning_lemmas, languages, args.retry_uncertain
+        )
         run_batch_populate(
             TRANSLATIONS_JOB,
             states,
@@ -314,7 +338,7 @@ def _run_populate_batch(agent: Any, lemmas: List[Any], args: argparse.Namespace)
             "VORAS AGENT - BATCH POPULATE",
             [
                 f"languages ({len(languages)}): {', '.join(languages)}",
-                f"lemmas: {len(lemmas)} ({complete} already complete, "
+                f"lemmas: {len(lemmas)} ({complete} with nothing to ask, "
                 f"{len(lemmas) - len(lemma_ids)} in an older batch)",
             ],
         )

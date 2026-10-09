@@ -30,6 +30,10 @@ from .schema import Base
 # The model answered, but below the caller's confidence threshold.
 REASON_LOW_CONFIDENCE = "low_confidence"
 
+# The topic of a lemma's translation into ``language_code``.  Every
+# set_translation clears it, so a translation however written answers it.
+TOPIC_TRANSLATION = "translation"
+
 
 class UncertainLLMResult(Base):
     """A question an LLM answered with too little confidence to store.

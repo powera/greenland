@@ -28,18 +28,40 @@ from storage.translation_helpers import (
     split_llm_language_batches,
 )
 from wordfreq.translation.translations import build_translation_prompt
+from words.lemma_creation import store_llm_translation
 
 logger = logging.getLogger(__name__)
 
 
 def missing_translation_languages(
-    session: Session, lemma: Lemma, languages: Sequence[str]
+    session: Session, lemma: Lemma, languages: Sequence[str], retry_uncertain: bool = False
 ) -> List[str]:
-    """The languages among *languages* the lemma has no (non-blank) translation for."""
-    return [
+    """The languages among *languages* the lemma has no (non-blank) translation for.
+
+    A language a model was uncertain of (see
+    words.lemma_creation.store_llm_translation) is left out unless
+    *retry_uncertain*: asked again without its context, a model fills the gap
+    with the term it doubted, or a worse one.
+    """
+    missing = [
         language_code
         for language_code in languages
         if not (get_translation(session, lemma, language_code) or "").strip()
+    ]
+    if retry_uncertain:
+        return missing
+    uncertain = uncertain_translation_languages(session, lemma, missing)
+    return [language_code for language_code in missing if language_code not in uncertain]
+
+
+def uncertain_translation_languages(
+    session: Session, lemma: Lemma, languages: Sequence[str]
+) -> List[str]:
+    """The languages among *languages* a model was uncertain of for this lemma."""
+    return [
+        language_code
+        for language_code in languages
+        if store_llm_translation.is_uncertain(session, lemma=lemma, lang_code=language_code)
     ]
 
 
