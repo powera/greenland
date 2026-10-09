@@ -21,6 +21,7 @@ from storage.crud.derivative_form import (
     needs_pronunciation_update_filter,
     pronunciation_required_filter,
 )
+from storage.crud.uncertain_llm_result import LLMQuestion, confidence_gated
 from storage.models.schema import (
     DerivativeForm,
     Lemma,
@@ -38,6 +39,8 @@ from wordfreq.tools.llm_validators import generate_pronunciation
 
 logger = logging.getLogger(__name__)
 
+# The floor a generated pronunciation must meet to be stored.
+PRONUNCIATION_MIN_CONFIDENCE = 0.7
 
 # Base-form field name per POS, as it appears in a LanguageFormSpec.form_mapping.
 _BASE_FORM_FIELDS: Dict[str, str] = {
@@ -98,7 +101,7 @@ def generate_pronunciation_for_form(
     example_sentence: Optional[str],
     english_translation: Optional[str] = None,
     model: Optional[str] = None,
-) -> Tuple[bool, Optional[str], Optional[str]]:
+) -> Tuple[bool, Optional[str], Optional[str], float]:
     """
     Generate pronunciation for a single derivative form.
 
@@ -110,7 +113,7 @@ def generate_pronunciation_for_form(
         model: LLM model to use (defaults to constants.DEFAULT_MODEL)
 
     Returns:
-        Tuple of (success, ipa_pronunciation, phonetic_pronunciation)
+        Tuple of (success, ipa_pronunciation, phonetic_pronunciation, confidence)
     """
     if model is None:
         model = constants.DEFAULT_MODEL
@@ -130,7 +133,7 @@ def generate_pronunciation_for_form(
     phonetic = result.get("phonetic_pronunciation")
 
     success = bool(ipa or phonetic)
-    return success, ipa, phonetic
+    return success, ipa, phonetic, float(result.get("confidence") or 0.0)
 
 
 @dataclass(frozen=True)
@@ -174,6 +177,28 @@ class PronunciationTarget:
             known_phonetic=state.get("known_phonetic"),
         )
 
+    @classmethod
+    def for_form(cls, form: DerivativeForm) -> "PronunciationTarget":
+        return cls(
+            kind="form",
+            lemma_id=form.lemma_id,
+            language_code=form.language_code,
+            word=form.derivative_form_text,
+            grammatical_form=form.grammatical_form,
+            form_id=form.id,
+        )
+
+    @property
+    def question_topic(self) -> str:
+        """The uncertain_llm_results topic for this word's pronunciation.
+
+        Keyed by grammatical form and word rather than ``form_id``, which a
+        forms rebuild renumbers.  The grammatical form is part of it because
+        homographs can be stressed differently (lt "rankos": genitive singular
+        vs nominative plural).
+        """
+        return f"pronunciation:{self.grammatical_form or ''}:{self.word}"
+
 
 def _base_form_for(
     session: Session, lemma: Lemma, language_code: str, translation_text: Optional[str]
@@ -206,9 +231,35 @@ def plan_pronunciation_targets(
     language_code: str,
     base_forms_only: bool = False,
     all_forms_pronunciation: bool = False,
+    retry_uncertain: bool = False,
 ) -> List[PronunciationTarget]:
     """Everything of *lemma* in *language_code* that needs a pronunciation, in order:
-    derivative forms, then the translation, then the English base form."""
+    derivative forms, then the translation, then the English base form.
+
+    A word a model was uncertain of is left out unless *retry_uncertain*
+    (a translation whose values are known from its base form needs no call,
+    so it stays)."""
+    targets = _all_pronunciation_targets(
+        session, lemma, language_code, base_forms_only, all_forms_pronunciation
+    )
+    if retry_uncertain:
+        return targets
+    return [
+        target
+        for target in targets
+        if not (
+            target.needs_call and store_target_pronunciation.is_uncertain(session, target=target)
+        )
+    ]
+
+
+def _all_pronunciation_targets(
+    session: Session,
+    lemma: Lemma,
+    language_code: str,
+    base_forms_only: bool,
+    all_forms_pronunciation: bool,
+) -> List[PronunciationTarget]:
     translation_text = get_translation(session, lemma, language_code)
     translation_ipa, translation_phonetic = get_translation_pronunciations(
         session, lemma, language_code
@@ -236,15 +287,7 @@ def plan_pronunciation_targets(
         forms_query = forms_query.filter(DerivativeForm.is_base_form == True)
 
     targets = [
-        PronunciationTarget(
-            kind="form",
-            lemma_id=lemma.id,
-            language_code=language_code,
-            word=form.derivative_form_text,
-            grammatical_form=form.grammatical_form,
-            form_id=form.id,
-        )
-        for form in forms_query.order_by(DerivativeForm.id).all()
+        PronunciationTarget.for_form(form) for form in forms_query.order_by(DerivativeForm.id).all()
     ]
     if translation_missing and translation_text:
         targets.append(
@@ -288,20 +331,43 @@ def target_still_needed(session: Session, lemma: Lemma, target: PronunciationTar
     return _base_form_for(session, lemma, target.language_code, target.word) is None
 
 
+@confidence_gated(
+    question=lambda a: LLMQuestion(
+        a["target"].question_topic, a["target"].language_code, lemma_id=a["target"].lemma_id
+    ),
+    value=lambda a: " ".join(
+        value
+        for value in (
+            a["ipa"] or a["target"].known_ipa,
+            a["phonetic"] or a["target"].known_phonetic,
+        )
+        if value
+    ),
+    min_confidence=PRONUNCIATION_MIN_CONFIDENCE,
+)
 def store_target_pronunciation(
     session: Session,
     lemma: Lemma,
     target: PronunciationTarget,
     ipa: Optional[str],
     phonetic: Optional[str],
-) -> bool:
+    *,
+    confidence: Optional[float] = None,
+    min_confidence: Optional[float] = None,
+    model: Optional[str] = None,
+) -> Optional[bool]:
     """Write a generated (or, for a translation, known) pronunciation; the caller commits.
 
     Shared by the live path and batch completion.  Generated values take
     precedence over known ones.
 
+    ``confidence``, ``min_confidence`` and ``model`` are for a model's
+    answer; see storage.crud.uncertain_llm_result.confidence_gated.  One
+    below min_confidence (PRONUNCIATION_MIN_CONFIDENCE by default) is
+    recorded as uncertain, and plan_pronunciation_targets then skips the word.
+
     Returns:
-        Whether anything was written.
+        Whether anything was written; None for an answer below min_confidence.
     """
     if target.kind == "form":
         form = session.get(DerivativeForm, target.form_id)
@@ -383,6 +449,7 @@ def generate_pronunciations_for_lemma(
     base_forms_only: bool = False,
     all_forms_pronunciation: bool = False,
     lang_code: Optional[str] = None,
+    retry_uncertain: bool = False,
 ) -> Tuple[int, List[str]]:
     """
     Generate pronunciations for all forms of a lemma missing them.
@@ -399,6 +466,7 @@ def generate_pronunciations_for_lemma(
         base_forms_only: Restrict derivative-form generation to base forms
         all_forms_pronunciation: Include optional forms (legacy behavior)
         lang_code: Deprecated payload compatibility alias for language_code
+        retry_uncertain: Also ask for words a model was uncertain of before
 
     Returns:
         Tuple of (generated_count, list of error messages)
@@ -413,6 +481,7 @@ def generate_pronunciations_for_lemma(
         effective_language_code,
         base_forms_only=base_forms_only,
         all_forms_pronunciation=all_forms_pronunciation,
+        retry_uncertain=retry_uncertain,
     )
     if not targets:
         return 0, []
@@ -424,6 +493,7 @@ def generate_pronunciations_for_lemma(
     for target in targets:
         ipa: Optional[str] = None
         phonetic: Optional[str] = None
+        confidence: Optional[float] = None
         if target.needs_call:
             form = (
                 session.get(DerivativeForm, target.form_id)
@@ -439,7 +509,7 @@ def generate_pronunciations_for_lemma(
             if form is None:
                 errors.append(_NO_PRONUNCIATION_MESSAGES[target.kind].format(word=target.word))
                 continue
-            success, ipa, phonetic = generate_pronunciation_for_form(
+            success, ipa, phonetic, confidence = generate_pronunciation_for_form(
                 form=form,
                 pos_type=lemma.pos_type,
                 definition=lemma.definition_text,
@@ -451,8 +521,18 @@ def generate_pronunciations_for_lemma(
             )
             if not success:
                 errors.append(_NO_PRONUNCIATION_MESSAGES[target.kind].format(word=target.word))
-        if store_target_pronunciation(session, lemma, target, ipa, phonetic):
+                # A failed call is not an uncertain answer; known values still apply.
+                confidence = None
+        stored = store_target_pronunciation(
+            session, lemma, target, ipa, phonetic, confidence=confidence, model=config.model
+        )
+        if stored:
             generated_count += 1
+        elif stored is None and confidence is not None:
+            errors.append(
+                f"Pronunciation of '{target.word}' below confidence ({confidence:.2f}); "
+                "recorded as uncertain"
+            )
 
     return generated_count, errors
 

@@ -16,7 +16,9 @@ from sqlalchemy.orm import Session
 
 from clients.batch_queue import BatchQueueManager, create_batch_database_session
 from clients.types import Response
+from storage.crud.uncertain_llm_result import get_uncertain_llm_result, record_uncertain_llm_result
 from storage.models.schema import Base, DerivativeForm, Lemma, LemmaTranslation
+from storage.models.uncertain_llm_result import REASON_LOW_CONFIDENCE
 from wordfreq.tools.llm_validators import batch_generate_pronunciations
 from workqueue.handlers.words.pronunciations import PRONUNCIATIONS_JOB, pronunciation_state
 from workqueue.llm_batch import complete_rows, start_batch_run
@@ -202,15 +204,49 @@ def test_several_forms_share_one_grouped_call_like_the_live_path(
             "verb_en_present_confidence": 0.9,
             "verb_en_past_ipa": "/ræn/",
             "verb_en_past_phonetic": "RAN",
-            "verb_en_past_confidence": 0.3,
+            "verb_en_past_confidence": 0.6,
         },
     )
     assert result["updated"] == 1
     forms = {f.derivative_form_text: f for f in session.query(DerivativeForm).all()}
     assert forms["run"].ipa_pronunciation == "/rʌn/"
-    # Below papuga's 0.5 floor: left for another run.
+    # Below the 0.7 floor: not stored, and recorded as uncertain.
     assert forms["ran"].ipa_pronunciation is None
+    uncertain = get_uncertain_llm_result(
+        session, "pronunciation:verb/en_past:ran", "en", lemma_id=lemma.id
+    )
+    assert uncertain is not None
+    assert uncertain.note == f"{_MODEL} leaned /ræn/ RAN (0.60)"
     assert len(batch_client.batches) == 1
+
+
+def test_uncertain_form_is_skipped_unless_retried(
+    session: Session, manager: BatchQueueManager
+) -> None:
+    lemma = _lemma(session, "run", "verb")
+    _form(session, lemma, "run", "en", "verb/en_present", True, ipa="/rʌn/", phonetic="RUN")
+    _form(session, lemma, "ran", "en", "verb/en_past", False)
+    session.commit()
+    record_uncertain_llm_result(
+        session,
+        "pronunciation:verb/en_past:ran",
+        "en",
+        REASON_LOW_CONFIDENCE,
+        lemma_id=lemma.id,
+    )
+    session.commit()
+
+    skipped = start_batch_run(session, manager, PRONUNCIATIONS_JOB, [_state(lemma, "en")], _MODEL)
+    retried = start_batch_run(
+        session,
+        manager,
+        PRONUNCIATIONS_JOB,
+        [pronunciation_state(lemma.id, "en", all_forms_pronunciation=True, retry_uncertain=True)],
+        _MODEL,
+    )
+
+    assert skipped.resolved_without_llm == {"skipped": 1}
+    assert retried.calls == 1
 
 
 def test_translation_is_copied_from_the_base_form_with_no_second_call(
