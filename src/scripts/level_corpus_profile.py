@@ -16,17 +16,17 @@ Measuring every levelled lemma against every corpus takes a few minutes.
 --min-skew values.  A saved file keeps the levels it was measured at: re-measure
 after levels or sense prominences change.
 
-    GREENLAND_TEST_MODE=1 PYTHONPATH=src python src/wordfreq/tools/level_corpus_profile.py \
+    GREENLAND_TEST_MODE=1 PYTHONPATH=src python src/scripts/level_corpus_profile.py \
         --json /tmp/level_profiles.json
-    GREENLAND_TEST_MODE=1 PYTHONPATH=src python src/wordfreq/tools/level_corpus_profile.py \
+    GREENLAND_TEST_MODE=1 PYTHONPATH=src python src/scripts/level_corpus_profile.py \
         --from-json /tmp/level_profiles.json --min-skew 0.7 --exclude-general
 """
 
 import sys
 from pathlib import Path
 
-if str(Path(__file__).parent.parent.parent) not in sys.path:
-    sys.path.insert(0, str(Path(__file__).parent.parent.parent))
+if str(Path(__file__).parent.parent) not in sys.path:
+    sys.path.insert(0, str(Path(__file__).parent.parent))
 
 import argparse
 import contextlib
