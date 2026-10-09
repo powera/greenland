@@ -24,7 +24,6 @@ from workqueue.handlers.sentences.generation import (
 from workqueue.handlers.sentences.translation import (
     do_translate_sentence,
     handle_sentences_translate,
-    handle_sentences_translate_simple,
 )
 from workqueue.handlers.sentences.verification import (
     handle_sentences_links_verify,
@@ -42,7 +41,6 @@ __all__ = [
     "handle_sentences_patterns_generate",
     "handle_sentences_import_document",
     "handle_sentences_translate",
-    "handle_sentences_translate_simple",
     "handle_sentences_translate_batch_submit",
     "handle_sentences_links_verify",
     "handle_sentences_translations_verify",

@@ -52,7 +52,6 @@ class TaskType:
     SENTENCES_PATTERNS_GENERATE = "sentences.patterns.generate"
     SENTENCES_EXAMPLES_GENERATE = "sentences.examples.generate"
     SENTENCES_TRANSLATE = "sentences.translate"
-    SENTENCES_TRANSLATE_SIMPLE = "sentences.translate.simple"
     SENTENCES_TRANSLATIONS_VERIFY = "sentences.translations.verify"
     SENTENCES_LINKS_VERIFY = "sentences.links.verify"
     SENTENCES_TRANSLATE_BATCH_SUBMIT = "sentences.translate.batch_submit"

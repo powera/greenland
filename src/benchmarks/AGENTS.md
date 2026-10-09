@@ -2,7 +2,7 @@
 
 Automated evaluation framework for comparing language model performance on
 linguistic tasks. Designed to test both remote API models (OpenAI, Anthropic,
-Gemini) and local models (LM Studio, Ollama, TranslateGemma).
+Gemini) and local models (LM Studio, Ollama).
 
 ## How it works
 

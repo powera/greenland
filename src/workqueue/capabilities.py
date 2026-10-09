@@ -230,16 +230,6 @@ SENTENCE_CAPABILITIES: Tuple[CapabilityDescriptor, ...] = (
         preconditions=("the sentence exists and has at least one translation",),
     ),
     CapabilityDescriptor(
-        task_type="sentences.translate.simple",
-        summary="Add text-only sentence translations with TranslateGemma.",
-        target_kind="sentence",
-        required_payload=("sentence_id",),
-        optional_payload=("selected_languages",),
-        writes=True,
-        produces=("sentence translations in the target languages",),
-        preconditions=("the sentence has an English translation",),
-    ),
-    CapabilityDescriptor(
         task_type="sentences.translate.batch_submit",
         summary="Submit stored sentences for translation through the batch API.",
         target_kind="sentence",

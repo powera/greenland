@@ -43,7 +43,6 @@ def find_sentences_needing_translations(
     lemma_id: int,
     target_languages: Sequence[str],
     limit: Optional[int] = None,
-    require_english_source: bool = False,
     retry_uncertain: bool = False,
 ) -> List[int]:
     """Return linked sentence IDs that still need one of the target languages.
@@ -87,66 +86,13 @@ def find_sentences_needing_translations(
             )
         if required_languages.issubset(existing_languages):
             complete_count += 1
-        elif not require_english_source or "en" in existing_languages:
+        else:
             incomplete_ids.append(sentence_id)
 
     if limit is None:
         return incomplete_ids
     remaining_count = max(0, limit - complete_count)
     return incomplete_ids[:remaining_count]
-
-
-def translate_sentence_simple(
-    session: Session,
-    *,
-    sentence_id: int,
-    target_languages: Sequence[str],
-) -> int:
-    """Add missing text-only translations with TranslateGemma."""
-    from clients.translategemma_client import TranslateGemmaClient
-
-    source_text = (
-        session.query(SentenceTranslation.translation_text)
-        .filter(
-            SentenceTranslation.sentence_id == sentence_id,
-            SentenceTranslation.language_code == "en",
-        )
-        .scalar()
-    )
-    if not source_text:
-        raise ValueError(f"Sentence {sentence_id} has no English translation")
-
-    existing_languages = {
-        language_code
-        for (language_code,) in session.query(SentenceTranslation.language_code)
-        .filter(SentenceTranslation.sentence_id == sentence_id)
-        .all()
-    }
-    client = TranslateGemmaClient()
-    added_count = 0
-    for language_code in target_languages:
-        if language_code == "en" or language_code in existing_languages:
-            continue
-        response = client.generate_translation(
-            text=source_text,
-            source_lang="en",
-            target_lang=language_code,
-        )
-        if not response.response_text:
-            raise RuntimeError(
-                f"TranslateGemma returned no {language_code} translation for sentence {sentence_id}"
-            )
-        session.add(
-            SentenceTranslation(
-                sentence_id=sentence_id,
-                language_code=language_code,
-                translation_text=response.response_text,
-                verified=False,
-            )
-        )
-        added_count += 1
-    session.flush()
-    return added_count
 
 
 def ensure_translations(

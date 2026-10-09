@@ -69,12 +69,6 @@ _REQUEST_BOUNDARIES = [
     ),
     ("clients.lmstudio_client", "LMStudioClient", "_make_request", "lmstudio"),
     ("clients.ollama_client", "OllamaClient", "_make_request", "ollama"),
-    (
-        "clients.translategemma_client",
-        "TranslateGemmaClient",
-        "_make_request",
-        "translategemma",
-    ),
 ]
 
 
