@@ -30,7 +30,11 @@ from storage.models.schema import (
     SentenceWord,
 )
 from storage.translation_helpers import get_translation_pronunciations
-from words.pronunciation_generation import generate_pronunciations_for_lemma
+from words.pronunciation_generation import (
+    PronunciationTarget,
+    generate_pronunciations_for_lemma,
+    store_target_pronunciation,
+)
 from wordfreq.tools.llm_validators import (
     batch_generate_pronunciations,
     generate_pronunciation,
@@ -412,12 +416,17 @@ class PronunciationService:
         dry_run: bool = False,
         lemma_id: Optional[int] = None,
         lemmas: Optional[List[Lemma]] = None,
+        retry_uncertain: bool = False,
     ) -> Dict[str, Any]:
         """
         Generate pronunciations for forms that are missing them.
 
         Uses intelligent batching: groups forms by lemma/language and uses batch
         generation for multiple forms, single generation for individual forms.
+
+        Answers below PRONUNCIATION_MIN_CONFIDENCE are recorded as uncertain
+        (see words.pronunciation_generation.store_target_pronunciation), and
+        those words are skipped on later runs unless ``retry_uncertain``.
 
         Args:
             limit: Maximum number of lemmas to process
@@ -463,6 +472,20 @@ class PronunciationService:
             query = query.order_by(DerivativeForm.lemma_id, DerivativeForm.language_code)
 
             forms = query.all()
+            if not retry_uncertain:
+                asked = [
+                    form
+                    for form in forms
+                    if not store_target_pronunciation.is_uncertain(
+                        session, target=PronunciationTarget.for_form(form)
+                    )
+                ]
+                if len(asked) < len(forms):
+                    logger.info(
+                        f"Skipping {len(forms) - len(asked)} form(s) a model was uncertain "
+                        "of (--retry-uncertain to ask again)"
+                    )
+                forms = asked
             logger.info(f"Found {len(forms)} derivative forms to populate")
 
             # Group forms by (lemma_id, language_code) for intelligent batching
@@ -578,6 +601,7 @@ class PronunciationService:
                                 lang_code=lang_code,
                                 config=self.config,
                                 all_forms_pronunciation=all_forms_pronunciation,
+                                retry_uncertain=retry_uncertain,
                             )
                             populated_count += generated_count
                             failed_count += len(generation_errors)
@@ -628,10 +652,18 @@ class PronunciationService:
                                 english_translation=lemma.lemma_text if lang_code != "en" else None,
                             )
 
-                            if result["confidence"] >= 0.5:
-                                form.ipa_pronunciation = result["ipa_pronunciation"]
-                                form.phonetic_pronunciation = result["phonetic_pronunciation"]
-                                session.commit()
+                            stored = store_target_pronunciation(
+                                session,
+                                lemma,
+                                PronunciationTarget.for_form(form),
+                                result["ipa_pronunciation"] or None,
+                                result["phonetic_pronunciation"] or None,
+                                confidence=float(result["confidence"] or 0.0),
+                                model=self.config.model,
+                            )
+                            # Also commits an uncertain answer's record.
+                            session.commit()
+                            if stored:
                                 logger.info(
                                     f"  Generated: IPA={result['ipa_pronunciation']}, "
                                     f"Phonetic={result['phonetic_pronunciation']} "
@@ -646,13 +678,15 @@ class PronunciationService:
                                             lang_code=lang_code,
                                             config=self.config,
                                             all_forms_pronunciation=all_forms_pronunciation,
+                                            retry_uncertain=retry_uncertain,
                                         )
                                     )
                                     populated_count += max(generated_count - 1, 0)
                                     failed_count += len(generation_errors)
                             else:
                                 logger.warning(
-                                    f"  Low confidence ({result['confidence']:.2f}), skipping"
+                                    f"  Low confidence ({result['confidence']:.2f}), "
+                                    "recorded as uncertain"
                                 )
                                 failed_count += 1
 
@@ -717,15 +751,20 @@ class PronunciationService:
                                     batch_failed += 1
                                     continue
 
-                                if result["confidence"] >= 0.5:
-                                    form_obj.ipa_pronunciation = result["ipa_pronunciation"]
-                                    form_obj.phonetic_pronunciation = result[
-                                        "phonetic_pronunciation"
-                                    ]
+                                if store_target_pronunciation(
+                                    session,
+                                    lemma,
+                                    PronunciationTarget.for_form(form_obj),
+                                    result["ipa_pronunciation"] or None,
+                                    result["phonetic_pronunciation"] or None,
+                                    confidence=float(result["confidence"] or 0.0),
+                                    model=self.config.model,
+                                ):
                                     batch_populated += 1
                                 else:
                                     logger.warning(
-                                        f"  Low confidence ({result['confidence']:.2f}) for {grammatical_form}, skipping"
+                                        f"  Low confidence ({result['confidence']:.2f}) for "
+                                        f"{grammatical_form}, recorded as uncertain"
                                     )
                                     batch_failed += 1
 
@@ -745,6 +784,7 @@ class PronunciationService:
                                         lang_code=lang_code,
                                         config=self.config,
                                         all_forms_pronunciation=all_forms_pronunciation,
+                                        retry_uncertain=retry_uncertain,
                                     )
                                 )
                                 populated_count += max(generated_count - batch_populated, 0)

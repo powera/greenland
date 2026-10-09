@@ -5,10 +5,14 @@ OpenAI batches (``papuga --populate --batch``), one item per (lemma, language),
 grouped the way papuga's populate path groups its live calls:
 
 1. ``pronunciations.forms``: one call for the lemma's forms -- the grouped
-   prompt when there are several -- keeping papuga's 0.5 confidence floor.
+   prompt when there are several.
 2. ``pronunciations.lemma``: the translation's (or English base form's) own
    pronunciation, prepared after every item's forms are stored, so it is
    usually copied from the base form with no call at all.
+
+Both store through store_target_pronunciation, which records an answer below
+PRONUNCIATION_MIN_CONFIDENCE as uncertain; planning skips those words unless
+the state says ``retry_uncertain``.
 """
 
 from __future__ import annotations
@@ -114,9 +118,6 @@ PRONUNCIATIONS_JOB_NAME = "papuga"
 FORMS_STAGE = "pronunciations.forms"
 LEMMA_STAGE = "pronunciations.lemma"
 
-# The floor papuga's populate path applies to form pronunciations.
-FORM_MIN_CONFIDENCE = 0.5
-
 # Ready markers: no forms to do in stage 1; a translation whose values are known.
 _NO_FORMS = "__no_forms__"
 _KNOWN = "__known_pronunciation__"
@@ -127,6 +128,7 @@ def pronunciation_state(
     language_code: str,
     base_forms_only: bool = False,
     all_forms_pronunciation: bool = False,
+    retry_uncertain: bool = False,
 ) -> Dict[str, Any]:
     """The item state the pronunciation job works on: one lemma in one language."""
     return {
@@ -134,6 +136,7 @@ def pronunciation_state(
         "language_code": language_code,
         "base_forms_only": base_forms_only,
         "all_forms_pronunciation": all_forms_pronunciation,
+        "retry_uncertain": retry_uncertain,
     }
 
 
@@ -144,6 +147,7 @@ def _targets(session: Session, lemma: Lemma, state: Dict[str, Any]) -> List[Pron
         state["language_code"],
         base_forms_only=bool(state.get("base_forms_only")),
         all_forms_pronunciation=bool(state.get("all_forms_pronunciation")),
+        retry_uncertain=bool(state.get("retry_uncertain")),
     )
 
 
@@ -195,7 +199,11 @@ def _prepare_forms(
 
 
 def _store_form_answers(
-    session: Session, lemma: Lemma, state: Dict[str, Any], data: Dict[str, Any]
+    session: Session,
+    lemma: Lemma,
+    state: Dict[str, Any],
+    data: Dict[str, Any],
+    model: Optional[str],
 ) -> Tuple[int, int]:
     """Write stage-1 answers; returns ``(written, rejected)``."""
     forms = state["forms"]
@@ -203,13 +211,12 @@ def _store_form_answers(
         results = interpret_batch_pronunciations(
             data, [{"form": form["form"], "word": form["word"]} for form in forms]
         )
-        answers = [(form["form_id"], form["word"], results[form["form"]]) for form in forms]
+        answers = [(form, results[form["form"]]) for form in forms]
     else:
         single = interpret_pronunciation(data, state["language_code"])
         answers = [
             (
-                forms[0]["form_id"],
-                forms[0]["word"],
+                forms[0],
                 {
                     "ipa_pronunciation": single.get("suggested_ipa"),
                     "phonetic_pronunciation": single.get("suggested_phonetic"),
@@ -218,20 +225,18 @@ def _store_form_answers(
             )
         ]
     written = rejected = 0
-    for form_id, word, answer in answers:
+    for form, answer in answers:
         target = PronunciationTarget(
             kind="form",
             lemma_id=lemma.id,
             language_code=state["language_code"],
-            word=word,
-            grammatical_form=None,
-            form_id=form_id,
+            word=form["word"],
+            # As planned, so the uncertainty is recorded under the same question.
+            grammatical_form=form["form"] or None,
+            form_id=form["form_id"],
         )
         # Someone may have entered it by hand while the batch ran; theirs stays.
         if not target_still_needed(session, lemma, target):
-            continue
-        if float(answer.get("confidence") or 0.0) < FORM_MIN_CONFIDENCE:
-            rejected += 1
             continue
         if store_target_pronunciation(
             session,
@@ -239,6 +244,8 @@ def _store_form_answers(
             target,
             answer.get("ipa_pronunciation") or None,
             answer.get("phonetic_pronunciation") or None,
+            confidence=float(answer.get("confidence") or 0.0),
+            model=model,
         ):
             written += 1
         else:
@@ -254,7 +261,7 @@ def _apply_forms(
         return Done("failed", f"Lemma {state['lemma_id']} not found")
     written = rejected = 0
     if not data.get(_NO_FORMS):
-        written, rejected = _store_form_answers(session, lemma, state, data)
+        written, rejected = _store_form_answers(session, lemma, state, data, ctx.model)
         session.flush()
     remaining = [t for t in _targets(session, lemma, state) if t.kind != "form"]
     if not remaining:
@@ -309,12 +316,20 @@ def _apply_lemma(
         return Done("skipped", "pronunciation already present")
     ipa: Optional[str] = None
     phonetic: Optional[str] = None
+    confidence: Optional[float] = None
     if not data.get(_KNOWN):
         result = interpret_pronunciation(data, target.language_code)
         ipa = result.get("suggested_ipa") or None
         phonetic = result.get("suggested_phonetic") or None
-    if store_target_pronunciation(session, lemma, target, ipa, phonetic):
+        if ipa or phonetic:
+            confidence = float(result.get("confidence") or 0.0)
+    stored = store_target_pronunciation(
+        session, lemma, target, ipa, phonetic, confidence=confidence, model=ctx.model
+    )
+    if stored:
         return Done("written", f"{target.word}: {ipa or ''} {phonetic or ''}".strip())
+    if stored is None and confidence is not None:
+        return Done("rejected", f"{target.word!r} at confidence {confidence:.2f}")
     return Done("rejected", f"no pronunciation for {target.word!r}")
 
 

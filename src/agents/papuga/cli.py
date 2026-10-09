@@ -88,6 +88,14 @@ def get_argument_parser() -> argparse.ArgumentParser:
         action="store_true",
         help="Force pronunciation generation for all forms (legacy behavior)",
     )
+    parser.add_argument(
+        "--retry-uncertain",
+        action="store_true",
+        help=(
+            "With --populate, also ask for words a model answered below the 0.7 "
+            "confidence floor before (uncertain_llm_results); by default they are skipped"
+        ),
+    )
 
     # Workqueue arguments
     parser.add_argument(
@@ -241,7 +249,11 @@ def _run_populate_batch(
         )
         states = [
             pronunciation_state(
-                lemma_id, language_code, args.base_forms_only, args.all_forms_pronunciation
+                lemma_id,
+                language_code,
+                args.base_forms_only,
+                args.all_forms_pronunciation,
+                args.retry_uncertain,
             )
             for lemma_id, language_code in pairs
         ]
@@ -401,6 +413,7 @@ def main() -> None:
             dry_run=args.dry_run,
             lemma_id=lemma_id,
             lemmas=lemmas,
+            retry_uncertain=args.retry_uncertain,
         )
         logger.info(
             f"\nPopulation complete: {result['populated']} populated, {result['failed']} failed "

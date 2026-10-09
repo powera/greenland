@@ -259,6 +259,9 @@ _LLM_ANSWER_MODULES = (
     "src/words/grammar_fact_tasks/english_principal_parts.py",
     "src/workqueue/handlers/words/grammar_facts.py",
     "src/words/lemma_creation.py",
+    "src/words/pronunciation.py",
+    "src/words/pronunciation_generation.py",
+    "src/workqueue/handlers/words/pronunciations.py",
 )
 
 
@@ -268,6 +271,7 @@ def test_llm_code_passes_a_confidence_to_gated_writers(path: str) -> None:
     import storage.crud.lemma_fact  # noqa: F401
     import words.grammar_fact_tasks.english_principal_parts  # noqa: F401
     import words.lemma_creation  # noqa: F401
+    import words.pronunciation_generation  # noqa: F401
 
     tree = ast.parse((_REPO_ROOT / path).read_text())
     unchecked = [

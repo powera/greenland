@@ -8,7 +8,11 @@ from sqlalchemy.orm import Session
 from langtools.form_registry import FORM_SPECS
 from storage.backend.config import BackendType, DataSourceConfig
 from storage.models.schema import Base, DerivativeForm, Lemma, LemmaTranslation
-from words.pronunciation_generation import generate_pronunciations_for_lemma
+from words.pronunciation_generation import (
+    PronunciationTarget,
+    generate_pronunciations_for_lemma,
+    store_target_pronunciation,
+)
 
 
 def _build_config() -> DataSourceConfig:
@@ -48,7 +52,7 @@ def test_generate_pronunciations_for_lemma_updates_lemma_translation() -> None:
 
         with patch(
             "words.pronunciation_generation.generate_pronunciation_for_form",
-            return_value=(True, "/ˈpero/", "PEH-roh"),
+            return_value=(True, "/ˈpero/", "PEH-roh", 0.9),
         ):
             generated_count, errors = generate_pronunciations_for_lemma(
                 session=session,
@@ -165,7 +169,7 @@ def test_generate_pronunciations_for_lemma_updates_rhyme_key_for_english_forms()
 
         with patch(
             "words.pronunciation_generation.generate_pronunciation_for_form",
-            return_value=(True, "/kæt/", "KAT"),
+            return_value=(True, "/kæt/", "KAT", 0.9),
         ):
             generated_count, errors = generate_pronunciations_for_lemma(
                 session=session,
@@ -205,7 +209,7 @@ def test_generate_pronunciations_for_lemma_creates_english_base_form_when_missin
 
         with patch(
             "words.pronunciation_generation.generate_pronunciation_for_form",
-            return_value=(True, "/ˈkwɪkli/", "KWIK-lee"),
+            return_value=(True, "/ˈkwɪkli/", "KWIK-lee", 0.9),
         ):
             generated_count, errors = generate_pronunciations_for_lemma(
                 session=session,
@@ -276,7 +280,7 @@ def test_generate_pronunciations_for_lemma_skips_english_future_by_default() -> 
 
         with patch(
             "words.pronunciation_generation.generate_pronunciation_for_form",
-            return_value=(True, "/wɔk/", "WAWK"),
+            return_value=(True, "/wɔk/", "WAWK", 0.9),
         ) as mocked_generate:
             generated_count, errors = generate_pronunciations_for_lemma(
                 session=session,
@@ -343,7 +347,7 @@ def test_generate_pronunciations_for_lemma_includes_english_future_with_override
 
         with patch(
             "words.pronunciation_generation.generate_pronunciation_for_form",
-            return_value=(True, "/wɔk/", "WAWK"),
+            return_value=(True, "/wɔk/", "WAWK", 0.9),
         ) as mocked_generate:
             generated_count, errors = generate_pronunciations_for_lemma(
                 session=session,
@@ -404,7 +408,7 @@ def test_generate_pronunciations_base_forms_only_skips_other_forms() -> None:
 
         with patch(
             "words.pronunciation_generation.generate_pronunciation_for_form",
-            return_value=(True, "/rʌn/", "RUN"),
+            return_value=(True, "/rʌn/", "RUN", 0.9),
         ) as mocked_generate:
             generated_count, errors = generate_pronunciations_for_lemma(
                 session,
@@ -418,6 +422,67 @@ def test_generate_pronunciations_base_forms_only_skips_other_forms() -> None:
         mocked_generate.assert_called_once()
         assert base_form.ipa_pronunciation == "/rʌn/"
         assert other_form.ipa_pronunciation is None
+    finally:
+        session.close()
+        engine.dispose()
+
+
+def test_low_confidence_pronunciation_is_recorded_and_skipped_next_time() -> None:
+    """Below the floor: nothing stored, the word recorded, and not asked again."""
+    engine = create_engine("sqlite:///:memory:")
+    Base.metadata.create_all(engine)
+
+    session = Session(engine)
+    try:
+        lemma = Lemma(
+            lemma_text="cat",
+            definition_text="a feline",
+            pos_type="noun",
+            guid="N00_006",
+        )
+        session.add(lemma)
+        session.flush()
+        form = DerivativeForm(
+            lemma_id=lemma.id,
+            derivative_form_text="cat",
+            language_code="en",
+            grammatical_form="singular",
+            is_base_form=True,
+        )
+        session.add(form)
+        session.commit()
+
+        with patch(
+            "words.pronunciation_generation.generate_pronunciation_for_form",
+            return_value=(True, "/kæt/", "KAT", 0.6),
+        ) as generate:
+            generated_count, errors = generate_pronunciations_for_lemma(
+                session=session, lemma=lemma, lang_code="en", config=_build_config()
+            )
+            session.commit()
+            assert generate.call_count == 1
+
+            assert generated_count == 0
+            assert errors == [
+                "Pronunciation of 'cat' below confidence (0.60); recorded as uncertain"
+            ]
+            assert form.ipa_pronunciation is None
+            assert store_target_pronunciation.is_uncertain(
+                session, target=PronunciationTarget.for_form(form)
+            )
+
+            generate_pronunciations_for_lemma(
+                session=session, lemma=lemma, lang_code="en", config=_build_config()
+            )
+            assert generate.call_count == 1
+            generate_pronunciations_for_lemma(
+                session=session,
+                lemma=lemma,
+                lang_code="en",
+                config=_build_config(),
+                retry_uncertain=True,
+            )
+            assert generate.call_count == 2
     finally:
         session.close()
         engine.dispose()
