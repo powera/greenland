@@ -17,7 +17,9 @@ Words can be:
    - These get difficulty_level=-1 override
 """
 
-from typing import Dict, List, Set
+from typing import Dict, List, Optional, Set
+
+from wordfreq.data.family_relations_sections import FAMILY_TIER_LEVELS
 
 # =============================================================================
 # FAMILY RELATION CATEGORIES
@@ -441,6 +443,27 @@ EXCLUDED_TERMS["es-419"] = EXCLUDED_TERMS["es"]
 EXCLUDED_TERMS["pt-br"] = EXCLUDED_TERMS["pt"]
 EXCLUDED_TERMS["zh-tw"] = EXCLUDED_TERMS["zh"]
 
+# =============================================================================
+# LANGUAGE PROMOTION CONFIGURATION
+# =============================================================================
+# Terms a language moves to a different curriculum level.  Excluding a generic
+# term (zh "brother") only removes it; the language's own replacements sit at
+# the base level of the distinguished terms (outside the core), so without a
+# promotion the learner is taught no sibling or grandparent word at all.
+#
+# Key: target language code
+# Value: dict mapping concept_label -> difficulty level
+
+PROMOTED_TERMS: Dict[str, Dict[str, int]] = {
+    "zh": {
+        label: FAMILY_TIER_LEVELS[1]
+        for label in AGE_DISTINGUISHED_SIBLINGS
+        + GRANDPARENTS_DISTINGUISHED
+        + AUNTS_UNCLES_DISTINGUISHED
+    },
+}
+PROMOTED_TERMS["zh-tw"] = PROMOTED_TERMS["zh"]
+
 # Default exclusions for languages not explicitly configured
 DEFAULT_EXCLUDED_TERMS: Set[str] = {
     # By default, exclude specialized terms that require linguistic analysis
@@ -503,6 +526,20 @@ def is_term_excluded_for_language(concept_label: str, lang_code: str) -> bool:
         True if the term should be excluded (difficulty=-1), False otherwise
     """
     return concept_label in get_excluded_terms_for_language(lang_code)
+
+
+def get_promoted_level(concept_label: str, lang_code: str) -> Optional[int]:
+    """
+    Return the level a language moves a family relation term to.
+
+    Args:
+        concept_label: The family relation concept_label (e.g., "older brother")
+        lang_code: Language code (e.g., "zh")
+
+    Returns:
+        The promoted difficulty level, or None to keep the lemma's own level
+    """
+    return PROMOTED_TERMS.get(lang_code, {}).get(concept_label)
 
 
 def get_supported_languages() -> List[str]:

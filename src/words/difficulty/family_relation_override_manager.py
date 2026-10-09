@@ -43,6 +43,7 @@ from storage.crud.difficulty_override import (
 )
 from storage.models.schema import Lemma, LemmaDifficultyOverride
 from words.difficulty.family_relation_priorities import (
+    get_promoted_level,
     get_supported_languages,
     is_term_excluded_for_language,
 )
@@ -68,6 +69,9 @@ class OverrideChange:
     current_override: Optional[int]
     proposed_level: int
     reason: str
+    # True for a promotion: proposed_level is written as an override rather
+    # than restored by deleting one
+    sets_override: bool = False
 
     @property
     def is_change(self) -> bool:
@@ -224,8 +228,22 @@ class FamilyRelationOverrideManager:
                         changes.append(change)
                 else:
                     words_to_include += 1
-                    # If currently excluded but shouldn't be, we need to remove the override
-                    if current_override_level == EXCLUDED_DIFFICULTY_LEVEL:
+                    promoted_level = get_promoted_level(concept_label, target_language)
+                    if promoted_level is not None and current_override_level != promoted_level:
+                        change = OverrideChange(
+                            guid=lemma.guid or "",
+                            word_text=lemma.lemma_text,
+                            concept_label=concept_label,
+                            default_level=lemma.difficulty_level,
+                            current_override=current_override_level,
+                            proposed_level=promoted_level,
+                            reason=f"Term '{concept_label}' is taught early in {target_language}",
+                            sets_override=True,
+                        )
+                        changes.append(change)
+                    # An override this tool wrote (an exclusion, or a promotion
+                    # since dropped from the config) no longer applies: remove it
+                    elif promoted_level is None and current_override_level is not None:
                         change = OverrideChange(
                             guid=lemma.guid or "",
                             word_text=lemma.lemma_text,
@@ -286,21 +304,21 @@ class FamilyRelationOverrideManager:
             if not lemma:
                 continue
 
-            if change.is_exclusion:
-                # Add/update exclusion override
+            if change.is_exclusion or change.sets_override:
+                # Add/update exclusion or promotion override
                 notes = notes_template.format(reason=change.reason)
                 add_difficulty_override(
                     session=self.session,
                     lemma_id=lemma.id,
                     language_code=target_language,
-                    difficulty_level=EXCLUDED_DIFFICULTY_LEVEL,
+                    difficulty_level=change.proposed_level,
                     notes=notes,
                 )
                 applied_count += 1
             else:
-                # Remove exclusion override (restore to default)
+                # Remove this tool's override (restore to default)
                 existing = get_difficulty_override(self.session, lemma.id, target_language)
-                if existing and existing.difficulty_level == EXCLUDED_DIFFICULTY_LEVEL:
+                if _is_family_override(existing):
                     delete_difficulty_override(self.session, lemma.id, target_language)
                     applied_count += 1
 

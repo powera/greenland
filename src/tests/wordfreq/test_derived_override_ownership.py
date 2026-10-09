@@ -118,3 +118,32 @@ def test_country_preview_ignores_states_and_keeps_main_countries_in_main_batch(
         ("N_CONTINENT", TIER_2_LEVEL),
         ("N_COUNTRY", TIER_2_LEVEL),
     ]
+
+
+def test_family_promotion_is_applied_and_removed_when_unconfigured(session: Session) -> None:
+    lemma = Lemma(
+        guid="N_OLDER_BROTHER",
+        lemma_text="older brother",
+        definition_text="an elder male sibling",
+        pos_type="noun",
+        pos_subtype="family_relation",
+        difficulty_level=1003,
+    )
+    session.add(lemma)
+    session.flush()
+    manager = FamilyRelationOverrideManager(session)
+
+    manager.apply_overrides("zh")
+    promoted = session.query(LemmaDifficultyOverride).filter_by(lemma_id=lemma.id).one()
+    assert (promoted.language_code, promoted.difficulty_level) == ("zh", 5)
+    assert _is_family_override(promoted)
+
+    # Rerunning is a no-op; a language without the promotion gets no override
+    assert manager.preview_changes("zh").changes == []
+    assert [c.proposed_level for c in manager.preview_changes("ko").changes] == []
+
+    # A promotion dropped from the config is removed, restoring the base level
+    promoted.language_code = "ko"
+    session.flush()
+    manager.apply_overrides("ko")
+    assert session.query(LemmaDifficultyOverride).filter_by(lemma_id=lemma.id).count() == 0
