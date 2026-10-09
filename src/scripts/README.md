@@ -25,3 +25,15 @@ PYTHONPATH=src python src/scripts/<script>.py --help
 For repo-level checks and deployment helpers, see the top-level `scripts/`
 directory instead. Dated one-off migrations, including the historical staging
 audio path migration, live in root-level `migrations/`.
+
+## Vocabulary maintenance
+
+These commands were moved from `wordfreq/tools/`. Use
+`GREENLAND_TEST_MODE=1 PYTHONPATH=src python src/scripts/<name>.py --help`
+to inspect their arguments. For deliberate local writes without LLM calls,
+use `GREENLAND_DISABLE_LLM=1` and back up the database before risky changes.
+
+- `apply_country_overrides.py`: preview, apply, inspect or clear country priorities.
+- `apply_family_relation_overrides.py`: preview, apply, inspect or clear kinship exclusions.
+- `manage_difficulty_overrides.py`: manage individual overrides and CSV import/export.
+- `import_ancient_translations.py`: import ancient translations from release files.

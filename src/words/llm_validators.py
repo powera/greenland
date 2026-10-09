@@ -9,10 +9,10 @@ word data quality, including lemma forms and translations.
 import logging
 import sys
 from pathlib import Path
-from typing import Any, Dict, List, Optional, Tuple
+from typing import Any, Dict, List, Optional
 
 # Add src directory to path
-GREENLAND_SRC_PATH = str(Path(__file__).parent.parent.parent)
+GREENLAND_SRC_PATH = str(Path(__file__).parent.parent)
 if GREENLAND_SRC_PATH not in sys.path:
     sys.path.insert(0, GREENLAND_SRC_PATH)
 
@@ -281,36 +281,6 @@ def validate_definition(
         }
 
 
-def batch_validate_lemmas(
-    words: List[Dict[str, str]],
-    model: str = constants.DEFAULT_MODEL,
-    confidence_threshold: float = 0.7,
-) -> List[Dict[str, Any]]:
-    """
-    Validate multiple words for lemma form.
-
-    Args:
-        words: List of dicts with 'word' and 'pos_type' keys
-        model: LLM model to use
-        confidence_threshold: Minimum confidence to flag issues
-
-    Returns:
-        List of validation results for words that have issues
-    """
-    issues: List[Dict[str, Any]] = []
-
-    for word_info in words:
-        word = word_info["word"]
-        pos_type = word_info["pos_type"]
-
-        result = validate_lemma_form(word, pos_type, model)
-
-        if not result["is_lemma"] and result["confidence"] >= confidence_threshold:
-            issues.append({"word": word, "pos_type": pos_type, "validation": result})
-
-    return issues
-
-
 def validate_all_translations_for_word(
     english_word: str,
     translations: Dict[str, str],
@@ -453,52 +423,6 @@ Language guidance: Validate for {language_list}.
             }
             for lang_code in translations.keys()
         }
-
-
-def batch_validate_translations(
-    translations: List[Dict[str, str]],
-    model: str = constants.DEFAULT_MODEL,
-    confidence_threshold: float = 0.7,
-) -> List[Dict[str, Any]]:
-    """
-    Validate multiple translations.
-
-    Args:
-        translations: List of dicts with 'english_word', 'translation',
-                     'target_language', and 'pos_type' keys
-        model: LLM model to use
-        confidence_threshold: Minimum confidence to flag issues
-
-    Returns:
-        List of validation results for translations that have issues
-    """
-    issues = []
-
-    for trans_info in translations:
-        result = validate_translation(
-            trans_info["english_word"],
-            trans_info["translation"],
-            trans_info["target_language"],
-            trans_info["pos_type"],
-            model,
-        )
-
-        has_issues = (not result["is_correct"] or not result["is_lemma_form"]) and result[
-            "confidence"
-        ] >= confidence_threshold
-
-        if has_issues:
-            issues.append(
-                {
-                    "english_word": trans_info["english_word"],
-                    "translation": trans_info["translation"],
-                    "target_language": trans_info["target_language"],
-                    "pos_type": trans_info["pos_type"],
-                    "validation": result,
-                }
-            )
-
-    return issues
 
 
 def build_pronunciation_call(

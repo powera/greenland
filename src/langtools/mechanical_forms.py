@@ -1,6 +1,6 @@
 """Rule-based paradigms per language, for bootstrap and the release export.
 
-``wordfreq.tools.generate_mechanical_forms`` writes the forms the rules can
+``words.mechanical_forms`` writes the forms the rules can
 derive, and ``storage.release.mechanical_filter`` keeps exactly those out of
 ``data/release``; both ask this module for the paradigm, so they cannot drift.
 

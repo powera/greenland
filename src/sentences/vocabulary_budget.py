@@ -144,34 +144,6 @@ def format_vocabulary_summary(
     return "\n".join(lines)
 
 
-def get_words_for_category(
-    vocabulary: Dict[str, Dict[str, List[str]]],
-    pos_type: str,
-    pos_subtype: Optional[str] = None,
-) -> List[str]:
-    """Get all words for a specific category.
-
-    Args:
-        vocabulary: Output from load_vocabulary_from_release()
-        pos_type: Part of speech (noun, verb, etc.)
-        pos_subtype: Optional subtype filter
-
-    Returns:
-        List of words
-    """
-    if pos_type not in vocabulary:
-        return []
-
-    if pos_subtype:
-        return vocabulary[pos_type].get(pos_subtype, [])
-
-    # Return all words for this POS type
-    all_words = []
-    for words in vocabulary[pos_type].values():
-        all_words.extend(words)
-    return all_words
-
-
 def build_prompt_vocabulary_section(
     target_word: str,
     target_pos_type: str,

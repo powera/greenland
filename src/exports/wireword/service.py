@@ -31,10 +31,10 @@ from exports.wireword.generate_categorychoice import (
     build_reverse_subtype_map,
     generate_for_language,
 )
-from wordfreq.tools.country_word_priorities import (
+from words.difficulty.country_word_priorities import (
     get_supported_languages as get_country_override_languages,
 )
-from wordfreq.tools.family_relation_priorities import (
+from words.difficulty.family_relation_priorities import (
     get_supported_languages as get_family_override_languages,
 )
 from exports.wireword.export_wireword_conversations import WirewordConversationExporter
@@ -67,7 +67,7 @@ class WirewordExportService:
         language: str = "lt",
         include_unreviewed_audio: bool = False,
         source_language: str = "en",
-    ):
+    ) -> None:
         """
         Initialize the export service.
 
@@ -168,7 +168,7 @@ class WirewordExportService:
             return {"applied": False, "reason": "no_configuration"}
 
         try:
-            from wordfreq.tools.country_override_manager import CountryOverrideManager
+            from words.difficulty.country_override_manager import CountryOverrideManager
 
             session = create_session(self.config)
             manager = CountryOverrideManager(session)
@@ -213,7 +213,7 @@ class WirewordExportService:
             return {"applied": False, "reason": "no_configuration"}
 
         try:
-            from wordfreq.tools.family_relation_override_manager import (
+            from words.difficulty.family_relation_override_manager import (
                 FamilyRelationOverrideManager,
             )
 

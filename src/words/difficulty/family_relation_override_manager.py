@@ -9,7 +9,7 @@ This module provides the business logic for:
 4. Bulk applying overrides to the database
 
 Usage:
-    from wordfreq.tools.family_relation_override_manager import FamilyRelationOverrideManager
+    from words.difficulty.family_relation_override_manager import FamilyRelationOverrideManager
     from storage.backend.factory import create_session
     from storage.backend.config import DataSourceConfig, BackendType
 
@@ -42,10 +42,7 @@ from storage.crud.difficulty_override import (
     get_difficulty_override,
 )
 from storage.models.schema import Lemma, LemmaDifficultyOverride
-from wordfreq.tools.family_relation_priorities import (
-    ALL_FAMILY_RELATIONS,
-    get_excluded_terms_for_language,
-    get_included_terms_for_language,
+from words.difficulty.family_relation_priorities import (
     get_supported_languages,
     is_term_excluded_for_language,
 )
@@ -109,7 +106,7 @@ class FamilyRelationOverrideManager:
 
     POS_SUBTYPE = "family_relation"
 
-    def __init__(self, session: Session):
+    def __init__(self, session: Session) -> None:
         """
         Initialize the manager.
 

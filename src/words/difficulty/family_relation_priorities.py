@@ -17,7 +17,7 @@ Words can be:
    - These get difficulty_level=-1 override
 """
 
-from typing import Dict, List, Optional, Set
+from typing import Dict, List, Set
 
 # =============================================================================
 # FAMILY RELATION CATEGORIES

@@ -9,7 +9,7 @@ This module provides the business logic for:
 4. Bulk applying overrides to the database
 
 Usage:
-    from wordfreq.tools.country_override_manager import CountryOverrideManager
+    from words.difficulty.country_override_manager import CountryOverrideManager
     from storage.database import create_database_session
 
     session = create_database_session()
@@ -25,7 +25,7 @@ Usage:
 import sys
 from dataclasses import dataclass
 from pathlib import Path
-from typing import Dict, List, Optional, Set, Tuple
+from typing import Dict, List, Optional, Tuple
 
 # Add src directory to path
 GREENLAND_SRC_PATH = str(Path(__file__).parent.parent.parent)
@@ -37,11 +37,10 @@ from sqlalchemy.orm import Session
 from storage.crud.difficulty_override import (
     add_difficulty_override,
     delete_difficulty_override,
-    get_all_overrides_for_lemma,
     get_difficulty_override,
 )
 from storage.models.schema import Lemma, LemmaDifficultyOverride
-from wordfreq.tools.country_word_priorities import (
+from words.difficulty.country_word_priorities import (
     CONTINENT_NAMES,
     COUNTRY_NAMES,
     COUNTRY_TO_NATIONALITY_MAP,
@@ -119,7 +118,7 @@ class CountryOverrideManager:
     # POS subtypes that are considered "country-related"
     COUNTRY_SUBTYPES = {"region", "nationality"}
 
-    def __init__(self, session: Session):
+    def __init__(self, session: Session) -> None:
         """
         Initialize the manager.
 

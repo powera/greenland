@@ -21,7 +21,6 @@ from wordfreq.translation.generate_forms_base import (
     get_lemmas_needing_forms,
     get_lemmas_with_translation,
     process_lemma_forms,
-    run_form_generation,
 )
 
 
@@ -102,15 +101,6 @@ def _build_all_tasks() -> Dict[str, FormGenerationTask]:
 
 
 FORM_GENERATION_TASKS: Dict[str, FormGenerationTask] = _build_all_tasks()
-
-
-def run_form_generation_task(task_key: str) -> None:
-    """Run a registered task by key."""
-    if task_key not in FORM_GENERATION_TASKS:
-        raise KeyError(f"Unknown form generation task: {task_key}")
-
-    task = FORM_GENERATION_TASKS[task_key]
-    run_form_generation(task.config, task.lemma_fetcher)
 
 
 def get_task_key(language_code: str, pos_type: str) -> str:

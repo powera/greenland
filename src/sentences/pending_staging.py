@@ -55,7 +55,7 @@ from storage.models.name_entity import normalize_name_text
 from storage.models.schema import DerivativeForm, Lemma
 from words.pending_imports.sentence_links import link_sentence_to_pending_import
 from words.pending_imports.staging import create_pending_import
-from wordfreq.tools.sentence_word_linker import ResolvedLemma
+from sentences.sentence_word_linker import ResolvedLemma
 
 logger = logging.getLogger(__name__)
 

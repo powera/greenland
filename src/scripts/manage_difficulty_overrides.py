@@ -15,21 +15,19 @@ import argparse
 import csv
 import sys
 from pathlib import Path
-from typing import Dict, List, Optional
+from typing import Optional
 
 # Add src directory to path
-GREENLAND_SRC_PATH = str(Path(__file__).parent.parent.parent)
+GREENLAND_SRC_PATH = str(Path(__file__).parent.parent)
 if GREENLAND_SRC_PATH not in sys.path:
     sys.path.insert(0, GREENLAND_SRC_PATH)
 
-import constants
 from sqlalchemy.orm import Session
 from storage.crud.difficulty_override import (
     add_difficulty_override,
     delete_difficulty_override,
     get_all_overrides_for_language,
     get_all_overrides_for_lemma,
-    get_difficulty_override,
     get_effective_difficulty_level,
 )
 from storage.database import create_database_session

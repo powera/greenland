@@ -50,24 +50,24 @@ The `manage_difficulty_overrides.py` script provides a command-line interface:
 
 ```bash
 # Set chopsticks to level 2 in Chinese
-python src/wordfreq/tools/manage_difficulty_overrides.py set N01_123 zh 2 \
+python src/scripts/manage_difficulty_overrides.py set N01_123 zh 2 \
   --notes "Common eating utensil in Chinese culture"
 
 # Exclude a word from German wordlists
-python src/wordfreq/tools/manage_difficulty_overrides.py set N01_456 de -1 \
+python src/scripts/manage_difficulty_overrides.py set N01_456 de -1 \
   --notes "Not relevant for German learners"
 
 # View overrides for a specific word
-python src/wordfreq/tools/manage_difficulty_overrides.py view N01_123
+python src/scripts/manage_difficulty_overrides.py view N01_123
 
 # List all overrides for Chinese
-python src/wordfreq/tools/manage_difficulty_overrides.py list zh
+python src/scripts/manage_difficulty_overrides.py list zh
 
 # Import overrides from CSV
-python src/wordfreq/tools/manage_difficulty_overrides.py import overrides.csv
+python src/scripts/manage_difficulty_overrides.py import overrides.csv
 
 # Export overrides to CSV
-python src/wordfreq/tools/manage_difficulty_overrides.py export \
+python src/scripts/manage_difficulty_overrides.py export \
   --language zh --output zh_overrides.csv
 ```
 

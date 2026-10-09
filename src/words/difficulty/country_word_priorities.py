@@ -582,35 +582,9 @@ def get_country_level_for_language(country_label: str, target_language: str) -> 
     return TIER_3_LEVEL
 
 
-def get_all_countries_for_language(target_language: str) -> Dict[int, List[str]]:
-    """
-    Get all country assignments for a target language.
-
-    Args:
-        target_language: Language code
-
-    Returns:
-        Dictionary mapping level -> list of country labels
-    """
-    return COUNTRY_PRIORITIES.get(target_language, {})
-
-
 def get_supported_languages() -> List[str]:
     """Get list of languages with country priority configuration."""
     return list(COUNTRY_PRIORITIES.keys())
-
-
-def get_nationality_for_country(country_label: str) -> Optional[str]:
-    """
-    Get the corresponding nationality label for a country.
-
-    Args:
-        country_label: The country concept_label (e.g., "Lithuania")
-
-    Returns:
-        The nationality concept_label (e.g., "Lithuanian") or None
-    """
-    return COUNTRY_TO_NATIONALITY_MAP.get(country_label)
 
 
 def get_all_tier_levels() -> List[int]:

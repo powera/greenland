@@ -48,7 +48,7 @@ from wordfreq.tiers.basic_english import BasicEnglishImporter
 from wordfreq.tiers.cambridge_yle import CambridgeYleImporter
 from wordfreq.tiers.cefr import CefrImporter
 from wordfreq.tiers.runner import run_import as run_tier_import
-from wordfreq.tools.generate_mechanical_forms import generate_for_session
+from words.mechanical_forms import generate_for_session
 
 if TYPE_CHECKING:
     from storage.backend.jsonl.storage import JSONLStorage

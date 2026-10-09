@@ -4,11 +4,10 @@
 
 import logging
 import threading
-from typing import Any, Dict, List, Optional, Tuple, Union, cast
+from typing import Any, Dict, List, Optional, Tuple, Union
 
 import constants
 from clients.unified_client import UnifiedLLMClient
-from storage import database as linguistic_db
 from storage.backend.config import BackendType, DataSourceConfig
 from storage.backend import create_session
 
@@ -34,8 +33,6 @@ class LinguisticClient:
 
     # Thread-local storage for client instances
     _thread_local = threading.local()
-    # Lock for thread safety
-    _lock = threading.Lock()
 
     def __init__(
         self,
@@ -43,7 +40,7 @@ class LinguisticClient:
         model: Optional[str] = None,
         db_path: Optional[str] = None,
         debug: bool = False,
-    ):
+    ) -> None:
         """
         Initialize client with configuration or legacy parameters.
 
@@ -105,32 +102,6 @@ class LinguisticClient:
                 logger.warning("Model %s did not warm up", self.model)
         except Exception as e:
             logger.warning(f"Failed to warm up model {self.model}: {e}")
-
-    @classmethod
-    def get_instance(
-        cls, model: str = DEFAULT_MODEL, db_path: Optional[str] = None, debug: bool = False
-    ) -> "LinguisticClient":
-        """
-        Get a thread-local instance of the LinguisticClient.
-
-        This method ensures that each thread gets its own client instance.
-
-        Args:
-            model: Model name to use for queries
-            db_path: Path to the SQLite database, or None to use default
-            debug: Whether to enable debug logging
-
-        Returns:
-            Thread-local LinguisticClient instance
-        """
-        if not hasattr(cls._thread_local, "instance"):
-            with cls._lock:
-                # Initialize the thread-local instance
-                cls._thread_local.instance = cls(model=model, db_path=db_path, debug=debug)
-                logger.debug(
-                    f"Created new LinguisticClient for thread {threading.current_thread().name}"
-                )
-        return cast("LinguisticClient", cls._thread_local.instance)
 
     def get_session(self) -> Any:
         """
@@ -215,155 +186,3 @@ class LinguisticClient:
     def process_word(self, word: str, refresh: bool = False) -> bool:
         """Process a word to get linguistic information and store in database."""
         return word_processing.process_word(self.client, word, self.get_session, refresh)
-
-    def process_words_batch(
-        self, word_list: List[str], refresh: bool = False, throttle: float = 1.0
-    ) -> Dict[str, Any]:
-        """Process a batch of words."""
-        return word_processing.process_words_batch(
-            self.client, word_list, self.get_session, refresh, throttle
-        )
-
-    # Legacy methods for compatibility
-    def get_word_token_info(self, token_text: str) -> Dict[str, Any]:
-        """Get comprehensive information about a word token using the new schema."""
-        session = self.get_session()
-        word_token = linguistic_db.get_word_token_by_text(session, token_text, "en")
-
-        if not word_token:
-            return {"token": token_text, "exists": False, "derivative_forms": []}
-
-        forms_info = []
-        for derivative_form in word_token.derivative_forms:
-            lemma = derivative_form.lemma
-
-            form_info = {
-                "lemma_text": lemma.lemma_text,
-                "definition": lemma.definition_text,
-                "pos_type": lemma.pos_type,
-                "pos_subtype": lemma.pos_subtype,
-                "grammatical_form": derivative_form.grammatical_form,
-                "is_base_form": derivative_form.is_base_form,
-                "ipa_pronunciation": derivative_form.ipa_pronunciation,
-                "phonetic_pronunciation": derivative_form.phonetic_pronunciation,
-                "confidence": derivative_form.confidence,
-                "verified": derivative_form.verified,
-                "examples": [],
-                "translations": {
-                    "chinese": derivative_form.chinese_translation,
-                    "korean": derivative_form.korean_translation,
-                    "french": derivative_form.french_translation,
-                    "swahili": derivative_form.swahili_translation,
-                    "vietnamese": derivative_form.vietnamese_translation,
-                    "lithuanian": derivative_form.lithuanian_translation,
-                },
-            }
-            forms_info.append(form_info)
-
-        return {"token": token_text, "exists": True, "derivative_forms": forms_info}
-
-    def get_lemma_forms(
-        self, lemma_text: str, pos_type: Optional[str] = None
-    ) -> List[Dict[str, Any]]:
-        """Get all word tokens that represent forms of a specific lemma."""
-        session = self.get_session()
-        derivative_forms = linguistic_db.get_all_derivative_forms_for_lemma(
-            session, lemma_text, pos_type
-        )
-
-        forms_info = []
-        for derivative_form in derivative_forms:
-            word_token = derivative_form.word_token
-
-            form_info = {
-                "token": word_token.token,
-                "grammatical_form": derivative_form.grammatical_form,
-                "is_base_form": derivative_form.is_base_form,
-                "ipa_pronunciation": derivative_form.ipa_pronunciation,
-                "phonetic_pronunciation": derivative_form.phonetic_pronunciation,
-                "verified": derivative_form.verified,
-                "examples": [],
-            }
-            forms_info.append(form_info)
-
-        return forms_info
-
-    def add_translation_for_derivative_form(self, derivative_form_id: int, language: str) -> bool:
-        """Add a translation for a specific derivative form using the new schema."""
-        session = self.get_session()
-
-        # Get the derivative form
-        derivative_form = (
-            session.query(linguistic_db.DerivativeForm)
-            .filter(linguistic_db.DerivativeForm.id == derivative_form_id)
-            .first()
-        )
-
-        if not derivative_form:
-            logger.warning(f"Derivative form with ID {derivative_form_id} not found")
-            return False
-
-        # Get the word token and lemma
-        word_token = derivative_form.word_token
-        lemma = derivative_form.lemma
-
-        # Query for definitions (which includes all translations)
-        definitions_list, success = self.query_definitions(word_token.token)
-
-        if not success or not definitions_list:
-            logger.warning(
-                f"Failed to get definitions and translations for '{word_token.token}' (derivative form ID: {derivative_form.id})"
-            )
-            return False
-
-        # Find the matching definition and extract the requested translation
-        translation = None
-        language_key = f"{language.lower()}_translation"
-
-        for def_data in definitions_list:
-            # If we find a matching definition, use its translation
-            if (
-                def_data.get("definition", "").lower().strip()
-                == lemma.definition_text.lower().strip()
-            ):
-                translation = def_data.get(language_key)
-                break
-
-        # If no exact match, use the first available translation
-        if not translation and definitions_list:
-            translation = definitions_list[0].get(language_key)
-
-        if translation:
-            # Update the derivative form with the translation
-            # TODO: Implement direct translation update on derivative form
-            logger.info(
-                f"Added {language} translation '{translation}' for '{word_token.token}' (derivative form ID: {derivative_form.id})"
-            )
-            return True
-        else:
-            logger.warning(
-                f"No {language} translation found for '{word_token.token}' (derivative form ID: {derivative_form.id})"
-            )
-            return False
-
-    # Deprecated methods - retained for backwards compatibility
-    def query_word_forms(self, lemma: str, pos_type: str) -> Tuple[List[Dict[str, Any]], bool]:
-        """
-        Query LLM for all forms of a lemma based on its part of speech.
-
-        DEPRECATED: This method is retained for backwards compatibility but should not be used.
-        """
-        logger.warning("query_word_forms is deprecated and should not be used")
-        return [], False
-
-    @classmethod
-    def close_all(cls) -> None:
-        """
-        Close this thread's resources at shutdown.
-
-        Thread-local state is only reachable from its own thread, so this
-        releases the calling thread's session and no other.  Worker threads
-        must release their own before exiting -- see ``close_thread_session``.
-        """
-        cls.close_thread_session()
-        logger.info("Closed this thread's database session")

@@ -84,7 +84,7 @@ Barsukas integrity page.  vieversys is the production audio path.
   kept).
 - bebras sentence mode (`--sentence`/`--file`) predates the `sentences/`
   pipeline (genys, zvirblis decomposition) and duplicates it; only
-  `wordfreq/tools/sentence_word_linker.py` still imports it.
+  `sentences/sentence_word_linker.py` still imports it.
 - ungurys, elnias, gyvate, veidrodis, buivolas, sarka and zvirblis are
   compatibility wrappers (gyvate and veidrodis are imported only by
   `tests/test_exports_compatibility.py`).  New code should import from `exports/` and

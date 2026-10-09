@@ -35,7 +35,7 @@ from storage.translation_helpers import (
     get_translation_pronunciations,
     set_translation_pronunciations,
 )
-from wordfreq.tools.llm_validators import generate_pronunciation
+from words.llm_validators import generate_pronunciation
 
 logger = logging.getLogger(__name__)
 

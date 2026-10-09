@@ -54,7 +54,7 @@ def derivable_form_keys(session: Session, lemma: Any, language_code: str) -> Set
     # Imported lazily: generate_mechanical_forms pulls in every langtools
     # builder, which is far too much to load for an export that may write no
     # forms at all.
-    from wordfreq.tools.generate_mechanical_forms import (
+    from words.mechanical_forms import (
         SUPPORTED,
         build_for_lemma,
         resolve_grammatical_form,

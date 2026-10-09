@@ -33,7 +33,7 @@ from storage.release.mechanical_filter import (
     without_derivable,
 )
 from storage.release.variant import release_variants_by_language
-from wordfreq.tools.generate_mechanical_forms import derivable_variant_slots
+from words.mechanical_forms import derivable_variant_slots
 
 
 def _form(

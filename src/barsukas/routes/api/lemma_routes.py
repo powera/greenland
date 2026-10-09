@@ -670,7 +670,7 @@ def check_translations_by_guid(guid: str) -> ResponseReturnValue:
         return error
     from storage.backend.config import BackendType, DataSourceConfig
     from storage.translation_helpers import LANGUAGE_FIELDS
-    from wordfreq.tools.llm_validators import validate_all_translations_for_word
+    from words.llm_validators import validate_all_translations_for_word
     from words.translation_workflow import TranslationWorkflow
 
     lemma = get_lemma_by_guid(g.db, guid)
@@ -711,7 +711,7 @@ def check_pronunciations_by_guid(guid: str) -> ResponseReturnValue:
     model, error = _require_model()
     if error is not None:
         return error
-    from wordfreq.tools.llm_validators import validate_pronunciation
+    from words.llm_validators import validate_pronunciation
 
     lemma = get_lemma_by_guid(g.db, guid)
     if lemma is None:

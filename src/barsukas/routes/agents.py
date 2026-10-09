@@ -57,7 +57,7 @@ def check_translations(lemma_id: int) -> ResponseReturnValue:
             return redirect(url_for("lemmas.view_lemma", lemma_id=lemma_id))
 
         # Use the LLM validator to check all translations at once
-        from wordfreq.tools.llm_validators import validate_all_translations_for_word
+        from words.llm_validators import validate_all_translations_for_word
 
         validation_results = validate_all_translations_for_word(
             lemma.lemma_text, translations, lemma.pos_type, workflow.config.model
@@ -165,7 +165,7 @@ def check_pronunciations(lemma_id: int) -> ResponseReturnValue:
 
         # Check pronunciations (using dry_run=False to actually validate)
         from storage.models.schema import Sentence, SentenceTranslation, SentenceWord
-        from wordfreq.tools.llm_validators import validate_pronunciation
+        from words.llm_validators import validate_pronunciation
 
         issues = []
         for form in forms_with_pronunciations:
@@ -942,7 +942,7 @@ def check_translation_disambiguation(lemma_id: int, lang_code: str) -> ResponseR
 
     # Call LLM
     try:
-        from wordfreq.tools.llm_validators import suggest_translation_disambiguation
+        from words.llm_validators import suggest_translation_disambiguation
 
         llm_result = suggest_translation_disambiguation(
             translation_word=translation_word,

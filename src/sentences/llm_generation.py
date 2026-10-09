@@ -16,7 +16,7 @@ from storage.database import (
     calculate_minimum_level,
 )
 from storage.models.schema import SentenceWordHint
-from wordfreq.tools.sentence_word_linker import find_lemma_by_text
+from sentences.sentence_word_linker import find_lemma_by_text
 from sentences.pattern_generation import strip_disambiguation
 
 logger = logging.getLogger(__name__)
@@ -25,7 +25,7 @@ logger = logging.getLogger(__name__)
 class LlmSentenceGenerator:
     """Generate sentences using an LLM and store structured word data."""
 
-    def __init__(self, config: DataSourceConfig, dry_run: bool = False):
+    def __init__(self, config: DataSourceConfig, dry_run: bool = False) -> None:
         self.config = config
         self.debug = config.debug
         self.dry_run = dry_run
@@ -368,6 +368,6 @@ class LlmSentenceGenerator:
     ) -> Optional[Lemma]:
         """Find a lemma matching the given word text and part of speech.
 
-        Delegates to wordfreq.tools.sentence_word_linker.find_lemma_by_text().
+        Delegates to sentences.sentence_word_linker.find_lemma_by_text().
         """
         return find_lemma_by_text(session, word_text, part_of_speech, source_lemma=source_lemma)

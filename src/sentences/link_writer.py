@@ -1,6 +1,6 @@
 """Persist the results of sentence word-to-lemma resolution.
 
-``wordfreq.tools.sentence_word_linker.resolve_lemmas_for_sentence`` decides
+``sentences.sentence_word_linker.resolve_lemmas_for_sentence`` decides
 which lemma each word slot refers to, using a cascade of six strategies. It is a
 pure function: it returns its verdicts and writes nothing. This module is the
 writer half.
@@ -40,7 +40,7 @@ from sqlalchemy.orm import Session
 from storage.crud.operation_log import SENTENCE_LINK, log_entity_operation
 from storage.models.schema import Lemma, Sentence, SentenceWord, SentenceWordHint
 from words.pending_imports.sentence_links import release_legacy_hints
-from wordfreq.tools.sentence_word_linker import ResolvedLemma, resolve_lemmas_for_sentence
+from sentences.sentence_word_linker import ResolvedLemma, resolve_lemmas_for_sentence
 
 logger = logging.getLogger(__name__)
 

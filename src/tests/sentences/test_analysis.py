@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
-Tests for wordfreq.tools.sentence_analysis module.
+Tests for sentences.analysis module.
 
 Tests the sentence analysis utilities for finding lemma associations.
 Uses in-memory SQLite for realistic query testing.

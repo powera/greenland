@@ -2,7 +2,7 @@
 
 """Runner for validate_lemma_form agent benchmark.
 
-Calls validate_lemma_form() from wordfreq/tools/llm_validators.py directly
+Calls validate_lemma_form() from words/llm_validators.py directly
 with the model under test, then scores the result against the expected
 is_lemma boolean from the sample. No DB access is required.
 """
@@ -14,7 +14,7 @@ from typing import Any, Dict, Optional, Tuple
 
 from benchmarks.lib.utils.base_runner import BenchmarkRunner
 from benchmarks.lib.utils.data_models import BenchmarkMetadata, BenchmarkResult
-from wordfreq.tools.llm_validators import validate_lemma_form
+from words.llm_validators import validate_lemma_form
 
 logging.basicConfig(
     level=logging.INFO, format="%(asctime)s - %(filename)s:%(lineno)d - %(levelname)s - %(message)s"

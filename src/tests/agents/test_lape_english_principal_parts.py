@@ -21,7 +21,7 @@ from words.grammar_fact_tasks.english_principal_parts import (
     generate_and_store_english_principal_parts,
     generate_english_principal_parts,
 )
-from wordfreq.tools.generate_mechanical_forms import build_for_lemma
+from words.mechanical_forms import build_for_lemma
 
 
 class FakeResponse:

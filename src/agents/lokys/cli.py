@@ -31,7 +31,7 @@ from agents.lokys.display import (
     display_lemma_validation_result,
     display_single_lemma_header,
 )
-from wordfreq.tools.llm_validators import validate_definition, validate_lemma_form
+from words.llm_validators import validate_definition, validate_lemma_form
 
 # Configure logging
 logger = logging.getLogger(__name__)
