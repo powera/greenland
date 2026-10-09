@@ -49,7 +49,7 @@ def test_rerun_preserves_existing_senses_and_separates_language() -> None:
                 [
                     sense
                     for sense in GEOGRAPHY_SENSES
-                    if sense.pos_subtype == "communication_information" and sense.base_level == 231
+                    if sense.pos_subtype == "communication_information" and sense.base_level == 233
                 ]
             )
             == 22
@@ -106,7 +106,8 @@ def test_optional_base_normalization_is_logged_and_rollback_safe() -> None:
         module = migration_module()
         updates = module.normalize_base_levels(session)
         assert len(updates) == 2
-        assert language.difficulty_level == country.difficulty_level == 231
+        assert language.difficulty_level == 233
+        assert country.difficulty_level == 231
         assert generic.difficulty_level == 360
         assert session.query(LemmaDifficultyOverride).one().difficulty_level == 18
         assert session.query(OperationLog).filter_by(source=module.SOURCE).count() == 2
@@ -134,7 +135,7 @@ def test_level_names_preserve_human_edits_and_rollback() -> None:
         )
         session.commit()
         module = migration_module()
-        assert module.ensure_level_names(session) == 1
+        assert module.ensure_level_names(session) == 3
         existing = get_curriculum_level(session, 231)
         assert existing is not None
         assert existing.name == "Human title"

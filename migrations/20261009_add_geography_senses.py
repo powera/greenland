@@ -84,7 +84,9 @@ def ensure_level_names(session: Session) -> int:
     """Fill missing names while preserving all existing metadata and translations."""
     updated = 0
     for level, default_name in (
-        (231, "Countries, Nationalities and Languages"),
+        (231, "Countries"),
+        (232, "Nationalities and Ethnicities"),
+        (233, "Languages"),
         (1031, "Extended Countries, Languages and Ethnicities"),
     ):
         existing = get_curriculum_level(session, level)
