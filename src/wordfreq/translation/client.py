@@ -15,7 +15,6 @@ from storage.backend import create_session
 # Import specialized modules
 from wordfreq.translation import (
     definitions,
-    pos_subtype,
     translations,
     word_processing,
 )
@@ -224,25 +223,6 @@ class LinguisticClient:
         return word_processing.process_words_batch(
             self.client, word_list, self.get_session, refresh, throttle
         )
-
-    # POS subtype queries
-    def query_pos_subtype(self, word: str, definition_text: str, pos_type: str) -> Tuple[str, bool]:
-        """Query LLM for POS subtype for a definition."""
-        return pos_subtype.query_pos_subtype(
-            self.client, word, definition_text, pos_type, self.get_session
-        )
-
-    def update_missing_subtypes_for_word(
-        self, word_text: str, throttle: float = 1.0
-    ) -> Dict[str, Any]:
-        """Add missing POS subtypes for all definitions of a word."""
-        return pos_subtype.update_missing_subtypes_for_word(
-            self.client, word_text, self.get_session, throttle
-        )
-
-    def update_subtypes_for_batch(self, limit: int = 100, throttle: float = 1.0) -> Dict[str, Any]:
-        """Add missing POS subtypes for a batch of definitions."""
-        return pos_subtype.update_subtypes_for_batch(self.client, self.get_session, limit, throttle)
 
     # Legacy methods for compatibility
     def get_word_token_info(self, token_text: str) -> Dict[str, Any]:
