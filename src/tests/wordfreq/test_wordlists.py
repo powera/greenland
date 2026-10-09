@@ -23,18 +23,18 @@ from wordfreq.frequency.wordlists import (
 CORPORA = ["cooking", "19th_books", "wiki_linguistics"]
 
 DOMAIN_IMPORT_MODULES: Sequence[str] = (
-    "scripts.import_wiki_arts_level_330",
-    "scripts.import_wiki_biology_level_340",
-    "scripts.import_wiki_geography_level_350",
-    "scripts.import_wiki_history_level_360",
-    "scripts.import_wiki_modern_life_level_370",
-    "scripts.import_wiki_physical_science_level_380",
-    "scripts.import_wiki_society_level_390",
-    "scripts.import_legal_scotus_level_400",
-    "scripts.import_cooking_exclusive_level_410",
-    "scripts.import_wiki_math_exclusive_level_420",
-    "scripts.import_linguistics_basic_level_460",
-    "scripts.import_hyphenated_level_430",
+    "scripts.wordlists.import_wiki_arts_level_330",
+    "scripts.wordlists.import_wiki_biology_level_340",
+    "scripts.wordlists.import_wiki_geography_level_350",
+    "scripts.wordlists.import_wiki_history_level_360",
+    "scripts.wordlists.import_wiki_modern_life_level_370",
+    "scripts.wordlists.import_wiki_physical_science_level_380",
+    "scripts.wordlists.import_wiki_society_level_390",
+    "scripts.wordlists.import_legal_scotus_level_400",
+    "scripts.wordlists.import_cooking_exclusive_level_410",
+    "scripts.wordlists.import_wiki_math_exclusive_level_420",
+    "scripts.wordlists.import_linguistics_basic_level_460",
+    "scripts.wordlists.import_hyphenated_level_430",
 )
 
 
@@ -298,7 +298,7 @@ def test_domain_imports_have_reviewed_general_samples_and_topic_remainders() -> 
 
 
 def test_arts_import_exposes_two_explicit_wordlists() -> None:
-    arts_import = importlib.import_module("scripts.import_wiki_arts_level_330")
+    arts_import = importlib.import_module("scripts.wordlists.import_wiki_arts_level_330")
 
     assert len(arts_import.GENERAL_WORDS) == 40
     assert len(arts_import.TOPIC_WORDS) == 40

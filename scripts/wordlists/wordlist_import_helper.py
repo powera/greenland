@@ -1,0 +1,815 @@
+#!/usr/bin/env python3
+"""Shared driver for the corpus-derived wordlist import scripts.
+
+Each ``import_*_level_*.py`` script contains one or two difficulty bands, a
+curated wordlist, and a docstring recording where the list came from. Everything else -- the
+argument parsing, the existence preflight, the pending-queue check, the
+per-word add loop, the summary -- was identical in all of them, copied twenty
+times, so a fix to any of it had to be made twenty times or not at all.  It
+lives here instead, and a script is now its provenance note plus a call to
+:func:`run_import`.
+
+The API facade this drives is the public ``ROOT/api`` one.  In particular
+``api.lemmas.add_word`` runs Barsukas' intelligent word workflow: the server's
+LLM identifies the senses and supplies their translations, then the server
+selects and stores the useful ones.  A bare wordlist supplies no definition or
+translation of its own.
+
+:func:`run_term_import` is the second entry point, for lists the first one
+cannot carry.  A borrowed term -- "ex post facto", "voir dire" -- has no native
+English headword for sense discovery to find, so ``add_word`` invents one.
+Those lists are :class:`TermEntry` rows carrying the POS, subtype and
+definition, and go to ``api.lemmas.add_term``, where the server's LLM supplies
+the translations only.
+
+:func:`run_mixed_import` is for the common case where one level needs both:
+a domain wordlist that is mostly ordinary English plus the few borrowings in
+it that sense discovery would mistranslate.
+
+:func:`run_sense_import` is for a field's vocabulary -- a sport, a game --
+where the words are ordinary English but the meanings are the field's: "check"
+in chess, "single" in baseball.  Both paths above stop at a headword that
+already exists, so these go to ``api.lemmas.add_sense``, whose LLM call
+describes the field's sense and decides whether an existing one already is it.
+
+Without ``--execute`` the run prints its plan and makes no HTTP requests at
+all, which is the state every one of these scripts is committed in.
+"""
+
+from __future__ import annotations
+
+import argparse
+import sys
+from pathlib import Path
+from typing import Any, List, Mapping, NamedTuple, Sequence, Set
+
+import requests
+
+ROOT = Path(__file__).resolve().parent.parent.parent
+if str(ROOT) not in sys.path:
+    sys.path.insert(0, str(ROOT))
+
+from api import BarsukasAPIError
+from api.batch_operations import pending_import_words
+from api.constants import BASE_URL
+from api.lemmas import add_sense, add_term, add_word, words_exist
+
+DEFAULT_MODEL = "gpt-6-luna"
+
+# ``POST /v1/words/exists`` caps a single request's word list, so a survey of a
+# hundred-word list has to be split.  25 is well inside that cap and keeps one
+# request small enough to stay readable in a log.  The scripts used to carry
+# their own chunking loop -- eleven of them with a hardcoded 140, the other ten
+# with none at all, which left those a few added words away from a 400.
+EXISTS_BATCH_SIZE = 25
+
+
+def _response_data(response: Mapping[str, Any], *, operation: str) -> Any:
+    if "data" not in response:
+        raise RuntimeError(f"{operation} returned no data: {response!r}")
+    return response["data"]
+
+
+def _created_guids(response: Mapping[str, Any], *, word: str) -> List[str]:
+    """The GUIDs ``add_word`` minted, or an empty list if it minted none."""
+    response_data = _response_data(response, operation=f"adding {word!r}")
+    if not isinstance(response_data, dict):
+        raise RuntimeError(f"Adding {word!r} returned invalid data: {response_data!r}")
+
+    raw_senses = response_data.get("senses", [])
+    if not isinstance(raw_senses, list):
+        raise RuntimeError(f"Adding {word!r} returned invalid senses: {raw_senses!r}")
+
+    created_guids: List[str] = []
+    for raw_sense in raw_senses:
+        if not isinstance(raw_sense, dict):
+            raise RuntimeError(f"Adding {word!r} returned an invalid sense: {raw_sense!r}")
+        guid = raw_sense.get("guid")
+        if isinstance(guid, str) and guid:
+            created_guids.append(guid)
+    return created_guids
+
+
+def _normalized(word: str) -> str:
+    """``word`` as ``words_exist`` and the pending queue key it: stripped, lowercase."""
+    return word.strip().lower()
+
+
+def check_words_exist(words: Sequence[str]) -> dict[str, bool]:
+    """Which of ``words`` the database already accounts for.
+
+    Batches to :data:`EXISTS_BATCH_SIZE` and merges the results, because the
+    endpoint caps one request's list and these wordlists run past it.
+
+    Args:
+        words: The words to survey.
+
+    Returns:
+        Each word, normalized by :func:`_normalized` as the endpoint reports it,
+        mapped to whether the database accounts for it -- as a lemma, a
+        disambiguated lemma, an English derivative form or an alternate
+        spelling.  Look a word up by its normalized form: "Lipitor" is
+        reported as "lipitor".
+    """
+    existence_data: dict[str, bool] = {}
+    for start in range(0, len(words), EXISTS_BATCH_SIZE):
+        batch = list(words[start : start + EXISTS_BATCH_SIZE])
+        response = words_exist(batch, include_exclusions=True)
+        batch_data = _response_data(response, operation="checking existing words")
+        if not isinstance(batch_data, dict):
+            raise RuntimeError(f"Existence check returned invalid data: {batch_data!r}")
+        existence_data.update(batch_data)
+    return existence_data
+
+
+def pending_queue_words() -> Set[str]:
+    """Every ``english_word`` currently sitting in the pending-import queue.
+
+    ``words_exist`` deliberately does not consult this queue -- it reports what
+    the database *accounts for* (lemma, disambiguated lemma, English derivative
+    form, alternate spelling), and a pending row is none of those.  But a word
+    whose senses were all diverted to review would otherwise be re-sent to the
+    LLM on the next run and paid for again, only for the server to drop the
+    result as a duplicate.  Filter it out here instead.
+
+    This asks ``/api/words``, which returns both the word each row is filed
+    under and the word it was queried with.  The two differ whenever the
+    staging LLM answered with another headword -- "bona fide" is filed as "in
+    good faith" -- and skipping on the filed word alone would re-send the term
+    that was actually asked about, paying for it again on every run.
+    """
+    response = pending_import_words(target_kind="lemma")
+    data = _response_data(response, operation="listing pending import words")
+    if not isinstance(data, Mapping):
+        raise RuntimeError(f"Pending-import word listing returned invalid data: {data!r}")
+
+    words = data.get("words")
+    if not isinstance(words, list):
+        raise RuntimeError(f"Pending-import word listing returned invalid words: {words!r}")
+
+    return {word.strip().lower() for word in words if isinstance(word, str) and word.strip()}
+
+
+def parse_args(description: str) -> argparse.Namespace:
+    """The argument parser every one of these scripts shares."""
+    parser = argparse.ArgumentParser(description=description)
+    parser.add_argument(
+        "--model",
+        default=DEFAULT_MODEL,
+        help=f"Barsukas LLM model (default: {DEFAULT_MODEL})",
+    )
+    parser.add_argument(
+        "--execute",
+        action="store_true",
+        help="Make the live, paid API calls. Without this flag, only print the plan.",
+    )
+    parser.add_argument(
+        "--limit",
+        type=int,
+        help="Import at most this many currently unlinked words.",
+    )
+    return parser.parse_args()
+
+
+def print_plan(words: Sequence[str], level: int) -> None:
+    print(f"Barsukas: {BASE_URL}")
+    print(f"Target level: {level}")
+    print(f"Curated words: {len(words)}")
+    for rank, word in enumerate(words, start=1):
+        print(f"{rank:3}. {word}")
+
+
+def execute_assignments(
+    assignments: Sequence[tuple[str, int]],
+    model: str,
+    limit: int | None,
+    queued: Set[str] | None = None,
+) -> None:
+    """Import ranked ``(word, level)`` assignments, skipping known words.
+
+    ``queued`` is the pending-import survey, passed in when a caller has
+    already made it so one run does not repeat the request.
+    """
+    if limit is not None and limit < 1:
+        raise RuntimeError("--limit must be at least 1")
+
+    words = [word for word, _level in assignments]
+    level_by_word = {word: level for word, level in assignments}
+    if len(level_by_word) != len(words):
+        raise RuntimeError("A wordlist import assigns the same word more than once")
+    existence_data = check_words_exist(words)
+    if queued is None:
+        queued = pending_queue_words()
+
+    unaccounted_words = [
+        word for word in words if not bool(existence_data.get(_normalized(word), False))
+    ]
+    queued_words = [word for word in unaccounted_words if _normalized(word) in queued]
+    all_missing_words = [word for word in unaccounted_words if _normalized(word) not in queued]
+    words_to_add = all_missing_words[:limit] if limit is not None else all_missing_words
+    existing_count = len(words) - len(unaccounted_words)
+    print(
+        f"Preflight: {existing_count} already accounted for; "
+        f"{len(queued_words)} awaiting review in the pending queue; "
+        f"{len(all_missing_words)} missing; {len(words_to_add)} selected for this run."
+    )
+    if queued_words:
+        print(f"  Skipping queued: {', '.join(queued_words)}")
+
+    created_word_count = 0
+    created_sense_count = 0
+    pending_word_count = 0
+    skipped_word_count = existing_count + len(queued_words)
+
+    for position, word in enumerate(words_to_add, start=1):
+        level = level_by_word[word]
+        print(f"[{position}/{len(words_to_add)}] {word}: importing senses...", flush=True)
+        # The level goes in with the word rather than in a PATCH afterwards. A
+        # separate patch can fail once the lemma is already committed, and the
+        # stranded lemma is then invisible to a re-run: words_exist counts it as
+        # accounted for, so nothing ever sets its level.
+        addition_response = add_word(word, model, difficulty_level=level)
+        addition_data = _response_data(addition_response, operation=f"adding {word!r}")
+        if not isinstance(addition_data, dict):
+            raise RuntimeError(f"Adding {word!r} returned invalid data: {addition_data!r}")
+
+        status = str(addition_data.get("status", "unknown"))
+        created_guids = _created_guids(addition_response, word=word)
+
+        pending_senses = addition_data.get("pending_senses", [])
+        pending_count = len(pending_senses) if isinstance(pending_senses, list) else 0
+        if created_guids:
+            created_word_count += 1
+            created_sense_count += len(created_guids)
+        elif status == "pending_review":
+            pending_word_count += 1
+        else:
+            skipped_word_count += 1
+
+        print(
+            f"  {status}: {len(created_guids)} sense(s) at level {level}, "
+            f"{pending_count} pending review"
+        )
+
+    print(
+        "Complete: "
+        f"{created_word_count} word(s) / {created_sense_count} sense(s) created, "
+        f"{pending_word_count} word(s) pending review, "
+        f"{skipped_word_count} word(s) skipped."
+    )
+
+
+def execute(
+    words: Sequence[str],
+    level: int,
+    model: str,
+    limit: int | None,
+    queued: Set[str] | None = None,
+) -> None:
+    """Import ``words`` at one ``level``, skipping what is already accounted for."""
+    execute_assignments([(word, level) for word in words], model, limit, queued=queued)
+
+
+class TermEntry(NamedTuple):
+    """One fully specified term for :func:`run_term_import`.
+
+    Unlike a bare wordlist entry, a term carries the facts the sense-discovery
+    pipeline would otherwise have to guess and would get wrong for a borrowing:
+    which part of speech it is and what it means. ``pos_subtype`` may be a
+    catch-all ``*_other`` -- for a Latin legal term that is usually the honest
+    answer, and the terms endpoint honors it rather than queueing it.
+    """
+
+    term: str
+    pos_type: str
+    pos_subtype: str
+    definition: str
+
+
+def print_term_plan(terms: Sequence[TermEntry], level: int) -> None:
+    print(f"Barsukas: {BASE_URL}")
+    print(f"Target level: {level}")
+    print(f"Curated terms: {len(terms)}")
+    for rank, entry in enumerate(terms, start=1):
+        print(f"{rank:3}. {entry.term}  [{entry.pos_type}/{entry.pos_subtype}]")
+        print(f"       {entry.definition}")
+
+
+def execute_terms(
+    terms: Sequence[TermEntry],
+    level: int,
+    model: str,
+    limit: int | None,
+    tags: Sequence[str] | None = None,
+    queued: Set[str] | None = None,
+) -> None:
+    """Import fully specified ``terms`` at one ``level``.
+
+    Shares the preflight with :func:`execute_assignments` -- the same existence
+    check and pending-queue skip -- but calls ``add_term`` per entry, so the
+    server generates translations only and never runs sense discovery.
+    """
+    if limit is not None and limit < 1:
+        raise RuntimeError("--limit must be at least 1")
+
+    term_texts = [entry.term for entry in terms]
+    if len(set(term_texts)) != len(term_texts):
+        raise RuntimeError("A term import lists the same term more than once")
+
+    existence_data = check_words_exist(term_texts)
+    if queued is None:
+        queued = pending_queue_words()
+
+    unaccounted = [
+        entry for entry in terms if not bool(existence_data.get(_normalized(entry.term), False))
+    ]
+    queued_entries = [entry for entry in unaccounted if _normalized(entry.term) in queued]
+    missing = [entry for entry in unaccounted if _normalized(entry.term) not in queued]
+    to_add = missing[:limit] if limit is not None else missing
+    existing_count = len(terms) - len(unaccounted)
+
+    print(
+        f"Preflight: {existing_count} already accounted for; "
+        f"{len(queued_entries)} awaiting review in the pending queue; "
+        f"{len(missing)} missing; {len(to_add)} selected for this run."
+    )
+    if queued_entries:
+        print(f"  Skipping queued: {', '.join(entry.term for entry in queued_entries)}")
+
+    created_count = 0
+    skipped_count = existing_count + len(queued_entries)
+    incomplete: List[str] = []
+
+    for position, entry in enumerate(to_add, start=1):
+        print(f"[{position}/{len(to_add)}] {entry.term}: translating...", flush=True)
+        response = add_term(
+            entry.term,
+            model,
+            pos_type=entry.pos_type,
+            pos_subtype=entry.pos_subtype,
+            definition=entry.definition,
+            difficulty_level=level,
+            tags=list(tags) if tags else None,
+        )
+        data = _response_data(response, operation=f"adding {entry.term!r}")
+        if not isinstance(data, dict):
+            raise RuntimeError(f"Adding {entry.term!r} returned invalid data: {data!r}")
+
+        status = str(data.get("status", "unknown"))
+        guid = data.get("guid")
+        missing_languages = data.get("missing_languages") or []
+
+        if status == "created":
+            created_count += 1
+        else:
+            skipped_count += 1
+
+        # A term nobody could translate is still worth having -- these are
+        # wanted for tokenizing first -- but it is worth naming at the end
+        # rather than leaving in the scrollback.
+        if missing_languages:
+            incomplete.append(f"{entry.term} (no {', '.join(missing_languages)})")
+
+        print(f"  {status}: {guid or '-'}")
+
+    print(f"Complete: {created_count} term(s) created, {skipped_count} skipped.")
+    if incomplete:
+        print(f"Incomplete translations ({len(incomplete)}):")
+        for note in incomplete:
+            print(f"  {note}")
+
+
+def run_term_import(
+    terms: Sequence[TermEntry],
+    level: int,
+    description: str,
+    tags: Sequence[str] | None = None,
+) -> int:
+    """Entry point for a fully specified term import script.
+
+    The counterpart to :func:`run_import` for terms the sense-discovery
+    pipeline cannot handle. Same two-step contract: without ``--execute`` it
+    prints the plan and makes no HTTP request.
+    """
+    args = parse_args(description)
+    print_term_plan(terms, level)
+    if not args.execute:
+        print("\nNo API calls made. Re-run with --execute only after approval.")
+        return 0
+
+    print(f"\nLIVE MODE: Barsukas will use {args.model!r} for paid translation calls.")
+    try:
+        execute_terms(terms, level, args.model, args.limit, tags=tags)
+    except (BarsukasAPIError, RuntimeError, requests.exceptions.RequestException) as error:
+        print(f"Import stopped: {error}", file=sys.stderr)
+        return 1
+    return 0
+
+
+def run_import(words: Sequence[str], level: int, description: str) -> int:
+    """Entry point for a wordlist import script.
+
+    Args:
+        words: The curated wordlist, in the order it should be imported.
+        level: The difficulty level to stamp on every sense created.
+        description: The calling script's docstring, used as ``--help`` text.
+
+    Returns:
+        A process exit status: 0 on success, 1 if the import stopped early.
+    """
+    args = parse_args(description)
+    print_plan(words, level)
+    if not args.execute:
+        print("\nNo API calls made. Re-run with --execute only after approval.")
+        return 0
+
+    print(f"\nLIVE MODE: Barsukas will use {args.model!r} for paid sense/translation calls.")
+    try:
+        execute(words, level, args.model, args.limit)
+    except (BarsukasAPIError, RuntimeError, requests.exceptions.RequestException) as error:
+        print(f"Import stopped: {error}", file=sys.stderr)
+        return 1
+    return 0
+
+
+def run_mixed_import(
+    words: Sequence[str],
+    terms: Sequence[TermEntry],
+    level: int,
+    description: str,
+    tags: Sequence[str] | None = None,
+) -> int:
+    """Import one level's wordlist and its term list in a single run.
+
+    Most curated lists need both paths.  A domain list is mostly ordinary
+    English that sense discovery handles well, but carries a handful of
+    borrowings -- "dharma", "abjad" -- that it cannot: asked what "halal"
+    means, the model finds "permissible" and translates that instead, and the
+    entry lands in the pending queue under a word nobody looked up.  Splitting
+    those into a second file would separate them from the provenance note that
+    explains where the whole list came from, so a script passes both shapes
+    here: bare strings for ``add_word``, :class:`TermEntry` rows for
+    ``add_term``.
+
+    ``tags`` applies to the terms only, matching :func:`run_term_import`.
+    """
+    term_texts = [entry.term for entry in terms]
+    collisions = set(words) & set(term_texts)
+    if collisions:
+        raise ValueError(f"A word is listed both as a word and as a term: {sorted(collisions)!r}")
+
+    args = parse_args(description)
+    print("Sense-discovery wordlist:")
+    print_plan(words, level)
+    if terms:
+        print("\nFully specified terms:")
+        print_term_plan(terms, level)
+    if not args.execute:
+        print("\nNo API calls made. Re-run with --execute only after approval.")
+        return 0
+
+    print(f"\nLIVE MODE: Barsukas will use {args.model!r} for paid calls.")
+    try:
+        # Surveyed once and handed to both halves: the queue is one request now,
+        # but it is still a request, and nothing between the two calls changes it.
+        queued = pending_queue_words()
+        if words:
+            execute([*words], level, args.model, args.limit, queued=queued)
+        if terms:
+            execute_terms(terms, level, args.model, args.limit, tags=tags, queued=queued)
+    except (BarsukasAPIError, RuntimeError, requests.exceptions.RequestException) as error:
+        print(f"Import stopped: {error}", file=sys.stderr)
+        return 1
+    return 0
+
+
+def run_leveled_import(
+    word_groups: Sequence[tuple[int, Sequence[str]]],
+    term_groups: Sequence[tuple[int, Sequence[TermEntry]]],
+    description: str,
+    tags: Sequence[str] | None = None,
+) -> int:
+    """Import several wordlists and term lists, each at its own level.
+
+    :func:`run_mixed_import` for a topic split across levels -- essential
+    medicines at one, brand names at another -- whose provenance note is
+    shared.  Each group is ``(level, entries)``.  ``--limit`` applies to the
+    words and to each term group separately, as it does in the mixed import.
+
+    ``tags`` applies to the terms only, matching :func:`run_term_import`.
+    """
+    words = [word for _level, group in word_groups for word in group]
+    term_texts = [entry.term for _level, group in term_groups for entry in group]
+    collisions = {_normalized(word) for word in words} & {_normalized(t) for t in term_texts}
+    if collisions:
+        raise ValueError(f"A word is listed both as a word and as a term: {sorted(collisions)!r}")
+    if len({_normalized(term) for term in term_texts}) != len(term_texts):
+        raise ValueError("A term is listed more than once")
+
+    args = parse_args(description)
+    for level, group in word_groups:
+        print("Sense-discovery wordlist:")
+        print_plan(group, level)
+        print()
+    for level, term_group in term_groups:
+        print("Fully specified terms:")
+        print_term_plan(term_group, level)
+        print()
+    if not args.execute:
+        print("No API calls made. Re-run with --execute only after approval.")
+        return 0
+
+    print(f"LIVE MODE: Barsukas will use {args.model!r} for paid calls.")
+    assignments = [(word, level) for level, group in word_groups for word in group]
+    try:
+        queued = pending_queue_words()
+        if assignments:
+            execute_assignments(assignments, args.model, args.limit, queued=queued)
+        for level, term_group in term_groups:
+            execute_terms(term_group, level, args.model, args.limit, tags=tags, queued=queued)
+    except (BarsukasAPIError, RuntimeError, requests.exceptions.RequestException) as error:
+        print(f"Import stopped: {error}", file=sys.stderr)
+        return 1
+    return 0
+
+
+class SenseEntry(NamedTuple):
+    """One domain sense for :func:`run_sense_import`: a word as a term of a field.
+
+    The field comes from the :class:`SenseList` the entry sits in; the entry
+    carries only what differs word to word.
+
+    ``hint`` is a short gloss for a word that is ambiguous even within the
+    field ("single" in baseball).  ``disambiguation`` overrides the list's
+    label -- "pitch (sports field)" rather than "pitch (football)" -- and
+    ``unique`` stores no label at all, for a headword with no other meaning in
+    English ("checkmate").  ``abbreviation`` ("LBW") is recorded as a variant of
+    the sense.  ``move`` says that if the database already has this sense at
+    another level, it moves here rather than only being tagged.
+
+    ``pos`` fixes the part of speech ("verb") and leaves the subtype to the
+    model.  It is what lets one headword appear twice -- "dunk" as the noun and
+    as the verb -- since the server then matches existing senses of that part
+    of speech only.
+    """
+
+    term: str
+    hint: str | None = None
+    disambiguation: str | None = None
+    unique: bool = False
+    abbreviation: str | None = None
+    move: bool = False
+    pos: str | None = None
+
+
+class SenseList(NamedTuple):
+    """One field's vocabulary at one level, for :func:`run_sense_import`."""
+
+    level: int
+    #: The field as the prompt names it: "chess", "American football".
+    domain: str
+    #: The disambiguation stored on a new lemma unless an entry says otherwise.
+    label: str
+    #: Tags for every sense the list creates or matches -- the theme and the field.
+    tags: Sequence[str]
+    entries: Sequence[SenseEntry]
+    #: The subtype every new lemma is stored under, for a closed set that must
+    #: share one; None lets the model choose per word.
+    pos_subtype: str | None = None
+
+
+def _entry_label(sense_list: SenseList, entry: SenseEntry) -> str | None:
+    """The disambiguation ``entry`` is stored under."""
+    if entry.unique:
+        if entry.disambiguation is not None:
+            raise ValueError(f"{entry.term!r} is marked unique and also given a label")
+        return None
+    return entry.disambiguation or sense_list.label
+
+
+def _check_sense_lists(sense_lists: Sequence[SenseList]) -> None:
+    """Reject a script that lists one headword twice, unless by part of speech.
+
+    Even under two labels this is refused: the server recognises a sense a
+    previous run created by its tags, and two senses of one headword sharing
+    a list's tags would be indistinguishable on the re-run.  The exception is
+    one entry per part of speech, each with ``pos`` set: the server only
+    matches senses of the given part of speech, so the noun's tags cannot
+    stand in for the verb.  An entry without ``pos`` would match either.
+    """
+    pos_by_term: dict[str, List[str | None]] = {}
+    for sense_list in sense_lists:
+        for entry in sense_list.entries:
+            _entry_label(sense_list, entry)
+            pos_by_term.setdefault(_normalized(entry.term), []).append(entry.pos)
+    for term, listed_pos in pos_by_term.items():
+        if len(listed_pos) == 1:
+            continue
+        if None in listed_pos or len(set(listed_pos)) != len(listed_pos):
+            raise ValueError(f"{term!r} is listed more than once; give each entry a different pos")
+
+
+def print_sense_plan(sense_list: SenseList) -> None:
+    print(f"Target level: {sense_list.level}  Domain: {sense_list.domain}")
+    print(f"Tags: {', '.join(sense_list.tags)}")
+    if sense_list.pos_subtype:
+        print(f"Subtype: {sense_list.pos_subtype}")
+    print(f"Curated senses: {len(sense_list.entries)}")
+    for rank, entry in enumerate(sense_list.entries, start=1):
+        label = _entry_label(sense_list, entry)
+        shown = f"{entry.term} ({label})" if label else entry.term
+        notes = []
+        if entry.pos:
+            notes.append(entry.pos)
+        if entry.abbreviation:
+            notes.append(f"abbr {entry.abbreviation}")
+        if entry.move:
+            notes.append("move if present")
+        suffix = f"  [{'; '.join(notes)}]" if notes else ""
+        print(f"{rank:3}. {shown}{suffix}")
+        if entry.hint:
+            print(f"       {entry.hint}")
+
+
+def execute_senses(sense_list: SenseList, model: str, limit: int | None) -> List[str]:
+    """Add every sense in ``sense_list``, returning the ones that failed.
+
+    There is no preflight: whether a sense is present is the server's question
+    to answer, and it answers it for free when a previous run left its label or
+    tags on the sense.  A failed sense is reported and the run carries on, since
+    a re-run skips everything that succeeded without paying for it again.
+    """
+    if limit is not None and limit < 1:
+        raise RuntimeError("--limit must be at least 1")
+
+    entries = list(sense_list.entries)[:limit] if limit is not None else sense_list.entries
+    counts: dict[str, int] = {}
+    failures: List[str] = []
+    for position, entry in enumerate(entries, start=1):
+        label = _entry_label(sense_list, entry)
+        shown = f"{entry.term} ({label})" if label else entry.term
+        if entry.pos:
+            shown = f"{shown} [{entry.pos}]"
+        print(f"[{position}/{len(entries)}] {shown}: ...", flush=True)
+        try:
+            response = add_sense(
+                entry.term,
+                model,
+                domain=sense_list.domain,
+                disambiguation=label,
+                hint=entry.hint,
+                difficulty_level=sense_list.level,
+                tags=list(sense_list.tags),
+                abbreviation=entry.abbreviation,
+                relevel_existing=entry.move,
+                pos_subtype=sense_list.pos_subtype,
+                pos_type=entry.pos,
+            )
+        except BarsukasAPIError as error:
+            print(f"  failed: {error}")
+            failures.append(f"{shown}: {error}")
+            continue
+
+        data = _response_data(response, operation=f"adding {shown!r}")
+        if not isinstance(data, dict):
+            raise RuntimeError(f"Adding {shown!r} returned invalid data: {data!r}")
+        status = str(data.get("status", "unknown"))
+        counts[status] = counts.get(status, 0) + 1
+        detail = f"{data.get('guid') or '-'} {data.get('pos_type')}/{data.get('pos_subtype')}"
+        print(f"  {status}: {detail}")
+        if status in ("covered", "moved"):
+            print(f"    matched: {data.get('definition_text')}")
+        missing_languages = data.get("missing_languages") or []
+        if missing_languages:
+            print(f"    no translation for: {', '.join(missing_languages)}")
+        low_confidence = data.get("low_confidence") or {}
+        for lang_code, dropped in low_confidence.items():
+            print(
+                f"    dropped {lang_code} {dropped.get('translation')!r}"
+                f" at confidence {dropped.get('confidence')}"
+            )
+
+    summary = ", ".join(f"{count} {status}" for status, count in sorted(counts.items()))
+    print(f"Complete at level {sense_list.level}: {summary or 'nothing to do'}.")
+    return failures
+
+
+def run_sense_import(
+    sense_lists: Sequence[SenseList],
+    description: str,
+    term_groups: Sequence[tuple[int, Sequence[TermEntry]]] = (),
+    term_tags: Sequence[str] | None = None,
+) -> int:
+    """Entry point for a domain-sense import script.
+
+    The counterpart to :func:`run_import` for a field's vocabulary, driving
+    ``api.lemmas.add_sense``.  Same two-step contract: without ``--execute``
+    it prints the plan and makes no HTTP request.
+
+    ``term_groups`` are ``(level, entries)`` of fully specified terms, run
+    after the senses through ``add_term`` -- brand names beside the generics
+    they name, where sense discovery would file the brand under its generic.
+    """
+    _check_sense_lists(sense_lists)
+    sense_terms = {_normalized(entry.term) for sl in sense_lists for entry in sl.entries}
+    term_texts = [entry.term for _level, group in term_groups for entry in group]
+    collisions = sense_terms & {_normalized(term) for term in term_texts}
+    if collisions:
+        raise ValueError(f"Listed both as a sense and as a term: {sorted(collisions)!r}")
+    if len({_normalized(term) for term in term_texts}) != len(term_texts):
+        raise ValueError("A term is listed more than once")
+
+    args = parse_args(description)
+    print(f"Barsukas: {BASE_URL}")
+    for sense_list in sense_lists:
+        print_sense_plan(sense_list)
+        print()
+    for level, term_group in term_groups:
+        print("Fully specified terms:")
+        print_term_plan(term_group, level)
+        print()
+    if not args.execute:
+        print("No API calls made. Re-run with --execute only after approval.")
+        return 0
+
+    print(f"LIVE MODE: Barsukas will use {args.model!r} for paid calls.")
+    failures: List[str] = []
+    try:
+        for sense_list in sense_lists:
+            failures.extend(execute_senses(sense_list, args.model, args.limit))
+        if term_groups:
+            queued = pending_queue_words()
+            for level, term_group in term_groups:
+                execute_terms(
+                    term_group, level, args.model, args.limit, tags=term_tags, queued=queued
+                )
+    except (BarsukasAPIError, RuntimeError, requests.exceptions.RequestException) as error:
+        print(f"Import stopped: {error}", file=sys.stderr)
+        return 1
+    if failures:
+        print(f"Failed ({len(failures)}); re-run to retry only these:", file=sys.stderr)
+        for failure in failures:
+            print(f"  {failure}", file=sys.stderr)
+        return 1
+    return 0
+
+
+def run_domain_import(
+    words: Sequence[str],
+    general_words: Sequence[str],
+    general_level: int,
+    topic_level: int,
+    description: str,
+) -> int:
+    """Import a reviewed domain sample generally and the remainder topically."""
+    general_word_set = set(general_words)
+    unknown_general_words = general_word_set - set(words)
+    if unknown_general_words:
+        raise ValueError(
+            f"General sample contains unknown words: {sorted(unknown_general_words)!r}"
+        )
+    if len(general_word_set) != len(general_words):
+        raise ValueError("General sample contains a duplicate word")
+    ranked_general_words = [word for word in words if word in general_word_set]
+    topic_words = [word for word in words if word not in general_word_set]
+    return run_tiered_import(
+        ranked_general_words,
+        topic_words,
+        general_level,
+        topic_level,
+        description,
+    )
+
+
+def run_tiered_import(
+    general_words: Sequence[str],
+    topic_words: Sequence[str],
+    general_level: int,
+    topic_level: int,
+    description: str,
+) -> int:
+    """Import two explicit, disjoint general and topic wordlists."""
+    all_words = [*general_words, *topic_words]
+    if len(set(all_words)) != len(all_words):
+        raise ValueError("General and topic lists contain a duplicate word")
+    args = parse_args(description)
+    print("General-curriculum sample:")
+    print_plan(general_words, general_level)
+    if topic_words:
+        print("\nTopic-specific remainder:")
+        print_plan(topic_words, topic_level)
+    if not args.execute:
+        print("\nNo API calls made. Re-run with --execute only after approval.")
+        return 0
+
+    print(f"\nLIVE MODE: Barsukas will use {args.model!r} for paid sense/translation calls.")
+    assignments = [
+        *((word, general_level) for word in general_words),
+        *((word, topic_level) for word in topic_words),
+    ]
+    try:
+        execute_assignments(assignments, args.model, args.limit)
+    except (BarsukasAPIError, RuntimeError, requests.exceptions.RequestException) as error:
+        print(f"Import stopped: {error}", file=sys.stderr)
+        return 1
+    return 0
