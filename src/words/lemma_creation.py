@@ -138,6 +138,8 @@ def store_llm_translation(
     translation: str,
     *,
     source: str,
+    translation_status: Optional[str] = None,
+    translation_status_note: Optional[str] = None,
     confidence: Optional[float] = None,
     min_confidence: Optional[float] = None,
     model: Optional[str] = None,
@@ -152,7 +154,14 @@ def store_llm_translation(
     Returns:
         The translation stored, or None for an answer below min_confidence.
     """
-    old_translation, _ = set_translation(session, lemma, lang_code, translation)
+    old_translation, _ = set_translation(
+        session,
+        lemma,
+        lang_code,
+        translation,
+        translation_status=translation_status,
+        translation_status_note=translation_status_note,
+    )
     log_translation_change(
         session=session,
         source=source,

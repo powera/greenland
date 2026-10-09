@@ -12,19 +12,18 @@ job (``workqueue.handlers.words.translations.TRANSLATIONS_JOB``) both:
 """
 
 import logging
-from typing import Any, Dict, List, Optional, Sequence, Tuple
+from typing import Any, Dict, List, NamedTuple, Optional, Sequence, Tuple
 
 from sqlalchemy.orm import Session
 
 from clients.types import LLMCall
-from storage.crud.operation_log import log_translation_change
 from storage.models.schema import Lemma
 from storage.translation_helpers import (
+    convert_llm_response_to_confidences,
     convert_llm_response_to_lang_codes,
     convert_llm_response_to_translation_metadata,
     get_reference_translation,
     get_translation,
-    set_translation,
     split_llm_language_batches,
 )
 from wordfreq.translation.translations import build_translation_prompt
@@ -99,17 +98,28 @@ def populate_groups(missing: Sequence[str]) -> List[List[str]]:
     return [list(group) for group in split_llm_language_batches(list(missing))]
 
 
+class PopulateOutcome(NamedTuple):
+    """What :func:`store_translations_by_language` did with each language."""
+
+    written: List[str]
+    #: The answer left these blank.
+    blank: List[str]
+    #: Below the confidence floor: recorded in uncertain_llm_results instead.
+    uncertain: List[str]
+
+
 def store_populated_translations(
     session: Session,
     lemma: Lemma,
     llm_response: Dict[str, Any],
     languages: Sequence[str],
     source: str,
-) -> Tuple[List[str], List[str]]:
+    model: Optional[str] = None,
+) -> PopulateOutcome:
     """Write a translation answer (LLM field names) for *languages*; the caller commits.
 
-    Returns:
-        ``(languages written, languages the answer left blank)``.
+    Each language's own confidence gates its translation; see
+    :func:`store_translations_by_language`.
     """
     return store_translations_by_language(
         session,
@@ -118,6 +128,8 @@ def store_populated_translations(
         convert_llm_response_to_translation_metadata(llm_response),
         languages,
         source,
+        confidences=convert_llm_response_to_confidences(llm_response),
+        model=model,
     )
 
 
@@ -128,42 +140,47 @@ def store_translations_by_language(
     metadata: Dict[str, Dict[str, Any]],
     languages: Sequence[str],
     source: str,
-) -> Tuple[List[str], List[str]]:
+    confidences: Optional[Dict[str, Optional[float]]] = None,
+    model: Optional[str] = None,
+) -> PopulateOutcome:
     """Write language-code-keyed translations for *languages*; the caller commits.
 
     The one writer for filled-in translations, live or batched.  A language
     that has gained a translation since it was found missing (added by hand
     while a batch ran, say) is left alone.
 
-    Returns:
-        ``(languages written, languages the answer left blank)``.
+    A language in *confidences* is gated on its confidence (a missing or
+    non-numeric one counts as 0.0) through
+    words.lemma_creation.store_llm_translation, which records one below the
+    floor as uncertain.  A language absent from it -- an answer that was never
+    asked to rate itself, such as a batch sent before the field existed, or a
+    cached translation -- is stored as it is.
     """
-    written: List[str] = []
-    blank: List[str] = []
+    outcome = PopulateOutcome([], [], [])
     for language_code in languages:
         text = (texts.get(language_code) or "").strip()
         if not text:
-            blank.append(language_code)
+            outcome.blank.append(language_code)
             continue
         if (get_translation(session, lemma, language_code) or "").strip():
             continue
         language_metadata = metadata.get(language_code, {})
-        old_translation, new_translation = set_translation(
+        confidence: Optional[float] = None
+        if confidences is not None and language_code in confidences:
+            confidence = confidences[language_code] or 0.0
+        stored = store_llm_translation(
             session,
             lemma,
             language_code,
             text,
+            source=source,
             translation_status=language_metadata.get("translation_status"),
             translation_status_note=language_metadata.get("translation_status_note"),
+            confidence=confidence,
+            model=model,
         )
-        log_translation_change(
-            session=session,
-            source=source,
-            operation_type="translation",
-            lemma_id=lemma.id,
-            language_code=language_code,
-            old_translation=old_translation,
-            new_translation=new_translation,
-        )
-        written.append(language_code)
-    return written, blank
+        if stored is None:
+            outcome.uncertain.append(language_code)
+        else:
+            outcome.written.append(language_code)
+    return outcome

@@ -74,17 +74,18 @@ def apply_populate_results(
                 batch_response_text(json.loads(request.response_body))
             )
             model = json.loads(request.request_body).get("model", "unknown")
-            written, _blank = store_populated_translations(
+            outcome = store_populated_translations(
                 session,
                 lemma,
                 structured,
                 list(convert_llm_response_to_lang_codes(structured)),
                 source=f"voras-agent/batch/{model}",
+                model=model,
             )
             session.commit()
-            if written:
+            if outcome.written:
                 results["updated"] += 1
-                results["translations"] += len(written)
+                results["translations"] += len(outcome.written)
         except Exception as exc:
             session.rollback()
             results["failed"] += 1

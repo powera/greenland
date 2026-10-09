@@ -21,7 +21,6 @@ from storage.crud.operation_log import log_operation
 from storage.models.schema import Lemma
 from storage.translation_helpers import (
     LANGUAGE_FIELDS,
-    convert_llm_response_to_translation_metadata,
     get_reference_translation,
     get_translation,
     lang_code_to_llm_field,
@@ -84,7 +83,6 @@ def do_generate_missing_translations(
         reference_translation = lemma.lemma_text
 
     config = _build_config(model)
-    workflow = TranslationWorkflow(config=config)
     client = LinguisticClient(
         model=config.model or "",
         db_path=config.sqlite_path or "",
@@ -109,30 +107,16 @@ def do_generate_missing_translations(
             )
         translations.update(batch_translations)
 
-    translation_metadata_by_lang_code = convert_llm_response_to_translation_metadata(translations)
-    added_count = 0
-    for language_code in missing_languages:
-        llm_field = lang_code_to_llm_field(language_code)
-        if llm_field:
-            response_value = translations.get(llm_field, "")
-            if isinstance(response_value, dict):
-                raw_translation = response_value.get("translation", "")
-                translation_text = (
-                    raw_translation.strip() if isinstance(raw_translation, str) else ""
-                )
-            else:
-                translation_text = response_value.strip() if isinstance(response_value, str) else ""
-            if translation_text:
-                translation_metadata = translation_metadata_by_lang_code.get(language_code, {})
-                workflow.set_translation(
-                    session,
-                    lemma,
-                    language_code,
-                    translation_text,
-                    translation_status=translation_metadata.get("translation_status"),
-                    translation_status_note=translation_metadata.get("translation_status_note"),
-                )
-                added_count += 1
+    # Asked for one lemma by hand, so every missing language was asked, but
+    # each answer is still gated on its own confidence.
+    outcome = store_populated_translations(
+        session,
+        lemma,
+        translations,
+        missing_languages,
+        source=f"voras-agent/{config.model}",
+        model=config.model,
+    )
 
     log_operation(
         session,
@@ -141,14 +125,18 @@ def do_generate_missing_translations(
         entity_id=lemma.id,
         details={
             "languages": missing_languages,
-            "count": added_count,
+            "count": len(outcome.written),
+            "uncertain": outcome.uncertain,
             "task": "words.translations",
             "model": config.model,
             "via_worker": True,
         },
     )
     session.commit()
-    return f"Added {added_count} translation(s) for {', '.join(missing_languages)}"
+    message = f"Added {len(outcome.written)} translation(s) for {', '.join(missing_languages)}"
+    if outcome.uncertain:
+        message += f"; below confidence (recorded as uncertain): {', '.join(outcome.uncertain)}"
+    return message
 
 
 def do_regenerate_translations(session: Any, lemma_id: int, **_: Any) -> str:
@@ -325,13 +313,21 @@ def _apply_populate(
     lemma = session.get(Lemma, state["lemma_id"])
     if lemma is None:
         return Done("failed", f"Lemma {state['lemma_id']} not found")
-    written, blank = store_populated_translations(
-        session, lemma, data, state["asked"], source=f"voras-agent/batch/{ctx.model}"
+    outcome = store_populated_translations(
+        session,
+        lemma,
+        data,
+        state["asked"],
+        source=f"voras-agent/batch/{ctx.model}",
+        model=ctx.model,
     )
-    if written:
-        return Done("written", ", ".join(written))
-    if blank:
-        return Done("rejected", f"blank answer for {', '.join(blank)}")
+    uncertain = f"; uncertain: {', '.join(outcome.uncertain)}" if outcome.uncertain else ""
+    if outcome.written:
+        return Done("written", ", ".join(outcome.written) + uncertain)
+    if outcome.uncertain:
+        return Done("rejected", f"below confidence: {', '.join(outcome.uncertain)}")
+    if outcome.blank:
+        return Done("rejected", f"blank answer for {', '.join(outcome.blank)}")
     return Done("skipped", "translations already present")
 
 

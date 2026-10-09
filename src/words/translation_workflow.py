@@ -33,6 +33,7 @@ from storage.backend.config import BackendType, DataSourceConfig
 from storage.crud.operation_log import log_translation_change
 from storage.models.schema import Lemma, LemmaTranslation
 from words.translation_populate import (
+    PopulateOutcome,
     missing_translation_languages,
     populate_groups,
     populate_reference,
@@ -43,6 +44,7 @@ from storage.translation_helpers import (
     LANG_CODE_TO_LLM_FIELD,
     LANGUAGE_FIELDS,
     convert_llm_response_to_lang_codes,
+    convert_llm_response_to_confidences,
     convert_llm_response_to_translation_metadata,
     get_language_name,
     get_default_generation_languages,
@@ -81,6 +83,9 @@ class LemmaTranslations:
     source: Optional[str] = None
     # Human-readable failure reason for the caller to display; None on success.
     error: Optional[str] = None
+    # The model's confidence per language; None for cached translations,
+    # which are stored as they are.
+    confidences: Optional[Dict[str, Optional[float]]] = None
 
 
 def select_curated_lemmas(session: Any, limit: Optional[int] = None) -> List[Lemma]:
@@ -375,38 +380,36 @@ class TranslationWorkflow:
         return LemmaTranslations(
             translations=convert_llm_response_to_lang_codes(llm_response),
             source=f"voras-agent/{self.config.model}",
+            confidences=convert_llm_response_to_confidences(llm_response),
         )
 
     def save_lemma_translations(
-        self,
-        session: Any,
-        lemma: Lemma,
-        translations: Dict[str, str],
-        languages: Sequence[str],
-        source: Optional[str] = None,
-    ) -> int:
+        self, session: Any, lemma: Lemma, generated: LemmaTranslations, languages: Sequence[str]
+    ) -> PopulateOutcome:
         """Store the non-empty translations for ``languages`` and commit.
+
+        A translation the model rated below the confidence floor is recorded as
+        uncertain instead (see translation_populate.store_translations_by_language).
 
         Args:
             session: Database session.
             lemma: The lemma being updated.
-            translations: Language code -> translation.
-            languages: The languages to store (others in ``translations`` are
+            generated: What :meth:`generate_translations_for_lemma` produced.
+            languages: The languages to store (others in ``generated`` are
                 ignored).
-            source: Provenance recorded in the operation log.
-
-        Returns:
-            The number of translations stored.
         """
-        saved = 0
-        for lang_code in languages:
-            translation = translations.get(lang_code)
-            if not translation:
-                continue
-            self.set_translation(session, lemma, lang_code, translation, source=source)
-            saved += 1
+        outcome = store_translations_by_language(
+            session,
+            lemma,
+            generated.translations,
+            {},
+            languages,
+            source=generated.source or f"voras-agent/{self.config.model}",
+            confidences=generated.confidences,
+            model=self.config.model,
+        )
         session.commit()
-        return saved
+        return outcome
 
     def validate_translations(
         self,
@@ -901,6 +904,9 @@ class TranslationWorkflow:
         results: Dict[str, Any] = {
             "total_fixed": 0,
             "total_failed": 0,
+            # Asked this run, answered below the confidence floor.
+            "total_uncertain": 0,
+            # Not asked: a model was uncertain of them before.
             "total_uncertain_skipped": 0,
             "llm_cost_usd": 0.0,
             "by_language": {
@@ -909,6 +915,7 @@ class TranslationWorkflow:
                     "total_missing": 0,
                     "fixed": 0,
                     "failed": 0,
+                    "uncertain": 0,
                 }
                 for lang_code in languages_to_fix
             },
@@ -1069,42 +1076,50 @@ class TranslationWorkflow:
                         translation_metadata_by_lang_code = (
                             convert_llm_response_to_translation_metadata(llm_translations)
                         )
+                        confidences_by_lang_code: Optional[Dict[str, Optional[float]]] = (
+                            convert_llm_response_to_confidences(llm_translations)
+                        )
                         translation_source = f"voras-agent/{self.config.model}"
                     else:
+                        # Cached translations carry no confidence and are stored as they are.
                         translation_metadata_by_lang_code = {}
+                        confidences_by_lang_code = None
 
                     # Apply translations to lemma (translations_by_lang_code now always uses lang_code keys)
                     if translations_by_lang_code:
-                        written, blank = store_translations_by_language(
+                        outcome = store_translations_by_language(
                             session,
                             lemma,
                             translations_by_lang_code,
                             translation_metadata_by_lang_code,
                             [lang_code for lang_code, _ in missing_languages],
                             source=translation_source or f"voras-agent/{self.config.model}",
+                            confidences=confidences_by_lang_code,
+                            model=self.config.model,
                         )
                         for lang_code, language_name in missing_languages:
-                            if lang_code in blank:
+                            if lang_code in outcome.blank:
                                 logger.warning(
                                     f"  LLM returned empty {language_name} translation for '{lemma.lemma_text}'"
                                 )
                                 results["by_language"][lang_code]["failed"] += 1
                                 results["total_failed"] += 1
-                            elif lang_code in written:
+                            elif lang_code in outcome.uncertain:
+                                logger.warning(
+                                    f"  {language_name} translation for '{lemma.lemma_text}' "
+                                    "below confidence, recorded as uncertain"
+                                )
+                                results["by_language"][lang_code]["uncertain"] += 1
+                                results["total_uncertain"] += 1
+                            elif lang_code in outcome.written:
                                 results["by_language"][lang_code]["fixed"] += 1
                                 results["total_fixed"] += 1
 
                         # Commit all updates for this word at once
                         session.commit()
-                        added_count = len(
-                            [
-                                lc
-                                for lc, _ in missing_languages
-                                if lc != "lt" and translations_by_lang_code.get(lc, "").strip()
-                            ]
-                        )
                         logger.info(
-                            f"Added {added_count} translations for '{lemma.lemma_text}' (GUID: {lemma.guid})"
+                            f"Added {len(outcome.written)} translations for "
+                            f"'{lemma.lemma_text}' (GUID: {lemma.guid})"
                         )
 
                 except Exception as e:
