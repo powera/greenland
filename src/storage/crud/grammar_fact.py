@@ -7,6 +7,7 @@ from sqlalchemy.exc import IntegrityError
 from sqlalchemy.orm import Session
 
 from storage.config.grammar_fact_registry import VERB_FORM_OVERRIDE_PREFIX
+from storage.crud.uncertain_llm_result import clear_uncertain_llm_result
 from storage.models.grammar_fact import GrammarFact
 
 logger = logging.getLogger(__name__)
@@ -60,6 +61,8 @@ def add_grammar_fact(
             verified=verified,
         )
         session.add(grammar_fact)
+        # The question now has an answer, whoever gave it.
+        clear_uncertain_llm_result(session, fact_type, language_code, lemma_id=lemma_id)
         session.commit()
         logger.info(
             f"Added grammar fact: lemma_id={lemma_id}, {fact_type}={fact_value} ({language_code})"

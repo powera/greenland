@@ -164,6 +164,14 @@ Task presets:
         default=0.7,
         help="Minimum confidence score to save fact (default: 0.7)",
     )
+    parser.add_argument(
+        "--retry-uncertain",
+        action="store_true",
+        help=(
+            "Ask again where a model answered below --min-confidence before "
+            "(uncertain_llm_results); by default those lemmas are skipped"
+        ),
+    )
 
     # Mode selection - mutually exclusive flags
     mode_group = parser.add_mutually_exclusive_group()
@@ -286,7 +294,9 @@ def _run_populate_batch(
     from workqueue.handlers.words.grammar_facts import GRAMMAR_FACT_JOB, grammar_fact_state
 
     states = [
-        grammar_fact_state(lemma.id, language_code, fact_type, args.min_confidence)
+        grammar_fact_state(
+            lemma.id, language_code, fact_type, args.min_confidence, args.retry_uncertain
+        )
         for language_code, fact_types in fact_types_by_language.items()
         for fact_type in fact_types
         for lemma in lemmas
@@ -429,6 +439,7 @@ def main() -> None:
     # COVERAGE MODE: Report what grammar facts are missing
     if mode == "coverage":
         from storage.crud.grammar_fact import get_grammar_fact_value
+        from storage.crud.uncertain_llm_result import get_uncertain_llm_result
 
         logger.info("=" * 80)
         logger.info("LAPE AGENT - COVERAGE REPORT")
@@ -444,8 +455,9 @@ def main() -> None:
                     # Filter lemmas by POS type
                     matching_lemmas = [l for l in lemmas if l.pos_type in required_pos]
 
-                    # Count missing
+                    # Count missing, and of those, where a model was uncertain
                     missing_count = 0
+                    uncertain_count = 0
                     for lemma in matching_lemmas:
                         if fact_type == ENGLISH_PRINCIPAL_PARTS_TASK or fact_type in (
                             PRINCIPAL_PART_FACT_TYPES
@@ -458,9 +470,14 @@ def main() -> None:
                         )
                         if existing is None:
                             missing_count += 1
+                            if get_uncertain_llm_result(
+                                session, fact_type, language_code, lemma_id=lemma.id
+                            ):
+                                uncertain_count += 1
 
                     print(
                         f"{fact_type} ({language_code}): {missing_count}/{len(matching_lemmas)} missing"
+                        f" ({uncertain_count} uncertain)"
                     )
         finally:
             session.close()
@@ -532,6 +549,7 @@ def main() -> None:
                     skip_existing=args.skip_existing,
                     min_confidence=args.min_confidence,
                     dry_run=args.dry_run,
+                    retry_uncertain=args.retry_uncertain,
                 )
 
                 # Print summary

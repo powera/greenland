@@ -35,6 +35,7 @@ from storage.backend import create_session as create_backend_session
 from storage.backend.config import BackendType, DataSourceConfig
 from storage.config.grammar_fact_registry import legacy_supported_fact_types
 from storage.crud.grammar_fact import get_grammar_fact_value
+from storage.crud.uncertain_llm_result import get_uncertain_llm_result
 from storage.models.schema import Lemma
 from storage.translation_helpers import get_translation
 from wordfreq.translation.client import LinguisticClient
@@ -237,6 +238,7 @@ class GrammarFactService:
         skip_existing: bool = True,
         min_confidence: float = 0.7,
         dry_run: bool = False,
+        retry_uncertain: bool = False,
     ) -> Dict[str, Any]:
         """
         Generate grammar facts for lemmas.
@@ -249,6 +251,8 @@ class GrammarFactService:
             skip_existing: Skip lemmas that already have this fact
             min_confidence: Minimum confidence to save the fact
             dry_run: If True, don't save to database
+            retry_uncertain: Ask again where a model was uncertain before
+                (uncertain_llm_results); by default those lemmas are skipped
 
         Returns:
             Dictionary with generation results
@@ -327,6 +331,12 @@ class GrammarFactService:
                         skipped_count += 1
                         continue
 
+                if not retry_uncertain and get_uncertain_llm_result(
+                    session, fact_type, language_code, lemma_id=lemma.id
+                ):
+                    skipped_count += 1
+                    continue
+
                 # Get translation for target language
                 translation = get_translation(session, lemma, language_code)
                 if not translation:
@@ -344,23 +354,25 @@ class GrammarFactService:
                     fact_type, lemma, language_code, translation, session
                 )
 
-                if fact_value and confidence >= min_confidence:
-                    if not dry_run:
-                        outcome = save_generated_fact(
-                            session,
-                            lemma.id,
-                            language_code,
-                            fact_type,
-                            FactResult(fact_value, notes, confidence),
-                            min_confidence,
-                            self.config.model,
-                        )
-                        session.commit()
-                        if outcome == "exists":
-                            # Added by someone else since the check above.
-                            skipped_count += 1
-                            continue
+                outcome = None
+                if not dry_run:
+                    # Also records a low-confidence answer as uncertain.
+                    outcome = save_generated_fact(
+                        session,
+                        lemma.id,
+                        language_code,
+                        fact_type,
+                        FactResult(fact_value, notes, confidence),
+                        min_confidence,
+                        self.config.model,
+                    )
+                    session.commit()
+                if outcome == "exists":
+                    # Added by someone else since the check above.
+                    skipped_count += 1
+                    continue
 
+                if fact_value and confidence >= min_confidence:
                     success_count += 1
                     results.append(
                         {

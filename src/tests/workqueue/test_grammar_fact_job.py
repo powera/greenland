@@ -16,6 +16,10 @@ from sqlalchemy.orm import Session
 from clients.batch_queue import BatchQueueManager, create_batch_database_session
 from clients.types import LLMCall, Response
 from storage.crud.grammar_fact import add_grammar_fact, get_grammar_fact_value
+from storage.crud.uncertain_llm_result import (
+    get_uncertain_llm_result,
+    record_uncertain_llm_result,
+)
 from storage.models.grammar_fact import GrammarFact
 from storage.models.schema import Base, Lemma
 from storage.translation_helpers import set_translation
@@ -200,6 +204,60 @@ def test_low_confidence_is_not_stored(
     result = _complete(manager, batch_client, session, "batch-0", _gender("neuter", 0.75))
     assert result["skipped"] == 1
     assert session.query(GrammarFact).count() == 0
+    uncertain = get_uncertain_llm_result(session, "grammatical_gender", "de", lemma_id=lemma.id)
+    assert uncertain is not None
+    assert uncertain.reason == "low_confidence"
+    assert uncertain.note == "gpt-6-luna leaned neuter (0.75): because"
+
+
+def test_uncertain_question_is_not_sent_again(session: Session, manager: BatchQueueManager) -> None:
+    lemma = _lemma(session, "book", "noun", {"de": "Buch"})
+    record_uncertain_llm_result(
+        session, "grammatical_gender", "de", "low_confidence", lemma_id=lemma.id
+    )
+    session.commit()
+
+    report = start_batch_run(
+        session,
+        manager,
+        GRAMMAR_FACT_JOB,
+        [grammar_fact_state(lemma.id, "de", "grammatical_gender")],
+        _MODEL,
+        dry_run=True,
+    )
+    assert report.calls == 0
+    assert report.resolved_without_llm == {"skipped": 1}
+
+    retry = start_batch_run(
+        session,
+        manager,
+        GRAMMAR_FACT_JOB,
+        [grammar_fact_state(lemma.id, "de", "grammatical_gender", retry_uncertain=True)],
+        _MODEL,
+        dry_run=True,
+    )
+    assert retry.calls == 1
+
+
+def test_confident_retry_clears_the_uncertainty(
+    session: Session, manager: BatchQueueManager, batch_client: _FakeBatchClient
+) -> None:
+    lemma = _lemma(session, "book", "noun", {"de": "Buch"})
+    record_uncertain_llm_result(
+        session, "grammatical_gender", "de", "low_confidence", lemma_id=lemma.id
+    )
+    session.commit()
+    start_batch_run(
+        session,
+        manager,
+        GRAMMAR_FACT_JOB,
+        [grammar_fact_state(lemma.id, "de", "grammatical_gender", retry_uncertain=True)],
+        _MODEL,
+    )
+
+    result = _complete(manager, batch_client, session, "batch-0", _gender("neuter"))
+    assert result["updated"] == 1
+    assert get_uncertain_llm_result(session, "grammatical_gender", "de", lemma_id=lemma.id) is None
 
 
 def test_hand_edit_made_while_batch_ran_wins(
