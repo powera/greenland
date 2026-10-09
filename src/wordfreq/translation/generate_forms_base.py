@@ -20,12 +20,15 @@ from sqlalchemy.orm import Session
 import constants
 from agents.common.common_args import get_data_source_config
 from langtools.form_tasks import generate_forms
+from langtools.llm_forms_base import forms_answer_confidence, forms_answer_notes
 from langtools.wiktionary import WIKTIONARY_TO_TASK_MAPPINGS, get_wiktionary_forms
 from storage import database as linguistic_db
 from storage.backend.config import DataSourceConfig
 from storage.backend import create_session
 from storage.crud.operation_log import log_operation
+from storage.crud.uncertain_llm_result import LLMQuestion, confidence_gated
 from storage.models.enums import GrammaticalForm
+from storage.models.uncertain_llm_result import TOPIC_FORMS
 from storage.translation_helpers import get_translation
 from wordfreq.translation.client import LinguisticClient
 
@@ -478,20 +481,56 @@ def forms_already_complete(
     return existing_count >= form_config.min_forms_threshold
 
 
+def _forms_summary(forms_dict: Dict[str, str]) -> str:
+    """The non-empty forms as ``name=text; ...``: the gate's value, and its note."""
+    shown = [f"{name}={text.strip()}" for name, text in forms_dict.items() if text and text.strip()]
+    if len(shown) > _SUMMARY_FORMS:
+        return "; ".join(shown[:_SUMMARY_FORMS]) + f"; ... ({len(shown)} forms)"
+    return "; ".join(shown)
+
+
+# Forms an uncertain record's note lists before eliding the rest.
+_SUMMARY_FORMS = 8
+
+
+def forms_uncertain(session: Session, lemma_id: int, form_config: FormGenerationConfig) -> bool:
+    """Whether a model was uncertain of this lemma's forms in the config's language."""
+    return store_generated_forms.is_uncertain(session, lemma_id=lemma_id, form_config=form_config)
+
+
+@confidence_gated(
+    question=lambda a: LLMQuestion(
+        TOPIC_FORMS, a["form_config"].language_code, lemma_id=a["lemma_id"]
+    ),
+    value=lambda a: _forms_summary(a["forms_dict"]),
+    notes_arg="notes",
+)
 def store_generated_forms(
     session: Session,
     lemma_id: int,
     forms_dict: Dict[str, str],
     form_config: FormGenerationConfig,
-) -> Tuple[int, int]:
+    *,
+    notes: Optional[str] = None,
+    confidence: Optional[float] = None,
+    min_confidence: Optional[float] = None,
+    model: Optional[str] = None,
+) -> Optional[Tuple[int, int]]:
     """Store generated forms, and the grammar facts read off them; the caller commits.
 
     Shared by the live path (:func:`process_lemma_forms`) and batch completion
     (``workqueue.handlers.words.forms``).  A form the lemma already has is left
     as it is, so a form entered by hand while a batch ran stays.
 
+    ``confidence``, ``min_confidence`` and ``model`` are for a model's answer
+    (a mechanical paradigm passes none); see
+    storage.crud.uncertain_llm_result.confidence_gated.  One below
+    min_confidence is recorded as uncertain, with the model's ``notes``, and
+    form runs then skip the lemma in that language unless told to retry.
+
     Returns:
-        ``(forms stored, grammar facts added)``.
+        ``(forms stored, grammar facts added)``, or None for an answer below
+        min_confidence.
     """
     existing_grammatical_forms = _existing_form_values(session, lemma_id, form_config)
 
@@ -608,6 +647,7 @@ def process_lemma_forms(
     lemma_id: int,
     data_config: DataSourceConfig,
     form_config: FormGenerationConfig,
+    retry_uncertain: bool = False,
 ) -> bool:
     """
     Process and store forms for a single lemma.
@@ -617,9 +657,12 @@ def process_lemma_forms(
         lemma_id: ID of the lemma to process
         data_config: DataSourceConfig with database configuration
         form_config: FormGenerationConfig with language and form settings
+        retry_uncertain: Ask again where a model was uncertain of these
+            forms before; by default the lemma is skipped
 
     Returns:
-        True if successful, False otherwise
+        True if successful, False otherwise (including an uncertain answer,
+        or a lemma skipped as uncertain)
     """
     session = create_session(data_config)
 
@@ -638,24 +681,45 @@ def process_lemma_forms(
             )
             return True
 
-        forms_dict, success = generate_forms(
+        if not retry_uncertain and forms_uncertain(session, lemma_id, form_config):
+            logger.info(
+                f"Lemma ID {lemma_id}: a model was uncertain of its "
+                f"{form_config.language_name} forms, skipping (--retry-uncertain to ask again)"
+            )
+            return False
+
+        generated = generate_forms(
             form_config.language_code,
             form_config.pos_type,
             client.client,
             lemma_id,
             client.get_session,
         )
+        forms_dict, success = generated
 
         if not success or not forms_dict:
             logger.error(f"Failed to get forms for lemma ID {lemma_id}")
             return False
 
-        stored, _grammar_facts_added = store_generated_forms(
-            session, lemma_id, forms_dict, form_config
+        result = store_generated_forms(
+            session,
+            lemma_id,
+            forms_dict,
+            form_config,
+            notes=forms_answer_notes(generated),
+            confidence=forms_answer_confidence(generated),
+            model=data_config.model,
         )
 
+        # Also commits an uncertain answer's record.
         _commit_with_retry(session, lemma_id)
-        logger.info(f"Added {stored} forms for lemma ID {lemma_id}")
+        if result is None:
+            logger.warning(
+                f"Lemma ID {lemma_id}: forms below confidence "
+                f"({forms_answer_confidence(generated) or 0.0:.2f}), recorded as uncertain"
+            )
+            return False
+        logger.info(f"Added {result[0]} forms for lemma ID {lemma_id}")
         return True
 
     except OperationalError as oe:

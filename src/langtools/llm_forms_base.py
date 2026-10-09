@@ -47,12 +47,62 @@ class LanguageFormSpec:
             self.word_variable = self.pos_type
 
 
+class FormsAnswer(Tuple[Dict[str, str], bool]):
+    """A ``(forms, success)`` pair that also carries the model's confidence.
+
+    Unpacks like the plain pair every generator returns, so generators that
+    pass :func:`query_forms`'s result through need no change, while the
+    writer can read ``confidence`` for its gate (see
+    wordfreq.translation.generate_forms_base.store_generated_forms).  A
+    mechanical paradigm returns a plain tuple: no confidence, no gate.
+    """
+
+    confidence: Optional[float]
+    notes: Optional[str]
+
+    def __new__(
+        cls,
+        forms: Dict[str, str],
+        success: bool,
+        confidence: Optional[float] = None,
+        notes: Optional[str] = None,
+    ) -> "FormsAnswer":
+        answer = super().__new__(cls, (forms, success))
+        answer.confidence = confidence
+        answer.notes = notes
+        return answer
+
+
+def forms_answer_confidence(result: Tuple[Dict[str, str], bool]) -> Optional[float]:
+    """A generator result's confidence: a model's, or None for a mechanical paradigm."""
+    return result.confidence if isinstance(result, FormsAnswer) else None
+
+
+def forms_answer_notes(result: Tuple[Dict[str, str], bool]) -> Optional[str]:
+    """The model's notes on a generator result, if a model gave it."""
+    return result.notes if isinstance(result, FormsAnswer) else None
+
+
 def parse_forms_response(response_data: Dict[str, Any]) -> Dict[str, str]:
     """The ``forms`` mapping of a form-generation answer, or ``{}``."""
     forms = response_data.get("forms")
     if isinstance(forms, dict):
         return forms
     return {}
+
+
+def parse_forms_confidence(response_data: Dict[str, Any]) -> float:
+    """The answer's confidence; a missing or non-numeric one counts as 0.0."""
+    confidence = response_data.get("confidence")
+    if isinstance(confidence, (int, float)) and not isinstance(confidence, bool):
+        return float(confidence)
+    return 0.0
+
+
+def parse_forms_notes(response_data: Dict[str, Any]) -> Optional[str]:
+    """The model's notes on its answer, or None."""
+    notes = response_data.get("notes")
+    return notes if isinstance(notes, str) and notes.strip() else None
 
 
 def query_forms(
@@ -172,7 +222,12 @@ def query_forms(
             model=client.default_model,
         )
         forms = parse_forms_response(response_data)
-        return forms, bool(forms)
+        return FormsAnswer(
+            forms,
+            bool(forms),
+            parse_forms_confidence(response_data),
+            parse_forms_notes(response_data),
+        )
     except DeferLLMCall:
         # A batch is collecting this call (see clients.deferring_client).
         raise

@@ -47,6 +47,11 @@ def print_fix_results(results: dict[str, Any], dry_run: bool = False) -> None:
             print(f"  Processed: {results['processed']}")
             print(f"  Successful: {results['successful']}")
             print(f"  Failed: {results['failed']}")
+            if results.get("uncertain_skipped"):
+                print(
+                    f"  Skipped as uncertain: {results['uncertain_skipped']} "
+                    "(--retry-uncertain to ask again)"
+                )
 
 
 def print_base_forms_check(results: dict[str, Any]) -> None:

@@ -128,12 +128,17 @@ def process_lemma_for_task(
     lemma_id: int,
     data_config: DataSourceConfig,
     client: Optional[LinguisticClient] = None,
+    retry_uncertain: bool = False,
 ) -> bool:
-    """Process a single lemma for a registered task."""
+    """Process a single lemma for a registered task.
+
+    A lemma whose forms a model was uncertain of is skipped (False) unless
+    ``retry_uncertain``.
+    """
 
     if task_key not in FORM_GENERATION_TASKS:
         raise KeyError(f"Unknown form generation task: {task_key}")
 
     task = FORM_GENERATION_TASKS[task_key]
     client = client or LinguisticClient(config=data_config)
-    return process_lemma_forms(client, lemma_id, data_config, task.config)
+    return process_lemma_forms(client, lemma_id, data_config, task.config, retry_uncertain)

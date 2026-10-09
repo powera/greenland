@@ -104,12 +104,17 @@ def generate_forms_for_lemma(
     if client is None:
         client = LinguisticClient(config=config)
 
-    # Generate forms using the task system
-    success = process_lemma_for_task(task_key, lemma.id, config, client)
+    # Generate forms using the task system.  Asked for one lemma by hand, so a
+    # model's earlier uncertainty does not stop it asking again; a new
+    # uncertain answer is still recorded rather than stored.
+    success = process_lemma_for_task(task_key, lemma.id, config, client, retry_uncertain=True)
 
     if success:
         return True, None
-    return False, f"Could not generate {lang_code} {pos_type} forms"
+    return False, (
+        f"Could not generate {lang_code} {pos_type} forms "
+        "(or the model was below confidence; see uncertain_llm_results)"
+    )
 
 
 def handle_generate_forms(session: Session, payload: Dict) -> str:
