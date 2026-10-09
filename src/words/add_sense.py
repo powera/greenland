@@ -52,7 +52,7 @@ from storage.models.schema import SENSE_PROMINENCE_RARE, Lemma
 from storage.models.variant_form import VARIANT_KIND_ABBREVIATION
 from storage.queries.lemma import get_english_senses
 from storage.translation_helpers import (
-    LLM_FIELD_TO_LANG_CODE,
+    convert_llm_response_to_confidences,
     convert_llm_response_to_lang_codes,
     ensure_english_translation,
 )
@@ -219,26 +219,6 @@ def _describe_existing(senses: Sequence[Lemma]) -> str:
             f"{number}. {label} [{lemma.pos_type}/{lemma.pos_subtype}]: {lemma.definition_text}"
         )
     return "\n".join(lines)
-
-
-def _translation_confidences(sense: Dict[str, Any]) -> Dict[str, Optional[float]]:
-    """Each translation's confidence by language code; None where it is missing.
-
-    A confidence that is missing or not a number is None here and gated as
-    0.0: the floor exists to keep doubtful terms out, so an unrated one stays
-    out.
-    """
-    confidences: Dict[str, Optional[float]] = {}
-    for field_name, value in sense.items():
-        lang_code = LLM_FIELD_TO_LANG_CODE.get(field_name)
-        if lang_code is None or not isinstance(value, dict):
-            continue
-        raw_confidence = value.get("confidence")
-        confidence: Optional[float] = None
-        if isinstance(raw_confidence, (int, float)) and not isinstance(raw_confidence, bool):
-            confidence = float(raw_confidence)
-        confidences[lang_code] = confidence
-    return confidences
 
 
 def pos_type_for_subtype(pos_subtype: str) -> Optional[str]:
@@ -596,7 +576,9 @@ def add_sense(
                 error=f"LLM gave the catch-all subtype {new_subtype!r}; nothing written",
             )
 
-        confidences = _translation_confidences(sense)
+        # A confidence that is missing or not a number is gated as 0.0: the
+        # floor exists to keep doubtful terms out, so an unrated one stays out.
+        confidences = convert_llm_response_to_confidences(sense)
 
         guid = generate_guid(session, new_pos_type, new_subtype)
         new_lemma = Lemma(

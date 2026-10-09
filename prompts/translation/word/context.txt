@@ -9,6 +9,9 @@ CRITICAL REQUIREMENTS:
 4. For adjectives: positive/base form
 5. For adverbs: base form
 6. Ensure translations match the specific meaning indicated by the English word, its definition, and any reference translation provided
+7. Give each translation its own confidence (0-1): how sure you are that it is the word a native speaker would use for this meaning
+   - When you are not sure of the usual word - you are choosing between candidates, the word you remember may belong to a neighboring meaning, or the language has no common word for it - still give your best answer, with a low confidence
+   - A loanword or a plain descriptive phrase you are sure is the usual way to say it deserves a high confidence
 {status_requirements}
 Languages to translate to:
 {language_instructions}

@@ -92,8 +92,12 @@ def display_population_summary(results: Dict[str, Any]) -> None:
         print(f"  Total missing: {lang_results['total_missing']}")
         print(f"  Populated: {lang_results['fixed']}")
         print(f"  Failed: {lang_results['failed']}")
+        if lang_results.get("uncertain"):
+            print(f"  Below confidence: {lang_results['uncertain']}")
     print(f"\nTotal populated: {results['total_fixed']}")
     print(f"Total failed: {results['total_failed']}")
+    if results.get("total_uncertain"):
+        print(f"Below confidence (recorded as uncertain): {results['total_uncertain']}")
     if results.get("total_uncertain_skipped"):
         print(
             f"Skipped as uncertain: {results['total_uncertain_skipped']} "

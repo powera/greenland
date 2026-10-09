@@ -129,6 +129,11 @@ def build_translation_prompt(
             continue
         language_properties = {
             "translation": SchemaProperty("string", lang_config["description"]),
+            "confidence": SchemaProperty(
+                "number",
+                "Confidence from 0-1 that this is the word a native speaker would use "
+                "for this meaning",
+            ),
         }
         if include_status:
             language_properties["translation_status"] = SchemaProperty(

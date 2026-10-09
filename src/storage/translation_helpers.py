@@ -1331,6 +1331,28 @@ def convert_llm_response_to_lang_codes(llm_response: Dict[str, Any]) -> Dict[str
     }
 
 
+def convert_llm_response_to_confidences(llm_response: Dict[str, Any]) -> Dict[str, Optional[float]]:
+    """Each rated translation's confidence, by language code.
+
+    A language answered as ``{"translation": ..., "confidence": ...}`` maps to
+    its confidence, or None when the confidence is missing or not a number.
+    A language answered with a bare string, or with an object that has no
+    confidence key at all, is left out: that answer was never asked to rate
+    itself (an older request, or a schema without the field).
+    """
+    confidences: Dict[str, Optional[float]] = {}
+    for field_name, value in llm_response.items():
+        lang_code = LLM_FIELD_TO_LANG_CODE.get(field_name)
+        if lang_code is None or not isinstance(value, dict) or "confidence" not in value:
+            continue
+        raw_confidence = value["confidence"]
+        if isinstance(raw_confidence, (int, float)) and not isinstance(raw_confidence, bool):
+            confidences[lang_code] = float(raw_confidence)
+        else:
+            confidences[lang_code] = None
+    return confidences
+
+
 def convert_llm_response_to_translation_metadata(
     llm_response: Dict[str, Any],
 ) -> Dict[str, Dict[str, Optional[str]]]:

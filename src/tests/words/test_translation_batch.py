@@ -351,3 +351,44 @@ def test_apply_counts_incomplete_and_unknown_lemmas_as_failed(session: Session) 
     assert results["failed"] == 2
     assert results["updated"] == 0
     assert get_translation(session, lemma, "hi") is None
+
+
+def test_populate_schema_rates_each_language() -> None:
+    prompt = build_translation_prompt("dog", ("lt", "šuo"), "a canine", "noun", languages=["hi"])
+
+    assert prompt is not None
+    rated = prompt.schema.properties[_field("hi")]
+    assert set(rated.properties or {}) == {"translation", "confidence"}
+
+
+def test_batch_gates_each_language_on_its_own_confidence(
+    session: Session, batch_session: Session
+) -> None:
+    lemma = _add_lemma(session, "skewer", {"lt": "iešmas"})
+    client = _FakeBatchClient()
+    manager = BatchQueueManager(batch_session, batch_client=client)  # type: ignore[arg-type]
+    states, _complete = translation_populate_states(session, [lemma], ["hi", "vi", "ms"])
+    report = start_batch_run(session, manager, TRANSLATIONS_JOB, states, _MODEL)
+
+    batch_id = report.batch_ids[0]
+    client.finish(
+        batch_id,
+        0,
+        {
+            _field("hi"): {"translation": "सीख", "confidence": 0.95},
+            _field("vi"): {"translation": "xiên", "confidence": 0.4},
+            # Sent before the schema asked for a confidence: stored as it is.
+            _field("ms"): {"translation": "cucuk"},
+        },
+    )
+    manager.retrieve_batch_results(batch_id)
+    complete_rows(
+        TRANSLATIONS_JOB, manager.get_completed_requests(batch_id=batch_id), session, batch_id
+    )
+
+    assert get_translation(session, lemma, "hi") == "सीख"
+    assert get_translation(session, lemma, "vi") is None
+    assert get_translation(session, lemma, "ms") == "cucuk"
+    row = get_uncertain_llm_result(session, TOPIC_TRANSLATION, "vi", lemma_id=lemma.id)
+    assert row is not None
+    assert row.note == f"{_MODEL} leaned xiên (0.40)"

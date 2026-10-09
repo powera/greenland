@@ -157,10 +157,13 @@ def _handle_single_lemma_populate(
         return False
 
     cli_display.display_generated_translations(generated.translations, missing_langs)
-    agent.save_lemma_translations(
-        session, lemma, generated.translations, missing_langs, source=generated.source
-    )
-    print("\n✓ Translations saved")
+    outcome = agent.save_lemma_translations(session, lemma, generated, missing_langs)
+    if outcome.uncertain:
+        print(
+            f"\nBelow confidence, recorded as uncertain (not saved): "
+            f"{', '.join(outcome.uncertain)}"
+        )
+    print(f"\n✓ {len(outcome.written)} translation(s) saved")
     return True
 
 

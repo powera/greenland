@@ -264,6 +264,7 @@ _LLM_ANSWER_MODULES = (
     "src/workqueue/handlers/words/pronunciations.py",
     "src/wordfreq/translation/generate_forms_base.py",
     "src/workqueue/handlers/words/forms.py",
+    "src/words/translation_populate.py",
 )
 
 
