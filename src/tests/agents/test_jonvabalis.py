@@ -28,6 +28,7 @@ from agents.jonvabalis import (
     select_pending_rows,
     spacing_key,
 )
+from clients.types import LLMCall
 from storage.backend.config import DataSourceConfig
 from storage.models.imports import TARGET_KIND_LEMMA, PendingImport, WordExclusion
 from storage.models.operation_log import OperationLog
@@ -40,6 +41,9 @@ from storage.models.variant_form import (
 from storage.translation_helpers import LANG_CODE_TO_LLM_FIELD
 from words.lemma_creation import TRANSLATION_LANGUAGES
 from words.pending_imports.staging import create_pending_import
+from workqueue.handlers.jonvabalis import JONVABALIS_JOB, review_state
+from workqueue.llm_batch import Done, StageContext
+from workqueue.registry import get_llm_job
 
 SUBTYPE_REVIEW_NOTE = "add_word: noun_other needs subtype review before import"
 
@@ -176,6 +180,10 @@ class TestSelectPendingRows(JonvabalisTestCase):
         self.assertEqual(
             self.selected_ids(only=ONLY_SPACING_VARIANTS), {self.spacing_neither_lemma.id}
         )
+
+    def test_pos_type_narrows_the_selection(self) -> None:
+        verb_row = self.stage("proclaim", "say", pos_type="verb", pos_subtype="communication")
+        self.assertEqual(self.selected_ids(pos_type="verb"), {verb_row.id})
 
 
 class TestDuplicateVerdict(JonvabalisTestCase):
@@ -368,6 +376,62 @@ class TestPromptBranches(JonvabalisTestCase):
         prompt = build_prompt(self.stage("capital"), [], [])
         self.assertNotIn("Subtypes for", prompt)
         self.assertNotIn("capital", context)
+
+
+class TestBatchJob(JonvabalisTestCase):
+    """Every prompt of a batch is built before any verdict is applied."""
+
+    ctx = StageContext(model="gpt-test", via="batch")
+
+    def setUp(self) -> None:
+        super().setUp()
+        self.add_lemma("heritage")
+        self.add_lemma("descent")
+        self.stage_fns = JONVABALIS_JOB.stages[0]
+
+    def prepare(self, pending: PendingImport) -> Dict[str, Any]:
+        state = review_state(pending)
+        call = self.stage_fns.prepare(self.session, state, self.ctx)
+        self.assertIsInstance(call, LLMCall)
+        return state
+
+    def test_a_head_word_another_row_of_the_batch_created_stays_queued(self) -> None:
+        """Both rows judged "ancestry" new; only the first verdict may stand."""
+        first = self.prepare(self.stage("ancestry", "heritage", pos_subtype="concept_idea"))
+        second = self.prepare(self.stage("ancestry", "descent", pos_subtype="concept_idea"))
+        # With a tag: an untagged verdict is already held by the check that a
+        # head word with a sense needs one.
+        decision = TestDistinctVerdict.distinct(
+            "ancestry",
+            "She traced her ancestry to Lithuania.",
+            pos_subtype="concept_idea",
+            disambiguation="lineage",
+        )
+
+        applied = self.stage_fns.apply(self.session, first, decision, self.ctx)
+        self.session.commit()
+        assert isinstance(applied, Done)
+        self.assertEqual(applied.status, "written")
+        stale = self.stage_fns.apply(self.session, second, dict(decision), self.ctx)
+
+        assert isinstance(stale, Done)
+        self.assertEqual(stale.status, "skipped")
+        self.assertIn("after the prompt was built", stale.detail)
+        self.assertEqual(self.session.query(Lemma).filter_by(lemma_text="ancestry").count(), 1)
+        self.assertEqual(self.session.query(PendingImport).count(), 1)
+
+    def test_a_row_settled_since_submission_is_skipped(self) -> None:
+        pending = self.stage("ancestry", "heritage", pos_subtype="concept_idea")
+        state = self.prepare(pending)
+        self.session.delete(pending)
+        self.session.commit()
+
+        outcome = self.stage_fns.apply(self.session, state, {"verdict": "unsure"}, self.ctx)
+
+        self.assertEqual(outcome, Done("skipped", "pending row is gone"))
+
+    def test_the_job_is_registered_for_the_batch_poller(self) -> None:
+        self.assertIs(get_llm_job(JONVABALIS_JOB.name), JONVABALIS_JOB)
 
 
 if __name__ == "__main__":
