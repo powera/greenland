@@ -64,7 +64,6 @@ EXCLUDE_DIFFICULTY_LEVEL: int = -1
 # Wordfreq directories
 WORDFREQ_DATA_DIR = os.path.join(PROJECT_ROOT, "data", "wordfreq")
 WORDFREQ_DB_PATH = os.path.join(WORDFREQ_DATA_DIR, "linguistics.sqlite")
-WORDFREQ_TEMPLATE_DIR = os.path.join(SRC_DIR, "wordfreq", "templates")
 # Downloaded Gutenberg book text, kept out of git (data/working is ignored).
 # Gutenberg rate-limits, so this cache is deliberately persistent rather than
 # a scratch directory that a reboot clears.

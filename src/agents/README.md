@@ -46,7 +46,6 @@ can launch or that back a Barsukas page.
 | **gandras** | stork | Import S3 staging audio manifests into review records | inline | via helpers | no |
 | **ungurys** | eel | WireWord export | shim → `exports.wireword` | yes | no |
 | **elnias** | deer | Bootstrap export (minimal format) | shim → `exports.bootstrap` | yes | no |
-| **povas** | peacock | POS-subtype HTML reports | shim → `exports.pos_reports` | yes | no |
 | **gyvate** | snake | App string catalog export (import-only, no CLI) | shim → `exports.strings` | via `exports` | no |
 | **veidrodis** | mirror | Template string catalogs (import-only, no CLI) | shim → `exports.strings` | no | no |
 
@@ -86,7 +85,7 @@ Barsukas integrity page.  vieversys is the production audio path.
 - bebras sentence mode (`--sentence`/`--file`) predates the `sentences/`
   pipeline (genys, zvirblis decomposition) and duplicates it; only
   `wordfreq/tools/sentence_word_linker.py` still imports it.
-- ungurys, elnias, povas, gyvate, veidrodis, buivolas, sarka and zvirblis are
+- ungurys, elnias, gyvate, veidrodis, buivolas, sarka and zvirblis are
   compatibility wrappers (gyvate and veidrodis are imported only by
   `tests/test_exports_compatibility.py`).  New code should import from `exports/` and
   `sentences/` directly; the wrappers can go once Barsukas's launcher and the
@@ -339,15 +338,6 @@ level coverage, use the Barsukas-first flow instead: Conversations → New
 Dialog, which enqueues `conversations.scene.generate` and stores word links,
 a derived difficulty level, and a coverage report of the words the dictionary
 is missing. See `docs/dialog_generation.md`.
-
-### povas (HTML Reports)
-
-```bash
-povas.py                              # Generate all POS subtype HTML pages
-povas.py --index-only                 # Generate only the index page
-```
-
-Output: `{OUTPUT_DIR}/pos_subtypes/`
 
 ### ungurys (WireWord Export)
 

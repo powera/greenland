@@ -302,7 +302,6 @@ if __name__ == '__main__':
 | Agent | Lithuanian | Purpose |
 |-------|-----------|---------|
 | **Žvirblis** | Sparrow | Example sentence generator with automatic difficulty calculation |
-| **Povas** | Peacock | HTML report generator (POS subtype pages with comprehensive data) |
 | **Vovere** | Squirrel | Concept entry generator (fetches source pages, writes encyclopedia bodies) |
 | **Voverukas** | Little squirrel | Concept crawl ranker (read-only): ranks wanted "red-link" topics by importance over the concept link-graph to prioritise what to create next |
 
@@ -721,7 +720,6 @@ Choose Lithuanian animal names that metaphorically represent the agent's functio
 - **Šernas** (Boar) - Persistent in finding similar things
 - **Papuga** (Parrot) - Repeats sounds with accuracy
 - **Žvirblis** (Sparrow) - Small but prolific
-- **Povas** (Peacock) - Beautiful displays
 - **Ungurys** (Eel) - Swimming data downstream
 
 Avoid:

@@ -193,16 +193,6 @@ intentionally excluded.
   - Include: English, target language, GUID, POS, subtype, difficulty level
   - Lightweight format for bootstrapping systems
 
-#### Povas (Peacock)
-- **Animal**: Peacock
-- **Purpose**: HTML generation - "beautiful displays of information"
-- **Dependencies**: Voras, Vilkas, Papuga (needs full enriched data)
-- **Outputs**: Static HTML pages for vocabulary browsing
-- **Key Functions**:
-  - Generate HTML pages organized by POS subtypes
-  - Create index and navigation pages
-  - Display comprehensive linguistic information
-
 #### Kiškis (Rabbit)
 - **Animal**: Rabbit
 - **Purpose**: Sentence export - "quick to deliver sentences everywhere"
@@ -256,7 +246,6 @@ Vilkas → Vieversys (Audio - Grammatical Forms)
 ```
 Complete Data → Ungurys (WireWord Export - needs Voras, Vilkas, Lape, Šernas, Vieversys)
               → Elnias (Bootstrap Export - needs Voras)
-              → Povas (HTML Export - needs Voras, Vilkas, Papuga)
               → Kiškis (Sentence Export - needs Žvirblis, Bebras)
 ```
 
@@ -275,7 +264,7 @@ Complete Data → Ungurys (WireWord Export - needs Voras, Vilkas, Lape, Šernas,
 6. `žvirblis` - Generate sentences (after Voras)
 7. `bebras` - Link sentences to vocabulary (after Žvirblis)
 8. `vieversys` - Generate audio files for base lemmas (after Voras) AND grammatical forms (after Vilkas)
-9. `ungurys`, `elnias`, `povas`, `kiškis` - Export data (after all enrichment complete)
+9. `ungurys`, `elnias`, `kiškis` - Export data (after all enrichment complete)
 
 ### Optional/Maintenance Agents
 - **Dramblys** - Run periodically to find missing vocabulary
