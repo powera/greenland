@@ -55,9 +55,10 @@ if TYPE_CHECKING:
 
 def _get_db_session(db_path: Optional[str]) -> "Session":
     """Lazy import and create database session."""
-    from storage.database import create_database_session
+    from storage.backend.config import BackendType, DataSourceConfig
+    from storage.backend.factory import create_session
 
-    return create_database_session(db_path) if db_path else create_database_session()
+    return create_session(DataSourceConfig(backend_type=BackendType.SQLITE, sqlite_path=db_path))
 
 
 def _get_manager(session: "Session") -> "CountryOverrideManager":
@@ -104,8 +105,8 @@ def cmd_preview_all(args: argparse.Namespace) -> None:
 
             tier_names = {
                 TIER_1_LEVEL: "Tier 1 (Home/Neighbors/English)",
-                TIER_2_LEVEL: "Tier 2 (Major Powers)",
-                TIER_3_LEVEL: "Tier 3 (Remaining)",
+                TIER_2_LEVEL: "Tier 2 (Main Geography)",
+                TIER_3_LEVEL: "Tier 3 (Extended Geography)",
             }
 
             for level in get_all_tier_levels():
@@ -246,8 +247,8 @@ def cmd_validate(args: argparse.Namespace) -> None:
         print()
         print("Tier levels:")
         print(f"  Tier 1 (Home/Neighbors/English): Level {TIER_1_LEVEL}")
-        print(f"  Tier 2 (Major Powers): Level {TIER_2_LEVEL}")
-        print(f"  Tier 3 (Remaining): Level {TIER_3_LEVEL}")
+        print(f"  Tier 2 (Main Geography): Level {TIER_2_LEVEL}")
+        print(f"  Tier 3 (Extended Geography): Level {TIER_3_LEVEL}")
 
 
 def cmd_info(args: argparse.Namespace) -> None:
@@ -266,8 +267,8 @@ def cmd_info(args: argparse.Namespace) -> None:
 
     tier_names = {
         TIER_1_LEVEL: "Tier 1 - Home country, neighbors, and English-speaking",
-        TIER_2_LEVEL: "Tier 2 - Major world powers and culturally relevant",
-        TIER_3_LEVEL: "Tier 3 - Remaining countries",
+        TIER_2_LEVEL: "Tier 2 - Main geography batch",
+        TIER_3_LEVEL: "Tier 3 - Extended geography",
     }
 
     for level in get_all_tier_levels():

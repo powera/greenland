@@ -40,10 +40,10 @@ from storage.crud.difficulty_override import (
     get_difficulty_override,
 )
 from storage.models.schema import Lemma, LemmaDifficultyOverride
+from words.difficulty.geography_catalog import GEOGRAPHY_SENSES, MAIN_COUNTRY_NAMES, find_sense
 from words.difficulty.country_word_priorities import (
     CONTINENT_NAMES,
     COUNTRY_NAMES,
-    COUNTRY_TO_NATIONALITY_MAP,
     TIER_1_LEVEL,
     TIER_2_LEVEL,
     TIER_3_LEVEL,
@@ -55,6 +55,9 @@ from words.difficulty.country_word_priorities import (
 # Difficulty level for excluded words (not relevant for this language)
 EXCLUDED_LEVEL = -1
 COUNTRY_NOTES_PREFIX = "Country word priority:"
+GEOGRAPHY_COUNTRY_NAMES = COUNTRY_NAMES | {
+    sense.lemma_text for sense in GEOGRAPHY_SENSES if sense.pos_subtype == "region"
+}
 
 
 def _is_country_override(override: Optional[LemmaDifficultyOverride]) -> bool:
@@ -69,8 +72,10 @@ def _is_country_override(override: Optional[LemmaDifficultyOverride]) -> bool:
     return not override.notes and override.difficulty_level in {
         EXCLUDED_LEVEL,
         8,
+        10,
         13,
         18,
+        145,
         *get_all_tier_levels(),
     }
 
@@ -115,125 +120,42 @@ class CountryOverrideManager:
     language-specific difficulty level overrides.
     """
 
-    # POS subtypes that are considered "country-related"
-    COUNTRY_SUBTYPES = {"region", "nationality"}
+    # Match curated senses, not every word in these broad categories.
+    COUNTRY_SUBTYPES = {
+        "region",
+        "nationality",
+        "origin",
+        "communication_information",
+        "group_people",
+    }
 
     def __init__(self, session: Session) -> None:
-        """
-        Initialize the manager.
-
-        Args:
-            session: SQLAlchemy database session
-        """
         self.session = session
-        self._country_words: Optional[Dict[str, List[Lemma]]] = None
-        self._nationality_words: Optional[Dict[str, List[Lemma]]] = None
 
-    def _load_country_words(self) -> Dict[str, List[Lemma]]:
+    def _geography_words(self) -> List[Tuple[Lemma, Tuple[str, ...], int, str]]:
+        """Recognized countries and distinct, explicitly catalogued senses.
+
+        A language can belong to several countries. Keep it as one item so
+        preview/apply emits at most one change for its lemma.
         """
-        Load all country words from the database.
-
-        Returns:
-            Dictionary mapping concept_label to list of Lemma objects
-        """
-        if self._country_words is not None:
-            return self._country_words
-
-        self._country_words = {}
-
-        countries = (
-            self.session.query(Lemma)
-            .filter(
-                Lemma.pos_type == "noun",
-                Lemma.pos_subtype == "region",
-                Lemma.lemma_text.in_(COUNTRY_NAMES | CONTINENT_NAMES),
-            )
-            .all()
+        candidates = (
+            self.session.query(Lemma).filter(Lemma.pos_subtype.in_(self.COUNTRY_SUBTYPES)).all()
         )
-
-        for lemma in countries:
-            label = lemma.lemma_text
-            if label not in self._country_words:
-                self._country_words[label] = []
-            self._country_words[label].append(lemma)
-
-        return self._country_words
-
-    def _load_nationality_words(self) -> Dict[str, List[Lemma]]:
-        """
-        Load all nationality words from the database.
-
-        Returns:
-            Dictionary mapping concept_label to list of Lemma objects
-        """
-        if self._nationality_words is not None:
-            return self._nationality_words
-
-        self._nationality_words = {}
-
-        nationalities = (
-            self.session.query(Lemma)
-            .filter(
-                Lemma.pos_type == "noun",
-                Lemma.pos_subtype == "nationality",
-            )
-            .all()
-        )
-
-        for lemma in nationalities:
-            label = lemma.lemma_text
-            if label not in self._nationality_words:
-                self._nationality_words[label] = []
-            self._nationality_words[label].append(lemma)
-
-        return self._nationality_words
-
-    def _find_related_words_for_country(self, country_label: str) -> List[Tuple[Lemma, str]]:
-        """
-        Find all words related to a country.
-
-        Args:
-            country_label: The country concept_label (e.g., "Lithuania")
-
-        Returns:
-            List of tuples: (Lemma, relationship_type)
-            where relationship_type is "country", "nationality", etc.
-        """
-        results: List[Tuple[Lemma, str]] = []
-
-        # Get the country itself
-        countries = self._load_country_words()
-        if country_label in countries:
-            for lemma in countries[country_label]:
-                results.append((lemma, "country"))
-
-        # Get the nationality (person from country)
-        nationality_label = COUNTRY_TO_NATIONALITY_MAP.get(country_label)
-        if nationality_label:
-            nationalities = self._load_nationality_words()
-            if nationality_label in nationalities:
-                for lemma in nationalities[nationality_label]:
-                    results.append((lemma, "nationality"))
-
+        results: List[Tuple[Lemma, Tuple[str, ...], int, str]] = []
+        for lemma in candidates:
+            sense = find_sense(lemma)
+            if sense is not None:
+                results.append((lemma, sense.countries, sense.base_level, sense.pos_subtype))
+            elif lemma.pos_type == "noun" and lemma.pos_subtype == "region":
+                if lemma.lemma_text in CONTINENT_NAMES:
+                    results.append((lemma, (lemma.lemma_text,), TIER_2_LEVEL, "continent"))
+                elif lemma.lemma_text in COUNTRY_NAMES | MAIN_COUNTRY_NAMES:
+                    results.append((lemma, (lemma.lemma_text,), TIER_2_LEVEL, "country"))
         return results
 
     def get_all_country_related_words(self) -> List[Lemma]:
-        """
-        Get all country-related words (countries and nationalities).
-
-        Returns:
-            List of Lemma objects
-        """
-        countries = self._load_country_words()
-        nationalities = self._load_nationality_words()
-
-        all_words: List[Lemma] = []
-        for lemmas in countries.values():
-            all_words.extend(lemmas)
-        for lemmas in nationalities.values():
-            all_words.extend(lemmas)
-
-        return all_words
+        """Countries, demonyms, origin adjectives, languages and ethnic groups."""
+        return [lemma for lemma, _, _, _ in self._geography_words()]
 
     def preview_changes(
         self,
@@ -264,59 +186,46 @@ class CountryOverrideManager:
             TIER_3_LEVEL: 0,
         }
 
-        # Process all countries
-        countries = self._load_country_words()
-        all_country_labels = set(countries.keys())
+        geography_words = self._geography_words()
+        for lemma, country_labels, base_level, relationship in geography_words:
+            # Extended senses (e.g. Assamese) do not become beginner vocabulary
+            # just because a related large country (India) is promoted.
+            country_levels = [
+                get_country_level_for_language(country_label, target_language)
+                for country_label in country_labels
+            ]
+            proposed_level = base_level
+            if base_level == TIER_2_LEVEL:
+                available_levels = [level for level in country_levels if level is not None]
+                if available_levels:
+                    proposed_level = min(available_levels)
 
-        # Also add countries from the priority config that might not be in DB yet
-        for country_label in all_country_labels:
-            proposed_level = get_country_level_for_language(country_label, target_language)
-
-            if proposed_level is None:
-                # Not in any tier - exclude this country (level -1)
-                proposed_level = EXCLUDED_LEVEL
-
-            # Find all related words for this country
-            related_words = self._find_related_words_for_country(country_label)
-
-            for lemma, relationship in related_words:
-                # Get current state
-                current_override = get_difficulty_override(self.session, lemma.id, target_language)
-                if current_override is not None and not _is_country_override(current_override):
-                    # A manually maintained override is authoritative and must
-                    # not be replaced by this derived country configuration.
-                    continue
-                current_override_level = (
-                    current_override.difficulty_level if current_override else None
-                )
-
-                reason = f"{relationship} word for {country_label}"
-                if proposed_level == EXCLUDED_LEVEL:
-                    reason = f"{relationship} word for {country_label} (not relevant for {target_language})"
-
-                change = OverrideChange(
-                    guid=lemma.guid or "",
-                    word_text=lemma.lemma_text,
-                    pos_subtype=lemma.pos_subtype or "",
-                    country_label=country_label,
-                    default_level=lemma.difficulty_level,
-                    current_override=current_override_level,
-                    proposed_level=proposed_level,
-                    reason=reason,
-                )
-
-                if change.is_change or include_unchanged:
-                    changes.append(change)
-
-                    if change.is_change and proposed_level in changes_by_tier:
-                        changes_by_tier[proposed_level] += 1
+            current_override = get_difficulty_override(self.session, lemma.id, target_language)
+            if current_override is not None and not _is_country_override(current_override):
+                continue
+            current_override_level = current_override.difficulty_level if current_override else None
+            country_label = ", ".join(country_labels)
+            change = OverrideChange(
+                guid=lemma.guid or "",
+                word_text=lemma.lemma_text,
+                pos_subtype=lemma.pos_subtype or "",
+                country_label=country_label,
+                default_level=lemma.difficulty_level,
+                current_override=current_override_level,
+                proposed_level=proposed_level,
+                reason=f"{relationship} word for {country_label}",
+            )
+            if change.is_change or include_unchanged:
+                changes.append(change)
+                if change.is_change:
+                    changes_by_tier[proposed_level] += 1
 
         # Sort changes by proposed level, then by country label
         changes.sort(key=lambda c: (c.proposed_level, c.country_label, c.pos_subtype))
 
         return OverrideSummary(
             target_language=target_language,
-            total_words_analyzed=len(self.get_all_country_related_words()),
+            total_words_analyzed=len(geography_words),
             words_with_changes=sum(1 for c in changes if c.is_change),
             changes_by_tier=changes_by_tier,
             changes=changes,
@@ -372,7 +281,7 @@ class CountryOverrideManager:
             .filter(
                 LemmaDifficultyOverride.language_code == target_language,
                 Lemma.pos_subtype == "region",
-                Lemma.lemma_text.notin_(COUNTRY_NAMES | CONTINENT_NAMES),
+                Lemma.lemma_text.notin_(GEOGRAPHY_COUNTRY_NAMES | CONTINENT_NAMES),
             )
             .all()
         )
@@ -486,9 +395,9 @@ class CountryOverrideManager:
         ]
 
         tier_names = {
-            TIER_1_LEVEL: f"Tier 1 (Level {TIER_1_LEVEL}) - Home/Neighbors/English",
-            TIER_2_LEVEL: f"Tier 2 (Level {TIER_2_LEVEL}) - Major Powers",
-            TIER_3_LEVEL: f"Tier 3 (Level {TIER_3_LEVEL}) - Remaining",
+            TIER_1_LEVEL: f"Tier 1 (Level {TIER_1_LEVEL}) - Target-language home countries and neighbors",
+            TIER_2_LEVEL: f"Tier 2 (Level {TIER_2_LEVEL}) - Main geography batch",
+            TIER_3_LEVEL: f"Tier 3 (Level {TIER_3_LEVEL}) - Extended geography",
         }
 
         for level in get_all_tier_levels():

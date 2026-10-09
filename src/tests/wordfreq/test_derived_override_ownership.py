@@ -9,7 +9,7 @@ from sqlalchemy.orm import Session
 import storage.models  # noqa: F401
 from storage.models.schema import Base, Lemma, LemmaDifficultyOverride
 from words.difficulty.country_override_manager import CountryOverrideManager, _is_country_override
-from words.difficulty.country_word_priorities import TIER_2_LEVEL, TIER_3_LEVEL
+from words.difficulty.country_word_priorities import TIER_2_LEVEL
 from words.difficulty.family_relation_override_manager import (
     FamilyRelationOverrideManager,
     _is_family_override,
@@ -81,7 +81,7 @@ def test_preview_preserves_manual_override(
     assert summary.changes == []
 
 
-def test_country_preview_ignores_states_and_uses_tier_three(
+def test_country_preview_ignores_states_and_keeps_main_countries_in_main_batch(
     session: Session,
 ) -> None:
     state = Lemma(
@@ -116,5 +116,5 @@ def test_country_preview_ignores_states_and_uses_tier_three(
     assert summary.total_words_analyzed == 2
     assert [(change.guid, change.proposed_level) for change in summary.changes] == [
         ("N_CONTINENT", TIER_2_LEVEL),
-        ("N_COUNTRY", TIER_3_LEVEL),
+        ("N_COUNTRY", TIER_2_LEVEL),
     ]
