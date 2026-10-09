@@ -414,7 +414,7 @@ finally:
 ### LLM Integration
 
 ```python
-from wordfreq.tools.llm_validators import validate_lemma_form
+from words.llm_validators import validate_lemma_form
 
 result = validate_lemma_form(
     lemma_text="shoes",
@@ -744,7 +744,7 @@ Agents interact with SQLAlchemy models from `storage.models.schema`:
 
 ### LLM Tools
 
-Use utilities from `wordfreq.tools.llm_validators`:
+Use utilities from `words.llm_validators`:
 - `validate_lemma_form()` - Check if word is in lemma form
 - `validate_definition()` - Validate definition quality
 - `validate_pronunciation()` - Check IPA/phonetic

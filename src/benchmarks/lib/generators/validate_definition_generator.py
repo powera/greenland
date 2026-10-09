@@ -3,7 +3,7 @@
 """Generator for validate_definition agent benchmark questions.
 
 Tests the lokys agent's validate_definition() LLM function from
-wordfreq/tools/llm_validators.py, which checks whether a definition is
+words/llm_validators.py, which checks whether a definition is
 well-formed and appropriate for a given word and part of speech.
 """
 

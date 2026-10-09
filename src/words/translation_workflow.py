@@ -55,7 +55,7 @@ from storage.translation_helpers import (
 from storage.translation_helpers import get_translation
 from storage.translation_helpers import get_translation as get_translation_helper
 from storage.translation_helpers import set_translation as set_translation_helper
-from wordfreq.tools.llm_validators import validate_all_translations_for_word
+from words.llm_validators import validate_all_translations_for_word
 from wordfreq.translation.client import LinguisticClient
 
 if TYPE_CHECKING:  # workqueue handlers import this module, so the import below
@@ -204,7 +204,7 @@ def enqueue_translation_regeneration(
 class TranslationWorkflow:
     """Service for validating and populating multi-lingual translations."""
 
-    def __init__(self, config: DataSourceConfig):
+    def __init__(self, config: DataSourceConfig) -> None:
         """
         Initialize the translation workflow.
 

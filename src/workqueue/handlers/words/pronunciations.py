@@ -23,7 +23,7 @@ from sqlalchemy.orm import Session
 
 from clients.types import LLMCall
 from storage.models.schema import Lemma
-from wordfreq.tools.llm_validators import (
+from words.llm_validators import (
     build_batch_pronunciation_call,
     build_pronunciation_call,
     interpret_batch_pronunciations,

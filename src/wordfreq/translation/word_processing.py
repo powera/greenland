@@ -3,7 +3,6 @@
 """Core word processing logic for linguistic analysis."""
 
 import logging
-import time
 from typing import Any, Dict, List, Optional
 
 from storage import database as linguistic_db
@@ -252,53 +251,3 @@ def process_word(
         session.rollback()
         logger.error(f"Error processing word '{word}': {e}", exc_info=True)
         return False
-
-
-def process_words_batch(
-    client: Any,
-    word_list: List[str],
-    get_session_func: Any,
-    refresh: bool = False,
-    throttle: float = 1.0,
-) -> Dict[str, Any]:
-    """
-    Process a batch of words using the new schema.
-
-    Args:
-        client: LinguisticClient instance
-        word_list: List of word tokens to process
-        get_session_func: Function to get database session
-        refresh: Whether to refresh existing entries
-        throttle: Time to wait between API calls
-
-    Returns:
-        Dictionary with processing statistics
-    """
-    logger.info(f"Processing batch of {len(word_list)} words")
-
-    successful = 0
-    failed = 0
-    skipped = 0
-
-    for word in word_list:
-        try:
-            success = process_word(client, word, get_session_func, refresh=refresh)
-            if success:
-                successful += 1
-                logger.info(f"Successfully processed '{word}'")
-            else:
-                failed += 1
-                logger.warning(f"Failed to process '{word}'")
-
-            # Throttle to avoid overloading the API
-            time.sleep(throttle)
-
-        except Exception as e:
-            failed += 1
-            logger.error(f"Error processing '{word}': {e}")
-
-    logger.info(
-        f"Batch processing complete: {successful} successful, {failed} failed, {skipped} skipped"
-    )
-
-    return {"total": len(word_list), "successful": successful, "failed": failed, "skipped": skipped}

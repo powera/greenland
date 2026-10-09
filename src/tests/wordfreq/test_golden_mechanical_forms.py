@@ -30,7 +30,7 @@ from storage.lexeme import get_lexeme
 from storage.models.schema import Base, DerivativeForm, Lemma
 from storage.release.mechanical_filter import clear_cache, without_derivable
 from wordfreq import golden_loader
-from wordfreq.tools.generate_mechanical_forms import generate_for_session
+from words.mechanical_forms import generate_for_session
 
 
 class GoldenMechanicalFormsTest(unittest.TestCase):

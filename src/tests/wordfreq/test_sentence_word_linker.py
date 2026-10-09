@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
-Tests for wordfreq.tools.sentence_word_linker module.
+Tests for sentences.sentence_word_linker module.
 
 Tests the unified lemma resolution cascade. LLM disambiguation is not tested
 here since it requires a live model; only the DB-based strategies are covered.
@@ -20,7 +20,7 @@ from storage.models.schema import (
     SentenceTranslation,
     SentenceWord,
 )
-from wordfreq.tools.sentence_word_linker import (
+from sentences.sentence_word_linker import (
     PART_OF_SPEECH_TO_POS,
     find_lemma_by_text,
     resolve_lemma_for_word,

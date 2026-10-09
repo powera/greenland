@@ -2,7 +2,7 @@
 
 """Runner for validate_all_translations_for_word agent benchmark.
 
-Calls validate_all_translations_for_word() from wordfreq/tools/llm_validators.py
+Calls validate_all_translations_for_word() from words/llm_validators.py
 directly with the model under test, then scores the result using partial credit
 based on how many per-language is_correct/is_lemma_form booleans match expected.
 No DB access is required.
@@ -15,7 +15,7 @@ from typing import Any, Dict, Optional, Tuple
 
 from benchmarks.lib.utils.base_runner import BenchmarkRunner
 from benchmarks.lib.utils.data_models import BenchmarkMetadata, BenchmarkResult
-from wordfreq.tools.llm_validators import validate_all_translations_for_word
+from words.llm_validators import validate_all_translations_for_word
 
 logging.basicConfig(
     level=logging.INFO, format="%(asctime)s - %(filename)s:%(lineno)d - %(levelname)s - %(message)s"

@@ -303,7 +303,7 @@ def api_check_translations() -> ResponseReturnValue:
             )
 
         # Use the LLM validator to check all translations at once
-        from wordfreq.tools.llm_validators import validate_all_translations_for_word
+        from words.llm_validators import validate_all_translations_for_word
 
         validation_results = validate_all_translations_for_word(
             lemma.lemma_text, translations, lemma.pos_type, config.model

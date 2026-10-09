@@ -8,9 +8,9 @@ from sqlalchemy.orm import Session
 
 import storage.models  # noqa: F401
 from storage.models.schema import Base, Lemma, LemmaDifficultyOverride
-from wordfreq.tools.country_override_manager import CountryOverrideManager, _is_country_override
-from wordfreq.tools.country_word_priorities import TIER_2_LEVEL, TIER_3_LEVEL
-from wordfreq.tools.family_relation_override_manager import (
+from words.difficulty.country_override_manager import CountryOverrideManager, _is_country_override
+from words.difficulty.country_word_priorities import TIER_2_LEVEL, TIER_3_LEVEL
+from words.difficulty.family_relation_override_manager import (
     FamilyRelationOverrideManager,
     _is_family_override,
 )

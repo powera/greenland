@@ -3,7 +3,7 @@
 """Generator for validate_all_translations_for_word agent benchmark questions.
 
 Tests the voras agent's validate_all_translations_for_word() LLM function
-from wordfreq/tools/llm_validators.py, which validates whether multilingual
+from words/llm_validators.py, which validates whether multilingual
 translations of an English word are semantically correct and in lemma form.
 """
 

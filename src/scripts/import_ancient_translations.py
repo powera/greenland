@@ -5,8 +5,8 @@ The ``la``/``sa``/``grc``/``ar-classical``/``non`` translations and their
 ``data/release/lemmas/*/*/ancient.jsonl``; nothing had ever read them back into
 a SQL backend. This is the mechanical, no-LLM import that fixes that.
 
-    PYTHONPATH=src python src/wordfreq/tools/import_ancient_translations.py --dry-run
-    PYTHONPATH=src python src/wordfreq/tools/import_ancient_translations.py
+    PYTHONPATH=src python src/scripts/import_ancient_translations.py --dry-run
+    PYTHONPATH=src python src/scripts/import_ancient_translations.py
 
 It is read-only against ``data/release`` - the release files are never written.
 """
@@ -18,8 +18,8 @@ import sys
 from pathlib import Path
 from typing import Any, Dict
 
-if str(Path(__file__).parent.parent.parent) not in sys.path:
-    sys.path.insert(0, str(Path(__file__).parent.parent.parent))
+if str(Path(__file__).parent.parent) not in sys.path:
+    sys.path.insert(0, str(Path(__file__).parent.parent))
 
 from agents.common.common_args import add_backend_args, add_common_args, get_data_source_config
 from storage.backend import create_session

@@ -30,10 +30,11 @@ LLM-based linguistic analysis: word translation, definitions, pronunciation,
 POS subtype classification, and form generation (`client.py`,
 `processor.py`, `generate_forms_*.py`, `wiktionary_forms.py`).
 
-### `tools/`
-CLI utilities: difficulty override management, release reports,
-sentence/word linking, vocabulary budgets, country and family-relation
-overrides, Chinese conversion, word categorization.
+Related workflow helpers now live with their owners: sentence linking and
+vocabulary budgets in `src/sentences/`; LLM validation, text helpers and
+mechanical-form persistence in `src/words/`; language-specific difficulty
+rules and override managers in `src/words/difficulty/`. Maintenance CLIs
+live in `src/scripts/`.
 
 ### `data/`
 Python data modules and corpus comparison helpers (`compare.py`,

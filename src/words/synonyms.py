@@ -32,7 +32,7 @@ from storage.models.variant_form import (
     VARIANT_KIND_SPELLING,
 )
 from storage.translation_helpers import get_supported_languages, get_translation
-from wordfreq.tools.text_utils import is_numeral
+from words.text_utils import is_numeral
 
 import util.prompt_loader
 

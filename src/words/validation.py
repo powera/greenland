@@ -30,7 +30,7 @@ from storage.backend import create_session as create_backend_session
 from storage.backend.config import DataSourceConfig
 from storage.models.schema import Lemma
 from storage.translation_helpers import get_translation
-from wordfreq.tools.llm_validators import (
+from words.llm_validators import (
     suggest_disambiguation,
     validate_definition,
     validate_disambiguation_need,
@@ -46,7 +46,7 @@ class LemmaValidationService:
 
     disambiguation_confidence_threshold = 0.7
 
-    def __init__(self, config: DataSourceConfig):
+    def __init__(self, config: DataSourceConfig) -> None:
         """
         Initialize the lemma validation service.
 

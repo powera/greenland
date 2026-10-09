@@ -87,7 +87,7 @@ def test_verb_slots_survive_the_wireword_key_conversion(language_code: str) -> N
 
 
 def test_mechanical_generator_covers_both_spanish_varieties() -> None:
-    from wordfreq.tools.generate_mechanical_forms import (
+    from words.mechanical_forms import (
         SUPPORTED,
         resolve_grammatical_form,
     )

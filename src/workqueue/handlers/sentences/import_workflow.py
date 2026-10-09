@@ -280,7 +280,7 @@ def _run_stage(
     the two stages can be reached independently -- a sentence whose linking was
     already complete still needs its unresolved words staged.
     """
-    from wordfreq.tools.sentence_word_linker import ResolvedLemma
+    from sentences.sentence_word_linker import ResolvedLemma
 
     unresolved: List[ResolvedLemma] = []
     for language_code in spec.decompose_languages:

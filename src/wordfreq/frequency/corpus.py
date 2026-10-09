@@ -634,43 +634,6 @@ def get_effective_unknown_rank(
             session.close()
 
 
-def get_corpus_configs_from_db(
-    session: Optional[Session] = None, db_path: Optional[str] = None, enabled_only: bool = True
-) -> List[storage.models.schema.Corpus]:
-    """
-    Get corpus configurations from the database.
-
-    Args:
-        session: Optional database session
-        db_path: Optional database path
-        enabled_only: Whether to return only enabled corpora
-
-    Returns:
-        List of Corpus objects from database
-    """
-    if session is None:
-        if db_path:
-            session_config = DataSourceConfig(sqlite_path=db_path)
-            session = create_session(session_config)
-        else:
-            session_config = DataSourceConfig()
-            session = create_session(session_config)
-        should_close = True
-    else:
-        should_close = False
-
-    try:
-        query = session.query(storage.models.schema.Corpus)
-        if enabled_only:
-            query = query.filter(storage.models.schema.Corpus.enabled == True)
-        result: list[storage.models.schema.Corpus] = query.all()
-        return result
-
-    finally:
-        if should_close:
-            session.close()
-
-
 def initialize_corpus_configs(
     session: Optional[Session] = None, db_path: Optional[str] = None
 ) -> Dict[str, Any]:

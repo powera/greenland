@@ -1,31 +1,36 @@
 #!/usr/bin/env python3
 """
-CLI tool for applying country-related word difficulty level overrides.
+CLI tool for applying family relation word difficulty level overrides.
 
 This tool allows you to:
 - Preview changes that would be made for a specific language
 - Apply overrides for one or all languages
-- View current country-related overrides
-- Clear country-related overrides
+- View current family relation overrides
+- Clear family relation overrides
+
+The key difference from country overrides is that family relation overrides
+primarily deal with EXCLUSION (setting terms to null/-1) rather than
+prioritizing difficulty levels. This is because family relation terms that
+don't exist naturally in a language should be excluded from learning.
 
 Examples:
     # Preview changes for Chinese learners
-    PYTHONPATH=src python src/wordfreq/tools/apply_country_overrides.py preview zh
+    PYTHONPATH=src python src/scripts/apply_family_relation_overrides.py preview zh
 
     # Apply changes for Chinese learners
-    PYTHONPATH=src python src/wordfreq/tools/apply_country_overrides.py apply zh
+    PYTHONPATH=src python src/scripts/apply_family_relation_overrides.py apply zh
 
     # Preview changes for all languages
-    PYTHONPATH=src python src/wordfreq/tools/apply_country_overrides.py preview-all
+    PYTHONPATH=src python src/scripts/apply_family_relation_overrides.py preview-all
 
     # Apply changes for all languages
-    PYTHONPATH=src python src/wordfreq/tools/apply_country_overrides.py apply-all
+    PYTHONPATH=src python src/scripts/apply_family_relation_overrides.py apply-all
 
     # View current overrides for a language
-    PYTHONPATH=src python src/wordfreq/tools/apply_country_overrides.py view zh
+    PYTHONPATH=src python src/scripts/apply_family_relation_overrides.py view zh
 
     # Validate the priority configuration
-    PYTHONPATH=src python src/wordfreq/tools/apply_country_overrides.py validate
+    PYTHONPATH=src python src/scripts/apply_family_relation_overrides.py validate
 """
 
 import argparse
@@ -34,23 +39,25 @@ from pathlib import Path
 from typing import TYPE_CHECKING, Optional
 
 # Add src directory to path
-GREENLAND_SRC_PATH = str(Path(__file__).parent.parent.parent)
+GREENLAND_SRC_PATH = str(Path(__file__).parent.parent)
 if GREENLAND_SRC_PATH not in sys.path:
     sys.path.insert(0, GREENLAND_SRC_PATH)
 
 # Import priority configuration (no database dependencies)
-from wordfreq.tools.country_word_priorities import (
-    TIER_1_LEVEL,
-    TIER_2_LEVEL,
-    TIER_3_LEVEL,
-    get_all_tier_levels,
+from words.difficulty.family_relation_priorities import (
+    ALL_FAMILY_RELATIONS,
+    get_excluded_terms_for_language,
+    get_included_terms_for_language,
     get_supported_languages,
     validate_configuration,
 )
 
 if TYPE_CHECKING:
     from sqlalchemy.orm import Session
-    from wordfreq.tools.country_override_manager import CountryOverrideManager
+
+    from words.difficulty.family_relation_override_manager import (
+        FamilyRelationOverrideManager,
+    )
 
 
 def _get_db_session(db_path: Optional[str]) -> "Session":
@@ -60,11 +67,13 @@ def _get_db_session(db_path: Optional[str]) -> "Session":
     return create_database_session(db_path) if db_path else create_database_session()
 
 
-def _get_manager(session: "Session") -> "CountryOverrideManager":
+def _get_manager(session: "Session") -> "FamilyRelationOverrideManager":
     """Lazy import and create manager."""
-    from wordfreq.tools.country_override_manager import CountryOverrideManager
+    from words.difficulty.family_relation_override_manager import (
+        FamilyRelationOverrideManager,
+    )
 
-    return CountryOverrideManager(session)
+    return FamilyRelationOverrideManager(session)
 
 
 def cmd_preview(args: argparse.Namespace) -> None:
@@ -72,7 +81,7 @@ def cmd_preview(args: argparse.Namespace) -> None:
     session = _get_db_session(args.db_path)
     manager = _get_manager(session)
 
-    print(f"Previewing country word overrides for '{args.language}'...")
+    print(f"Previewing family relation overrides for '{args.language}'...")
     print()
 
     try:
@@ -90,7 +99,7 @@ def cmd_preview_all(args: argparse.Namespace) -> None:
     session = _get_db_session(args.db_path)
     manager = _get_manager(session)
 
-    print("Previewing country word overrides for all languages...")
+    print("Previewing family relation overrides for all languages...")
     print()
 
     try:
@@ -100,18 +109,18 @@ def cmd_preview_all(args: argparse.Namespace) -> None:
             print("=" * 60)
 
             summary = manager.preview_changes(lang_code, include_unchanged=False)
-            print(f"Words with changes: {summary.words_with_changes}")
+            excluded = get_excluded_terms_for_language(lang_code)
+            included = get_included_terms_for_language(lang_code)
 
-            tier_names = {
-                TIER_1_LEVEL: "Tier 1 (Home/Neighbors/English)",
-                TIER_2_LEVEL: "Tier 2 (Major Powers)",
-                TIER_3_LEVEL: "Tier 3 (Remaining)",
-            }
+            print(f"Terms included: {len(included)}")
+            print(f"Terms excluded (null): {len(excluded)}")
+            print(f"Changes to apply: {len(summary.changes)}")
 
-            for level in get_all_tier_levels():
-                count = summary.changes_by_tier.get(level, 0)
-                if count > 0:
-                    print(f"  Level {level} ({tier_names.get(level, '')}): {count}")
+            if summary.changes:
+                exclusion_count = sum(1 for c in summary.changes if c.is_exclusion)
+                inclusion_count = len(summary.changes) - exclusion_count
+                print(f"  - Exclusions to add: {exclusion_count}")
+                print(f"  - Exclusions to remove: {inclusion_count}")
     finally:
         session.close()
 
@@ -122,7 +131,7 @@ def cmd_apply(args: argparse.Namespace) -> None:
     manager = _get_manager(session)
 
     action = "DRY RUN - " if args.dry_run else ""
-    print(f"{action}Applying country word overrides for '{args.language}'...")
+    print(f"{action}Applying family relation overrides for '{args.language}'...")
     print()
 
     try:
@@ -139,7 +148,7 @@ def cmd_apply(args: argparse.Namespace) -> None:
 
         if not args.dry_run:
             print()
-            print(f"Successfully applied {summary.words_with_changes} overrides!")
+            print(f"Successfully applied {len(summary.changes)} overrides!")
     except ValueError as e:
         print(f"Error: {e}")
         sys.exit(1)
@@ -153,7 +162,7 @@ def cmd_apply_all(args: argparse.Namespace) -> None:
     manager = _get_manager(session)
 
     action = "DRY RUN - " if args.dry_run else ""
-    print(f"{action}Applying country word overrides for all languages...")
+    print(f"{action}Applying family relation overrides for all languages...")
     print()
 
     try:
@@ -161,8 +170,8 @@ def cmd_apply_all(args: argparse.Namespace) -> None:
 
         total_changes = 0
         for lang_code, summary in results.items():
-            print(f"{lang_code}: {summary.words_with_changes} changes")
-            total_changes += summary.words_with_changes
+            print(f"{lang_code}: {len(summary.changes)} changes")
+            total_changes += len(summary.changes)
 
         if args.dry_run:
             print()
@@ -179,27 +188,33 @@ def cmd_view(args: argparse.Namespace) -> None:
     session = _get_db_session(args.db_path)
     manager = _get_manager(session)
 
-    print(f"Current country-related overrides for '{args.language}':")
+    print(f"Current family relation overrides for '{args.language}':")
     print("=" * 60)
 
     try:
         overrides = manager.get_current_overrides_for_language(args.language)
 
         if not overrides:
-            print("No country-related overrides found for this language.")
+            print("No family relation overrides found for this language.")
             return
 
-        # Sort by level
-        overrides.sort(key=lambda x: (x[1].difficulty_level, x[0].lemma_text))
+        # Sort by level, then by lemma text
+        overrides.sort(
+            key=lambda x: (
+                x[1].difficulty_level,
+                x[0].lemma_text,
+            )
+        )
 
-        print(f"{'GUID':<12} {'Word':<20} {'Type':<12} {'Level':>6}")
+        print(f"{'GUID':<12} {'Concept':<25} {'Level':>6}")
         print("-" * 60)
 
         for lemma, override in overrides:
-            print(
-                f"{lemma.guid or '':<12} {lemma.lemma_text:<20} "
-                f"{lemma.pos_subtype or '':<12} {override.difficulty_level:>6}"
-            )
+            concept = lemma.lemma_text
+            level_str = str(override.difficulty_level)
+            if override.difficulty_level == -1:
+                level_str = "-1 (null)"
+            print(f"{lemma.guid or '':<12} {concept:<25} {level_str:>10}")
 
         print()
         print(f"Total: {len(overrides)} overrides")
@@ -208,15 +223,17 @@ def cmd_view(args: argparse.Namespace) -> None:
 
 
 def cmd_clear(args: argparse.Namespace) -> None:
-    """Clear country-related overrides for a language."""
+    """Clear family relation overrides for a language."""
     session = _get_db_session(args.db_path)
     manager = _get_manager(session)
 
     action = "DRY RUN - " if args.dry_run else ""
-    print(f"{action}Clearing country-related overrides for '{args.language}'...")
+    print(f"{action}Clearing family relation overrides for '{args.language}'...")
 
     try:
-        count = manager.clear_country_overrides_for_language(args.language, dry_run=args.dry_run)
+        count = manager.clear_family_relation_overrides_for_language(
+            args.language, dry_run=args.dry_run
+        )
 
         if args.dry_run:
             print(f"DRY RUN - Would remove {count} overrides")
@@ -228,7 +245,7 @@ def cmd_clear(args: argparse.Namespace) -> None:
 
 def cmd_validate(args: argparse.Namespace) -> None:
     """Validate the priority configuration."""
-    print("Validating country word priority configuration...")
+    print("Validating family relation priority configuration...")
     print()
 
     issues = validate_configuration()
@@ -241,48 +258,50 @@ def cmd_validate(args: argparse.Namespace) -> None:
     else:
         print("Configuration is valid!")
         print()
+        print(f"Total family relation terms: {len(ALL_FAMILY_RELATIONS)}")
         print(f"Supported languages: {len(get_supported_languages())}")
         print(f"  {', '.join(get_supported_languages())}")
-        print()
-        print("Tier levels:")
-        print(f"  Tier 1 (Home/Neighbors/English): Level {TIER_1_LEVEL}")
-        print(f"  Tier 2 (Major Powers): Level {TIER_2_LEVEL}")
-        print(f"  Tier 3 (Remaining): Level {TIER_3_LEVEL}")
 
 
 def cmd_info(args: argparse.Namespace) -> None:
     """Show configuration info for a language."""
-    from wordfreq.tools.country_word_priorities import COUNTRY_PRIORITIES
-
-    if args.language not in COUNTRY_PRIORITIES:
+    if args.language not in get_supported_languages():
         print(f"Error: Language '{args.language}' not found in configuration.")
         print(f"Supported languages: {', '.join(get_supported_languages())}")
         sys.exit(1)
 
-    priorities = COUNTRY_PRIORITIES[args.language]
+    excluded = get_excluded_terms_for_language(args.language)
+    included = get_included_terms_for_language(args.language)
 
-    print(f"Country priority configuration for '{args.language}':")
+    print(f"Family relation configuration for '{args.language}':")
     print("=" * 60)
 
-    tier_names = {
-        TIER_1_LEVEL: "Tier 1 - Home country, neighbors, and English-speaking",
-        TIER_2_LEVEL: "Tier 2 - Major world powers and culturally relevant",
-        TIER_3_LEVEL: "Tier 3 - Remaining countries",
-    }
+    print(f"\nINCLUDED terms ({len(included)}):")
+    print("-" * 40)
+    for term in sorted(included):
+        print(f"  - {term}")
 
-    for level in get_all_tier_levels():
-        countries = priorities.get(level, [])
-        print(f"\nLevel {level} ({tier_names.get(level, '')}):")
-        if countries:
-            for country in countries:
-                print(f"  - {country}")
-        else:
-            print("  (no countries assigned)")
+    print(f"\nEXCLUDED terms (set to null) ({len(excluded)}):")
+    print("-" * 40)
+    for term in sorted(excluded):
+        print(f"  - {term}")
+
+
+def cmd_list_terms(args: argparse.Namespace) -> None:
+    """List all known family relation terms."""
+    print("All family relation terms:")
+    print("=" * 60)
+
+    for i, term in enumerate(ALL_FAMILY_RELATIONS, 1):
+        print(f"  {i:2}. {term}")
+
+    print()
+    print(f"Total: {len(ALL_FAMILY_RELATIONS)} terms")
 
 
 def main() -> None:
     parser = argparse.ArgumentParser(
-        description="Apply country-related word difficulty level overrides",
+        description="Apply family relation word difficulty level overrides",
         formatter_class=argparse.RawDescriptionHelpFormatter,
         epilog="""
 Examples:
@@ -301,6 +320,9 @@ Examples:
 
   # Show configuration for a language
   %(prog)s info lt
+
+  # List all known family relation terms
+  %(prog)s list-terms
 
   # Validate the configuration
   %(prog)s validate
@@ -324,9 +346,7 @@ Examples:
     )
 
     # Preview-all command
-    preview_all_parser = subparsers.add_parser(
-        "preview-all", help="Preview changes for all languages"
-    )
+    subparsers.add_parser("preview-all", help="Preview changes for all languages")
 
     # Apply command
     apply_parser = subparsers.add_parser("apply", help="Apply changes for a language")
@@ -351,7 +371,7 @@ Examples:
 
     # Clear command
     clear_parser = subparsers.add_parser(
-        "clear", help="Clear country-related overrides for a language"
+        "clear", help="Clear family relation overrides for a language"
     )
     clear_parser.add_argument("language", help="Target language code")
     clear_parser.add_argument(
@@ -361,11 +381,14 @@ Examples:
     )
 
     # Validate command
-    validate_parser = subparsers.add_parser("validate", help="Validate the priority configuration")
+    subparsers.add_parser("validate", help="Validate the priority configuration")
 
     # Info command
     info_parser = subparsers.add_parser("info", help="Show configuration info for a language")
     info_parser.add_argument("language", help="Target language code")
+
+    # List-terms command
+    subparsers.add_parser("list-terms", help="List all known family relation terms")
 
     args = parser.parse_args()
 
@@ -383,6 +406,7 @@ Examples:
         "clear": cmd_clear,
         "validate": cmd_validate,
         "info": cmd_info,
+        "list-terms": cmd_list_terms,
     }
 
     handler = commands.get(args.command)

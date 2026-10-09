@@ -35,7 +35,7 @@ from words.pronunciation_generation import (
     generate_pronunciations_for_lemma,
     store_target_pronunciation,
 )
-from wordfreq.tools.llm_validators import (
+from words.llm_validators import (
     batch_generate_pronunciations,
     generate_pronunciation,
     validate_pronunciation,
@@ -48,7 +48,7 @@ logger = logging.getLogger(__name__)
 class PronunciationService:
     """Service for validating and generating pronunciations."""
 
-    def __init__(self, config: DataSourceConfig):
+    def __init__(self, config: DataSourceConfig) -> None:
         """
         Initialize the pronunciation service.
 

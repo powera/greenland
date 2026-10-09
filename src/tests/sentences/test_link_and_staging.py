@@ -38,7 +38,7 @@ from storage.models.schema import (
     SentenceWord,
     SentenceWordHint,
 )
-from wordfreq.tools.sentence_word_linker import ResolvedLemma
+from sentences.sentence_word_linker import ResolvedLemma
 
 
 class WriterTestCase(unittest.TestCase):

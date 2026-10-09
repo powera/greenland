@@ -3,7 +3,7 @@
 """Generator for validate_lemma_form agent benchmark questions.
 
 Tests the lokys agent's validate_lemma_form() LLM function from
-wordfreq/tools/llm_validators.py, which checks whether a word is in its
+words/llm_validators.py, which checks whether a word is in its
 correct base/lemma form and suggests the correct form when it is not.
 """
 

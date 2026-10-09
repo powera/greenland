@@ -107,7 +107,7 @@ def _is_derivable_variant_form(variant_form: VariantForm) -> bool:
         return False
     # Imported lazily: the generator pulls in every langtools builder, far too
     # much to load for a module that usually only regroups records.
-    from wordfreq.tools.generate_mechanical_forms import derivable_variant_slots
+    from words.mechanical_forms import derivable_variant_slots
 
     return variant_form.grammatical_form in derivable_variant_slots(variant_form)
 

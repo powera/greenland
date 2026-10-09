@@ -19,7 +19,7 @@ from clients.types import Response
 from storage.crud.uncertain_llm_result import get_uncertain_llm_result, record_uncertain_llm_result
 from storage.models.schema import Base, DerivativeForm, Lemma, LemmaTranslation
 from storage.models.uncertain_llm_result import REASON_LOW_CONFIDENCE
-from wordfreq.tools.llm_validators import batch_generate_pronunciations
+from words.llm_validators import batch_generate_pronunciations
 from workqueue.handlers.words.pronunciations import PRONUNCIATIONS_JOB, pronunciation_state
 from workqueue.llm_batch import complete_rows, start_batch_run
 from workqueue.registry import get_llm_job
@@ -177,7 +177,7 @@ def test_several_forms_share_one_grouped_call_like_the_live_path(
         sent.update(kwargs)
         return Response(response_text="", structured_data={}, usage=None)
 
-    with patch("wordfreq.tools.llm_validators.UnifiedLLMClient") as client_class:
+    with patch("words.llm_validators.UnifiedLLMClient") as client_class:
         client_class.return_value.generate_chat.side_effect = record
         batch_generate_pronunciations(
             lemma="run",

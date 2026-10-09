@@ -11,7 +11,7 @@ if "storage.translation_helpers" not in sys.modules:
     _fake_th.LANGUAGE_NAMES = {"en": "English", "fr": "French", "es": "Spanish"}  # type: ignore[attr-defined]
     sys.modules.setdefault("storage.translation_helpers", _fake_th)
 
-import wordfreq.tools.llm_validators as llm_validators
+import words.llm_validators as llm_validators
 
 
 def test_generate_pronunciation_single_prompt(

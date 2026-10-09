@@ -2,7 +2,7 @@
 
 """Runner for validate_definition agent benchmark.
 
-Calls validate_definition() from wordfreq/tools/llm_validators.py directly
+Calls validate_definition() from words/llm_validators.py directly
 with the model under test, then scores the result against the expected
 is_valid boolean from the sample. No DB access is required.
 """
@@ -14,7 +14,7 @@ from typing import Any, Dict, Optional, Tuple
 
 from benchmarks.lib.utils.base_runner import BenchmarkRunner
 from benchmarks.lib.utils.data_models import BenchmarkMetadata, BenchmarkResult
-from wordfreq.tools.llm_validators import validate_definition
+from words.llm_validators import validate_definition
 
 logging.basicConfig(
     level=logging.INFO, format="%(asctime)s - %(filename)s:%(lineno)d - %(levelname)s - %(message)s"

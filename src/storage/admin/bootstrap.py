@@ -14,7 +14,7 @@ from storage.migrate import (
     import_lemma_audio_release_to_sqlite,
     import_name_release_to_sqlite,
 )
-from wordfreq.tools.generate_mechanical_forms import generate as generate_mechanical_forms
+from words.mechanical_forms import generate as generate_mechanical_forms
 
 
 def _sqlite_path(config: DataSourceConfig) -> Path:
