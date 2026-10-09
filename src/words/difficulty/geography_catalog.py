@@ -19,6 +19,14 @@ class GeographySense:
     base_level: int = 231
     aliases: tuple[str, ...] = ()
 
+    def __post_init__(self) -> None:
+        """Split the main batch by sense while retaining extended-tier levels."""
+        if self.base_level == 231:
+            main_level = {"nationality": 232, "origin": 232, "communication_information": 233}.get(
+                self.pos_subtype, 231
+            )
+            object.__setattr__(self, "base_level", main_level)
+
 
 # country, origin adjective, person noun, language (None for extra countries).
 _COUNTRY_WORDS: tuple[tuple[str, str, str, str | None], ...] = (

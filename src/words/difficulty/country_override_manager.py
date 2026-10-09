@@ -76,6 +76,8 @@ def _is_country_override(override: Optional[LemmaDifficultyOverride]) -> bool:
         13,
         18,
         145,
+        232,
+        233,
         *get_all_tier_levels(),
     }
 
@@ -184,6 +186,8 @@ class CountryOverrideManager:
             TIER_1_LEVEL: 0,
             TIER_2_LEVEL: 0,
             TIER_3_LEVEL: 0,
+            232: 0,
+            233: 0,
         }
 
         geography_words = self._geography_words()
@@ -195,10 +199,11 @@ class CountryOverrideManager:
                 for country_label in country_labels
             ]
             proposed_level = base_level
-            if base_level == TIER_2_LEVEL:
+            if base_level in {TIER_2_LEVEL, 232, 233}:
                 available_levels = [level for level in country_levels if level is not None]
                 if available_levels:
-                    proposed_level = min(available_levels)
+                    country_level = min(available_levels)
+                    proposed_level = base_level if country_level == TIER_2_LEVEL else country_level
 
             current_override = get_difficulty_override(self.session, lemma.id, target_language)
             if current_override is not None and not _is_country_override(current_override):
@@ -400,7 +405,7 @@ class CountryOverrideManager:
             TIER_3_LEVEL: f"Tier 3 (Level {TIER_3_LEVEL}) - Extended geography",
         }
 
-        for level in get_all_tier_levels():
+        for level in [*get_all_tier_levels(), 232, 233]:
             count = summary.changes_by_tier.get(level, 0)
             tier_name = tier_names.get(level, f"Level {level}")
             lines.append(f"  {tier_name}: {count} words")

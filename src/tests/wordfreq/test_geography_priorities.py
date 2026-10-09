@@ -65,7 +65,9 @@ def test_person_adjective_and_language_senses_follow_country(session: Session) -
     for lemma in [person, adjective, language]:
         assert lemma.guid is not None
         assert _levels(session, "lt")[lemma.guid] == 15
-        assert _levels(session, "zh")[lemma.guid] == 231
+        assert _levels(session, "zh")[lemma.guid] == (
+            233 if lemma.pos_subtype == "communication_information" else 232
+        )
     assert generic_origin.guid not in _levels(session, "lt")
 
 

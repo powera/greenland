@@ -42,7 +42,7 @@ from workqueue.task_queue import TaskRequest, TaskType, enqueue_task, enqueue_ta
 bp = Blueprint("levels", __name__, url_prefix="/levels")
 
 # Words previewed per row on the list page.
-_SAMPLE_WORDS = 8
+_SAMPLE_WORDS = 50
 
 
 def _band(level: int) -> str:
@@ -63,7 +63,7 @@ def _readonly_redirect(target: str) -> Optional[ResponseReturnValue]:
 
 
 def _sample_words(level_numbers: List[int]) -> Dict[int, List[str]]:
-    """The most frequent few words at each level, from one query."""
+    """Up to 50 words per level, ordered by combined wordfreq rank, from one query."""
     rows = (
         g.db.query(Lemma.difficulty_level, Lemma.lemma_text)
         .filter(Lemma.difficulty_level.in_(level_numbers))
@@ -326,7 +326,8 @@ def _posted_levels(field: str) -> List[int]:
 @bp.route("/generate-missing", methods=["POST"])
 def generate_missing() -> ResponseReturnValue:
     """Queue naming (and translation) for every unnamed level the page showed."""
-    target = url_for("levels.list_levels", **request.args)
+    query_args: Dict[str, Any] = request.args.to_dict(flat=False)
+    target = url_for("levels.list_levels", **query_args)
     blocked = _readonly_redirect(target)
     if blocked is not None:
         return blocked
@@ -347,7 +348,8 @@ def generate_missing() -> ResponseReturnValue:
 @bp.route("/translate-missing", methods=["POST"])
 def translate_missing() -> ResponseReturnValue:
     """Queue translation of missing languages for every named level the page showed."""
-    target = url_for("levels.list_levels", **request.args)
+    query_args: Dict[str, Any] = request.args.to_dict(flat=False)
+    target = url_for("levels.list_levels", **query_args)
     blocked = _readonly_redirect(target)
     if blocked is not None:
         return blocked
