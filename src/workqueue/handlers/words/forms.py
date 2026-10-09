@@ -17,13 +17,18 @@ from clients.deferring_client import DeferLLMCall, DeferringClient
 from clients.types import LLMCall
 from langtools.form_registry import FORM_SPECS
 from langtools.form_tasks import generate_forms
-from langtools.llm_forms_base import parse_forms_response
+from langtools.llm_forms_base import (
+    parse_forms_confidence,
+    parse_forms_notes,
+    parse_forms_response,
+)
 from storage.database import log_query
 from storage.models.schema import Lemma
 from storage.translation_helpers import get_translation
 from wordfreq.translation.generate_forms_base import (
     FormGenerationConfig,
     forms_already_complete,
+    forms_uncertain,
     store_generated_forms,
 )
 from wordfreq.translation.generate_forms_tasks import FORM_GENERATION_TASKS, get_task_key
@@ -92,9 +97,20 @@ FORMS_JOB_NAME = "vilkas"
 FORMS_STAGE = "forms.generate"
 
 
-def forms_state(lemma_id: int, language_code: str, pos_type: str) -> Dict[str, Any]:
-    """The item state the forms job works on: one lemma in one language."""
-    return {"lemma_id": lemma_id, "language_code": language_code, "pos_type": pos_type}
+def forms_state(
+    lemma_id: int, language_code: str, pos_type: str, retry_uncertain: bool = False
+) -> Dict[str, Any]:
+    """The item state the forms job works on: one lemma in one language.
+
+    A lemma whose forms a model was uncertain of is skipped unless
+    ``retry_uncertain``.
+    """
+    return {
+        "lemma_id": lemma_id,
+        "language_code": language_code,
+        "pos_type": pos_type,
+        "retry_uncertain": retry_uncertain,
+    }
 
 
 def _form_config(language_code: str, pos_type: str) -> FormGenerationConfig:
@@ -116,6 +132,8 @@ def _prepare_forms(
         return Done("rejected", f"No {language_code} {lemma.pos_type} form task")
     if forms_already_complete(session, lemma.id, form_config):
         return Done("skipped", "forms already present")
+    if not state.get("retry_uncertain") and forms_uncertain(session, lemma.id, form_config):
+        return Done("skipped", "a model was uncertain of these forms")
     # The same generator the live path runs: a mechanical paradigm answers
     # here, and the LLM fallback surfaces as the call to batch.
     try:
@@ -160,7 +178,20 @@ def _apply_forms(
         )
     if not forms:
         return Done("rejected", "answer had no forms")
-    stored, facts_added = store_generated_forms(session, lemma.id, forms, form_config)
+    # A mechanical paradigm has no confidence and is stored as it is.
+    confidence = None if data.get("mechanical") else parse_forms_confidence(data)
+    result = store_generated_forms(
+        session,
+        lemma.id,
+        forms,
+        form_config,
+        notes=None if data.get("mechanical") else parse_forms_notes(data),
+        confidence=confidence,
+        model=ctx.model,
+    )
+    if result is None:
+        return Done("rejected", f"forms at confidence {confidence or 0.0:.2f}")
+    stored, facts_added = result
     if stored or facts_added:
         return Done("written", f"{stored} form(s), {facts_added} fact(s)")
     return Done("skipped", "every form already present")

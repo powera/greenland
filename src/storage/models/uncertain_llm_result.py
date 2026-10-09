@@ -34,6 +34,9 @@ REASON_LOW_CONFIDENCE = "low_confidence"
 # set_translation clears it, so a translation however written answers it.
 TOPIC_TRANSLATION = "translation"
 
+# The topic of a lemma's generated forms (its paradigm) in ``language_code``.
+TOPIC_FORMS = "forms"
+
 
 class UncertainLLMResult(Base):
     """A question an LLM answered with too little confidence to store.

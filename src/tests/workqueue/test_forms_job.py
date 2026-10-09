@@ -19,9 +19,11 @@ from clients.deferring_client import DeferLLMCall, DeferringClient
 from clients.types import LLMCall, Response
 from langtools.form_registry import FORM_SPECS
 from langtools.form_tasks import generate_forms, get_on_demand_pos_types
-from langtools.llm_forms_base import query_forms
+from langtools.llm_forms_base import forms_answer_confidence, forms_answer_notes, query_forms
+from storage.crud.uncertain_llm_result import get_uncertain_llm_result
 from storage.database import QueryLog
 from storage.models.schema import Base, DerivativeForm, Lemma
+from storage.models.uncertain_llm_result import TOPIC_FORMS
 from storage.translation_helpers import set_translation
 from workqueue.handlers.words.forms import FORMS_JOB, forms_state
 from workqueue.llm_batch import complete_rows, start_batch_run
@@ -248,8 +250,63 @@ def test_hand_entered_form_survives_batch(
     session.commit()
 
     answer_forms = {field: f"{field}-form" for field in spec.form_fields}
-    _complete(manager, batch_client, session, "batch-0", {"forms": answer_forms})
+    _complete(manager, batch_client, session, "batch-0", {"forms": answer_forms, "confidence": 0.9})
     assert _forms(session, lemma, "de")[grammatical_form] == "Haus (by hand)"
+    assert len(_forms(session, lemma, "de")) > 1
+
+
+def test_low_confidence_forms_are_recorded_and_skipped_unless_retried(
+    session: Session, manager: BatchQueueManager, batch_client: _FakeBatchClient
+) -> None:
+    lemma = _lemma(session, "house", "noun", {"de": "Haus"})
+    start_batch_run(session, manager, FORMS_JOB, [forms_state(lemma.id, "de", "noun")], _MODEL)
+    spec = FORM_SPECS[("de", "noun")]
+    answer_forms = {field: f"{field}-form" for field in spec.form_fields}
+
+    result = _complete(
+        manager,
+        batch_client,
+        session,
+        "batch-0",
+        {"forms": answer_forms, "confidence": 0.5, "notes": "unsure of the plural"},
+    )
+
+    assert result["updated"] == 0
+    assert _forms(session, lemma, "de") == {}
+    row = get_uncertain_llm_result(session, TOPIC_FORMS, "de", lemma_id=lemma.id)
+    assert row is not None
+    assert row.note is not None
+    assert row.note.startswith(f"{_MODEL} leaned ")
+    assert row.note.endswith("(0.50): unsure of the plural")
+
+    skipped = start_batch_run(
+        session, manager, FORMS_JOB, [forms_state(lemma.id, "de", "noun")], _MODEL
+    )
+    retried = start_batch_run(
+        session,
+        manager,
+        FORMS_JOB,
+        [forms_state(lemma.id, "de", "noun", retry_uncertain=True)],
+        _MODEL,
+    )
+    assert skipped.resolved_without_llm == {"skipped": 1}
+    assert retried.calls == 1
+
+
+def test_live_query_carries_the_confidence(session: Session) -> None:
+    lemma = _lemma(session, "house", "noun", {"de": "Haus"})
+    spec = FORM_SPECS[("de", "noun")]
+    live = _RecordingClient(
+        {"forms": {spec.form_fields[0]: "Haus"}, "confidence": 0.4, "notes": "rare word"}
+    )
+
+    answer = query_forms(spec, live, lemma.id, lambda: session)  # type: ignore[arg-type]
+
+    forms, success = answer
+    assert (forms, success) == ({spec.form_fields[0]: "Haus"}, True)
+    assert forms_answer_confidence(answer) == 0.4
+    assert forms_answer_notes(answer) == "rare word"
+    assert forms_answer_confidence(({}, False)) is None
 
 
 def test_dry_run_prepares_nothing(

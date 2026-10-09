@@ -181,6 +181,14 @@ def get_argument_parser() -> argparse.ArgumentParser:
         default=False,
         help="Use Wiktionary instead of LLM for form generation (no API cost, supports en/es/fr/lt)",
     )
+    parser.add_argument(
+        "--retry-uncertain",
+        action="store_true",
+        help=(
+            "With --populate, also ask for lemmas whose forms a model answered below "
+            "0.7 confidence before (uncertain_llm_results); by default they are skipped"
+        ),
+    )
     add_batch_args(parser)
 
     return parser
@@ -277,7 +285,7 @@ def _run_populate_batch(
 
     tasks = batch_form_tasks(task, selected_languages)
     states = [
-        forms_state(lemma.id, lang, pos)
+        forms_state(lemma.id, lang, pos, args.retry_uncertain)
         for lang, pos in tasks
         for lemma in lemmas
         if lemma.pos_type == pos
@@ -482,6 +490,7 @@ def main() -> None:
                     "throttle": args.throttle,
                     "dry_run": args.dry_run,
                     "use_wiktionary": args.use_wiktionary,
+                    "retry_uncertain": args.retry_uncertain,
                 }
 
                 results = agent.fix_missing_forms(**kwargs)
@@ -501,6 +510,7 @@ def main() -> None:
                 throttle=args.throttle,
                 dry_run=args.dry_run,
                 use_wiktionary=args.use_wiktionary,
+                retry_uncertain=args.retry_uncertain,
             )
             display.print_fix_results(results, args.dry_run)
 

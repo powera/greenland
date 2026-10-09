@@ -245,6 +245,7 @@ class InflectionService:
         language_code: str,
         pos_type: str,
         client: Optional[LinguisticClient] = None,
+        retry_uncertain: bool = False,
     ) -> bool:
         """Generate forms for a single lemma by GUID using configured tasks."""
 
@@ -272,7 +273,10 @@ class InflectionService:
                 return False
 
             client = client or LinguisticClient(config=self.config)
-            return cast(bool, process_lemma_for_task(task_key, lemma.id, self.config, client))
+            return cast(
+                bool,
+                process_lemma_for_task(task_key, lemma.id, self.config, client, retry_uncertain),
+            )
         finally:
             session.close()
 
@@ -378,6 +382,7 @@ class InflectionService:
         throttle: float = 1.0,
         dry_run: bool = False,
         use_wiktionary: bool = False,
+        retry_uncertain: bool = False,
     ) -> Dict[str, Any]:
         """
         Generate and store missing word forms for a specific language.
@@ -399,6 +404,8 @@ class InflectionService:
             throttle: Seconds to wait between API calls
             dry_run: If True, show what would be fixed without making changes
             use_wiktionary: If True, use Wiktionary instead of LLM for form generation
+            retry_uncertain: Also ask for lemmas whose forms a model was
+                uncertain of before; by default they are skipped
 
         Returns:
             Dictionary with fix results
@@ -468,6 +475,7 @@ class InflectionService:
                 throttle=throttle,
                 dry_run=dry_run,
                 use_wiktionary=use_wiktionary,
+                retry_uncertain=retry_uncertain,
             )
         else:
             logger.error(f"Unexpected handler configuration for {handler_key}")
@@ -485,6 +493,7 @@ class InflectionService:
         throttle: float = 1.0,
         dry_run: bool = False,
         use_wiktionary: bool = False,
+        retry_uncertain: bool = False,
     ) -> Dict[str, Any]:
         """
         Generic handler for generating missing word forms across languages.
@@ -500,6 +509,8 @@ class InflectionService:
             throttle: Seconds to wait between API calls
             dry_run: If True, show what would be fixed without making changes
             use_wiktionary: If True, use Wiktionary instead of LLM for form generation
+            retry_uncertain: Also ask for lemmas whose forms a model was
+                uncertain of before; by default they are skipped
 
         Returns:
             Dictionary with fix results
@@ -573,6 +584,35 @@ class InflectionService:
                 "verbs_needing_conjugations" if pos_type == "verb" else "nouns_needing_declensions"
             )
             items_needing_forms = check_results.get(items_key, [])
+            total_needs_fix = len(items_needing_forms)
+
+        uncertain_skipped = 0
+        if not use_wiktionary and not retry_uncertain:
+            from wordfreq.translation.generate_forms_base import forms_uncertain
+            from wordfreq.translation.generate_forms_tasks import FORM_GENERATION_TASKS
+
+            form_config = FORM_GENERATION_TASKS[task_key].config
+            session = self.get_session()
+            try:
+                asked = []
+                for item in items_needing_forms:
+                    item_lemma = find_lemma_by_guid(
+                        session, str(item["guid"]), error_on_missing=False
+                    )
+                    if item_lemma is not None and forms_uncertain(
+                        session, item_lemma.id, form_config
+                    ):
+                        continue
+                    asked.append(item)
+            finally:
+                session.close()
+            uncertain_skipped = len(items_needing_forms) - len(asked)
+            if uncertain_skipped:
+                logger.info(
+                    f"Skipping {uncertain_skipped} {pos_type}(s) a model was uncertain of "
+                    "(--retry-uncertain to ask again)"
+                )
+            items_needing_forms = asked
             total_needs_fix = len(items_needing_forms)
 
         if total_needs_fix == 0:
@@ -662,7 +702,9 @@ class InflectionService:
                         found_lemma.id, self.config, task_config
                     )
                 else:
-                    success = process_lemma_for_task(task_key, found_lemma.id, self.config, client)
+                    success = process_lemma_for_task(
+                        task_key, found_lemma.id, self.config, client, retry_uncertain
+                    )
 
                 if success:
                     successful += 1
@@ -687,6 +729,8 @@ class InflectionService:
         logger.info(f"  Processed: {len(items_to_process)}")
         logger.info(f"  Successful: {successful}")
         logger.info(f"  Failed: {failed}")
+        if uncertain_skipped:
+            logger.info(f"  Skipped as uncertain: {uncertain_skipped}")
         logger.info(f"{'='*60}")
 
         return {
@@ -694,6 +738,7 @@ class InflectionService:
             "processed": len(items_to_process),
             "successful": successful,
             "failed": failed,
+            "uncertain_skipped": uncertain_skipped,
             "dry_run": dry_run,
             "source": "wiktionary" if use_wiktionary else "llm",
         }
