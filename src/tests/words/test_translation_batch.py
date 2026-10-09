@@ -20,7 +20,9 @@ from clients.batch_queue import (
     create_batch_database_session,
 )
 from clients.openai.client import build_responses_request
+from storage.crud.uncertain_llm_result import get_uncertain_llm_result, record_uncertain_llm_result
 from storage.models.schema import Base, Lemma
+from storage.models.uncertain_llm_result import REASON_LOW_CONFIDENCE, TOPIC_TRANSLATION
 from storage.translation_helpers import get_translation, lang_code_to_llm_field, set_translation
 from words.translation_batch import (
     AGENT_NAME,
@@ -162,7 +164,51 @@ def test_states_ask_each_lemma_only_for_its_missing_languages(session: Session) 
     )
 
     assert complete == 1
-    assert states == [{"lemma_id": partial.id, "languages": ["vi", "ms"]}]
+    assert states == [{"lemma_id": partial.id, "languages": ["vi", "ms"], "retry_uncertain": False}]
+
+
+def test_states_skip_uncertain_languages_unless_retried(session: Session) -> None:
+    lemma = _add_lemma(session, "skewer", {"lt": "iešmas"})
+    record_uncertain_llm_result(
+        session, TOPIC_TRANSLATION, "vi", REASON_LOW_CONFIDENCE, lemma_id=lemma.id
+    )
+
+    skipped, _complete = translation_populate_states(session, [lemma], ["hi", "vi"])
+    retried, _complete = translation_populate_states(
+        session, [lemma], ["hi", "vi"], retry_uncertain=True
+    )
+
+    assert [state["languages"] for state in skipped] == [["hi"]]
+    assert [state["languages"] for state in retried] == [["hi", "vi"]]
+
+
+def test_lemma_with_only_uncertain_gaps_is_not_asked(
+    session: Session, batch_session: Session
+) -> None:
+    lemma = _add_lemma(session, "skewer", {"lt": "iešmas"})
+    record_uncertain_llm_result(
+        session, TOPIC_TRANSLATION, "hi", REASON_LOW_CONFIDENCE, lemma_id=lemma.id
+    )
+    manager = BatchQueueManager(batch_session, batch_client=_FakeBatchClient())  # type: ignore[arg-type]
+
+    # A state planned before the row was recorded is skipped when prepared.
+    report = start_batch_run(
+        session, manager, TRANSLATIONS_JOB, [{"lemma_id": lemma.id, "languages": ["hi"]}], _MODEL
+    )
+
+    assert report.calls == 0
+    assert report.resolved_without_llm == {"skipped": 1}
+
+
+def test_set_translation_clears_the_uncertain_row(session: Session) -> None:
+    lemma = _add_lemma(session, "skewer", {"lt": "iešmas"})
+    record_uncertain_llm_result(
+        session, TOPIC_TRANSLATION, "hi", REASON_LOW_CONFIDENCE, lemma_id=lemma.id
+    )
+
+    set_translation(session, lemma, "hi", "सीख")
+
+    assert get_uncertain_llm_result(session, TOPIC_TRANSLATION, "hi", lemma_id=lemma.id) is None
 
 
 def test_states_split_more_than_ten_languages(session: Session) -> None:

@@ -25,8 +25,10 @@ from storage.crud.derivative_form import add_derivative_form
 from storage.crud.operation_log import log_translation_change
 from storage.crud.sentence import add_sentence
 from storage.crud.sentence_translation import add_sentence_translation
+from storage.crud.uncertain_llm_result import LLMQuestion, confidence_gated
 from langtools.en.base_forms import en_base_form
 from storage.models.schema import Lemma, SentenceWordHint, WordToken
+from storage.models.uncertain_llm_result import TOPIC_TRANSLATION
 from storage.translation_helpers import (
     convert_llm_response_to_lang_codes,
     ensure_english_translation,
@@ -125,8 +127,55 @@ def store_sense_examples(
     return stored
 
 
+@confidence_gated(
+    question=lambda a: LLMQuestion(TOPIC_TRANSLATION, a["lang_code"], lemma_id=a["lemma"].id),
+    value="translation",
+)
+def store_llm_translation(
+    session: Session,
+    lemma: Lemma,
+    lang_code: str,
+    translation: str,
+    *,
+    source: str,
+    confidence: Optional[float] = None,
+    min_confidence: Optional[float] = None,
+    model: Optional[str] = None,
+) -> Optional[str]:
+    """Set one translation a model gave for ``lemma``, and log it.
+
+    ``confidence``, ``min_confidence`` and ``model`` are for an answer rated
+    per language; see storage.crud.uncertain_llm_result.confidence_gated.
+    One below min_confidence is recorded as uncertain, not set, and the
+    translation populate pass then leaves the language missing.
+
+    Returns:
+        The translation stored, or None for an answer below min_confidence.
+    """
+    old_translation, _ = set_translation(session, lemma, lang_code, translation)
+    log_translation_change(
+        session=session,
+        source=source,
+        operation_type="translation",
+        lemma_id=lemma.id,
+        language_code=lang_code,
+        old_translation=old_translation,
+        new_translation=translation,
+        guid=lemma.guid,
+        model=model,
+    )
+    return translation
+
+
 def store_sense_translations(
-    session: Session, lemma: Lemma, sense: Dict[str, Any], *, source: str, model: Optional[str]
+    session: Session,
+    lemma: Lemma,
+    sense: Dict[str, Any],
+    *,
+    source: str,
+    model: Optional[str],
+    confidences: Optional[Dict[str, float]] = None,
+    min_confidence: Optional[float] = None,
 ) -> Dict[str, str]:
     """Save the translations the definitions call already returned for this sense.
 
@@ -134,6 +183,10 @@ def store_sense_translations(
     the definition at no extra LLM cost, and each sense gets its own
     translation. Field names map to language codes through translation_helpers,
     per CLAUDE.md -- no local mapping.
+
+    With ``confidences`` (by language code; a language absent from it counts
+    as 0.0) each translation is gated on ``min_confidence``, and one below it
+    is recorded as uncertain instead of stored.
 
     Returns:
         The language code -> translation text pairs actually stored.
@@ -144,19 +197,18 @@ def store_sense_translations(
         translation = (by_lang_code.get(lang_code) or "").strip()
         if not translation:
             continue
-        set_translation(session, lemma, lang_code, translation)
-        log_translation_change(
-            session=session,
+        written = store_llm_translation(
+            session,
+            lemma,
+            lang_code,
+            translation,
             source=source,
-            operation_type="translation",
-            lemma_id=lemma.id,
-            language_code=lang_code,
-            old_translation=None,
-            new_translation=translation,
-            guid=lemma.guid,
+            confidence=None if confidences is None else confidences.get(lang_code, 0.0),
+            min_confidence=min_confidence,
             model=model,
         )
-        stored[lang_code] = translation
+        if written is not None:
+            stored[lang_code] = written
     return stored
 
 

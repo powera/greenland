@@ -21,11 +21,14 @@ from sqlalchemy.orm import Session, sessionmaker
 import storage.models  # noqa: F401
 from storage.backend.config import BackendType, DataSourceConfig
 from storage.crud.lemma_tags import read_tags
+from storage.crud.uncertain_llm_result import get_uncertain_llm_result
 from storage.models import Base, DerivativeForm, Lemma
 from storage.models.schema import SENSE_PROMINENCE_RARE
+from storage.models.uncertain_llm_result import TOPIC_TRANSLATION
 from storage.models.variant_form import VARIANT_KIND_ABBREVIATION, VariantForm
 from storage.translation_helpers import get_translation
 from words.add_sense import add_sense, build_sense_prompt, build_subtype_prompt
+from words.translation_populate import missing_translation_languages
 
 
 @pytest.fixture()
@@ -179,6 +182,24 @@ class TestCreation:
         assert get_translation(session, lemma, "fr") is None
         assert get_translation(session, lemma, "es-419") == "jaque"
         assert get_translation(session, lemma, "zh") == "将军"
+
+    def test_low_confidence_translation_is_recorded_as_uncertain(
+        self, session: Session, config: DataSourceConfig
+    ) -> None:
+        sense = _chess_check()
+        sense["spanish_translation"] = _rated("clavada", 0.6)
+
+        result = _add(session, config, _FakeClient(sense))
+
+        lemma = session.query(Lemma).filter(Lemma.guid == result.guid).one()
+        row = get_uncertain_llm_result(session, TOPIC_TRANSLATION, "es", lemma_id=lemma.id)
+        assert row is not None
+        assert row.note == f"{config.model} leaned clavada (0.60)"
+        assert missing_translation_languages(session, lemma, ["es", "fr"]) == []
+        assert missing_translation_languages(
+            session, lemma, ["es", "fr"], retry_uncertain=True
+        ) == ["es"]
+        assert get_uncertain_llm_result(session, TOPIC_TRANSLATION, "zh", lemma_id=lemma.id) is None
 
     def test_translation_at_the_floor_is_kept(
         self, session: Session, config: DataSourceConfig

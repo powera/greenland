@@ -53,6 +53,7 @@ from storage.models.variant_form import VARIANT_KIND_ABBREVIATION
 from storage.queries.lemma import get_english_senses
 from storage.translation_helpers import (
     LLM_FIELD_TO_LANG_CODE,
+    convert_llm_response_to_lang_codes,
     ensure_english_translation,
 )
 from storage.utils.enums import get_subtype_values_for_pos
@@ -96,8 +97,9 @@ _CATCH_ALL_SUBTYPE = "other"
 _SUBTYPED_POS_TYPES = frozenset({*MAJOR_POS_TYPES, "numeral"})
 
 
-# A translation the model rates below this is dropped, leaving a gap for the
-# translation coverage pass. The model is asked for a confidence per language
+# A translation the model rates below this is not stored but recorded in
+# uncertain_llm_results, which the translation coverage pass (voras --populate)
+# skips unless --retry-uncertain. The model is asked for a confidence per language
 # because its doubt is per language: on chess "skewer" luna was sure of the
 # Chinese and wrong about the Spanish and French ("clavada" is the pin). A
 # literal but non-idiomatic rendering it is sure of is kept; this only catches
@@ -142,7 +144,7 @@ class AddSenseResult:
     missing_languages: List[str] = field(default_factory=list)
     #: Translations dropped for falling under TRANSLATION_CONFIDENCE_FLOOR, by
     #: language code: ``{"translation": ..., "confidence": ...}``. Each is also
-    #: in ``missing_languages``.
+    #: in ``missing_languages``, and recorded in uncertain_llm_results.
     low_confidence: Dict[str, Dict[str, Any]] = field(default_factory=dict)
     error: Optional[str] = None
 
@@ -219,20 +221,14 @@ def _describe_existing(senses: Sequence[Lemma]) -> str:
     return "\n".join(lines)
 
 
-def _split_by_confidence(
-    sense: Dict[str, Any],
-) -> tuple[Dict[str, Any], Dict[str, Dict[str, Any]]]:
-    """``sense`` without its low-confidence translations, and those translations.
+def _translation_confidences(sense: Dict[str, Any]) -> Dict[str, Optional[float]]:
+    """Each translation's confidence by language code; None where it is missing.
 
-    A translation whose confidence is missing or not a number counts as low:
-    the floor exists to keep doubtful terms out, so an unrated one stays out.
-
-    Returns:
-        A copy of ``sense`` with each dropped translation field removed, and
-        the dropped ones by language code as ``{"translation", "confidence"}``.
+    A confidence that is missing or not a number is None here and gated as
+    0.0: the floor exists to keep doubtful terms out, so an unrated one stays
+    out.
     """
-    kept = dict(sense)
-    dropped: Dict[str, Dict[str, Any]] = {}
+    confidences: Dict[str, Optional[float]] = {}
     for field_name, value in sense.items():
         lang_code = LLM_FIELD_TO_LANG_CODE.get(field_name)
         if lang_code is None or not isinstance(value, dict):
@@ -241,11 +237,8 @@ def _split_by_confidence(
         confidence: Optional[float] = None
         if isinstance(raw_confidence, (int, float)) and not isinstance(raw_confidence, bool):
             confidence = float(raw_confidence)
-        if confidence is not None and confidence >= TRANSLATION_CONFIDENCE_FLOOR:
-            continue
-        del kept[field_name]
-        dropped[lang_code] = {"translation": value.get("translation"), "confidence": confidence}
-    return kept, dropped
+        confidences[lang_code] = confidence
+    return confidences
 
 
 def pos_type_for_subtype(pos_subtype: str) -> Optional[str]:
@@ -603,7 +596,7 @@ def add_sense(
                 error=f"LLM gave the catch-all subtype {new_subtype!r}; nothing written",
             )
 
-        confident_sense, low_confidence = _split_by_confidence(sense)
+        confidences = _translation_confidences(sense)
 
         guid = generate_guid(session, new_pos_type, new_subtype)
         new_lemma = Lemma(
@@ -641,10 +634,26 @@ def add_sense(
         )
         # A missing language is reported rather than fatal, as in add_term:
         # the sense is still worth having, and the gap is visible to the
-        # translation coverage pass. A low-confidence one is left missing too.
+        # translation coverage pass. A low-confidence one is left missing too,
+        # and recorded as uncertain so the coverage pass does not fill it.
         stored = store_sense_translations(
-            session, new_lemma, confident_sense, source=source, model=config.model
+            session,
+            new_lemma,
+            sense,
+            source=source,
+            model=config.model,
+            confidences={
+                code: 0.0 if confidence is None else confidence
+                for code, confidence in confidences.items()
+            },
+            min_confidence=TRANSLATION_CONFIDENCE_FLOOR,
         )
+        texts = convert_llm_response_to_lang_codes(sense)
+        low_confidence = {
+            code: {"translation": texts[code], "confidence": confidences.get(code)}
+            for code in TRANSLATION_LANGUAGES
+            if (texts.get(code) or "").strip() and code not in stored
+        }
         store_sense_examples(session, new_lemma, sense, source=source)
         attach_english_base_form(session, new_lemma, sense, source=source)
         _add_abbreviation(session, new_lemma, abbreviation, source=source)
