@@ -13,6 +13,7 @@ from exports.wireword.export_wireword import (
 def test_language_export_max_levels_cover_full_curricula() -> None:
     assert LANGUAGE_EXPORT_MAX_LEVELS == {
         "zh": constants.TOPIC_DIFFICULTY_LEVEL_MIN - 1,
+        "lt": constants.GENERAL_DIFFICULTY_LEVEL_MAX,
     }
     assert DEFAULT_EXPORT_MAX_LEVEL == 30
 
@@ -32,10 +33,24 @@ def test_level_ranges_for_zh_stop_below_topic_band() -> None:
     assert ranges[-1] == (975, 999)
 
 
-def test_level_ranges_for_lt_stop_at_core_max() -> None:
+def test_level_ranges_for_lt_stop_at_general_max() -> None:
     exporter = WirewordExporter(
         config=DataSourceConfig(backend_type=BackendType.SQLITE),
         language="lt",
+    )
+
+    ranges = exporter._get_level_ranges()
+
+    assert ranges[0] == (1, 5)
+    assert (26, 30) in ranges
+    assert (100, 124) in ranges
+    assert ranges[-1] == (475, 499)
+
+
+def test_level_ranges_for_default_language_stop_at_core_max() -> None:
+    exporter = WirewordExporter(
+        config=DataSourceConfig(backend_type=BackendType.SQLITE),
+        language="fr",
     )
 
     ranges = exporter._get_level_ranges()
