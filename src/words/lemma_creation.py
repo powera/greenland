@@ -276,7 +276,8 @@ def create_sense_lemma(
 
     The caller has already decided this sense is new and validated its POS;
     this only writes.  The caller commits, so it can decide whether a
-    multi-sense word is one transaction or several.
+    multi-sense word is one transaction or several -- through
+    ``storage.utils.guid.run_lemma_write``, since the lemma takes a GUID.
 
     Raises:
         ValueError: from GUID generation, when ``pos_subtype`` has no prefix.

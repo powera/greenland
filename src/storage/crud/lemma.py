@@ -47,6 +47,9 @@ def add_lemma(
     drives the weighted frequency split in ``wordfreq.lexeme_frequency`` when
     the form is shared with other lemmas. ``None`` leaves the schema default
     ("common") in place, which is what a caller with no opinion should pass.
+
+    A new lemma with a ``pos_subtype`` takes a GUID, so the call must run
+    inside ``storage.utils.guid.run_lemma_write``.
     """
     # Check if lemma already exists with same text, definition, and POS
     existing = (
@@ -407,6 +410,9 @@ def handle_lemma_type_subtype_change(
     A subtype change alone keeps the forms by default: a plural is the same
     whether "polynomial" is a knowledge_domain or a mathematical_concept, and
     regenerating English noun forms costs an LLM call.
+
+    The new GUID is allocated here, so the call must run inside
+    ``storage.utils.guid.run_lemma_write`` with the commit.
 
     Args:
         session: Database session

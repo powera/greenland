@@ -1,7 +1,7 @@
 """GUID generation utilities for lemmas."""
 
 import threading
-from typing import Dict, Iterable, Iterator, Optional, Tuple
+from typing import Callable, Dict, Iterable, Iterator, Optional, Tuple, TypeVar
 
 from sqlalchemy.orm import Session
 
@@ -9,16 +9,102 @@ from storage.models.guid_prefixes import SUBTYPE_GUID_PREFIXES
 from storage.models.guid_tombstone import GuidTombstone
 from storage.models.schema import Lemma
 
-# Allocation reads the highest GUID and the caller inserts the next one, so two
-# sessions allocating at once would both read the same maximum: neither sees
-# the other's uncommitted row.  Every number handed out is therefore reserved
-# in this process, under a mutex held only for the reservation, and the next
-# allocation starts above it whether or not that row is committed yet.  This
-# covers every thread of one process -- Barsukas's request threads, task worker
-# and batch poller.  A rolled-back allocation leaves a gap, as a tombstone
-# does.  Separate processes (a CLI agent beside Barsukas) are not covered; the
-# UNIQUE guid column still turns that race into an IntegrityError rather than
-# a duplicate.
+T = TypeVar("T")
+
+# Lemma GUID allocation reads the highest GUID in use and the caller inserts
+# the next one, so two sessions allocating at once would both read the same
+# maximum: neither sees the other's uncommitted lemma.  Every write that
+# assigns a lemma GUID therefore runs through run_lemma_write, which holds this
+# mutex from before the GUID is read until the lemma is committed.  It covers
+# every thread of one process -- Barsukas's request threads, task worker and
+# batch poller.  Separate processes (a CLI agent beside Barsukas) are not
+# covered; the UNIQUE guid column still turns that race into an IntegrityError
+# rather than a duplicate.
+_lemma_write_lock = threading.Lock()
+_LEMMA_WRITE_KEY = "lemma_write_scope"
+
+# Shorter than SQLite's 30s busy_timeout.  A session that flushed other writes
+# before entering run_lemma_write holds the database write lock while it waits
+# here; if the mutex holder is itself waiting for that write lock, this
+# timeout breaks the cycle first, and the waiting write fails rather than both.
+LEMMA_WRITE_LOCK_TIMEOUT_SECONDS = 10.0
+
+# Tests build lemmas directly with storage.crud.lemma.add_lemma and commit as
+# they please; the suite's conftest clears this, and the tests of the scope
+# itself set it again.
+require_lemma_write_scope = True
+
+
+class LemmaWriteBusyError(RuntimeError):
+    """Another lemma write held the GUID mutex (at once, with ``fail_fast``)."""
+
+
+class LemmaWriteScopeError(RuntimeError):
+    """A lemma GUID was allocated outside :func:`run_lemma_write`."""
+
+
+def run_lemma_write(
+    session: Session,
+    write: Callable[[], T],
+    *,
+    fail_fast: bool = False,
+    commit: bool = True,
+) -> T:
+    """Run ``write`` and commit it, serialized with every other lemma GUID write.
+
+    The single path for anything that assigns a lemma GUID -- a new lemma or a
+    renumbered one.  The mutex is held from before ``write`` runs until the
+    commit, so the next writer's :func:`generate_guid` sees this one's lemma.
+    Any exception rolls the session back and is re-raised.
+
+    A call nested inside another on the same session runs ``write`` in the
+    outer scope: the outer call holds the mutex and commits.
+
+    Args:
+        session: The session ``write`` uses.
+        write: Does the writes, calling :func:`generate_guid` as it needs.
+        fail_fast: Raise :class:`LemmaWriteBusyError` at once if another write
+            holds the mutex, instead of waiting up to
+            ``LEMMA_WRITE_LOCK_TIMEOUT_SECONDS``.
+        commit: False rolls the writes back instead (a preview or dry run).
+
+    Returns:
+        What ``write`` returns.
+    """
+    if session.info.get(_LEMMA_WRITE_KEY):
+        return write()
+    acquired = (
+        _lemma_write_lock.acquire(blocking=False)
+        if fail_fast
+        else _lemma_write_lock.acquire(timeout=LEMMA_WRITE_LOCK_TIMEOUT_SECONDS)
+    )
+    if not acquired:
+        raise LemmaWriteBusyError(
+            "Another lemma is being added; try again"
+            if fail_fast
+            else f"Another lemma write held the GUID lock for {LEMMA_WRITE_LOCK_TIMEOUT_SECONDS:.0f}s"
+        )
+    session.info[_LEMMA_WRITE_KEY] = True
+    try:
+        result = write()
+        if commit:
+            session.commit()
+        else:
+            session.rollback()
+        return result
+    except BaseException:
+        session.rollback()
+        raise
+    finally:
+        session.info.pop(_LEMMA_WRITE_KEY, None)
+        _lemma_write_lock.release()
+
+
+# Sentence and phrase GUIDs are not written through run_lemma_write; each number
+# they hand out is reserved in this process instead, under a mutex held only
+# for the reservation, so the next allocation starts above it whether or not
+# that row is committed yet.  A rolled-back allocation leaves a gap, as a
+# tombstone does.
 _reservation_lock = threading.Lock()
 # (database URL, prefix) -> highest sequence number handed out in this process
 _reserved: Dict[Tuple[str, str], int] = {}
@@ -106,11 +192,12 @@ def generate_guid(session: Session, pos_type: str, subtype: str) -> str:
     number that was ever published must not come back attached to a different
     word - even once its lemma row is gone from this database.
 
-    Each call reserves the GUID it returns for the life of the process, so
-    calling twice returns two GUIDs even when the first is never used; an
-    unused one is a gap, never a duplicate.  This is what keeps two threads
-    allocating at once apart (see ``_reserved``).  Across processes nothing
-    does; the ``guid`` column is UNIQUE, so the second committer fails with an
+    A GUID counts as taken only once it is attached to a Lemma, so callers
+    that allocate several must build each Lemma before allocating the next.
+
+    Must run inside :func:`run_lemma_write`, which keeps concurrent writers in
+    one process off the same GUID.  Across processes nothing does; the
+    ``guid`` column is UNIQUE, so the second committer fails with an
     IntegrityError rather than persisting a duplicate.
 
     Args:
@@ -120,7 +207,14 @@ def generate_guid(session: Session, pos_type: str, subtype: str) -> str:
 
     Returns:
         Unique GUID string (e.g., 'N14_001')
+
+    Raises:
+        LemmaWriteScopeError: Called outside :func:`run_lemma_write`.
     """
+    if require_lemma_write_scope and not session.info.get(_LEMMA_WRITE_KEY):
+        raise LemmaWriteScopeError(
+            "generate_guid must run inside storage.utils.guid.run_lemma_write"
+        )
     if pos_type not in SUBTYPE_GUID_PREFIXES:
         raise ValueError(f"Unknown pos_type: {pos_type}")
 
@@ -153,7 +247,7 @@ def generate_guid(session: Session, pos_type: str, subtype: str) -> str:
     max_num = max(max_num, _highest_sequence_number(tombstoned_guids(session, prefix), prefix))
 
     # Generate next GUID in new format (using underscore for valid Python variable names)
-    next_num = _reserve_after(session, prefix, max_num)
+    next_num = max_num + 1
     return f"{prefix}_{next_num:03d}"
 
 

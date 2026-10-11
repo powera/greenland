@@ -15,6 +15,7 @@ hints is what used to leave a sentence permanently waiting.
 import unittest
 from typing import Any
 
+import pytest
 from sqlalchemy import create_engine
 from sqlalchemy.orm import Session
 
@@ -50,6 +51,8 @@ from words.pending_imports.approval import (
 )
 from words.pending_imports.sentence_links import link_sentence_to_pending_import
 from words.pending_imports.staging import create_pending_import
+
+pytestmark = pytest.mark.usefixtures("require_lemma_write_scope")
 
 
 class ApprovalTestCase(unittest.TestCase):

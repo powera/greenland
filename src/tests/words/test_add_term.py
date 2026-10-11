@@ -29,6 +29,8 @@ from storage.models.operation_log import OperationLog
 from storage.translation_helpers import get_translation
 from words.add_term import TRANSLATION_LANGUAGES, add_term
 
+pytestmark = pytest.mark.usefixtures("require_lemma_write_scope")
+
 
 @pytest.fixture()
 def db_engine(tmp_path: Path) -> Generator[Engine, None, None]:

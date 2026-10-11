@@ -11,6 +11,7 @@ import json
 import unittest
 from typing import Any, Dict
 
+import pytest
 from sqlalchemy import create_engine
 from sqlalchemy.orm import Session
 
@@ -46,6 +47,8 @@ from workqueue.llm_batch import Done, StageContext
 from workqueue.registry import get_llm_job
 
 SUBTYPE_REVIEW_NOTE = "add_word: noun_other needs subtype review before import"
+
+pytestmark = pytest.mark.usefixtures("require_lemma_write_scope")
 
 
 class JonvabalisTestCase(unittest.TestCase):

@@ -27,7 +27,14 @@ from storage.models.guid_prefixes import (
 )
 from storage.models.guid_tombstone import GuidTombstone
 from storage.models.schema import Base, Lemma
-from storage.utils.guid import clear_reservations, generate_guid
+import storage.utils.guid as guid_module
+from storage.utils.guid import (
+    LemmaWriteBusyError,
+    LemmaWriteScopeError,
+    clear_reservations,
+    generate_guid,
+    run_lemma_write,
+)
 
 
 @pytest.fixture()
@@ -233,29 +240,95 @@ def _allocate_on_another_thread(engine: Engine, allocate: Callable[[Session], st
     return result[0]
 
 
-def test_threads_of_one_process_never_share_an_uncommitted_guid() -> None:
-    """Barsukas's threads: the second allocator cannot see the first's uncommitted
-    lemma, but the reservation keeps it off that GUID."""
-    engine = create_engine(f"sqlite:///{tempfile.mkdtemp()}/guid-reserve.sqlite")
+def _add_lemma_write(session: Session, pos_type: str, subtype: str) -> str:
+    """One lemma written the only allowed way: allocate, attach and commit under the lock."""
+
+    def write() -> str:
+        guid = generate_guid(session, pos_type, subtype)
+        _add_without_flush(session, guid, pos_type)
+        return guid
+
+    return run_lemma_write(session, write)
+
+
+def test_generate_guid_refuses_to_run_outside_a_lemma_write(
+    session: Session, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    monkeypatch.setattr(guid_module, "require_lemma_write_scope", True)
+    pos_type, subtype, prefix = _any_subtype()
+
+    with pytest.raises(LemmaWriteScopeError):
+        generate_guid(session, pos_type, subtype)
+    assert _add_lemma_write(session, pos_type, subtype) == f"{prefix}_001"
+
+
+def test_a_second_writer_waits_for_the_first_commit(monkeypatch: pytest.MonkeyPatch) -> None:
+    """Barsukas's threads: the second writer cannot read the highest GUID until
+    the first writer's lemma is committed, so it never computes the same one."""
+    monkeypatch.setattr(guid_module, "require_lemma_write_scope", True)
+    engine = create_engine(f"sqlite:///{tempfile.mkdtemp()}/guid-lock.sqlite")
     Base.metadata.create_all(engine)
     pos_type, subtype, prefix = _any_subtype()
+    allocated = threading.Event()
+    finish = threading.Event()
 
-    def allocate(db_session: Session) -> str:
-        return generate_guid(db_session, pos_type, subtype)
+    def first_writer() -> None:
+        with Session(engine) as first_session:
 
-    with Session(engine) as first_session:
-        first_guid = allocate(first_session)
-        assert _allocate_on_another_thread(engine, allocate) == f"{prefix}_002"
-        _add_without_flush(first_session, first_guid, pos_type)
-        first_session.commit()
+            def write() -> None:
+                guid = generate_guid(first_session, pos_type, subtype)
+                _add_without_flush(first_session, guid, pos_type)
+                allocated.set()
+                finish.wait(timeout=5)
 
-    assert first_guid == f"{prefix}_001"
+            run_lemma_write(first_session, write)
+
+    thread = threading.Thread(target=first_writer)
+    thread.start()
+    assert allocated.wait(timeout=5)
+
+    with Session(engine) as second_session:
+        with pytest.raises(LemmaWriteBusyError):
+            run_lemma_write(second_session, lambda: None, fail_fast=True)
+        finish.set()
+        assert _add_lemma_write(second_session, pos_type, subtype) == f"{prefix}_002"
+    thread.join()
 
 
-def test_an_unused_reservation_leaves_a_gap(session: Session) -> None:
+def test_a_failed_write_rolls_back_and_frees_the_lock(session: Session) -> None:
     pos_type, subtype, prefix = _any_subtype()
-    generate_guid(session, pos_type, subtype)
-    assert generate_guid(session, pos_type, subtype) == f"{prefix}_002"
+
+    def failing_write() -> None:
+        _add_without_flush(session, generate_guid(session, pos_type, subtype), pos_type)
+        raise RuntimeError("boom")
+
+    with pytest.raises(RuntimeError):
+        run_lemma_write(session, failing_write)
+
+    assert session.query(Lemma).count() == 0
+    assert _add_lemma_write(session, pos_type, subtype) == f"{prefix}_001"
+
+
+def test_a_nested_write_joins_the_outer_one(session: Session) -> None:
+    """The outer write holds the lock; the inner one must not wait on it."""
+    pos_type, subtype, prefix = _any_subtype()
+
+    def outer() -> str:
+        _add_lemma_write(session, pos_type, subtype)
+        return _add_lemma_write(session, pos_type, subtype)
+
+    assert run_lemma_write(session, outer, fail_fast=True) == f"{prefix}_002"
+
+
+def test_a_preview_write_is_rolled_back(session: Session) -> None:
+    pos_type, subtype, _ = _any_subtype()
+
+    def write() -> None:
+        _add_without_flush(session, generate_guid(session, pos_type, subtype), pos_type)
+
+    run_lemma_write(session, write, commit=False)
+
+    assert session.query(Lemma).count() == 0
 
 
 def test_sentence_and_phrase_allocation_reserve_their_numbers() -> None:

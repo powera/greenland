@@ -25,6 +25,7 @@ from storage.crud.lemma import add_lemma
 from storage.crud.curriculum_level import get_curriculum_level, set_curriculum_level
 from storage.crud.operation_log import FieldChange, log_entity_operation, log_field_changes
 from storage.models.schema import Lemma
+from storage.utils.guid import run_lemma_write
 from words.difficulty.geography_catalog import GEOGRAPHY_SENSES, GeographySense, find_sense
 from words.difficulty.country_word_priorities import COUNTRY_NAMES
 
@@ -142,7 +143,8 @@ def normalize_base_levels(session: Session) -> list[tuple[Lemma, int | None, int
 def migrate(config: DataSourceConfig, *, apply: bool = False, set_base_levels: bool = False) -> int:
     """Preview or commit the complete set in a single transaction."""
     session = create_session(config)
-    try:
+
+    def write_all() -> tuple[int, int, int]:
         additions = add_missing_senses(session)
         updates = normalize_base_levels(session) if set_base_levels else []
         named_levels = ensure_level_names(session) if set_base_levels else 0
@@ -154,17 +156,15 @@ def migrate(config: DataSourceConfig, *, apply: bool = False, set_base_levels: b
             print(
                 f"{updated_lemma.guid}: {updated_lemma.lemma_text} base level {old_level} -> {new_level}"
             )
-        if apply:
-            session.commit()
-        else:
-            session.rollback()
-        print(f"{'Added' if apply else 'Would add'} {len(additions)} senses.")
-        print(f"{'Updated' if apply else 'Would update'} {len(updates)} existing base levels.")
+        return len(additions), len(updates), named_levels
+
+    try:
+        # New lemmas take GUIDs, so the set is written under the lemma write lock.
+        added, updated, named_levels = run_lemma_write(session, write_all, commit=apply)
+        print(f"{'Added' if apply else 'Would add'} {added} senses.")
+        print(f"{'Updated' if apply else 'Would update'} {updated} existing base levels.")
         print(f"{'Named' if apply else 'Would name'} {named_levels} curriculum levels.")
-        return len(additions)
-    except Exception:
-        session.rollback()
-        raise
+        return added
     finally:
         session.close()
 
