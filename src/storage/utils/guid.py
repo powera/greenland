@@ -1,12 +1,46 @@
 """GUID generation utilities for lemmas."""
 
-from typing import Iterable, Iterator, Optional
+import threading
+from typing import Dict, Iterable, Iterator, Optional, Tuple
 
 from sqlalchemy.orm import Session
 
 from storage.models.guid_prefixes import SUBTYPE_GUID_PREFIXES
 from storage.models.guid_tombstone import GuidTombstone
 from storage.models.schema import Lemma
+
+# Allocation reads the highest GUID and the caller inserts the next one, so two
+# sessions allocating at once would both read the same maximum: neither sees
+# the other's uncommitted row.  Every number handed out is therefore reserved
+# in this process, under a mutex held only for the reservation, and the next
+# allocation starts above it whether or not that row is committed yet.  This
+# covers every thread of one process -- Barsukas's request threads, task worker
+# and batch poller.  A rolled-back allocation leaves a gap, as a tombstone
+# does.  Separate processes (a CLI agent beside Barsukas) are not covered; the
+# UNIQUE guid column still turns that race into an IntegrityError rather than
+# a duplicate.
+_reservation_lock = threading.Lock()
+# (database URL, prefix) -> highest sequence number handed out in this process
+_reserved: Dict[Tuple[str, str], int] = {}
+
+
+def _reserve_after(session: Session, prefix: str, highest_in_use: int) -> int:
+    """Hand out the next sequence number above both ``highest_in_use`` and every earlier reservation."""
+    key = (str(session.get_bind().engine.url), prefix)
+    with _reservation_lock:
+        next_number = max(highest_in_use, _reserved.get(key, 0)) + 1
+        _reserved[key] = next_number
+    return next_number
+
+
+def clear_reservations() -> None:
+    """Forget every reservation, as a new process would.
+
+    For tests, which build a fresh database at the same URL (``sqlite:///:memory:``)
+    over and over.
+    """
+    with _reservation_lock:
+        _reserved.clear()
 
 
 def _guid_sequence_number(guid: str, prefix: str) -> Optional[int]:
@@ -72,17 +106,12 @@ def generate_guid(session: Session, pos_type: str, subtype: str) -> str:
     number that was ever published must not come back attached to a different
     word - even once its lemma row is gone from this database.
 
-    A GUID counts as taken only once it is attached to a Lemma. Calling this
-    twice without assigning the first result returns the same GUID both times,
-    so callers that pre-allocate into a dict or a form field must build the
-    Lemma before allocating the next one.
-
-    Concurrency caveat: two *separate* sessions allocating at the same time do
-    not see each other's uncommitted rows, so both can compute the same GUID.
-    That is not preventable from here - it would need a dedicated allocation
-    table or a locking read. The ``guid`` column is UNIQUE, so the second
-    committer fails with an IntegrityError rather than persisting a duplicate.
-    Scripts should therefore not write lemmas from concurrent transactions.
+    Each call reserves the GUID it returns for the life of the process, so
+    calling twice returns two GUIDs even when the first is never used; an
+    unused one is a gap, never a duplicate.  This is what keeps two threads
+    allocating at once apart (see ``_reserved``).  Across processes nothing
+    does; the ``guid`` column is UNIQUE, so the second committer fails with an
+    IntegrityError rather than persisting a duplicate.
 
     Args:
         session: Database session
@@ -124,7 +153,7 @@ def generate_guid(session: Session, pos_type: str, subtype: str) -> str:
     max_num = max(max_num, _highest_sequence_number(tombstoned_guids(session, prefix), prefix))
 
     # Generate next GUID in new format (using underscore for valid Python variable names)
-    next_num = max_num + 1
+    next_num = _reserve_after(session, prefix, max_num)
     return f"{prefix}_{next_num:03d}"
 
 
@@ -145,8 +174,9 @@ def next_sequence_number(session: Session, prefix: str, live_guids: Iterable[str
 
     ``live_guids`` are the GUIDs currently attached to rows of whichever table
     owns this prefix. Callers outside :func:`generate_guid` (phrases, sentences)
-    use this so that "never reuse a retired GUID" is stated in one place.
+    use this so that "never reuse a retired GUID" is stated in one place.  The
+    number is reserved as :func:`generate_guid`'s are.
     """
     highest = _highest_sequence_number(live_guids, prefix)
     highest = max(highest, _highest_sequence_number(tombstoned_guids(session, prefix), prefix))
-    return highest + 1
+    return _reserve_after(session, prefix, highest)

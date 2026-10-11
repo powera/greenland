@@ -10,10 +10,11 @@ Prefixes used below are looked up from the registry rather than hardcoded.
 from __future__ import annotations
 
 import tempfile
-from typing import Iterator, Tuple
+import threading
+from typing import Callable, Iterator, List, Tuple
 
 import pytest
-from sqlalchemy import create_engine
+from sqlalchemy import Engine, create_engine
 from sqlalchemy.exc import IntegrityError
 from sqlalchemy.orm import Session
 
@@ -26,7 +27,7 @@ from storage.models.guid_prefixes import (
 )
 from storage.models.guid_tombstone import GuidTombstone
 from storage.models.schema import Base, Lemma
-from storage.utils.guid import generate_guid
+from storage.utils.guid import clear_reservations, generate_guid
 
 
 @pytest.fixture()
@@ -125,10 +126,14 @@ def test_unknown_pos_type_and_subtype_raise(session: Session) -> None:
 
 def test_interjection_subtype_aliases_are_normalized(session: Session) -> None:
     """LLM output says "interjection" or "other"; both mean interjection_other."""
-    canonical = generate_guid(session, "interjection", "interjection_other")
 
-    assert generate_guid(session, "interjection", "interjection") == canonical
-    assert generate_guid(session, "interjection", "other") == canonical
+    def prefix_of(guid: str) -> str:
+        return guid.rsplit("_", 1)[0]
+
+    canonical = prefix_of(generate_guid(session, "interjection", "interjection_other"))
+
+    assert prefix_of(generate_guid(session, "interjection", "interjection")) == canonical
+    assert prefix_of(generate_guid(session, "interjection", "other")) == canonical
 
 
 def _add_without_flush(session: Session, guid: str, pos_type: str) -> None:
@@ -151,24 +156,6 @@ def test_unflushed_lemmas_do_not_get_duplicate_guids(session: Session) -> None:
     second = generate_guid(session, pos_type, subtype)
 
     assert first != second
-
-
-def test_allocating_without_assigning_repeats_the_same_guid(session: Session) -> None:
-    """Known limitation: a GUID is only reserved once it is attached to a Lemma.
-
-    generate_guid infers what is taken from the table plus the session's pending
-    lemmas, so calling it twice without assigning the first result returns the
-    same GUID both times. Callers that pre-allocate into a dict or form field -
-    words.add_word and the barsukas lemma routes - must build the Lemma before
-    allocating the next GUID. Fixing this properly needs the session to track
-    handed-out GUIDs, which is deliberately out of scope here.
-    """
-    pos_type, subtype, _ = _any_subtype()
-
-    first = generate_guid(session, pos_type, subtype)
-    second = generate_guid(session, pos_type, subtype)
-
-    assert first == second
 
 
 def test_allocation_is_safe_without_autoflush() -> None:
@@ -206,12 +193,13 @@ def test_reassigned_guids_in_the_same_transaction_do_not_collide(session: Sessio
 
 
 def test_concurrent_sessions_are_guarded_by_the_unique_constraint() -> None:
-    """Separate transactions can allocate the same GUID; the DB rejects the second.
+    """Uncoordinated transactions can allocate the same GUID; the DB rejects the second.
 
-    Documented in generate_guid: cross-session allocation is not coordinated,
-    because a session cannot see another's uncommitted rows. The guid column is
-    UNIQUE so the loser fails loudly at commit instead of persisting a duplicate.
-    Pinned here so that safety net cannot be dropped from the schema unnoticed.
+    Reservations are per process, so clearing them between the two allocations
+    stands in here for two processes, which nothing coordinates. The guid
+    column is UNIQUE so the loser fails loudly at commit instead of persisting
+    a duplicate. Pinned here so that safety net cannot be dropped from the
+    schema unnoticed.
     """
     engine = create_engine(f"sqlite:///{tempfile.mkdtemp()}/guid-concurrency.sqlite")
     Base.metadata.create_all(engine)
@@ -219,8 +207,9 @@ def test_concurrent_sessions_are_guarded_by_the_unique_constraint() -> None:
 
     with Session(engine) as first_session, Session(engine) as second_session:
         first_guid = generate_guid(first_session, pos_type, subtype)
+        clear_reservations()
         second_guid = generate_guid(second_session, pos_type, subtype)
-        assert first_guid == second_guid, "separate sessions do not coordinate allocation"
+        assert first_guid == second_guid, "separate processes do not coordinate allocation"
 
         _add_without_flush(first_session, first_guid, pos_type)
         first_session.commit()
@@ -228,6 +217,59 @@ def test_concurrent_sessions_are_guarded_by_the_unique_constraint() -> None:
         _add_without_flush(second_session, second_guid, pos_type)
         with pytest.raises(IntegrityError):
             second_session.commit()
+
+
+def _allocate_on_another_thread(engine: Engine, allocate: Callable[[Session], str]) -> str:
+    """Allocate in a fresh session on a new thread, as a second Barsukas thread would."""
+    result: List[str] = []
+
+    def run() -> None:
+        with Session(engine) as other_session:
+            result.append(allocate(other_session))
+
+    thread = threading.Thread(target=run)
+    thread.start()
+    thread.join()
+    return result[0]
+
+
+def test_threads_of_one_process_never_share_an_uncommitted_guid() -> None:
+    """Barsukas's threads: the second allocator cannot see the first's uncommitted
+    lemma, but the reservation keeps it off that GUID."""
+    engine = create_engine(f"sqlite:///{tempfile.mkdtemp()}/guid-reserve.sqlite")
+    Base.metadata.create_all(engine)
+    pos_type, subtype, prefix = _any_subtype()
+
+    def allocate(db_session: Session) -> str:
+        return generate_guid(db_session, pos_type, subtype)
+
+    with Session(engine) as first_session:
+        first_guid = allocate(first_session)
+        assert _allocate_on_another_thread(engine, allocate) == f"{prefix}_002"
+        _add_without_flush(first_session, first_guid, pos_type)
+        first_session.commit()
+
+    assert first_guid == f"{prefix}_001"
+
+
+def test_an_unused_reservation_leaves_a_gap(session: Session) -> None:
+    pos_type, subtype, prefix = _any_subtype()
+    generate_guid(session, pos_type, subtype)
+    assert generate_guid(session, pos_type, subtype) == f"{prefix}_002"
+
+
+def test_sentence_and_phrase_allocation_reserve_their_numbers() -> None:
+    engine = create_engine(f"sqlite:///{tempfile.mkdtemp()}/guid-reserve.sqlite")
+    Base.metadata.create_all(engine)
+    phrase_subtype = sorted(PHRASE_SUBTYPE_GUID_PREFIXES)[0]
+
+    def allocate_phrase(db_session: Session) -> str:
+        return next_phrase_guid(db_session, phrase_subtype)
+
+    for allocate in (next_sentence_guid, allocate_phrase):
+        with Session(engine) as holder:
+            held = allocate(holder)
+            assert _allocate_on_another_thread(engine, allocate) != held
 
 
 def _tombstone(session: Session, guid: str, pos_type: str = "noun") -> None:

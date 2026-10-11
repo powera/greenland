@@ -48,3 +48,17 @@ def _skip_when_tiktoken_data_unavailable() -> Iterator[None]:
     mp.setattr(tiktoken, "get_encoding", get_encoding)
     yield
     mp.undo()
+
+
+@pytest.fixture(autouse=True)
+def _fresh_guid_reservations() -> Iterator[None]:
+    """Start each test with no GUIDs reserved, as each test starts a fresh database.
+
+    GUID allocation reserves every number it hands out for the process (see
+    storage.utils.guid), and tests reuse one URL (``sqlite:///:memory:``) for
+    many databases, so without this a test's GUIDs depend on the tests before it.
+    """
+    from storage.utils.guid import clear_reservations
+
+    clear_reservations()
+    yield
