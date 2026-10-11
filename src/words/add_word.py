@@ -29,6 +29,7 @@ disambiguated lemmas, English derivative forms and alternate spellings
 splitting one lexeme across two rows.
 """
 
+import functools
 import logging
 from dataclasses import dataclass, field
 from typing import Any, Dict, List, Optional, Tuple
@@ -60,6 +61,7 @@ from storage.models.imports import WordExclusion
 from storage.queries.lemma import get_english_senses, word_exists_in_english
 from words.pending_imports.staging import create_pending_import, find_pending_import
 from storage.translation_helpers import convert_llm_response_to_lang_codes
+from storage.utils.guid import run_lemma_write
 from wordfreq.translation.client import LinguisticClient
 from wordfreq.translation.constants import MAJOR_POS_TYPES
 from wordfreq.translation.definitions import (
@@ -1032,22 +1034,28 @@ def add_word(
                     dropped.append(f"{definition_text[:40]} (already in the pending queue)")
                 continue
 
+            # Commit per sense: a multi-sense word is a series of small writes,
+            # so a failure on a later sense does not discard the earlier ones.
             try:
-                new_lemma, stored_translations = create_sense_lemma(
+                new_lemma, stored_translations = run_lemma_write(
                     session,
-                    normalized,
-                    sense,
-                    pos_type=pos_type,
-                    pos_subtype=pos_subtype,
-                    definition_text=definition_text,
-                    sense_prominence=prominence,
-                    difficulty_level=difficulty_level,
-                    source=source,
-                    model=client_model,
-                    # _lookup_frequency already resolved the POS-directed
-                    # lookup, so this is a store, not a second search.
-                    frequency_rank=frequency_rank,
-                    best_corpus_rank=best_corpus_rank,
+                    functools.partial(
+                        create_sense_lemma,
+                        session,
+                        normalized,
+                        sense,
+                        pos_type=pos_type,
+                        pos_subtype=pos_subtype,
+                        definition_text=definition_text,
+                        sense_prominence=prominence,
+                        difficulty_level=difficulty_level,
+                        source=source,
+                        model=client_model,
+                        # _lookup_frequency already resolved the POS-directed
+                        # lookup, so this is a store, not a second search.
+                        frequency_rank=frequency_rank,
+                        best_corpus_rank=best_corpus_rank,
+                    ),
                 )
             except ValueError as exc:
                 session.rollback()
@@ -1069,10 +1077,6 @@ def add_word(
                 sense_prominence=prominence,
                 translations=stored_translations,
             )
-
-            # Commit per sense: a multi-sense word is a series of small writes,
-            # so a failure on a later sense does not discard the earlier ones.
-            session.commit()
             result.senses.append(sense_result)
     except Exception:
         session.rollback()

@@ -49,6 +49,8 @@ from words.add_word import (
 )
 from wordfreq.translation.definitions import select_senses_to_add
 
+pytestmark = pytest.mark.usefixtures("require_lemma_write_scope")
+
 
 @pytest.fixture()
 def db_engine(tmp_path: Path) -> Generator[Engine, None, None]:

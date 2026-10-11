@@ -40,7 +40,7 @@ from storage.models.guid_prefixes import SUBTYPE_GUID_PREFIXES
 from storage.models.schema import Lemma
 from storage.queries.lemma import word_exists_in_english
 from storage.translation_helpers import ensure_english_translation, set_translation
-from storage.utils.guid import generate_guid
+from storage.utils.guid import generate_guid, run_lemma_write
 from words.translation import build_term_translation_prompt
 
 logger = logging.getLogger(__name__)
@@ -198,62 +198,64 @@ def add_term(
         else:
             missing.append(lang_code)
 
-    guid = generate_guid(session, pos_type, pos_subtype)
-    new_lemma = Lemma(
-        lemma_text=normalized,
-        definition_text=definition_text,
-        pos_type=pos_type,
-        pos_subtype=pos_subtype,
-        guid=guid,
-        difficulty_level=difficulty_level,
-        confidence=0.0,
-        verified=False,
-    )
-    session.add(new_lemma)
-    session.flush()
-    ensure_english_translation(session, new_lemma)
+    def write_term() -> str:
+        guid = generate_guid(session, pos_type, pos_subtype)
+        new_lemma = Lemma(
+            lemma_text=normalized,
+            definition_text=definition_text,
+            pos_type=pos_type,
+            pos_subtype=pos_subtype,
+            guid=guid,
+            difficulty_level=difficulty_level,
+            confidence=0.0,
+            verified=False,
+        )
+        session.add(new_lemma)
+        session.flush()
+        ensure_english_translation(session, new_lemma)
 
-    log_translation_change(
-        session=session,
-        source=source,
-        operation_type="lemma_create",
-        lemma_id=new_lemma.id,
-        language_code="en",
-        old_translation=None,
-        new_translation=normalized,
-        # entity_guid populates the indexed column; guid also goes in the fact,
-        # matching the shape add_word's lemma_create entries already have.
-        entity_guid=guid,
-        guid=guid,
-        pos_type=pos_type,
-        pos_subtype=pos_subtype,
-        definition=definition_text,
-        model=resolved_model,
-    )
-
-    for lang_code, translation in translations.items():
-        set_translation(session, new_lemma, lang_code, translation)
         log_translation_change(
             session=session,
             source=source,
-            operation_type="translation",
+            operation_type="lemma_create",
             lemma_id=new_lemma.id,
-            language_code=lang_code,
+            language_code="en",
             old_translation=None,
-            new_translation=translation,
+            new_translation=normalized,
+            # entity_guid populates the indexed column; guid also goes in the fact,
+            # matching the shape add_word's lemma_create entries already have.
             entity_guid=guid,
             guid=guid,
+            pos_type=pos_type,
+            pos_subtype=pos_subtype,
+            definition=definition_text,
             model=resolved_model,
         )
 
-    if tags:
-        # Imported here for the same reason as the client: keeps module import
-        # free of the wider lemma CRUD surface.
-        from storage.crud.lemma_tags import add_tags
+        for lang_code, translation in translations.items():
+            set_translation(session, new_lemma, lang_code, translation)
+            log_translation_change(
+                session=session,
+                source=source,
+                operation_type="translation",
+                lemma_id=new_lemma.id,
+                language_code=lang_code,
+                old_translation=None,
+                new_translation=translation,
+                entity_guid=guid,
+                guid=guid,
+                model=resolved_model,
+            )
 
-        add_tags(session, new_lemma, tags, source=source)
+        if tags:
+            # Imported here for the same reason as the client: keeps module import
+            # free of the wider lemma CRUD surface.
+            from storage.crud.lemma_tags import add_tags
 
-    session.commit()
+            add_tags(session, new_lemma, tags, source=source)
+        return guid
+
+    guid = run_lemma_write(session, write_term)
 
     if missing:
         logger.warning(

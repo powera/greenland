@@ -32,6 +32,7 @@ from storage.crud.guid_tombstone import create_tombstone, get_tombstones_by_lemm
 from storage.crud.difficulty_override import get_all_overrides_for_lemma
 from storage.config.lemma_fact_registry import LEMMA_FACT_DEFINITIONS
 from storage.crud.lemma import handle_lemma_type_subtype_change
+from storage.utils.guid import LemmaWriteBusyError, generate_guid, run_lemma_write
 from storage.crud.lemma_fact import get_lemma_facts
 from storage.crud.lemma_tags import parse_tags_input, serialize_tags_for_column
 from storage.crud.operation_log import (
@@ -137,15 +138,6 @@ def add_lemma() -> ResponseReturnValue:
             flash(f'Lemma "{lemma_text}" with POS type "{pos_type}" already exists', "error")
             return redirect(url_for("lemmas.view_lemma", lemma_id=existing.id))
 
-        # Generate GUID based on pos_subtype
-        from storage.utils.guid import generate_guid
-
-        try:
-            guid = generate_guid(g.db, pos_type, pos_subtype)
-        except ValueError as e:
-            flash(f"Invalid POS subtype for GUID generation: {e}", "error")
-            return render_template("lemmas/add.html")
-
         # Parse difficulty level
         difficulty_level = None
         if difficulty_level_str:
@@ -165,56 +157,70 @@ def add_lemma() -> ResponseReturnValue:
                 flash("Invalid difficulty level", "error")
                 return render_template("lemmas/add.html")
 
-        # Create new lemma
-        new_lemma = Lemma(
-            lemma_text=lemma_text,
-            definition_text=definition_text,
-            pos_type=pos_type,
-            pos_subtype=pos_subtype,
-            guid=guid,
-            difficulty_level=difficulty_level,
-            confidence=0.0,
-            verified=False,
-        )
-        if sense_prominence:
-            new_lemma.sense_prominence = sense_prominence
+        assert pos_subtype is not None  # for the closure; required above
 
-        g.db.add(new_lemma)
-        g.db.flush()  # Get the ID
-        ensure_english_translation(g.db, new_lemma)
+        def create_lemma() -> Lemma:
+            new_lemma = Lemma(
+                lemma_text=lemma_text,
+                definition_text=definition_text,
+                pos_type=pos_type,
+                pos_subtype=pos_subtype,
+                guid=generate_guid(g.db, pos_type, pos_subtype),
+                difficulty_level=difficulty_level,
+                confidence=0.0,
+                verified=False,
+            )
+            if sense_prominence:
+                new_lemma.sense_prominence = sense_prominence
 
-        # Log the creation
-        log_translation_change(
-            session=g.db,
-            source=Config.OPERATION_LOG_SOURCE,
-            operation_type="lemma_create",
-            lemma_id=new_lemma.id,
-            field_name="created",
-            old_value=None,
-            new_value=f"{lemma_text} ({pos_type})",
-        )
+            g.db.add(new_lemma)
+            g.db.flush()  # Get the ID
+            ensure_english_translation(g.db, new_lemma)
 
-        # Save initial translation if provided
-        if initial_translation_lang and initial_translation_text:
-            from storage.translation_helpers import set_translation
+            # Log the creation
+            log_translation_change(
+                session=g.db,
+                source=Config.OPERATION_LOG_SOURCE,
+                operation_type="lemma_create",
+                lemma_id=new_lemma.id,
+                field_name="created",
+                old_value=None,
+                new_value=f"{lemma_text} ({pos_type})",
+            )
 
-            try:
-                set_translation(g.db, new_lemma, initial_translation_lang, initial_translation_text)
-                # Log the translation
-                log_translation_change(
-                    session=g.db,
-                    source=Config.OPERATION_LOG_SOURCE,
-                    operation_type="translation_add",
-                    lemma_id=new_lemma.id,
-                    field_name=f"{initial_translation_lang}_translation",
-                    old_value=None,
-                    new_value=initial_translation_text,
-                )
-            except Exception as e:
-                # Don't fail lemma creation if translation fails
-                flash(f"Warning: Failed to save translation: {str(e)}", "warning")
+            # Save initial translation if provided
+            if initial_translation_lang and initial_translation_text:
+                from storage.translation_helpers import set_translation
 
-        g.db.commit()
+                try:
+                    set_translation(
+                        g.db, new_lemma, initial_translation_lang, initial_translation_text
+                    )
+                    # Log the translation
+                    log_translation_change(
+                        session=g.db,
+                        source=Config.OPERATION_LOG_SOURCE,
+                        operation_type="translation_add",
+                        lemma_id=new_lemma.id,
+                        field_name=f"{initial_translation_lang}_translation",
+                        old_value=None,
+                        new_value=initial_translation_text,
+                    )
+                except Exception as e:
+                    # Don't fail lemma creation if translation fails
+                    flash(f"Warning: Failed to save translation: {str(e)}", "warning")
+            return new_lemma
+
+        # A person is waiting on this page, so a busy lock is reported at once
+        # rather than held for up to the lock timeout.
+        try:
+            new_lemma = run_lemma_write(g.db, create_lemma, fail_fast=True)
+        except ValueError as e:
+            flash(f"Invalid POS subtype for GUID generation: {e}", "error")
+            return render_template("lemmas/add.html")
+        except LemmaWriteBusyError as e:
+            flash(str(e), "error")
+            return render_template("lemmas/add.html")
 
         success_message = f"Created new lemma: {lemma_text}"
         if initial_translation_lang and initial_translation_text:
@@ -813,50 +819,9 @@ def edit_lemma(lemma_id: int) -> ResponseReturnValue:
 
         type_changed = new_pos_type != lemma.pos_type
         subtype_changed = new_pos_subtype != lemma.pos_subtype
-
-        if type_changed or subtype_changed:
-            # Use the special handler for type/subtype changes
-            # This will create tombstone and regenerate GUID; translations and
-            # forms go only on a type change, or forms on request.
-            result = handle_lemma_type_subtype_change(
-                session=g.db,
-                lemma=lemma,
-                new_pos_type=new_pos_type,
-                new_pos_subtype=new_pos_subtype,
-                source=Config.OPERATION_LOG_SOURCE,
-                notes=f"Type/subtype changed via BARSUKAS edit form",
-                drop_forms_on_subtype_change=bool(request.form.get("drop_forms_on_subtype_change")),
-            )
-
-            # Add changes to track for user feedback
-            if type_changed:
-                changes.append(("pos_type", result.get("old_guid", lemma.pos_type), new_pos_type))
-            if subtype_changed:
-                changes.append(
-                    (
-                        "pos_subtype",
-                        lemma.pos_subtype if not subtype_changed else None,
-                        new_pos_subtype,
-                    )
-                )
-
-            # Flash informative message about the type/subtype change
-            if result["tombstone_created"]:
-                flash(
-                    f"Type/subtype changed. Old GUID {result['old_guid']} tombstoned, "
-                    f"new GUID: {result['new_guid']}",
-                    "warning",
-                )
-            if result["translations_cleared"] > 0:
-                flash(
-                    f"Cleared {result['translations_cleared']} translation(s) due to type/subtype change",
-                    "warning",
-                )
-            if result["derivative_forms_deleted"] > 0:
-                flash(
-                    f"Deleted {result['derivative_forms_deleted']} derivative form(s) due to type/subtype change",
-                    "warning",
-                )
+        # The type/subtype change itself is applied last, in save_edit below:
+        # it assigns a new GUID, so it runs under the lemma write lock with
+        # the commit, after every field has validated.
 
         # Allow manual GUID override (but only if type/subtype didn't change)
         new_guid = request.form.get("guid", "").strip() or None
@@ -980,19 +945,82 @@ def edit_lemma(lemma_id: int) -> ResponseReturnValue:
                 )
             )
 
-        # Log all changes
-        for field_name, old_value, new_value in changes:
-            log_translation_change(
-                session=g.db,
-                source=Config.OPERATION_LOG_SOURCE,
-                operation_type="lemma_update",
-                lemma_id=lemma.id,
-                field_name=field_name,
-                old_value=str(old_value) if old_value is not None else None,
-                new_value=str(new_value) if new_value is not None else None,
-            )
+        edited = lemma
 
-        g.db.commit()
+        def save_edit() -> Optional[Dict[str, Any]]:
+            type_result: Optional[Dict[str, Any]] = None
+            if type_changed or subtype_changed:
+                # Use the special handler for type/subtype changes
+                # This will create tombstone and regenerate GUID; translations and
+                # forms go only on a type change, or forms on request.
+                type_result = handle_lemma_type_subtype_change(
+                    session=g.db,
+                    lemma=edited,
+                    new_pos_type=new_pos_type,
+                    new_pos_subtype=new_pos_subtype,
+                    source=Config.OPERATION_LOG_SOURCE,
+                    notes=f"Type/subtype changed via BARSUKAS edit form",
+                    drop_forms_on_subtype_change=bool(
+                        request.form.get("drop_forms_on_subtype_change")
+                    ),
+                )
+
+                # Add changes to track for user feedback
+                if type_changed:
+                    changes.append(
+                        ("pos_type", type_result.get("old_guid", edited.pos_type), new_pos_type)
+                    )
+                if subtype_changed:
+                    changes.append(
+                        (
+                            "pos_subtype",
+                            edited.pos_subtype if not subtype_changed else None,
+                            new_pos_subtype,
+                        )
+                    )
+
+            # Log all changes
+            for field_name, old_value, new_value in changes:
+                log_translation_change(
+                    session=g.db,
+                    source=Config.OPERATION_LOG_SOURCE,
+                    operation_type="lemma_update",
+                    lemma_id=edited.id,
+                    field_name=field_name,
+                    old_value=str(old_value) if old_value is not None else None,
+                    new_value=str(new_value) if new_value is not None else None,
+                )
+            return type_result
+
+        if type_changed or subtype_changed:
+            try:
+                result = run_lemma_write(g.db, save_edit, fail_fast=True)
+            except LemmaWriteBusyError as busy:
+                flash(str(busy), "error")
+                return _render_lemma_edit_form(lemma)
+        else:
+            result = save_edit()
+            g.db.commit()
+
+        # Flash informative message about the type/subtype change
+        if result is not None:
+            if result["tombstone_created"]:
+                flash(
+                    f"Type/subtype changed. Old GUID {result['old_guid']} tombstoned, "
+                    f"new GUID: {result['new_guid']}",
+                    "warning",
+                )
+            if result["translations_cleared"] > 0:
+                flash(
+                    f"Cleared {result['translations_cleared']} translation(s) due to type/subtype change",
+                    "warning",
+                )
+            if result["derivative_forms_deleted"] > 0:
+                flash(
+                    f"Deleted {result['derivative_forms_deleted']} derivative form(s) due to type/subtype change",
+                    "warning",
+                )
+
         flash(f"Updated lemma: {lemma.lemma_text}", "success")
         return redirect(url_for("lemmas.view_lemma", lemma_id=lemma.id))
 

@@ -66,7 +66,7 @@ from storage.translation_helpers import (
     get_translation_pronunciations,
     set_translation,
 )
-from storage.utils.guid import generate_guid
+from storage.utils.guid import LemmaWriteBusyError, generate_guid, run_lemma_write
 from workqueue.task_queue import TaskStatus, TaskType, enqueue_task
 from barsukas.routes.api import bp
 
@@ -368,6 +368,10 @@ def _serialize_value(value: Any, field_name: str = "") -> Any:
     if isinstance(value, str):
         return value
     return str(value)
+
+
+class _LemmaItemError(ValueError):
+    """An invalid item of a /v1/lemmas/add batch; the message is the error response."""
 
 
 def _build_error_response(message: str, status_code: int = 400) -> ResponseReturnValue:
@@ -867,150 +871,160 @@ def add_lemmas() -> ResponseReturnValue:
     created_count = 0
     already_exists_count = 0
 
-    for index, item in enumerate(lemmas_raw):
-        if not isinstance(item, dict):
-            return _build_error_response(f"lemmas[{index}] must be an object")
+    def add_items() -> None:
+        """Validate and create every item; any invalid item rolls back the batch."""
+        nonlocal created_count, already_exists_count
+        for index, item in enumerate(lemmas_raw):
+            if not isinstance(item, dict):
+                raise _LemmaItemError(f"lemmas[{index}] must be an object")
 
-        required_fields: Dict[str, str] = {}
-        for field_name in ("lemma_text", "definition_text", "pos_type", "pos_subtype"):
-            field_value = item.get(field_name)
-            if not isinstance(field_value, str) or not field_value.strip():
-                return _build_error_response(
-                    f"lemmas[{index}].{field_name} is required and must be a non-empty string"
+            required_fields: Dict[str, str] = {}
+            for field_name in ("lemma_text", "definition_text", "pos_type", "pos_subtype"):
+                field_value = item.get(field_name)
+                if not isinstance(field_value, str) or not field_value.strip():
+                    raise _LemmaItemError(
+                        f"lemmas[{index}].{field_name} is required and must be a non-empty string"
+                    )
+                required_fields[field_name] = field_value.strip()
+            lemma_text = required_fields["lemma_text"]
+            definition_text = required_fields["definition_text"]
+            pos_type = required_fields["pos_type"]
+            pos_subtype = required_fields["pos_subtype"]
+
+            difficulty_value = item.get("difficulty_level")
+            if difficulty_value is None:
+                difficulty_level: Optional[int] = None
+            else:
+                try:
+                    difficulty_level = int(difficulty_value)
+                except (TypeError, ValueError):
+                    raise _LemmaItemError(
+                        f"lemmas[{index}].difficulty_level must be an integer or null"
+                    )
+                if difficulty_level != Config.EXCLUDE_DIFFICULTY_LEVEL and (
+                    difficulty_level < Config.MIN_DIFFICULTY_LEVEL
+                    or difficulty_level > Config.MAX_DIFFICULTY_LEVEL
+                ):
+                    raise _LemmaItemError(
+                        f"lemmas[{index}].difficulty_level must be between "
+                        f"{Config.MIN_DIFFICULTY_LEVEL} and {Config.MAX_DIFFICULTY_LEVEL}, "
+                        f"or {Config.EXCLUDE_DIFFICULTY_LEVEL}"
+                    )
+
+            prominence_value = item.get("sense_prominence")
+            sense_prominence: Optional[str] = None
+            if prominence_value is not None:
+                if (
+                    not isinstance(prominence_value, str)
+                    or prominence_value not in SENSE_PROMINENCE_VALUES
+                ):
+                    raise _LemmaItemError(
+                        f"lemmas[{index}].sense_prominence must be one of "
+                        f"{sorted(SENSE_PROMINENCE_VALUES)} or null"
+                    )
+                sense_prominence = prominence_value
+
+            translations_raw = item.get("translations")
+            translations: Dict[str, str] = {}
+            if translations_raw is not None:
+                if not isinstance(translations_raw, dict):
+                    raise _LemmaItemError(
+                        f"lemmas[{index}].translations must be an object mapping language to text"
+                    )
+                for lang_code, translation_text in translations_raw.items():
+                    if not isinstance(lang_code, str) or not lang_code.strip():
+                        raise _LemmaItemError(
+                            f"lemmas[{index}].translations has an invalid language code"
+                        )
+                    if not isinstance(translation_text, str) or not translation_text.strip():
+                        raise _LemmaItemError(
+                            f"lemmas[{index}].translations[{lang_code}] must be a non-empty string"
+                        )
+                    translations[lang_code.strip().lower()] = translation_text.strip()
+
+            existing = (
+                g.db.query(Lemma)
+                .filter(Lemma.lemma_text == lemma_text, Lemma.pos_type == pos_type)
+                .first()
+            )
+            if existing is not None:
+                results.append(
+                    {
+                        "lemma_text": lemma_text,
+                        "pos_type": pos_type,
+                        "guid": existing.guid,
+                        "status": "already_exists",
+                    }
                 )
-            required_fields[field_name] = field_value.strip()
-        lemma_text = required_fields["lemma_text"]
-        definition_text = required_fields["definition_text"]
-        pos_type = required_fields["pos_type"]
-        pos_subtype = required_fields["pos_subtype"]
+                already_exists_count += 1
+                continue
 
-        difficulty_value = item.get("difficulty_level")
-        if difficulty_value is None:
-            difficulty_level: Optional[int] = None
-        else:
             try:
-                difficulty_level = int(difficulty_value)
-            except (TypeError, ValueError):
-                return _build_error_response(
-                    f"lemmas[{index}].difficulty_level must be an integer or null"
-                )
-            if difficulty_level != Config.EXCLUDE_DIFFICULTY_LEVEL and (
-                difficulty_level < Config.MIN_DIFFICULTY_LEVEL
-                or difficulty_level > Config.MAX_DIFFICULTY_LEVEL
-            ):
-                return _build_error_response(
-                    f"lemmas[{index}].difficulty_level must be between "
-                    f"{Config.MIN_DIFFICULTY_LEVEL} and {Config.MAX_DIFFICULTY_LEVEL}, "
-                    f"or {Config.EXCLUDE_DIFFICULTY_LEVEL}"
-                )
+                guid = generate_guid(g.db, pos_type, pos_subtype)
+            except ValueError as exc:
+                raise _LemmaItemError(f"lemmas[{index}]: {exc}")
 
-        prominence_value = item.get("sense_prominence")
-        sense_prominence: Optional[str] = None
-        if prominence_value is not None:
-            if (
-                not isinstance(prominence_value, str)
-                or prominence_value not in SENSE_PROMINENCE_VALUES
-            ):
-                return _build_error_response(
-                    f"lemmas[{index}].sense_prominence must be one of "
-                    f"{sorted(SENSE_PROMINENCE_VALUES)} or null"
-                )
-            sense_prominence = prominence_value
+            new_lemma = Lemma(
+                lemma_text=lemma_text,
+                definition_text=definition_text,
+                pos_type=pos_type,
+                pos_subtype=pos_subtype,
+                guid=guid,
+                difficulty_level=difficulty_level,
+                confidence=0.0,
+                verified=False,
+            )
+            if sense_prominence is not None:
+                new_lemma.sense_prominence = sense_prominence
+            g.db.add(new_lemma)
+            g.db.flush()
+            ensure_english_translation(g.db, new_lemma)
 
-        translations_raw = item.get("translations")
-        translations: Dict[str, str] = {}
-        if translations_raw is not None:
-            if not isinstance(translations_raw, dict):
-                return _build_error_response(
-                    f"lemmas[{index}].translations must be an object mapping language to text"
-                )
-            for lang_code, translation_text in translations_raw.items():
-                if not isinstance(lang_code, str) or not lang_code.strip():
-                    return _build_error_response(
-                        f"lemmas[{index}].translations has an invalid language code"
-                    )
-                if not isinstance(translation_text, str) or not translation_text.strip():
-                    return _build_error_response(
-                        f"lemmas[{index}].translations[{lang_code}] must be a non-empty string"
-                    )
-                translations[lang_code.strip().lower()] = translation_text.strip()
+            log_translation_change(
+                session=g.db,
+                source=Config.OPERATION_LOG_SOURCE,
+                operation_type="lemma_create",
+                lemma_id=new_lemma.id,
+                field_name="created",
+                old_value=None,
+                new_value=f"{lemma_text} ({pos_type})",
+            )
 
-        existing = (
-            g.db.query(Lemma)
-            .filter(Lemma.lemma_text == lemma_text, Lemma.pos_type == pos_type)
-            .first()
-        )
-        if existing is not None:
+            seeded_languages: List[str] = []
+            for lang_code, translation_text in translations.items():
+                set_translation(g.db, new_lemma, lang_code, translation_text)
+                log_translation_change(
+                    session=g.db,
+                    source=Config.OPERATION_LOG_SOURCE,
+                    operation_type="translation_add",
+                    lemma_id=new_lemma.id,
+                    field_name=f"{lang_code}_translation",
+                    old_value=None,
+                    new_value=translation_text,
+                )
+                seeded_languages.append(lang_code)
+
             results.append(
                 {
                     "lemma_text": lemma_text,
                     "pos_type": pos_type,
-                    "guid": existing.guid,
-                    "status": "already_exists",
+                    "pos_subtype": pos_subtype,
+                    "guid": guid,
+                    "difficulty_level": _serialize_value(difficulty_level),
+                    "translations": sorted(seeded_languages),
+                    "status": "created",
                 }
             )
-            already_exists_count += 1
-            continue
+            created_count += 1
 
-        try:
-            guid = generate_guid(g.db, pos_type, pos_subtype)
-        except ValueError as exc:
-            return _build_error_response(f"lemmas[{index}]: {exc}")
-
-        new_lemma = Lemma(
-            lemma_text=lemma_text,
-            definition_text=definition_text,
-            pos_type=pos_type,
-            pos_subtype=pos_subtype,
-            guid=guid,
-            difficulty_level=difficulty_level,
-            confidence=0.0,
-            verified=False,
-        )
-        if sense_prominence is not None:
-            new_lemma.sense_prominence = sense_prominence
-        g.db.add(new_lemma)
-        g.db.flush()
-        ensure_english_translation(g.db, new_lemma)
-
-        log_translation_change(
-            session=g.db,
-            source=Config.OPERATION_LOG_SOURCE,
-            operation_type="lemma_create",
-            lemma_id=new_lemma.id,
-            field_name="created",
-            old_value=None,
-            new_value=f"{lemma_text} ({pos_type})",
-        )
-
-        seeded_languages: List[str] = []
-        for lang_code, translation_text in translations.items():
-            set_translation(g.db, new_lemma, lang_code, translation_text)
-            log_translation_change(
-                session=g.db,
-                source=Config.OPERATION_LOG_SOURCE,
-                operation_type="translation_add",
-                lemma_id=new_lemma.id,
-                field_name=f"{lang_code}_translation",
-                old_value=None,
-                new_value=translation_text,
-            )
-            seeded_languages.append(lang_code)
-
-        results.append(
-            {
-                "lemma_text": lemma_text,
-                "pos_type": pos_type,
-                "pos_subtype": pos_subtype,
-                "guid": guid,
-                "difficulty_level": _serialize_value(difficulty_level),
-                "translations": sorted(seeded_languages),
-                "status": "created",
-            }
-        )
-        created_count += 1
-
-    g.db.commit()
+    # Every new lemma takes a GUID, so the whole batch runs under the lemma
+    # write lock; an API caller is told at once when the lock is busy.
+    try:
+        run_lemma_write(g.db, add_items, fail_fast=True)
+    except _LemmaItemError as item_error:
+        return _build_error_response(str(item_error))
+    except LemmaWriteBusyError as busy:
+        return _build_error_response(str(busy), status_code=409)
 
     return _build_success_response(
         results,

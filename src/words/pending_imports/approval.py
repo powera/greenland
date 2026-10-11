@@ -52,6 +52,7 @@ from storage.models.imports import (
 from storage.models.name_entity import NAME_KINDS, normalize_name_text
 from storage.models.schema import SENSE_PROMINENCE_COMMON, Lemma
 from storage.translation_helpers import LANG_CODE_TO_LLM_FIELD
+from storage.utils.guid import run_lemma_write
 from util.logging_config import get_logger
 from words.emoji import attach_pending_emoji_to_lemma, release_pending_emoji
 from words.lemma_creation import UNSET_DIFFICULTY_LEVEL, create_sense_lemma
@@ -393,18 +394,21 @@ def approve_as_lemma(
     # word that already has forms -- so approving a second sense of an existing
     # word created nothing, and the lookup that followed picked up an older
     # lemma of the same word as if it were new.
-    created: List[Lemma] = []
-    try:
+    for def_data in filtered_definitions:
+        if not (def_data.get("pos") or "") or not def_data.get("pos_subtype"):
+            session.rollback()
+            return {
+                "success": False,
+                "word": word,
+                "error": f"No POS type/subtype for a sense of '{word}'",
+            }
+
+    def create_senses() -> List[Lemma]:
+        """Create every sense and consume the pending row, in one commit."""
+        created: List[Lemma] = []
         for def_data in filtered_definitions:
             pos_type = (def_data.get("pos") or "").lower()
-            pos_subtype = def_data.get("pos_subtype")
-            if not pos_type or not pos_subtype:
-                session.rollback()
-                return {
-                    "success": False,
-                    "word": word,
-                    "error": f"No POS type/subtype for a sense of '{word}'",
-                }
+            pos_subtype = str(def_data["pos_subtype"])  # checked above
             lemma, _ = create_sense_lemma(
                 session,
                 word,
@@ -419,18 +423,20 @@ def approve_as_lemma(
                 disambiguation=disambiguation,
             )
             created.append(lemma)
+        # Any sentence waiting on this pending import is repointed at the lemma
+        # it just became; with several senses created, the first is the staged one.
+        delete_pending_import(session, pending, lemma_id=created[0].id)
+        return created
+
+    try:
+        created = run_lemma_write(session, create_senses)
     except ValueError as e:
         # GUID generation rejects a subtype it has no prefix for.
-        session.rollback()
         logger.error(f"Subtype validation error for '{word}': {e}")
         return {"success": False, "word": word, "error": f"Invalid subtype: {e}"}
 
-    # Any sentence waiting on this pending import is repointed at the lemma it
-    # just became; with several senses created, the first is the staged one.
     new_lemma = created[0]
     new_lemma_id: Optional[int] = new_lemma.id
-    delete_pending_import(session, pending, lemma_id=new_lemma_id)
-    session.commit()
 
     # Carry any tags staged on the pending import onto the new lemma, so
     # a corpus ingested with `genys --tags legal` needs no second pass.

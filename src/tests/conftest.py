@@ -51,14 +51,35 @@ def _skip_when_tiktoken_data_unavailable() -> Iterator[None]:
 
 
 @pytest.fixture(autouse=True)
-def _fresh_guid_reservations() -> Iterator[None]:
-    """Start each test with no GUIDs reserved, as each test starts a fresh database.
+def _guid_allocation_for_tests() -> Iterator[None]:
+    """Start each test with no GUIDs reserved, and lemma GUIDs allowed anywhere.
 
-    GUID allocation reserves every number it hands out for the process (see
-    storage.utils.guid), and tests reuse one URL (``sqlite:///:memory:``) for
-    many databases, so without this a test's GUIDs depend on the tests before it.
+    Sentence and phrase allocation reserves every number it hands out for the
+    process (see storage.utils.guid), and tests reuse one URL
+    (``sqlite:///:memory:``) for many databases, so without the reset a test's
+    GUIDs depend on the tests before it.  Tests build lemmas with add_lemma and
+    commit as they please, so generate_guid's run_lemma_write requirement is
+    lifted; tests of that requirement turn it back on.
     """
-    from storage.utils.guid import clear_reservations
+    from storage.utils import guid
 
-    clear_reservations()
+    guid.clear_reservations()
+    previous = guid.require_lemma_write_scope
+    guid.require_lemma_write_scope = False
     yield
+    guid.require_lemma_write_scope = previous
+
+
+@pytest.fixture()
+def require_lemma_write_scope() -> Iterator[None]:
+    """Turn generate_guid's run_lemma_write requirement back on.
+
+    For the tests of a path that creates lemmas in production, so a path that
+    assigns a GUID outside run_lemma_write fails its tests.  Apply to a module
+    with ``pytestmark = pytest.mark.usefixtures("require_lemma_write_scope")``.
+    """
+    from storage.utils import guid
+
+    guid.require_lemma_write_scope = True
+    yield
+    guid.require_lemma_write_scope = False

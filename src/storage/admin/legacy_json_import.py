@@ -60,6 +60,7 @@ from storage.database import (
 )
 from storage.models.schema import DerivativeForm, Lemma, WordToken
 from storage.translation_helpers import has_translation_clause
+from storage.utils.guid import run_lemma_write
 
 DEFAULT_JSON_PATH = os.path.join(constants.PROJECT_ROOT, "data", "nouns.json")
 
@@ -339,7 +340,7 @@ def find_or_create_lemma(
     word_token = get_word_token_by_text(session, clean_english, "en")
 
     # Step 3: Create new lemma
-    try:
+    def create_lemma() -> Lemma:
         lemma = add_lemma(
             session=session,
             lemma_text=clean_english,
@@ -356,7 +357,6 @@ def find_or_create_lemma(
         # Set the existing GUID if provided
         if existing_guid:
             lemma.guid = existing_guid
-            session.commit()
 
         # Add English derivative form.
         add_derivative_form(
@@ -368,6 +368,10 @@ def find_or_create_lemma(
             word_token=word_token,  # Will be None if no word token exists
             is_base_form=True,
         )
+        return lemma
+
+    try:
+        lemma = run_lemma_write(session, create_lemma)
 
         if word_token:
             print(f"Created lemma with word token for: {english_word}")

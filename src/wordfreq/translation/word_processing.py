@@ -2,12 +2,14 @@
 
 """Core word processing logic for linguistic analysis."""
 
+import functools
 import logging
 from typing import Any, Dict, List, Optional
 
 from storage import database as linguistic_db
 from storage.models.enums import GrammaticalForm
 from storage.models.translations import Translation, TranslationSet
+from storage.utils.guid import run_lemma_write
 from wordfreq.translation import definitions
 from wordfreq.translation.constants import VALID_POS_TYPES
 from langtools.en.base_forms import EN_BASE_FORM_BY_POS
@@ -218,22 +220,27 @@ def process_word(
                 chinese=chinese_trans,
             )
 
-            # Create complete word entry (WordToken + Lemma + DerivativeForm)
-            derivative_form = linguistic_db.add_complete_word_entry(
-                session=session,
-                token=word,
-                lemma_text=def_data.get("lemma", word),
-                definition_text=def_data.get("definition", f"Definition for {word}"),
-                pos_type=pos_type,
-                grammatical_form=grammatical_form,
-                pos_subtype=def_data.get("pos_subtype"),
-                is_base_form=is_base_form_flag,
-                ipa_pronunciation=def_data.get("ipa_spelling"),
-                phonetic_pronunciation=def_data.get("phonetic_spelling"),
-                translations=translations_set,
-                confidence=def_data.get("confidence", 0.0),
-                notes=def_data.get("notes"),
-                sense_prominence=def_data.get("sense_prominence"),
+            # Create complete word entry (WordToken + Lemma + DerivativeForm),
+            # committed per definition since the lemma takes a new GUID
+            derivative_form = run_lemma_write(
+                session,
+                functools.partial(
+                    linguistic_db.add_complete_word_entry,
+                    session=session,
+                    token=word,
+                    lemma_text=def_data.get("lemma", word),
+                    definition_text=def_data.get("definition", f"Definition for {word}"),
+                    pos_type=pos_type,
+                    grammatical_form=grammatical_form,
+                    pos_subtype=def_data.get("pos_subtype"),
+                    is_base_form=is_base_form_flag,
+                    ipa_pronunciation=def_data.get("ipa_spelling"),
+                    phonetic_pronunciation=def_data.get("phonetic_spelling"),
+                    translations=translations_set,
+                    confidence=def_data.get("confidence", 0.0),
+                    notes=def_data.get("notes"),
+                    sense_prominence=def_data.get("sense_prominence"),
+                ),
             )
 
             if not derivative_form:

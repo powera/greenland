@@ -37,7 +37,7 @@ the chess sense.
 
 import logging
 from dataclasses import dataclass, field
-from typing import Any, Dict, List, Optional, Sequence
+from typing import Any, Dict, List, Optional, Sequence, Tuple
 
 from sqlalchemy.orm import Session
 
@@ -57,7 +57,7 @@ from storage.translation_helpers import (
     ensure_english_translation,
 )
 from storage.utils.enums import get_subtype_values_for_pos
-from storage.utils.guid import generate_guid
+from storage.utils.guid import generate_guid, run_lemma_write
 from wordfreq.translation.constants import MAJOR_POS_TYPES, VALID_POS_TYPES
 from wordfreq.translation.word_processing import determine_default_grammatical_form
 from words.add_word import (
@@ -580,68 +580,73 @@ def add_sense(
         # floor exists to keep doubtful terms out, so an unrated one stays out.
         confidences = convert_llm_response_to_confidences(sense)
 
-        guid = generate_guid(session, new_pos_type, new_subtype)
-        new_lemma = Lemma(
-            lemma_text=normalized,
-            disambiguation=disambiguation,
-            definition_text=definition_text,
-            pos_type=new_pos_type,
-            pos_subtype=new_subtype,
-            guid=guid,
-            difficulty_level=difficulty_level,
-            sense_prominence=SENSE_PROMINENCE_RARE,
-            confidence=0.0,
-            verified=False,
-        )
-        session.add(new_lemma)
-        session.flush()
-        ensure_english_translation(session, new_lemma)
+        assert new_subtype is not None  # for the closure; checked above
 
-        log_translation_change(
-            session=session,
-            source=source,
-            operation_type="lemma_create",
-            lemma_id=new_lemma.id,
-            language_code="en",
-            old_translation=None,
-            new_translation=normalized,
-            entity_guid=guid,
-            guid=guid,
-            pos_type=new_pos_type,
-            pos_subtype=new_subtype,
-            definition=definition_text,
-            disambiguation=disambiguation,
-            domain=domain,
-            model=config.model,
-        )
-        # A missing language is reported rather than fatal, as in add_term:
-        # the sense is still worth having, and the gap is visible to the
-        # translation coverage pass. A low-confidence one is left missing too,
-        # and recorded as uncertain so the coverage pass does not fill it.
-        stored = store_sense_translations(
-            session,
-            new_lemma,
-            sense,
-            source=source,
-            model=config.model,
-            confidences={
-                code: 0.0 if confidence is None else confidence
-                for code, confidence in confidences.items()
-            },
-            min_confidence=TRANSLATION_CONFIDENCE_FLOOR,
-        )
+        def write_sense() -> Tuple[str, Dict[str, str]]:
+            guid = generate_guid(session, new_pos_type, new_subtype)
+            new_lemma = Lemma(
+                lemma_text=normalized,
+                disambiguation=disambiguation,
+                definition_text=definition_text,
+                pos_type=new_pos_type,
+                pos_subtype=new_subtype,
+                guid=guid,
+                difficulty_level=difficulty_level,
+                sense_prominence=SENSE_PROMINENCE_RARE,
+                confidence=0.0,
+                verified=False,
+            )
+            session.add(new_lemma)
+            session.flush()
+            ensure_english_translation(session, new_lemma)
+
+            log_translation_change(
+                session=session,
+                source=source,
+                operation_type="lemma_create",
+                lemma_id=new_lemma.id,
+                language_code="en",
+                old_translation=None,
+                new_translation=normalized,
+                entity_guid=guid,
+                guid=guid,
+                pos_type=new_pos_type,
+                pos_subtype=new_subtype,
+                definition=definition_text,
+                disambiguation=disambiguation,
+                domain=domain,
+                model=config.model,
+            )
+            # A missing language is reported rather than fatal, as in add_term:
+            # the sense is still worth having, and the gap is visible to the
+            # translation coverage pass. A low-confidence one is left missing too,
+            # and recorded as uncertain so the coverage pass does not fill it.
+            stored = store_sense_translations(
+                session,
+                new_lemma,
+                sense,
+                source=source,
+                model=config.model,
+                confidences={
+                    code: 0.0 if confidence is None else confidence
+                    for code, confidence in confidences.items()
+                },
+                min_confidence=TRANSLATION_CONFIDENCE_FLOOR,
+            )
+            store_sense_examples(session, new_lemma, sense, source=source)
+            attach_english_base_form(session, new_lemma, sense, source=source)
+            _add_abbreviation(session, new_lemma, abbreviation, source=source)
+            if requested_tags:
+                add_tags(session, new_lemma, requested_tags, source=source)
+            return guid, stored
+
+        guid, stored = run_lemma_write(session, write_sense)
         texts = convert_llm_response_to_lang_codes(sense)
         low_confidence = {
             code: {"translation": texts[code], "confidence": confidences.get(code)}
             for code in TRANSLATION_LANGUAGES
             if (texts.get(code) or "").strip() and code not in stored
         }
-        store_sense_examples(session, new_lemma, sense, source=source)
-        attach_english_base_form(session, new_lemma, sense, source=source)
-        _add_abbreviation(session, new_lemma, abbreviation, source=source)
-        if requested_tags:
-            add_tags(session, new_lemma, requested_tags, source=source)
-        session.commit()
     except Exception:
         session.rollback()
         raise

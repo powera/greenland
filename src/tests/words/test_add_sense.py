@@ -30,6 +30,8 @@ from storage.translation_helpers import get_translation
 from words.add_sense import add_sense, build_sense_prompt, build_subtype_prompt
 from words.translation_populate import missing_translation_languages
 
+pytestmark = pytest.mark.usefixtures("require_lemma_write_scope")
+
 
 @pytest.fixture()
 def db_engine(tmp_path: Path) -> Generator[Engine, None, None]:
