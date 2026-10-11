@@ -64,9 +64,11 @@ from words.emoji import emoji_values
 logger = logging.getLogger(__name__)
 
 # zh exports the core and the named units (everything below the topic band);
-# every other language stops at the top of the core.
+# lt exports the core and the general named band (up to 499); every other
+# language stops at the top of the core.
 LANGUAGE_EXPORT_MAX_LEVELS: Dict[str, int] = {
     "zh": constants.TOPIC_DIFFICULTY_LEVEL_MIN - 1,
+    "lt": constants.GENERAL_DIFFICULTY_LEVEL_MAX,
 }
 DEFAULT_EXPORT_MAX_LEVEL = constants.CORE_DIFFICULTY_LEVEL_MAX
 
