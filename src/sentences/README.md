@@ -6,10 +6,12 @@ entry points and work finders.
 
 ## Generation and translation
 
-- `generation.py` coordinates pattern, basic LLM, and vocabulary-guided example
-  generation.
-- `pattern_generation.py`, `llm_generation.py`, and
-  `guided_generation.py` implement those three strategies.
+- `generation.py` coordinates general LLM and vocabulary-guided examples;
+  `llm_generation.py` and `guided_generation.py` implement them.
+- Mechanical runtime practice belongs to `langtools.sentence_patterns`;
+  `pattern_pools.py` loads vocabulary and `pattern_coverage.py` audits coverage.
+  See `docs/sentence_patterns.md`. These sentences never use buivolas, an LLM,
+  a translation queue, or stored Sentence rows.
 - `translation.py` builds translation/decomposition prompts and persists their
   structured results.
 - `translation_coverage.py` finds missing translations and provides both rich
@@ -53,7 +55,7 @@ package directly.
 
 Canonical tasks owned here include:
 
-- `sentences.patterns.generate`
+- `sentences.patterns.generate` (retired; old queued jobs fail explicitly)
 - `sentences.examples.generate`
 - `sentences.translate`
 - `sentences.import`

@@ -177,7 +177,7 @@ GRAMMAR_FACT_DEFINITIONS: Dict[str, GrammarFactDefinition] = {
     ),
     "countability": GrammarFactDefinition(
         fact_type="countability",
-        languages=("en",),
+        languages=("en", "lt", "es", "es-419", "fr", "zh"),
         required_pos=("noun",),
         display_label="Countability",
         description=(
@@ -379,7 +379,7 @@ EXPORTED_FACT_TYPES: Tuple[str, ...] = (
     # countability (langtools/en/llm_forms.py:133) and number_type to decide
     # whether a plural slot exists at all.
     "grammatical_gender",  # fr, lt, es, es-419, de, pt, it; feeds decline_noun()
-    "countability",  # en; feeds the English form generator
+    "countability",  # language-specific count/mass usage; also feeds patterns
     "animacy",  # en
     "verb_transitivity",  # en
     "verb_reflexivity",  # fr, es, de, lt, it

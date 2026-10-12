@@ -1,0 +1,38 @@
+{% extends "base.html" %}
+{% block title %}Sentence Patterns{% endblock %}
+{% block content %}
+<h1>Sentence Patterns</h1>
+<p>Translate the English sentence into the target language.</p>
+<form method="get" class="d-flex gap-3 mb-3">
+    <label>Level <select name="level" class="form-select">
+    {% for lvl in available_levels %}<option value="{{ lvl }}" {% if lvl == level %}selected{% endif %}>{{ lvl }}</option>{% endfor %}
+    </select></label>
+    <label>Target language <select name="foreign_lang" class="form-select">
+    {% for code in pattern_languages %}<option value="{{ code }}" {% if code == foreign_lang %}selected{% endif %}>{{ supported_languages.get(code, code) }}</option>{% endfor %}
+    </select></label>
+    <button class="btn btn-primary" type="submit">Practice</button>
+</form>
+{% if question %}
+<div class="card card-body mb-3">
+    <h2>{{ question.english }}</h2>
+    {% if question.detail %}<p>{{ question.detail }}</p>{% endif %}
+    {% if feedback %}
+    <p class="alert alert-info">{{ feedback }}</p>
+    <details><summary>Accepted translations</summary><p>{{ question.target }}</p>
+    {% for answer in question.also_accepted %}<p>{{ answer }}</p>{% endfor %}</details>
+    {% else %}
+    <form method="post">
+        <label for="pattern-answer">Your translation</label>
+        <input id="pattern-answer" class="form-control mb-2" name="answer" required autocomplete="off">
+        <button class="btn btn-primary" type="submit">Check</button>
+    </form>
+    {% endif %}
+</div>
+{% else %}<p>No sentences are available for this language and level yet.</p>{% endif %}
+<a class="btn btn-secondary" href="{{ url_for('trakaido_activities.sentence_patterns', level=level, foreign_lang=foreign_lang) }}">Next sentence</a>
+{% if skips %}
+<details class="mt-3"><summary>Missing vocabulary data</summary><ul>
+{% for reason, count in skips|dictsort %}<li>{{ reason }}: {{ count }} word/pattern combinations</li>{% endfor %}
+</ul></details>
+{% endif %}
+{% endblock %}

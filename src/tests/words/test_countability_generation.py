@@ -46,3 +46,21 @@ def test_countability_query_keeps_chicken_senses_separate() -> None:
         "Do not combine count and mass usages belonging to separate lemmas" in meat_query["prompt"]
     )
     assert "chicken meaning the animal is countable" in meat_query["context"]
+
+
+def test_target_countability_uses_translation_and_language() -> None:
+    from clients.types import LLMCall
+    from storage.config.grammar_fact_registry import GRAMMAR_FACT_DEFINITIONS
+    from words.grammar_fact_tasks.countability import prepare_countability
+
+    lemma = Lemma(
+        lemma_text="bread", definition_text="bread as food", pos_type="noun", pos_subtype="food"
+    )
+    prepared = prepare_countability(None, lemma, "pain", "fr")
+    assert isinstance(prepared, LLMCall)
+    assert "French grammatical countability" in prepared.prompt
+    assert "Target-language word: pain" in prepared.prompt
+    assert prepared.context is not None
+    assert "grammatically in French" in prepared.context
+    assert "fr" in GRAMMAR_FACT_DEFINITIONS["countability"].languages
+    assert not isinstance(prepare_countability(None, lemma, None, "fr"), LLMCall)

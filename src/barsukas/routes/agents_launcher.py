@@ -153,12 +153,11 @@ AGENTS = [
     {
         "name": "BUIVOLAS",
         "display_name": "Buivolas",
-        "subtitle": "Pattern Sentence Generator",
-        "description": "Generates English-only pattern or LLM sentences for language learning.",
+        "subtitle": "Sentence Example Generator",
+        "description": "Generates general LLM or vocabulary-guided example sentences.",
         "script": "buivolas/cli.py",
         "icon": "bi-grid-3x3",
         "use_dynamic_form": True,
-        "redirect_to": "pattern_sentences.index",
     },
     {
         "name": "LAPE",
