@@ -34,6 +34,13 @@ class Config:
     # Pagination
     ITEMS_PER_PAGE = 50
 
+    # Per-process results cache. External writers become visible within this
+    # interval; set TTL to 0 to disable. Web commits invalidate immediately.
+    BENCHMARK_CACHE_TTL = float(os.environ.get("BENCH_SERVER_CACHE_TTL", "1800"))
+    BENCHMARK_CACHE_MAX_BYTES = int(
+        os.environ.get("BENCH_SERVER_CACHE_MAX_BYTES", str(32 * 1024 * 1024))
+    )
+
     # Access control
     READONLY = False  # Can be overridden at runtime
 

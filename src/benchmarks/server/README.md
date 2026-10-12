@@ -147,3 +147,20 @@ Default port is 5556 to avoid conflicts:
 - Read-only mode can be enabled via config
 - The application is designed to eventually merge with Barsukas
 - Currently maintains separate database (benchmarks.db vs linguistics.sqlite)
+
+### Results caching
+
+The server precalculates run scores, latency, cost, and warning summaries on the
+first scoreboard request, and shares them across the dashboard, benchmark
+leaderboards, and model pages. Refreshes select only numeric detail fields and
+question exclusion flags, avoiding question/debug JSON downloads. Rendered
+results pages are also cached, so repeat visits need no database connection.
+
+Both caches are process-local and expire after 30 minutes. Web commits and POST
+requests invalidate them; changes from CLI runs or other writers become visible
+on expiry. Page expiry never extends the summary's freshness deadline. Restarting
+the server clears both caches. Queue and execution controls remain uncached.
+
+Set `BENCH_SERVER_CACHE_TTL` to change the lifetime in seconds (`0` disables
+caching). `BENCH_SERVER_CACHE_MAX_BYTES` bounds rendered pages, defaulting to
+33554432 (32 MiB) per process. These settings take effect on server startup.

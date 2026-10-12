@@ -3,20 +3,19 @@
 """Dashboard routes - main scoreboard view."""
 
 from datetime import datetime
-from itertools import groupby
 from statistics import median
 from typing import Any, Optional
 
 from flask import Blueprint, g, render_template
 from sqlalchemy import case
 
-from benchmarks.datastore.benchmarks import Benchmark, Question, Run, RunDetail
+from benchmarks.datastore.benchmarks import Benchmark, Run
 from benchmarks.datastore.common import Model
 from benchmarks.server.analysis import (
-    analyze_run_details,
     describe_run_warnings,
     get_score_color,
 )
+from benchmarks.server.scores import get_run_summaries
 from benchmarks.tiers import BENCHMARK_TIERS, get_benchmark_tier, model_can_run_benchmark
 
 __all__ = ["bp", "get_score_color", "index", "summarize_cells"]
@@ -63,90 +62,38 @@ def index() -> str:
     # Get all benchmarks
     benchmarks = g.bench_db.query(Benchmark).order_by(Benchmark.codename).all()
 
-    run_rows = (
-        g.bench_db.query(
-            Run,
-            RunDetail,
-            Model,
-            Question,
+    scores: dict[tuple[str, str], dict[str, Any]] = {}
+    for entry in get_run_summaries(g.bench_db):
+        run = entry["run"]
+        metrics = entry["metrics"]
+        avg_cost_usd = (
+            metrics.total_cost_usd / metrics.included_question_count
+            if metrics.included_question_count
+            else 0.0
         )
-        .join(Model, Run.model_name == Model.codename)
-        .outerjoin(RunDetail, RunDetail.run_id == Run.run_id)
-        .outerjoin(Question, RunDetail.question_id == Question.question_id)
-        .order_by(Run.benchmark_name, Run.model_name, Run.run_id, Run.run_ts)
-        .all()
-    )
-
-    scores = {}
-    for (_benchmark_name, _model_name), grouped_rows in groupby(
-        run_rows,
-        key=lambda row: (row[0].benchmark_name, row[0].model_name),
-    ):
-        best_run_data = None
-        for _run_id, run_details_iter in groupby(grouped_rows, key=lambda row: row[0].run_id):
-            detail_records = []
-            run = None
-            model_record = None
-            for current_run, detail, model, question in run_details_iter:
-                run = current_run
-                model_record = model
-                if detail is None:
-                    continue
-                detail_records.append(
-                    {
-                        "question_id": detail.question_id,
-                        "score": detail.score,
-                        "eval_msec": detail.eval_msec,
-                        "cost_usd": detail.cost_usd,
-                        "tokens_used": detail.tokens_used,
-                        "tokens_in": detail.tokens_in,
-                        "tokens_out": detail.tokens_out,
-                        "is_question_excluded": bool(question.is_excluded) if question else False,
-                    }
-                )
-
-            if run is None:
-                continue
-
-            metrics = analyze_run_details(
-                run.benchmark_name,
-                detail_records,
-                model_path=model_record.model_path if model_record else None,
-                model_type=model_record.model_type if model_record else None,
-            )
-            avg_cost_usd = (
-                metrics.total_cost_usd / metrics.included_question_count
-                if metrics.included_question_count
-                else 0.0
-            )
-            candidate = {
-                "run_id": run.run_id,
-                "value": metrics.effective_score,
-                "score": metrics.effective_score,
-                "color": get_score_color(metrics.effective_score),
-                "median_eval_time": metrics.median_time_msec,
-                "latency_msec": metrics.median_time_msec,
-                "avg_cost_usd": avg_cost_usd,
-                "cost_micro_usd": avg_cost_usd * 1_000_000,
-                "run_ts": run.run_ts,
-                "outlier_count": metrics.outlier_count,
-                "excluded_question_count": metrics.excluded_question_count,
-                "price_diagnostics": metrics.price_diagnostics,
-                "warnings": describe_run_warnings(metrics),
-            }
-            if best_run_data is None or (
-                candidate["value"],
-                candidate["run_ts"],
-                candidate["run_id"],
-            ) > (
-                best_run_data["value"],
-                best_run_data["run_ts"],
-                best_run_data["run_id"],
-            ):
-                best_run_data = candidate
-
-        if best_run_data is not None:
-            scores[(_benchmark_name, _model_name)] = best_run_data
+        candidate = {
+            "run_id": run.run_id,
+            "value": metrics.effective_score,
+            "score": metrics.effective_score,
+            "color": get_score_color(metrics.effective_score),
+            "median_eval_time": metrics.median_time_msec,
+            "latency_msec": metrics.median_time_msec,
+            "avg_cost_usd": avg_cost_usd,
+            "cost_micro_usd": avg_cost_usd * 1_000_000,
+            "run_ts": run.run_ts,
+            "outlier_count": metrics.outlier_count,
+            "excluded_question_count": metrics.excluded_question_count,
+            "price_diagnostics": metrics.price_diagnostics,
+            "warnings": describe_run_warnings(metrics),
+        }
+        score_key = (run.benchmark_name, run.model_name)
+        best_run_data = scores.get(score_key)
+        if best_run_data is None or (
+            candidate["value"],
+            candidate["run_ts"],
+            candidate["run_id"],
+        ) > (best_run_data["value"], best_run_data["run_ts"], best_run_data["run_id"]):
+            scores[score_key] = candidate
 
     categories = sorted({b.category for b in benchmarks if b.category})
     eligibility = {
