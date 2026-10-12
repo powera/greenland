@@ -9,6 +9,7 @@
 {"guid": "N03_009", "grammar_facts": [{"fact_type": "grammatical_gender", "fact_value": "masculine"}]}
 {"guid": "N03_010", "grammar_facts": [{"fact_type": "grammatical_gender", "fact_value": "masculine"}]}
 {"guid": "N03_011", "grammar_facts": [{"fact_type": "grammatical_gender", "fact_value": "masculine"}]}
+{"guid": "N03_012", "grammar_facts": [{"fact_type": "grammatical_gender", "fact_value": "masculine"}]}
 {"guid": "N03_014", "grammar_facts": [{"fact_type": "grammatical_gender", "fact_value": "feminine"}]}
 {"guid": "N03_015", "grammar_facts": [{"fact_type": "grammatical_gender", "fact_value": "masculine"}]}
 {"guid": "N03_016", "grammar_facts": [{"fact_type": "grammatical_gender", "fact_value": "masculine"}]}
@@ -24,5 +25,14 @@
 {"guid": "N03_028", "grammar_facts": [{"fact_type": "grammatical_gender", "fact_value": "masculine"}]}
 {"guid": "N03_029", "grammar_facts": [{"fact_type": "grammatical_gender", "fact_value": "masculine"}]}
 {"guid": "N03_030", "grammar_facts": [{"fact_type": "grammatical_gender", "fact_value": "masculine"}]}
+{"guid": "N03_031", "grammar_facts": [{"fact_type": "grammatical_gender", "fact_value": "masculine"}]}
 {"guid": "N03_032", "grammar_facts": [{"fact_type": "grammatical_gender", "fact_value": "masculine"}]}
+{"guid": "N03_034", "grammar_facts": [{"fact_type": "grammatical_gender", "fact_value": "feminine"}]}
+{"guid": "N03_036", "grammar_facts": [{"fact_type": "grammatical_gender", "fact_value": "masculine"}]}
+{"guid": "N03_037", "grammar_facts": [{"fact_type": "grammatical_gender", "fact_value": "feminine"}]}
+{"guid": "N03_038", "grammar_facts": [{"fact_type": "grammatical_gender", "fact_value": "feminine"}]}
+{"guid": "N03_045", "grammar_facts": [{"fact_type": "grammatical_gender", "fact_value": "feminine"}]}
 {"guid": "N03_049", "grammar_facts": [{"fact_type": "grammatical_gender", "fact_value": "masculine"}]}
+{"guid": "N03_054", "grammar_facts": [{"fact_type": "grammatical_gender", "fact_value": "feminine"}]}
+{"guid": "N03_056", "grammar_facts": [{"fact_type": "grammatical_gender", "fact_value": "feminine"}]}
+{"guid": "N03_064", "grammar_facts": [{"fact_type": "grammatical_gender", "fact_value": "feminine"}]}

@@ -90,3 +90,4 @@
 {"guid": "N22_114", "forms": [{"grammatical_form": "noun/en_singular", "text": "estimate", "is_base_form": true, "ipa": "/ˈɛstəmət/", "phonetic": "ES-tuh-mit"}]}
 {"guid": "N22_115", "forms": [{"grammatical_form": "noun/en_singular", "text": "box office", "is_base_form": true}], "variants": [{"kind": "spelling", "key": "box-office", "forms": [{"grammatical_form": "noun/en_singular", "text": "box-office", "is_base_form": true}]}]}
 {"guid": "N22_117", "forms": [{"grammatical_form": "noun/en_singular", "text": "literacy rate", "is_base_form": true}]}
+{"guid": "N22_118", "forms": [{"grammatical_form": "noun/en_singular", "text": "place value", "is_base_form": true}]}

@@ -29,3 +29,4 @@
 {"guid": "N52_033", "forms": [{"grammatical_form": "noun/en_singular", "text": "desktop", "is_base_form": true, "ipa": "/ˈdɛskˌtɑp/", "phonetic": "DESK-top"}]}
 {"guid": "N52_034", "forms": [{"grammatical_form": "noun/en_singular", "text": "waveguide", "is_base_form": true, "ipa": "/ˈweɪvˌɡaɪd/", "phonetic": "WAVE-guide"}]}
 {"guid": "N52_035", "forms": [{"grammatical_form": "noun/en_singular", "text": "e-book", "is_base_form": true, "ipa": "/ˈiːˌbʊk/", "phonetic": "EE-book"}]}
+{"guid": "N52_036", "forms": [{"grammatical_form": "noun/en_singular", "text": "search-engine optimization", "is_base_form": true}]}
