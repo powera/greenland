@@ -7,53 +7,11 @@ from sqlalchemy.orm import Session
 
 from sentences.guided_generation import GuidedSentenceGenerator
 from sentences.llm_generation import LlmSentenceGenerator
-from sentences.pattern_generation import PatternSentenceGenerator
-from sentences.pattern_generation import ALL_PATTERNS
 from storage.backend import create_session as create_backend_session
 from storage.backend.config import DataSourceConfig
 from storage.models.schema import Lemma
 
 logger = logging.getLogger(__name__)
-
-
-def generate_pattern_candidates(
-    session: Session,
-    config: DataSourceConfig,
-    *,
-    pattern_ids: Optional[List[str]] = None,
-    all_patterns: bool = False,
-    max_combinations: Optional[int] = None,
-) -> Dict[str, Any]:
-    """Generate and store candidates for selected sentence patterns."""
-    patterns_by_id = {pattern["pattern_id"]: pattern for pattern in ALL_PATTERNS}
-    if all_patterns:
-        selected_patterns = list(ALL_PATTERNS)
-    else:
-        requested_ids = pattern_ids or []
-        unknown_ids = sorted(set(requested_ids) - set(patterns_by_id))
-        if unknown_ids:
-            raise ValueError(f"Unknown sentence pattern(s): {', '.join(unknown_ids)}")
-        selected_patterns = [patterns_by_id[pattern_id] for pattern_id in requested_ids]
-
-    if not selected_patterns:
-        raise ValueError("pattern_ids must be non-empty unless all_patterns is true")
-
-    generator = PatternSentenceGenerator(config=config)
-    pattern_results = [
-        generator.generate_candidates_for_pattern(
-            pattern,
-            max_combinations=max_combinations,
-            session=session,
-        )
-        for pattern in selected_patterns
-    ]
-    return {
-        "patterns_processed": len(pattern_results),
-        "total_candidates": sum(result.get("total", 0) for result in pattern_results),
-        "stored": sum(result.get("success_count", 0) for result in pattern_results),
-        "duplicates": sum(result.get("duplicate_count", 0) for result in pattern_results),
-        "errors": sum(result.get("error_count", 0) for result in pattern_results),
-    }
 
 
 def generate_examples_for_lemma(
@@ -68,6 +26,8 @@ def generate_examples_for_lemma(
     max_vocabulary_level: int = 7,
 ) -> Dict[str, Any]:
     """Generate and store example sentences for one lemma."""
+    if mode == "pattern":
+        raise ValueError("Stored pattern generation is retired; use langtools.sentence_patterns")
     lemma = session.get(Lemma, lemma_id)
     if lemma is None:
         raise ValueError(f"Lemma {lemma_id} not found")
@@ -75,12 +35,6 @@ def generate_examples_for_lemma(
         raise ValueError(f"Lemma {lemma_id} has no GUID")
 
     service = SentenceGenerationService(config=config)
-    if mode == "pattern":
-        return service.generate_pattern_sentences_for_guid(
-            guid=lemma.guid,
-            max_combinations=max_combinations,
-            session=session,
-        )
     if mode == "llm":
         generated = service.generate_llm_sentences_for_lemma(
             lemma=lemma,
@@ -111,9 +65,9 @@ def generate_examples_for_lemma(
 
 
 class SentenceGenerationService:
-    """Coordinate pattern, basic LLM, and vocabulary-guided generation."""
+    """Coordinate basic LLM and vocabulary-guided example generation."""
 
-    def __init__(self, config: DataSourceConfig, dry_run: bool = False):
+    def __init__(self, config: DataSourceConfig, dry_run: bool = False) -> None:
         self.config = config
         self.debug = config.debug
         self.dry_run = dry_run
@@ -121,24 +75,11 @@ class SentenceGenerationService:
         if self.debug:
             logger.setLevel(logging.DEBUG)
 
-        self.pattern_generator = PatternSentenceGenerator(config=config, dry_run=dry_run)
         self.llm_generator = LlmSentenceGenerator(config=config, dry_run=dry_run)
         self.guided_generator = GuidedSentenceGenerator(config=config, dry_run=dry_run)
 
     def get_session(self) -> Any:
         return create_backend_session(self.config)
-
-    def generate_pattern_sentences_for_guid(
-        self,
-        guid: str,
-        max_combinations: Optional[int] = None,
-        session: Optional[Session] = None,
-    ) -> Dict[str, Any]:
-        return self.pattern_generator.generate_candidates_for_guid(
-            guid=guid,
-            max_combinations=max_combinations,
-            session=session,
-        )
 
     def generate_llm_sentences_for_lemma(
         self,

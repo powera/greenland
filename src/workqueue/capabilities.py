@@ -120,7 +120,7 @@ CONVERSATION_CAPABILITIES: Tuple[CapabilityDescriptor, ...] = (
 SENTENCE_CAPABILITIES: Tuple[CapabilityDescriptor, ...] = (
     CapabilityDescriptor(
         task_type="sentences.patterns.generate",
-        summary="Generate English sentence candidates from reusable patterns.",
+        summary="Retired stored-pattern task; use langtools.sentence_patterns for runtime practice.",
         target_kind="sentence",
         required_payload=(),
         optional_payload=("pattern_ids", "all_patterns", "max_combinations"),
@@ -130,7 +130,7 @@ SENTENCE_CAPABILITIES: Tuple[CapabilityDescriptor, ...] = (
     ),
     CapabilityDescriptor(
         task_type="sentences.examples.generate",
-        summary="Generate pattern, basic LLM, or vocabulary-guided examples for one lemma.",
+        summary="Generate basic LLM or vocabulary-guided examples for one lemma.",
         target_kind="lemma",
         required_payload=("lemma_id", "mode"),
         optional_payload=(

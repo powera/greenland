@@ -32,7 +32,7 @@
                         {% for pattern in patterns %}
                         <option value="{{ pattern.pattern_id }}"
                                 {% if pattern_id == pattern.pattern_id %}selected{% endif %}>
-                            {{ pattern.pattern_id }} - {{ pattern.en_template }}
+                            {{ pattern.pattern_id }}
                         </option>
                         {% endfor %}
                     </select>
@@ -208,7 +208,7 @@
         {% if pattern_id %}
         Try <a href="{{ url_for('pattern_sentences.view') }}">viewing all patterns</a>.
         {% else %}
-        <a href="{{ url_for('pattern_sentences.index') }}">Generate some sentences</a> to get started.
+        <a href="{{ url_for('pattern_sentences.index') }}">Practice sentence patterns</a> to get started.
         {% endif %}
     </div>
     {% endif %}

@@ -1,13 +1,11 @@
 #!/usr/bin/env python3
 """Command-line interface for sentence generation.
 
-Generates example sentences for vocabulary words, using either:
-- Pattern templates (mechanical generation), or
-- LLM-driven sentence generation with word-level annotations.
+Generates general LLM or vocabulary-guided examples. Mechanical practice
+sentences live in langtools.sentence_patterns and never use this CLI.
 """
 
 import argparse
-import hashlib
 import logging
 import sys
 from pathlib import Path
@@ -26,7 +24,6 @@ from agents.common.common_args import (
     get_data_source_config,
 )
 from words.lemma_selection import get_lemmas_for_agent
-from sentences.patterns.simple_patterns import SIMPLE_PATTERNS
 from storage.models.schema import Lemma
 from workqueue.task_queue import TaskType, enqueue_task
 
@@ -43,15 +40,6 @@ def get_argument_parser() -> argparse.ArgumentParser:
         formatter_class=argparse.RawDescriptionHelpFormatter,
         epilog="""
 Examples:
-  # Generate candidate sentences for specific patterns
-  python -m agents.buivolas --task generate-candidates --patterns where_is_noun my_noun_is_color --limit 100
-
-  # Generate candidates for all patterns
-  python -m agents.buivolas --task generate-candidates --all-patterns --limit 1000
-
-  # Generate pattern sentences for a GUID
-  python -m agents.buivolas --task generate-sentences --mode pattern --guid N06_001 --pattern-limit 10
-
   # Generate LLM sentences for a GUID
   python -m agents.buivolas --task generate-sentences --mode llm --guid N06_001 --num-sentences 3 --language lt zh fr es en
 
@@ -71,31 +59,16 @@ Examples:
     # Task selection
     parser.add_argument(
         "--task",
-        choices=["generate-candidates", "generate-sentences"],
+        choices=["generate-sentences"],
         required=True,
         help="Task to execute",
-    )
-
-    # Arguments for generate-candidates task
-    parser.add_argument(
-        "--patterns", nargs="+", help="Specific pattern IDs to generate (for generate-candidates)"
-    )
-    parser.add_argument(
-        "--all-patterns",
-        action="store_true",
-        help="Generate for all patterns (for generate-candidates)",
     )
 
     # Arguments for generate-sentences task
     parser.add_argument(
         "--mode",
-        choices=["pattern", "llm", "guided"],
-        help="Sentence generation mode: pattern (templates), llm (basic), guided (vocabulary-aware)",
-    )
-    parser.add_argument(
-        "--pattern-limit",
-        type=int,
-        help="Max combinations per compatible pattern (for pattern mode)",
+        choices=["llm", "guided"],
+        help="Sentence generation mode: llm (basic), guided (vocabulary-aware)",
     )
     parser.add_argument(
         "--num-sentences",
@@ -111,7 +84,7 @@ Examples:
     parser.add_argument(
         "--limit",
         type=int,
-        help="Limit number of lemmas to process (for llm mode) or max combinations per pattern (for generate-candidates)",
+        help="Limit number of lemmas to process (for llm mode)",
     )
     parser.add_argument(
         "--language",
@@ -164,38 +137,6 @@ def enqueue_generation_work(service: SentenceGenerationService, args: argparse.N
     """Discover sentence-generation work and enqueue capability-named tasks."""
     session = service.get_session()
     try:
-        if args.task == "generate-candidates":
-            pattern_ids = sorted(args.patterns or [])
-            identity = "all" if args.all_patterns else ",".join(pattern_ids)
-            dedup_hash = hashlib.sha256(identity.encode()).hexdigest()[:12]
-            if not args.dry_run:
-                result = enqueue_task(
-                    session,
-                    task_type=TaskType.SENTENCES_PATTERNS_GENERATE,
-                    target_type="sentence_pattern",
-                    target_id=None,
-                    payload={
-                        "schema_version": 1,
-                        "pattern_ids": pattern_ids,
-                        "all_patterns": args.all_patterns,
-                        "max_combinations": args.limit,
-                        "source_component": "agents.buivolas",
-                    },
-                    dedup_key=(
-                        f"{TaskType.SENTENCES_PATTERNS_GENERATE}:{dedup_hash}:"
-                        f"{args.limit or 'all'}"
-                    ),
-                )
-                session.commit()
-                logger.info(
-                    "%s pattern-generation task %s",
-                    "Queued" if result.created else "Reused",
-                    result.task.id,
-                )
-            else:
-                logger.info("Would queue pattern generation for %s", identity)
-            return 0
-
         lemmas = _get_llm_lemmas(service, args)
         if not lemmas:
             logger.error("No supported lemmas found for sentence generation")
@@ -217,7 +158,6 @@ def enqueue_generation_work(service: SentenceGenerationService, args: argparse.N
                     "lemma_id": lemma.id,
                     "mode": args.mode,
                     "num_sentences": args.num_sentences,
-                    "max_combinations": args.pattern_limit,
                     "difficulty_context": args.level,
                     "max_vocabulary_level": 7,
                     "model": service.config.model,
@@ -238,13 +178,8 @@ def main() -> int:
     parser = get_argument_parser()
     args = parser.parse_args()
 
-    # Validate arguments based on task
-    if args.task == "generate-candidates":
-        if not args.patterns and not args.all_patterns:
-            parser.error("generate-candidates requires either --patterns or --all-patterns")
-    elif args.task == "generate-sentences":
-        if not args.mode:
-            parser.error("generate-sentences requires --mode (pattern, llm, or guided)")
+    if not args.mode:
+        parser.error("generate-sentences requires --mode (llm or guided)")
 
     config = get_data_source_config(args)
     service = SentenceGenerationService(config=config, dry_run=args.dry_run)
@@ -252,88 +187,8 @@ def main() -> int:
     if not args.execute_inline:
         return enqueue_generation_work(service, args)
 
-    if args.task == "generate-candidates":
-        pattern_dict = {p["pattern_id"]: p for p in SIMPLE_PATTERNS}
-
-        if args.all_patterns:
-            results = service.pattern_generator.generate_candidates_all_patterns(
-                max_per_pattern=args.limit
-            )
-
-            logger.info("=" * 80)
-            logger.info("BUIVOLAS - CANDIDATE GENERATION REPORT")
-            logger.info("=" * 80)
-            logger.info("Patterns processed: %s", results["patterns_processed"])
-            logger.info("Total candidates: %s", results["total_candidates"])
-            logger.info("Successful: %s", results["total_success"])
-            logger.info("Duplicates: %s", results["total_duplicates"])
-            logger.info("Errors: %s", results["total_errors"])
-            if args.dry_run:
-                logger.info("DRY RUN - No database changes made")
-            logger.info("=" * 80)
-
-        else:
-            patterns_to_generate = []
-            for pattern_id in args.patterns:
-                if pattern_id in pattern_dict:
-                    patterns_to_generate.append(pattern_dict[pattern_id])
-                else:
-                    logger.error("Unknown pattern: %s", pattern_id)
-                    available = ", ".join(sorted(pattern_dict.keys()))  # type: ignore[arg-type]
-                    logger.error("Available patterns: %s", available)
-                    return 1
-
-            total_success = 0
-            total_duplicates = 0
-            total_errors = 0
-            total_candidates = 0
-
-            for pattern in patterns_to_generate:
-                result = service.pattern_generator.generate_candidates_for_pattern(
-                    pattern, max_combinations=args.limit
-                )
-                total_candidates += result.get("total", 0)
-                total_success += result.get("success_count", 0)
-                total_duplicates += result.get("duplicate_count", 0)
-                total_errors += result.get("error_count", 0)
-
-            logger.info("=" * 80)
-            logger.info("BUIVOLAS - CANDIDATE GENERATION REPORT")
-            logger.info("=" * 80)
-            logger.info("Patterns: %s", ", ".join(args.patterns))
-            logger.info("Total candidates: %s", total_candidates)
-            logger.info("Successful: %s", total_success)
-            logger.info("Duplicates: %s", total_duplicates)
-            logger.info("Errors: %s", total_errors)
-            if args.dry_run:
-                logger.info("DRY RUN - No database changes made")
-            logger.info("=" * 80)
-
-    elif args.task == "generate-sentences":
-        if args.mode == "pattern":
-            if not args.guid:
-                logger.error("--guid is required for pattern sentence generation")
-                return 1
-
-            result = service.generate_pattern_sentences_for_guid(
-                guid=args.guid, max_combinations=args.pattern_limit
-            )
-
-            logger.info("=" * 80)
-            logger.info("BUIVOLAS - PATTERN GUID GENERATION REPORT")
-            logger.info("=" * 80)
-            if result.get("success"):
-                logger.info("Patterns processed: %s", result.get("processed", 0))
-                logger.info("Sentences stored: %s", result.get("stored", 0))
-                logger.info("Duplicates: %s", result.get("duplicates", 0))
-                logger.info("Errors: %s", result.get("errors", 0))
-            else:
-                logger.error(result.get("error", "Unknown error generating patterns"))
-            if args.dry_run:
-                logger.info("DRY RUN - No database changes made")
-            logger.info("=" * 80)
-
-        elif args.mode == "guided":
+    if args.task == "generate-sentences":
+        if args.mode == "guided":
             # Guided mode: vocabulary-aware sentence generation
             lemmas = _get_llm_lemmas(service, args)
 

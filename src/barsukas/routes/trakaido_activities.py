@@ -13,9 +13,12 @@ frequency the further below the level they sit.
 
 import json
 import random
+import unicodedata
+from collections import Counter
+from dataclasses import asdict
 from typing import Any, Dict, List, Optional, Tuple, cast
 
-from flask import Blueprint, Response, g, make_response, render_template, request, url_for
+from flask import Blueprint, Response, g, make_response, render_template, request, session, url_for
 from flask.typing import ResponseReturnValue
 from sqlalchemy import func
 
@@ -1046,4 +1049,53 @@ def listening() -> ResponseReturnValue:
         question_count=len(questions),
         study_mode=study_mode,
         study_modes=_LISTENING_STUDY_MODES,
+    )
+
+
+@bp.route("/sentence-patterns", methods=["GET", "POST"])
+def sentence_patterns() -> ResponseReturnValue:
+    """Practice mechanical sentences, with explicit coverage for missing facts."""
+    from langtools.sentence_patterns import render, supported_languages
+    from sentences.pattern_pools import load_pools
+
+    level, interface_lang, foreign_lang = _parse_activity_params()
+    question = None
+    feedback = None
+    skips: Dict[str, int] = {}
+    if request.method == "POST":
+        saved = session.get("pattern_question")
+        if saved and saved["language"] == foreign_lang and saved["level"] == level:
+            question = saved["sentence"]
+
+            def normalize(text: str) -> str:
+                return " ".join(
+                    unicodedata.normalize("NFC", text)
+                    .casefold()
+                    .strip()
+                    .rstrip(".!?。！？")
+                    .split()
+                )
+
+            answers = [question["target"], *question["also_accepted"]]
+            correct = normalize(request.form.get("answer", "")) in {normalize(a) for a in answers}
+            feedback = "Correct!" if correct else "Answer: " + question["target"]
+    elif foreign_lang in supported_languages():
+        result = render(foreign_lang, load_pools(g.db, foreign_lang, max_level=level))
+        skips = dict(Counter(skip.reason for skip in result.skips))
+        if result.sentences:
+            question = asdict(random.choice(result.sentences))
+            session["pattern_question"] = {
+                "language": foreign_lang,
+                "level": level,
+                "sentence": question,
+            }
+    return _render_activity(
+        "trakaido/activities/sentence_patterns.html",
+        level,
+        interface_lang,
+        foreign_lang,
+        question=question,
+        feedback=feedback,
+        skips=skips,
+        pattern_languages=supported_languages(),
     )

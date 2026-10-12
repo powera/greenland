@@ -17,7 +17,7 @@ from storage.database import (
 )
 from storage.models.schema import SentenceWordHint
 from sentences.sentence_word_linker import find_lemma_by_text
-from sentences.pattern_generation import strip_disambiguation
+from langtools.sentence_patterns.common import strip_disambiguation
 
 logger = logging.getLogger(__name__)
 

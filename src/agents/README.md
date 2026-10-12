@@ -35,7 +35,7 @@ can launch or that back a Barsukas page.
 | **lape** | fox | Grammar facts (measure words, gender, declension class, ...) | queue, batch | yes | yes |
 | **gegute** | cuckoo | Idioms: generate, populate equivalents, audit equivalents | queue | yes | yes |
 | **zvirblis** | sparrow | Translate existing sentences linked to lemmas | shim → `sentences/`, queue, batch | yes | yes |
-| **buivolas** | buffalo | English example sentences (pattern / LLM / guided) | shim → `sentences/`, queue | yes | pattern: no |
+| **buivolas** | buffalo | English example sentences (LLM / guided) | shim → `sentences/`, queue | yes | yes |
 | **sarka** | magpie | Bulk vocabulary-driven conversations | shim → `sentences/`, queue | yes | yes |
 | **genys** | woodpecker | Parse a document into sentences and stage unknown words | inline | via workqueue | yes |
 | **erelis** | eagle | False lemma links (lemma's translation absent from sentence translation) | inline | no | no |
@@ -304,8 +304,6 @@ intentional foreground run.
 ### buivolas (Sentence examples)
 
 ```bash
-python -m agents.buivolas --task generate-candidates --all-patterns --limit 100
-python -m agents.buivolas --task generate-sentences --mode pattern --guid N06_001
 python -m agents.buivolas --task generate-sentences --mode llm --level 3 --limit 10
 python -m agents.buivolas --task generate-sentences --mode guided --guid N06_001
 ```
@@ -585,3 +583,5 @@ Next candidates, best first:
    dramblys's pending-import classification: one call per item each.
 2. A lemma-review job (all of a lemma's data, "what's wrong?"), which would
    also absorb lokys's checks; it needs a findings table to write to first.
+
+Mechanical sentence drills now live in `langtools.sentence_patterns`, with a read-only coverage CLI at `sentences/pattern_coverage.py` and practice under Barsukas Trakaido Activities.

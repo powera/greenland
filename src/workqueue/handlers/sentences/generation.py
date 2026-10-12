@@ -4,10 +4,7 @@ from __future__ import annotations
 
 from typing import Any, List, Optional
 
-from sentences.generation import (
-    generate_examples_for_lemma,
-    generate_pattern_candidates,
-)
+from sentences.generation import generate_examples_for_lemma
 from workqueue.tools import build_default_config, workqueue_payload_handler
 
 
@@ -19,19 +16,8 @@ def handle_sentences_patterns_generate(
     max_combinations: Optional[int] = None,
     **_: Any,
 ) -> str:
-    """Generate stored sentence candidates from one or more patterns."""
-    result = generate_pattern_candidates(
-        session=session,
-        config=build_default_config(),
-        pattern_ids=pattern_ids,
-        all_patterns=all_patterns,
-        max_combinations=max_combinations,
-    )
-    return (
-        f"Generated {result['stored']} candidates from "
-        f"{result['patterns_processed']} patterns; "
-        f"{result['duplicates']} duplicates, {result['errors']} errors"
-    )
+    """Reject old queued jobs without creating obsolete stored patterns."""
+    raise ValueError("Stored pattern generation is retired; use langtools.sentence_patterns")
 
 
 @workqueue_payload_handler()
