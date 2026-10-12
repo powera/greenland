@@ -90,3 +90,46 @@ def test_budget_and_disable(cached_app: tuple) -> None:
     client.get("/results?a")
     client.get("/results?a")
     assert len(calls) == 5
+
+
+def test_embedded_dashboard_cache_initialization() -> None:
+    from flask import g
+    from benchmarks.server.cache import install_benchmark_caches, watch_benchmark_session
+    from benchmarks.server.routes.dashboard import bp
+
+    app = Flask(__name__)
+    app.secret_key = "test-only"
+    install_benchmark_caches(app)
+    app.register_blueprint(bp, url_prefix="/benchmarks/dashboard")
+    engine = create_engine("sqlite://")
+    from benchmarks.datastore.common import Base
+
+    Base.metadata.create_all(engine)
+    calls: list[int] = []
+
+    @app.before_request
+    def open_benchmark_session() -> None:
+        calls.append(1)
+        g.bench_db = Session(engine)
+        watch_benchmark_session(app, g.bench_db)
+
+    @app.teardown_appcontext
+    def close_benchmark_session(error: BaseException | None) -> None:
+        db = g.pop("bench_db", None)
+        if db is not None:
+            db.close()
+
+    # Render only the data here: the embedded host supplies its own templates.
+    with patch("benchmarks.server.routes.dashboard.render_template", return_value="dashboard"):
+        client = app.test_client()
+        assert client.get("/benchmarks/dashboard/").status_code == 200
+        assert client.get("/benchmarks/dashboard/").data == b"dashboard"
+        assert len(calls) == 1
+        assert app.extensions["benchmark_score_cache"].expires_at > 0
+        with Session(engine) as writer:
+            watch_benchmark_session(app, writer)
+            writer.commit()
+        assert app.extensions["benchmark_score_cache"].expires_at == 0
+        assert client.get("/benchmarks/dashboard/").status_code == 200
+        assert len(calls) == 2
+    engine.dispose()
