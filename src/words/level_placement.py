@@ -44,8 +44,9 @@ from sqlalchemy.orm import Session
 import constants
 import util.prompt_loader
 from clients.unified_client import UnifiedLLMClient
-from reports.curriculum_bands import PRESERVED_LEVEL_MAX, band_of
+from reports.curriculum_bands import PRESERVED_LEVEL_MAX, UNRANKED_SENTINEL, band_of
 from reports.level_candidates import (
+    IndexRow,
     LevelIndex,
     PlacementQuery,
     core_evidence,
@@ -447,6 +448,17 @@ class LevelPlacer:
         return parse_placement(
             payload, self.menu_levels, [entry.level for entry in shortlist], core_block
         )
+
+    def place_lemma(self, lemma: Lemma) -> PlacementSuggestion:
+        """Place a stored lemma -- one just approved, usually -- as if it were new."""
+        return self.place(query_for_lemma(self.session, lemma, self.index))
+
+    def record(self, lemma: Lemma, level: int) -> None:
+        """Count ``lemma`` at ``level``, so later words in the run see the level fill up."""
+        if lemma.id in self.index.rows_by_id:
+            return
+        rank = int(lemma.frequency_rank or UNRANKED_SENTINEL)
+        self.index.add(IndexRow(lemma.id, lemma.pos_type, lemma.pos_subtype, level, rank))
 
 
 def load_profiles(session: Session, profiles_json: Optional[Path]) -> Dict[int, LevelProfile]:
