@@ -33,7 +33,6 @@
 {"guid": "A18_033", "forms": [{"grammatical_form": "adjective/en_positive", "text": "shining", "is_base_form": true, "ipa": "/ˈʃaɪnɪŋ/", "phonetic": "SHY-nin"}]}
 {"guid": "A18_034", "forms": [{"grammatical_form": "adjective/en_positive", "text": "familiar", "is_base_form": true, "ipa": "fəˈmɛl.i.ər", "phonetic": "fuh-MELL-ee-er"}]}
 {"guid": "A18_035", "forms": [{"grammatical_form": "adjective/en_positive", "text": "rich", "is_base_form": true, "ipa": "/rɪtʃ/", "phonetic": "RICH"}]}
-{"guid": "A18_036", "forms": [{"grammatical_form": "adjective/en_positive", "text": "smooth", "is_base_form": true, "ipa": "/smuːθ/", "phonetic": "SMOOTH"}]}
 {"guid": "A18_037", "forms": [{"grammatical_form": "adjective/en_positive", "text": "outer", "is_base_form": true, "ipa": "/ˌʌtər/", "phonetic": "OO-tur"}]}
 {"guid": "A18_038", "forms": [{"grammatical_form": "adjective/en_positive", "text": "floating", "is_base_form": true, "ipa": "/ˈfloʊtɪŋ/", "phonetic": "FLOH-ting"}]}
 {"guid": "A18_039", "forms": [{"grammatical_form": "adjective/en_positive", "text": "blind", "is_base_form": true, "ipa": "/blaɪnd/", "phonetic": "BLYND"}]}
@@ -64,7 +63,6 @@
 {"guid": "A18_068", "forms": [{"grammatical_form": "adjective/en_positive", "text": "quiet", "is_base_form": true, "ipa": "/ˈkwaɪət/", "phonetic": "KWAHY-t"}]}
 {"guid": "A18_069", "forms": [{"grammatical_form": "adjective/en_positive", "text": "hard", "is_base_form": true, "ipa": "/hɑrd/", "phonetic": "HARD"}]}
 {"guid": "A18_070", "forms": [{"grammatical_form": "adjective/en_positive", "text": "dirty", "is_base_form": true, "ipa": "/dɜrti/", "phonetic": "DUR-ti"}]}
-{"guid": "A18_071", "forms": [{"grammatical_form": "adjective/en_positive", "text": "rough", "is_base_form": true, "ipa": "/rʌf/", "phonetic": "ROOF"}]}
 {"guid": "A18_080", "forms": [{"grammatical_form": "adjective/en_positive", "text": "wooden", "is_base_form": true}]}
 {"guid": "A18_084", "forms": [{"grammatical_form": "adjective/en_positive", "text": "invertible", "is_base_form": true, "ipa": "/ɪnˈvɝːtəbəl/", "phonetic": "in-VUR-tuh-bul"}]}
 {"guid": "A18_085", "forms": [{"grammatical_form": "adjective/en_positive", "text": "gravitational", "is_base_form": true, "ipa": "/ˌɡrævəˈteɪʃənəl/", "phonetic": "grav-uh-TAY-shuh-nuhl"}]}
@@ -126,3 +124,6 @@
 {"guid": "A18_141", "forms": [{"grammatical_form": "adjective/en_positive", "text": "furry", "is_base_form": true, "ipa": "/ˈfɝi/", "phonetic": "FUR-ee"}]}
 {"guid": "A18_142", "forms": [{"grammatical_form": "adjective/en_positive", "text": "express", "is_base_form": true, "ipa": "/ɪkˈsprɛs/", "phonetic": "ik-SPRESS"}]}
 {"guid": "A18_143", "forms": [{"grammatical_form": "adjective/en_positive", "text": "short-handed", "is_base_form": true, "ipa": "/ˌʃɔrtˈhændɪd/", "phonetic": "short-HAN-did"}]}
+{"guid": "A18_144", "forms": [{"grammatical_form": "adjective/en_positive", "text": "chromatic", "is_base_form": true, "ipa": "/kroʊˈmætɪk/", "phonetic": "kroh-MAT-ik"}]}
+{"guid": "A18_145", "forms": [{"grammatical_form": "adjective/en_positive", "text": "black-and-white", "is_base_form": true, "ipa": "/ˌblæk ən ˈwaɪt/", "phonetic": "black-and-WHITE"}]}
+{"guid": "A18_146", "forms": [{"grammatical_form": "adjective/en_positive", "text": "blond", "is_base_form": true, "ipa": "/blɑnd/", "phonetic": "BLOND"}]}

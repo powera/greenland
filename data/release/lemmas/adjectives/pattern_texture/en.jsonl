@@ -2,3 +2,7 @@
 {"guid": "A04_002", "forms": [{"grammatical_form": "adjective/en_positive", "text": "fine-grained", "is_base_form": true, "ipa": "/ˈfaɪnˌɡreɪnd/", "phonetic": "FINE-graynd"}]}
 {"guid": "A04_003", "forms": [{"grammatical_form": "adjective/en_positive", "text": "curly", "is_base_form": true, "ipa": "/ˈkɝli/", "phonetic": "KUR-lee"}]}
 {"guid": "A04_004", "forms": [{"grammatical_form": "adjective/en_positive", "text": "furry", "is_base_form": true, "ipa": "/ˈfɝi/", "phonetic": "FUR-ee"}]}
+{"guid": "A04_005", "forms": [{"grammatical_form": "adjective/en_positive", "text": "spotted", "is_base_form": true, "ipa": "/ˈspɑtɪd/", "phonetic": "SPOT-id"}]}
+{"guid": "A04_006", "forms": [{"grammatical_form": "adjective/en_positive", "text": "striped", "is_base_form": true, "ipa": "/straɪpt/", "phonetic": "STRYPD"}]}
+{"guid": "A04_007", "forms": [{"grammatical_form": "adjective/en_positive", "text": "smooth", "is_base_form": true, "ipa": "/smuːθ/", "phonetic": "SMOOTH"}]}
+{"guid": "A04_008", "forms": [{"grammatical_form": "adjective/en_positive", "text": "rough", "is_base_form": true, "ipa": "/rʌf/", "phonetic": "ROOF"}]}

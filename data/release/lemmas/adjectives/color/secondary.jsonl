@@ -9,12 +9,5 @@
 {"guid": "A02_009", "translations": {"ro": "portocaliu", "pl": "pomarańczowy", "th": "ส้ม", "ms": "oren", "ta": "ஆரஞ்சு", "kn": "ಕಿತ್ತಳೆ", "uk": "помаранчевий", "bn": "কমলা", "hi": "नारंगी", "tr": "turuncu", "bs": "narančast"}}
 {"guid": "A02_010", "translations": {"ro": "violet", "pl": "fioletowy", "th": "ม่วง", "ms": "ungu", "ta": "ஊதா", "kn": "ನೇರಳೆ", "uk": "фіолетовий", "bn": "বেগুনি", "hi": "बैंगनी", "tr": "mor", "bs": "ljubičast"}}
 {"guid": "A02_011", "translations": {"ro": "roz", "pl": "różowy", "th": "ชมพู", "ms": "merah jambu", "ta": "இளஞ்சிவப்பு", "kn": "ಗುಲಾಬಿ", "uk": "рожевий", "bn": "বেগুনি", "hi": "गुलाबी", "tr": "pembe", "bs": "ružičast"}}
-{"guid": "A02_012", "translations": {"ms": "bertompok", "hi": "धब्बेदार", "tr": "benekli"}}
-{"guid": "A02_013", "translations": {"ms": "berjalur", "hi": "धारीदार", "tr": "çizgili"}}
-{"guid": "A02_014", "translations": {"ms": "kromatik", "hi": "वर्ण-संबंधी", "tr": "kromatik"}}
-{"guid": "A02_015", "translations": {"ms": "berwarna terakota", "hi": "टेराकोटा रंग का", "tr": "terakota rengi"}}
-{"guid": "A02_016", "translations": {"ms": "hitam putih", "hi": "श्याम-श्वेत", "tr": "siyah beyaz"}}
 {"guid": "A02_017", "translations": {"ms": "perang kemerahan", "hi": "लाल-भूरा", "tr": "kızıl kahverengi"}}
-{"guid": "A02_018", "translations": {"ms": "berekor putih", "hi": "सफेद पूँछ वाला", "tr": "beyaz kuyruklu"}}
 {"guid": "A02_019", "translations": {"ms": "biru kehijauan", "hi": "नीला-हरा", "tr": "mavi-yeşil"}}
-{"guid": "A02_020", "translations": {"ms": "berambut perang", "hi": "सुनहरे बालों वाला", "tr": "sarışın"}}

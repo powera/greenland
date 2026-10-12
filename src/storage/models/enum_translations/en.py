@@ -93,7 +93,7 @@ SUBTYPE_DISPLAY = {
     # Adjective subtypes
     "size": "Size",
     "color": "Color",
-    "texture": "Texture",
+    "pattern_texture": "Pattern and texture",
     "personal_quality": "Personal Quality",
     "physical_property": "Physical Property",
     "condition": "Condition",

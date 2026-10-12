@@ -33,7 +33,6 @@
 {"guid": "A18_033", "translations": {"ro": "strălucitor", "pl": "lśniący", "th": "ส่องแสง", "ms": "bercahaya", "ta": "ஒளிரும்", "kn": "ಹೊಳೆಯುವ", "uk": "сяючий", "bn": "উজ্জ্বল", "hi": "चमकदार", "tr": "parlak", "bs": "sjajan"}}
 {"guid": "A18_034", "translations": {"ro": "familiar", "pl": "znajomy", "th": "คุ้นเคย", "ms": "biasa", "ta": "பரிச்சயமான", "kn": "ಪರಿಚಿತ", "uk": "знайомий", "bn": "পরিচিত", "hi": "परिचित", "tr": "tanıdık", "bs": "poznat"}}
 {"guid": "A18_035", "translations": {"ro": "bogat", "pl": "bogaty", "th": "รวย", "ms": "kaya", "ta": "பணக்கார", "kn": "ಶ್ರೀಮಂತ", "uk": "заможний", "bn": "ধনী", "hi": "अਮੀर", "tr": "zengin", "bs": "bogat"}}
-{"guid": "A18_036", "translations": {"ro": "neted", "pl": "gładki", "th": "เรียบ", "ms": "licin", "ta": "மென்மையான", "kn": "ನಯವಾದ", "uk": "гладкий", "bn": "মসৃণ", "hi": "मुलায়েম", "tr": "düz", "bs": "glad"}}
 {"guid": "A18_037", "translations": {"ro": "exterior", "pl": "zewnętrzny", "th": "ภายนอก", "ms": "luar", "ta": "வெளிப்புற", "kn": "ಹೊರಗಿನ", "uk": "зовнішній", "bn": "বহির্মুখী", "hi": "बाहरी", "tr": "dış"}}
 {"guid": "A18_038", "translations": {"ro": "plutitor", "pl": "pływający", "th": "ลอย", "ms": "terapung", "ta": "மிதக்கும்", "kn": "ತೇಲುವ", "uk": "плавучий", "bn": "ভাসমান", "hi": "तैरता", "tr": "yüzen", "bs": "plutajući"}}
 {"guid": "A18_039", "translations": {"ro": "orb", "pl": "ślepy", "th": "ตาบอด", "ms": "buta", "ta": "குருடான", "kn": "ಕುರುಡ", "uk": "сліпий", "bn": "অন্ধ", "hi": "अंधा", "tr": "kör", "bs": "slijep"}}
@@ -66,7 +65,6 @@
 {"guid": "A18_068", "translations": {"ro": "liniștit", "pl": "cichy", "th": "เงียบ", "ms": "senyap", "ta": "அமைதியான", "kn": "ಶಾಂತ", "uk": "тихий", "bn": "নীরব", "hi": "शांत", "tr": "sessiz", "bs": "tih"}}
 {"guid": "A18_069", "translations": {"ro": "dur", "pl": "twardy", "th": "แข็ง", "ms": "keras", "ta": "கடினமான", "kn": "ಗಟ್ಟಿಯಾದ", "uk": "твердий", "bn": "কঠিন", "hi": "कठोर", "tr": "sert", "bs": "tvrd"}}
 {"guid": "A18_070", "translations": {"ro": "murdar", "pl": "brudny", "th": "สกปรก", "ms": "kotor", "ta": "அழுக்கான", "kn": "ಕೊಳಕು", "uk": "брудний", "bn": "ময়লা", "hi": "गंदा", "tr": "kirli", "bs": "prljav"}}
-{"guid": "A18_071", "translations": {"ro": "aspru", "pl": "szorstki", "th": "หยาบ", "ms": "kasar", "ta": "கரடுமுரடான", "kn": "ಒರಟಾದ", "uk": "шорсткий", "bn": "খাঁজখাঁজানো", "hi": "खुरदरा", "tr": "pürüzlü", "bs": "hrapav"}}
 {"guid": "A18_072", "translations": {"ro": "tânăr", "pl": "młody", "th": "หนุ่มสาว", "ms": "muda", "ta": "இளம்", "kn": "ಯುವ", "uk": "молодий", "bn": "যুব", "hi": "युवा", "tr": "genç", "bs": "mlad"}}
 {"guid": "A18_073", "translations": {"ro": "bătrân", "pl": "stary", "th": "เก่า", "ms": "tua", "ta": "வயதான", "kn": "ಹಳೆಯ", "uk": "старий", "bn": "বয়স্ক", "hi": "बुज़ुर्ग", "tr": "yaşlı", "bs": "star"}}
 {"guid": "A18_074", "translations": {"ro": "confortabil", "pl": "wygodny", "th": "สบาย", "ms": "selesa", "ta": "வசதியான", "kn": "ಆರಾಮದಾಯಕ", "uk": "зручний", "bn": "আরামদায়ক", "hi": "आरामदायक", "tr": "rahat", "bs": "udoban"}}
@@ -136,3 +134,6 @@
 {"guid": "A18_140", "translations": {"ms": "berangin", "hi": "हवादार", "tr": "rüzgârlı"}}
 {"guid": "A18_141", "translations": {"ms": "berbulu", "hi": "रोएँदार", "tr": "kürklü"}}
 {"guid": "A18_142", "translations": {"ms": "ekspres", "hi": "एक्सप्रेस", "tr": "ekspres"}}
+{"guid": "A18_144", "translations": {"ms": "kromatik", "hi": "वर्ण-संबंधी", "tr": "kromatik"}}
+{"guid": "A18_145", "translations": {"ms": "hitam putih", "hi": "श्याम-श्वेत", "tr": "siyah beyaz"}}
+{"guid": "A18_146", "translations": {"ms": "berambut perang", "hi": "सुनहरे बालों वाला", "tr": "sarışın"}}

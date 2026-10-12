@@ -93,7 +93,7 @@ SUBTYPE_DISPLAY = {
     # Adjective subtypes
     "size": "大小",
     "color": "颜色",
-    "texture": "质地",
+    "pattern_texture": "图案与质地",
     "personal_quality": "个人品质",
     "physical_property": "物理属性",
     "condition": "状态",

@@ -662,10 +662,10 @@ SUBTYPE_DEFS: Dict[str, Dict[str, SubtypeDef]] = {
             examples=["round", "square", "triangular", "oval"],
             group="Physical Properties",
         ),
-        "texture": SubtypeDef(
+        "pattern_texture": SubtypeDef(
             prefix="A04",
-            description="Texture descriptions",
-            examples=["soft", "hard", "smooth", "rough"],
+            description="Surface patterns and textures",
+            examples=["striped", "spotted", "smooth", "rough", "silky", "ribbed"],
             group="Physical Properties",
         ),
         "personal_quality": SubtypeDef(
