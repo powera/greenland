@@ -1,0 +1,17 @@
+Choose a level for this word.
+
+Word: {{word}}
+Part of speech: {{pos}}
+Definition: {{definition}}
+{{evidence}}
+
+Core levels: {{core_status}}
+
+Shortlist (levels the data suggests; any level in the full list may be chosen instead):
+{{shortlist}}
+
+Return:
+- `reasoning`: two or three sentences for the human curator: what the word is about, and why the chosen level's title fits it better than the alternatives
+- `fit`: "good", "acceptable" or "none"
+- `level`: the chosen level number, or 0 when fit is "none"
+- `alternatives`: up to two other level numbers that would also work, best first (may be empty)

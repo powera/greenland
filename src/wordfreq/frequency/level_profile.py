@@ -64,7 +64,7 @@ from sqlalchemy import func
 from sqlalchemy.orm import Session
 
 from storage.lexeme import get_lexeme
-from storage.models.schema import ExternalLexemeAnnotation, Lemma
+from storage.models.schema import ExternalLexemeAnnotation, Lemma, WordToken
 from wordfreq.frequency.corpus import get_enabled_corpus_names
 from wordfreq.frequency.corpus_skew import MIN_FREQUENCY, zipf_from_frequency
 from wordfreq.lexeme_frequency import get_lexeme_frequency
@@ -382,6 +382,58 @@ def measure_lemma_weights(
     return lemma_profile.weights if lemma_profile is not None else None
 
 
+def measure_token_weights(
+    session: Session,
+    text: str,
+    min_skew: float = DEFAULT_MIN_SKEW,
+    corpus_names: Optional[Sequence[str]] = None,
+    floors: Optional[Dict[str, float]] = None,
+) -> Optional[Dict[str, float]]:
+    """Corpus weights for an English spelling that is not a lemma yet.
+
+    :func:`measure_lemma_weights` for a pending import: the word's own
+    ``WordToken`` frequencies, floored as a lemma's are, but with no rollup
+    over forms and no sense split -- every sense of the spelling profiles
+    alike, so the caller still needs the definition to tell them apart.
+    Returns None when no corpus lists the spelling.  ``floors`` may be passed
+    to skip re-reading them for each word.
+    """
+    token = (
+        session.query(WordToken)
+        .filter(WordToken.token == text.casefold(), WordToken.language_code == "en")
+        .first()
+    )
+    if token is None:
+        return None
+    names = list(corpus_names) if corpus_names is not None else get_enabled_corpus_names()
+    if floors is None:
+        floors = get_corpus_zipf_floors(session, names)
+    rows = (
+        session.query(ExternalLexemeAnnotation.source, func.max(ExternalLexemeAnnotation.frequency))
+        .filter(
+            ExternalLexemeAnnotation.word_token_id == token.id,
+            ExternalLexemeAnnotation.source.in_([f"wordfreq_{name}" for name in names]),
+        )
+        .group_by(ExternalLexemeAnnotation.source)
+        .all()
+    )
+    zipf_by_source = {source: zipf_from_frequency(frequency) for source, frequency in rows}
+
+    zipf_by_corpus: Dict[str, float] = {}
+    attested: List[str] = []
+    for corpus_name in names:
+        zipf = zipf_by_source.get(f"wordfreq_{corpus_name}")
+        if zipf is not None:
+            attested.append(corpus_name)
+        floor = floors[corpus_name]
+        zipf_by_corpus[corpus_name] = floor if zipf is None else max(zipf, floor)
+    if not attested:
+        return None
+    return profile_from_zipfs(
+        token.id, text, None, None, zipf_by_corpus, attested, min_skew
+    ).weights
+
+
 def suggest_levels(
     level_profiles: Dict[int, LevelProfile],
     word_weights: Dict[str, float],
@@ -597,6 +649,7 @@ __all__ = [
     "get_corpus_zipf_floors",
     "load_level_profiles",
     "measure_lemma_weights",
+    "measure_token_weights",
     "profile_from_zipfs",
     "profile_lemma",
     "profiles_from_json",
