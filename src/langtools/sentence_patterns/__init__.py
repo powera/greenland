@@ -74,13 +74,24 @@ def render(
                 if not isinstance(word, SlotNoun):
                     continue
                 reason = None
-                if word.countability not in {"countable", "uncountable", "both"}:
+                # These frames use definite nouns or recorded plural forms,
+                # rather than choosing between a count and mass noun phrase.
+                needs_countability = pattern.pattern_id not in {"color", "like-many", "number"}
+                if needs_countability and word.countability not in {
+                    "countable",
+                    "uncountable",
+                    "both",
+                }:
                     reason = "missing countability"
-                elif word.english_countability not in {"countable", "uncountable", "both"}:
+                elif needs_countability and word.english_countability not in {
+                    "countable",
+                    "uncountable",
+                    "both",
+                }:
                     reason = "missing en countability"
                 elif "plurale_tantum" in (word.number_type, word.english_number_type):
                     reason = "unsupported plural-only noun"
-                elif (word.countability == "uncountable") != (
+                elif needs_countability and (word.countability == "uncountable") != (
                     word.english_countability == "uncountable"
                 ):
                     reason = "unsupported countability mismatch with English"

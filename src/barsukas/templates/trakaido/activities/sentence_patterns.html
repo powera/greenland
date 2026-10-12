@@ -4,8 +4,8 @@
 <h1>Sentence Patterns</h1>
 <p>Translate the English sentence into the target language.</p>
 <form method="get" class="d-flex gap-3 mb-3">
-    <label>Level <select name="level" class="form-select">
-    {% for lvl in available_levels %}<option value="{{ lvl }}" {% if lvl == level %}selected{% endif %}>{{ lvl }}</option>{% endfor %}
+    <label>Vocabulary up to level <select name="level" class="form-select">
+    {% for lvl in available_levels %}<option value="{{ lvl }}" {% if lvl == level %}selected{% endif %}>{{ lvl }} (levels 1–{{ lvl }})</option>{% endfor %}
     </select></label>
     <label>Target language <select name="foreign_lang" class="form-select">
     {% for code in pattern_languages %}<option value="{{ code }}" {% if code == foreign_lang %}selected{% endif %}>{{ supported_languages.get(code, code) }}</option>{% endfor %}

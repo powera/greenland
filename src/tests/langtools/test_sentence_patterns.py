@@ -169,6 +169,35 @@ def test_missing_countability_is_not_guessed() -> None:
     assert result.skips[0].reason == "missing countability"
 
 
+def test_plural_patterns_do_not_require_countability() -> None:
+    from dataclasses import replace
+
+    for language, original in (("lt", LT_CAT), ("es", ES_CAT), ("es-419", ES_CAT), ("fr", ES_CAT)):
+        noun = replace(original, countability=None, english_countability=None)
+        result = render(language, WordPools([noun], []), ["like-many", "number"])
+        assert {s.pattern_id for s in result.sentences} == {"like-many", "number"}
+        assert not result.skips
+
+
+def test_missing_english_plural_still_blocks_plural_patterns() -> None:
+    from dataclasses import replace
+
+    noun = replace(LT_CAT, countability=None, english_countability=None, english_plural=None)
+    result = render("lt", WordPools([noun], []), ["like-many", "number"])
+    assert not result.sentences
+    assert {s.reason for s in result.skips} == {"missing en plural"}
+
+
+def test_color_does_not_require_countability_or_english_plural() -> None:
+    from dataclasses import replace
+
+    noun = replace(LT_CAT, countability=None, english_countability=None, english_plural=None)
+    color = replace(LT_TIRED, english="red", kind="color")
+    result = render("lt", WordPools([noun], [color]), ["color"])
+    assert [s.english for s in result.sentences] == ["The cat is red."]
+    assert {s.reason for s in result.skips} == {"missing en plural"}
+
+
 def test_mass_noun_and_plural_only_guards() -> None:
     from dataclasses import replace
 
