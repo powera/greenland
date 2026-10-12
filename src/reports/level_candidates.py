@@ -331,7 +331,8 @@ class LevelIndex:
         )
 
 
-def _capacity(level: int) -> int:
+def level_capacity(level: int) -> int:
+    """Most words a level may hold before it counts as full."""
     band = band_of(level)
     if band == "core":
         return CORE_RULES.maximum
@@ -347,7 +348,7 @@ def _candidate(
         band=band_of(level),
         reason=reason,
         level_size=index.level_size(level, query),
-        capacity=_capacity(level),
+        capacity=level_capacity(level),
         subtype_count=subtype_count,
     )
 
