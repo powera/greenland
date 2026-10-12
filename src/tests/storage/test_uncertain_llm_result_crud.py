@@ -89,16 +89,11 @@ def test_recording_again_replaces_the_row(session: Session) -> None:
 def test_language_independent_question(session: Session) -> None:
     lemma = _noun(session)
 
-    record_uncertain_llm_result(
-        session, "has_individual_instances", None, "low_confidence", lemma_id=lemma.id
-    )
+    record_uncertain_llm_result(session, "individuation", None, "low_confidence", lemma_id=lemma.id)
     session.commit()
 
-    assert get_uncertain_llm_result(session, "has_individual_instances", None, lemma_id=lemma.id)
-    assert (
-        get_uncertain_llm_result(session, "has_individual_instances", "en", lemma_id=lemma.id)
-        is None
-    )
+    assert get_uncertain_llm_result(session, "individuation", None, lemma_id=lemma.id)
+    assert get_uncertain_llm_result(session, "individuation", "en", lemma_id=lemma.id) is None
 
 
 def test_sentence_question(session: Session) -> None:
@@ -142,7 +137,7 @@ def test_unique_per_question_even_with_null_language(session: Session) -> None:
             UncertainLLMResult(
                 lemma_id=lemma.id,
                 language_code=None,
-                topic="has_individual_instances",
+                topic="individuation",
                 reason="low_confidence",
             )
         )
@@ -235,11 +230,11 @@ def test_gated_lemma_fact_has_no_language(session: Session) -> None:
     lemma = _noun(session)
 
     stored = add_lemma_fact(
-        session, lemma.id, "has_individual_instances", "true", confidence=0.5, model="m"
+        session, lemma.id, "individuation", "individual", confidence=0.5, model="m"
     )
 
     assert stored is None
-    assert get_uncertain_llm_result(session, "has_individual_instances", None, lemma_id=lemma.id)
+    assert get_uncertain_llm_result(session, "individuation", None, lemma_id=lemma.id)
 
 
 def test_a_writer_without_the_gate_parameters_cannot_be_gated() -> None:

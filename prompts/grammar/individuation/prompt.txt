@@ -1,0 +1,10 @@
+Classify the concept represented by this noun sense, independently of language.
+
+English label (only an identifier): {english_word}
+Sense disambiguation: {disambiguation}
+Part of speech: {pos_type}
+Noun subtype: {pos_subtype}
+Concept definition: {definition}
+
+Return individuation using one allowed value, a brief explanation, and confidence.
+Do not classify a different sense or infer the answer from English articles or plurals.

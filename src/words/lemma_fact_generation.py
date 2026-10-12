@@ -17,48 +17,52 @@ from storage.models.schema import Lemma
 logger = logging.getLogger(__name__)
 
 
-def generate_has_individual_instances(
-    client: UnifiedLLMClient, lemma: Lemma
+def generate_noun_concept_fact(
+    client: UnifiedLLMClient, lemma: Lemma, fact_type: str
 ) -> Tuple[Optional[str], Optional[str], float]:
-    """Classify natural individual instances of a lemma sense."""
-    if lemma.pos_type != "noun":
-        logger.warning(f"Lemma '{lemma.lemma_text}' is not a noun, skipping individual instances")
+    """Classify one dimension of the concept, never a language's noun grammar."""
+    definition = LEMMA_FACT_DEFINITIONS.get(fact_type)
+    if fact_type not in {"individuation", "concreteness"} or definition is None:
+        return None, None, 0.0
+    if lemma.pos_type not in definition.required_pos:
         return None, None, 0.0
 
-    context = util.prompt_loader.get_context("grammar", "has_individual_instances")
-    prompt_text = util.prompt_loader.get_prompt("grammar", "has_individual_instances").format(
+    context = util.prompt_loader.get_context("grammar", fact_type)
+    prompt_text = util.prompt_loader.get_prompt("grammar", fact_type).format(
         english_word=lemma.lemma_text,
+        disambiguation=lemma.disambiguation or "N/A",
         pos_type=lemma.pos_type,
         pos_subtype=lemma.pos_subtype or "N/A",
         definition=lemma.definition_text or "N/A",
     )
     schema = Schema(
-        name="NounIndividualInstancesClassification",
-        description="Classify whether a lemma sense has natural individual instances",
+        name=f"Noun{definition.display_label}Classification",
+        description=definition.description,
         properties={
-            "has_individual_instances": SchemaProperty(
-                "boolean", "Whether the sense denotes naturally separate individual instances"
+            fact_type: SchemaProperty(
+                "string", definition.description, enum=list(definition.allowed_values)
             ),
-            "explanation": SchemaProperty("string", "Brief explanation if notable"),
+            "explanation": SchemaProperty("string", "Brief sense-specific explanation"),
             "confidence": SchemaProperty(
                 "number", "Confidence score 0.0-1.0", minimum=0.0, maximum=1.0
             ),
         },
     )
-
     try:
         response = client.generate_chat(prompt=prompt_text, json_schema=schema, context=context)
     except Exception as error:
-        logger.error(f"Failed to generate individual instances for '{lemma.lemma_text}': {error}")
+        logger.error("Failed to generate %s for %r: %s", fact_type, lemma.lemma_text, error)
         return None, None, 0.0
 
     result = response.structured_data
-    if not result or not isinstance(result.get("has_individual_instances"), bool):
-        logger.error(f"No usable structured data for '{lemma.lemma_text}'")
+    if not result or result.get(fact_type) not in definition.allowed_values:
+        logger.error("No usable %s for %r", fact_type, lemma.lemma_text)
         return None, None, 0.0
-
-    value = "true" if result["has_individual_instances"] else "false"
-    return value, result.get("explanation") or None, float(result.get("confidence", 0.5))
+    return (
+        result[fact_type],
+        result.get("explanation") or None,
+        float(result.get("confidence", 0.5)),
+    )
 
 
 def generate_lemma_fact_for_lemma(
@@ -94,10 +98,10 @@ def generate_lemma_fact_for_lemma(
     ):
         return {**base, "skipped": True, "reason": "uncertain"}
 
-    if fact_type != "has_individual_instances":
+    if fact_type not in {"individuation", "concreteness"}:
         return {**base, "error": f"No generator for lemma fact type: {fact_type}"}
 
-    value, notes, confidence = generate_has_individual_instances(client, lemma)
+    value, notes, confidence = generate_noun_concept_fact(client, lemma, fact_type)
     stored = None
     if value is not None:
         stored = add_lemma_fact(

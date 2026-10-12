@@ -17,7 +17,8 @@ from storage.crud.lemma_fact import (
     get_lemma_fact_value,
     get_lemma_facts,
     get_lemma_facts_dict,
-    get_has_individual_instances,
+    get_individuation,
+    get_concreteness,
 )
 from storage.models.lemma_fact import LemmaFact
 from storage.models.schema import Base, Lemma
@@ -44,7 +45,7 @@ def _noun(session: Session, text: str = "bear") -> Lemma:
 def test_unclassified_lemma_is_none(session: Session) -> None:
     lemma = _noun(session)
 
-    assert get_has_individual_instances(session, lemma.id) is None
+    assert get_individuation(session, lemma.id) is None
     assert get_lemma_facts(session, lemma.id) == []
 
 
@@ -52,76 +53,79 @@ def test_add_and_read_back(session: Session) -> None:
     lemma = _noun(session)
 
     fact = add_lemma_fact(
-        session, lemma.id, "has_individual_instances", "true", notes="units", verified=True
+        session, lemma.id, "individuation", "individual", notes="units", verified=True
     )
 
     assert fact is not None
-    assert get_lemma_fact_value(session, lemma.id, "has_individual_instances") == "true"
-    assert get_has_individual_instances(session, lemma.id) is True
-    assert get_lemma_facts_dict(session, lemma.id) == {"has_individual_instances": "true"}
-    assert get_lemma_facts_dict(session, lemma.id) == {"has_individual_instances": "true"}
+    assert get_lemma_fact_value(session, lemma.id, "individuation") == "individual"
+    assert get_individuation(session, lemma.id) == "individual"
+    assert get_lemma_facts_dict(session, lemma.id) == {"individuation": "individual"}
 
 
-def test_false_is_distinct_from_unclassified(session: Session) -> None:
+def test_non_individuated_is_distinct_from_unclassified(session: Session) -> None:
     lemma = _noun(session, "rice")
 
-    add_lemma_fact(session, lemma.id, "has_individual_instances", "false")
+    add_lemma_fact(session, lemma.id, "individuation", "non_individuated")
 
-    assert get_has_individual_instances(session, lemma.id) is False
+    assert get_individuation(session, lemma.id) == "non_individuated"
 
 
-def test_legacy_value_is_read_but_canonical_value_wins(session: Session) -> None:
+def test_retired_fact_types_are_rejected(session: Session) -> None:
     lemma = _noun(session)
-    session.add(LemmaFact(lemma_id=lemma.id, fact_type="quantifiable", fact_value="true"))
-    session.commit()
+    for fact_type in ("quantifiable", "has_individual_instances"):
+        assert add_lemma_fact(session, lemma.id, fact_type, "true") is None
+    assert get_lemma_facts(session, lemma.id) == []
 
-    assert get_has_individual_instances(session, lemma.id) is True
-    add_lemma_fact(session, lemma.id, "has_individual_instances", "false")
-    assert get_has_individual_instances(session, lemma.id) is False
-    assert [fact.fact_type for fact in get_lemma_facts(session, lemma.id)] == [
-        "has_individual_instances"
-    ]
+
+def test_concreteness_is_independent_of_individuation(session: Session) -> None:
+    lemma = _noun(session, "idea")
+    assert add_lemma_fact(session, lemma.id, "individuation", "individual") is not None
+    assert add_lemma_fact(session, lemma.id, "concreteness", "abstract") is not None
+    assert get_lemma_facts_dict(session, lemma.id) == {
+        "individuation": "individual",
+        "concreteness": "abstract",
+    }
 
 
 def test_add_replaces_existing_value(session: Session) -> None:
     lemma = _noun(session)
-    add_lemma_fact(session, lemma.id, "has_individual_instances", "false", notes="first")
+    add_lemma_fact(session, lemma.id, "individuation", "non_individuated", notes="first")
 
-    add_lemma_fact(session, lemma.id, "has_individual_instances", "true", notes=None)
+    add_lemma_fact(session, lemma.id, "individuation", "individual", notes=None)
 
     facts = get_lemma_facts(session, lemma.id)
     assert len(facts) == 1
-    assert facts[0].fact_value == "true"
+    assert facts[0].fact_value == "individual"
     assert facts[0].notes is None
 
 
 def test_invalid_value_is_rejected_without_writing(session: Session) -> None:
     lemma = _noun(session)
 
-    assert add_lemma_fact(session, lemma.id, "has_individual_instances", "maybe") is None
+    assert add_lemma_fact(session, lemma.id, "individuation", "maybe") is None
     assert get_lemma_facts(session, lemma.id) == []
 
 
 def test_unknown_fact_type_is_rejected(session: Session) -> None:
     lemma = _noun(session)
 
-    assert add_lemma_fact(session, lemma.id, "no_such_fact", "true") is None
-    assert validate_lemma_fact("no_such_fact", "true") is not None
-    assert validate_lemma_fact("has_individual_instances", "true") is None
+    assert add_lemma_fact(session, lemma.id, "no_such_fact", "individual") is None
+    assert validate_lemma_fact("no_such_fact", "individual") is not None
+    assert validate_lemma_fact("individuation", "individual") is None
 
 
 def test_delete(session: Session) -> None:
     lemma = _noun(session)
-    add_lemma_fact(session, lemma.id, "has_individual_instances", "true")
+    add_lemma_fact(session, lemma.id, "individuation", "individual")
 
-    assert delete_lemma_fact(session, lemma.id, "has_individual_instances") is True
-    assert delete_lemma_fact(session, lemma.id, "has_individual_instances") is False
-    assert get_has_individual_instances(session, lemma.id) is None
+    assert delete_lemma_fact(session, lemma.id, "individuation") is True
+    assert delete_lemma_fact(session, lemma.id, "individuation") is False
+    assert get_individuation(session, lemma.id) is None
 
 
 def test_facts_are_removed_with_their_lemma(session: Session) -> None:
     lemma = _noun(session)
-    add_lemma_fact(session, lemma.id, "has_individual_instances", "true")
+    add_lemma_fact(session, lemma.id, "individuation", "individual")
 
     session.delete(lemma)
     session.commit()
@@ -153,3 +157,17 @@ def test_numeral_is_stored_on_a_numeral_lemma(session: Session) -> None:
     assert add_lemma_fact(session, lemma.id, "numeral", "1") is not None
     assert add_lemma_fact(session, lemma.id, "numeral", "one") is None
     assert get_lemma_fact_value(session, lemma.id, "numeral") == "1"
+
+
+def test_noun_dimensions_reject_other_parts_of_speech(session: Session) -> None:
+    lemma = add_lemma(
+        session,
+        lemma_text="run",
+        definition_text="to move",
+        pos_type="verb",
+        auto_generate_guid=False,
+    )
+    assert add_lemma_fact(session, lemma.id, "individuation", "individual") is None
+    assert add_lemma_fact(session, lemma.id, "concreteness", "physical") is None
+    assert get_concreteness(session, lemma.id) is None
+    assert get_lemma_facts(session, lemma.id) == []

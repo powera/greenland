@@ -2,7 +2,7 @@
 LemmaFact model for storing language-independent facts about a lemma.
 
 GrammarFact is keyed by language; this table holds facts about the concept
-itself, such as whether a noun sense has individual instances.
+itself, such as individuation and concreteness of a noun sense.
 """
 
 import datetime
@@ -20,7 +20,7 @@ from sqlalchemy import (
 )
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
-from .schema import Base
+from storage.models.schema import Base
 
 
 class LemmaFact(Base):
@@ -28,7 +28,8 @@ class LemmaFact(Base):
     Language-independent key-value fact about a lemma.
 
     Examples:
-        - has_individual_instances: "true" (horse, leg) or "false" (salt, furniture)
+        - individuation: "individual", "non_individuated", or "collection"
+        - concreteness: "physical" or "abstract"
 
     Absence of a row means the fact has not been classified.
     """

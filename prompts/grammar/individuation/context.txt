@@ -1,0 +1,6 @@
+Classify the language-independent organization of the supplied concept.
+- individual: a discrete entity with its own identity, physical or abstract (cat, chair, apple, an idea, a particular religion, one garment).
+- non_individuated: material, a quality or condition without an inherent individual unit (water, flour, sand, chicken meat, justice, swagger as a confident manner).
+- collection: an aggregate of members as a whole (furniture, lingerie collectively, data as collected observations, a team).
+
+A sense explicitly denoting an aggregate is collection even when the aggregate is bounded. Sand denotes an amount of material, not a collection merely because grains exist. One grain is an individual. A chicken animal is individual; chicken meat is non_individuated. The classification concerns this sense, not the English word's grammatical countability, plural-only behavior, or any translation's classifiers. Pants can represent an individual garment. Religion as a general phenomenon is non_individuated; a particular belief system is individual. If the definition mixes senses, lower confidence and explain rather than silently choosing a different sense.

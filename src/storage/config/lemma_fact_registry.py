@@ -17,17 +17,32 @@ class LemmaFactDefinition:
     value_pattern: Optional[str] = None
 
 
+RETIRED_LEMMA_FACT_TYPES = frozenset({"quantifiable", "has_individual_instances"})
+
+
 LEMMA_FACT_DEFINITIONS: Dict[str, LemmaFactDefinition] = {
-    "has_individual_instances": LemmaFactDefinition(
-        fact_type="has_individual_instances",
-        allowed_values=("true", "false"),
+    "individuation": LemmaFactDefinition(
+        fact_type="individuation",
+        allowed_values=("individual", "non_individuated", "collection"),
         required_pos=("noun",),
-        display_label="Has Individual Instances",
+        display_label="Individuation",
         description=(
-            "Whether this lemma sense naturally denotes separate instances that can "
-            "be counted across languages (horse, leg: true; salt, furniture as a "
-            "collective: false). Independent of grammatical countability and the "
-            "app's choice of which instances to show."
+            "How this concept is organized, independently of language: a discrete "
+            "entity (cat, idea), material or a quality without inherent units "
+            "(water, justice), or an aggregate of members (furniture, collected data). "
+            "This does not determine grammatical countability."
+        ),
+        generatable=True,
+    ),
+    "concreteness": LemmaFactDefinition(
+        fact_type="concreteness",
+        allowed_values=("physical", "abstract"),
+        required_pos=("noun",),
+        display_label="Concreteness",
+        description=(
+            "Whether this concept denotes material entities/material (physical), "
+            "or informational, mental, social or conceptual referents (abstract). "
+            "Classify the referent, not its physical representation."
         ),
         generatable=True,
     ),

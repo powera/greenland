@@ -1,0 +1,5 @@
+Classify the language-independent referent of the supplied concept.
+- physical: material entities, material, or aggregates of physical things (cat, chair, a physical picture print, water, sand, furniture, lingerie).
+- abstract: informational, mental, social or conceptual referents (an idea, justice, a religion, a team as a social organization, data as observations, swagger as a manner).
+
+Classify the referent, not its physical representation: information stored on a disk is abstract; the disk is physical. A printed photograph is physical; its visual content is abstract. This dimension is independent of individuation: ideas are individual and abstract, justice is non_individuated and abstract, and collected data is collection and abstract. Use the specific definition and disambiguation. If the definition mixes physical and abstract senses, lower confidence and explain rather than guessing.
