@@ -92,3 +92,14 @@ The lape lemma-fact CLI accepts either new fact independently. Its default
 coverage mode is read-only; `--populate` requires deliberately authorized live
 model use and persists through the ordinary confidence-gated writer. No live
 model calls were made to classify the 30 migrated senses.
+
+To import just these dimensions into an existing SQLite database, run:
+
+```sh
+GREENLAND_DISABLE_LLM=1 PYTHONPATH=src python migrations/20261012_import_noun_concept_facts.py --apply
+```
+
+Omit `--apply` for a preview. The importer validates GUIDs and sense labels,
+requires reviewed release replacements for every retired fact, saves a
+WAL-aware backup, and commits atomically. It preserves unrelated facts and
+lemma content. Repeating the import makes no changes once synchronized.
