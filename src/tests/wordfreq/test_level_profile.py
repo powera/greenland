@@ -24,6 +24,7 @@ from wordfreq.frequency.level_profile import (
     LevelProfile,
     get_corpus_zipf_floors,
     measure_lemma_weights,
+    measure_token_weights,
     rank_levels_for_corpus,
     skew_from_zipfs,
     suggest_levels,
@@ -295,3 +296,15 @@ def test_measure_lemma_weights_works_for_an_unlevelled_word() -> None:
 
     assert measure_lemma_weights(session, fresco.id, corpus_names=CORPORA) == {"arts": 1.0}
     assert measure_lemma_weights(session, 9999, corpus_names=CORPORA) is None
+
+
+def test_measure_token_weights_reads_a_spelling_with_no_lemma() -> None:
+    session = _make_session()
+    _floor_tokens(session)
+    _token(session, "braise", {"cooking": 100.0})
+    _token(session, "table", {name: 50.0 for name in CORPORA})
+    session.commit()
+
+    assert measure_token_weights(session, "Braise", corpus_names=CORPORA) == {"cooking": 1.0}
+    assert measure_token_weights(session, "table", corpus_names=CORPORA) == {GENERAL: 1.0}
+    assert measure_token_weights(session, "absent", corpus_names=CORPORA) is None
