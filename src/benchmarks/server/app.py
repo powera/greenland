@@ -18,15 +18,13 @@ if str(Path(__file__).parent.parent.parent) not in sys.path:
     sys.path.insert(0, str(Path(__file__).parent.parent.parent))
 
 from benchmarks.server.config import Config
-from flask import Flask, Response, g, redirect, render_template, request, url_for
+from flask import Flask, g, redirect, render_template, url_for
 from flask.json.provider import DefaultJSONProvider
-from sqlalchemy import event
 
 from benchmarks.config import BenchmarkConfig
 from benchmarks.datastore.common import create_database_and_session, create_postgres_session
 from benchmarks.server.benchmark_worker import BenchmarkRunWorker
-from benchmarks.server.cache import BenchmarkPageCache
-from benchmarks.server.scores import ScoreCache
+from benchmarks.server.cache import install_benchmark_caches, watch_benchmark_session
 
 
 class BenchmarkFlask(Flask):
@@ -88,20 +86,7 @@ def create_app(config_class=Config, postgres_url: Optional[str] = None):
 
     app.db_session_factory = session_factory
     app.extensions["benchmark_run_worker"] = BenchmarkRunWorker()
-    page_cache = BenchmarkPageCache(
-        ttl=app.config.get("BENCHMARK_CACHE_TTL", 1800),
-        max_bytes=app.config.get("BENCHMARK_CACHE_MAX_BYTES", 32 * 1024 * 1024),
-    )
-    app.extensions["benchmark_page_cache"] = page_cache
-    score_cache = ScoreCache(app.config.get("BENCHMARK_CACHE_TTL", 1800))
-    app.extensions["benchmark_score_cache"] = score_cache
-    page_cache.install(app)
-
-    @app.after_request
-    def invalidate_scores(response: Response) -> Response:
-        if request.method not in {"GET", "HEAD", "OPTIONS"}:
-            score_cache.clear()
-        return response
+    install_benchmark_caches(app)
 
     @app.context_processor
     def inject_worker_status():
@@ -114,8 +99,7 @@ def create_app(config_class=Config, postgres_url: Optional[str] = None):
     def before_request():
         """Set up database session before each request."""
         g.bench_db = app.db_session_factory()
-        page_cache.watch_session(g.bench_db)
-        event.listen(g.bench_db, "after_commit", score_cache.clear)
+        watch_benchmark_session(app, g.bench_db)
 
     @app.teardown_appcontext
     def teardown_db(exception=None):

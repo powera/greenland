@@ -440,6 +440,7 @@ def create_app(
     if bench_postgres_url:
         from benchmarks.datastore.common import create_postgres_session
         from benchmarks.server.benchmark_worker import BenchmarkRunWorker
+        from benchmarks.server.cache import install_benchmark_caches, watch_benchmark_session
         from benchmarks.server.config import Config as BenchmarkServerConfig
         from benchmarks.server.routes import benchmarks as bench_benchmarks
         from benchmarks.server.routes import dashboard as bench_dashboard
@@ -475,10 +476,15 @@ def create_app(
         app.register_blueprint(bench_models.bp, url_prefix="/benchmarks/models")
         app.register_blueprint(bench_runs.bp, url_prefix="/benchmarks/runs")
 
+        install_benchmark_caches(app)
+
         @app.before_request
         def before_bench_request() -> None:
             """Set up benchmarks database session."""
+            if request.blueprint not in {"dashboard", "benchmarks", "models", "runs"}:
+                return
             g.bench_db = bench_session_factory()
+            watch_benchmark_session(app, g.bench_db)
 
         @app.teardown_appcontext
         def shutdown_bench_session(exception: Optional[BaseException]) -> None:

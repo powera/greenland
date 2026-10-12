@@ -12,6 +12,9 @@ from typing import Any
 from flask import Flask, Response, g, request, session
 from sqlalchemy import event
 
+from benchmarks.server.config import Config
+from benchmarks.server.scores import ScoreCache
+
 
 CACHED_ENDPOINTS = frozenset(
     {
@@ -112,3 +115,29 @@ class BenchmarkPageCache:
     def watch_session(self, db: Any) -> None:
         """Invalidate on a successful commit from a web request."""
         event.listen(db, "after_commit", self.clear)
+
+
+def install_benchmark_caches(app: Flask) -> BenchmarkPageCache:
+    """Install the same cache lifecycle in standalone and embedded servers."""
+    ttl = app.config.get("BENCHMARK_CACHE_TTL", Config.BENCHMARK_CACHE_TTL)
+    page_cache = BenchmarkPageCache(
+        ttl, app.config.get("BENCHMARK_CACHE_MAX_BYTES", Config.BENCHMARK_CACHE_MAX_BYTES)
+    )
+    score_cache = ScoreCache(ttl)
+    app.extensions["benchmark_page_cache"] = page_cache
+    app.extensions["benchmark_score_cache"] = score_cache
+    page_cache.install(app)
+
+    @app.after_request
+    def invalidate_scores(response: Response) -> Response:
+        if request.method not in {"GET", "HEAD", "OPTIONS"}:
+            score_cache.clear()
+        return response
+
+    return page_cache
+
+
+def watch_benchmark_session(app: Flask, db: Any) -> None:
+    """Clear both caches when a benchmark web session commits."""
+    app.extensions["benchmark_page_cache"].watch_session(db)
+    event.listen(db, "after_commit", app.extensions["benchmark_score_cache"].clear)
