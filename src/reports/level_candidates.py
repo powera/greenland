@@ -271,15 +271,19 @@ class LevelIndex:
         self.core_subtype_counts: Counter[str] = Counter()
         self.corpus_unknown_ranks = dict(corpus_unknown_ranks)
         for row in rows:
-            self.rows_by_id[row.lemma_id] = row
-            subtype = row.pos_subtype or row.pos_type
-            self.level_sizes[row.level] += 1
-            self.subtype_levels[(row.pos_type, subtype)][row.level] += 1
-            self.subtype_level_ranks[(row.pos_type, subtype, row.level)].append(row.rank)
-            if band_of(row.level) == "named":
-                self.theme_levels[theme_of(row.pos_type, row.pos_subtype)][row.level] += 1
-            if band_of(row.level) == "core":
-                self.core_subtype_counts[subtype] += 1
+            self.add(row)
+
+    def add(self, row: IndexRow) -> None:
+        """Count one placed lemma, e.g. one placed since the index was loaded."""
+        self.rows_by_id[row.lemma_id] = row
+        subtype = row.pos_subtype or row.pos_type
+        self.level_sizes[row.level] += 1
+        self.subtype_levels[(row.pos_type, subtype)][row.level] += 1
+        self.subtype_level_ranks[(row.pos_type, subtype, row.level)].append(row.rank)
+        if band_of(row.level) == "named":
+            self.theme_levels[theme_of(row.pos_type, row.pos_subtype)][row.level] += 1
+        if band_of(row.level) == "core":
+            self.core_subtype_counts[subtype] += 1
 
     def _excluded(self, query: PlacementQuery) -> Optional[IndexRow]:
         if query.exclude_lemma_id is None:

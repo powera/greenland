@@ -17,6 +17,7 @@ from sqlalchemy.orm import Session
 
 from agents.jonvabalis import (
     ONLY_SPACING_VARIANTS,
+    PARKING_LEVEL,
     ONLY_SUBTYPE_REVIEW,
     JonvabalisAgent,
     build_context,
@@ -41,6 +42,7 @@ from storage.models.variant_form import (
 )
 from storage.translation_helpers import LANG_CODE_TO_LLM_FIELD
 from words.lemma_creation import TRANSLATION_LANGUAGES
+from words.level_placement import PlacementSuggestion
 from words.pending_imports.staging import create_pending_import
 from workqueue.handlers.jonvabalis import JONVABALIS_JOB, review_state
 from workqueue.llm_batch import Done, StageContext
@@ -358,6 +360,76 @@ class TestDistinctVerdict(JonvabalisTestCase):
         self.assertTrue(variants)
         self.assertEqual({variant.lemma_id for variant in variants}, {outcome["lemma_id"]})
         self.assertEqual({variant.variant_kind for variant in variants}, {VARIANT_KIND_EQUIVALENT})
+
+
+class _FakePlacer:
+    """Stands in for words.level_placement.LevelPlacer: no index, no model."""
+
+    def __init__(self, session: Session, level: Any = None, error: Any = None) -> None:
+        self.session = session
+        self.level = level
+        self.error = error
+        self.recorded: list = []
+
+    def place_lemma(self, lemma: Lemma) -> PlacementSuggestion:
+        if self.error is not None:
+            raise self.error
+        return PlacementSuggestion(
+            level=self.level,
+            fit="good" if self.level else "none",
+            alternatives=(),
+            reasoning="because",
+            shortlist=(120,),
+        )
+
+    def record(self, lemma: Lemma, level: int) -> None:
+        self.recorded.append((lemma.id, level))
+
+
+class TestLevelPlacement(JonvabalisTestCase):
+    def approve(self, placer: Any) -> Dict[str, Any]:
+        pending = self.stage("badger", "brock", pos_subtype="animal")
+        decision = TestDistinctVerdict.distinct(
+            "badger", "A badger dug under the fence.", pos_subtype="animal"
+        )
+        agent = self.agent()
+        if placer is not None:
+            agent.place_levels = True
+            agent._placer = placer
+        return agent.apply_decision(self.session, pending, decision)
+
+    def level_of(self, outcome: Dict[str, Any]) -> Any:
+        lemma = self.session.get(Lemma, outcome["lemma_id"])
+        assert lemma is not None
+        return lemma.difficulty_level
+
+    def test_an_approved_lemma_moves_to_the_placed_level(self) -> None:
+        placer = _FakePlacer(self.session, level=120)
+        outcome = self.approve(placer)
+
+        self.assertEqual(outcome["action"], "approved")
+        self.assertEqual(self.level_of(outcome), 120)
+        self.assertEqual(outcome["placement"]["fit"], "good")
+        self.assertEqual(placer.recorded, [(outcome["lemma_id"], 120)])
+
+    def test_no_fitting_level_leaves_it_parked(self) -> None:
+        outcome = self.approve(_FakePlacer(self.session, level=None))
+
+        self.assertEqual(self.level_of(outcome), PARKING_LEVEL)
+        self.assertIsNone(outcome["placement"]["level"])
+
+    def test_a_failed_placement_keeps_the_approval(self) -> None:
+        outcome = self.approve(_FakePlacer(self.session, error=RuntimeError("model down")))
+
+        self.assertEqual(outcome["action"], "approved")
+        self.assertEqual(self.level_of(outcome), PARKING_LEVEL)
+        self.assertIn("model down", outcome["placement"]["error"])
+
+    def test_placement_is_off_unless_asked_for(self) -> None:
+        outcome = self.approve(None)
+
+        self.assertEqual(self.level_of(outcome), PARKING_LEVEL)
+        self.assertNotIn("placement", outcome)
 
 
 class TestPromptBranches(JonvabalisTestCase):

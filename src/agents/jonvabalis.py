@@ -50,11 +50,16 @@ A row queried under a word that is not yet a lemma ("consumed", with no
 "consume") is skipped without an LLM call: it is a minor sense of a word whose
 main senses have never been added, and add_word should add those first.
 
-The model is not asked for a level.  Placing one sense among thousands of
-lemmas needs the whole level band in view, which a single-row prompt cannot
-show, and every row in a queued group inherits the *word's* frequency rank,
-which is wrong for a minor sense.  The lemma is stored at ``PARKING_LEVEL``, an
-otherwise empty level above the topic band, to be rebalanced lower later.
+The review prompt does not ask for a level.  Placing one sense among
+thousands of lemmas needs the whole level band in view, which a single-row
+prompt cannot show, and every row in a queued group inherits the *word's*
+frequency rank, which is wrong for a minor sense.  The lemma is stored at
+``PARKING_LEVEL``, an otherwise empty level above the topic band; a sequential
+run then makes a second call, ``words.level_placement``, which shows the model
+every level title and a data-driven shortlist and moves the lemma there.  An
+answer of "none fit", or a failed call, leaves it parked.  ``--park-levels``
+skips that call, and batched runs (below) always park, since their verdicts
+are applied by the poller, which should not make model calls of its own.
 
 Acting on a decision goes through the same approval path the Barsukas review
 page uses -- ``words.pending_imports.approve_pending_import`` creates the lemma
@@ -167,6 +172,7 @@ from storage.models.variant_form import VARIANT_KIND_EQUIVALENT, VARIANT_KIND_SP
 from storage.translation_helpers import LANG_CODE_TO_LLM_FIELD, convert_llm_response_to_lang_codes
 from wordfreq.translation.constants import MAJOR_POS_TYPES
 from words.lemma_creation import TRANSLATION_LANGUAGES
+from words.level_placement import LevelPlacer, PlacementSuggestion, load_profiles
 from words.pending_imports.approval import approve_pending_import, reject_pending_import
 from words.synonyms import store_spelling_variants
 
@@ -198,6 +204,8 @@ RELATION_PARAPHRASE = "paraphrase"
 SUBTYPE_REVIEW_NOTE = "needs subtype review"
 
 SOURCE = "jonvabalis"
+# Operation-log source of the level move made after approval.
+PLACEMENT_SOURCE = "jonvabalis/level-placement"
 
 # Where a new sense is stored until its level is assessed: nothing else sits
 # above the 1000-1299 topic band, so the senses parked here are easy to find
@@ -783,10 +791,26 @@ def build_prompt(
 class JonvabalisAgent:
     """Review queued pending imports and propose a disposition for each."""
 
-    def __init__(self, config: DataSourceConfig, timeout: int = 120) -> None:
+    # Class-level defaults, so an agent built without __init__ (the batch
+    # poller's, or a test's) parks new lemmas and makes no placement call.
+    place_levels: bool = False
+    level_profiles_path: Optional[Path] = None
+    _placer: Optional[LevelPlacer] = None
+
+    def __init__(
+        self,
+        config: DataSourceConfig,
+        timeout: int = 120,
+        place_levels: bool = False,
+        level_profiles_path: Optional[Path] = None,
+    ) -> None:
+        """``place_levels`` moves each approved lemma out of ``PARKING_LEVEL``
+        with a second model call (see :meth:`place_new_lemma`)."""
         self.config = config
         self.timeout = timeout
         self._client: Optional[UnifiedLLMClient] = None
+        self.place_levels = place_levels
+        self.level_profiles_path = level_profiles_path
 
     @property
     def client(self) -> UnifiedLLMClient:
@@ -994,8 +1018,8 @@ class JonvabalisAgent:
         them back and the row stays queued as it was.  The disambiguation has
         no pending-row column and is passed to approval directly.
 
-        The new lemma is moved to ``PARKING_LEVEL`` until levels are assessed
-        properly.
+        The new lemma is moved to ``PARKING_LEVEL``, then, when the agent
+        places levels, on to the level :meth:`place_new_lemma` picks.
 
         An incomplete verdict is left in the queue rather than approved with
         the gaps filled from the queued row.
@@ -1120,13 +1144,63 @@ class JonvabalisAgent:
                 self.record_variant_for(session, spacing_spellings, lemma_id)
             session.commit()
 
-        return {
+        placement = (
+            self.place_new_lemma(session, int(lemma_id))
+            if outcome.get("success") and lemma_id
+            else None
+        )
+        result: Dict[str, Any] = {
             # A success with no lemma means approval found the sense already
             # stored and only removed the row.
             "action": "approved" if lemma_id or not outcome.get("success") else "dropped",
             "success": bool(outcome.get("success")),
             "lemma_id": lemma_id,
             "error": outcome.get("error") or outcome.get("message"),
+        }
+        if placement is not None:
+            result["placement"] = placement
+        return result
+
+    def placer_for(self, session: Session) -> LevelPlacer:
+        """The run's level placer, built on first use: measuring profiles is slow."""
+        if self._placer is None or self._placer.session is not session:
+            profiles = load_profiles(session, self.level_profiles_path)
+            self._placer = LevelPlacer(session, profiles, self.client)
+        return self._placer
+
+    def place_new_lemma(self, session: Session, lemma_id: int) -> Optional[Dict[str, Any]]:
+        """Move a just-approved lemma from ``PARKING_LEVEL`` to the level the model picks.
+
+        Returns what was decided, for the run's output, or None when placement
+        is off.  Any failure leaves the lemma parked: the approval it follows
+        is already committed and must not be undone by a placement problem.
+        """
+        if not self.place_levels:
+            return None
+        lemma = session.get(Lemma, lemma_id)
+        if lemma is None:
+            return None
+        try:
+            placer = self.placer_for(session)
+            suggestion: PlacementSuggestion = placer.place_lemma(lemma)
+        except Exception as exc:  # parked is a safe outcome
+            session.rollback()
+            LOGGER.warning("Level placement failed for lemma %s: %s", lemma_id, exc)
+            return {"level": None, "error": str(exc)}
+
+        if suggestion.level is not None:
+            update_lemma(
+                session, lemma_id, difficulty_level=suggestion.level, source=PLACEMENT_SOURCE
+            )
+            session.commit()
+            placer.record(lemma, suggestion.level)
+        return {
+            "level": suggestion.level,
+            "fit": suggestion.fit,
+            "alternatives": list(suggestion.alternatives),
+            "shortlist": list(suggestion.shortlist),
+            "reasoning": suggestion.reasoning,
+            "problems": list(suggestion.problems),
         }
 
     @staticmethod
@@ -1224,6 +1298,17 @@ def print_results(results: Sequence[Dict[str, Any]]) -> None:
             print(f"       {decision['reasoning']}")
         if applied:
             print(f"       => {applied}")
+        placement = outcome.get("placement")
+        if placement:
+            if placement.get("error"):
+                where = f"parked at {PARKING_LEVEL}: placement failed: {placement['error']}"
+            elif placement.get("level") is None:
+                where = f"parked at {PARKING_LEVEL}: no level fits"
+            else:
+                where = f"level {placement['level']} ({placement.get('fit')})"
+            print(f"       => {where}")
+            if placement.get("reasoning"):
+                print(f"          {placement['reasoning']}")
 
     tally: Dict[str, int] = {}
     for result in results:
@@ -1294,6 +1379,22 @@ def main() -> int:
         default=DEFAULT_ITEMS_PER_BATCH,
         help=f"With --batch: requests per OpenAI batch (default: {DEFAULT_ITEMS_PER_BATCH})",
     )
+    parser.add_argument(
+        "--park-levels",
+        action="store_true",
+        help=(
+            f"Leave approved lemmas at level {PARKING_LEVEL} instead of asking the model "
+            "for a level (a second call per approved row). Batched runs always park."
+        ),
+    )
+    parser.add_argument(
+        "--level-profiles",
+        type=Path,
+        help=(
+            "Level corpus profiles saved by scripts/level_corpus_profile.py --json, for "
+            "level placement; without it they are measured at the first approval (minutes)."
+        ),
+    )
     args = parser.parse_args()
 
     logging.basicConfig(level=logging.INFO, format="%(message)s")
@@ -1315,7 +1416,9 @@ def main() -> int:
         print_dry_run(config, args.limit, args.pending_ids, args.only, args.pos)
         return 0
 
-    agent = JonvabalisAgent(config)
+    agent = JonvabalisAgent(
+        config, place_levels=not args.park_levels, level_profiles_path=args.level_profiles
+    )
     results = agent.review(
         limit=args.limit,
         pending_ids=args.pending_ids,
