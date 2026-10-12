@@ -17,8 +17,8 @@ from benchmarks.datastore.benchmarks import (
     set_question_exclusion,
 )
 from benchmarks.datastore.common import Model, decode_json
+from benchmarks.server.scores import get_run_summaries
 from benchmarks.server.analysis import (
-    analyze_run_details,
     describe_run_warnings,
     get_score_color,
 )
@@ -215,72 +215,18 @@ def view_benchmark(benchmark_name):
             }
         )
 
-    leaderboard_rows = (
-        g.bench_db.query(Run, Model, RunDetail, Question)
-        .join(Model, Run.model_name == Model.codename)
-        .outerjoin(RunDetail, RunDetail.run_id == Run.run_id)
-        .outerjoin(Question, RunDetail.question_id == Question.question_id)
-        .filter(Run.benchmark_name == benchmark_name)
-        .order_by(Run.model_name, Run.run_id)
-        .all()
-    )
     best_runs_by_model: dict[str, dict] = {}
-    current_model_name = None
-    current_run_id = None
-    current_run = None
-    current_model = None
-    current_details: list[dict] = []
-    for run, model, detail, question in leaderboard_rows + [(None, None, None, None)]:
-        row_model_name = run.model_name if run is not None else None
-        row_run_id = run.run_id if run is not None else None
-        if current_run is not None and (
-            row_model_name != current_model_name or row_run_id != current_run_id
+    for candidate in get_run_summaries(g.bench_db):
+        run = candidate["run"]
+        if run.benchmark_name != benchmark_name:
+            continue
+        existing = best_runs_by_model.get(run.model_name)
+        if existing is None or (candidate["metrics"].effective_score, run.run_ts, run.run_id) > (
+            existing["metrics"].effective_score,
+            existing["run"].run_ts,
+            existing["run"].run_id,
         ):
-            metrics = analyze_run_details(
-                current_run.benchmark_name,
-                current_details,
-                model_path=current_model.model_path if current_model else None,
-                model_type=current_model.model_type if current_model else None,
-            )
-            candidate = {
-                "run": current_run,
-                "model": current_model,
-                "metrics": metrics,
-            }
-            if current_model_name is None:
-                current_details = []
-                continue
-            existing = best_runs_by_model.get(current_model_name)
-            if existing is None or (
-                candidate["metrics"].effective_score,
-                candidate["run"].run_ts,
-                candidate["run"].run_id,
-            ) > (
-                existing["metrics"].effective_score,
-                existing["run"].run_ts,
-                existing["run"].run_id,
-            ):
-                best_runs_by_model[current_model_name] = candidate
-
-            current_details = []
-
-        current_model_name = row_model_name
-        current_run_id = row_run_id
-        current_run = run
-        current_model = model
-        if detail is not None:
-            current_details.append(
-                {
-                    "question_id": detail.question_id,
-                    "score": detail.score,
-                    "eval_msec": detail.eval_msec,
-                    "cost_usd": detail.cost_usd,
-                    "tokens_used": detail.tokens_used,
-                    "tokens_in": detail.tokens_in,
-                    "tokens_out": detail.tokens_out,
-                    "is_question_excluded": bool(question.is_excluded) if question else False,
-                }
-            )
+            best_runs_by_model[run.model_name] = dict(candidate)
 
     leaderboard = sorted(
         best_runs_by_model.values(),
