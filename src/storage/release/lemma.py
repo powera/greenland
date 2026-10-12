@@ -52,6 +52,7 @@ from typing import Any, Dict, List, Optional, Set, Tuple
 from sqlalchemy.orm import Session
 
 from storage import translation_helpers
+from storage.config.lemma_fact_registry import RETIRED_LEMMA_FACT_TYPES, validate_lemma_fact
 from storage.models.lemma_fact import LemmaFact
 from storage.models.schema import Lemma, LemmaTranslation
 
@@ -266,11 +267,8 @@ def lemma_to_release_record(lemma: Lemma, *, qid: Optional[str] = None) -> Dict[
     facts = {
         fact.fact_type: fact.fact_value
         for fact in sorted(lemma.lemma_facts, key=lambda fact: fact.fact_type)
-        if fact.fact_value is not None
+        if fact.fact_value is not None and fact.fact_type not in RETIRED_LEMMA_FACT_TYPES
     }
-    if "quantifiable" in facts:
-        facts.setdefault("has_individual_instances", facts["quantifiable"])
-        del facts["quantifiable"]
     if facts:
         record["facts"] = facts
 
@@ -309,9 +307,18 @@ def apply_base_fields(lemma: Lemma, record: Dict[str, Any]) -> None:
 def apply_lemma_facts(lemma: Lemma, record: Dict[str, Any]) -> None:
     """Make a lemma's language-independent facts match the record's ``facts`` dict."""
     wanted: Dict[str, str] = dict(record.get("facts") or {})
-    if "quantifiable" in wanted:
-        wanted.setdefault("has_individual_instances", wanted["quantifiable"])
-        del wanted["quantifiable"]
+    # Validate before mutating: obsolete booleans cannot be converted by name.
+    for fact_type, fact_value in wanted.items():
+        if fact_type in RETIRED_LEMMA_FACT_TYPES:
+            raise ValueError(
+                f"Retired lemma fact {fact_type}; run the release concept-fact migration"
+            )
+        if fact_type in {"individuation", "concreteness"}:
+            if lemma.pos_type != "noun":
+                raise ValueError(f"{fact_type} applies only to noun concepts")
+            error = validate_lemma_fact(fact_type, fact_value)
+            if error:
+                raise ValueError(error)
     for fact in list(lemma.lemma_facts):
         if fact.fact_type not in wanted:
             lemma.lemma_facts.remove(fact)

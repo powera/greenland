@@ -112,3 +112,9 @@ in the lemma's definition.
 - `src/langtools/<lang>/` — the rules that decide or cross-check facts, and
   the form builders that read them
 - `src/storage/crud/grammar_fact.py` — reading and writing facts
+
+## Language-independent noun facts
+
+`individuation` and `concreteness` belong to `lemma_facts`, separately from
+per-language countability and number paradigms. See [Noun concept facts](noun_concept_facts.md)
+for their values, sense-level examples, migration, and export contract.

@@ -21,7 +21,7 @@
                     <tbody>
                         {% for fact in lemma_facts %}
                         <tr>
-                            <td>{% if fact.fact_type == 'quantifiable' %}Has Individual Instances (legacy row){% else %}{{ fact.fact_type|replace('_', ' ')|title }}{% endif %}</td>
+                            <td>{{ fact.fact_type|replace('_', ' ')|title }}</td>
                             <td><strong>{{ fact.fact_value }}</strong></td>
                             <td><small class="text-muted">{{ fact.notes or '-' }}</small></td>
                             <td>
@@ -46,34 +46,32 @@
                 {% endif %}
 
                 {% if lemma_fact_defs %}
-                <form method="post" action="{{ url_for('agents.add_lemma_fact_manual', lemma_id=lemma.id) }}" class="row g-2 align-items-end">
+                {% for definition in lemma_fact_defs %}
+                <form method="post" action="{{ url_for('agents.add_lemma_fact_manual', lemma_id=lemma.id) }}" class="row g-2 align-items-end mb-3">
+                    <input type="hidden" name="fact_type" value="{{ definition.fact_type }}">
                     <div class="col-auto">
-                        <label for="lemma_fact_type" class="form-label">Fact type</label>
-                        <select class="form-select form-select-sm" id="lemma_fact_type" name="fact_type" required>
-                            {% for definition in lemma_fact_defs %}
-                            <option value="{{ definition.fact_type }}">{{ definition.display_label }}</option>
-                            {% endfor %}
-                        </select>
-                    </div>
-                    <div class="col-auto">
-                        <label for="lemma_fact_value" class="form-label">Value</label>
-                        <select class="form-select form-select-sm" id="lemma_fact_value" name="fact_value" required>
-                            {% for value in lemma_fact_values %}
+                        <label for="lemma_fact_{{ definition.fact_type }}" class="form-label">{{ definition.display_label }}</label>
+                        {% if definition.allowed_values %}
+                        <select class="form-select form-select-sm" id="lemma_fact_{{ definition.fact_type }}" name="fact_value" required>
+                            <option value="" selected disabled>Choose a value</option>
+                            {% for value in definition.allowed_values %}
                             <option value="{{ value }}">{{ value }}</option>
                             {% endfor %}
                         </select>
+                        {% else %}
+                        <input class="form-control form-control-sm" id="lemma_fact_{{ definition.fact_type }}" name="fact_value" required pattern="[0-9]+" inputmode="numeric">
+                        {% endif %}
                     </div>
                     <div class="col">
-                        <label for="lemma_fact_notes" class="form-label">Notes</label>
-                        <input class="form-control form-control-sm" id="lemma_fact_notes" name="notes">
+                        <label for="lemma_fact_notes_{{ definition.fact_type }}" class="form-label">Notes</label>
+                        <input class="form-control form-control-sm" id="lemma_fact_notes_{{ definition.fact_type }}" name="notes">
                     </div>
                     <div class="col-auto">
-                        <button type="submit" class="btn btn-sm btn-primary">Save</button>
+                        <button type="submit" class="btn btn-sm btn-primary">Save {{ definition.display_label }}</button>
                     </div>
+                    <small class="form-text text-muted">{{ definition.description }}</small>
                 </form>
-                <small class="form-text text-muted">
-                    {% for definition in lemma_fact_defs %}<strong>{{ definition.display_label }}:</strong> {{ definition.description }}{% endfor %}
-                </small>
+                {% endfor %}
                 {% endif %}
             </div>
         </div>

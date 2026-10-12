@@ -4,6 +4,8 @@ from __future__ import annotations
 
 from typing import Any, Dict
 
+import pytest
+
 from sqlalchemy import create_engine
 from sqlalchemy.orm import Session, sessionmaker
 
@@ -51,30 +53,28 @@ def test_record_omits_facts_when_none() -> None:
 def test_record_carries_facts_dict() -> None:
     session = _make_session()
     lemma = _lemma(session)
-    lemma.lemma_facts.append(LemmaFact(fact_type="has_individual_instances", fact_value="false"))
+    lemma.lemma_facts.append(LemmaFact(fact_type="individuation", fact_value="non_individuated"))
     session.commit()
 
-    assert _record(lemma)["facts"] == {"has_individual_instances": "false"}
+    assert _record(lemma)["facts"] == {"individuation": "non_individuated"}
 
 
-def test_legacy_fact_exports_under_new_name() -> None:
+def test_retired_fact_is_not_exported() -> None:
     session = _make_session()
     lemma = _lemma(session)
     lemma.lemma_facts.append(LemmaFact(fact_type="quantifiable", fact_value="true"))
     session.commit()
+    assert "facts" not in _record(lemma)
 
-    assert _record(lemma)["facts"] == {"has_individual_instances": "true"}
 
-
-def test_legacy_release_fact_imports_under_new_name() -> None:
+@pytest.mark.parametrize("fact_type", ["quantifiable", "has_individual_instances"])
+def test_retired_release_fact_is_rejected_before_mutation(fact_type: str) -> None:
     session = _make_session()
     lemma = _lemma(session)
-    apply_lemma_facts(lemma, {"facts": {"quantifiable": "false"}})
-    session.commit()
-
-    assert {fact.fact_type: fact.fact_value for fact in lemma.lemma_facts} == {
-        "has_individual_instances": "false"
-    }
+    lemma.lemma_facts.append(LemmaFact(fact_type="concreteness", fact_value="physical"))
+    with pytest.raises(ValueError, match="Retired lemma fact"):
+        apply_lemma_facts(lemma, {"facts": {fact_type: "false"}})
+    assert lemma.lemma_facts[0].fact_type == "concreteness"
 
 
 def test_import_creates_facts() -> None:
@@ -87,27 +87,27 @@ def test_import_creates_facts() -> None:
         "concept_definition": "a seasoning",
         "translations": {"en": "salt"},
         "difficulty_level": 1,
-        "facts": {"has_individual_instances": "false"},
+        "facts": {"individuation": "non_individuated"},
     }
 
     lemma = import_release_record(session, record)
     session.commit()
 
     assert {fact.fact_type: fact.fact_value for fact in lemma.lemma_facts} == {
-        "has_individual_instances": "false"
+        "individuation": "non_individuated"
     }
 
 
 def test_apply_replaces_and_removes_facts() -> None:
     session = _make_session()
     lemma = _lemma(session)
-    lemma.lemma_facts.append(LemmaFact(fact_type="has_individual_instances", fact_value="false"))
+    lemma.lemma_facts.append(LemmaFact(fact_type="individuation", fact_value="non_individuated"))
     session.commit()
 
-    apply_lemma_facts(lemma, {"facts": {"has_individual_instances": "true"}})
+    apply_lemma_facts(lemma, {"facts": {"individuation": "individual"}})
     session.commit()
     assert {fact.fact_type: fact.fact_value for fact in lemma.lemma_facts} == {
-        "has_individual_instances": "true"
+        "individuation": "individual"
     }
 
     apply_lemma_facts(lemma, {})
@@ -119,7 +119,8 @@ def test_apply_replaces_and_removes_facts() -> None:
 def test_export_then_import_is_stable() -> None:
     source = _make_session()
     lemma = _lemma(source)
-    lemma.lemma_facts.append(LemmaFact(fact_type="has_individual_instances", fact_value="true"))
+    lemma.lemma_facts.append(LemmaFact(fact_type="individuation", fact_value="individual"))
+    lemma.lemma_facts.append(LemmaFact(fact_type="concreteness", fact_value="physical"))
     source.commit()
     record = _record(lemma)
 
@@ -128,3 +129,15 @@ def test_export_then_import_is_stable() -> None:
     target.commit()
 
     assert _record(imported)["facts"] == record["facts"]
+
+
+def test_noun_dimensions_reject_invalid_values_and_other_parts_of_speech() -> None:
+    session = _make_session()
+    lemma = _lemma(session)
+    with pytest.raises(ValueError, match="Invalid value"):
+        apply_lemma_facts(lemma, {"facts": {"concreteness": "mixed"}})
+    assert lemma.lemma_facts == []
+    lemma.pos_type = "verb"
+    with pytest.raises(ValueError, match="only to noun"):
+        apply_lemma_facts(lemma, {"facts": {"individuation": "individual"}})
+    assert lemma.lemma_facts == []

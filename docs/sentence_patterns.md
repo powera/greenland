@@ -50,3 +50,7 @@ buivolas pattern CLI mode have been removed. Existing stored sentences can still
 be reviewed at `/pattern-sentences/view`. General LLM/guided examples remain a
 separate buivolas use case. Old queued pattern jobs fail with a retirement message
 rather than producing obsolete data. No database or release files were changed.
+
+Shared concept dimensions `individuation` and `concreteness` are documented in
+[noun concept facts](noun_concept_facts.md). They do not substitute for grammatical
+countability; the current renderer still checks per-language grammar independently.

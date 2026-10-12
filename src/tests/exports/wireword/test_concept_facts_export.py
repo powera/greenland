@@ -1,4 +1,4 @@
-"""The noun instance fact is shared by exports for every target language."""
+"""The concept dimensions is shared by exports for every target language."""
 
 import json
 from pathlib import Path
@@ -14,14 +14,14 @@ from storage.models.lemma_fact import LemmaFact
 from storage.models.schema import Base, Lemma, LemmaTranslation
 
 
-def test_individual_instances_export_is_language_independent(tmp_path: Path) -> None:
+def test_concept_facts_export_is_language_independent(tmp_path: Path) -> None:
     engine = create_engine("sqlite:///:memory:")
     Base.metadata.create_all(engine)
     with Session(engine) as session:
-        for index, (text, value, fact_type) in enumerate(
+        for index, (text, value, concreteness) in enumerate(
             (
-                ("horse", "true", "quantifiable"),
-                ("salt", "false", "has_individual_instances"),
+                ("horse", "individual", "physical"),
+                ("justice", "non_individuated", "abstract"),
                 ("unknown", None, None),
             ),
             start=1,
@@ -36,7 +36,7 @@ def test_individual_instances_export_is_language_independent(tmp_path: Path) -> 
             )
             session.add(lemma)
             session.flush()
-            for language_code in ("fr", "es"):
+            for language_code in ("fr", "es", "zh"):
                 session.add(
                     LemmaTranslation(
                         lemma_id=lemma.id,
@@ -44,12 +44,17 @@ def test_individual_instances_export_is_language_independent(tmp_path: Path) -> 
                         translation=f"{text}_{language_code}",
                     )
                 )
-            if fact_type is not None and value is not None:
-                session.add(LemmaFact(lemma_id=lemma.id, fact_type=fact_type, fact_value=value))
+            if value is not None and concreteness is not None:
+                session.add(
+                    LemmaFact(lemma_id=lemma.id, fact_type="individuation", fact_value=value)
+                )
+                session.add(
+                    LemmaFact(lemma_id=lemma.id, fact_type="concreteness", fact_value=concreteness)
+                )
         session.commit()
 
         session.close()
-        for language_code in ("fr", "es"):
+        for language_code in ("fr", "es", "zh"):
             exporter = WirewordExporter(language=language_code)
             output_path = tmp_path / f"{language_code}.json"
             with patch.object(exporter, "get_session", side_effect=lambda: Session(engine)):
@@ -57,8 +62,12 @@ def test_individual_instances_export_is_language_independent(tmp_path: Path) -> 
             assert success
             rows: List[Dict[str, Any]] = json.loads(output_path.read_text(encoding="utf-8"))
             by_guid = {row["guid"]: row for row in rows}
-            assert by_guid["N01_001"]["has_individual_instances"] is True
-            assert by_guid["N01_001"]["quantifiable"] is True
-            assert by_guid["N01_002"]["has_individual_instances"] is False
-            assert by_guid["N01_002"]["quantifiable"] is False
-            assert "has_individual_instances" not in by_guid["N01_003"]
+            assert by_guid["N01_001"]["individuation"] == "individual"
+            assert by_guid["N01_001"]["concreteness"] == "physical"
+            assert by_guid["N01_002"]["individuation"] == "non_individuated"
+            assert by_guid["N01_002"]["concreteness"] == "abstract"
+            assert "individuation" not in by_guid["N01_003"]
+            assert "concreteness" not in by_guid["N01_003"]
+            assert all(
+                "quantifiable" not in row and "has_individual_instances" not in row for row in rows
+            )
