@@ -51,6 +51,7 @@ from reports.level_candidates import (
     PlacementQuery,
     core_evidence,
     level_candidates,
+    level_capacity,
     load_level_index,
     query_for_lemma,
     query_for_pending,
@@ -83,8 +84,11 @@ MAX_SHORTLIST = 6
 #: Sample words shown per shortlisted level.
 SAMPLE_WORDS = 12
 #: A corpus match weaker than this many times the average level is not
-#: evidence of anything.
+#: evidence of anything ...
 MIN_CORPUS_LIFT = 1.5
+#: ... and neither is one resting on fewer than this many words' weight: a
+#: level whose only topical word leans the right way reads as 100% on share.
+MIN_CORPUS_WEIGHT = 3.0
 #: Corpora shown in the word's own lean.
 MAX_LEAN_CORPORA = 3
 
@@ -391,13 +395,13 @@ class LevelPlacer:
             for match in suggest_levels(self.level_profiles, dict(weights)):
                 if match.lift < MIN_CORPUS_LIFT:
                     break
-                if not offered(match.level):
+                if not offered(match.level) or match.weight < MIN_CORPUS_WEIGHT:
                     continue
                 corpus_reasons.append(
                     (
                         match.level,
-                        f"corpus match: {match.share:.0%} of its topical words lean the "
-                        f"same way ({match.lift:.1f}x an average level)",
+                        f"corpus match: about {match.weight:.0f} of its {match.lemma_count} "
+                        f"words lean the same way ({match.lift:.1f}x an average level)",
                     )
                 )
                 if len(corpus_reasons) >= CORPUS_CANDIDATES:
@@ -405,24 +409,33 @@ class LevelPlacer:
 
         entries: List[ShortlistEntry] = []
         for level, reasons in merge_shortlist(rule_reasons, corpus_reasons, self.menu_levels):
-            rule_match = next((item for item in rule if item.level == level), None)
-            samples = [
-                lemma.lemma_text
-                for lemma in level_words(self.session, level, limit=SAMPLE_WORDS + 1)
-                if lemma.id != query.exclude_lemma_id
-            ][:SAMPLE_WORDS]
             entries.append(
                 ShortlistEntry(
                     level=level,
                     reasons=reasons,
-                    level_size=(
-                        rule_match.level_size if rule_match else self.index.level_size(level, query)
-                    ),
-                    capacity=rule_match.capacity if rule_match else None,
-                    sample_words=tuple(samples),
+                    level_size=self.index.level_size(level, query),
+                    capacity=level_capacity(level),
+                    sample_words=self.sample_words(level, query),
                 )
             )
         return entries
+
+    def sample_words(self, level: int, query: PlacementQuery) -> tuple[str, ...]:
+        """The level's most frequent words, each spelling once, with its sense tag."""
+        samples: List[str] = []
+        seen: set[str] = set()
+        # Extra rows, since a word's several senses at one level collapse to one.
+        for lemma in level_words(self.session, level, limit=SAMPLE_WORDS * 3):
+            if lemma.id == query.exclude_lemma_id or lemma.lemma_text in seen:
+                continue
+            seen.add(lemma.lemma_text)
+            label = lemma.lemma_text
+            if lemma.disambiguation:
+                label += f" ({lemma.disambiguation})"
+            samples.append(label)
+            if len(samples) >= SAMPLE_WORDS:
+                break
+        return tuple(samples)
 
     def prepare(self, query: PlacementQuery) -> tuple[str, List[ShortlistEntry], Optional[str]]:
         """Build the per-word prompt. Returns ``(prompt, shortlist, core_block)``."""

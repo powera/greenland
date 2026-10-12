@@ -186,7 +186,7 @@ def _lemma(session: Session, text: str, level: Optional[int], subtype: str = "an
         pos_type="noun",
         pos_subtype=subtype,
         difficulty_level=level,
-        guid=f"N_{text}",
+        guid=f"N_{text}_{session.query(Lemma).count()}",
         frequency_rank=3000,
     )
     session.add(lemma)
@@ -198,7 +198,8 @@ def test_placer_sends_titles_as_context_and_shortlists_subtype_levels() -> None:
     session = _session()
     for level, name in ((120, "Animals"), (1070, "Law")):
         session.add(CurriculumLevel(level=level, name=name, cefr="B1"))
-    for text in ("otter", "weasel"):
+    # Two senses of one spelling are sampled once.
+    for text in ("otter", "otter", "weasel"):
         _lemma(session, text, 120)
     _lemma(session, "statute", 1070, "legal_concept")
     session.commit()
