@@ -460,18 +460,55 @@ def lemmas_without_corpus_evidence(session: Session, lemma_ids: List[int]) -> se
     other corpus has a hit, so a word below every corpus cap (vodka, vaccine)
     is scored by its CEFR/Basic English tier and can look common. A caller
     that must read missing data as "uncommon" uses this to discount them.
+
+    Exactly the lemmas for which :func:`get_lemma_corpus_rank` is None in
+    every enabled corpus, worked out in bulk: that is None unless some form
+    token is ranked (rank > 0) and the lemma's share of it is above zero.  The
+    share always is -- the lemma holds the token through its own form, and
+    every ``SENSE_PROMINENCE_WEIGHTS`` value is positive -- and neither the
+    Zipf exponent nor the cap can make a rank None, so a ranked token is
+    enough.  Asking corpus by corpus cost one query per lemma per corpus --
+    over a minute for the whole curriculum.
     """
-    exponents = {
-        corpus_name: get_corpus_zipf_exponent(session, corpus_name)
-        for corpus_name in _corpus_weights(session)
+    # Imported lazily, as in get_lemma_corpus_rank, to avoid a circular import.
+    from storage.models.schema import DerivativeForm
+    from storage.models.variant_form import VariantForm
+
+    wanted = set(lemma_ids)
+    # A lemma has an English lexeme only through an English DerivativeForm;
+    # its variant forms count only once it has one.
+    has_lexeme: set[int] = set()
+    tokens_by_lemma: Dict[int, set[int]] = {}
+    for lemma_id, token_id in session.query(
+        DerivativeForm.lemma_id, DerivativeForm.word_token_id
+    ).filter(DerivativeForm.language_code == "en"):
+        if lemma_id not in wanted:
+            continue
+        has_lexeme.add(lemma_id)
+        if token_id is not None:
+            tokens_by_lemma.setdefault(lemma_id, set()).add(token_id)
+    for lemma_id, token_id in session.query(VariantForm.lemma_id, VariantForm.word_token_id).filter(
+        VariantForm.language_code == "en", VariantForm.word_token_id.isnot(None)
+    ):
+        if lemma_id in has_lexeme:
+            tokens_by_lemma.setdefault(lemma_id, set()).add(token_id)
+
+    sources = [f"wordfreq_{corpus_name}" for corpus_name in _corpus_weights(session)]
+    ranked_tokens = {
+        token_id
+        for (token_id,) in session.query(ExternalLexemeAnnotation.word_token_id)
+        .filter(
+            ExternalLexemeAnnotation.source.in_(sources),
+            ExternalLexemeAnnotation.ordinal_rank > 0,
+            ExternalLexemeAnnotation.word_token_id.isnot(None),
+        )
+        .distinct()
     }
+
     return {
         lemma_id
         for lemma_id in lemma_ids
-        if all(
-            get_lemma_corpus_rank(session, lemma_id, corpus_name, exponent) is None
-            for corpus_name, exponent in exponents.items()
-        )
+        if not tokens_by_lemma.get(lemma_id, set()) & ranked_tokens
     }
 
 

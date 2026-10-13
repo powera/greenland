@@ -505,3 +505,66 @@ def test_token_ranks_are_stable_across_reruns() -> None:
         assert second["tokens_updated"] == 0
     finally:
         session.close()
+
+
+def test_lemmas_without_corpus_evidence_matches_the_per_corpus_ranks() -> None:
+    """The bulk answer agrees with asking get_lemma_corpus_rank corpus by corpus."""
+    session = _make_session()
+    try:
+        ranked = _add_lemma(session, "bread", "N_1")
+        _add_form(
+            session,
+            ranked,
+            "bread",
+            word_token=_add_token_with_freq(session, "bread", "cooking", 50.0, 40),
+        )
+        unranked = _add_lemma(session, "crumb", "N_2")
+        _add_form(
+            session,
+            unranked,
+            "crumb",
+            word_token=_add_token_with_freq(session, "crumb", "cooking", 5.0, None),
+        )
+        disabled = _add_lemma(session, "statute", "N_3")
+        _add_form(
+            session,
+            disabled,
+            "statute",
+            word_token=_add_token_with_freq(session, "statute", "legal", 9.0, 30),
+        )
+        multiword = _add_lemma(session, "brown sugar", "N_4")
+        _add_form(session, multiword, "brown sugar")
+        no_english = _add_lemma(session, "duona", "N_5")
+        # Two senses of one ranked spelling: both hold a share, so both count.
+        bank_token = _add_token_with_freq(session, "bank", "cooking", 20.0, 90)
+        bank_money = _add_lemma(session, "bank", "N_6")
+        bank_river = _add_lemma(session, "bank", "N_7")
+        _add_form(session, bank_money, "bank", word_token=bank_token)
+        _add_form(session, bank_river, "bank", word_token=bank_token)
+        session.commit()
+        lemma_ids = [
+            lemma.id
+            for lemma in (ranked, unranked, disabled, multiword, no_english, bank_money, bank_river)
+        ]
+
+        with patch.object(
+            combined_rank, "get_enabled_corpus_configs", return_value=_corpus_configs("cooking")
+        ):
+            found = combined_rank.lemmas_without_corpus_evidence(session, lemma_ids)
+            expected = {
+                lemma_id
+                for lemma_id in lemma_ids
+                if combined_rank.get_lemma_corpus_rank(session, lemma_id, "cooking", 1.0) is None
+            }
+
+        assert found == expected == {unranked.id, disabled.id, multiword.id, no_english.id}
+    finally:
+        session.close()
+
+
+def test_every_prominence_weight_is_positive() -> None:
+    """lemmas_without_corpus_evidence relies on this: a lemma's share of its
+    own ranked form is then never zero, so a ranked token alone is evidence."""
+    from storage.models.schema import SENSE_PROMINENCE_WEIGHTS
+
+    assert all(weight > 0 for weight in SENSE_PROMINENCE_WEIGHTS.values())
