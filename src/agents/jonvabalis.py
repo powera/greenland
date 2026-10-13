@@ -55,7 +55,7 @@ thousands of lemmas needs the whole level band in view, which a single-row
 prompt cannot show, and every row in a queued group inherits the *word's*
 frequency rank, which is wrong for a minor sense.  The lemma is stored at
 ``PARKING_LEVEL``, an otherwise empty level above the topic band; a sequential
-run then makes a second call, ``words.level_placement``, which shows the model
+run then makes a second call, ``quality.level_placement``, which shows the model
 every level title and a data-driven shortlist and moves the lemma there.  An
 answer of "none fit", or a failed call, leaves it parked.  ``--park-levels``
 skips that call, and batched runs (below) always park, since their verdicts
@@ -172,7 +172,7 @@ from storage.models.variant_form import VARIANT_KIND_EQUIVALENT, VARIANT_KIND_SP
 from storage.translation_helpers import LANG_CODE_TO_LLM_FIELD, convert_llm_response_to_lang_codes
 from wordfreq.translation.constants import MAJOR_POS_TYPES
 from words.lemma_creation import TRANSLATION_LANGUAGES
-from words.level_placement import LevelPlacer, PlacementSuggestion, load_profiles
+from quality.level_placement import LevelPlacer, PlacementSuggestion, load_profiles
 from words.pending_imports.approval import approve_pending_import, reject_pending_import
 from words.synonyms import store_spelling_variants
 

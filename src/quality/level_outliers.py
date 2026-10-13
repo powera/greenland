@@ -17,10 +17,10 @@ Words are numbered in the prompt and the answer refers to them by number, so
 two senses of one spelling at a level stay distinguishable.  Nothing is
 written: :func:`scan_level` returns the flags, and the CLI prints them.
 
-    GREENLAND_TEST_MODE=1 PYTHONPATH=src python src/words/level_outliers.py \\
+    GREENLAND_TEST_MODE=1 PYTHONPATH=src python src/quality/level_outliers.py \\
         --level 150 --dry-run
-    PYTHONPATH=src python src/words/level_outliers.py --level 150 --level 1070
-    PYTHONPATH=src python src/words/level_outliers.py --band named --output /tmp/outliers.tsv
+    PYTHONPATH=src python src/quality/level_outliers.py --level 150 --level 1070
+    PYTHONPATH=src python src/quality/level_outliers.py --band named --output /tmp/outliers.tsv
 """
 
 import argparse
@@ -133,7 +133,7 @@ def describe_word(number: int, lemma: Lemma) -> str:
 
 def build_context() -> str:
     """The system context: instructions, the same for every level."""
-    return util.prompt_loader.get_context("curriculum", "level_outliers")
+    return util.prompt_loader.get_context("quality", "level_outliers")
 
 
 def word_label(lemma: Lemma) -> str:
@@ -163,7 +163,7 @@ def build_prompt(
     neighbours: Sequence[NeighbourLevel] = (),
 ) -> str:
     """The per-level prompt listing every word, numbered from 1."""
-    template = util.prompt_loader.get_prompt("curriculum", "level_outliers")
+    template = util.prompt_loader.get_prompt("quality", "level_outliers")
     replacements = {
         "{{level}}": str(level),
         "{{title}}": title or "(no title yet)",

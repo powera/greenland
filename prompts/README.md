@@ -15,6 +15,7 @@ and/or `context.txt`.
 - `language_forms/` — per-language morphological form generation, organized
   by language code and POS subtype
 - `pronunciation/` — IPA and pronunciation generation
+- `quality/` — LLM review of existing data (level placement, level outliers)
 - `sentence_decomposition/` — sentence parsing and translation breakdown
 - `sentences/` — example sentence generation by difficulty level
 - `synonyms/` — synonym discovery
