@@ -344,7 +344,9 @@ def main() -> int:
     logging.basicConfig(level=logging.INFO, format="%(message)s")
 
     config = DataSourceConfig(
-        backend_type=BackendType.SQLITE, sqlite_path=str(args.db_path), model=args.model
+        backend_type=BackendType.SQLITE,
+        sqlite_path=str(args.db_path),
+        model=args.model or constants.DEFAULT_MODEL,
     )
     session = create_session(config)
     levels: List[int] = args.level or levels_in_band(session, args.band)
