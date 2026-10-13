@@ -198,7 +198,7 @@ def parse_outliers(
             problems.append(f"flag {item!r} is not an object")
             continue
         word = str(item.get("word") or "").strip()
-        lemma = _match_word(item.get("number"), word, words)
+        lemma = match_word(item.get("number"), word, words)
         if lemma is None:
             problems.append(f"flag {item.get('number')!r} {word!r} matches no word at the level")
             continue
@@ -236,7 +236,7 @@ def parse_outliers(
     )
 
 
-def _match_word(number: Any, word: str, words: Sequence[Lemma]) -> Optional[Lemma]:
+def match_word(number: Any, word: str, words: Sequence[Lemma]) -> Optional[Lemma]:
     """The word a flag refers to: by number when it agrees with the spelling, else by spelling."""
     try:
         index = int(number) - 1

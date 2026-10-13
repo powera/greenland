@@ -13,3 +13,8 @@ live in `prompts/quality/<name>/`.
   the placement step jonvabalis runs on new head words.  Writes nothing.
 - `level_outliers.py` — LLM review of one level for words to remove or fix
   (wrong sense, off topic, obscure).  Prints only; writes nothing.
+- `subtype_review.py` — LLM review of the senses filed under each POS subtype,
+  against that POS's full subtype list.  Writes a TSV with an `apply` column
+  pre-filled `yes` on clear moves into a named subtype (never on moves into
+  `<pos>_other`); edit the column, then `--apply` the file.  Applying renumbers
+  each moved lemma's GUID and tombstones the old one, after a `.backup`.
