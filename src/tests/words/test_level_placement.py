@@ -54,6 +54,7 @@ def test_offered_skips_preserved_cohort_and_parking_levels() -> None:
     assert offered(6) and offered(150) and offered(1070)
     assert not offered(3)  # hand-curated core
     assert not offered(US_STATES.level)  # a fixed set
+    assert not offered(15)  # filled only by per-language overrides
     assert not offered(1399)  # parking, outside every band
     assert not offered(-1)
 

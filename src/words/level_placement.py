@@ -45,7 +45,12 @@ from sqlalchemy.orm import Session
 import constants
 import util.prompt_loader
 from clients.unified_client import UnifiedLLMClient
-from reports.curriculum_bands import PRESERVED_LEVEL_MAX, UNRANKED_SENTINEL, band_of
+from reports.curriculum_bands import (
+    OVERRIDE_ONLY_LEVELS,
+    PRESERVED_LEVEL_MAX,
+    UNRANKED_SENTINEL,
+    band_of,
+)
 from reports.level_candidates import (
     IndexRow,
     LevelIndex,
@@ -184,6 +189,7 @@ def offered(level: int) -> bool:
         band_of(level) in ("core", "named", "topic")
         and level > PRESERVED_LEVEL_MAX
         and level not in COHORT_LEVELS
+        and level not in OVERRIDE_ONLY_LEVELS
     )
 
 

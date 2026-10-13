@@ -40,7 +40,7 @@ from sqlalchemy.orm import Session
 import constants
 import util.prompt_loader
 from clients.unified_client import UnifiedLLMClient
-from reports.curriculum_bands import UNRANKED_SENTINEL, band_of
+from reports.curriculum_bands import OVERRIDE_ONLY_LEVELS, UNRANKED_SENTINEL, band_of
 from storage.backend import BackendType, DataSourceConfig, create_session
 from storage.crud.curriculum_level import get_curriculum_level, list_curriculum_levels
 from storage.models.schema import Lemma
@@ -52,6 +52,8 @@ logger = logging.getLogger(__name__)
 ISSUE_VALUES = ("wrong_sense", "off_topic", "obscure", "other")
 SEVERITY_VALUES = ("clear", "borderline")
 BANDS = ("core", "named", "topic")
+#: Neighbouring core levels shown as reference on each side.
+NEIGHBOURS_PER_SIDE = 1
 
 OUTLIER_JSON_SCHEMA: Dict[str, Any] = {
     "type": "object",
@@ -90,6 +92,15 @@ class Outlier:
 
 
 @dataclass(frozen=True)
+class NeighbourLevel:
+    """A core level next to the one under review, shown for reference."""
+
+    level: int
+    title: Optional[str]
+    words: tuple[Lemma, ...]
+
+
+@dataclass(frozen=True)
 class LevelOutlierScan:
     """The flags for one level, checked against the words that were sent."""
 
@@ -125,8 +136,31 @@ def build_context() -> str:
     return util.prompt_loader.get_context("curriculum", "level_outliers")
 
 
+def word_label(lemma: Lemma) -> str:
+    """A word as a neighbour list shows it: the text, with its sense tag."""
+    if lemma.disambiguation:
+        return f"{lemma.lemma_text} ({lemma.disambiguation})"
+    return lemma.lemma_text
+
+
+def format_neighbours(neighbours: Sequence[NeighbourLevel]) -> str:
+    """The reference block of neighbouring levels, or "" when there are none."""
+    if not neighbours:
+        return ""
+    lines = ["", "For reference only, the neighbouring core levels (not for review):"]
+    for neighbour in neighbours:
+        title = neighbour.title or "(no title yet)"
+        words = ", ".join(word_label(lemma) for lemma in neighbour.words)
+        lines.append(f"Level {neighbour.level} - {title}: {words}")
+    return "\n".join(lines) + "\n"
+
+
 def build_prompt(
-    level: int, title: Optional[str], cefr: Optional[str], words: Sequence[Lemma]
+    level: int,
+    title: Optional[str],
+    cefr: Optional[str],
+    words: Sequence[Lemma],
+    neighbours: Sequence[NeighbourLevel] = (),
 ) -> str:
     """The per-level prompt listing every word, numbered from 1."""
     template = util.prompt_loader.get_prompt("curriculum", "level_outliers")
@@ -139,6 +173,7 @@ def build_prompt(
         "{{words}}": "\n".join(
             describe_word(number, lemma) for number, lemma in enumerate(words, start=1)
         ),
+        "{{neighbours}}": format_neighbours(neighbours),
     }
     for placeholder, value in replacements.items():
         template = template.replace(placeholder, value)
@@ -226,7 +261,38 @@ def prepare_level(session: Session, level: int) -> tuple[str, Optional[str], Lis
     title = row.name if row is not None else None
     cefr = row.cefr if row is not None else None
     words = level_words(session, level)
-    return build_prompt(level, title, cefr, words), title, words
+    neighbours = neighbour_levels(session, level)
+    return build_prompt(level, title, cefr, words, neighbours), title, words
+
+
+def neighbour_levels(session: Session, level: int) -> List[NeighbourLevel]:
+    """The nearest core levels with words on each side of a core ``level``.
+
+    Only the core is taught in order, so only there is a level's neighbour
+    meaningful; named and topic numbers are not a sequence.
+    """
+    if band_of(level) != "core":
+        return []
+    core = [
+        number
+        for number in range(constants.MIN_DIFFICULTY_LEVEL, constants.CORE_DIFFICULTY_LEVEL_MAX + 1)
+        if number != level and number not in OVERRIDE_ONLY_LEVELS
+    ]
+    before = [number for number in reversed(core) if number < level]
+    after = [number for number in core if number > level]
+    neighbours: List[NeighbourLevel] = []
+    for side in (before, after):
+        found = 0
+        for number in side:
+            if found >= NEIGHBOURS_PER_SIDE:
+                break
+            words = level_words(session, number)
+            if not words:
+                continue
+            row = get_curriculum_level(session, number)
+            neighbours.append(NeighbourLevel(number, row.name if row else None, tuple(words)))
+            found += 1
+    return sorted(neighbours, key=lambda neighbour: neighbour.level)
 
 
 def scan_level(session: Session, level: int, client: UnifiedLLMClient) -> LevelOutlierScan:
@@ -246,16 +312,18 @@ def scan_level(session: Session, level: int, client: UnifiedLLMClient) -> LevelO
 
 
 def levels_in_band(session: Session, band: str) -> List[int]:
-    """Titled levels in ``band``, in order, less the fixed sets.
+    """Titled levels in ``band``, in order, less the fixed sets and override-only levels.
 
     A cohort level holds exactly its set, so there is nothing for the model to
     judge; a stray word there is a data error checked by hand (see
-    ``wordfreq.data.cohorts``).  ``--level`` can still scan one.
+    ``wordfreq.data.cohorts``).  An override-only level has no base words to
+    scan.  ``--level`` can still scan either.
     """
+    skipped = COHORT_LEVELS | OVERRIDE_ONLY_LEVELS
     return sorted(
         int(row.level)
         for row in list_curriculum_levels(session)
-        if band_of(int(row.level)) == band and int(row.level) not in COHORT_LEVELS
+        if band_of(int(row.level)) == band and int(row.level) not in skipped
     )
 
 
