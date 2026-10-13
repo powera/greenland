@@ -1391,7 +1391,7 @@ def main() -> int:
         "--level-profiles",
         type=Path,
         help=(
-            "Level corpus profiles saved by scripts/level_corpus_profile.py --json, for "
+            "Level corpus profiles saved by src/scripts/level_corpus_profile.py --json, for "
             "level placement; without it they are measured at the first approval (minutes)."
         ),
     )

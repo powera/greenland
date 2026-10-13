@@ -5,6 +5,9 @@ Part of speech: {{pos}}
 Definition: {{definition}}
 {{evidence}}
 
+Other senses of this spelling already in the course:
+{{other_senses}}
+
 Core levels: {{core_status}}
 
 Shortlist (levels the data suggests; any level in the full list may be chosen instead):

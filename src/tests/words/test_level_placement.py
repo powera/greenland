@@ -11,11 +11,13 @@ from storage.models.schema import Base, Lemma
 from wordfreq.data.cohorts import COHORT_LEVELS, US_STATES
 from wordfreq.data.family_relations_sections import ALL_SECTIONS
 from words.difficulty.geography_catalog import GEOGRAPHY_SENSES
+from wordfreq.frequency.level_profile import LevelCandidate as CorpusMatch
 from wordfreq.frequency.level_profile import LevelProfile
 from words.level_placement import (
     PLACEMENT_JSON_SCHEMA,
     LevelPlacer,
     MenuLevel,
+    OtherSense,
     ShortlistEntry,
     build_context,
     build_prompt,
@@ -128,6 +130,32 @@ def test_lean_of_a_general_word() -> None:
     assert "general vocabulary" in describe_lean({"general": 1.0})
 
 
+CHEMISTRY_SENSE = OtherSense(
+    level=1050,
+    word="catalyst",
+    pos_subtype="chemical_compound",
+    disambiguation=None,
+    definition="a substance that speeds up a reaction",
+    title="Chemistry",
+)
+
+
+def test_lean_owned_by_another_sense_is_named_but_not_offered() -> None:
+    line = describe_lean({"wiki_physical_science": 1.0}, CHEMISTRY_SENSE)
+    assert line.startswith("Corpus lean: none for this sense")
+    assert "catalyst (chemical_compound) sense at level 1050" in line
+
+
+def test_prompt_lists_other_senses_and_an_unranked_word() -> None:
+    prompt = build_prompt(_query(rank=None), [], MENU, None, None, [CHEMISTRY_SENSE])
+    assert "Frequency rank: unranked" in prompt
+    assert "- catalyst (chemical_compound) at 1050 Chemistry: a substance" in prompt
+    assert "{{" not in prompt
+    assert "Other senses of this spelling already in the course:\n(none)" in build_prompt(
+        _query(), [], MENU, None, None
+    )
+
+
 def test_merge_interleaves_rankers_and_joins_shared_reasons() -> None:
     merged = merge_shortlist(
         [(120, "subtype"), (121, "subtype"), (999, "not offered")],
@@ -230,3 +258,46 @@ def test_placer_sends_titles_as_context_and_shortlists_subtype_levels() -> None:
     assert "1070 | Law | B1" in call["context"]
     assert "words: otter, weasel" in call["prompt"]
     assert "1070 | Law" not in call["prompt"]
+
+
+def _catalyst_placer(match_level: int) -> tuple[LevelPlacer, PlacementQuery]:
+    """A placer for the figurative catalyst whose spelling leans to ``match_level``."""
+    session = _session()
+    for level, name in ((290, "Events and Processes"), (1050, "Chemistry")):
+        session.add(CurriculumLevel(level=level, name=name, cefr="B2"))
+    _lemma(session, "catalyst", 1050, "chemical_compound")
+    _lemma(session, "process", 290, "process_event")
+    session.commit()
+
+    placer = LevelPlacer(session, {}, None)
+    lean = {"wiki_physical_science": 1.0}
+    match = CorpusMatch(level=match_level, share=0.7, weight=90.0, lemma_count=128, lift=10.0)
+    placer.word_weights = lambda query: lean  # type: ignore[method-assign]
+    placer.corpus_matches = (  # type: ignore[method-assign]
+        lambda weights: [match] if weights else []
+    )
+    query = _query(
+        lemma_text="catalyst",
+        pos_subtype="process_event",
+        definition="something that prompts change",
+        rank=None,
+    )
+    return placer, query
+
+
+def test_lean_explained_by_another_sense_is_dropped() -> None:
+    placer, query = _catalyst_placer(match_level=1050)
+    prompt, shortlist, _ = placer.prepare(query)
+
+    assert "Corpus lean: none for this sense" in prompt
+    assert "- catalyst (chemical_compound) at 1050 Chemistry:" in prompt
+    assert [entry.level for entry in shortlist] == [290]
+    assert not any("corpus match" in reason for entry in shortlist for reason in entry.reasons)
+
+
+def test_lean_pointing_elsewhere_is_kept() -> None:
+    placer, query = _catalyst_placer(match_level=290)
+    prompt, shortlist, _ = placer.prepare(query)
+
+    assert "Corpus lean (of this spelling): wiki_physical_science 100%" in prompt
+    assert any("corpus match" in reason for reason in shortlist[0].reasons)
