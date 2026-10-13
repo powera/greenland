@@ -50,6 +50,9 @@ VOCABULARY_NAME_SUBTYPES: Tuple[str, ...] = (
     "temporal_name",
     "city",
     "region",
+    "named_geographic_feature",
+    # Held the proper names (Alps, Nile) until named_geographic_feature was
+    # split out of it; kept while those words are being moved.
     "geographic_place",
 )
 

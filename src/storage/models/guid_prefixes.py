@@ -148,13 +148,22 @@ SUBTYPE_DEFS: Dict[str, Dict[str, SubtypeDef]] = {
         "building_structure": SubtypeDef(
             prefix="N07",
             description="Buildings and built structures",
-            examples=["house", "hospital", "bridge", "library", "port"],
+            examples=["house", "hospital", "fire station", "library", "stadium"],
+            comment=(
+                "bridge is path_infrastructure, and a room is building_part. The line "
+                "against place_name is open: a zoo, airport, campsite or cemetery is "
+                "land with buildings on it, and has not been settled either way."
+            ),
             group="Physical Objects and Structures",
         ),
         "building_part": SubtypeDef(
             prefix="N47",
-            description="Parts of buildings",
-            examples=["door", "window", "wall", "floor", "ceiling", "roof", "stairs"],
+            description="Parts of buildings, including rooms",
+            examples=["door", "window", "wall", "stairs", "room", "kitchen", "classroom"],
+            comment=(
+                "Rooms had been split between building_structure (bedroom, kitchen) "
+                "and place_name, whose examples named room; every room is filed here."
+            ),
             group="Physical Objects and Structures",
         ),
         "furniture": SubtypeDef(
@@ -165,8 +174,16 @@ SUBTYPE_DEFS: Dict[str, Dict[str, SubtypeDef]] = {
         ),
         "small_movable_object": SubtypeDef(
             prefix="N08",
-            description="Portable everyday objects",
-            examples=["cup", "key", "book", "bottle", "wallet"],
+            description="Portable physical objects with no narrower subtype",
+            examples=["book", "key", "bag", "box", "candle"],
+            comment=(
+                "The catch-all for concrete objects, as concept_idea is for "
+                "abstractions; noun_other mixes the two and is worse. It was "
+                "'portable everyday objects', which overlapped tool and drew in "
+                "kitchenware, sports and game equipment and machine parts, all of "
+                "which now have subtypes of their own. A personal_item subtype "
+                "(wallet, comb, toothbrush, soap, shampoo) is planned for a later round."
+            ),
             group="Physical Objects and Structures",
         ),
         "clothing_accessory": SubtypeDef(
@@ -177,9 +194,31 @@ SUBTYPE_DEFS: Dict[str, Dict[str, SubtypeDef]] = {
         ),
         "artwork_artifact": SubtypeDef(
             prefix="N10",
-            description="Made works and cultural artifacts",
-            examples=["statue", "photograph", "mural", "comic book", "crossword puzzle"],
+            description=(
+                "Physical objects made as art or for cultural use: artworks, crafts "
+                "and musical instruments"
+            ),
+            examples=["statue", "painting", "pottery", "violin", "drum"],
+            comment=(
+                "Musical instruments had no subtype and were spread across tool, "
+                "appliance, activity and this one. A work or genre that is not a "
+                "physical object (novel, sonnet, opera, comedy) is creative_work."
+            ),
             group="Physical Objects and Structures",
+        ),
+        "creative_work": SubtypeDef(
+            prefix="N69",
+            description=(
+                "A kind of work of literature, music, film, broadcasting or "
+                "performance, or a genre of one, as distinct from a physical object"
+            ),
+            examples=["novel", "sonnet", "symphony", "opera", "comedy"],
+            comment=(
+                "Carved out of artwork_artifact, which had held both statues and "
+                "sonatas. A painting or photograph as an object stays artwork_artifact; "
+                "the field of study (literature, musicology) is knowledge_domain."
+            ),
+            group="Abstract Concepts and Ideas",
         ),
         "legal_document": SubtypeDef(
             prefix="N58",
@@ -189,9 +228,16 @@ SUBTYPE_DEFS: Dict[str, Dict[str, SubtypeDef]] = {
         ),
         "natural_feature": SubtypeDef(
             prefix="N11",
-            description="Natural formations and phenomena",
+            description=(
+                "Kinds of landform, body of water and natural area, and natural "
+                "phenomena such as weather"
+            ),
             examples=["river", "island", "cloud", "beach", "volcano"],
-            group="Physical Objects and Structures",
+            comment=(
+                "Generic kinds only: a named river or mountain range (Nile, Alps) is "
+                "named_geographic_feature."
+            ),
+            group="Places and Geography",
         ),
         "celestial_object": SubtypeDef(
             prefix="N64",
@@ -214,8 +260,58 @@ SUBTYPE_DEFS: Dict[str, Dict[str, SubtypeDef]] = {
         ),
         "tool": SubtypeDef(
             prefix="N12",
-            description="Hand tools and generic tools",
-            examples=["hammer", "saw", "wrench", "screwdriver"],
+            description=(
+                "Implements held in the hand and used on a material or object to do a "
+                "job such as cutting, fastening, digging, measuring or shaping, and "
+                "fastening hardware"
+            ),
+            examples=["hammer", "saw", "screwdriver", "shovel", "nail"],
+            comment=(
+                "Was 'hand tools and generic tools', which took anything used for a "
+                "purpose: musical instruments, rackets, pans and engines. Those are "
+                "artwork_artifact, sports_game_equipment, kitchenware and machine_part."
+            ),
+            group="Physical Objects and Structures",
+        ),
+        "sports_game_equipment": SubtypeDef(
+            prefix="N70",
+            description=(
+                "Equipment and pieces used to play a sport or game: balls, bats, "
+                "rackets, sticks, apparatus, goals, boards, pieces, cards, tiles and dice"
+            ),
+            examples=["ball", "tennis racket", "puck", "pawn", "domino"],
+            comment=(
+                "Rackets, clubs and gymnastics apparatus had been tool; balls, chess "
+                "pieces, cards and mahjong tiles small_movable_object. Gear that is "
+                "worn as clothing (glove, gi, helmet) stays clothing_accessory; skis "
+                "and skates are this. A playing area is place_name, its lines "
+                "spatial_division."
+            ),
+            group="Physical Objects and Structures",
+        ),
+        "kitchenware": SubtypeDef(
+            prefix="N71",
+            description=(
+                "Unpowered things for preparing, cooking, serving or eating food: "
+                "cookware, utensils and tableware"
+            ),
+            examples=["frying pan", "spatula", "plate", "fork", "cutting board"],
+            comment=(
+                "Anything powered (oven, toaster, kettle) is appliance. These had "
+                "been split between small_movable_object, tool and appliance."
+            ),
+            group="Physical Objects and Structures",
+        ),
+        "machine_part": SubtypeDef(
+            prefix="N72",
+            description="A component of a machine, vehicle or device, named for its job in it",
+            examples=["engine", "gear", "brake", "steering wheel", "button"],
+            comment=(
+                "Had been split between tool, small_movable_object and vehicle, which "
+                "kept trading them. Fasteners (screw, bolt) stay tool; batteries, "
+                "plugs and cables stay electronic_device. button is the push-button "
+                "sense; the clothing button is clothing_accessory."
+            ),
             group="Physical Objects and Structures",
         ),
         "electronic_device": SubtypeDef(
@@ -477,24 +573,50 @@ SUBTYPE_DEFS: Dict[str, Dict[str, SubtypeDef]] = {
         ),
         "place_name": SubtypeDef(
             prefix="N30",
-            description="Generic place nouns, including whole areas of play",
-            examples=["room", "street", "park", "playing field", "tennis court"],
-            group="Named Entities",
+            description=(
+                "An area of land laid out or kept for a use: parks, gardens, yards, "
+                "farms and playing areas"
+            ),
+            examples=["park", "garden", "playground", "farm", "tennis court"],
+            comment=(
+                "Not proper names, despite the name; renaming it (the prefix stays) is "
+                "deferred until the line against building_structure is settled. A zoo, "
+                "airport, campsite or cemetery is land with buildings on it, and could "
+                "go either way: one option is building vs site (one building is "
+                "building_structure, an area of land is this), another is a single "
+                "subtype for every place one goes to for a purpose. A playing surface "
+                "(court, rink) is this even when indoors. It used to hold compass "
+                "points and inside/outside (now spatial_division), country and state "
+                "(geographic_place) and rooms (building_part)."
+            ),
+            group="Places and Geography",
         ),
         "region": SubtypeDef(
             prefix="N45",
-            description="Countries, states, and similar political regions",
-            examples=["Italy", "Japan", "California", "Scotland"],
+            description=(
+                "Proper names of countries, states, provinces, continents, and named "
+                "cultural or historical regions"
+            ),
+            examples=["Italy", "California", "Europe", "Scandinavia"],
+            comment=(
+                "Proper names only. The generic words (kingdom, province, region) are "
+                "geographic_place."
+            ),
             group="Named Entities",
         ),
         "spatial_division": SubtypeDef(
             prefix="N65",
             description=(
-                "A named part into which a space, surface or grid is divided by rule "
-                "or convention: a line, row, column, cell, zone or section"
+                "A part of a space or surface named by its position, a direction, or a "
+                "rule or convention: a compass direction or the part of a region lying "
+                "in it, a side or part of a thing, or a line, row, cell or zone"
             ),
-            examples=["equator", "border", "aisle", "goal line", "chess file"],
+            examples=["north", "northeast", "top", "border", "equator", "goal line"],
             comment=(
+                "Compass points and relative positions (north, inside, top, middle) "
+                "were added later: they had sat in place_name and concept_idea, and a "
+                "description that named only divisions by rule left the review calling "
+                "them borderline. "
                 "A named division of a laid-out space: equator, time zone, border, "
                 "lane, aisle, margin, row, column, goal line, penalty area, and the "
                 "file, rank, diagonal and square of a game board. The test is that it "
@@ -506,18 +628,45 @@ SUBTYPE_DEFS: Dict[str, Dict[str, SubtypeDef]] = {
                 "symbolic_element and concept_idea, which had each taken some of "
                 "these for want of anything closer."
             ),
-            group="Named Entities",
+            group="Places and Geography",
         ),
         "city": SubtypeDef(
             prefix="N46",
-            description="Cities",
+            description="Proper names of cities and towns",
             examples=["Vilnius", "Paris", "Tokyo"],
+            comment="The generic words (capital, borough, metropolis) are geographic_place.",
             group="Named Entities",
         ),
         "geographic_place": SubtypeDef(
             prefix="N56",
-            description="Named geographic features",
-            examples=["Atlantic Ocean", "Pacific Ocean", "Indian Ocean"],
+            description=(
+                "Kinds of area defined by people: settlements, parts of a town, "
+                "political and administrative divisions, and general words for an area"
+            ),
+            examples=["village", "suburb", "district", "province", "area"],
+            comment=(
+                "Was 'named geographic features' with ocean examples, though most of "
+                "its words were already generic (village, downtown, countryside). The "
+                "proper names went to named_geographic_feature. The test against "
+                "place_name is whether the area is defined by settlement or "
+                "administration (here) or by what the land is used for (place_name); "
+                "against natural_feature, by people or by nature."
+            ),
+            group="Places and Geography",
+        ),
+        "named_geographic_feature": SubtypeDef(
+            prefix="N68",
+            description=(
+                "Proper names of landforms and bodies of water: oceans, seas, rivers, "
+                "lakes, mountains and ranges, deserts and islands"
+            ),
+            examples=["Atlantic Ocean", "Nile", "Alps", "Sahara", "Baltic Sea"],
+            comment=(
+                "Split out of geographic_place, which was described as named features "
+                "but mostly held generic words. Countries, continents and named "
+                "cultural regions are region; cities are city; a named body in the sky "
+                "is celestial_object."
+            ),
             group="Named Entities",
         ),
         "organization_name": SubtypeDef(

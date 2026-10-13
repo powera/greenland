@@ -16,9 +16,18 @@ from langtools.sentence_patterns.types import (
 )
 
 # Noun subtypes for things you can sensibly want, have and like; the same
-# groups as Trakaido's objectGroups.
+# groups as Trakaido's objectGroups.  kitchenware and sports_game_equipment
+# were split out of small_movable_object, and keep its place here.
 OBJECT_GROUPS = frozenset(
-    {"food", "clothing_accessory", "animal", "small_movable_object", "vehicle"}
+    {
+        "food",
+        "clothing_accessory",
+        "animal",
+        "small_movable_object",
+        "kitchenware",
+        "sports_game_equipment",
+        "vehicle",
+    }
 )
 
 # Noun subtypes you can sensibly describe by color.
@@ -27,6 +36,8 @@ COLORABLE_GROUPS = frozenset(
         "clothing_accessory",
         "animal",
         "small_movable_object",
+        "kitchenware",
+        "sports_game_equipment",
         "vehicle",
         "shape",
         "building_structure",
