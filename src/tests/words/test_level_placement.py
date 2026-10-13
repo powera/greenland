@@ -8,7 +8,9 @@ from sqlalchemy.orm import Session
 from reports.level_candidates import PlacementQuery
 from storage.models.curriculum_level import CurriculumLevel
 from storage.models.schema import Base, Lemma
-from wordfreq.data.cohorts import US_STATES
+from wordfreq.data.cohorts import COHORT_LEVELS, US_STATES
+from wordfreq.data.family_relations_sections import ALL_SECTIONS
+from words.difficulty.geography_catalog import GEOGRAPHY_SENSES
 from wordfreq.frequency.level_profile import LevelProfile
 from words.level_placement import (
     PLACEMENT_JSON_SCHEMA,
@@ -52,6 +54,18 @@ def test_offered_skips_preserved_cohort_and_parking_levels() -> None:
     assert not offered(US_STATES.level)  # a fixed set
     assert not offered(1399)  # parking, outside every band
     assert not offered(-1)
+
+
+def test_curated_catalog_levels_are_fixed_sets() -> None:
+    """A word joins these by being added to its catalog, never by placement."""
+    catalog_levels = {sense.base_level for sense in GEOGRAPHY_SENSES} | {
+        variant.curriculum_level
+        for section in ALL_SECTIONS
+        for variant in section.variants
+        if variant.curriculum_level is not None and variant.curriculum_level > 30
+    }
+    assert catalog_levels <= COHORT_LEVELS
+    assert not any(offered(level) for level in catalog_levels)
 
 
 def test_menu_drops_untitled_and_unoffered_rows() -> None:
