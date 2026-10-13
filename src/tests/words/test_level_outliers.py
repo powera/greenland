@@ -15,6 +15,7 @@ from words.level_outliers import (
     build_prompt,
     describe_word,
     levels_in_band,
+    neighbour_levels,
     parse_outliers,
     scan_level,
 )
@@ -197,10 +198,45 @@ def test_scan_of_an_empty_level_makes_no_call() -> None:
 
 def test_levels_in_band() -> None:
     session = _session()
-    for level, name in ((8, "Basics"), (21, "Days and Months"), (150, "Thinking"), (1070, "Law")):
+    for level, name in (
+        (8, "Basics"),
+        (15, "Local Countries"),
+        (21, "Days and Months"),
+        (150, "Thinking"),
+        (1070, "Law"),
+    ):
         session.add(CurriculumLevel(level=level, name=name))
     session.add(CurriculumLevel(level=US_STATES.level, name="US States"))
     session.commit()
     assert levels_in_band(session, "named") == [150]
-    # Fixed sets are skipped: level 21 is the days and months.
+    # Skipped: 15 is override-only, 21 the days-and-months fixed set.
     assert levels_in_band(session, "core") == [8]
+
+
+def test_core_neighbours_skip_empty_and_override_only_levels() -> None:
+    session = _session()
+    for level, name in ((13, "Feelings"), (14, "Descriptions"), (16, "People"), (18, "Family")):
+        session.add(CurriculumLevel(level=level, name=name))
+    _lemma(session, "joy", 13)
+    _lemma(session, "big", 14)
+    _lemma(session, "aunt", 18)
+    # 15 is override-only and 17 is empty, so 16's neighbours are 14 and 18.
+    _lemma(session, "uncle", 16)
+    session.commit()
+
+    neighbours = neighbour_levels(session, 16)
+
+    assert [neighbour.level for neighbour in neighbours] == [14, 18]
+    prompt = build_prompt(16, "People", "A2", [], neighbours)
+    assert "Level 14 - Descriptions: big" in prompt
+    assert "{{" not in prompt
+
+
+def test_named_levels_have_no_neighbours() -> None:
+    session = _session()
+    _sports_level(session)
+    _lemma(session, "goal", 211)
+    session.commit()
+
+    assert neighbour_levels(session, 210) == []
+    assert "For reference only" not in build_prompt(210, "Sports Equipment", "A2", [])

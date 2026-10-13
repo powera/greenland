@@ -6,7 +6,7 @@ CEFR: {{cefr}}
 
 The {{word_count}} words (number. word (part of speech/subtype) [sense tag]: definition | frequency rank), most frequent first:
 {{words}}
-
+{{neighbours}}
 Return `outliers`, a list with one entry per flagged word (empty when nothing stands out), each with:
 - `number`: the word's number in the list above
 - `word`: the word, exactly as listed

@@ -66,6 +66,12 @@ NO_TIER = 99
 # Levels 1-5 are hand-curated and never repacked.
 PRESERVED_LEVEL_MAX = 5
 
+# Levels that hold no words of their own: each language fills them through
+# per-language overrides.  15 is the learner's local countries, nationalities
+# and languages, which differ by language.  Never offered to a new word, and
+# empty to anything reading base levels.
+OVERRIDE_ONLY_LEVELS = frozenset({15})
+
 # Grammar words: taught a few per level through the core rather than as a block.
 FUNCTION_POS_TYPES = frozenset(
     {"pronoun", "conjunction", "preposition", "determiner", "interjection"}
