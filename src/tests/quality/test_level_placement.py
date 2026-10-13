@@ -13,7 +13,7 @@ from wordfreq.data.family_relations_sections import ALL_SECTIONS
 from words.difficulty.geography_catalog import GEOGRAPHY_SENSES
 from wordfreq.frequency.level_profile import LevelCandidate as CorpusMatch
 from wordfreq.frequency.level_profile import LevelProfile
-from words.level_placement import (
+from quality.level_placement import (
     PLACEMENT_JSON_SCHEMA,
     LevelPlacer,
     MenuLevel,

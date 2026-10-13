@@ -24,11 +24,8 @@ Word-level LLM helpers (single lemma tasks, not sentence workflows).
 - `verb_forms.py` — language-specific verb-form prompt/query helpers.
 - `ipa_pronunciation.py` — compatibility exports for IPA generation utilities.
 - `level_naming.py` — LLM titles (and CEFR estimates) for curriculum levels, and
-  their translations.
-- `level_placement.py` — LLM placement of a new word into a level, from every
-  level title plus a shortlist from the rule and corpus-lean rankers.
-- `level_outliers.py` — LLM review of one level for words to remove or fix
-  (wrong sense, off topic, obscure). Prints only; writes nothing.
+  their translations.  Level placement and the level-outlier review live in
+  `src/quality/`.
 - `pending_imports/` — the staging queue for terms nobody has decided about
   yet, and the approval paths that turn one into a lemma, a name, or a concept.
   Used to live in `agents/dramblys/`. See `docs/pending_imports.md` for the

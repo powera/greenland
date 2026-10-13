@@ -9,7 +9,7 @@ from reports.curriculum_bands import UNRANKED_SENTINEL
 from storage.models.curriculum_level import CurriculumLevel
 from storage.models.schema import Base, Lemma
 from wordfreq.data.cohorts import US_STATES
-from words.level_outliers import (
+from quality.level_outliers import (
     OUTLIER_JSON_SCHEMA,
     build_context,
     build_prompt,

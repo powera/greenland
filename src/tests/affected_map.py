@@ -42,16 +42,17 @@ DIRECTORY_MAP: dict[str, tuple[str, ...]] = {
     "idioms": ("storage", "words"),
     "ipa": ("ipa", "langtools", "storage", "wordfreq", "words", "sentences"),
     "langtools": ("langtools", "clients", "sentences", "words", "storage", "wordfreq"),
-    "reports": ("reports", "agents", "storage"),
+    "quality": ("quality", "agents"),
+    "reports": ("reports", "agents", "storage", "quality"),
     "regtest": ("storage",),
     "sentences": ("sentences", "workqueue", "agents", "storage"),
-    "storage": ("storage", "barsukas", "words", "wordfreq", "sentences"),
+    "storage": ("storage", "barsukas", "words", "wordfreq", "sentences", "quality"),
     "strings": ("strings", "barsukas"),
     "util": ("clients", "workqueue", "sentences", "agents", "benchmarks"),
     "verbalator": ("sentences",),
     "verification": ("words", "storage"),
     "wordfreq": ("wordfreq", "words", "sentences", "storage"),
-    "words": ("words", "agents", "sentences", "barsukas"),
+    "words": ("words", "agents", "sentences", "barsukas", "quality"),
     "workqueue": ("workqueue", "barsukas", "sentences", "words"),
 }
 
@@ -59,6 +60,7 @@ DIRECTORY_MAP: dict[str, tuple[str, ...]] = {
 PATH_MAP: tuple[tuple[str, tuple[str, ...]], ...] = (
     ("src/barsukas/templates/", ("barsukas",)),
     ("src/barsukas/static/", ("barsukas",)),
+    ("prompts/quality/", ("quality",)),
     ("prompts/", ("clients", "langtools")),
     ("data/release/", ("storage",)),
     ("migrations/", ("storage",)),

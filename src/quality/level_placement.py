@@ -21,9 +21,9 @@ until a unit exists for it, rather than forced into the nearest title.
 Levels 1-5 (hand-curated), fixed sets (``wordfreq.data.cohorts``) and levels
 with no ``curriculum_levels`` title are not offered.  Nothing is written.
 
-    GREENLAND_TEST_MODE=1 PYTHONPATH=src python src/words/level_placement.py \\
+    GREENLAND_TEST_MODE=1 PYTHONPATH=src python src/quality/level_placement.py \\
         --pending --limit 5 --dry-run
-    PYTHONPATH=src python src/words/level_placement.py --lemma-guid N14_001 \\
+    PYTHONPATH=src python src/quality/level_placement.py --lemma-guid N14_001 \\
         --profiles-json /tmp/level_profiles.json
 """
 
@@ -224,7 +224,7 @@ def format_menu(menu: Sequence[MenuLevel]) -> str:
 
 def build_context(menu: Sequence[MenuLevel]) -> str:
     """The system context: instructions and every level title, the same for every word."""
-    template = util.prompt_loader.get_context("curriculum", "level_placement")
+    template = util.prompt_loader.get_context("quality", "level_placement")
     return template.replace("{{level_menu}}", format_menu(menu))
 
 
@@ -319,7 +319,7 @@ def build_prompt(
     """The per-word prompt; the level list is in :func:`build_context`."""
     pos = query.pos_type + (f" / {query.pos_subtype}" if query.pos_subtype else "")
     core_status = "open" if core_block is None else f"closed ({core_block})"
-    template = util.prompt_loader.get_prompt("curriculum", "level_placement")
+    template = util.prompt_loader.get_prompt("quality", "level_placement")
     replacements = {
         "{{word}}": query.lemma_text,
         "{{pos}}": pos,

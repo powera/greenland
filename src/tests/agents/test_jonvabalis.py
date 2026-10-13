@@ -42,7 +42,7 @@ from storage.models.variant_form import (
 )
 from storage.translation_helpers import LANG_CODE_TO_LLM_FIELD
 from words.lemma_creation import TRANSLATION_LANGUAGES
-from words.level_placement import PlacementSuggestion
+from quality.level_placement import PlacementSuggestion
 from words.pending_imports.staging import create_pending_import
 from workqueue.handlers.jonvabalis import JONVABALIS_JOB, review_state
 from workqueue.llm_batch import Done, StageContext
@@ -363,7 +363,7 @@ class TestDistinctVerdict(JonvabalisTestCase):
 
 
 class _FakePlacer:
-    """Stands in for words.level_placement.LevelPlacer: no index, no model."""
+    """Stands in for quality.level_placement.LevelPlacer: no index, no model."""
 
     def __init__(self, session: Session, level: Any = None, error: Any = None) -> None:
         self.session = session
