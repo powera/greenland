@@ -70,6 +70,7 @@ NAMED_ENTITY_SUBTYPES: frozenset[str] = frozenset(
         NounSubtype.ORGANIZATION_NAME.value,
         NounSubtype.TEMPORAL_NAME.value,
         NounSubtype.NATIONALITY.value,
+        NounSubtype.LANGUAGE_NAME.value,
     }
 )
 

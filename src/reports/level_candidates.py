@@ -146,6 +146,7 @@ THEME_BY_SUBTYPE: Mapping[str, str] = {
     "artwork_artifact": "objects_and_materials",
     "region": "places_and_geography",
     "nationality": "places_and_geography",
+    "language_name": "places_and_geography",
     "city": "places_and_geography",
     "place_name": "places_and_geography",
     "geographic_place": "places_and_geography",
