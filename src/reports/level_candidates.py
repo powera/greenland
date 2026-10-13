@@ -97,6 +97,11 @@ CORE_MAX_CEFR = "B1"
 # the core should be words a learner meets constantly.
 CORE_LOW_FREQUENCY_RANK = 5000
 
+# Topic units are opt-in specialist vocabulary and run larger than named ones.
+TOPIC_CAPACITY = 120
+# Topic levels allowed past TOPIC_CAPACITY (level -> capacity).
+TOPIC_CAPACITY_OVERRIDES: Mapping[int, int] = {}
+
 # Broad curriculum themes, for a subtype no level holds yet. These are not a
 # replacement taxonomy: the stored POS subtype remains the unit kept together.
 THEME_BY_SUBTYPE: Mapping[str, str] = {
@@ -230,8 +235,10 @@ class PlacementQuery:
     pos_type: str
     pos_subtype: Optional[str]
     definition: str
-    #: Effective rank: missing data reads as :data:`UNRANKED_SENTINEL`.
-    rank: int
+    #: Frequency rank, or None when unranked: no stored rank, or the rollup's
+    #: :data:`UNRANKED_SENTINEL` for a word no corpus lists.  Not read as a
+    #: number, so an unranked word is not treated as a moderately rare one.
+    rank: Optional[int]
     tags: tuple[str, ...] = ()
     #: ``(source, tier_name)`` learner-list evidence.
     tiers: tuple[tuple[str, str], ...] = ()
@@ -331,12 +338,20 @@ class LevelIndex:
         )
 
 
+def known_rank(rank: Optional[int]) -> Optional[int]:
+    """``rank``, or None when it is missing or the rollup's unranked value."""
+    if rank is None or rank >= UNRANKED_SENTINEL:
+        return None
+    return int(rank)
+
+
 def level_capacity(level: int) -> int:
     """Most words a level may hold before it counts as full."""
     band = band_of(level)
     if band == "core":
         return CORE_RULES.maximum
-    # Named and topic units alike may run to a coherent unit's size.
+    if band == "topic":
+        return TOPIC_CAPACITY_OVERRIDES.get(level, TOPIC_CAPACITY)
     return NAMED_RULES.coherent_maximum
 
 
@@ -359,7 +374,7 @@ def detect_theme(query: PlacementQuery, index: LevelIndex) -> Optional[tuple[Cur
         tagged = THEMES_BY_NAME.get(tag)
         if tagged is not None:
             return tagged, f"tagged {tag}"
-    if query.rank < THEME_MIN_GENERAL_RANK:
+    if query.rank is not None and query.rank < THEME_MIN_GENERAL_RANK:
         return None
     by_subtype = theme_for_subtype(query.pos_subtype)
     if by_subtype is not None:
@@ -388,26 +403,38 @@ def core_evidence(query: PlacementQuery, index: LevelIndex) -> Optional[str]:
     """Why the query may not join the core, or None when it may.
 
     Both the rank and the learner-list test apply to every subtype, since a
-    new word has no current level to give it the benefit of the doubt.
+    new word has no current level to give it the benefit of the doubt.  Every
+    failed test is named, so an unranked word off the lists says both.
     """
+    reasons: list[str] = []
     subtype = query.pos_subtype or query.pos_type
     ceiling = CORE_RANK_CEILINGS.get(subtype, CORE_LOW_FREQUENCY_RANK)
-    if query.rank >= ceiling:
-        return f"rank {query.rank} not under {ceiling}"
+    if query.rank is None:
+        reasons.append("unranked")
+    elif query.rank >= ceiling:
+        reasons.append(f"rank {query.rank} not under {ceiling}")
     on_learner_list = any(
         source == "cambridge_yle"
         or (source == "cefr" and TIER_ORDER.get(tier, NO_TIER) <= TIER_ORDER[CORE_MAX_CEFR])
         for source, tier in query.tiers
     )
     if not on_learner_list:
-        return f"not on YLE or CEFR {CORE_MAX_CEFR}-or-easier"
+        reasons.append(f"not on YLE or CEFR {CORE_MAX_CEFR}-or-easier")
     cap = CORE_SUBTYPE_CAPS.get(subtype, CORE_SUBTYPE_CAP)
     if index.core_subtype_count(query) >= cap:
-        return f"core already holds {cap} {subtype}"
-    return None
+        reasons.append(f"core already holds {cap} {subtype}")
+    return "; ".join(reasons) or None
 
 
-def _log_distance(rank: int, peers: Sequence[int]) -> float:
+def _log_distance(rank: Optional[int], peers: Sequence[int]) -> float:
+    """How far ``rank`` sits from the peers' median, in doublings.
+
+    Unranked peers are left out of the median.  An unranked query is equally
+    near every level, so the caller's other keys decide.
+    """
+    if rank is None:
+        return 0.0
+    peers = [peer for peer in peers if known_rank(peer) is not None]
     if not peers:
         return math.inf
     peer_median = statistics.median(math.log2(max(peer, 1)) for peer in peers)
@@ -556,7 +583,7 @@ def query_for_pending(session: Session, pending: PendingImport) -> PlacementQuer
         pos_type=pending.pos_type or "noun",
         pos_subtype=pending.pos_subtype,
         definition=pending.definition,
-        rank=int(pending.frequency_rank or UNRANKED_SENTINEL),
+        rank=known_rank(pending.frequency_rank),
         tags=tuple(read_pending_import_tags(pending)),
         tiers=tiers,
         corpus_ranks=corpus_ranks,
@@ -572,7 +599,7 @@ def query_for_lemma(session: Session, lemma: Lemma, index: LevelIndex) -> Placem
         pos_type=lemma.pos_type,
         pos_subtype=lemma.pos_subtype,
         definition=lemma.definition_text,
-        rank=row.rank if row else int(lemma.frequency_rank or UNRANKED_SENTINEL),
+        rank=known_rank(row.rank if row else lemma.frequency_rank),
         tags=tuple(read_tags(lemma)),
         tiers=tiers,
         corpus_ranks=corpus_ranks,
@@ -602,7 +629,8 @@ def main() -> None:
     session = create_session(config)
     index = load_level_index(session)
 
-    rows: list[tuple[str, str, str, int, str]] = []
+    # An unranked word's rank column is left empty.
+    rows: list[tuple[str, str, str, Optional[int], str]] = []
     if args.lemma_guid:
         lemma = session.query(Lemma).filter(Lemma.guid == args.lemma_guid).one()
         query = query_for_lemma(session, lemma, index)

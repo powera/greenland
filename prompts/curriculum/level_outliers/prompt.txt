@@ -1,0 +1,16 @@
+Review level {{level}}.
+
+Title: {{title}}
+Band: {{band}}
+CEFR: {{cefr}}
+
+The {{word_count}} words (number. word (part of speech/subtype) [sense tag]: definition | frequency rank), most frequent first:
+{{words}}
+
+Return `outliers`, a list with one entry per flagged word (empty when nothing stands out), each with:
+- `number`: the word's number in the list above
+- `word`: the word, exactly as listed
+- `issue`: "wrong_sense", "off_topic", "obscure" or "other"
+- `severity`: "clear" or "borderline"
+- `reasoning`: one or two sentences for the human curator: why this word stands out in this level
+- `suggestion`: what to do about it, briefly (e.g. "teach the baseball sense", "belongs in an animals unit", "drop from the curriculum"); empty if unsure

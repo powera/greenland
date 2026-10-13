@@ -32,13 +32,14 @@ import csv
 import json
 import logging
 import sys
-from dataclasses import dataclass
+from dataclasses import dataclass, replace
 from pathlib import Path
 from typing import Any, Dict, List, Mapping, Optional, Sequence
 
 if str(Path(__file__).parent.parent) not in sys.path:
     sys.path.insert(0, str(Path(__file__).parent.parent))
 
+from sqlalchemy import func
 from sqlalchemy.orm import Session
 
 import constants
@@ -62,8 +63,9 @@ from storage.models.imports import TARGET_KIND_LEMMA, PendingImport
 from storage.models.schema import Lemma
 from wordfreq.data.cohorts import COHORT_LEVELS
 from wordfreq.frequency.corpus import get_enabled_corpus_names
+from wordfreq.frequency.level_profile import GENERAL
+from wordfreq.frequency.level_profile import LevelCandidate as CorpusMatch
 from wordfreq.frequency.level_profile import (
-    GENERAL,
     LevelProfile,
     build_level_profiles,
     get_corpus_zipf_floors,
@@ -153,6 +155,26 @@ class PlacementSuggestion:
         return self.level is not None and self.level in self.shortlist
 
 
+@dataclass(frozen=True)
+class OtherSense:
+    """Another placed sense of the word's spelling."""
+
+    level: int
+    word: str
+    pos_subtype: Optional[str]
+    disambiguation: Optional[str]
+    definition: str
+    title: Optional[str] = None
+
+    @property
+    def label(self) -> str:
+        """``word (subtype)``, with the sense tag when there is one."""
+        tag = self.pos_subtype or "?"
+        if self.disambiguation:
+            tag += f", {self.disambiguation}"
+        return f"{self.word} ({tag})"
+
+
 # -- Pure prompt building ---------------------------------------------------
 
 
@@ -200,28 +222,61 @@ def build_context(menu: Sequence[MenuLevel]) -> str:
     return template.replace("{{level_menu}}", format_menu(menu))
 
 
-def describe_lean(weights: Optional[Mapping[str, float]]) -> str:
-    """The word's corpus lean, in one line."""
-    if not weights:
-        return "Corpus lean: no corpus data"
-    topical = sorted(
+def _topical_lean(weights: Mapping[str, float]) -> List[tuple[str, float]]:
+    """The word's corpora other than GENERAL, heaviest first."""
+    return sorted(
         ((name, weight) for name, weight in weights.items() if name != GENERAL and weight > 0),
         key=lambda pair: (-pair[1], pair[0]),
     )
+
+
+def describe_lean(
+    weights: Optional[Mapping[str, float]], lean_owner: Optional[OtherSense] = None
+) -> str:
+    """The word's corpus lean, in one line.
+
+    With ``lean_owner``, the lean is another sense's: it is named, but not
+    offered as evidence for this one.
+    """
+    if not weights:
+        return "Corpus lean: no corpus data"
+    topical = _topical_lean(weights)
     if not topical:
         return "Corpus lean: none (even across corpora; general vocabulary)"
     shown = ", ".join(f"{name} {weight:.0%}" for name, weight in topical[:MAX_LEAN_CORPORA])
+    if lean_owner is not None:
+        return (
+            f"Corpus lean: none for this sense. The spelling leans toward {shown}, which is "
+            f"the {lean_owner.label} sense at level {lean_owner.level}; as this is not the "
+            "spelling's primary sense, word usage gives no guess for it."
+        )
     return f"Corpus lean (of this spelling): {shown}"
 
 
-def describe_evidence(query: PlacementQuery, weights: Optional[Mapping[str, float]]) -> str:
+def describe_evidence(
+    query: PlacementQuery,
+    weights: Optional[Mapping[str, float]],
+    lean_owner: Optional[OtherSense] = None,
+) -> str:
     """Rank, learner lists, tags and corpus lean, one per line."""
-    lines = [f"Frequency rank: {query.rank}"]
+    rank = query.rank if query.rank is not None else "unranked"
+    lines = [f"Frequency rank: {rank}"]
     if query.tiers:
         lines.append("Learner lists: " + ", ".join(f"{src} {tier}" for src, tier in query.tiers))
     if query.tags:
         lines.append("Tags: " + ", ".join(query.tags))
-    lines.append(describe_lean(weights))
+    lines.append(describe_lean(weights, lean_owner))
+    return "\n".join(lines)
+
+
+def format_other_senses(senses: Sequence[OtherSense]) -> str:
+    """The other placed senses of the spelling, one per line."""
+    if not senses:
+        return "(none)"
+    lines = []
+    for sense in senses:
+        title = f" {sense.title}" if sense.title else ""
+        lines.append(f"- {sense.label} at {sense.level}{title}: {sense.definition}")
     return "\n".join(lines)
 
 
@@ -252,6 +307,8 @@ def build_prompt(
     menu: Sequence[MenuLevel],
     weights: Optional[Mapping[str, float]],
     core_block: Optional[str],
+    other_senses: Sequence[OtherSense] = (),
+    lean_owner: Optional[OtherSense] = None,
 ) -> str:
     """The per-word prompt; the level list is in :func:`build_context`."""
     pos = query.pos_type + (f" / {query.pos_subtype}" if query.pos_subtype else "")
@@ -261,7 +318,8 @@ def build_prompt(
         "{{word}}": query.lemma_text,
         "{{pos}}": pos,
         "{{definition}}": query.definition or "(none)",
-        "{{evidence}}": describe_evidence(query, weights),
+        "{{evidence}}": describe_evidence(query, weights, lean_owner),
+        "{{other_senses}}": format_other_senses(other_senses),
         "{{core_status}}": core_status,
         "{{shortlist}}": format_shortlist(shortlist, menu),
     }
@@ -366,7 +424,10 @@ class LevelPlacer:
         self.level_profiles = dict(level_profiles)
         self.client = client
         self.index: LevelIndex = load_level_index(session)
-        self.menu = menu_from_rows(list_curriculum_levels(session))
+        level_rows = list_curriculum_levels(session)
+        #: Every titled level, offered or not: another sense may sit in a fixed set.
+        self.titles: Dict[int, str] = {int(row.level): str(row.name) for row in level_rows}
+        self.menu = menu_from_rows(level_rows)
         self.menu_levels = [item.level for item in self.menu]
         self.corpus_names = get_enabled_corpus_names()
         self.floors = get_corpus_zipf_floors(session, self.corpus_names)
@@ -384,28 +445,80 @@ class LevelPlacer:
             self.session, query.lemma_text, corpus_names=self.corpus_names, floors=self.floors
         )
 
+    def corpus_matches(self, weights: Optional[Mapping[str, float]]) -> List[CorpusMatch]:
+        """Levels whose corpus mix matches ``weights`` strongly enough to count, best first.
+
+        Fixed-set and core levels are kept: callers filter for what they need.
+        """
+        if not weights:
+            return []
+        matches: List[CorpusMatch] = []
+        for match in suggest_levels(self.level_profiles, dict(weights)):
+            if match.lift < MIN_CORPUS_LIFT:
+                break
+            if match.weight >= MIN_CORPUS_WEIGHT:
+                matches.append(match)
+        return matches
+
+    def other_senses(self, query: PlacementQuery) -> List[OtherSense]:
+        """Other senses of the query's spelling placed in a band, lowest level first."""
+        rows = (
+            self.session.query(Lemma)
+            .filter(
+                func.lower(Lemma.lemma_text) == query.lemma_text.casefold(),
+                Lemma.difficulty_level.isnot(None),
+            )
+            .order_by(Lemma.difficulty_level, Lemma.id)
+            .all()
+        )
+        return [
+            OtherSense(
+                level=int(lemma.difficulty_level),
+                word=lemma.lemma_text,
+                pos_subtype=lemma.pos_subtype,
+                disambiguation=lemma.disambiguation,
+                definition=lemma.definition_text,
+                title=self.titles.get(int(lemma.difficulty_level)),
+            )
+            for lemma in rows
+            if lemma.id != query.exclude_lemma_id
+            and lemma.difficulty_level is not None
+            and band_of(int(lemma.difficulty_level)) in ("core", "named", "topic")
+        ]
+
+    def lean_owner(
+        self, weights: Optional[Mapping[str, float]], senses: Sequence[OtherSense]
+    ) -> Optional[OtherSense]:
+        """The other sense the spelling's corpus lean belongs to, if it can be told.
+
+        Corpus counts are per spelling, so they describe every sense at once.
+        When the levels they match best already hold another sense, the lean is
+        that sense's, not evidence for this one.
+        """
+        if not senses:
+            return None
+        top_levels = [match.level for match in self.corpus_matches(weights)[:CORPUS_CANDIDATES]]
+        for level in top_levels:
+            for sense in senses:
+                if sense.level == level:
+                    return sense
+        return None
+
     def shortlist(
         self, query: PlacementQuery, weights: Optional[Mapping[str, float]]
     ) -> List[ShortlistEntry]:
         """Merge both rankers' suggestions and attach level details."""
         rule = level_candidates(query, self.index, limit=RULE_CANDIDATES)
         rule_reasons = [(candidate.level, candidate.reason) for candidate in rule]
-        corpus_reasons: List[tuple[int, str]] = []
-        if weights:
-            for match in suggest_levels(self.level_profiles, dict(weights)):
-                if match.lift < MIN_CORPUS_LIFT:
-                    break
-                if not offered(match.level) or match.weight < MIN_CORPUS_WEIGHT:
-                    continue
-                corpus_reasons.append(
-                    (
-                        match.level,
-                        f"corpus match: about {match.weight:.0f} of its {match.lemma_count} "
-                        f"words lean the same way ({match.lift:.1f}x an average level)",
-                    )
-                )
-                if len(corpus_reasons) >= CORPUS_CANDIDATES:
-                    break
+        offered_matches = [match for match in self.corpus_matches(weights) if offered(match.level)]
+        corpus_reasons = [
+            (
+                match.level,
+                f"corpus match: about {match.weight:.0f} of its {match.lemma_count} "
+                f"words lean the same way ({match.lift:.1f}x an average level)",
+            )
+            for match in offered_matches[:CORPUS_CANDIDATES]
+        ]
 
         entries: List[ShortlistEntry] = []
         for level, reasons in merge_shortlist(rule_reasons, corpus_reasons, self.menu_levels):
@@ -438,11 +551,26 @@ class LevelPlacer:
         return tuple(samples)
 
     def prepare(self, query: PlacementQuery) -> tuple[str, List[ShortlistEntry], Optional[str]]:
-        """Build the per-word prompt. Returns ``(prompt, shortlist, core_block)``."""
+        """Build the per-word prompt. Returns ``(prompt, shortlist, core_block)``.
+
+        When the spelling's corpus lean belongs to another sense, neither
+        ranker sees it: no corpus matches, and no theme read from corpus ranks.
+        """
+        senses = self.other_senses(query)
         weights = self.word_weights(query)
-        shortlist = self.shortlist(query, weights)
+        owner = self.lean_owner(weights, senses)
+        ranker_query = replace(query, corpus_ranks={}) if owner is not None else query
+        shortlist = self.shortlist(ranker_query, None if owner is not None else weights)
         core_block = core_evidence(query, self.index)
-        prompt = build_prompt(query, shortlist, self.menu, weights, core_block)
+        prompt = build_prompt(
+            query,
+            shortlist,
+            self.menu,
+            weights,
+            core_block,
+            other_senses=senses,
+            lean_owner=owner,
+        )
         return prompt, shortlist, core_block
 
     def place(self, query: PlacementQuery) -> PlacementSuggestion:
@@ -470,6 +598,7 @@ class LevelPlacer:
         """Count ``lemma`` at ``level``, so later words in the run see the level fill up."""
         if lemma.id in self.index.rows_by_id:
             return
+        # Index rows keep the sentinel: known_rank reads it as unranked.
         rank = int(lemma.frequency_rank or UNRANKED_SENTINEL)
         self.index.add(IndexRow(lemma.id, lemma.pos_type, lemma.pos_subtype, level, rank))
 
@@ -480,8 +609,14 @@ def load_profiles(session: Session, profiles_json: Optional[Path]) -> Dict[int, 
         level_profiles, _ = load_level_profiles(str(profiles_json))
     else:
         logger.info("Measuring level corpus profiles; pass --profiles-json to reuse a saved run")
-        level_profiles, _ = build_level_profiles(session)
+        level_profiles, _ = build_level_profiles(session, progress=_log_progress)
     return level_profiles
+
+
+def _log_progress(done: int, total: int) -> None:
+    """Log measuring progress, so a run of several minutes does not look hung."""
+    if done % 500 == 0 or done == total:
+        logger.info("  profiled %d/%d lemmas", done, total)
 
 
 def main() -> int:
@@ -494,7 +629,7 @@ def main() -> int:
     parser.add_argument(
         "--profiles-json",
         type=Path,
-        help="Level corpus profiles saved by scripts/level_corpus_profile.py --json",
+        help="Level corpus profiles saved by src/scripts/level_corpus_profile.py --json",
     )
     parser.add_argument(
         "--dry-run", action="store_true", help="Print the prompts instead of calling the model"

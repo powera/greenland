@@ -2,13 +2,17 @@
 
 from typing import Optional
 
+from reports.curriculum_bands import UNRANKED_SENTINEL
 from reports.level_candidates import (
+    TOPIC_CAPACITY,
     IndexRow,
     LevelIndex,
     PlacementQuery,
     core_evidence,
     detect_theme,
+    known_rank,
     level_candidates,
+    level_capacity,
 )
 
 UNKNOWN = {"19th_books": 20000, "20th_books": 20000}
@@ -76,6 +80,38 @@ def test_core_needs_rank_and_learner_list() -> None:
     assert core_evidence(_query(rank=1200), index) is not None
     assert core_evidence(_query(rank=1200, tiers=(("cefr", "C1"),)), index) is not None
     assert core_evidence(_query(rank=7000, tiers=(("cefr", "A1"),)), index) is not None
+
+
+def test_core_names_every_reason_and_an_unranked_word() -> None:
+    reason = core_evidence(_query(rank=None, tiers=(("cefr", "B2"),)), _index())
+    assert reason == "unranked; not on YLE or CEFR B1-or-easier"
+
+
+def test_unranked_means_missing_or_the_rollup_sentinel() -> None:
+    assert known_rank(None) is None
+    assert known_rank(UNRANKED_SENTINEL) is None
+    assert known_rank(UNRANKED_SENTINEL + 5) is None
+    assert known_rank(4200) == 4200
+
+
+def test_topic_levels_hold_more_than_named_ones() -> None:
+    assert level_capacity(1050) == TOPIC_CAPACITY
+    assert level_capacity(150) < TOPIC_CAPACITY
+
+
+def test_unranked_peers_do_not_pull_the_core_rank_match() -> None:
+    # Level 16's only other peer is unranked; read as 9783 it would sit
+    # nearer 2500 than level 8's 400 does, and win.
+    index = _index(
+        (1, "noun", "animal", 8, 1500),
+        (2, "noun", "animal", 16, UNRANKED_SENTINEL),
+        (3, "noun", "animal", 16, 300),
+    )
+    query = _query(rank=2500, tiers=(("cambridge_yle", "movers"),))
+
+    levels = [candidate.level for candidate in level_candidates(query, index)]
+
+    assert levels[:2] == [8, 16]
 
 
 def test_uncommon_word_goes_to_the_named_unit_holding_most_of_its_subtype() -> None:
