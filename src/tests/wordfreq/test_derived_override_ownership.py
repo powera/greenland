@@ -127,7 +127,7 @@ def test_family_promotion_is_applied_and_removed_when_unconfigured(session: Sess
         definition_text="an elder male sibling",
         pos_type="noun",
         pos_subtype="family_relation",
-        difficulty_level=1003,
+        difficulty_level=1002,
     )
     session.add(lemma)
     session.flush()
