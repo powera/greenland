@@ -29,9 +29,12 @@ jargon up the list.
 """
 
 from dataclasses import dataclass
-from typing import Dict, FrozenSet, List, Optional, Tuple
+from typing import TYPE_CHECKING, Dict, FrozenSet, List, Optional, Tuple
 
 from wordfreq.corpora.gutenberg_text import slugify_title
+
+if TYPE_CHECKING:
+    from sqlalchemy.orm import Session
 
 
 @dataclass(frozen=True)
@@ -81,7 +84,7 @@ class BookList:
             though they are almost always capitalized, and so would otherwise
             be classified as proper nouns and dropped.  Corpus-specific
             additions only; the names every corpus should keep (days, months,
-            cities, countries) come from ``data/release`` via
+            cities, countries) come from the database via
             :meth:`resolved_always_vocabulary`.
     """
 
@@ -96,18 +99,18 @@ class BookList:
         """Gutenberg IDs of every book in the list."""
         return [book.gutenberg_id for book in self.books]
 
-    def resolved_always_vocabulary(self, release_dir: Optional[str] = None) -> Tuple[str, ...]:
-        """This corpus's own never-names plus the release-derived ones.
+    def resolved_always_vocabulary(self, session: "Session") -> Tuple[str, ...]:
+        """This corpus's own never-names plus the database-derived ones.
 
         Read at build time rather than baked into the dataclass, so a lemma
-        added to ``data/release`` reaches the next corpus build without an
-        edit here. See :mod:`wordfreq.corpora.proper_noun_vocabulary` for what
-        the release contributes and what it deliberately holds back.
+        added to the database reaches the next corpus build without an edit
+        here. See :mod:`wordfreq.corpora.proper_noun_vocabulary` for what the
+        database contributes and what it deliberately holds back.
         """
         from wordfreq.corpora.proper_noun_vocabulary import load_always_vocabulary
 
         combined = set(word.lower() for word in self.always_vocabulary)
-        combined.update(load_always_vocabulary(release_dir=release_dir))
+        combined.update(load_always_vocabulary(session))
         return tuple(sorted(combined))
 
 

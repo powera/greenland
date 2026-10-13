@@ -1,14 +1,14 @@
-"""Tests for the release-derived proper-noun vocabulary whitelist."""
+"""Tests for the database-derived proper-noun vocabulary whitelist."""
 
 from __future__ import annotations
 
-import json
-import os
-from pathlib import Path
-from typing import Dict, List, Sequence
+from typing import Sequence
 
+from sqlalchemy import create_engine
+from sqlalchemy.orm import Session
+
+from storage.models.schema import Base, DerivativeForm, Lemma
 from wordfreq.corpora.proper_noun_vocabulary import (
-    AMBIGUOUS_WITH_COMMON_WORDS,
     VOCABULARY_NAME_SUBTYPES,
     excluded_words,
     load_always_vocabulary,
@@ -16,105 +16,118 @@ from wordfreq.corpora.proper_noun_vocabulary import (
 )
 
 
-def _write_subtype(root: Path, subtype: str, forms_by_guid: Dict[str, Sequence[str]]) -> None:
-    """Write a minimal ``en.jsonl`` for one noun subtype."""
-    directory = root / "lemmas" / "nouns" / subtype
-    directory.mkdir(parents=True, exist_ok=True)
-    with open(directory / "en.jsonl", "w", encoding="utf-8") as handle:
-        for guid, forms in forms_by_guid.items():
-            record = {
-                "guid": guid,
-                "forms": [{"grammatical_form": "noun/en_singular", "text": text} for text in forms],
-            }
-            handle.write(json.dumps(record) + "\n")
+def _make_session() -> Session:
+    engine = create_engine("sqlite:///:memory:")
+    Base.metadata.create_all(engine)
+    return Session(engine)
 
 
-def test_days_and_months_are_kept_as_vocabulary(tmp_path: Path) -> None:
-    """The words the capitalization filter would otherwise eat."""
-    _write_subtype(
-        tmp_path,
-        "temporal_name",
-        {"N32_001": ["Monday"], "N32_006": ["Saturday"], "N32_008": ["January"]},
+def _add_lemma(
+    session: Session,
+    lemma_text: str,
+    subtype: str,
+    forms: Sequence[str] = (),
+    pos_type: str = "noun",
+    language_code: str = "en",
+) -> None:
+    """Add one lemma with the given subtype and surface forms."""
+    lemma = Lemma(
+        lemma_text=lemma_text,
+        definition_text=lemma_text,
+        pos_type=pos_type,
+        pos_subtype=subtype,
     )
+    session.add(lemma)
+    session.flush()
+    for form_text in forms:
+        session.add(
+            DerivativeForm(
+                lemma_id=lemma.id,
+                derivative_form_text=form_text,
+                language_code=language_code,
+                grammatical_form="noun/en_singular",
+            )
+        )
+    session.flush()
 
-    words = load_always_vocabulary(subtypes=["temporal_name"], release_dir=str(tmp_path))
+
+def test_days_and_months_are_kept_as_vocabulary() -> None:
+    """The words the capitalization filter would otherwise eat."""
+    session = _make_session()
+    for name in ("Monday", "Saturday", "January"):
+        _add_lemma(session, name, "temporal_name", [name])
+
+    words = load_always_vocabulary(session, subtypes=["temporal_name"])
     assert words == ("january", "monday", "saturday")
 
 
-def test_ambiguous_month_names_are_held_back(tmp_path: Path) -> None:
+def test_ambiguous_month_names_are_held_back() -> None:
     """ "May" as a whitelist entry would credit the month with the modal verb."""
-    _write_subtype(
-        tmp_path,
-        "temporal_name",
-        {"N32_010": ["March"], "N32_012": ["May"], "N32_006": ["Saturday"]},
-    )
+    session = _make_session()
+    for name in ("March", "May", "Saturday"):
+        _add_lemma(session, name, "temporal_name", [name])
 
-    words = load_always_vocabulary(subtypes=["temporal_name"], release_dir=str(tmp_path))
+    words = load_always_vocabulary(session, subtypes=["temporal_name"])
     assert words == ("saturday",)
-    assert "may" not in words
-    assert "march" not in words
 
-    held = excluded_words(subtypes=["temporal_name"], release_dir=str(tmp_path))
+    held = excluded_words(session, subtypes=["temporal_name"])
     assert set(held) == {"march", "may"}
 
 
-def test_multiword_names_are_kept_whole(tmp_path: Path) -> None:
+def test_multiword_names_are_kept_whole() -> None:
     """Splitting "New York" would whitelist "new" -- an ordinary English word."""
-    _write_subtype(tmp_path, "city", {"N46_008": ["New York"], "N46_010": ["Los Angeles"]})
+    session = _make_session()
+    _add_lemma(session, "New York", "city", ["New York"])
+    _add_lemma(session, "Los Angeles", "city", ["Los Angeles"])
 
-    words = load_always_vocabulary(subtypes=["city"], release_dir=str(tmp_path))
+    words = load_always_vocabulary(session, subtypes=["city"])
     assert words == ("los angeles", "new york")
     for fragment in ("new", "york", "los", "angeles"):
         assert fragment not in words
 
 
-def test_lowercase_entries_are_skipped(tmp_path: Path) -> None:
+def test_lowercase_entries_are_skipped() -> None:
     """An uncapitalized entry is never filtered as a name, so it is a no-op."""
-    _write_subtype(tmp_path, "city", {"N46_001": ["Warsaw"], "N46_002": ["area"]})
+    session = _make_session()
+    _add_lemma(session, "Warsaw", "city", ["Warsaw"])
+    _add_lemma(session, "area", "city", ["area"])
 
-    words = load_always_vocabulary(subtypes=["city"], release_dir=str(tmp_path))
+    words = load_always_vocabulary(session, subtypes=["city"])
     assert words == ("warsaw",)
 
 
-def test_inflected_forms_are_all_collected(tmp_path: Path) -> None:
-    """Every English form of a name enters, not just the base form."""
-    _write_subtype(tmp_path, "geographic_place", {"N56_010": ["Alps", "Alp"]})
+def test_inflected_forms_are_all_collected() -> None:
+    """Every English form of a name enters, not just the headword."""
+    session = _make_session()
+    _add_lemma(session, "Alps", "geographic_place", ["Alps", "Alp"])
 
-    words = load_always_vocabulary(subtypes=["geographic_place"], release_dir=str(tmp_path))
+    words = load_always_vocabulary(session, subtypes=["geographic_place"])
     assert words == ("alp", "alps")
 
 
-def test_missing_subtype_file_yields_nothing(tmp_path: Path) -> None:
-    """A subtype with no en.jsonl is skipped rather than raising."""
-    (tmp_path / "lemmas" / "nouns").mkdir(parents=True, exist_ok=True)
+def test_headword_without_forms_is_collected() -> None:
+    """A lemma need not have any DerivativeForm rows to be whitelisted."""
+    session = _make_session()
+    _add_lemma(session, "Europe", "region")
 
-    assert load_always_vocabulary(subtypes=["personal_name"], release_dir=str(tmp_path)) == ()
-
-
-def test_malformed_json_line_is_skipped(tmp_path: Path) -> None:
-    """One bad line does not lose the rest of the file."""
-    directory = tmp_path / "lemmas" / "nouns" / "city"
-    directory.mkdir(parents=True, exist_ok=True)
-    with open(directory / "en.jsonl", "w", encoding="utf-8") as handle:
-        handle.write("{not json}\n")
-        handle.write(
-            json.dumps(
-                {"guid": "N46_001", "forms": [{"text": "Warsaw"}]},
-            )
-            + "\n"
-        )
-
-    words = load_always_vocabulary(subtypes=["city"], release_dir=str(tmp_path))
-    assert words == ("warsaw",)
+    assert load_always_vocabulary(session, subtypes=["region"]) == ("europe",)
 
 
-def test_by_subtype_keeps_categories_apart(tmp_path: Path) -> None:
-    _write_subtype(tmp_path, "temporal_name", {"N32_006": ["Saturday"]})
-    _write_subtype(tmp_path, "city", {"N46_001": ["Warsaw"]})
+def test_other_languages_and_parts_of_speech_are_ignored() -> None:
+    """Only English forms of noun lemmas are read."""
+    session = _make_session()
+    _add_lemma(session, "Paris", "city", ["Paryžius"], language_code="lt")
+    _add_lemma(session, "Polish", "city", ["Polish"], pos_type="adjective")
 
-    by_subtype = load_always_vocabulary_by_subtype(
-        subtypes=["temporal_name", "city"], release_dir=str(tmp_path)
-    )
+    assert load_always_vocabulary(session, subtypes=["city"]) == ("paris",)
+
+
+def test_by_subtype_keeps_categories_apart() -> None:
+    session = _make_session()
+    _add_lemma(session, "Saturday", "temporal_name", ["Saturday"])
+    _add_lemma(session, "Warsaw", "city", ["Warsaw"])
+
+    by_subtype = load_always_vocabulary_by_subtype(session, subtypes=["temporal_name", "city"])
     assert by_subtype == {"temporal_name": ("saturday",), "city": ("warsaw",)}
 
 
@@ -124,24 +137,3 @@ def test_place_name_is_not_a_default_subtype() -> None:
     assert "temporal_name" in VOCABULARY_NAME_SUBTYPES
     assert "region" in VOCABULARY_NAME_SUBTYPES
     assert "country" not in VOCABULARY_NAME_SUBTYPES
-
-
-def test_real_release_gives_the_priority_categories() -> None:
-    """Against the checked-in release tree: days and months are covered."""
-    words = load_always_vocabulary()
-    for day in ("monday", "saturday", "sunday"):
-        assert day in words
-    for month in ("january", "june", "december"):
-        assert month in words
-    # Cities land at the same time, per the stated priority.
-    assert "london" in words
-    assert "paris" in words
-    # ...and the ambiguous ones stay out.
-    assert AMBIGUOUS_WITH_COMMON_WORDS.isdisjoint(words)
-
-
-def test_real_release_has_no_bare_fragments_of_multiword_names() -> None:
-    """A regression guard: "new", "year" and "states" must never appear."""
-    words = set(load_always_vocabulary())
-    for fragment in ("new", "year", "day", "states", "united", "sea", "ocean"):
-        assert fragment not in words

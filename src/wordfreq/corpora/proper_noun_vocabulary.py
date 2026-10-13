@@ -9,13 +9,17 @@ they are exactly the words the capitalization test eats.
 ``BookList.always_vocabulary`` is the existing escape hatch -- a per-corpus
 tuple fed to ``detect_names`` as ``extra_never_names``.  It was maintained by
 hand, which is why only ``religious_translated`` had one.  This module derives
-the list from ``data/release`` instead, so a name that is already a dictionary
+the list from the database instead, so a name that is already a dictionary
 headword is kept automatically and the two cannot drift apart.
 
-Read-only: this reads the release JSONL to learn what the database considers
-vocabulary and never writes to it.
+It reads the database rather than the ``data/release`` export, because a corpus
+rebuild usually follows new lemmas and the release lags the database until
+someone exports it.  The session comes from the caller, so a build pointed at
+a release tree (``--backend jsonl --data-dir data/release``) still reads that.
 
-**Which categories are safe.**  Not every proper noun in the release tree can
+Read-only: this never writes to the database.
+
+**Which categories are safe.**  Not every proper noun in the database can
 be whitelisted, because a whitelist is keyed on a *lowercased surface string*
 and the corpora cannot tell senses apart:
 
@@ -33,17 +37,13 @@ See :func:`load_always_vocabulary` for what a caller gets.
 
 from __future__ import annotations
 
-import json
-import logging
-import os
-from typing import Dict, FrozenSet, Iterable, List, Optional, Sequence, Tuple
+from typing import Dict, FrozenSet, List, Optional, Sequence, Tuple
 
-from constants import PROJECT_ROOT
+from sqlalchemy.orm import Session
 
-logger = logging.getLogger(__name__)
+from storage.models.schema import DerivativeForm, Lemma
 
-# Release subdirectories under ``lemmas/nouns`` holding capitalized entries that
-# are legitimate vocabulary. ``place_name`` is deliberately absent: despite the
+# Noun subtypes holding capitalized entries that are legitimate vocabulary. ``place_name`` is deliberately absent: despite the
 # name it holds common nouns (area, city, north), which are never capitalized
 # and so are never filtered in the first place.
 VOCABULARY_NAME_SUBTYPES: Tuple[str, ...] = (
@@ -57,10 +57,6 @@ VOCABULARY_NAME_SUBTYPES: Tuple[str, ...] = (
 # than) they are the name, and so must not be whitelisted. The corpus counts a
 # lowercased string, so whitelisting "may" would credit the month with every
 # use of the modal verb.
-#
-# Continents are not here because they are not yet lemmas at all; see the
-# module docstring in ``wordfreq.frequency.corpus_skew`` and the note in
-# ``load_always_vocabulary``.
 AMBIGUOUS_WITH_COMMON_WORDS: FrozenSet[str] = frozenset(
     {
         "march",  # to march; the Marches
@@ -76,44 +72,34 @@ AMBIGUOUS_WITH_COMMON_WORDS: FrozenSet[str] = frozenset(
 )
 
 
-def _release_nouns_dir(release_dir: Optional[str] = None) -> str:
-    base = release_dir or os.path.join(PROJECT_ROOT, "data", "release")
-    return os.path.join(base, "lemmas", "nouns")
-
-
-def _read_subtype_forms(nouns_dir: str, subtype: str) -> List[str]:
+def _read_subtype_forms(session: Session, subtype: str) -> List[str]:
     """Return every English surface form for one noun subtype.
 
-    Reads ``en.jsonl`` -- the per-language forms file -- rather than
-    ``base.jsonl``, because the filter matches surface strings and a name may
-    inflect ("Alps" alongside "Alp"). A subtype with no ``en.jsonl`` yields
-    nothing rather than raising: not every subtype has English forms exported.
+    Both the headword and its English ``DerivativeForm`` rows are read, because
+    the filter matches surface strings and a name may inflect ("Alps" alongside
+    "Alp"), while a lemma need not have any forms at all.
     """
-    path = os.path.join(nouns_dir, subtype, "en.jsonl")
-    if not os.path.exists(path):
-        logger.debug("No en.jsonl for noun subtype %s", subtype)
-        return []
-
-    forms: List[str] = []
-    with open(path, "r", encoding="utf-8") as handle:
-        for line_number, line in enumerate(handle, start=1):
-            line = line.strip()
-            if not line:
-                continue
-            try:
-                record = json.loads(line)
-            except json.JSONDecodeError:
-                logger.warning("Skipping malformed JSON at %s:%d", path, line_number)
-                continue
-            for form in record.get("forms", []):
-                text = form.get("text")
-                if text:
-                    forms.append(text)
-    return forms
+    headwords = [
+        lemma_text
+        for (lemma_text,) in session.query(Lemma.lemma_text).filter(
+            Lemma.pos_type == "noun", Lemma.pos_subtype == subtype
+        )
+    ]
+    forms = [
+        form_text
+        for (form_text,) in session.query(DerivativeForm.derivative_form_text)
+        .join(Lemma, DerivativeForm.lemma_id == Lemma.id)
+        .filter(
+            Lemma.pos_type == "noun",
+            Lemma.pos_subtype == subtype,
+            DerivativeForm.language_code == "en",
+        )
+    ]
+    return [text for text in headwords + forms if text]
 
 
 def _normalize_entry(text: str) -> Optional[str]:
-    """Lowercase one release name, or None if it must not be whitelisted.
+    """Lowercase one database name, or None if it must not be whitelisted.
 
     A multi-word name is kept **whole** ("new york", not "new" + "york"). It
     must therefore be matched by a tokenizer that emits multi-word tokens; see
@@ -140,35 +126,28 @@ def _normalize_entry(text: str) -> Optional[str]:
 
 
 def load_always_vocabulary(
+    session: Session,
     subtypes: Sequence[str] = VOCABULARY_NAME_SUBTYPES,
-    release_dir: Optional[str] = None,
     exclude: FrozenSet[str] = AMBIGUOUS_WITH_COMMON_WORDS,
 ) -> Tuple[str, ...]:
-    """Capitalized words from ``data/release`` to keep as ordinary vocabulary.
+    """Capitalized words from the database to keep as ordinary vocabulary.
 
     Suitable for ``BookList.always_vocabulary`` / ``detect_names``'s
     ``extra_never_names``, both of which lowercase what they receive.
 
-    Note: continents (Europe, Asia, Africa) are *not* returned, because they
-    are not lemmas in any of these subtypes yet. They belong on this list once
-    they exist in the database; until then the corpus filter will keep eating
-    them.
-
     Args:
+        session: Open session on the database (or release tree) to read.
         subtypes: Noun subtypes to read. Defaults to the capitalized-vocabulary
             ones; ``place_name`` is excluded by default as it holds common nouns.
-        release_dir: Root of the release tree. Defaults to ``data/release``.
-        exclude: Lowercased surface strings to hold back, whatever the release
+        exclude: Lowercased surface strings to hold back, whatever the database
             says. Defaults to the words that collide with common English.
 
     Returns:
         Lowercased words, sorted and deduplicated.
     """
-    nouns_dir = _release_nouns_dir(release_dir)
-
     words: set[str] = set()
     for subtype in subtypes:
-        for text in _read_subtype_forms(nouns_dir, subtype):
+        for text in _read_subtype_forms(session, subtype):
             lowered = _normalize_entry(text)
             if lowered is None or lowered in exclude:
                 continue
@@ -178,8 +157,8 @@ def load_always_vocabulary(
 
 
 def load_always_vocabulary_by_subtype(
+    session: Session,
     subtypes: Sequence[str] = VOCABULARY_NAME_SUBTYPES,
-    release_dir: Optional[str] = None,
     exclude: FrozenSet[str] = AMBIGUOUS_WITH_COMMON_WORDS,
 ) -> Dict[str, Tuple[str, ...]]:
     """Same as :func:`load_always_vocabulary`, kept per subtype.
@@ -187,12 +166,10 @@ def load_always_vocabulary_by_subtype(
     Useful for reporting which categories a corpus rebuild would newly protect,
     and for whitelisting only some categories in a given corpus.
     """
-    nouns_dir = _release_nouns_dir(release_dir)
-
     out: Dict[str, Tuple[str, ...]] = {}
     for subtype in subtypes:
         words: set[str] = set()
-        for text in _read_subtype_forms(nouns_dir, subtype):
+        for text in _read_subtype_forms(session, subtype):
             lowered = _normalize_entry(text)
             if lowered is None or lowered in exclude:
                 continue
@@ -202,20 +179,18 @@ def load_always_vocabulary_by_subtype(
 
 
 def excluded_words(
+    session: Session,
     subtypes: Sequence[str] = VOCABULARY_NAME_SUBTYPES,
-    release_dir: Optional[str] = None,
     exclude: FrozenSet[str] = AMBIGUOUS_WITH_COMMON_WORDS,
 ) -> Tuple[str, ...]:
-    """Release words held back by ``exclude``, for reporting.
+    """Database words held back by ``exclude``, for reporting.
 
     Lets a caller show *which* names were withheld as too ambiguous, rather
     than leaving their absence unexplained.
     """
-    nouns_dir = _release_nouns_dir(release_dir)
-
     held: set[str] = set()
     for subtype in subtypes:
-        for text in _read_subtype_forms(nouns_dir, subtype):
+        for text in _read_subtype_forms(session, subtype):
             lowered = _normalize_entry(text)
             if lowered is not None and lowered in exclude:
                 held.add(lowered)
