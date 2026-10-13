@@ -1,0 +1,18 @@
+Review the {{pos}} subtype "{{subtype}}".
+
+What it covers: {{subtype_description}}
+
+Every {{pos}} subtype a sense can be filed under:
+{{subtype_list}}
+
+The {{word_count}} senses currently filed under "{{subtype}}"{{chunk_note}} (number. word [sense tag]: definition | level):
+{{words}}
+
+Return `flags`, a list with one entry per misfiled sense (empty when nothing is misfiled), each with:
+- `number`: the sense's number in the list above
+- `word`: the word, exactly as listed
+- `verdict`: "move", "wrong_pos" or "wrong_sense"
+- `suggested_subtype`: for "move", the listed {{pos}} subtype the sense belongs in; otherwise ""
+- `severity`: "clear" or "borderline"
+- `reasoning`: one sentence for the human reviewer: why this sense does not belong under "{{subtype}}"
+- `suggestion`: for "wrong_pos", the part of speech it should be; for "wrong_sense", what is wrong with the definition; otherwise ""
