@@ -42,10 +42,12 @@ from typing import Dict, List, Optional, Set
 
 # The curriculum level each family tier is taught at. Tier 1 (mother, father)
 # comes at level 5, after the noun-only opening; tier 2 is at 18, and
-# the remaining tiers are outside the core. A tier is a teaching order, not a level: per-language
+# the remaining tiers are outside the core. Outside the core the last two
+# digits match (102, 302, 1002: roughly B1, B2, C1) by convention only. A tier
+# is a teaching order, not a level: per-language
 # overrides then drop the terms a language does not use (older brother
 # outside CJK, maternal/paternal aunt in most languages).
-FAMILY_TIER_LEVELS: Dict[int, int] = {1: 5, 2: 18, 3: 102, 4: 302, 5: 1003}
+FAMILY_TIER_LEVELS: Dict[int, int] = {1: 5, 2: 18, 3: 102, 4: 302, 5: 1002}
 
 
 @dataclass
