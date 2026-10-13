@@ -675,6 +675,19 @@ SUBTYPE_DEFS: Dict[str, Dict[str, SubtypeDef]] = {
             examples=["Coca-Cola", "agency", "small business"],
             group="Named Entities",
         ),
+        "language_name": SubtypeDef(
+            prefix="N73",
+            description="Proper names of languages",
+            examples=["English", "Lithuanian", "Chinese", "Swahili"],
+            comment=(
+                "Language names had been filed under communication_information "
+                "beside word and message. The generic words stay where they were: "
+                "language is communication_information, and dialect, creole and "
+                "pidgin are linguistic_concept. A person of a nationality is "
+                "nationality."
+            ),
+            group="Named Entities",
+        ),
         "temporal_name": SubtypeDef(
             prefix="N32",
             description="Named days of the week, months and holidays",

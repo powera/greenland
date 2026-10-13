@@ -79,6 +79,7 @@ SUBTYPE_DISPLAY = {
     "temporal_name": "Nombre temporal",
     # Nationality and Measurement
     "nationality": "Nacionalidad",
+    "language_name": "Idioma",
     "unit_of_measurement": "Unidad de medida",
     # Verb subtypes
     "physical_action": "Acción física",
