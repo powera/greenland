@@ -58,14 +58,15 @@ class LexicalStratum(Enum):
 #: the concept's age - Berlin and Paris are ancient cities spelled ベルリン and
 #: パリ. The katakana signal is suppressed entirely for these.
 #:
-#: ``PLACE_NAME`` is deliberately absent: despite the name it covers generic
-#: place nouns (room, street), which are ordinary vocabulary.
+#: ``PLACE_NAME`` and ``GEOGRAPHIC_PLACE`` are deliberately absent: despite
+#: the names they cover generic place nouns (park, village), which are
+#: ordinary vocabulary.  The proper names are ``NAMED_GEOGRAPHIC_FEATURE``.
 NAMED_ENTITY_SUBTYPES: frozenset[str] = frozenset(
     {
         NounSubtype.PERSONAL_NAME.value,
         NounSubtype.REGION.value,
         NounSubtype.CITY.value,
-        NounSubtype.GEOGRAPHIC_PLACE.value,
+        NounSubtype.NAMED_GEOGRAPHIC_FEATURE.value,
         NounSubtype.ORGANIZATION_NAME.value,
         NounSubtype.TEMPORAL_NAME.value,
         NounSubtype.NATIONALITY.value,

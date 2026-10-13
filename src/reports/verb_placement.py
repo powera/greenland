@@ -82,6 +82,7 @@ NON_OBJECT_SUBTYPES = frozenset(
         "region",
         "place_name",
         "geographic_place",
+        "named_geographic_feature",
         "temporal_name",
         "time_period",
         "relative_time",
