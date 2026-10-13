@@ -1,6 +1,6 @@
 # Corpus generation
 
-Builds the `data/wordfreq/*.json` word-frequency corpora. Three builders share
+Builds the `data/wordfreq/*.json` word-frequency corpora. Six builders share
 this directory, and everything after text extraction is common code in
 `frequency_build.py` — proper-noun detection, per-document weighting and the
 output format are the same for all of them:
@@ -9,9 +9,57 @@ output format are the same for all of them:
 | --- | --- | --- |
 | `build_gutenberg.py` | Project Gutenberg books | the five below |
 | `build_scotus.py` | Supreme Court opinions | `legal_scotus` |
-| `build_wikipedia.py` | A Wikipedia dump snapshot | `wiki_math`, `wiki_geography`, `wiki_biology`, `wiki_modern_life`, `wiki_arts`, `wiki_society`, `wiki_physical_science`, `wiki_history` |
+| `build_europarl.py` | Europarl English debates | `eu_parliament_debates` |
+| `build_wikipedia.py` | A Wikipedia dump snapshot | `wiki_math`, `wiki_geography`, `wiki_biology`, `wiki_modern_life`, `wiki_arts`, `wiki_society`, `wiki_linguistics`, `wiki_physical_science`, `wiki_history` |
 | `build_openstax.py` | OpenStax textbooks, pinned by commit | `openstax_science`, `openstax_society` |
 | `build_wpalh.py` | WPA life-history interviews, Library of Congress | `wpa_life_histories` |
+
+## Regenerating every corpus
+
+The corpora must be rebuilt whenever the database gains multi-word or
+hyphenated lemmas, forms or variants. The tokenizer joins only the phrases in
+the index `--phrases-from-db` reads from the database at build time (see
+`lemma_phrases.py`), so "ice cream" stays "ice" + "cream" in a corpus built
+before the lemma existed. Capitalized lemmas mostly need no database input: a
+capitalized spelling is published as its own entry whenever its corpus use
+supports it. The Gutenberg builder also keeps the database's day, month, city
+and region names as ordinary vocabulary (`proper_noun_vocabulary.py`), so a
+new name of that kind is a reason to rebuild those five corpora.
+
+A full rebuild is offline once the caches below exist, makes no LLM calls,
+and writes only the JSON files, which are in version control. It took about
+12.5 minutes in October 2026, run one corpus at a time:
+
+| Corpora | Time | Source cache |
+| --- | --- | --- |
+| 5 Gutenberg | ~1 min | `data/working/gutenberg` |
+| `legal_scotus` | 25s | `data/working/scotus` |
+| `eu_parliament_debates` | 35s | `data/working/europarl` |
+| 2 OpenStax | 20s | `data/working/openstax` |
+| `wpa_life_histories` | 30s | `/Volumes/Dorothy Day/wpalh` (extracted text) |
+| 9 Wikipedia | ~10 min (`wiki_history` alone 3.5 min) | `data/working/wiki_cache`; the dump is needed only for uncached titles |
+
+```bash
+export GREENLAND_DISABLE_LLM=1 PYTHONPATH=src
+for c in 19th_books 20th_books religious_translated early_modern_science cooking; do
+    python src/wordfreq/corpora/build_gutenberg.py --corpus $c --phrases-from-db
+done
+python src/wordfreq/corpora/build_scotus.py --phrases-from-db
+python src/wordfreq/corpora/build_europarl.py --phrases-from-db
+for c in openstax_science openstax_society; do
+    python src/wordfreq/corpora/build_openstax.py --corpus $c --phrases-from-db
+done
+python src/wordfreq/corpora/build_wpalh.py \
+    --source-dir "/Volumes/Dorothy Day/wpalh" --phrases-from-db
+for c in wiki_arts wiki_society wiki_linguistics wiki_physical_science \
+         wiki_history wiki_math wiki_geography wiki_biology wiki_modern_life; do
+    python src/wordfreq/corpora/build_wikipedia.py --corpus $c --phrases-from-db
+done
+```
+
+The new JSON does not affect anything until it is loaded into the database:
+run the four `storage.admin` steps under [After generating](#after-generating).
+They write to the database, so take a backup first.
 
 Five corpora have book lists here:
 
@@ -516,8 +564,7 @@ so they read like occurrence counts; only their ratios are meaningful.
 
 ## After generating
 
-Every corpus here — the five book lists, `legal_scotus` and the five `wiki_*`
-corpora — is enabled in `wordfreq.frequency.corpus.CORPUS_CONFIGS`, and each
+Every corpus in the builder table above is enabled in `wordfreq.frequency.corpus.CORPUS_CONFIGS`, and each
 one's JSON exists.
 **Import them before relying on `combined_rank`**: an enabled corpus with no annotations makes
 `combined_rank` charge every lemma that corpus's unknown-rank floor, which

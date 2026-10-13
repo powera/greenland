@@ -10,10 +10,10 @@ the Gutenberg header/footer and transcription apparatus, separates proper nouns
 from ordinary vocabulary, and writes ``data/wordfreq/<corpus>.json`` in the
 format ``wordfreq.frequency.importer`` expects.
 
-No network. No database access either, unless ``--phrases-from-db`` is passed:
-that reads the multi-word lemma forms so "ice cream" is counted as one token
-rather than inflating "ice" and "cream". Without the flag the step stays
-reproducible from the cache alone.
+No network. The database is read for the capitalized names to keep as
+vocabulary (see :mod:`wordfreq.corpora.proper_noun_vocabulary`), and with
+``--phrases-from-db`` also for the multi-word lemma forms, so "ice cream" is
+counted as one token rather than inflating "ice" and "cream".
 """
 
 import argparse
@@ -21,14 +21,14 @@ import json
 import logging
 import sys
 from pathlib import Path
-from typing import Dict, List, Optional, Sequence
+from typing import Dict, List, Optional, Sequence, Tuple
 
 if str(Path(__file__).parent.parent.parent) not in sys.path:
     sys.path.insert(0, str(Path(__file__).parent.parent.parent))
 
 import constants
 from agents.common.common_args import add_backend_args, get_data_source_config
-from wordfreq.corpora.book_lists import BOOK_LISTS, GutenbergBook, get_book_list
+from wordfreq.corpora.book_lists import BOOK_LISTS, BookList, GutenbergBook, get_book_list
 from wordfreq.corpora.download_gutenberg import default_cache_dir, text_path
 from wordfreq.corpora.frequency_build import (
     DEFAULT_FULL_WEIGHT_TOKENS,
@@ -46,16 +46,18 @@ from wordfreq.corpora.frequency_build import (
 logger = logging.getLogger(__name__)
 
 
-def _load_phrases(args: argparse.Namespace, always_vocabulary: Sequence[str]) -> Dict[str, int]:
-    """Build the multi-word phrase index from the selected data source.
+def _load_vocabulary_and_phrases(
+    args: argparse.Namespace, book_list: BookList
+) -> Tuple[Tuple[str, ...], Optional[Dict[str, int]]]:
+    """Read the always-vocabulary names, and the phrase index if requested.
 
     The backend comes from the standard ``--persona`` / ``--backend`` flags, so
     this reads the local SQLite database by default and a release tree under
     ``--persona custom --backend jsonl --data-dir data/release``.
 
-    The multi-word entries of ``always_vocabulary`` are folded in, because a
-    whitelisted name like "New York" is only protected if the tokenizer emits
-    it as one token.
+    The multi-word entries of the always-vocabulary are folded into the phrase
+    index, because a whitelisted name like "New York" is only protected if the
+    tokenizer emits it as one token.
     """
     from storage.backend import create_session
     from wordfreq.corpora.lemma_phrases import load_phrase_index
@@ -65,11 +67,15 @@ def _load_phrases(args: argparse.Namespace, always_vocabulary: Sequence[str]) ->
     # --data-dir release tree would otherwise fall through to SQLite.
     session = create_session(get_data_source_config(args))
     try:
-        return load_phrase_index(
+        always_vocabulary = book_list.resolved_always_vocabulary(session)
+        if not args.phrases_from_db:
+            return always_vocabulary, None
+        phrases = load_phrase_index(
             session,
             include_periphrastic=args.join_periphrastic,
             extra_phrases=[word for word in always_vocabulary if " " in word],
         )
+        return always_vocabulary, phrases
     finally:
         session.close()
 
@@ -238,11 +244,9 @@ def main() -> int:
     cache_dir = args.source_dir or default_cache_dir()
     max_words: Optional[int] = args.max_words or book_list.max_words
 
-    always_vocabulary = book_list.resolved_always_vocabulary()
-
-    phrases: Optional[Dict[str, int]] = None
-    if args.phrases_from_db:
-        phrases = _load_phrases(args, always_vocabulary)
+    always_vocabulary, phrases = _load_vocabulary_and_phrases(args, book_list)
+    logger.info("Always-vocabulary: %d names kept as ordinary words", len(always_vocabulary))
+    if phrases is not None:
         logger.info(
             "Phrase index: %d multi-word forms (periphrastic %s)",
             len(phrases),
