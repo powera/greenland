@@ -1,0 +1,128 @@
+{% extends "base.html" %}
+
+{% block title %}Subtype Review: {{ subtype }}{% endblock %}
+
+{% block content %}
+<link rel="stylesheet" href="{{ url_for('static', filename='css/subtype_review.css') }}">
+
+<div class="row">
+    <div class="col-lg-12">
+        <h3>
+            <a href="{{ url_for('subtype_review.index') }}" class="text-decoration-none">
+                <i class="bi bi-arrow-left"></i>
+            </a>
+            {{ subtype }}
+            <span class="text-muted small">{{ rows|length }} flagged</span>
+        </h3>
+        <p class="text-muted">{{ description }}</p>
+
+        {% if targets %}
+        <div class="mb-3">
+            <span class="small text-muted me-2">Apply or reject all moves to one subtype:</span>
+            {% for target, count in targets %}
+            <a class="btn btn-outline-secondary btn-sm mb-1"
+               href="{{ url_for('subtype_review.review_slice', subtype=subtype, target=target) }}">
+                &rarr; {{ target }} ({{ count }})
+            </a>
+            {% endfor %}
+        </div>
+        {% endif %}
+
+        <form method="post" action="{{ url_for('subtype_review.submit', subtype=subtype) }}">
+            {% if rows %}
+            <table class="table table-sm align-middle subtype-review-table">
+                <thead>
+                    <tr>
+                        <th>Decision</th>
+                        <th>Word</th>
+                        <th>Move to</th>
+                        <th>Level</th>
+                        <th>Definition</th>
+                        <th>Reasoning</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for row in rows %}
+                    {% set index = loop.index0 %}
+                    {% set movable = row.verdict == 'move' %}
+                    <tr>
+                        <td class="text-nowrap">
+                            {% if row.malformed %}
+                            <span class="badge text-bg-danger">Error</span>
+                            <div class="small text-muted">skipped</div>
+                            {% else %}
+                            <div class="form-check">
+                                <input class="form-check-input" type="radio"
+                                       name="decision_{{ index }}" id="approve_{{ index }}"
+                                       value="approve"
+                                       {% if not movable %}disabled{% endif %}
+                                       {% if row.default_decision == 'approve' %}checked{% endif %}>
+                                <label class="form-check-label" for="approve_{{ index }}">Approve</label>
+                            </div>
+                            <div class="form-check">
+                                <input class="form-check-input" type="radio"
+                                       name="decision_{{ index }}" id="reject_{{ index }}"
+                                       value="reject"
+                                       {% if row.default_decision == 'reject' %}checked{% endif %}>
+                                <label class="form-check-label" for="reject_{{ index }}">Reject</label>
+                            </div>
+                            <div class="form-check">
+                                <input class="form-check-input" type="radio"
+                                       name="decision_{{ index }}" id="ignore_{{ index }}"
+                                       value="ignore"
+                                       {% if row.default_decision == 'ignore' %}checked{% endif %}>
+                                <label class="form-check-label" for="ignore_{{ index }}">Ignore</label>
+                            </div>
+                            {% endif %}
+                        </td>
+                        <td>
+                            <a href="{{ url_for('subtype_review.review_word', subtype=subtype, guid=row.guid) }}"
+                               title="Move to a different subtype"><strong>{{ row.word }}</strong></a>
+                            {% if row.disambiguation %}
+                            <div class="text-muted small">{{ row.disambiguation }}</div>
+                            {% endif %}
+                            <div class="text-muted small">{{ row.guid }}</div>
+                        </td>
+                        <td>
+                            {% if row.malformed %}
+                            <span class="text-danger small">
+                                Review error: a move with no destination (the first pass named
+                                {{ subtype }} itself).  Skipped; not applied or rejected.
+                            </span>
+                            {% elif movable %}
+                            {{ row.target }}
+                            {% if row.target != row.suggested_subtype %}
+                            <div class="text-muted small">first pass: {{ row.suggested_subtype }}</div>
+                            {% endif %}
+                            {% else %}
+                            <span class="text-muted">{{ row.verdict }}</span>
+                            {% if row.suggestion %}<div class="small">{{ row.suggestion }}</div>{% endif %}
+                            {% endif %}
+                        </td>
+                        <td>{{ row.level }}</td>
+                        <td class="small">{{ row.definition }}</td>
+                        <td class="small text-muted">{{ row.reasoning }}{% include "subtype_review/_second_opinion.html" %}</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+            {% else %}
+            <div class="alert alert-info">Nothing was flagged in this subtype.</div>
+            {% endif %}
+
+            <div class="mb-3">
+                <label for="notes" class="form-label">Notes (kept in the operation log)</label>
+                <textarea class="form-control" id="notes" name="notes" rows="2"></textarea>
+            </div>
+            <button type="submit" class="btn btn-primary">
+                <i class="bi bi-check2-all"></i> Submit decisions
+            </button>
+            <span class="text-muted small ms-2">
+                Approved rows are applied and rejected rows dropped.  If any row is ignored, the
+                ignored rows stay in the TSV and the subtype stays open; otherwise the TSV is
+                cleared and the subtype marked complete.
+            </span>
+        </form>
+    </div>
+</div>
+{% endblock %}

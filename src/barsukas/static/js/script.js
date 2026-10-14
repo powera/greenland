@@ -84,8 +84,19 @@ document.addEventListener('DOMContentLoaded', function() {
             // Mark this form as submitted
             submittedForms.add(formId);
 
-            // Disable the submit button to prevent additional clicks
-            const submitButton = form.querySelector('button[type="submit"]');
+            // Disable the submit button to prevent additional clicks.  A disabled
+            // button's name=value is left out of the submission, which loses the
+            // choice on a form with several named buttons (action=apply vs
+            // reject), so carry the clicked button's value in a hidden field.
+            const submitButton = event.submitter || form.querySelector('button[type="submit"]');
+            if (submitButton && submitButton.name) {
+                const carried = document.createElement('input');
+                carried.type = 'hidden';
+                carried.name = submitButton.name;
+                carried.value = submitButton.value;
+                carried.dataset.carriedSubmitter = '1';
+                form.appendChild(carried);
+            }
             if (submitButton) {
                 submitButton.disabled = true;
 
@@ -117,6 +128,9 @@ document.addEventListener('DOMContentLoaded', function() {
     // Back. pageshow fires on both a fresh load and a bfcache restore.
     window.addEventListener('pageshow', function() {
         submittedForms.clear();
+        // A restored page still holds the hidden field of the last click; a
+        // second click would then send two values and the first would win.
+        document.querySelectorAll('input[data-carried-submitter]').forEach(input => input.remove());
         document.querySelectorAll('button[type="submit"][disabled]').forEach(button => {
             button.disabled = false;
             if (button.dataset.originalHtml) {

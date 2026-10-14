@@ -1,0 +1,14 @@
+{# The second-opinion columns of one TSV row, if it has them; included under the reasoning. #}
+{% if row.second_verdict %}
+<div class="mt-1 subtype-second-opinion">
+    {% set badge = {'agree': 'success', 'keep': 'secondary', 'other': 'info',
+                    'no_fit': 'danger', 'ambiguous': 'warning',
+                    'gestalt': 'dark'}.get(row.second_verdict, 'light') %}
+    <span class="badge text-bg-{{ badge }}">2nd: {{ row.second_verdict }}</span>
+    {% if row.second_verdict == 'other' %}&rarr; {{ row.second_subtype }}{% endif %}
+    {% if row.second_verdict == 'ambiguous' %}{{ row.second_subtype }} / {{ row.second_rival }}{% endif %}
+    {% if row.second_verdict == 'gestalt' %}{{ row.second_subtype }} + {{ row.second_rival }}: fix the definition first{% endif %}
+    <span class="text-muted">({{ row.second_confidence }})</span>
+    <div>{{ row.second_reasoning }}</div>
+</div>
+{% endif %}

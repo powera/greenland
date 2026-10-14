@@ -1,0 +1,103 @@
+{% extends "base.html" %}
+
+{% block title %}Subtype Review: {{ group }}{% endblock %}
+
+{% block content %}
+<link rel="stylesheet" href="{{ url_for('static', filename='css/subtype_review.css') }}">
+
+<div class="row">
+    <div class="col-lg-12">
+        <h3>
+            <a href="{{ url_for('subtype_review.index') }}" class="text-decoration-none">
+                <i class="bi bi-arrow-left"></i>
+            </a>
+            {{ group }}
+            <span class="text-muted small">{{ rows|length }} flagged, {{ movable_count }} with a move</span>
+        </h3>
+        <p class="text-muted small">
+            Moves within {{ group }} come first, then moves out of it, then flags with no
+            suggested move (open those one at a time).
+        </p>
+
+        {% if rows %}
+        <form method="post" action="{{ url_for('subtype_review.submit_group', group=group) }}">
+        <table class="table table-sm align-middle subtype-review-table">
+            <thead>
+                <tr>
+                    <th></th>
+                    <th>Word</th>
+                    <th>From</th>
+                    <th>To</th>
+                    <th>Level</th>
+                    <th>Definition</th>
+                    <th>Reasoning</th>
+                </tr>
+            </thead>
+            {% for placement, part in rows|groupby('placement')|sort(attribute='grouper', reverse=true) %}
+            <tbody>
+                <tr class="table-light">
+                    <th colspan="7">
+                        {% if placement == 'within' %}Within {{ group }}
+                        {% elif placement == 'out' %}Out of {{ group }}
+                        {% else %}No suggested move{% endif %}
+                        <span class="text-muted small">({{ part|length }})</span>
+                    </th>
+                </tr>
+                {% for row in part %}
+                <tr>
+                    <td>
+                        {% if placement != 'no move' %}
+                        <input class="form-check-input" type="checkbox" name="pick"
+                               value="{{ row.guid }}" id="pick_{{ row.guid }}" checked>
+                        {% endif %}
+                    </td>
+                    <td>
+                        <label for="pick_{{ row.guid }}"><strong>{{ row.word }}</strong></label>
+                        <a class="small ms-1"
+                           href="{{ url_for('subtype_review.review_word', subtype=row.current_subtype, guid=row.guid) }}">other subtype&hellip;</a>
+                        {% if row.disambiguation %}
+                        <div class="text-muted small">{{ row.disambiguation }}</div>
+                        {% endif %}
+                    </td>
+                    <td>{{ row.current_subtype }}</td>
+                    <td>
+                        {% if placement != 'no move' %}
+                        {{ row.target }}
+                        {% if row.target != row.suggested_subtype %}
+                        <div class="text-muted small">first pass: {{ row.suggested_subtype }}</div>
+                        {% endif %}
+                        {% if row.severity == 'borderline' %}<span class="badge text-bg-warning">borderline</span>{% endif %}
+                        {% else %}
+                        <span class="text-muted">{{ row.verdict }}</span>
+                        {% endif %}
+                    </td>
+                    <td>{{ row.level }}</td>
+                    <td class="small">{{ row.definition }}</td>
+                    <td class="small text-muted">{{ row.reasoning }}{% include "subtype_review/_second_opinion.html" %}</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+            {% endfor %}
+        </table>
+
+            <input type="hidden" name="expected_count" value="{{ movable_count }}">
+            <div class="mb-3">
+                <label for="notes" class="form-label">Notes (kept in the operation log when applied)</label>
+                <textarea class="form-control" id="notes" name="notes" rows="2"></textarea>
+            </div>
+            <button type="submit" name="action" value="apply" class="btn btn-primary">
+                <i class="bi bi-check2-all"></i> Apply checked
+            </button>
+            <button type="submit" name="action" value="reject" class="btn btn-outline-danger ms-2">
+                <i class="bi bi-x-lg"></i> Reject checked
+            </button>
+            <span class="text-muted small ms-2">
+                Checked rows leave their TSVs; unchecked rows stay.
+            </span>
+        </form>
+        {% else %}
+        <div class="alert alert-info">Nothing flagged is left in {{ group }}.</div>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}

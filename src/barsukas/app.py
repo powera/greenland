@@ -103,6 +103,7 @@ from barsukas.routes.review import (
     rapid_review,
     rapid_review_hub,
     sentence_rapid_review,
+    subtype_review,
 )
 from barsukas.routes.sync import (
     sync_derivative_release,
@@ -397,6 +398,7 @@ def create_app(
     app.register_blueprint(rapid_review.bp)
     app.register_blueprint(rapid_review_hub.bp)
     app.register_blueprint(emoji_review.bp)
+    app.register_blueprint(subtype_review.bp)
     app.register_blueprint(settings.bp)
     app.register_blueprint(strings_export.bp)
     app.register_blueprint(trakaido.bp)
