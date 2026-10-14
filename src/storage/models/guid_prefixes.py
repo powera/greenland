@@ -111,8 +111,13 @@ SUBTYPE_DEFS: Dict[str, Dict[str, SubtypeDef]] = {
         ),
         "body_part": SubtypeDef(
             prefix="N03",
-            description="Parts of a human or animal body",
-            examples=["arm", "eye", "heart", "muscle", "bone"],
+            description="Parts of a human or animal body, and the fluids it makes",
+            examples=["arm", "eye", "heart", "muscle", "bone", "blood"],
+            comment=(
+                "Bodily fluids (blood, sweat, tears) are filed here: the review had "
+                "nowhere better for them and sent tears to beverage. Milk as a drink "
+                "is beverage."
+            ),
             group="People and Living Things",
         ),
         "disease_condition": SubtypeDef(
@@ -150,9 +155,13 @@ SUBTYPE_DEFS: Dict[str, Dict[str, SubtypeDef]] = {
             description="Buildings and built structures",
             examples=["house", "hospital", "fire station", "library", "stadium"],
             comment=(
-                "bridge is path_infrastructure, and a room is building_part. The line "
-                "against place_name is open: a zoo, airport, campsite or cemetery is "
-                "land with buildings on it, and has not been settled either way."
+                "bridge is path_infrastructure, and a room is building_part. The test "
+                "against place_name is construction vs ground: a word for something "
+                "built (a building, or one construction such as a tower, tent, stadium "
+                "or swimming pool) is this; a word for the ground a use happens on is "
+                "place_name, even when it has buildings on it (zoo, airport, campsite, "
+                "cemetery, farm). A venue and the surface inside it nest: the arena is "
+                "this, its rink is place_name."
             ),
             group="Physical Objects and Structures",
         ),
@@ -577,15 +586,15 @@ SUBTYPE_DEFS: Dict[str, Dict[str, SubtypeDef]] = {
                 "An area of land laid out or kept for a use: parks, gardens, yards, "
                 "farms and playing areas"
             ),
-            examples=["park", "garden", "playground", "farm", "tennis court"],
+            examples=["park", "garden", "farm", "zoo", "airport", "tennis court"],
             comment=(
-                "Not proper names, despite the name; renaming it (the prefix stays) is "
-                "deferred until the line against building_structure is settled. A zoo, "
-                "airport, campsite or cemetery is land with buildings on it, and could "
-                "go either way: one option is building vs site (one building is "
-                "building_structure, an area of land is this), another is a single "
-                "subtype for every place one goes to for a purpose. A playing surface "
-                "(court, rink) is this even when indoors. It used to hold compass "
+                "Not proper names, despite the name; a rename (the prefix stays) is "
+                "deferred. The test against building_structure is ground vs "
+                "construction: a word for the ground a use happens on is this, even "
+                "when it has buildings on it (zoo, airport, campsite, cemetery); a word "
+                "for something built is building_structure (stadium, tower, tent). A "
+                "playing surface (court, rink) is this even when indoors: the arena is "
+                "building_structure and its rink is this. It used to hold compass "
                 "points and inside/outside (now spatial_division), country and state "
                 "(geographic_place) and rooms (building_part)."
             ),
