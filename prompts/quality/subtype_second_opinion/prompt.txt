@@ -1,0 +1,14 @@
+Every {{pos}} subtype a sense can be filed under, by group:
+{{subtype_list}}
+
+The {{row_count}} proposals to judge{{chunk_note}} (number. word [sense tag]: definition | level, then the current subtype, the proposed subtype and the first review's reason):
+{{rows}}
+
+Return `opinions`, a list with exactly one entry per proposal above, each with:
+- `number`: the proposal's number in the list above
+- `word`: the word, exactly as listed
+- `verdict`: "agree", "keep", "other", "no_fit", "ambiguous" or "gestalt"
+- `subtype`: for "other", the listed {{pos}} subtype the sense belongs in; for "ambiguous", one of the two that compete; for "gestalt", the subtype of one of the two meanings; otherwise ""
+- `rival`: for "ambiguous", the other subtype that competes; for "gestalt", the subtype of the other meaning; otherwise ""
+- `confidence`: "high", "medium" or "low"
+- `reasoning`: one sentence for the human reviewer
