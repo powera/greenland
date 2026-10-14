@@ -130,27 +130,18 @@ SUBTYPE_DEFS: Dict[str, Dict[str, SubtypeDef]] = {
             prefix="N05",
             description="Whole plants",
             examples=["rose", "oak", "bush", "moss", "weed"],
+            comment=(
+                "Fungi big enough to see (mushroom, mould, toadstool) are filed here "
+                "although they are not plants, as a learner would file them. A "
+                "mushroom as something eaten is food, and anything too small to see "
+                "is microscopic_entity."
+            ),
             group="People and Living Things",
         ),
         "plant_part": SubtypeDef(
             prefix="N38",
             description="Parts of plants",
             examples=["leaf", "root", "seed", "petal", "bark"],
-            group="People and Living Things",
-        ),
-        "microorganism": SubtypeDef(
-            prefix="N77",
-            description=(
-                "Living things too small to see, viruses, and fungi - the life that "
-                "is neither animal nor plant"
-            ),
-            examples=["bacteria", "virus", "germ", "yeast", "fungus"],
-            comment=(
-                "Fungi are filed here although a mushroom is not microscopic: they "
-                "are neither plant nor animal, and fungus had been plant. A mushroom "
-                "as food is food. The agent is not the illness: virus had been "
-                "disease_condition, which keeps the flu and an infection."
-            ),
             group="People and Living Things",
         ),
         "spiritual_being": SubtypeDef(
@@ -328,6 +319,40 @@ SUBTYPE_DEFS: Dict[str, Dict[str, SubtypeDef]] = {
             ),
             group="Physical Objects and Structures",
         ),
+        "physical_phenomenon": SubtypeDef(
+            prefix="N80",
+            description=(
+                "A force, a form of energy, or what light, heat and sound do, as "
+                "something that happens in the physical world"
+            ),
+            examples=["gravity", "electricity", "sound", "fire", "shadow"],
+            comment=(
+                "The thing itself, not its measure: mass, speed, pressure and force "
+                "as an amount stay quantitative_concept. Weather (rain, wind, cloud) "
+                "stays natural_feature, and atoms and electrons are "
+                "microscopic_entity. fire and flame had been natural_feature, shadow "
+                "abstract_condition, and gravity and sound concept_idea."
+            ),
+            group="Physical Objects and Structures",
+        ),
+        "microscopic_entity": SubtypeDef(
+            prefix="N77",
+            description="Anything too small to see, alive or not",
+            examples=["bacteria", "virus", "atom", "electron", "chromosome"],
+            comment=(
+                "The test is size alone: a living thing (bacteria, virus, germ, "
+                "yeast), a particle of matter (neutrino, ion) and a part of a cell "
+                "(chromosome, mitochondria) all belong. Fungi big enough to see "
+                "(mushroom, mould) are plant. A substance, as something there is an "
+                "amount of, is chemical_compound: oxygen is a substance, an oxygen "
+                "atom is microscopic_entity. A speck of dust or a grain of sand can "
+                "be seen, so natural_object or material_substance. The agent is not "
+                "the illness: the flu and an infection stay disease_condition. "
+                "molecule, ion, isotope, electron and proton had been "
+                "chemical_compound, and virus disease_condition."
+            ),
+            group="Physical Objects and Structures",
+        ),
         "means_of_payment": SubtypeDef(
             prefix="N75",
             description=(
@@ -447,6 +472,10 @@ SUBTYPE_DEFS: Dict[str, Dict[str, SubtypeDef]] = {
             prefix="N15",
             description="Chemical elements and compounds",
             examples=["oxygen", "lithium", "carbon dioxide"],
+            comment=(
+                "A substance, as something there is an amount of. The particles it "
+                "is made of (atom, molecule, ion) are microscopic_entity."
+            ),
             group="Materials and Substances",
         ),
         "medication_remedy": SubtypeDef(
