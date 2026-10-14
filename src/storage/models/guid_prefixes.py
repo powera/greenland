@@ -138,6 +138,46 @@ SUBTYPE_DEFS: Dict[str, Dict[str, SubtypeDef]] = {
             examples=["leaf", "root", "seed", "petal", "bark"],
             group="People and Living Things",
         ),
+        "microorganism": SubtypeDef(
+            prefix="N77",
+            description=(
+                "Living things too small to see, viruses, and fungi - the life that "
+                "is neither animal nor plant"
+            ),
+            examples=["bacteria", "virus", "germ", "yeast", "fungus"],
+            comment=(
+                "Fungi are filed here although a mushroom is not microscopic: they "
+                "are neither plant nor animal, and fungus had been plant. A mushroom "
+                "as food is food. The agent is not the illness: virus had been "
+                "disease_condition, which keeps the flu and an infection."
+            ),
+            group="People and Living Things",
+        ),
+        "spiritual_being": SubtypeDef(
+            prefix="N78",
+            description=("Gods and spirits, by kind or by name, whatever form they appear in"),
+            examples=["god", "goddess", "angel", "demon", "ghost", "Zeus"],
+            comment=(
+                "The test against mythical_creature is what the being is, not the "
+                "form it takes or whether anyone worships it today: Zeus is a god "
+                "even as a bull, and a ghost is a spirit though it comes from "
+                "folklore. Saints and prophets are people, so human. god had been "
+                "human."
+            ),
+            group="People and Living Things",
+        ),
+        "mythical_creature": SubtypeDef(
+            prefix="N79",
+            description="The animals and peoples of legend, myth and folklore",
+            examples=["dragon", "unicorn", "dwarf", "fairy", "vampire", "mermaid"],
+            comment=(
+                "A creature of legend, as a wolf is an animal. A god or spirit is "
+                "spiritual_being, whatever form it takes. dragon and monster had "
+                "been animal, and dwarf human; the mahjong dragon tile is "
+                "sports_game_equipment."
+            ),
+            group="People and Living Things",
+        ),
         "food": SubtypeDef(
             prefix="N06",
             description="Solid consumables",
@@ -155,7 +195,8 @@ SUBTYPE_DEFS: Dict[str, Dict[str, SubtypeDef]] = {
             description="Buildings and built structures",
             examples=["house", "hospital", "fire station", "library", "stadium"],
             comment=(
-                "bridge is path_infrastructure, and a room is building_part. The test "
+                "With place_name and path_infrastructure, the things that would be on "
+                "a map. bridge is path_infrastructure, and a room is building_part. The test "
                 "against place_name is construction vs ground: a word for something "
                 "built (a building, or one construction such as a tower, tent, stadium "
                 "or swimming pool) is this; a word for the ground a use happens on is "
@@ -244,7 +285,10 @@ SUBTYPE_DEFS: Dict[str, Dict[str, SubtypeDef]] = {
             examples=["river", "island", "cloud", "beach", "volcano"],
             comment=(
                 "Generic kinds only: a named river or mountain range (Nile, Alps) is "
-                "named_geographic_feature."
+                "named_geographic_feature. The natural counterpart of the map trio "
+                "(building_structure, place_name, path_infrastructure): a landform "
+                "is big enough to be on a map, and anything smaller that nature "
+                "formed or an animal built (pebble, nest) is natural_object."
             ),
             group="Places and Geography",
         ),
@@ -264,6 +308,43 @@ SUBTYPE_DEFS: Dict[str, Dict[str, SubtypeDef]] = {
                 "natural_feature. Carved out of natural_feature, whose examples named "
                 "star; sun, moon, planet and star were stored there before this "
                 "existed."
+            ),
+            group="Physical Objects and Structures",
+        ),
+        "natural_object": SubtypeDef(
+            prefix="N74",
+            description=(
+                "A thing formed by nature or built by an animal, too small to be a "
+                "feature on a map"
+            ),
+            examples=["nest", "spider web", "fossil", "pebble", "acorn"],
+            comment=(
+                "The test against natural_feature is map scale: a coral reef or a "
+                "rock outcrop is a feature, a pebble or a nest is an object. Against "
+                "small_movable_object, made by nature rather than by people. A part "
+                "still on a living thing keeps body_part or plant_part (a feather, a "
+                "leaf). nest and web had been animal_grouping_term, and fossil "
+                "natural_feature, for want of anything closer."
+            ),
+            group="Physical Objects and Structures",
+        ),
+        "means_of_payment": SubtypeDef(
+            prefix="N75",
+            description=(
+                "Money and the things used to pay with it: currencies by kind or by "
+                "name, cash, coins and banknotes, and the cards and cheques that draw "
+                "on money held elsewhere"
+            ),
+            examples=["money", "cash", "coin", "credit card", "Japanese yen"],
+            comment=(
+                "The test is that the thing exists to be money or to pay with it. "
+                "Something merely valuable (gold, or wheat used in barter) keeps its "
+                "material or food subtype, and something that holds money keeps its "
+                "own (wallet is small_movable_object, cash register electronic_device). "
+                "Money as it would appear in someone's accounts (income, debt, tax) is "
+                "financial_ledger_entry. Named currencies are filed here rather than as "
+                "a named entity. These had been spread over concept_idea, "
+                "small_movable_object and material_substance."
             ),
             group="Physical Objects and Structures",
         ),
@@ -351,6 +432,9 @@ SUBTYPE_DEFS: Dict[str, Dict[str, SubtypeDef]] = {
             prefix="N13",
             description="Ways through a place and the infrastructure of routes",
             examples=["road", "bridge", "sidewalk", "intersection", "bus stop"],
+            comment=(
+                "With building_structure and place_name, the things that would be on " "a map."
+            ),
             group="Physical Objects and Structures",
         ),
         "material_substance": SubtypeDef(
@@ -467,6 +551,37 @@ SUBTYPE_DEFS: Dict[str, Dict[str, SubtypeDef]] = {
             prefix="N22",
             description="Amounts, measures and magnitudes as concepts",
             examples=["number", "distance", "size", "level", "half"],
+            comment=(
+                "Prices and rates stay here even though they are money (price, the "
+                "price sense of cost, cost of living, exchange rate, interest rate): "
+                "a price belongs to the goods, not to anyone's accounts. Money as it "
+                "would appear in someone's accounts (income, debt, tax) is "
+                "financial_ledger_entry."
+            ),
+            group="Abstract Concepts and Ideas",
+        ),
+        "financial_ledger_entry": SubtypeDef(
+            prefix="N76",
+            description=(
+                "Money as it would appear in someone's accounts: what they hold or "
+                "owe, earn or pay - holdings, debts and loans, income, taxes, fees "
+                "and fines"
+            ),
+            examples=["stock", "mortgage", "pension", "income", "income tax", "fine"],
+            comment=(
+                "The test is whether it would be a line in a person's or business's "
+                "accounts: assets (stock, bond, bank account, pension), liabilities "
+                "(debt, loan, mortgage), earnings (income, wage, profit, interest "
+                "received) and charges (tax, fee, fine, rent, expenses). A price "
+                "belongs to the goods, not to anyone's books, so price, the price "
+                "sense of cost, and rates (exchange rate, interest rate) stay "
+                "quantitative_concept. The money itself and the means of paying is "
+                "means_of_payment. Institutions and systems (bank, economy) stay "
+                "social_institution, the act of paying is process_event, and the "
+                "field is knowledge_domain. These had been spread over concept_idea, "
+                "abstract_condition, quantitative_concept and social_institution, "
+                "and the review kept proposing legal_concept for tax and fine."
+            ),
             group="Abstract Concepts and Ideas",
         ),
         "mathematical_concept": SubtypeDef(
@@ -589,7 +704,8 @@ SUBTYPE_DEFS: Dict[str, Dict[str, SubtypeDef]] = {
             examples=["park", "garden", "farm", "zoo", "airport", "tennis court"],
             comment=(
                 "Not proper names, despite the name; a rename (the prefix stays) is "
-                "deferred. The test against building_structure is ground vs "
+                "deferred. With building_structure and path_infrastructure, the things "
+                "that would be on a map. The test against building_structure is ground vs "
                 "construction: a word for the ground a use happens on is this, even "
                 "when it has buildings on it (zoo, airport, campsite, cemetery); a word "
                 "for something built is building_structure (stadium, tower, tent). A "

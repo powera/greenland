@@ -113,6 +113,7 @@ SUBTYPE_MODERNITY: Mapping[str, float] = {
     "plant_part": -0.30,
     "family_relation": -0.30,
     "natural_feature": -0.30,
+    "natural_object": -0.30,
     "food": -0.20,
     "beverage": -0.20,
     "emotion_feeling": -0.20,
