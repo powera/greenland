@@ -28,6 +28,20 @@ be applied; the others are a to-do list for the lemma edit page.
         --output /tmp/subtype_review.tsv
     GREENLAND_DISABLE_LLM=1 PYTHONPATH=src python src/quality/subtype_review.py \\
         --apply /tmp/subtype_review.tsv
+
+``--second-opinion`` sends a reviewed TSV's proposed moves back to the model,
+this time each with its current and proposed subtype and the whole grouped
+subtype list, and asks for a verdict on the proposal: ``agree``, ``keep``,
+``other`` (a better subtype), ``no_fit`` (nothing listed fits),
+``ambiguous`` (two subtypes the definitions have not separated) or
+``gestalt`` (the sense's definition runs together two meanings that belong in
+different subtypes, so a person must rewrite or split it).  The first
+pass must name a destination for every flag, so it sends a sense with no good
+home to the nearest bad one; this pass is what separates those.  Answers are
+added to the same TSV as ``second_*`` columns; ``apply`` is not touched.
+
+    GREENLAND_TEST_MODE=1 PYTHONPATH=src python src/quality/subtype_review.py \\
+        --second-opinion subtype_review/nouns-max499/tool.tsv --dry-run
 """
 
 import argparse
@@ -36,6 +50,7 @@ import datetime
 import json
 import logging
 import sys
+from collections import Counter
 from dataclasses import dataclass
 from pathlib import Path
 from typing import Any, Dict, List, Mapping, Optional, Sequence, TextIO
@@ -52,7 +67,12 @@ from quality.level_outliers import match_word
 from reports.curriculum_bands import backup_database
 from storage.backend import BackendType, DataSourceConfig, create_session
 from storage.crud.lemma import handle_lemma_type_subtype_change
-from storage.models.guid_prefixes import SUBTYPE_DEFS, classifiable_subtypes, render_subtype_list
+from storage.models.guid_prefixes import (
+    SUBTYPE_DEFS,
+    classifiable_subtypes,
+    render_subtype_list,
+    subtype_groups,
+)
 from storage.models.schema import Lemma
 from storage.utils.guid import run_lemma_write
 
@@ -68,6 +88,22 @@ DEFAULT_CHUNK_SIZE = 150
 APPLY_SOURCE = "subtype_review"
 #: ``apply`` values read as "apply this row", compared case-insensitively.
 APPLY_YES = frozenset({"yes", "y", "true", "1", "x"})
+#: Second-opinion verdicts on a proposed move; see the subtype_second_opinion prompt.
+SECOND_VERDICTS = ("agree", "keep", "other", "no_fit", "ambiguous", "gestalt")
+#: Verdicts naming two subtypes, in ``subtype`` and ``rival``.
+PAIRED_VERDICTS = ("ambiguous", "gestalt")
+CONFIDENCE_VALUES = ("high", "medium", "low")
+#: Proposals per second-opinion prompt; each answer carries a reason, so the
+#: 4096-token output limit is reached far sooner than with the first pass.
+DEFAULT_SECOND_CHUNK_SIZE = 30
+#: Columns the second opinion adds to a reviewed TSV.
+SECOND_COLUMNS = (
+    "second_verdict",
+    "second_subtype",
+    "second_rival",
+    "second_confidence",
+    "second_reasoning",
+)
 
 TSV_COLUMNS = (
     "apply",
@@ -596,6 +632,253 @@ def run_apply(session: Session, db_path: Path, tsv_path: Path, dry_run: bool) ->
     return 0
 
 
+# -- Second opinion ---------------------------------------------------------
+
+
+def render_grouped_subtype_list(pos_type: str) -> str:
+    """The live subtypes under their display groups, for the second-opinion prompt.
+
+    Like :func:`render_subtype_list`, each line is the description and examples
+    only; the maintainer's ``comment`` is not classification guidance.
+    """
+    lines: List[str] = []
+    for group, names in subtype_groups(pos_type).items():
+        lines.append(f"{group}:")
+        for name in names:
+            spec = SUBTYPE_DEFS[pos_type][stored_name(pos_type, name)]
+            text = spec.description
+            if spec.examples:
+                examples = ", ".join(spec.examples)
+                text = f"{text} ({examples})" if text else f"e.g. {examples}"
+            lines.append(f"- {name}: {text}" if text else f"- {name}")
+    return "\n".join(lines)
+
+
+def describe_proposal(number: int, row: Mapping[str, str]) -> str:
+    """One numbered proposal: the sense, where it is, where the first pass sent it, why."""
+    pos_type = row.get("pos_type", "")
+    line = f"{number}. {row.get('word', '')}"
+    if row.get("disambiguation"):
+        line += f" [{row['disambiguation']}]"
+    definition = (row.get("definition") or "").strip() or "(no definition)"
+    level = row.get("level") or "none"
+    current = prompt_name(pos_type, row.get("current_subtype", ""))
+    proposed = prompt_name(pos_type, row.get("suggested_subtype", ""))
+    return (
+        f"{line}: {definition} | level {level}\n"
+        f"   filed as: {current}; proposed: {proposed}; first review: "
+        f"{(row.get('reasoning') or '').strip()}"
+    )
+
+
+def build_second_opinion_prompt(
+    pos_type: str, rows: Sequence[Mapping[str, str]], chunk_note: str = ""
+) -> str:
+    """The prompt listing ``rows`` as numbered proposals."""
+    template = util.prompt_loader.get_prompt("quality", "subtype_second_opinion")
+    replacements = {
+        "{{pos}}": pos_type,
+        "{{subtype_list}}": render_grouped_subtype_list(pos_type),
+        "{{row_count}}": str(len(rows)),
+        "{{chunk_note}}": chunk_note,
+        "{{rows}}": "\n".join(
+            describe_proposal(number, row) for number, row in enumerate(rows, start=1)
+        ),
+    }
+    for placeholder, value in replacements.items():
+        template = template.replace(placeholder, value)
+    return template
+
+
+def build_second_opinion_context() -> str:
+    """The system context for the second opinion."""
+    return util.prompt_loader.get_context("quality", "subtype_second_opinion")
+
+
+def build_second_opinion_schema(pos_type: str) -> Dict[str, Any]:
+    """The answer schema, with ``subtype`` and ``rival`` limited to live subtypes."""
+    names = subtype_choices(pos_type) + [""]
+    return {
+        "type": "object",
+        "properties": {
+            "opinions": {
+                "type": "array",
+                "items": {
+                    "type": "object",
+                    "properties": {
+                        "number": {"type": "integer"},
+                        "word": {"type": "string"},
+                        "verdict": {"type": "string", "enum": list(SECOND_VERDICTS)},
+                        "subtype": {"type": "string", "enum": names},
+                        "rival": {"type": "string", "enum": names},
+                        "confidence": {"type": "string", "enum": list(CONFIDENCE_VALUES)},
+                        "reasoning": {"type": "string"},
+                    },
+                    "required": [
+                        "number",
+                        "word",
+                        "verdict",
+                        "subtype",
+                        "rival",
+                        "confidence",
+                        "reasoning",
+                    ],
+                },
+            },
+        },
+        "required": ["opinions"],
+    }
+
+
+def needs_second_opinion(row: Mapping[str, str]) -> bool:
+    """Whether a TSV row is a proposed move with no second opinion yet."""
+    return (
+        row.get("verdict") == "move"
+        and bool(row.get("suggested_subtype"))
+        and not row.get("second_verdict")
+    )
+
+
+def _match_proposal(number: Any, word: str, rows: Sequence[Mapping[str, str]]) -> Optional[int]:
+    """The index in ``rows`` an answer refers to: by number if the word agrees,
+    else by a word that appears exactly once.  The word may carry its sense
+    tag as listed in the prompt ("smell [odor]")."""
+    folded = word.casefold()
+
+    def names(row: Mapping[str, str]) -> set[str]:
+        bare = row.get("word", "").casefold()
+        tag = row.get("disambiguation", "").casefold()
+        return {bare, f"{bare} [{tag}]"} if tag else {bare}
+
+    if isinstance(number, int) and 1 <= number <= len(rows):
+        if folded in names(rows[number - 1]):
+            return number - 1
+    hits = [index for index, row in enumerate(rows) if folded in names(row)]
+    return hits[0] if len(hits) == 1 else None
+
+
+def parse_second_opinions(
+    payload: Mapping[str, Any], pos_type: str, rows: Sequence[Mapping[str, str]]
+) -> tuple[Dict[int, Dict[str, str]], List[str]]:
+    """The ``second_*`` columns for each row answered, keyed by index in ``rows``.
+
+    An "other" naming the current subtype is read as "keep", and one naming the
+    proposed subtype as "agree".  An "other", "ambiguous" or "gestalt" without
+    a usable subtype (and, for the last two, a distinct usable rival) is
+    dropped and reported, so the row is asked again on a rerun.
+    """
+    choices = set(subtype_choices(pos_type))
+    answers: Dict[int, Dict[str, str]] = {}
+    problems: List[str] = []
+
+    for item in payload.get("opinions") or []:
+        if not isinstance(item, dict):
+            problems.append(f"opinion {item!r} is not an object")
+            continue
+        word = str(item.get("word") or "").strip()
+        index = _match_proposal(item.get("number"), word, rows)
+        if index is None:
+            problems.append(f"opinion {item.get('number')!r} {word!r} matches no proposal sent")
+            continue
+        if index in answers:
+            continue
+        row = rows[index]
+
+        verdict = str(item.get("verdict") or "").strip()
+        if verdict not in SECOND_VERDICTS:
+            problems.append(f"{word}: unknown verdict {verdict!r}, dropped")
+            continue
+        subtype = str(item.get("subtype") or "").strip()
+        rival = str(item.get("rival") or "").strip()
+        if (verdict == "other" or verdict in PAIRED_VERDICTS) and subtype not in choices:
+            problems.append(f"{word}: {verdict} with subtype {subtype!r}, dropped")
+            continue
+        if verdict in PAIRED_VERDICTS and (rival not in choices or rival == subtype):
+            problems.append(f"{word}: {verdict} with rival {rival!r}, dropped")
+            continue
+        stored_subtype = stored_name(pos_type, subtype) if subtype else ""
+        if verdict == "other" and stored_subtype == row.get("current_subtype"):
+            verdict, stored_subtype = "keep", ""
+        elif verdict == "other" and stored_subtype == row.get("suggested_subtype"):
+            verdict, stored_subtype = "agree", ""
+        if verdict != "other" and verdict not in PAIRED_VERDICTS:
+            stored_subtype = ""
+        confidence = str(item.get("confidence") or "").strip()
+        if confidence not in CONFIDENCE_VALUES:
+            problems.append(f"{word}: confidence {confidence!r} read as 'low'")
+            confidence = "low"
+
+        answers[index] = {
+            "second_verdict": verdict,
+            "second_subtype": stored_subtype,
+            "second_rival": stored_name(pos_type, rival) if verdict in PAIRED_VERDICTS else "",
+            "second_confidence": confidence,
+            "second_reasoning": str(item.get("reasoning") or "").strip(),
+        }
+
+    return answers, problems
+
+
+def run_second_opinion(
+    tsv_path: Path,
+    client: Optional[UnifiedLLMClient],
+    chunk_size: int,
+    dry_run: bool,
+) -> Counter[str]:
+    """Add a second opinion to every proposed move in one TSV that lacks one.
+
+    The ``second_*`` columns are written back into the same file after each
+    chunk, so a failed call keeps the answers already paid for, and a rerun
+    asks only about the rows still unanswered.  ``dry_run`` prints the
+    prompts and writes nothing.  Returns the count of each verdict added.
+    """
+    with tsv_path.open(encoding="utf-8", newline="") as handle:
+        reader = csv.DictReader(handle, delimiter="\t")
+        rows = list(reader)
+        fieldnames = list(reader.fieldnames or TSV_COLUMNS)
+    fieldnames += [column for column in SECOND_COLUMNS if column not in fieldnames]
+    pending = [row for row in rows if needs_second_opinion(row)]
+    verdicts: Counter[str] = Counter()
+    if not pending:
+        return verdicts
+    pos_type = pending[0].get("pos_type", "")
+    batches = [pending[start : start + chunk_size] for start in range(0, len(pending), chunk_size)]
+
+    if dry_run:
+        print("=== CONTEXT ===\n" + build_second_opinion_context())
+    schema = build_second_opinion_schema(pos_type)
+    for number, batch in enumerate(batches, start=1):
+        note = f" (part {number} of {len(batches)})" if len(batches) > 1 else ""
+        prompt = build_second_opinion_prompt(pos_type, batch, note)
+        if dry_run or client is None:
+            print(f"\n=== PROMPT {tsv_path.name} part {number} ===\n" + prompt)
+            continue
+        response = client.generate_chat(
+            prompt=prompt, context=build_second_opinion_context(), json_schema=schema
+        )
+        payload = response.structured_data
+        if isinstance(payload, str):
+            payload = json.loads(payload)
+        if not isinstance(payload, dict):
+            payload = {}
+        answers, problems = parse_second_opinions(payload, pos_type, batch)
+        for problem in problems:
+            logger.warning("%s: %s", tsv_path.name, problem)
+        for index, columns in answers.items():
+            batch[index].update(columns)
+            verdicts[columns["second_verdict"]] += 1
+        missing = len(batch) - len(answers)
+        if missing:
+            logger.warning("%s part %d: %d proposal(s) unanswered", tsv_path.name, number, missing)
+        partial = tsv_path.with_name(tsv_path.name + ".partial")
+        with partial.open("w", encoding="utf-8", newline="") as handle:
+            writer = csv.DictWriter(handle, fieldnames=fieldnames, delimiter="\t")
+            writer.writeheader()
+            writer.writerows(rows)
+        partial.replace(tsv_path)
+    return verdicts
+
+
 def main() -> int:
     parser = argparse.ArgumentParser(description=__doc__.split("\n\n")[0])
     parser.add_argument(
@@ -615,7 +898,18 @@ def main() -> int:
     parser.add_argument("--min-level", type=int, help="Only senses at this level or above")
     parser.add_argument("--max-level", type=int, help="Only senses at this level or below")
     parser.add_argument(
-        "--chunk-size", type=int, default=DEFAULT_CHUNK_SIZE, help="Senses per prompt"
+        "--chunk-size",
+        type=int,
+        help=f"Senses per prompt (default {DEFAULT_CHUNK_SIZE}; "
+        f"{DEFAULT_SECOND_CHUNK_SIZE} with --second-opinion)",
+    )
+    parser.add_argument(
+        "--second-opinion",
+        type=Path,
+        nargs="+",
+        metavar="TSV",
+        help="Ask the model to judge each proposed move in these reviewed TSVs, "
+        "adding second_* columns in place; rows already answered are skipped",
     )
     parser.add_argument(
         "--apply",
@@ -644,6 +938,21 @@ def main() -> int:
     if args.apply:
         return run_apply(session, args.db_path, args.apply, args.dry_run)
 
+    if args.second_opinion:
+        second_client = None if args.dry_run else UnifiedLLMClient.from_config(config)
+        for tsv_path in args.second_opinion:
+            verdicts = run_second_opinion(
+                tsv_path,
+                second_client,
+                args.chunk_size or DEFAULT_SECOND_CHUNK_SIZE,
+                args.dry_run,
+            )
+            if not args.dry_run:
+                summary = ", ".join(f"{verdict} {count}" for verdict, count in verdicts.items())
+                logger.info("%s: %s", tsv_path.name, summary or "nothing to ask")
+        return 0
+
+    chunk_size: int = args.chunk_size or DEFAULT_CHUNK_SIZE
     pos_types: List[str] = args.pos or list(REVIEW_POS_TYPES)
     try:
         pairs = subtypes_to_review(pos_types, args.subtype, args.include_catch_all)
@@ -654,7 +963,7 @@ def main() -> int:
         print("=== CONTEXT ===\n" + build_context())
         for pos_type, subtype in pairs:
             words = lemmas_in_subtype(session, pos_type, subtype, args.min_level, args.max_level)
-            for prompt, _ in prepare_prompts(pos_type, subtype, words, args.chunk_size):
+            for prompt, _ in prepare_prompts(pos_type, subtype, words, chunk_size):
                 print(f"\n=== PROMPT {pos_type}/{subtype} ===\n" + prompt)
         return 0
 
@@ -670,7 +979,7 @@ def main() -> int:
             client,
             args.min_level,
             args.max_level,
-            args.chunk_size,
+            chunk_size,
         )
         logger.info(
             "%s/%s: %d of %d sense(s) flagged",

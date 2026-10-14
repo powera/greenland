@@ -9,16 +9,21 @@ from sqlalchemy import create_engine
 from sqlalchemy.orm import Session
 
 from quality.subtype_review import (
+    SECOND_VERDICTS,
     TSV_COLUMNS,
     apply_rows,
     build_json_schema,
     build_prompt,
+    build_second_opinion_prompt,
+    build_second_opinion_schema,
     describe_word,
     flag_row,
     lemmas_in_subtype,
     parse_flags,
+    parse_second_opinions,
     read_apply_rows,
     review_subtype,
+    run_second_opinion,
     subtypes_to_review,
 )
 from storage.models.guid_prefixes import SUBTYPE_GUID_PREFIXES
@@ -282,3 +287,125 @@ def test_apply_dry_run_rolls_back() -> None:
     session.refresh(words[1])
     assert (words[1].pos_subtype, words[1].guid) == ("time_period", old_guid)
     assert session.query(GuidTombstone).count() == 0
+
+
+# -- Second opinion -----------------------------------------------------------
+
+
+def _proposal(word: str, current: str = "body_part", proposed: str = "beverage") -> Dict[str, str]:
+    row = {column: "" for column in TSV_COLUMNS}
+    row.update(
+        pos_type="noun",
+        current_subtype=current,
+        suggested_subtype=proposed,
+        verdict="move",
+        severity="clear",
+        word=word,
+        guid=f"N03_{len(word):03d}",
+        lemma_id="1",
+        definition=f"a {word}",
+        reasoning="not a body part",
+    )
+    return row
+
+
+def _opinion(number: int, word: str, verdict: str, **extra: Any) -> Dict[str, Any]:
+    item: Dict[str, Any] = {
+        "number": number,
+        "word": word,
+        "verdict": verdict,
+        "subtype": "",
+        "rival": "",
+        "confidence": "high",
+        "reasoning": "because",
+    }
+    item.update(extra)
+    return item
+
+
+def test_second_opinion_prompt_groups_subtypes_and_shows_the_proposal() -> None:
+    prompt = build_second_opinion_prompt("noun", [_proposal("tear")])
+    assert "People and Living Things:\n- human:" in prompt
+    assert "1. tear: a tear | level none" in prompt
+    assert "filed as: body_part; proposed: beverage; first review: not a body part" in prompt
+
+
+def test_second_opinion_schema_offers_live_subtypes() -> None:
+    item = build_second_opinion_schema("noun")["properties"]["opinions"]["items"]
+    assert "other" in item["properties"]["subtype"]["enum"]
+    assert item["properties"]["verdict"]["enum"] == list(SECOND_VERDICTS)
+
+
+def test_parse_second_opinions_normalises_other_and_drops_unusable() -> None:
+    rows = [_proposal("tear"), _proposal("pen", "small_movable_object", "tool")]
+    rows.append(_proposal("shadow", "abstract_condition", "natural_feature"))
+    rows.append(_proposal("pulse", "body_part", "process_event"))
+    payload = {
+        "opinions": [
+            _opinion(1, "tear", "other", subtype="body_part"),
+            _opinion(2, "pen", "ambiguous", subtype="tool", rival="small_movable_object"),
+            _opinion(3, "shadow", "other", subtype="natural_feature", confidence="sure"),
+            _opinion(4, "pulse", "other", subtype="not_a_subtype"),
+            _opinion(9, "nothing", "agree"),
+        ]
+    }
+    answers, problems = parse_second_opinions(payload, "noun", rows)
+
+    assert answers[0]["second_verdict"] == "keep" and answers[0]["second_subtype"] == ""
+    assert (answers[1]["second_subtype"], answers[1]["second_rival"]) == (
+        "tool",
+        "small_movable_object",
+    )
+    assert answers[2]["second_verdict"] == "agree"
+    assert answers[2]["second_confidence"] == "low"
+    assert 3 not in answers
+    assert len(problems) == 3
+
+
+def test_parse_second_opinions_keeps_both_subtypes_of_a_gestalt() -> None:
+    rows = [_proposal("glass", "material_substance", "kitchenware"), _proposal("tear")]
+    payload = {
+        "opinions": [
+            _opinion(1, "glass", "gestalt", subtype="material_substance", rival="kitchenware"),
+            _opinion(2, "tear", "gestalt", subtype="body_part", rival="body_part"),
+        ]
+    }
+    answers, problems = parse_second_opinions(payload, "noun", rows)
+
+    assert answers[0]["second_verdict"] == "gestalt"
+    assert (answers[0]["second_subtype"], answers[0]["second_rival"]) == (
+        "material_substance",
+        "kitchenware",
+    )
+    assert 1 not in answers and len(problems) == 1
+
+
+def test_parse_second_opinions_matches_a_word_given_with_its_sense_tag() -> None:
+    rows = [_proposal("tear"), _proposal("smell")]
+    rows[1]["disambiguation"] = "odor"
+    payload = {"opinions": [_opinion(2, "smell [odor]", "keep")]}
+    answers, problems = parse_second_opinions(payload, "noun", rows)
+    assert answers[1]["second_verdict"] == "keep" and not problems
+
+
+def test_run_second_opinion_adds_columns_and_skips_answered_rows(tmp_path: Any) -> None:
+    tsv_path = tmp_path / "body_part.tsv"
+    rows = [_proposal("tear"), _proposal("sweat"), _proposal("blood")]
+    rows[2]["verdict"] = "wrong_sense"
+    with tsv_path.open("w", encoding="utf-8", newline="") as handle:
+        writer = csv.DictWriter(handle, fieldnames=TSV_COLUMNS, delimiter="\t")
+        writer.writeheader()
+        writer.writerows(rows)
+
+    client = _FakeClient({"opinions": [_opinion(1, "tear", "keep")]})
+    verdicts = run_second_opinion(tsv_path, client, chunk_size=1, dry_run=False)  # type: ignore[arg-type]
+
+    assert len(client.calls) == 2 and verdicts == {"keep": 1}
+    with tsv_path.open(encoding="utf-8", newline="") as handle:
+        written = list(csv.DictReader(handle, delimiter="\t"))
+    assert [row["second_verdict"] for row in written] == ["keep", "", ""]
+
+    client = _FakeClient({"opinions": [_opinion(1, "sweat", "no_fit")]})
+    run_second_opinion(tsv_path, client, chunk_size=30, dry_run=False)  # type: ignore[arg-type]
+    assert len(client.calls) == 1 and "sweat" in client.calls[0]["prompt"]
+    assert "tear" not in client.calls[0]["prompt"]
