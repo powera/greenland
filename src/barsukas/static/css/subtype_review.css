@@ -1,0 +1,4 @@
+.subtype-review-table td:nth-child(5),
+.subtype-review-table td:nth-child(6) {
+    min-width: 18rem;
+}

@@ -1,0 +1,72 @@
+{% extends "base.html" %}
+
+{% block title %}Subtype Review{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-lg-8">
+        <h3><i class="bi bi-diagram-3"></i> Subtype Review</h3>
+        <p class="text-muted small">
+            Staged noun subtype review in <code>{{ tsv_dir }}</code>.
+            {{ complete_count }} subtype(s) marked complete.  Click a supertype to review
+            all of its subtypes' moves on one page.
+        </p>
+
+        {% if pending %}
+        <table class="table table-sm table-hover">
+            <thead>
+                <tr><th>Subtype</th><th class="text-end">Flagged</th></tr>
+            </thead>
+            {% for entry in pending %}
+            <tbody>
+                <tr class="table-light">
+                    <th>
+                        {% if entry.group != 'Ungrouped' %}
+                        <a href="{{ url_for('subtype_review.review_group', group=entry.group) }}">{{ entry.group }}</a>
+                        {% else %}
+                        {{ entry.group }}
+                        {% endif %}
+                    </th>
+                    <th class="text-end">{{ entry.count }}</th>
+                </tr>
+                {% for item in entry.subtypes %}
+                <tr>
+                    <td class="ps-4">
+                        <a href="{{ url_for('subtype_review.review', subtype=item.subtype) }}">
+                            {{ item.subtype }}
+                        </a>
+                    </td>
+                    <td class="text-end">{{ item.count }}</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+            {% endfor %}
+        </table>
+        {% else %}
+        <div class="alert alert-success">Nothing left to review.</div>
+        {% endif %}
+    </div>
+    <div class="col-lg-4">
+        {% if incoming %}
+        <h5 class="mt-lg-5">Moves into each subtype</h5>
+        <table class="table table-sm table-hover">
+            <thead>
+                <tr><th>Target</th><th class="text-end">Moves in</th></tr>
+            </thead>
+            <tbody>
+                {% for target, count in incoming %}
+                <tr>
+                    <td>
+                        <a href="{{ url_for('subtype_review.review_incoming', target=target) }}">
+                            &rarr; {{ target }}
+                        </a>
+                    </td>
+                    <td class="text-end">{{ count }}</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}

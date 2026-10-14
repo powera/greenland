@@ -1,0 +1,81 @@
+{% extends "base.html" %}
+
+{% block title %}Subtype Review: into {{ target }}{% endblock %}
+
+{% block content %}
+<link rel="stylesheet" href="{{ url_for('static', filename='css/subtype_review.css') }}">
+
+<div class="row">
+    <div class="col-lg-12">
+        <h3>
+            <a href="{{ url_for('subtype_review.index') }}" class="text-decoration-none">
+                <i class="bi bi-arrow-left"></i>
+            </a>
+            &rarr; {{ target }}
+            <span class="text-muted small">{{ rows|length }} move(s) in</span>
+        </h3>
+        <p class="text-muted small">{{ target_description }}</p>
+
+        {% if rows %}
+        <form method="post" action="{{ url_for('subtype_review.submit_incoming', target=target) }}">
+        <table class="table table-sm align-middle subtype-review-table">
+            <thead>
+                <tr>
+                    <th></th>
+                    <th>Word</th>
+                    <th>From</th>
+                    <th>Level</th>
+                    <th>Definition</th>
+                    <th>Reasoning</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for row in rows %}
+                <tr>
+                    <td>
+                        <input class="form-check-input" type="checkbox" name="pick"
+                               value="{{ row.guid }}" id="pick_{{ loop.index0 }}" checked>
+                    </td>
+                    <td>
+                        <label for="pick_{{ loop.index0 }}"><strong>{{ row.word }}</strong></label>
+                        <a class="small ms-1"
+                           href="{{ url_for('subtype_review.review_word', subtype=row.current_subtype, guid=row.guid) }}">other subtype&hellip;</a>
+                        {% if row.disambiguation %}
+                        <div class="text-muted small">{{ row.disambiguation }}</div>
+                        {% endif %}
+                        <div class="text-muted small">{{ row.guid }}</div>
+                    </td>
+                    <td>
+                        <a href="{{ url_for('subtype_review.review', subtype=row.current_subtype) }}">
+                            {{ row.current_subtype }}
+                        </a>
+                    </td>
+                    <td>{{ row.level }}</td>
+                    <td class="small">{{ row.definition }}</td>
+                    <td class="small text-muted">{{ row.reasoning }}{% include "subtype_review/_second_opinion.html" %}</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+
+            <input type="hidden" name="expected_count" value="{{ rows|length }}">
+            <div class="mb-3">
+                <label for="notes" class="form-label">Notes (kept in the operation log when applied)</label>
+                <textarea class="form-control" id="notes" name="notes" rows="2"></textarea>
+            </div>
+            <button type="submit" name="action" value="apply" class="btn btn-primary">
+                <i class="bi bi-check2-all"></i> Apply checked
+            </button>
+            <button type="submit" name="action" value="reject" class="btn btn-outline-danger ms-2">
+                <i class="bi bi-x-lg"></i> Reject checked
+            </button>
+            <span class="text-muted small ms-2">
+                Checked rows leave their TSVs; unchecked rows and every other move are untouched.
+            </span>
+        </form>
+        {% else %}
+        <div class="alert alert-info">No moves into {{ target }} are left.</div>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}

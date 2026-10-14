@@ -1,0 +1,57 @@
+{% extends "base.html" %}
+
+{% block title %}Subtype Review: {{ row.word }}{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-lg-8">
+        <h3>
+            <a href="{{ url_for('subtype_review.review', subtype=subtype) }}" class="text-decoration-none">
+                <i class="bi bi-arrow-left"></i>
+            </a>
+            {{ row.word }}
+            {% if row.disambiguation %}<span class="text-muted small">({{ row.disambiguation }})</span>{% endif %}
+        </h3>
+
+        <dl class="row">
+            <dt class="col-sm-3">Now</dt>
+            <dd class="col-sm-9">{{ subtype }} <span class="text-muted small">{{ row.guid }}, level {{ row.level }}</span></dd>
+            <dt class="col-sm-3">Definition</dt>
+            <dd class="col-sm-9">{{ row.definition }}</dd>
+            <dt class="col-sm-3">Review said</dt>
+            <dd class="col-sm-9">
+                {{ row.verdict }}{% if row.suggested_subtype %} &rarr; {{ row.suggested_subtype }}{% endif %}
+                <div class="text-muted small">{{ row.reasoning }}{% include "subtype_review/_second_opinion.html" %}</div>
+                {% if row.suggestion %}<div class="small">{{ row.suggestion }}</div>{% endif %}
+            </dd>
+            <dt class="col-sm-3">{{ subtype }} covers</dt>
+            <dd class="col-sm-9 small text-muted">{{ description }}</dd>
+        </dl>
+
+        <form method="post" action="{{ url_for('subtype_review.submit_word', subtype=subtype, guid=row.guid) }}">
+            <div class="mb-3">
+                <label for="target_subtype" class="form-label">Move to</label>
+                {% set preselect = row.second_subtype if row.second_verdict == 'other' else row.suggested_subtype %}
+                <select class="form-select" id="target_subtype" name="target_subtype">
+                    {% for choice in choices %}
+                    <option value="{{ choice }}" {% if choice == preselect %}selected{% endif %}>
+                        {{ choice }}
+                    </option>
+                    {% endfor %}
+                </select>
+            </div>
+            <div class="mb-3">
+                <label for="notes" class="form-label">Notes (kept in the operation log when moved)</label>
+                <textarea class="form-control" id="notes" name="notes" rows="2"></textarea>
+            </div>
+            <button type="submit" name="action" value="move" class="btn btn-primary">
+                <i class="bi bi-arrow-right"></i> Move
+            </button>
+            <button type="submit" name="action" value="reject" class="btn btn-outline-danger ms-2">
+                <i class="bi bi-x-lg"></i> Reject (keep in {{ subtype }})
+            </button>
+            <span class="text-muted small ms-2">Either way the row leaves the TSV.</span>
+        </form>
+    </div>
+</div>
+{% endblock %}
