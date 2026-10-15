@@ -1172,17 +1172,11 @@ SUBTYPE_DEFS: Dict[str, Dict[str, SubtypeDef]] = {
         "quality": SubtypeDef(
             prefix="A05",
             description="Evaluative and abstract properties",
-            examples=[
-                "good",
-                "bad",
-                "excellent",
-                "important",
-                "possible",
-                "necessary",
-                "real",
-                "clear",
-                "simple",
-            ],
+            examples=["good", "bad", "excellent", "nice", "terrible", "useful"],
+            comment=(
+                "important, possible, necessary, real, clear and simple were examples "
+                "here; the first is importance and the rest assessment."
+            ),
             group="Evaluative",
         ),
         "aesthetic": SubtypeDef(
@@ -1195,6 +1189,22 @@ SUBTYPE_DEFS: Dict[str, Dict[str, SubtypeDef]] = {
             prefix="A07",
             description="Importance or priority",
             examples=["important", "essential", "trivial", "critical"],
+            group="Evaluative",
+        ),
+        "assessment": SubtypeDef(
+            prefix="A31",
+            description=(
+                "A judgment on a claim or a task rather than on a thing's merit: "
+                "whether the claim holds and how sure one can be of it, or whether "
+                "the task can be done, must be done, and how much effort it takes"
+            ),
+            examples=["true", "correct", "likely", "possible", "necessary", "easy"],
+            comment=(
+                "Broader than the adverb subtype epistemic (D15), which is truth and "
+                "likelihood only; adverbs of effort (easily) are style. A thing's "
+                "merit stays quality and its weight importance. Decided sense by "
+                "sense: clear water is physical_property, a true story still here."
+            ),
             group="Evaluative",
         ),
         "origin": SubtypeDef(
@@ -1314,6 +1324,48 @@ SUBTYPE_DEFS: Dict[str, Dict[str, SubtypeDef]] = {
             examples=["statutory", "constitutional", "liable", "lawful", "permissible"],
             group="Technical and Domain",
         ),
+        "linguistic": SubtypeDef(
+            prefix="A28",
+            description=(
+                "Technical classification of language: a grammatical category, case, "
+                "number or word class, or the kind of speech sound"
+            ),
+            examples=["plural", "dative", "transitive", "verbal", "plosive", "nasal"],
+            comment=(
+                "The adjective side of linguistic_concept (N67). These had been filed "
+                "as mathematical (plural, singular, nominative, dative, ablative, "
+                "transitive, verbal) and biological_type (fricative, plosive, velar, "
+                "palatal, rhotic)."
+            ),
+            group="Technical and Domain",
+        ),
+        "sensory_quality": SubtypeDef(
+            prefix="A29",
+            description="How a thing tastes, smells or sounds to someone perceiving it",
+            examples=["sweet", "sour", "salty", "fragrant", "smelly", "loud"],
+            comment=(
+                "Describes the thing perceived; how a person's own body feels is "
+                "bodily_state. Texture stays pattern_texture and temperature "
+                "physical_property. Taste words had been spread across quality "
+                "(sweet, bitter, savory), aesthetic (delicious) and "
+                "chemical_physical (tart); sound words were physical_property."
+            ),
+            group="Physical Properties",
+        ),
+        "bodily_state": SubtypeDef(
+            prefix="A30",
+            description=(
+                "The state a person's or animal's body is in, as they feel it or as "
+                "it affects them, rather than a mood or a lasting trait"
+            ),
+            examples=["hungry", "thirsty", "tired", "sick", "sore", "asleep"],
+            comment=(
+                "The adjective side of the bodily_function verbs. Moods stay emotion "
+                "and character personal_quality. tired had been emotion, thirsty "
+                "condition, and hungry, sick and alive physical_property."
+            ),
+            group="Personal and Emotional",
+        ),
         "adjective_other": SubtypeDef(prefix="A99", member_name="OTHER"),
     },
     "adverb": {
@@ -1421,8 +1473,15 @@ SUBTYPE_DEFS: Dict[str, Dict[str, SubtypeDef]] = {
         ),
         "definite_frequency": SubtypeDef(
             prefix="D12",
-            description="Specific frequency",
-            examples=["daily", "weekly", "monthly", "yearly", "hourly"],
+            description=(
+                "An exact frequency: how many times something happens, whether it "
+                "happens one more time, or the fixed interval at which it recurs"
+            ),
+            examples=["once", "twice", "again", "daily", "weekly", "monthly"],
+            comment=(
+                "Widened to take the counts and repetition (once, twice, again) that "
+                "had been adverb_other. once meaning 'formerly' is relative_time."
+            ),
             group="Temporal",
         ),
         "indefinite_frequency": SubtypeDef(
@@ -1430,6 +1489,73 @@ SUBTYPE_DEFS: Dict[str, Dict[str, SubtypeDef]] = {
             description="Inexact frequency",
             examples=["often", "sometimes", "rarely", "seldom", "always", "never"],
             group="Temporal",
+        ),
+        "negation": SubtypeDef(
+            prefix="D14",
+            description="Turns a statement, or one word in it, into its negative",
+            examples=["not"],
+            comment=(
+                "Deliberately tiny. A negative of time or place keeps that subtype "
+                "(never is indefinite_frequency, nowhere location), and no as an "
+                "answer is an interjection."
+            ),
+            group="Sentence and Discourse",
+        ),
+        "epistemic": SubtypeDef(
+            prefix="D15",
+            description=(
+                "How sure the speaker is that a statement is true, or whether it is "
+                "in fact the case"
+            ),
+            examples=["probably", "perhaps", "certainly", "apparently", "actually"],
+            comment=(
+                "These had been filed as style. A word that also describes how "
+                "something is done keeps style in that sense (speak clearly). Whether "
+                "adjectives get a matching epistemic subtype is undecided."
+            ),
+            group="Sentence and Discourse",
+        ),
+        "connective": SubtypeDef(
+            prefix="D16",
+            description=(
+                "Links a sentence or clause to what came before, marking contrast, "
+                "result, addition or an alternative"
+            ),
+            examples=["however", "therefore", "thus", "otherwise", "moreover"],
+            comment=(
+                "These had been filed as style. then and meanwhile as time stay "
+                "relative_time. Words joining clauses inside one sentence (and, "
+                "because, though) are conjunctions."
+            ),
+            group="Sentence and Discourse",
+        ),
+        "focus": SubtypeDef(
+            prefix="D17",
+            description=(
+                "Singles out one word or phrase in a sentence: as the only one, as "
+                "an unexpected one, as one in addition, or as the most relevant one"
+            ),
+            examples=["only", "just", "even", "also", "especially", "merely"],
+            comment=(
+                "only and even had been intensity, the rest style. just meaning "
+                "'a moment ago' is relative_time; too meaning 'also' is focus, too "
+                "meaning 'excessively' is intensity."
+            ),
+            group="Sentence and Discourse",
+        ),
+        "viewpoint": SubtypeDef(
+            prefix="D18",
+            description=(
+                "Limits a statement to one field or point of view, meaning 'in terms "
+                "of' or 'as far as that is concerned'"
+            ),
+            examples=["politically", "geographically", "technically", "legally"],
+            comment=(
+                "Mostly -ly forms of domain adjectives, catching the ones that are a "
+                "version of another word rather than a manner. The same word "
+                "describing how something is done keeps style (act legally)."
+            ),
+            group="Sentence and Discourse",
         ),
         "adverb_other": SubtypeDef(prefix="D99", member_name="OTHER"),
     },
