@@ -1,0 +1,16 @@
+/* Word Categories page: a subtype that is a narrower kind of another is
+   listed directly under it, indented with a corner marker. */
+tr.subtype-kind-of td:nth-child(2) {
+    padding-left: 1.75rem;
+}
+
+tr.subtype-kind-of td:nth-child(2)::before {
+    content: "\21B3";
+    color: var(--bs-secondary-color);
+    margin-right: 0.35rem;
+}
+
+.subtype-part-of {
+    font-size: 0.85em;
+    margin-top: 0.15rem;
+}

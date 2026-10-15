@@ -2,6 +2,10 @@
 
 {% block title %}POS Subtype Categories{% endblock %}
 
+{% block extra_head %}
+<link rel="stylesheet" href="{{ url_for('static', filename='css/categories.css') }}">
+{% endblock %}
+
 {% block content %}
 <div class="row mb-4">
     <div class="col">
@@ -64,7 +68,7 @@
                             </thead>
                             <tbody>
                                 {% for item in group['items'] %}
-                                <tr>
+                                <tr id="{{ pos_type }}-{{ item.name }}"{% if item.kind_of %} class="subtype-kind-of"{% endif %}>
                                     <td>
                                         {% if item.guid_prefix %}
                                         <code class="text-primary">{{ item.guid_prefix }}</code>
@@ -78,7 +82,17 @@
                                             <strong>{{ item.display_name }}</strong>
                                         </a>
                                     </td>
-                                    <td class="text-muted">{{ item.description }}</td>
+                                    <td class="text-muted">
+                                        {{ item.description }}
+                                        {% if item.part_of %}
+                                        <div class="subtype-part-of">
+                                            Part of:
+                                            {% for whole in item.part_of %}
+                                            <a href="#{{ pos_type }}-{{ whole.name }}">{{ whole.display_name }}</a>{% if not loop.last %},{% endif %}
+                                            {% endfor %}
+                                        </div>
+                                        {% endif %}
+                                    </td>
                                     <td class="text-end">
                                         {% if item.count > 0 %}
                                         <a href="{{ url_for('lemmas.list_lemmas', pos_type=pos_type, pos_subtype=item.name) }}"
