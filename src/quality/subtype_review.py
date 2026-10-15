@@ -602,14 +602,16 @@ def apply_rows(
     return ApplyResult(applied=tuple(applied), skipped=tuple(skipped))
 
 
-def run_apply(session: Session, db_path: Path, tsv_path: Path, dry_run: bool) -> int:
-    """The ``--apply`` CLI path: back up, apply, and report."""
+def run_apply(
+    session: Session, db_path: Path, tsv_path: Path, dry_run: bool, backup_first: bool
+) -> int:
+    """The ``--apply`` CLI path: optionally back up, apply, and report."""
     with tsv_path.open(encoding="utf-8", newline="") as handle:
         rows = read_apply_rows(handle)
     if not rows:
         logger.info("No rows marked apply in %s", tsv_path)
         return 0
-    if not dry_run:
+    if backup_first and not dry_run:
         try:
             backup = backup_database(db_path, "subtype-review")
         except FileExistsError:
@@ -918,6 +920,11 @@ def main() -> int:
         help="Apply the rows of a reviewed TSV marked apply=yes (no LLM call)",
     )
     parser.add_argument(
+        "--backup",
+        action="store_true",
+        help="With --apply, take a full .backup of the database before writing",
+    )
+    parser.add_argument(
         "--dry-run",
         action="store_true",
         help="Print the prompts instead of calling the model; with --apply, roll back",
@@ -936,7 +943,7 @@ def main() -> int:
     session = create_session(config)
 
     if args.apply:
-        return run_apply(session, args.db_path, args.apply, args.dry_run)
+        return run_apply(session, args.db_path, args.apply, args.dry_run, args.backup)
 
     if args.second_opinion:
         second_client = None if args.dry_run else UnifiedLLMClient.from_config(config)

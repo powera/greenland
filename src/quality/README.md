@@ -17,4 +17,5 @@ live in `prompts/quality/<name>/`.
   against that POS's full subtype list.  Writes a TSV with an `apply` column
   pre-filled `yes` on clear moves into a named subtype (never on moves into
   `<pos>_other`); edit the column, then `--apply` the file.  Applying renumbers
-  each moved lemma's GUID and tombstones the old one, after a `.backup`.
+  each moved lemma's GUID and tombstones the old one; pass `--backup` to take
+  a `.backup` of the database first.
