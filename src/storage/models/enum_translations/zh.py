@@ -103,6 +103,12 @@ SUBTYPE_DISPLAY = {
     "directional_movement": "方向性移动",
     "manner_movement": "移动方式",
     "rule_defined_action": "规则规定的行为",
+    "auxiliary": "助动词",
+    "bodily_function": "身体机能",
+    "natural_process": "自然过程",
+    "stative_relation": "状态关系",
+    "aspectual": "体态动词",
+    "social_interaction": "社交互动",
     # Adjective subtypes
     "size": "大小",
     "color": "颜色",

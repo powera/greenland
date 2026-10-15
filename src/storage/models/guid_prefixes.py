@@ -1002,6 +1002,98 @@ SUBTYPE_DEFS: Dict[str, Dict[str, SubtypeDef]] = {
             ),
             group="Rule-Defined Actions",
         ),
+        "auxiliary": SubtypeDef(
+            prefix="V15",
+            description=(
+                "A verb whose main job is grammatical: the copula linking a subject "
+                "to what it is, or a modal of ability that takes another verb. A verb "
+                "that is only a helper in English tense or question forms keeps its "
+                "ordinary subtype"
+            ),
+            examples=["be", "can"],
+            comment=(
+                "Deliberately tiny. be and can differ so much across languages that "
+                "they are barely lemmas, but they are kept, and kept apart from the "
+                "lexical subtypes. must/may/should are not added: they do not "
+                "translate to a standalone verb in most target languages, and "
+                "future/perfect auxiliaries are part of the conjugated form."
+            ),
+            group="Grammatical",
+        ),
+        "bodily_function": SubtypeDef(
+            prefix="V16",
+            description=(
+                "What a body does to keep itself going or does on its own, and the "
+                "body visibly showing a feeling"
+            ),
+            examples=["sleep", "breathe", "cough", "sweat", "yawn", "cry"],
+            comment=(
+                "eat and drink stay physical_action: deliberate acts on food. die "
+                "stays existence. Washing and grooming (shower, wash) stay "
+                "physical_action. Feeling pain is perception or emotional_state."
+            ),
+            group="Physical Actions",
+        ),
+        "natural_process": SubtypeDef(
+            prefix="V17",
+            description=(
+                "Something weather, water, air, light or matter does by itself, with "
+                "no one acting, including a substance changing state"
+            ),
+            examples=["rain", "snow", "freeze", "melt", "flow", "shine"],
+            comment=(
+                "Decided by the lemma's main sense: boil and dry as kitchen or "
+                "household acts stay physical_action, and a person growing stays "
+                "development. Weather nouns are natural_feature and forces "
+                "physical_phenomenon; this is the verb side of both."
+            ),
+            group="Existence and Change",
+        ),
+        "stative_relation": SubtypeDef(
+            prefix="V18",
+            description=(
+                "A fixed relation between two things, or between a thing and an "
+                "amount, in which neither is doing anything"
+            ),
+            examples=["contain", "include", "cost", "depend", "resemble", "belong"],
+            comment=(
+                "Two participants. Whether one thing is there, comes, goes or lasts "
+                "is existence; having, getting and handing over is possession. "
+                "cost, contain, include and lack had been possession."
+            ),
+            group="Existence and Change",
+        ),
+        "aspectual": SubtypeDef(
+            prefix="V19",
+            description=(
+                "A verb about the course of another action rather than an action of "
+                "its own: where it begins, continues or ends, or whether it is "
+                "attempted and how it turns out"
+            ),
+            examples=["begin", "start", "finish", "stop", "continue", "try", "fail"],
+            comment=(
+                "The verbs of 'begin running', 'stop looking', 'try to open'. win, "
+                "lose and beat are acts against an opponent and stay physical_action "
+                "(or rule_defined_action for a game sense); becoming something is "
+                "change."
+            ),
+            group="Existence and Change",
+        ),
+        "social_interaction": SubtypeDef(
+            prefix="V20",
+            description=(
+                "Doing something with or to another person as a social act, other "
+                "than by speaking"
+            ),
+            examples=["meet", "greet", "help", "hug", "fight", "forgive"],
+            comment=(
+                "Acts done by speaking (thank, invite, apologize, promise) stay "
+                "communication. Acts that a formal procedure defines (marry, elect, "
+                "appoint) stay rule_defined_action. Feeling something about a person "
+                "without acting (love, admire, envy) stays emotional_state."
+            ),
+            group="Social",
+        ),
         "verb_other": SubtypeDef(prefix="V99", member_name="OTHER"),
     },
     "adjective": {

@@ -123,6 +123,7 @@ THEME_BY_SUBTYPE: Mapping[str, str] = {
     "body_part": "body_and_health",
     "disease_condition": "body_and_health",
     "medication_remedy": "body_and_health",
+    "bodily_function": "body_and_health",
     "building_structure": "home_and_buildings",
     "building_part": "home_and_buildings",
     "furniture": "home_and_buildings",
@@ -180,6 +181,10 @@ THEME_BY_SUBTYPE: Mapping[str, str] = {
     "creation_action": "actions",
     "destruction_action": "actions",
     "development": "actions",
+    "stative_relation": "actions",
+    "aspectual": "actions",
+    "social_interaction": "people_and_society",
+    "natural_process": "nature",
     "activity": "ideas_and_events",
     "concept_idea": "ideas_and_events",
     "mental_construct": "ideas_and_events",
@@ -206,6 +211,7 @@ THEME_BY_SUBTYPE: Mapping[str, str] = {
     "determiner_other": "grammar_words",
     "adverb_other": "grammar_words",
     "interjection_other": "grammar_words",
+    "auxiliary": "grammar_words",
 }
 
 # Corpora standing for general vocabulary, against which a theme corpus rank
