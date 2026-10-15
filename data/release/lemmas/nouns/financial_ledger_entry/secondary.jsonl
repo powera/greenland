@@ -1,0 +1,20 @@
+{"guid": "N76_001", "translations": {"ms": "akaun bank", "hi": "बैंक खाता", "tr": "banka hesabı"}}
+{"guid": "N76_002", "translations": {"ms": "cukai pendapatan", "hi": "आयकर", "tr": "gelir vergisi"}}
+{"guid": "N76_003", "translations": {"ms": "denda", "hi": "दंड", "tr": "ceza"}}
+{"guid": "N76_004", "translations": {"ms": "cukai jualan", "hi": "बिक्री कर", "tr": "satış vergisi"}}
+{"guid": "N76_005", "translations": {"ms": "akaun simpanan", "hi": "बचत खाता", "tr": "tasarruf hesabı"}}
+{"guid": "N76_006", "translations": {"ms": "pinjaman pelajar", "hi": "छात्र ऋण", "tr": "öğrenci kredisi"}}
+{"guid": "N76_007", "translations": {"ms": "saman parkir", "hi": "पार्किंग का जुर्माना", "tr": "park cezası"}}
+{"guid": "N76_008", "translations": {"ro": "cont", "pl": "konto", "th": "บัญชี", "ms": "akaun bank", "ta": "கணக்கு", "kn": "ಖಾತೆ", "uk": "рахунок", "bn": "হিসাব", "hi": "खाता", "tr": "banka hesabı"}}
+{"guid": "N76_009", "translations": {"ro": "datorie", "pl": "dług", "th": "หนี้", "ms": "hutang", "ta": "பரிவர்த்தனை", "kn": "ಬಡ್ಡಿ", "uk": "борг", "bn": "ঋণ", "hi": "ऋण", "tr": "borç"}}
+{"guid": "N76_010", "translations": {"ms": "fi", "hi": "शुल्क", "tr": "ücret"}}
+{"guid": "N76_011", "translations": {"ro": "amendă", "pl": "grzywna", "th": "ค่าปรับ", "ms": "denda", "ta": "ஐறுமுறை", "kn": "ದಂಡ", "uk": "штраф", "bn": "জরিমানা", "hi": "जुर्माना", "tr": "para cezası"}}
+{"guid": "N76_012", "translations": {"ro": "dobândă", "pl": "oprocentowanie", "th": "ดอกเบี้ย", "ms": "faedah", "ta": "வட்டி", "kn": "ಹೊರ", "uk": "відсоток", "bn": "সুদি", "hi": "ब्याज", "tr": "faiz"}}
+{"guid": "N76_013", "translations": {"ro": "plată", "pl": "płaca", "th": "ค่าจ้าง", "ms": "gaji", "ta": "சம்பளம்", "kn": "ಸಂಬಳ", "uk": "плата", "bn": "দরখানি", "hi": "वेतन", "tr": "ücret"}}
+{"guid": "N76_014", "translations": {"ro": "preț", "pl": "cena", "th": "ราคา", "ms": "harga", "ta": "விலை", "kn": "ಬೆಲೆ", "uk": "ціна", "bn": "মূল্য", "hi": "कीमत", "tr": "fiyat"}}
+{"guid": "N76_015", "translations": {"ro": "profit", "pl": "zysk", "th": "กำไร", "ms": "keuntungan", "ta": "லாபம்", "kn": "ಲಾಭ", "uk": "прибуток", "bn": "লাভ", "hi": "लाभ", "tr": "kâr"}}
+{"guid": "N76_016", "translations": {"ro": "acțiune", "pl": "akcja", "th": "หุ้น", "ms": "saham", "ta": "பங்குகள்", "kn": "ಶೇರು", "uk": "акція", "bn": "শেয়ার", "hi": "शेयर", "tr": "hisse senedi", "bs": "dionica"}}
+{"guid": "N76_017", "translations": {"ro": "sold", "pl": "saldo", "th": "ยอดคงเหลือ", "ms": "baki", "ta": "மீதமுள்ள தொகை", "kn": "ಬಾಕಿ", "uk": "залишок", "bn": "অবশিষ্ট", "hi": "शेष", "tr": "bakiye"}}
+{"guid": "N76_018", "translations": {"ms": "kos", "hi": "लागत", "tr": "maliyet"}}
+{"guid": "N76_019", "translations": {"ms": "gaji minimum", "hi": "न्यूनतम वेतन", "tr": "asgari ücret"}}
+{"guid": "N76_020", "translations": {"ro": "impozit", "pl": "podatek", "th": "ภาษี", "ms": "cukai", "ta": "வரி", "kn": "ಕರ (kara)", "uk": "податок", "bn": "কর", "hi": "कर", "tr": "vergi"}}

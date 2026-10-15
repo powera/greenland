@@ -24,7 +24,6 @@
 {"guid": "N14_024", "translations": {"ro": "nisip", "pl": "piasek", "th": "ทราย", "ms": "pasir", "ta": "மணல்", "kn": "ಮಣಿಸರ", "uk": "пісок", "bn": "বালু", "hi": "रेत", "tr": "kum", "bs": "pijesak"}}
 {"guid": "N14_025", "translations": {"ro": "aer", "pl": "powietrze", "th": "อากาศ", "ms": "udara", "ta": "காற்று", "kn": "ಗಾಳಿ", "uk": "повітря", "bn": "বায়ু", "hi": "हवा", "tr": "hava", "bs": "zrak"}}
 {"guid": "N14_026", "translations": {"ro": "praf", "pl": "kurz", "th": "ฝุ่น", "ms": "debu", "ta": "பூசி", "kn": "ದೂಳು", "uk": "пил", "bn": "ধুলো", "hi": "धूल", "tr": "toz"}}
-{"guid": "N14_027", "translations": {"ro": "fum", "pl": "dym", "th": "ควัน", "ms": "asap", "ta": "புகை", "kn": "ಹೂಗು", "uk": "дим", "bn": "ধোঁয়া", "hi": "धुआँ", "tr": "duman"}}
 {"guid": "N14_028", "translations": {"ro": "staniu", "pl": "cyna", "th": "ดีบุก", "ms": "timah", "ta": "தाँப்", "kn": "ಟಿನ್", "uk": "олово", "bn": "অলৌহ", "hi": "टिन", "tr": "kalay"}}
 {"guid": "N14_029", "translations": {"ro": "fir", "pl": "drut", "th": "ลวด", "ms": "wayar", "ta": "கயிறு", "kn": "ತಂತಿ", "uk": "дріт", "bn": "তার", "hi": "तार", "tr": "tel"}}
 {"guid": "N14_030", "translations": {"ro": "otrava", "pl": "trucizna", "th": "ยาพิษ", "ms": "racun", "ta": "விஷம்", "kn": "ವಿಷ", "uk": "отрута", "bn": "বিষ", "hi": "विष", "tr": "zehir"}}
@@ -72,7 +71,6 @@
 {"guid": "N14_073", "translations": {"ms": "filem nipis", "hi": "पतली परत", "tr": "ince tabaka"}}
 {"guid": "N14_074", "translations": {"ms": "gentian", "hi": "रेशा", "tr": "lif"}}
 {"guid": "N14_075", "translations": {"ms": "bahan api", "hi": "ईंधन", "tr": "yakıt"}}
-{"guid": "N14_076", "translations": {"ms": "mata wang", "hi": "मुद्रा", "tr": "para birimi"}}
 {"guid": "N14_077", "translations": {"ms": "terakota", "hi": "पकी हुई मिट्टी", "tr": "pişmiş toprak"}}
 {"guid": "N14_078", "translations": {"ms": "kelodak", "hi": "गाद", "tr": "mil"}}
 {"guid": "N14_079", "translations": {"ms": "lateks", "hi": "लेटेक्स", "tr": "lateks"}}
@@ -91,3 +89,5 @@
 {"guid": "N14_092", "translations": {"ms": "zink", "hi": "जस्ता", "tr": "çinko"}}
 {"guid": "N14_093", "translations": {"ms": "gam", "hi": "गोंद", "tr": "tutkal"}}
 {"guid": "N14_094", "translations": {"ms": "kertas surat khabar", "hi": "अख़बार का कागज़", "tr": "gazete kâğıdı"}}
+{"guid": "N14_095", "translations": {"ms": "bisa", "hi": "विष", "tr": "zehir"}}
+{"guid": "N14_096", "translations": {"ro": "gheață", "pl": "lód", "th": "น้ำแข็ง", "ms": "ais", "ta": "பனிக்கட்டி", "kn": "ಮಂಜುಗಡ್ಡೆ", "uk": "лід", "bn": "বরফ", "hi": "बर्फ", "tr": "buz", "bs": "led"}}

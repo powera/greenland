@@ -25,11 +25,9 @@
 {"guid": "N02_026", "forms": [{"grammatical_form": "noun/en_singular", "text": "crow", "is_base_form": true, "ipa": "/kraʊ/", "phonetic": "KROH"}]}
 {"guid": "N02_027", "forms": [{"grammatical_form": "noun/en_singular", "text": "eagle", "is_base_form": true, "ipa": "/ˈiː.ɡəl/", "phonetic": "EE-geh-ul"}]}
 {"guid": "N02_028", "forms": [{"grammatical_form": "noun/en_singular", "text": "sheep", "is_base_form": true, "ipa": "ʃiːp", "phonetic": "SHEEP"}, {"grammatical_form": "noun/en_plural", "text": "sheep", "is_base_form": false}]}
-{"guid": "N02_029", "forms": [{"grammatical_form": "noun/en_singular", "text": "dragon", "is_base_form": true, "ipa": "/ˈdræɡ.ə.n/", "phonetic": "DRAG-uhn"}]}
 {"guid": "N02_030", "forms": [{"grammatical_form": "noun/en_singular", "text": "animal", "is_base_form": true, "ipa": "/ˈænɪml/", "phonetic": "AN-ih-muhl"}]}
 {"guid": "N02_031", "forms": [{"grammatical_form": "noun/en_singular", "text": "creature", "is_base_form": true, "ipa": "/ˈkriːtʃɚ/", "phonetic": "KREE-chuh"}]}
 {"guid": "N02_032", "forms": [{"grammatical_form": "noun/en_singular", "text": "beast", "is_base_form": true, "ipa": "/biːst/", "phonetic": "BEAST"}]}
-{"guid": "N02_033", "forms": [{"grammatical_form": "noun/en_singular", "text": "monster", "is_base_form": true, "ipa": "/ˈmɒnstər/", "phonetic": "MON-s-tuh-er"}]}
 {"guid": "N02_034", "forms": [{"grammatical_form": "noun/en_plural", "text": "fish", "is_base_form": false}]}
 {"guid": "N02_037", "forms": [{"grammatical_form": "noun/en_plural", "text": "deer", "is_base_form": false}]}
 {"guid": "N02_053", "forms": [{"grammatical_form": "noun/en_singular", "text": "hippopotamus", "is_base_form": true}]}
@@ -77,6 +75,5 @@
 {"guid": "N02_108", "forms": [{"grammatical_form": "noun/en_singular", "text": "tick", "is_base_form": true, "ipa": "/tɪk/", "phonetic": "TIK"}]}
 {"guid": "N02_109", "forms": [{"grammatical_form": "noun/en_singular", "text": "kitten", "is_base_form": true, "ipa": "/ˈkɪtən/", "phonetic": "KIT-en"}]}
 {"guid": "N02_110", "forms": [{"grammatical_form": "noun/en_singular", "text": "puppy", "is_base_form": true, "ipa": "/ˈpʌpi/", "phonetic": "PUH-pee"}]}
-{"guid": "N02_111", "forms": [{"grammatical_form": "noun/en_singular", "text": "beard", "is_base_form": true, "ipa": "/bɪrd/", "phonetic": "BEERD"}]}
 {"guid": "N02_112", "forms": [{"grammatical_form": "noun/en_singular", "text": "dinosaur", "is_base_form": true, "ipa": "/ˈdaɪnəˌsɔr/", "phonetic": "DIE-nuh-sor"}]}
 {"guid": "N02_113", "forms": [{"grammatical_form": "noun/en_singular", "text": "tortoise", "is_base_form": true, "ipa": "/ˈtɔr.təs/", "phonetic": "TOR-tus"}]}

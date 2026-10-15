@@ -1,0 +1,6 @@
+{"guid": "N75_001", "translations": {"ro": "numerar", "pl": "gotówka", "th": "เงินสด", "ms": "wang tunai", "ta": "பணம்விளைவு", "kn": "ನಗದು", "uk": "готівка", "bn": "নগদ", "hi": "नकद", "tr": "nakit"}}
+{"guid": "N75_002", "translations": {"ro": "bani", "pl": "pieniądz", "th": "เงิน", "ms": "wang", "ta": "பணம்", "kn": "ಹಣ", "uk": "гривня", "bn": "টাকা", "hi": "पैसे", "tr": "para"}}
+{"guid": "N75_003", "translations": {"ms": "mata wang", "hi": "मुद्रा", "tr": "para birimi"}}
+{"guid": "N75_004", "translations": {"ro": "mărunt", "pl": "drobnica", "th": "เงินทอน", "ms": "duit baki", "ta": "சின்ன நாணயம்", "kn": "ರದ್ದ ಹಣ", "uk": "дрібні гроші", "bn": "কয়েন/ছোট টাকা", "hi": "छोटे पैसे", "tr": "bozuk para"}}
+{"guid": "N75_005", "translations": {"ro": "monedă", "pl": "moneta", "th": "เหรียญ", "ms": "syiling", "ta": "நாணயம்", "kn": "ನಾಣ್ಯ", "uk": "монета", "bn": "মুদ্রা", "hi": "सिक्का", "tr": "madeni para"}}
+{"guid": "N75_006", "translations": {"ms": "kad kredit", "hi": "क्रेडिट कार्ड", "tr": "kredi kartı"}}

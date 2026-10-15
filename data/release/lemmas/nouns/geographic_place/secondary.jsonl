@@ -1,13 +1,3 @@
-{"guid": "N56_001", "translations": {"ro": "Oceanul Atlantic", "pl": "Ocean Atlantycki", "th": "มหาสมุทรแอตแลนติก", "ms": "Lautan Atlantik", "ta": "அட்லாண்டிக் பெருநீர்", "kn": "ಅಟ್ಲಾಂಟಿಕ್ ಮಹಾಸಾಗರ", "uk": "Атлантичний океан", "bn": "অ্যাটলান্টিক মহাসাগর", "hi": "अटलांटिक महासागर", "tr": "Atlas Okyanusu"}}
-{"guid": "N56_002", "translations": {"ro": "Oceanul Pacific", "pl": "Ocean Spokojny", "th": "มหาสมุทรแปซิฟิก", "ms": "Lautan Pasifik", "ta": "பசிபிக் பெருங்கடல்", "kn": "ಪ್ರಶಾಂತ ಮಹಾಸಾಗರ", "uk": "Тихий океан", "bn": "প্রশান্ত মহাসাগর", "hi": "प्रशांत महासागर", "tr": "Pasifik Okyanusu"}}
-{"guid": "N56_003", "translations": {"ro": "Oceanul Indian", "pl": "Ocean Indyjski", "th": "มหาสมุทรอินเดีย", "ms": "Lautan Hindi", "ta": "இந்தியத் பெருங்கடல்", "kn": "ಇಂಡಿಯನ್ ಮಹಾಸಾಗರ", "uk": "Індійський океан", "bn": "ভারত মহাসাগর", "hi": "भारतीय महासागर", "tr": "Hint Okyanusu"}}
-{"guid": "N56_004", "translations": {"ro": "Marea Baltică", "pl": "Morze Bałtyckie", "th": "ทะเลบอลติก", "ms": "Laut Baltik", "ta": "பால்டிக் கடல்", "kn": "ಬಾಲ್ಟಿಕ್ ಸಮುದ್ರ", "uk": "Балтійське море", "bn": "বাল্টিক সাগর", "hi": "बाल्टिक सागर", "tr": "Baltık Denizi"}}
-{"guid": "N56_005", "translations": {"ro": "Marea Mediterană", "pl": "Morze Śródziemne", "th": "ทะเลเมดิเตอร์เรเนียน", "ms": "Laut Mediterranean", "ta": "மத்தியதரைக் கடல்", "kn": "ಮಧ್ಯಧರಾ ಸಮುದ್ರ", "uk": "Середземне море", "bn": "মধ্যভূ-মধ্যসাগর", "hi": "मध्य भूमध्य सागर", "tr": "Akdeniz"}}
-{"guid": "N56_006", "translations": {"ro": "Oceanul Arctic", "pl": "Ocean Arktyczny", "th": "มหาสมุทรอาร์กติก", "ms": "Lautan Artik", "ta": "ஆர்க்டிக் பெருங்கடல்", "kn": "ಅರ್ಕ್ಟಿಕ್ ಮಹಾಸಾಗರ", "uk": "Північний Льодовитий океан", "bn": "আর্কটিক মহাসাগর", "hi": "आर्कटिक महासागर", "tr": "Arktik Okyanusu"}}
-{"guid": "N56_007", "translations": {"ro": "Sahara", "pl": "Sahara", "th": "ซาฮารา", "ms": "Gurun Sahara", "ta": "சஹாரா", "kn": "ಸಹಾರಾ", "uk": "Сахара", "bn": "সাহারা", "hi": "सहारा", "tr": "Sahra Çölü"}}
-{"guid": "N56_008", "translations": {"ro": "râul Amazon", "pl": "rzeka Amazonka", "th": "แม่น้ำอเมซอน", "ms": "Sungai Amazon", "ta": "அமாசான் ஆறு", "kn": "ಅಮೆಜಾನ್ ನದಿ", "uk": "річка Амазонка", "bn": "আমাজন নদী", "hi": "अमेज़न नदी", "tr": "Amazon Nehri"}}
-{"guid": "N56_009", "translations": {"ro": "Nil", "pl": "Nil", "th": "ไนล์", "ms": "Sungai Nil", "ta": "நைல்", "kn": "ನೈಲು", "uk": "Ніл", "bn": "নাইল", "hi": "नाइल", "tr": "Nil Nehri"}}
-{"guid": "N56_010", "translations": {"ro": "Alpii", "pl": "Alpy", "th": "เทือกเขาแอลป์", "ms": "Alpen", "ta": "ஆல்ப்ஸ்", "kn": "ಆಲ್ಪ್ಸ್", "uk": "Альпи", "bn": "আলপস্", "hi": "आल्प्स", "tr": "Alpler"}}
 {"guid": "N56_011", "translations": {"ms": "taman negara", "hi": "राष्ट्रीय उद्यान", "tr": "millî park"}}
 {"guid": "N56_012", "translations": {"ms": "Kutub Utara", "hi": "उत्तरी ध्रुव", "tr": "Kuzey Kutbu"}}
 {"guid": "N56_013", "translations": {"ms": "Kutub Selatan", "hi": "दक्षिणी ध्रुव", "tr": "Güney Kutbu"}}
@@ -38,3 +28,12 @@
 {"guid": "N56_038", "translations": {"ms": "kawasan luar bandar", "hi": "देहात", "tr": "kırsal"}}
 {"guid": "N56_039", "translations": {"ms": "kampung", "hi": "गाँव", "tr": "köy"}}
 {"guid": "N56_040", "translations": {"ms": "dunia", "hi": "दुनिया", "tr": "dünya"}}
+{"guid": "N56_042", "translations": {"ms": "ibu negara", "hi": "राजधानी", "tr": "başkent"}}
+{"guid": "N56_043", "translations": {"ro": "oraș", "pl": "miasto", "th": "เมือง", "ms": "bandar", "ta": "நகரம்", "kn": "ನಗರ", "uk": "місто", "bn": "শহর", "hi": "शहर", "tr": "şehir"}}
+{"guid": "N56_044", "translations": {"ro": "țară", "pl": "kraj", "th": "ประเทศ", "ms": "negara", "ta": "நாடு", "kn": "దేశ", "uk": "держава", "bn": "দেশ", "hi": "देश", "tr": "ülke"}}
+{"guid": "N56_045", "translations": {"ro": "loc", "pl": "miejsce", "th": "สถานที่", "ms": "tempat", "ta": "இடம்", "kn": "ಸ್ಥಳ", "uk": "місце", "bn": "স্থান", "hi": "स्थान", "tr": "yer"}}
+{"guid": "N56_046", "translations": {"ro": "suprafață", "pl": "obszar", "th": "พื้นที่", "ms": "kawasan", "ta": "பகுதி", "kn": "ಪ್ರದೇಶ", "uk": "площа", "bn": "এলাকা", "hi": "क्षेत्र", "tr": "alan"}}
+{"guid": "N56_047", "translations": {"ro": "stat", "pl": "państwo", "th": "รัฐ", "ms": "negara", "ta": "மாநாடு", "kn": "ರಾಜ್ಯ", "uk": "держава", "bn": "রাষ্ট্র", "hi": "राज्य", "tr": "devlet"}}
+{"guid": "N56_048", "translations": {"ms": "kerajaan", "hi": "राज्य", "tr": "krallık"}}
+{"guid": "N56_049", "translations": {"ms": "wilayah", "hi": "प्रांत", "tr": "eyalet"}}
+{"guid": "N56_050", "translations": {"ms": "rantau", "hi": "क्षेत्र", "tr": "bölge"}}

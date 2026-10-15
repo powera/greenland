@@ -19,7 +19,6 @@
 {"guid": "N55_023", "translations": {"ro": "religie", "pl": "religia", "th": "ศาสนา", "ms": "agama", "ta": "மதம்", "kn": "ಧರ್ಮ", "uk": "релігія", "bn": "ধর্ম", "hi": "धर्म", "tr": "din"}}
 {"guid": "N55_024", "translations": {"ro": "comitet", "pl": "komitet", "th": "คณะกรรมการ", "ms": "jawatankuasa", "ta": "கமிட்டி", "kn": "ಕಮಿಟೀ", "uk": "комітет", "bn": "কমিটি", "hi": "समिति", "tr": "komite"}}
 {"guid": "N55_025", "translations": {"ro": "naţiune", "pl": "naród", "th": "ชาติ", "ms": "negara", "ta": "தேசியம்", "kn": "ರಾಷ್ಟ್ರ", "uk": "нація", "bn": "জাতি", "hi": "राष्ट्र", "tr": "ulus"}}
-{"guid": "N55_026", "translations": {"ro": "impozit", "pl": "podatek", "th": "ภาษี", "ms": "cukai", "ta": "வரி", "kn": "ಕರ (kara)", "uk": "податок", "bn": "কর", "hi": "कर", "tr": "vergi"}}
 {"guid": "N55_027", "translations": {"ms": "sekolah memandu", "hi": "ड्राइविंग स्कूल", "tr": "sürücü kursu"}}
 {"guid": "N55_028", "translations": {"ms": "insurans kesihatan", "hi": "स्वास्थ्य बीमा", "tr": "sağlık sigortası"}}
 {"guid": "N55_029", "translations": {"ms": "ekonomi", "hi": "अर्थव्यवस्था", "tr": "ekonomi"}}
@@ -72,7 +71,7 @@
 {"guid": "N55_076", "translations": {"ms": "liturgi", "hi": "धर्मविधि", "tr": "litürji"}}
 {"guid": "N55_077", "translations": {"ms": "tabu", "hi": "वर्जना", "tr": "tabu"}}
 {"guid": "N55_078", "translations": {"ms": "asimilasi", "hi": "समावेशन", "tr": "asimilasyon"}}
-{"guid": "N55_079", "translations": {"ms": "taman hiburan", "hi": "मनोरंजन मेला", "tr": "lunapark"}}
 {"guid": "N55_080", "translations": {"ms": "kelab", "hi": "क्लब", "tr": "kulüp"}}
 {"guid": "N55_081", "translations": {"ms": "kolej", "hi": "कॉलेज", "tr": "yüksekokul"}}
 {"guid": "N55_082", "translations": {"ms": "festival", "hi": "उत्सव", "tr": "festival"}}
+{"guid": "N55_086", "translations": {"ms": "perniagaan kecil", "hi": "छोटा व्यवसाय", "tr": "küçük işletme"}}

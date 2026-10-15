@@ -49,3 +49,16 @@
 {"guid": "N65_050", "forms": [{"grammatical_form": "noun/en_singular", "text": "penalty spot", "is_base_form": true, "ipa": "/ˈpɛnəlti spɑt/", "phonetic": "PEN-uhl-tee spot"}]}
 {"guid": "N65_051", "forms": [{"grammatical_form": "noun/en_singular", "text": "midfield", "is_base_form": true, "ipa": "/ˈmɪdˌfiːld/", "phonetic": "MID-feeld"}]}
 {"guid": "N65_052", "forms": [{"grammatical_form": "noun/en_singular", "text": "touchline", "is_base_form": true, "ipa": "/ˈtʌtʃˌlaɪn/", "phonetic": "TUCH-line"}]}
+{"guid": "N65_054", "forms": [{"grammatical_form": "noun/en_singular", "text": "behind", "is_base_form": true, "ipa": "/bɪˈhaɪnd/", "phonetic": "BIGH-end"}]}
+{"guid": "N65_055", "forms": [{"grammatical_form": "noun/en_singular", "text": "east", "is_base_form": true, "ipa": "/iːst/", "phonetic": "EEST"}], "variants": [{"kind": "spelling", "key": "East", "forms": [{"grammatical_form": "noun/en_singular", "text": "East", "is_base_form": true}]}]}
+{"guid": "N65_056", "forms": [{"grammatical_form": "noun/en_singular", "text": "inside", "is_base_form": true, "ipa": "/ɪnˈsaɪd/", "phonetic": "IN-sighd"}]}
+{"guid": "N65_057", "forms": [{"grammatical_form": "noun/en_singular", "text": "north", "is_base_form": true, "ipa": "/nɔːrθ/", "phonetic": "NOR-th"}], "variants": [{"kind": "spelling", "key": "North", "forms": [{"grammatical_form": "noun/en_singular", "text": "North", "is_base_form": true}]}]}
+{"guid": "N65_058", "variants": [{"kind": "spelling", "key": "north-east", "forms": [{"grammatical_form": "noun/en_base", "text": "north-east", "is_base_form": true}]}]}
+{"guid": "N65_059", "variants": [{"kind": "spelling", "key": "north-west", "forms": [{"grammatical_form": "noun/en_base", "text": "north-west", "is_base_form": true}]}]}
+{"guid": "N65_060", "forms": [{"grammatical_form": "noun/en_singular", "text": "outside", "is_base_form": true, "ipa": "/aʊtˈsaɪd/", "phonetic": "AWT-side"}]}
+{"guid": "N65_061", "forms": [{"grammatical_form": "noun/en_singular", "text": "south", "is_base_form": true, "ipa": "/sʌθ/", "phonetic": "SOOTH"}], "variants": [{"kind": "spelling", "key": "South", "forms": [{"grammatical_form": "noun/en_singular", "text": "South", "is_base_form": true}]}]}
+{"guid": "N65_062", "variants": [{"kind": "spelling", "key": "south-east", "forms": [{"grammatical_form": "noun/en_base", "text": "south-east", "is_base_form": true}]}]}
+{"guid": "N65_063", "variants": [{"kind": "spelling", "key": "south-west", "forms": [{"grammatical_form": "noun/en_base", "text": "south-west", "is_base_form": true}]}]}
+{"guid": "N65_064", "forms": [{"grammatical_form": "noun/en_singular", "text": "west", "is_base_form": true, "ipa": "/wɛst/", "phonetic": "WEST"}], "variants": [{"kind": "spelling", "key": "West", "forms": [{"grammatical_form": "noun/en_singular", "text": "West", "is_base_form": true}]}]}
+{"guid": "N65_065", "forms": [{"grammatical_form": "noun/en_singular", "text": "sector", "is_base_form": true, "ipa": "/ˈsɛktɚ/", "phonetic": "SEK-ter"}]}
+{"guid": "N65_066", "forms": [{"grammatical_form": "noun/en_singular", "text": "section", "is_base_form": true, "ipa": "/ˈsɛkʃən/", "phonetic": "SEK-shun"}]}

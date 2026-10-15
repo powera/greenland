@@ -1,0 +1,18 @@
+{"guid": "N72_001", "translations": {"ro": "tastă", "pl": "klawisz", "th": "ปุ่มคีย์บอร์ด", "ms": "kekunci", "ta": "சாவி", "kn": "ಕೀಬೋರ್ಡ್ ಕೀ", "uk": "клавіша", "bn": "কি", "hi": "कुई", "tr": "tuş"}}
+{"guid": "N72_002", "translations": {"ms": "tangki bahan api", "hi": "ईंधन टैंक", "tr": "yakıt deposu"}}
+{"guid": "N72_003", "translations": {"ms": "tali pinggang keledar", "hi": "सीट बेल्ट", "tr": "emniyet kemeri"}}
+{"guid": "N72_004", "translations": {"ro": "buton", "pl": "przycisk", "th": "ปุ่ม", "ms": "butang", "ta": "பட்டன்", "kn": "ಬಟನ್", "uk": "кнопка", "bn": "বাটন", "hi": "बटन", "tr": "düğme"}}
+{"guid": "N72_005", "translations": {"ms": "papan kekunci", "hi": "कीबोर्ड", "tr": "klavye"}}
+{"guid": "N72_006", "translations": {"ms": "panel solar", "hi": "सौर पैनल", "tr": "güneş paneli"}}
+{"guid": "N72_007", "translations": {"ms": "suis", "hi": "स्विच", "tr": "anahtar"}}
+{"guid": "N72_008", "translations": {"ms": "skrin sentuh", "hi": "टचस्क्रीन", "tr": "dokunmatik ekran"}}
+{"guid": "N72_009", "translations": {"ro": "frână", "pl": "hamulec", "th": "เบรก", "ms": "brek", "ta": "பிரேக்", "kn": "ಬ್ರೇಕ್", "uk": "гальмо", "bn": "ব্রেক", "hi": "ब्रेक", "tr": "fren"}}
+{"guid": "N72_010", "translations": {"ro": "motor", "pl": "silnik", "th": "เครื่องยนต์", "ms": "enjin", "ta": "இயந்திரம்", "kn": "ಎಂಜಿನ್", "uk": "двигун", "bn": "ইঞ্জিন", "hi": "इंजन", "tr": "motor"}}
+{"guid": "N72_011", "translations": {"ms": "sirip", "hi": "पंख", "tr": "kanatçık"}}
+{"guid": "N72_012", "translations": {"ms": "pedal", "hi": "पैडल", "tr": "pedal"}}
+{"guid": "N72_013", "translations": {"ms": "roda stereng", "hi": "स्टीयरिंग व्हील", "tr": "direksiyon simidi"}}
+{"guid": "N72_014", "translations": {"ro": "roată", "pl": "koło", "th": "ล้อ", "ms": "roda", "ta": "சக்கரம்", "kn": "ಚಕ್ರ", "uk": "колесо", "bn": "চাকা", "hi": "पहिया", "tr": "tekerlek"}}
+{"guid": "N72_015", "translations": {"ms": "kelopak peluru", "hi": "मैगज़ीन", "tr": "şarjör"}}
+{"guid": "N72_016", "translations": {"ro": "mânere", "pl": "uchwyt", "th": "ด้ามจับ", "ms": "pemegang", "ta": "கைப்பிடி", "kn": "ಹ್ಯಾಂಡಲ್", "uk": "ручка", "bn": "হাতল", "hi": "हथौड़ा", "tr": "tutamak"}}
+{"guid": "N72_017", "translations": {"ro": "arc", "pl": "sprężyna", "th": "สปริง", "ms": "pegas", "ta": "ஸ்பிரிங்", "kn": "ಸ್ಪ್ರಿಂಗ್", "uk": "пружина", "bn": "স্প্রিং", "hi": "स्प्रिंग", "tr": "yay"}}
+{"guid": "N72_018", "translations": {"ms": "tayar ganti", "hi": "अतिरिक्त टायर", "tr": "yedek lastik"}}

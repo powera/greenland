@@ -1,10 +1,7 @@
 {"guid": "N28_001", "translations": {"ms": "peti pertolongan cemas", "hi": "प्राथमिक चिकित्सा किट", "tr": "ilk yardım çantası"}}
 {"guid": "N28_002", "translations": {"ms": "berkas", "hi": "पूलि", "tr": "demet"}}
-{"guid": "N28_003", "translations": {"ms": "pengumpulan", "hi": "एकत्रीकरण", "tr": "toplanma"}}
 {"guid": "N28_004", "translations": {"ms": "kelompok", "hi": "समूह", "tr": "küme"}}
 {"guid": "N28_005", "translations": {"ms": "komposisi", "hi": "संघटन", "tr": "bileşim"}}
-{"guid": "N28_006", "translations": {"ms": "lalu lintas", "hi": "यातायात", "tr": "trafik"}}
-{"guid": "N28_007", "translations": {"ms": "sektor", "hi": "क्षेत्र", "tr": "sektör"}}
 {"guid": "N28_008", "translations": {"ms": "edisi", "hi": "संस्करण", "tr": "baskı"}}
 {"guid": "N28_009", "translations": {"ms": "koleksi", "hi": "संग्रह", "tr": "koleksiyon"}}
 {"guid": "N28_010", "translations": {"ms": "genus", "hi": "वंश", "tr": "cins"}}
@@ -19,9 +16,6 @@
 {"guid": "N28_019", "translations": {"ms": "arkib", "hi": "अभिलेखागार", "tr": "arşiv"}}
 {"guid": "N28_020", "translations": {"ms": "serpihan", "hi": "मलबा", "tr": "enkaz"}}
 {"guid": "N28_021", "translations": {"ms": "kepelbagaian", "hi": "विविधता", "tr": "çeşitlilik"}}
-{"guid": "N28_022", "translations": {"ms": "bahagian", "hi": "खंड", "tr": "bölüm"}}
-{"guid": "N28_023", "translations": {"ms": "bahagian", "hi": "हिस्सा", "tr": "pay"}}
 {"guid": "N28_024", "translations": {"ms": "buih", "hi": "झाग", "tr": "köpük"}}
-{"guid": "N28_025", "translations": {"ms": "perbendaharaan kata", "hi": "शब्दावली", "tr": "kelime dağarcığı"}}
 {"guid": "N28_026", "translations": {"ms": "harta karun", "hi": "ख़ज़ाना", "tr": "hazine"}}
 {"guid": "N28_027", "translations": {"ms": "pasang", "hi": "जोड़ा", "tr": "çift"}}

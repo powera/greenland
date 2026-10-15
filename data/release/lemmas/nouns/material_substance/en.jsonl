@@ -23,7 +23,6 @@
 {"guid": "N14_024", "forms": [{"grammatical_form": "noun/en_singular", "text": "sand", "is_base_form": true, "ipa": "/sænd/", "phonetic": "SAEND"}]}
 {"guid": "N14_025", "forms": [{"grammatical_form": "noun/en_singular", "text": "air", "is_base_form": true, "ipa": "/ɛr/", "phonetic": "AIR"}]}
 {"guid": "N14_026", "forms": [{"grammatical_form": "noun/en_singular", "text": "dust", "is_base_form": true, "ipa": "/dʌst/", "phonetic": "DUST"}]}
-{"guid": "N14_027", "forms": [{"grammatical_form": "noun/en_singular", "text": "smoke", "is_base_form": true, "ipa": "/smoʊk/", "phonetic": "SMOKE"}]}
 {"guid": "N14_028", "forms": [{"grammatical_form": "noun/en_singular", "text": "tin", "is_base_form": true, "ipa": "/tɪn/", "phonetic": "TIN"}]}
 {"guid": "N14_029", "forms": [{"grammatical_form": "noun/en_singular", "text": "wire", "is_base_form": true, "ipa": "/waɪr/", "phonetic": "WIRE"}]}
 {"guid": "N14_030", "forms": [{"grammatical_form": "noun/en_singular", "text": "poison", "is_base_form": true, "ipa": "/ˈpɔɪ.zən/", "phonetic": "POY-zən"}]}
@@ -41,7 +40,6 @@
 {"guid": "N14_073", "forms": [{"grammatical_form": "noun/en_singular", "text": "film", "is_base_form": true, "ipa": "/fɪlm/", "phonetic": "FILM"}]}
 {"guid": "N14_074", "forms": [{"grammatical_form": "noun/en_singular", "text": "fibre", "is_base_form": true, "ipa": "/ˈfaɪbər/", "phonetic": "FY-ber"}]}
 {"guid": "N14_075", "forms": [{"grammatical_form": "noun/en_singular", "text": "fuel", "is_base_form": true, "ipa": "/ˈfjuəl/", "phonetic": "FYOO-uhl"}]}
-{"guid": "N14_076", "forms": [{"grammatical_form": "noun/en_singular", "text": "currency", "is_base_form": true, "ipa": "/ˈkɝːənsi/", "phonetic": "KUR-uhn-see"}]}
 {"guid": "N14_077", "forms": [{"grammatical_form": "noun/en_singular", "text": "terracotta", "is_base_form": true, "ipa": "/ˌtɛrəˈkɑtə/", "phonetic": "ter-uh-KOT-uh"}]}
 {"guid": "N14_078", "forms": [{"grammatical_form": "noun/en_singular", "text": "silt", "is_base_form": true, "ipa": "/sɪlt/", "phonetic": "SILT"}]}
 {"guid": "N14_079", "forms": [{"grammatical_form": "noun/en_singular", "text": "latex", "is_base_form": true, "ipa": "/ˈleɪtɛks/", "phonetic": "LAY-teks"}]}
@@ -60,3 +58,5 @@
 {"guid": "N14_092", "forms": [{"grammatical_form": "noun/en_singular", "text": "zinc", "is_base_form": true, "ipa": "/zɪŋk/", "phonetic": "ZINGK"}]}
 {"guid": "N14_093", "forms": [{"grammatical_form": "noun/en_singular", "text": "glue", "is_base_form": true, "ipa": "/ɡluː/", "phonetic": "GLOO"}]}
 {"guid": "N14_094", "forms": [{"grammatical_form": "noun/en_singular", "text": "newspaper", "is_base_form": true, "ipa": "/ˈnuːzˌpeɪpər/", "phonetic": "NOOZ-pay-per"}]}
+{"guid": "N14_095", "forms": [{"grammatical_form": "noun/en_singular", "text": "venom", "is_base_form": true, "ipa": "/ˈvɛnəm/", "phonetic": "VEN-um"}]}
+{"guid": "N14_096", "forms": [{"grammatical_form": "noun/en_singular", "text": "ice", "is_base_form": true, "ipa": "/aɪs/", "phonetic": "AY-s"}]}

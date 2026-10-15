@@ -18,14 +18,11 @@
 {"guid": "N57_018", "translations": {"ro": "telefon", "pl": "telefon", "th": "โทรศัพท์", "ms": "telefon", "ta": "தொலைபேசி", "kn": "ಫೋನ್", "uk": "телефон", "bn": "ফোন", "hi": "फोन", "tr": "telefon"}}
 {"guid": "N57_019", "translations": {"ms": "alat kawalan jauh", "hi": "रिमोट कंट्रोल", "tr": "uzaktan kumanda"}}
 {"guid": "N57_020", "translations": {"ms": "pengesan asap", "hi": "धुआँ डिटेक्टर", "tr": "duman dedektörü"}}
-{"guid": "N57_021", "translations": {"ms": "panel solar", "hi": "सौर पैनल", "tr": "güneş paneli"}}
 {"guid": "N57_022", "translations": {"ms": "pemacu keras", "hi": "हार्ड डिस्क", "tr": "sabit disk"}}
 {"guid": "N57_023", "translations": {"ms": "pemacu kilat USB", "hi": "यूएसबी फ्लैश ड्राइव", "tr": "USB bellek"}}
 {"guid": "N57_024", "translations": {"ms": "kad memori", "hi": "मेमोरी कार्ड", "tr": "hafıza kartı"}}
 {"guid": "N57_025", "translations": {"ms": "komputer riba", "hi": "लैपटॉप", "tr": "dizüstü bilgisayar"}}
 {"guid": "N57_026", "translations": {"ms": "komputer meja", "hi": "डेस्कटॉप कंप्यूटर", "tr": "masaüstü bilgisayar"}}
-{"guid": "N57_027", "translations": {"ms": "skrin sentuh", "hi": "टचस्क्रीन", "tr": "dokunmatik ekran"}}
-{"guid": "N57_028", "translations": {"ms": "suis", "hi": "स्विच", "tr": "anahtar"}}
 {"guid": "N57_029", "translations": {"ms": "peranti", "hi": "उपकरण", "tr": "cihaz"}}
 {"guid": "N57_030", "translations": {"ms": "kabel", "hi": "केबल", "tr": "kablo"}}
 {"guid": "N57_031", "translations": {"ms": "oboe", "hi": "ओबो", "tr": "obua"}}
@@ -46,5 +43,5 @@
 {"guid": "N57_046", "translations": {"ms": "telefon pintar", "hi": "स्मार्टफ़ोन", "tr": "akıllı telefon"}}
 {"guid": "N57_047", "translations": {"ms": "reaktor", "hi": "परमाणु रिएक्टर", "tr": "reaktör"}}
 {"guid": "N57_048", "translations": {"ms": "CD-ROM", "hi": "सीडी-रोम", "tr": "CD-ROM"}}
-{"guid": "N57_049", "translations": {"ms": "papan kekunci", "hi": "कीबोर्ड", "tr": "klavye"}}
 {"guid": "N57_050", "translations": {"ms": "DVD", "hi": "डीवीडी", "tr": "DVD"}}
+{"guid": "N57_054", "translations": {"ms": "mesin daftar tunai", "hi": "कैश रजिस्टर", "tr": "yazar kasa", "bs": "kasa"}}

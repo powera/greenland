@@ -4,7 +4,6 @@
 {"guid": "N01_059", "grammar_facts": [{"fact_type": "grammatical_gender", "fact_value": "masculine"}]}
 {"guid": "N01_060", "synonyms": [{"grammatical_form": "synonym", "text": "asmuo"}]}
 {"guid": "N01_066", "grammar_facts": [{"fact_type": "grammatical_gender", "fact_value": "masculine"}]}
-{"guid": "N01_072", "grammar_facts": [{"fact_type": "grammatical_gender", "fact_value": "masculine"}]}
 {"guid": "N01_073", "grammar_facts": [{"fact_type": "grammatical_gender", "fact_value": "masculine"}]}
 {"guid": "N01_074", "grammar_facts": [{"fact_type": "grammatical_gender", "fact_value": "masculine"}]}
 {"guid": "N01_079", "grammar_facts": [{"fact_type": "grammatical_gender", "fact_value": "masculine"}]}
@@ -22,7 +21,6 @@
 {"guid": "N01_097", "grammar_facts": [{"fact_type": "grammatical_gender", "fact_value": "masculine"}]}
 {"guid": "N01_098", "grammar_facts": [{"fact_type": "grammatical_gender", "fact_value": "feminine"}]}
 {"guid": "N01_100", "grammar_facts": [{"fact_type": "grammatical_gender", "fact_value": "masculine"}]}
-{"guid": "N01_101", "grammar_facts": [{"fact_type": "grammatical_gender", "fact_value": "masculine"}]}
 {"guid": "N01_102", "grammar_facts": [{"fact_type": "grammatical_gender", "fact_value": "masculine"}]}
 {"guid": "N01_103", "grammar_facts": [{"fact_type": "grammatical_gender", "fact_value": "masculine"}]}
 {"guid": "N01_104", "grammar_facts": [{"fact_type": "grammatical_gender", "fact_value": "masculine"}]}

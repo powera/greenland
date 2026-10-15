@@ -3,14 +3,11 @@
 {"guid": "N57_011", "forms": [{"grammatical_form": "noun/en_singular", "text": "video camera", "is_base_form": true}]}
 {"guid": "N57_019", "forms": [{"grammatical_form": "noun/en_singular", "text": "remote control", "is_base_form": true}]}
 {"guid": "N57_020", "forms": [{"grammatical_form": "noun/en_singular", "text": "smoke detector", "is_base_form": true}]}
-{"guid": "N57_021", "forms": [{"grammatical_form": "noun/en_singular", "text": "solar panel", "is_base_form": true}]}
 {"guid": "N57_022", "forms": [{"grammatical_form": "noun/en_singular", "text": "hard drive", "is_base_form": true}]}
 {"guid": "N57_023", "forms": [{"grammatical_form": "noun/en_singular", "text": "flash drive", "is_base_form": true}]}
 {"guid": "N57_024", "forms": [{"grammatical_form": "noun/en_singular", "text": "memory card", "is_base_form": true}]}
 {"guid": "N57_025", "forms": [{"grammatical_form": "noun/en_singular", "text": "laptop computer", "is_base_form": true}]}
 {"guid": "N57_026", "forms": [{"grammatical_form": "noun/en_singular", "text": "desktop computer", "is_base_form": true}]}
-{"guid": "N57_027", "forms": [{"grammatical_form": "noun/en_singular", "text": "touch screen", "is_base_form": true}]}
-{"guid": "N57_028", "forms": [{"grammatical_form": "noun/en_singular", "text": "switch", "is_base_form": true, "ipa": "/swɪtʃ/", "phonetic": "SWITCH"}]}
 {"guid": "N57_029", "forms": [{"grammatical_form": "noun/en_singular", "text": "device", "is_base_form": true, "ipa": "/dɪˈvaɪs/", "phonetic": "duh-VICE"}]}
 {"guid": "N57_030", "forms": [{"grammatical_form": "noun/en_singular", "text": "cable", "is_base_form": true, "ipa": "/ˈkeɪbəl/", "phonetic": "KAY-bul"}]}
 {"guid": "N57_031", "forms": [{"grammatical_form": "noun/en_singular", "text": "oboe", "is_base_form": true, "ipa": "/ˈoʊboʊ/", "phonetic": "OH-boh"}]}
@@ -31,8 +28,8 @@
 {"guid": "N57_046", "forms": [{"grammatical_form": "noun/en_singular", "text": "smartphone", "is_base_form": true, "ipa": "/ˈsmɑrtˌfoʊn/", "phonetic": "SMART-fohn"}]}
 {"guid": "N57_047", "forms": [{"grammatical_form": "noun/en_singular", "text": "reactor", "is_base_form": true, "ipa": "/riˈæktɚ/", "phonetic": "ree-AK-ter"}]}
 {"guid": "N57_048", "forms": [{"grammatical_form": "noun/en_singular", "text": "cd-rom", "is_base_form": true, "ipa": "/ˌsiːˌdiːˈrɑːm/", "phonetic": "SEE-dee ROM"}]}
-{"guid": "N57_049", "forms": [{"grammatical_form": "noun/en_singular", "text": "keyboard", "is_base_form": true, "ipa": "/ˈkiˌbɔrd/", "phonetic": "KEE-bord"}]}
 {"guid": "N57_050", "forms": [{"grammatical_form": "noun/en_singular", "text": "DVD", "is_base_form": true, "ipa": "/ˌdiː viː ˈdiː/", "phonetic": "DEE-vee-DEE"}]}
 {"guid": "N57_051", "forms": [{"grammatical_form": "noun/en_singular", "text": "scoreboard", "is_base_form": true, "ipa": "/ˈskɔrˌbɔrd/", "phonetic": "SKOR-bord"}]}
 {"guid": "N57_052", "forms": [{"grammatical_form": "noun/en_singular", "text": "shot clock", "is_base_form": true, "ipa": "/ˈʃɑt klɑk/", "phonetic": "SHOT-klok"}]}
 {"guid": "N57_053", "forms": [{"grammatical_form": "noun/en_singular", "text": "touchpad", "is_base_form": true, "ipa": "/ˈtʌtʃˌpæd/", "phonetic": "TUCH-pad"}]}
+{"guid": "N57_054", "forms": [{"grammatical_form": "noun/en_singular", "text": "cash register", "is_base_form": true}]}

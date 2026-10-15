@@ -9,11 +9,6 @@
 {"guid": "N13_009", "translations": {"ro": "cale ferată", "pl": "kolej", "th": "ทางรถไฟ", "ms": "landasan kereta api", "ta": "இரயில்வே", "kn": "ರೈಲ್ವೆ", "uk": "залізниця", "bn": "রেলওয়ে", "hi": "रेलवे", "tr": "demiryolu"}}
 {"guid": "N13_010", "translations": {"ro": "șină", "pl": "szyna", "th": "ราง", "ms": "rel kereta api", "ta": "தண்டவாளம்", "kn": "ಹಳಿ", "uk": "рейка", "bn": "রেল", "hi": "रेल", "tr": "ray"}}
 {"guid": "N13_011", "translations": {"ro": "scenă", "pl": "scena", "th": "เวที", "ms": "pentas", "ta": "மேடை", "kn": "ವೇದಿಕೆ", "uk": "сцена", "bn": "মঞ্চ", "hi": "मंच", "tr": "sahne"}}
-{"guid": "N13_012", "translations": {"ro": "pistă", "pl": "tor", "th": "สนามแข่ง", "ms": "litar perlumbaan", "ta": "பந்தயப்பாதை", "kn": "ಓಟದ ಹಾದಿ", "uk": "трасa", "bn": "ট্র্যাক", "hi": "ट्रैक", "tr": "yarış pisti"}}
-{"guid": "N13_013", "translations": {"ms": "tempat letak kereta", "hi": "पार्किंग स्थल", "tr": "otopark"}}
-{"guid": "N13_014", "translations": {"ms": "dataran bandar", "hi": "नगर चौक", "tr": "kasaba meydanı"}}
-{"guid": "N13_015", "translations": {"ms": "halaman depan", "hi": "सामने का आँगन", "tr": "ön bahçe"}}
-{"guid": "N13_016", "translations": {"ms": "halaman belakang", "hi": "पिछवाड़ा", "tr": "arka bahçe"}}
 {"guid": "N13_017", "translations": {"ms": "lampu isyarat", "hi": "ट्रैफिक लाइट", "tr": "trafik ışığı"}}
 {"guid": "N13_018", "translations": {"ms": "perhentian bas", "hi": "बस स्टॉप", "tr": "otobüs durağı"}}
 {"guid": "N13_019", "translations": {"ms": "laluan", "hi": "पगडंडी", "tr": "patika"}}
@@ -22,4 +17,11 @@
 {"guid": "N13_022", "translations": {"ms": "akses", "hi": "पहुँच", "tr": "erişim"}}
 {"guid": "N13_023", "translations": {"ms": "saluran paip", "hi": "पाइपलाइन", "tr": "boru hattı"}}
 {"guid": "N13_024", "translations": {"ms": "lebuh raya", "hi": "द्रुतमार्ग", "tr": "otoyol"}}
-{"guid": "N13_025", "translations": {"ms": "tempat letak kereta", "hi": "कार पार्किंग स्थल", "tr": "otopark"}}
+{"guid": "N13_028", "translations": {"ro": "cărare", "pl": "ścieżka", "th": "ทางเดิน", "ms": "laluan", "ta": "பாதை", "kn": "ದಾರಿ", "uk": "стежка", "bn": "পথ", "hi": "पगडंडी", "tr": "patika", "bs": "staza"}}
+{"guid": "N13_029", "translations": {"ro": "șanț", "pl": "rów", "th": "คูน้ำ", "ms": "parit", "ta": "பள்ளம்", "kn": "ಕಂದಕ", "uk": "канавa", "bn": "খাল", "hi": "नाला", "tr": "hendek"}}
+{"guid": "N13_030", "translations": {"ro": "potecă", "pl": "ścieżka", "th": "ทางเดิน", "ms": "jalan setapak", "ta": "பாதை", "kn": "ಹಾದಿ", "uk": "стежка", "bn": "পথ", "hi": "पथ", "tr": "patika"}}
+{"guid": "N13_031", "translations": {"ro": "potecă", "pl": "szlak", "th": "เส้นทาง", "ms": "denai", "ta": "நடைபாதை", "kn": "ಕಾಲುದಾರಿ", "uk": "стежка", "bn": "পথ", "hi": "पगडंडी", "tr": "patika"}}
+{"guid": "N13_032", "translations": {"ro": "metrou", "pl": "metro", "th": "รถไฟใต้ดิน", "ms": "kereta api bawah tanah", "ta": "மெட்ரோ", "kn": "ಮೆಟ್ರೋ", "uk": "метро", "bn": "মেট্রো", "hi": "मेट्रो", "tr": "metro"}}
+{"guid": "N13_033", "translations": {"ro": "gard", "pl": "płot", "th": "รั้ว", "ms": "pagar", "ta": "வேலி", "kn": "ಬೇಲಿ", "uk": "паркан", "bn": "বেড়া", "hi": "बाड़", "tr": "çit", "bs": "ograda"}}
+{"guid": "N13_034", "translations": {"ms": "terusan", "hi": "नहर", "tr": "kanal"}}
+{"guid": "N13_035", "translations": {"ro": "doc", "pl": "dok", "th": "ท่าเรือ", "ms": "jeti", "ta": "துறைமுகம்", "kn": "ಡಾಕ್", "uk": "пристань", "bn": "ঘাট", "hi": "घाट", "tr": "iskele", "bs": "pristanište"}}

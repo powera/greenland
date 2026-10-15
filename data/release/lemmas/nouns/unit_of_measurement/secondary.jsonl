@@ -10,7 +10,6 @@
 {"guid": "N34_010", "translations": {"ro": "Celsius", "pl": "Celsjusz", "th": "เซลเซียส", "ms": "darjah Celsius", "ta": "செல்சியஸ்", "kn": "ಸೆಲ್ಷಿಯಸ್", "uk": "Цельсій", "bn": "সেলসিয়াস", "hi": "सेल्सियस", "tr": "santigrat derece"}}
 {"guid": "N34_011", "translations": {"ro": "Fahrenheit", "pl": "Fahrenheit", "th": "ฟาเรนไฮต์", "ms": "Fahrenheit", "ta": "பாரன்ஹெய்ட்", "kn": "ಫಾರೆನ್‌ಹೈಟ್", "uk": "Фаренгейт", "bn": "ফারেনহাইট", "hi": "फ़ारेनहाइट", "tr": "Fahrenheit"}}
 {"guid": "N34_012", "translations": {"ms": "tan", "hi": "शॉर्ट टन", "tr": "kısa ton"}}
-{"guid": "N34_013", "translations": {"ms": "fi", "hi": "शुल्क", "tr": "ücret"}}
 {"guid": "N34_014", "translations": {"ms": "sudu besar", "hi": "बड़ा चम्मच", "tr": "yemek kaşığı"}}
 {"guid": "N34_015", "translations": {"ms": "satu sudu teh", "hi": "एक चम्मच", "tr": "çay kaşığı"}}
 {"guid": "N34_016", "translations": {"ms": "satu sudu besar", "hi": "बड़ा चम्मच", "tr": "yemek kaşığı"}}

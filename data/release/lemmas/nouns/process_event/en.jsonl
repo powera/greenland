@@ -9,11 +9,9 @@
 {"guid": "N24_010", "forms": [{"grammatical_form": "noun/en_singular", "text": "race", "is_base_form": true, "ipa": "/res/", "phonetic": "REH-se"}]}
 {"guid": "N24_011", "forms": [{"grammatical_form": "noun/en_singular", "text": "test", "is_base_form": true, "ipa": "/tɛst/", "phonetic": "TEST"}]}
 {"guid": "N24_012", "forms": [{"grammatical_form": "noun/en_singular", "text": "action", "is_base_form": true, "ipa": "/ˈæk.ʃən/", "phonetic": "AK-shən"}]}
-{"guid": "N24_014", "forms": [{"grammatical_form": "noun/en_singular", "text": "blow", "is_base_form": true, "ipa": "/bloʊ/", "phonetic": "BLOW"}]}
 {"guid": "N24_015", "forms": [{"grammatical_form": "noun/en_singular", "text": "training", "is_base_form": true, "ipa": "/ˈtreɪnɪŋ/", "phonetic": "TRAY-nin"}]}
 {"guid": "N24_016", "forms": [{"grammatical_form": "noun/en_singular", "text": "movement", "is_base_form": true, "ipa": "/ˈmuːvmənt/", "phonetic": "MOO-vmənt"}]}
 {"guid": "N24_017", "forms": [{"grammatical_form": "noun/en_singular", "text": "flight", "is_base_form": true, "ipa": "/flaɪt/", "phonetic": "FLAHT"}]}
-{"guid": "N24_018", "forms": [{"grammatical_form": "noun/en_singular", "text": "flash", "is_base_form": true, "ipa": "/flæʃ/", "phonetic": "FLA-sh"}]}
 {"guid": "N24_019", "forms": [{"grammatical_form": "noun/en_singular", "text": "motion", "is_base_form": true, "ipa": "/ˈmoʊ.ʃən/", "phonetic": "MOH-shuhn"}]}
 {"guid": "N24_020", "forms": [{"grammatical_form": "noun/en_singular", "text": "charge", "is_base_form": true, "ipa": "tʃɑːrdʒ", "phonetic": "CHARE-j"}]}
 {"guid": "N24_021", "forms": [{"grammatical_form": "noun/en_singular", "text": "surprise", "is_base_form": true, "ipa": "/səˈpraɪz/", "phonetic": "SOO-prye-uz"}]}
@@ -174,3 +172,5 @@
 {"guid": "N24_225", "variants": [{"kind": "spelling", "key": "counter-attack", "forms": [{"grammatical_form": "noun/en_singular", "text": "counter-attack", "is_base_form": true}]}]}
 {"guid": "N24_227", "forms": [{"grammatical_form": "noun/en_singular", "text": "qualifying round", "is_base_form": true}]}
 {"guid": "N24_230", "variants": [{"kind": "equivalent", "key": "multiplication", "forms": [{"grammatical_form": "noun/en_singular", "text": "multiplication", "is_base_form": true}]}]}
+{"guid": "N24_231", "forms": [{"grammatical_form": "noun/en_singular", "text": "traffic", "is_base_form": true, "ipa": "/ˈtræfɪk/", "phonetic": "TRAF-ik"}]}
+{"guid": "N24_232", "forms": [{"grammatical_form": "noun/en_singular", "text": "concentration", "is_base_form": true, "ipa": "/ˌkɑnsənˈtreɪʃən/", "phonetic": "kon-sen-TRAY-shun"}]}

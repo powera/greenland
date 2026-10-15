@@ -1,6 +1,3 @@
-{"guid": "N08_001", "grammar_facts": [{"fact_type": "grammatical_gender", "fact_value": "feminine"}]}
-{"guid": "N08_002", "grammar_facts": [{"fact_type": "grammatical_gender", "fact_value": "masculine"}]}
-{"guid": "N08_004", "grammar_facts": [{"fact_type": "grammatical_gender", "fact_value": "feminine"}]}
 {"guid": "N08_005", "grammar_facts": [{"fact_type": "grammatical_gender", "fact_value": "feminine"}]}
 {"guid": "N08_006", "grammar_facts": [{"fact_type": "grammatical_gender", "fact_value": "masculine"}]}
 {"guid": "N08_009", "synonyms": [{"grammatical_form": "synonym", "text": "krepšelis"}, {"grammatical_form": "synonym", "text": "maišas"}, {"grammatical_form": "synonym", "text": "pakuotė"}, {"grammatical_form": "synonym_near", "text": "plastikinis maišelis"}, {"grammatical_form": "synonym_near", "text": "popierinis maišelis"}, {"grammatical_form": "synonym_near", "text": "rankinė"}, {"grammatical_form": "synonym_register", "text": "krepšys"}, {"grammatical_form": "synonym_register", "text": "pakuotė"}, {"grammatical_form": "synonym_related", "text": "audeklinis maišelis"}, {"grammatical_form": "synonym_related", "text": "plastikinis maišelis"}, {"grammatical_form": "synonym_related", "text": "popierinis maišelis"}, {"grammatical_form": "synonym_synecdoche", "text": "krepšelis"}, {"grammatical_form": "synonym_synecdoche", "text": "soma"}]}
@@ -9,10 +6,8 @@
 {"guid": "N08_020", "grammar_facts": [{"fact_type": "grammatical_gender", "fact_value": "masculine"}]}
 {"guid": "N08_024", "grammar_facts": [{"fact_type": "grammatical_gender", "fact_value": "feminine"}]}
 {"guid": "N08_025", "grammar_facts": [{"fact_type": "grammatical_gender", "fact_value": "feminine"}]}
-{"guid": "N08_026", "grammar_facts": [{"fact_type": "grammatical_gender", "fact_value": "feminine"}]}
 {"guid": "N08_029", "grammar_facts": [{"fact_type": "grammatical_gender", "fact_value": "feminine"}]}
 {"guid": "N08_030", "grammar_facts": [{"fact_type": "grammatical_gender", "fact_value": "feminine"}]}
-{"guid": "N08_031", "grammar_facts": [{"fact_type": "grammatical_gender", "fact_value": "feminine"}]}
 {"guid": "N08_032", "grammar_facts": [{"fact_type": "grammatical_gender", "fact_value": "feminine"}]}
 {"guid": "N08_033", "grammar_facts": [{"fact_type": "grammatical_gender", "fact_value": "masculine"}]}
 {"guid": "N08_034", "grammar_facts": [{"fact_type": "grammatical_gender", "fact_value": "masculine"}]}
@@ -28,13 +23,10 @@
 {"guid": "N08_053", "grammar_facts": [{"fact_type": "grammatical_gender", "fact_value": "masculine"}]}
 {"guid": "N08_055", "grammar_facts": [{"fact_type": "grammatical_gender", "fact_value": "masculine"}]}
 {"guid": "N08_056", "grammar_facts": [{"fact_type": "grammatical_gender", "fact_value": "masculine"}]}
-{"guid": "N08_057", "grammar_facts": [{"fact_type": "grammatical_gender", "fact_value": "masculine"}]}
 {"guid": "N08_058", "grammar_facts": [{"fact_type": "grammatical_gender", "fact_value": "masculine"}]}
 {"guid": "N08_059", "grammar_facts": [{"fact_type": "grammatical_gender", "fact_value": "feminine"}]}
 {"guid": "N08_060", "grammar_facts": [{"fact_type": "grammatical_gender", "fact_value": "masculine"}]}
-{"guid": "N08_061", "grammar_facts": [{"fact_type": "grammatical_gender", "fact_value": "feminine"}]}
 {"guid": "N08_062", "grammar_facts": [{"fact_type": "grammatical_gender", "fact_value": "feminine"}]}
-{"guid": "N08_063", "grammar_facts": [{"fact_type": "grammatical_gender", "fact_value": "masculine"}]}
 {"guid": "N08_064", "grammar_facts": [{"fact_type": "grammatical_gender", "fact_value": "feminine"}]}
 {"guid": "N08_067", "grammar_facts": [{"fact_type": "grammatical_gender", "fact_value": "masculine"}]}
 {"guid": "N08_068", "grammar_facts": [{"fact_type": "grammatical_gender", "fact_value": "masculine"}]}
@@ -44,7 +36,6 @@
 {"guid": "N08_076", "grammar_facts": [{"fact_type": "grammatical_gender", "fact_value": "feminine"}]}
 {"guid": "N08_077", "grammar_facts": [{"fact_type": "grammatical_gender", "fact_value": "masculine"}]}
 {"guid": "N08_078", "grammar_facts": [{"fact_type": "grammatical_gender", "fact_value": "masculine"}]}
-{"guid": "N08_079", "grammar_facts": [{"fact_type": "grammatical_gender", "fact_value": "masculine"}]}
 {"guid": "N08_080", "grammar_facts": [{"fact_type": "grammatical_gender", "fact_value": "feminine"}]}
 {"guid": "N08_081", "grammar_facts": [{"fact_type": "grammatical_gender", "fact_value": "feminine"}]}
 {"guid": "N08_084", "grammar_facts": [{"fact_type": "grammatical_gender", "fact_value": "feminine"}]}
@@ -70,12 +61,7 @@
 {"guid": "N08_109", "grammar_facts": [{"fact_type": "grammatical_gender", "fact_value": "masculine"}]}
 {"guid": "N08_110", "grammar_facts": [{"fact_type": "grammatical_gender", "fact_value": "masculine"}]}
 {"guid": "N08_111", "grammar_facts": [{"fact_type": "grammatical_gender", "fact_value": "masculine"}]}
-{"guid": "N08_112", "grammar_facts": [{"fact_type": "grammatical_gender", "fact_value": "feminine"}]}
-{"guid": "N08_113", "grammar_facts": [{"fact_type": "grammatical_gender", "fact_value": "masculine"}]}
-{"guid": "N08_114", "grammar_facts": [{"fact_type": "grammatical_gender", "fact_value": "masculine"}]}
 {"guid": "N08_115", "grammar_facts": [{"fact_type": "grammatical_gender", "fact_value": "feminine"}]}
-{"guid": "N08_117", "grammar_facts": [{"fact_type": "grammatical_gender", "fact_value": "feminine"}]}
-{"guid": "N08_118", "grammar_facts": [{"fact_type": "grammatical_gender", "fact_value": "feminine"}]}
 {"guid": "N08_120", "grammar_facts": [{"fact_type": "grammatical_gender", "fact_value": "feminine"}]}
 {"guid": "N08_121", "grammar_facts": [{"fact_type": "grammatical_gender", "fact_value": "masculine"}]}
 {"guid": "N08_123", "grammar_facts": [{"fact_type": "grammatical_gender", "fact_value": "feminine"}]}
@@ -92,4 +78,5 @@
 {"guid": "N08_156", "grammar_facts": [{"fact_type": "grammatical_gender", "fact_value": "feminine"}]}
 {"guid": "N08_159", "grammar_facts": [{"fact_type": "grammatical_gender", "fact_value": "feminine"}]}
 {"guid": "N08_160", "grammar_facts": [{"fact_type": "grammatical_gender", "fact_value": "feminine"}]}
-{"guid": "N08_163", "grammar_facts": [{"fact_type": "grammatical_gender", "fact_value": "masculine"}]}
+{"guid": "N08_228", "grammar_facts": [{"fact_type": "grammatical_gender", "fact_value": "masculine"}]}
+{"guid": "N08_229", "grammar_facts": [{"fact_type": "grammatical_gender", "fact_value": "feminine"}]}

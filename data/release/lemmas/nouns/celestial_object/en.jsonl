@@ -96,3 +96,5 @@
 {"guid": "N64_096", "forms": [{"grammatical_form": "noun/en_singular", "text": "Volans", "is_base_form": true, "ipa": "/ˈvoʊlænz/", "phonetic": "VOH-lanz"}]}
 {"guid": "N64_097", "forms": [{"grammatical_form": "noun/en_singular", "text": "Vulpecula", "is_base_form": true, "ipa": "/vʌlˈpɛkjəlɑ/", "phonetic": "vul-PEK-yuh-luh"}]}
 {"guid": "N64_098", "forms": [{"grammatical_form": "noun/en_singular", "text": "constellation", "is_base_form": true, "ipa": "/ˌkɑnstəˈleɪʃən/", "phonetic": "kon-stuh-LAY-shun"}]}
+{"guid": "N64_099", "forms": [{"grammatical_form": "noun/en_singular", "text": "phase", "is_base_form": true, "ipa": "/feɪz/", "phonetic": "FAYZ"}]}
+{"guid": "N64_100", "forms": [{"grammatical_form": "noun/en_singular", "text": "shooting star", "is_base_form": true}]}

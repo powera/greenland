@@ -4,3 +4,4 @@
 {"guid": "N64_004", "grammar_facts": [{"fact_type": "grammatical_gender", "fact_value": "feminine"}]}
 {"guid": "N64_006", "grammar_facts": [{"fact_type": "grammatical_gender", "fact_value": "feminine"}]}
 {"guid": "N64_008", "grammar_facts": [{"fact_type": "grammatical_gender", "fact_value": "masculine"}]}
+{"guid": "N64_100", "grammar_facts": [{"fact_type": "grammatical_gender", "fact_value": "feminine"}]}

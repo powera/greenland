@@ -23,7 +23,6 @@
 {"guid": "N41_023", "translations": {"ro": "picnic", "pl": "piknik", "th": "ปิกนิก", "ms": "perkelahan", "ta": "பிக்னிக்", "kn": "ಪಿಕ್ನಿಕ್", "uk": "пікнік", "bn": "পিকনিক", "hi": "पिकनिक", "tr": "piknik"}}
 {"guid": "N41_024", "translations": {"ro": "tenis", "pl": "tenis", "th": "เทนนิส", "ms": "tenis", "ta": "டென்னிஸ்", "kn": "ಟೆನಿಸ್", "uk": "теніс", "bn": "টেনিস", "hi": "टेनिस", "tr": "tenis"}}
 {"guid": "N41_025", "translations": {"ro": "fotbal", "pl": "piłka nożna", "th": "ฟุตบอล", "ms": "bola sepak", "ta": "பின்துப்பாச்சி", "kn": "ಸಾಕರ್", "uk": "футбол", "bn": "সকার", "hi": "सॉकर", "tr": "futbol"}}
-{"guid": "N41_026", "translations": {"ro": "chitară", "pl": "gitara", "th": "กีตาร์", "ms": "gitar", "ta": "கிடார்", "kn": "ಗಿಟಾರ್", "uk": "гітара", "bn": "গিটার", "hi": "गिटार", "tr": "gitar"}}
 {"guid": "N41_027", "translations": {"ro": "baschet", "pl": "koszykówka", "th": "บาสเกตบอล", "ms": "bola keranjang", "ta": "குறுகுந்த பந்து משחק", "kn": "ಬಾಸ್ಕೆಟ್‌ಬಾಲ್", "uk": "баскетбол", "bn": "বাস্কেটবল", "hi": "बास्केटबॉल", "tr": "basketbol"}}
 {"guid": "N41_028", "translations": {"ro": "baseball", "pl": "baseball", "th": "เบสบอล", "ms": "besbol", "ta": "பேஸ்பால்", "kn": "ಬೇಸ್ವಾಲ್", "uk": "бейсбол", "bn": "বেসবল", "hi": "बेसबॉल", "tr": "beyzbol"}}
 {"guid": "N41_029", "translations": {"ro": "volei", "pl": "siatkówka", "th": "วอลเลย์บอล", "ms": "bola tampar", "ta": "வாலிபால்", "kn": "ವಾಲಿಬಾಲ್", "uk": "волейбол", "bn": "ভলিবল", "hi": "वॉलीबॉल", "tr": "voleybol"}}

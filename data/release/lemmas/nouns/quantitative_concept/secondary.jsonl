@@ -1,11 +1,9 @@
-{"guid": "N22_001", "translations": {"ro": "putere", "pl": "moc", "th": "พลังงานกำลัง", "ms": "kuasa", "ta": "சக்தி", "kn": "ಶಕ್ತಿ", "uk": "потужність", "bn": "শক্তি", "hi": "शक्ति", "tr": "güç"}}
 {"guid": "N22_002", "translations": {"ro": "timp", "pl": "czas", "th": "เวลา", "ms": "masa", "ta": "நேரம்", "kn": "ಸಮಯ", "uk": "час", "bn": "সময়", "hi": "समय", "tr": "zaman", "bs": "vrijeme"}}
 {"guid": "N22_003", "translations": {"ro": "jumătate", "pl": "połowa", "th": "ครึ่ง", "ms": "separuh", "ta": "அரை", "kn": "ಅರ್ಧ", "uk": "половина", "bn": "অর্ধ", "hi": "अर्ध", "tr": "yarım"}}
 {"guid": "N22_004", "translations": {"ro": "parte", "pl": "część", "th": "ส่วน", "ms": "bahagian", "ta": "பகுதி", "kn": "ಭಾಗ", "uk": "частина", "bn": "অংশ", "hi": "भाग", "tr": "parça", "bs": "dio"}}
 {"guid": "N22_005", "translations": {"ro": "punct", "pl": "punkt", "th": "จุด", "ms": "titik", "ta": "புள்ளி", "kn": "ಬಿಂದು", "uk": "крапка", "bn": "বিন্দু", "hi": "बिंदु", "tr": "nokta"}}
 {"guid": "N22_006", "translations": {"ro": "număr", "pl": "liczba", "th": "จำนวน", "ms": "nombor", "ta": "எண்", "kn": "ಸಂಖ್ಯೆ", "uk": "число", "bn": "সংখ্যা", "hi": "संख्या", "tr": "sayı", "bs": "broj"}}
 {"guid": "N22_007", "translations": {"ro": "forță", "pl": "siła", "th": "พลัง", "ms": "kekuatan", "ta": "பலம்", "kn": "ಶಕ್ತಿ", "uk": "сила", "bn": "শক্তি", "hi": "शक्ति", "tr": "güç"}}
-{"guid": "N22_008", "translations": {"ro": "forță", "pl": "siła", "th": "กำลัง", "ms": "daya", "ta": "சக்தி", "kn": "ಶಕ್ತಿ", "uk": "сила", "bn": "শক্তি", "hi": "शक्ति", "tr": "kuvvet"}}
 {"guid": "N22_009", "translations": {"ro": "distanță", "pl": "odległość", "th": "ระยะทาง", "ms": "jarak", "ta": "தொலைவு", "kn": "ದೂರ", "uk": "відстань", "bn": "দূরত্ব", "hi": "दूरी", "tr": "mesafe"}}
 {"guid": "N22_010", "translations": {"ro": "cifră", "pl": "cyfra", "th": "หลักตัวเลข", "ms": "angka", "ta": "எண்", "kn": "ಅಂಕಿ", "uk": "цифра", "bn": "অঙ্ক", "hi": "अंक", "tr": "rakam"}}
 {"guid": "N22_011", "translations": {"ro": "viteză", "pl": "prędkość", "th": "ความเร็ว", "ms": "kelajuan", "ta": "வேகம்", "kn": "ವೇಗ", "uk": "швидкість", "bn": "গতিবেগ", "hi": "गति", "tr": "hız"}}
@@ -15,8 +13,6 @@
 {"guid": "N22_015", "translations": {"ro": "mărime", "pl": "rozmiar", "th": "ขนาด", "ms": "saiz", "ta": "அளவு", "kn": "ಆಕರ", "uk": "розмір", "bn": "আয়তন", "hi": "आकार", "tr": "boyut"}}
 {"guid": "N22_016", "translations": {"ro": "bucată", "pl": "kawałek", "th": "ชิ้น", "ms": "bahagian", "ta": "துண்டு", "kn": "ಟುಂಡು", "uk": "шматок", "bn": "টুকরা", "hi": "टुकड़ा", "tr": "parça"}}
 {"guid": "N22_017", "translations": {"ro": "greutate", "pl": "waga", "th": "น้ำหนัก", "ms": "berat", "ta": "எடை", "kn": "ತೂಕ", "uk": "вага", "bn": "ওজন", "hi": "वजन", "tr": "ağırlık"}}
-{"guid": "N22_018", "translations": {"ro": "căldură", "pl": "ciepło", "th": "ความร้อน", "ms": "haba", "ta": "சூடுபாடு", "kn": "ತಾಪ", "uk": "тепло", "bn": "তাপ", "hi": "ताप", "tr": "ısı"}}
-{"guid": "N22_019", "translations": {"ro": "presiune", "pl": "ciśnienie", "th": "ความดัน", "ms": "tekanan", "ta": "மிளித்துவழுக்காறு", "kn": "ದಾಳಿ", "uk": "тиск", "bn": "চাপ", "hi": "दबाव", "tr": "basınç"}}
 {"guid": "N22_020", "translations": {"ro": "cuplu", "pl": "para", "th": "คู่", "ms": "sepasang", "ta": "இரட்டை", "kn": "ಜೋಡಿ", "uk": "пара", "bn": "যুগল", "hi": "जोड़ी", "tr": "çift"}}
 {"guid": "N22_021", "translations": {"ro": "duzină", "pl": "tuzin", "th": "โหล", "ms": "dozen", "ta": "டஜன்", "kn": "ದೋಸೆನ್", "uk": "дюжина", "bn": "ডজন", "hi": "दर्जन", "tr": "düzine"}}
 {"guid": "N22_022", "translations": {"ro": "mulțime", "pl": "mnóstwo", "th": "จำนวนมาก", "ms": "jumlah yang besar", "ta": "சோதிக்க நிறைய", "kn": "ಸಂಖ್ಯೆಯಿಂತಲೂಬಹುತೇಕ", "uk": "безліч", "bn": "অনগনিত", "hi": "अनगिनत", "tr": "çokluk"}}
@@ -29,7 +25,6 @@
 {"guid": "N22_029", "translations": {"ro": "set", "pl": "zestaw", "th": "ชุด", "ms": "set", "ta": "குழு", "kn": "ಸಮೂಹ", "uk": "набір", "bn": "সেট", "hi": "सेट", "tr": "takım"}}
 {"guid": "N22_030", "translations": {"ro": "adunare", "pl": "dodawanie", "th": "การบวก", "ms": "penambahan", "ta": "கூட்டல்", "kn": "ಯೋಜನೆ", "uk": "додавання", "bn": "যোগ", "hi": "जोड़", "tr": "toplama"}}
 {"guid": "N22_031", "translations": {"ro": "cantitate", "pl": "ilość", "th": "ปริมาณ", "ms": "jumlah", "ta": "அளவு", "kn": "ಮಾತ್ರೆ", "uk": "кількість", "bn": "পরিমাণ", "hi": "मात्रा", "tr": "miktar"}}
-{"guid": "N22_032", "translations": {"ro": "sold", "pl": "saldo", "th": "ยอดคงเหลือ", "ms": "baki", "ta": "மீதமுள்ள தொகை", "kn": "ಬಾಕಿ", "uk": "залишок", "bn": "অবশিষ্ট", "hi": "शेष", "tr": "bakiye"}}
 {"guid": "N22_033", "translations": {"ro": "comparare", "pl": "porównanie", "th": "การเปรียบเทียบ", "ms": "perbandingan", "ta": "போகுபார்ப்பு", "kn": "ದುಲಾಗಣೆ", "uk": "порівняння", "bn": "তুলনা", "hi": "तुलना", "tr": "karşılaştırma"}}
 {"guid": "N22_034", "translations": {"ro": "împărțire", "pl": "dzielenie", "th": "การหาร", "ms": "pembahagian", "ta": "பகந்தல்", "kn": "ಭಾಗಿಸು", "uk": "ділення", "bn": "ভাগফল", "hi": "भाग (गणित)", "tr": "bölme"}}
 {"guid": "N22_035", "translations": {"ro": "interval", "pl": "zakres", "th": "ช่วง", "ms": "julat", "ta": "விகிதத்தரம்", "kn": "ಶ್ರೇಣಿ", "uk": "діапазон", "bn": "পরিসর", "hi": "परास", "tr": "aralık", "bs": "raspon"}}
@@ -45,7 +40,6 @@
 {"guid": "N22_045", "translations": {"ms": "kos sara hidup", "hi": "जीवन-यापन की लागत", "tr": "yaşam maliyeti"}}
 {"guid": "N22_046", "translations": {"ms": "kadar faedah", "hi": "ब्याज दर", "tr": "faiz oranı"}}
 {"guid": "N22_047", "translations": {"ms": "kadar pertukaran", "hi": "विनिमय दर", "tr": "döviz kuru"}}
-{"guid": "N22_048", "translations": {"ms": "gaji minimum", "hi": "न्यूनतम वेतन", "tr": "asgari ücret"}}
 {"guid": "N22_049", "translations": {"ms": "pendaraban", "hi": "गुणा", "tr": "çarpma"}}
 {"guid": "N22_050", "translations": {"ms": "nombor perpuluhan", "hi": "दशमलव संख्या", "tr": "ondalık sayı"}}
 {"guid": "N22_053", "translations": {"ms": "ketakterhinggaan", "hi": "अनंतता", "tr": "sonsuzluk"}}
@@ -74,10 +68,10 @@
 {"guid": "N22_083", "translations": {"ms": "purata", "hi": "औसत", "tr": "ortalama"}}
 {"guid": "N22_085", "translations": {"ms": "majoriti", "hi": "बहुमत", "tr": "çoğunluk"}}
 {"guid": "N22_086", "translations": {"ms": "majoriti", "hi": "बहुमत", "tr": "çoğunluk"}}
-{"guid": "N22_087", "translations": {"ms": "kos", "hi": "लागत", "tr": "maliyet"}}
 {"guid": "N22_088", "translations": {"ms": "kandungan", "hi": "मात्रा", "tr": "içerik"}}
 {"guid": "N22_089", "translations": {"ms": "ketinggian", "hi": "ऊँचाई", "tr": "yükseklik"}}
 {"guid": "N22_090", "translations": {"ms": "tahap", "hi": "सीमा", "tr": "kapsam"}}
 {"guid": "N22_091", "translations": {"ms": "secawan", "hi": "एक कप", "tr": "bir fincan"}}
 {"guid": "N22_092", "translations": {"ms": "skor", "hi": "अंक", "tr": "skor"}}
 {"guid": "N22_093", "translations": {"ms": "permintaan", "hi": "मांग", "tr": "talep"}}
+{"guid": "N22_119", "translations": {"ms": "bahagian", "hi": "हिस्सा", "tr": "pay"}}

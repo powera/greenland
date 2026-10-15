@@ -3,7 +3,6 @@
 {"guid": "N05_003", "translations": {"ro": "ierbă", "pl": "trawa", "th": "หญ้า", "ms": "rumput", "ta": "புல்", "kn": "ಬೆಳೆ/ಗಬ್ಬು", "uk": "трава", "bn": "ঘাস", "hi": "घास", "tr": "çimen", "bs": "trava"}}
 {"guid": "N05_004", "translations": {"ro": "stejar", "pl": "dąb", "th": "โอ๊ก", "ms": "pokok oak", "ta": "ஓக்", "kn": "ಒಕ್", "uk": "дуб", "bn": "ওক", "hi": "ओक", "tr": "meşe", "bs": "hrast"}}
 {"guid": "N05_005", "translations": {"ro": "trandafir", "pl": "róża", "th": "กุหลาบ", "ms": "mawar", "ta": "ரோஜா", "kn": "ಗುಲಾಬಿ", "uk": "троянда", "bn": "গোলাপ", "hi": "गुलाब", "tr": "gül", "bs": "ruža"}}
-{"guid": "N05_006", "translations": {"ro": "pădure", "pl": "las", "th": "ป่า", "ms": "hutan", "ta": "காடு", "kn": "ಕಾಡು", "uk": "ліс", "bn": "বন", "hi": "जंगल", "tr": "orman"}}
 {"guid": "N05_007", "translations": {"ro": "udla", "pl": "chwast", "th": "วัชพืช", "ms": "rumpai", "ta": "களிப்புல்", "kn": "ಕಿಡ್ನುಗಿಡ", "uk": "бур'ян", "bn": "বিদেশি-গাছি", "hi": "जंगलीघास", "tr": "yabani ot", "bs": "korov"}}
 {"guid": "N05_008", "translations": {"ro": "tufiș", "pl": "krzew", "th": "พุ่มไม้", "ms": "semak", "ta": "குன்று", "kn": "ತುಣುಕುಭೂಮಿ (Note: better: ಜೇತೆಗೆ? Wait)", "uk": "кущ", "bn": "ঝোড়ে", "hi": "झाड़ी", "tr": "çalı", "bs": "grm"}}
 {"guid": "N05_009", "translations": {"ro": "viță", "pl": "pnącze", "th": "เถา", "ms": "pokok menjalar", "ta": "பயிர்", "kn": "ದಾರಿಘೇಯ", "uk": "ліана", "bn": "বাইন", "hi": "आवृत्ति", "tr": "sarmaşık", "bs": "penjačica"}}

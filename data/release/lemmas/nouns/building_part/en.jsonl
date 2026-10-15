@@ -13,7 +13,6 @@
 {"guid": "N47_013", "forms": [{"grammatical_form": "noun/en_singular", "text": "chimney", "is_base_form": true, "ipa": "/tʃɪˈmiː/", "phonetic": "CHIM-nee"}, {"grammatical_form": "noun/en_plural", "text": "ies<l:archaic>", "is_base_form": false}]}
 {"guid": "N47_014", "forms": [{"grammatical_form": "noun/en_singular", "text": "balcony", "is_base_form": true, "ipa": "/ˈbæl.kə.ʃni/", "phonetic": "BAL-kuh-shee"}]}
 {"guid": "N47_015", "forms": [{"grammatical_form": "noun/en_singular", "text": "pillar", "is_base_form": true, "ipa": "/ˈpɪlər/", "phonetic": "PIL-lər"}]}
-{"guid": "N47_016", "forms": [{"grammatical_form": "noun/en_singular", "text": "fence", "is_base_form": true, "ipa": "/fɛnts/", "phonetic": "FENTS"}]}
 {"guid": "N47_026", "forms": [{"grammatical_form": "noun/en_singular", "text": "waiting room", "is_base_form": true}]}
 {"guid": "N47_027", "forms": [{"grammatical_form": "noun/en_singular", "text": "emergency room", "is_base_form": true}]}
 {"guid": "N47_028", "forms": [{"grammatical_form": "noun/en_singular", "text": "operating room", "is_base_form": true}]}
@@ -34,3 +33,12 @@
 {"guid": "N47_043", "forms": [{"grammatical_form": "noun/en_singular", "text": "entrance", "is_base_form": true, "ipa": "/ˈɛntrəns/", "phonetic": "EN-truhns"}]}
 {"guid": "N47_044", "forms": [{"grammatical_form": "noun/en_singular", "text": "basket", "is_base_form": true, "ipa": "/ˈbæs.kɪt/", "phonetic": "BAS-kit"}]}
 {"guid": "N47_045", "forms": [{"grammatical_form": "noun/en_singular", "text": "drawing room", "is_base_form": true}], "variants": [{"kind": "spelling", "key": "drawing-room", "forms": [{"grammatical_form": "noun/en_singular", "text": "drawing-room", "is_base_form": true}]}]}
+{"guid": "N47_046", "forms": [{"grammatical_form": "noun/en_singular", "text": "room", "is_base_form": true, "ipa": "/ruːm/", "phonetic": "ROO-m"}]}
+{"guid": "N47_047", "forms": [{"grammatical_form": "noun/en_singular", "text": "bathroom", "is_base_form": true, "ipa": "/ˈbæθruːm/", "phonetic": "BATH-room"}]}
+{"guid": "N47_048", "forms": [{"grammatical_form": "noun/en_singular", "text": "bedroom", "is_base_form": true, "ipa": "/ˈbɛdruːm/", "phonetic": "BED-ruh-m"}]}
+{"guid": "N47_049", "forms": [{"grammatical_form": "noun/en_singular", "text": "dining room", "is_base_form": true}], "variants": [{"kind": "spelling", "key": "dining-room", "forms": [{"grammatical_form": "noun/en_singular", "text": "dining-room", "is_base_form": true}]}]}
+{"guid": "N47_050", "forms": [{"grammatical_form": "noun/en_singular", "text": "kitchen", "is_base_form": true, "ipa": "kɪtʃɪn", "phonetic": "KIT-chn"}]}
+{"guid": "N47_051", "forms": [{"grammatical_form": "noun/en_singular", "text": "living room", "is_base_form": true, "ipa": "/ˈlɪvɪŋ ruːm/", "phonetic": "LIV-ing ROOM"}]}
+{"guid": "N47_052", "forms": [{"grammatical_form": "noun/en_singular", "text": "attic", "is_base_form": true, "ipa": "/ˈætɪk/", "phonetic": "AT-tik"}]}
+{"guid": "N47_053", "forms": [{"grammatical_form": "noun/en_singular", "text": "basement", "is_base_form": true, "ipa": "/ˈbæs.ɪ.mənt/", "phonetic": "BAS-i-mənt"}]}
+{"guid": "N47_054", "forms": [{"grammatical_form": "noun/en_singular", "text": "closet", "is_base_form": true, "ipa": "/ˈkloʊzɪt/", "phonetic": "KLOZ-it"}]}
