@@ -103,6 +103,12 @@ SUBTYPE_DISPLAY = {
     "directional_movement": "Directional Movement",
     "manner_movement": "Manner Movement",
     "rule_defined_action": "Rule-Defined Action",
+    "auxiliary": "Auxiliary",
+    "bodily_function": "Bodily Function",
+    "natural_process": "Natural Process",
+    "stative_relation": "Stative Relation",
+    "aspectual": "Aspectual",
+    "social_interaction": "Social Interaction",
     # Adjective subtypes
     "size": "Size",
     "color": "Color",
