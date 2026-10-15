@@ -76,5 +76,5 @@
 {"guid": "N03_100", "forms": [{"grammatical_form": "noun/en_singular", "text": "tartar", "is_base_form": true, "ipa": "/ˈtɑrtər/", "phonetic": "TAR-ter"}]}
 {"guid": "N03_101", "forms": [{"grammatical_form": "noun/en_singular", "text": "loin", "is_base_form": true, "ipa": "/lɔɪn/", "phonetic": "LOYN"}]}
 {"guid": "N03_102", "forms": [{"grammatical_form": "noun/en_singular", "text": "circumcision", "is_base_form": true, "ipa": "/ˌsɝːkəmˈsɪʒən/", "phonetic": "sur-kum-SIZH-un"}]}
-{"guid": "N03_103", "forms": [{"grammatical_form": "noun/en_singular", "text": "shell", "is_base_form": true, "ipa": "/ʃɛl/", "phonetic": "SHEL"}]}
 {"guid": "N03_104", "forms": [{"grammatical_form": "noun/en_singular", "text": "beard", "is_base_form": true, "ipa": "/bɪrd/", "phonetic": "BEERD"}]}
+{"guid": "N03_106", "forms": [{"grammatical_form": "noun/en_singular", "text": "beard", "is_base_form": true, "ipa": "/bɪrd/", "phonetic": "BEERD"}]}

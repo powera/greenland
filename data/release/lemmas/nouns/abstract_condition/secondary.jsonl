@@ -1,8 +1,6 @@
 {"guid": "N54_001", "translations": {"ro": "pace", "pl": "pokój", "th": "สันติภาพ", "ms": "keamanan", "ta": "சாந்தி", "kn": "ಶಾಂತಿ", "uk": "мир", "bn": "শান্তি", "hi": "शांति", "tr": "barış"}}
 {"guid": "N54_002", "translations": {"ro": "noroc", "pl": "szczęście", "th": "โชค", "ms": "nasib", "ta": "வாழ்க்கைப் பரிசு", "kn": "ಸೌಭಾಗ್ಯ", "uk": "вдача", "bn": "সাফল্য", "hi": "भाग्य", "tr": "şans"}}
 {"guid": "N54_003", "translations": {"ro": "odihnă", "pl": "odpoczynek", "th": "การพักผ่อน", "ms": "rehat", "ta": "ஓய்வு", "kn": "ವಿರಾಮ", "uk": "відпочинок", "bn": "বিরতি", "hi": "आराम", "tr": "dinlenme"}}
-{"guid": "N54_004", "translations": {"ro": "umbră", "pl": "cień", "th": "เงา", "ms": "bayang-bayang", "ta": "நிழல்", "kn": "ನಿಸ್ತುಲ", "uk": "тінь", "bn": "ছায়া", "hi": "छाया", "tr": "gölge"}}
-{"guid": "N54_005", "translations": {"ro": "liniște", "pl": "cisza", "th": "ความเงียบ", "ms": "kesunyian", "ta": "மௌனம்", "kn": "ಮೌನ", "uk": "тиша", "bn": "নীরবতা", "hi": "निशब्दता", "tr": "sessizlik"}}
 {"guid": "N54_006", "translations": {"ro": "întuneric", "pl": "ciemność", "th": "ความมืด", "ms": "kegelapan", "ta": "இருண்டமை", "kn": "ಕತ್ತಲ", "uk": "темрява", "bn": "অন্ধকার", "hi": "अँधेरा", "tr": "karanlık"}}
 {"guid": "N54_007", "translations": {"ro": "spațiu", "pl": "przestrzeń", "th": "พื้นที่", "ms": "ruang", "ta": "இடம்", "kn": "ಸ್ಥಳ", "uk": "простір", "bn": "স্থান", "hi": "अवಕಾಶ", "tr": "alan"}}
 {"guid": "N54_008", "translations": {"ro": "rău", "pl": "zło", "th": "ความชั่ว", "ms": "kejahatan", "ta": "தீமை", "kn": "ದುಷ್ಟತೆ", "uk": "зло", "bn": "অপকর্ম", "hi": "बुराई", "tr": "kötülük"}}
@@ -23,13 +21,8 @@
 {"guid": "N54_023", "translations": {"ro": "frumusețe", "pl": "piękno", "th": "ความงาม", "ms": "keindahan", "ta": "அழகு", "kn": "ಸುಂದರತೆ", "uk": "красa", "bn": "সৌন্দর্য", "hi": "सुंदरता", "tr": "güzellik"}}
 {"guid": "N54_024", "translations": {"ro": "sănătate", "pl": "zdrowie", "th": "สุขภาพ", "ms": "kesihatan", "ta": "ஆரோக்கியம்", "kn": "ಆರೋಗ್ಯ", "uk": "здоров'я", "bn": "স্বাস্থ্য", "hi": "स्वास्थ्य", "tr": "sağlık"}}
 {"guid": "N54_025", "translations": {"ro": "audieri", "pl": "posiedzenie", "th": "การพิจารณาคดี", "ms": "perbicaraan", "ta": "கேட்புக்கூட்டம்", "kn": "ಶಿಕೇಟ್ (ಶುಭ್ರ)", "uk": "слухання", "bn": "শোনা", "hi": "सुनवाई", "tr": "duruşma"}}
-{"guid": "N54_026", "translations": {"ms": "pinjaman pelajar", "hi": "छात्र ऋण", "tr": "öğrenci kredisi"}}
 {"guid": "N54_027", "translations": {"ms": "tekanan darah", "hi": "रक्तचाप", "tr": "kan basıncı"}}
 {"guid": "N54_028", "translations": {"ms": "kumpulan darah", "hi": "रक्त समूह", "tr": "kan grubu"}}
-{"guid": "N54_029", "translations": {"ms": "akaun bank", "hi": "बैंक खाता", "tr": "banka hesabı"}}
-{"guid": "N54_030", "translations": {"ms": "akaun simpanan", "hi": "बचत खाता", "tr": "tasarruf hesabı"}}
-{"guid": "N54_031", "translations": {"ms": "cukai pendapatan", "hi": "आयकर", "tr": "gelir vergisi"}}
-{"guid": "N54_032", "translations": {"ms": "cukai jualan", "hi": "बिक्री कर", "tr": "satış vergisi"}}
 {"guid": "N54_033", "translations": {"ms": "cuti sakit", "hi": "बीमारी की छुट्टी", "tr": "hastalık izni"}}
 {"guid": "N54_034", "translations": {"ms": "rekod dunia", "hi": "विश्व रिकॉर्ड", "tr": "dünya rekoru"}}
 {"guid": "N54_035", "translations": {"ms": "kebolehkiraan", "hi": "गणनीयता", "tr": "hesaplanabilirlik"}}
@@ -50,7 +43,6 @@
 {"guid": "N54_050", "translations": {"ms": "kelaziman", "hi": "व्यापकता", "tr": "yaygınlık"}}
 {"guid": "N54_051", "translations": {"ms": "ketuhanan", "hi": "दिव्यता", "tr": "tanrısallık"}}
 {"guid": "N54_052", "translations": {"ms": "keselamatan", "hi": "सुरक्षा", "tr": "güvenlik"}}
-{"guid": "N54_053", "translations": {"ms": "denda", "hi": "दंड", "tr": "ceza"}}
 {"guid": "N54_054", "translations": {"ms": "pelanggaran", "hi": "उल्लंघन", "tr": "ihlal"}}
 {"guid": "N54_055", "translations": {"ms": "kebergantungan", "hi": "निर्भरता", "tr": "bağımlılık"}}
 {"guid": "N54_056", "translations": {"ms": "pengawalseliaan", "hi": "विनियमन", "tr": "düzenleme"}}

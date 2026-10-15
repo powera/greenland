@@ -3,7 +3,6 @@
 {"guid": "N05_003", "forms": [{"grammatical_form": "noun/en_singular", "text": "grass", "is_base_form": true, "ipa": "/ɡræs/", "phonetic": "GRASS"}]}
 {"guid": "N05_004", "forms": [{"grammatical_form": "noun/en_singular", "text": "oak", "is_base_form": true, "ipa": "/oʊk/", "phonetic": "OWK"}]}
 {"guid": "N05_005", "forms": [{"grammatical_form": "noun/en_singular", "text": "rose", "is_base_form": true, "ipa": "/roʊz/", "phonetic": "ROH-z"}]}
-{"guid": "N05_006", "forms": [{"grammatical_form": "noun/en_singular", "text": "forest", "is_base_form": true, "ipa": "/fɔːrɛst/", "phonetic": "FOR-est"}]}
 {"guid": "N05_007", "forms": [{"grammatical_form": "noun/en_singular", "text": "weed", "is_base_form": true, "ipa": "/wiːd/", "phonetic": "WEED"}]}
 {"guid": "N05_008", "forms": [{"grammatical_form": "noun/en_singular", "text": "bush", "is_base_form": true, "ipa": "/bʊʃ/", "phonetic": "BOO-sh"}]}
 {"guid": "N05_009", "forms": [{"grammatical_form": "noun/en_singular", "text": "vine", "is_base_form": true, "ipa": "/vaɪn/", "phonetic": "VY-neh"}]}

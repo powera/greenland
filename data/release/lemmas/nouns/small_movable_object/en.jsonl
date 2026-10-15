@@ -1,7 +1,3 @@
-{"guid": "N08_001", "forms": [{"grammatical_form": "noun/en_singular", "text": "fork", "is_base_form": true, "ipa": "/fɔːrk/", "phonetic": "FORK"}]}
-{"guid": "N08_002", "forms": [{"grammatical_form": "noun/en_singular", "text": "spoon", "is_base_form": true, "ipa": "/spuːn/", "phonetic": "SPOON"}]}
-{"guid": "N08_003", "forms": [{"grammatical_form": "noun/en_singular", "text": "cup", "is_base_form": true, "ipa": "/kʌp/", "phonetic": "KUP"}]}
-{"guid": "N08_004", "forms": [{"grammatical_form": "noun/en_singular", "text": "plate", "is_base_form": true, "ipa": "/plɛɪt/", "phonetic": "PLAY-it"}]}
 {"guid": "N08_005", "forms": [{"grammatical_form": "noun/en_singular", "text": "book", "is_base_form": true, "ipa": "/bʊk/", "phonetic": "BOOK"}]}
 {"guid": "N08_006", "forms": [{"grammatical_form": "noun/en_singular", "text": "key", "is_base_form": true, "ipa": "/kiː/", "phonetic": "KEE"}]}
 {"guid": "N08_007", "forms": [{"grammatical_form": "noun/en_singular", "text": "cell phone", "is_base_form": true, "ipa": "/sɛl ˈfoʊn/", "phonetic": "SEL-fohn"}]}
@@ -20,18 +16,15 @@
 {"guid": "N08_023", "forms": [{"grammatical_form": "noun/en_singular", "text": "toothbrush", "is_base_form": true, "ipa": "/tuːθˈbrʌʃ/", "phonetic": "TOO-th-brush"}]}
 {"guid": "N08_024", "forms": [{"grammatical_form": "noun/en_singular", "text": "string", "is_base_form": true, "ipa": "/strɪŋ/", "phonetic": "STRING"}]}
 {"guid": "N08_025", "forms": [{"grammatical_form": "noun/en_singular", "text": "candle", "is_base_form": true, "ipa": "/ˈkændl/", "phonetic": "CAN-dl/"}]}
-{"guid": "N08_026", "forms": [{"grammatical_form": "noun/en_singular", "text": "spatula", "is_base_form": true, "ipa": "spæˈtʃələ", "phonetic": "SPAH-chuh-luh"}]}
 {"guid": "N08_027", "forms": [{"grammatical_form": "noun/en_singular", "text": "umbrella", "is_base_form": true, "ipa": "/ˈʌmbrə/", "phonetic": "OUM-bruh"}]}
 {"guid": "N08_028", "forms": [{"grammatical_form": "noun/en_singular", "text": "stapler", "is_base_form": true, "ipa": "/stæp.lɚ/", "phonetic": "STAP-lur"}]}
 {"guid": "N08_029", "forms": [{"grammatical_form": "noun/en_singular", "text": "pillow", "is_base_form": true, "ipa": "/ˈpɪləʊ/", "phonetic": "PIL-luh"}]}
 {"guid": "N08_030", "forms": [{"grammatical_form": "noun/en_singular", "text": "blanket", "is_base_form": true, "ipa": "/ˈblæŋ.kət/", "phonetic": "BLANG-kit"}]}
-{"guid": "N08_031", "forms": [{"grammatical_form": "noun/en_singular", "text": "pan", "is_base_form": true, "ipa": "/pæn/", "phonetic": "PANE"}]}
 {"guid": "N08_032", "forms": [{"grammatical_form": "noun/en_singular", "text": "vase", "is_base_form": true, "ipa": "/vɑːz/", "phonetic": "VAHZ"}]}
 {"guid": "N08_033", "forms": [{"grammatical_form": "noun/en_singular", "text": "soap", "is_base_form": true, "ipa": "səʊp", "phonetic": "SOH-p"}]}
 {"guid": "N08_034", "forms": [{"grammatical_form": "noun/en_singular", "text": "razor", "is_base_form": true, "ipa": "/ˈreɪzər/", "phonetic": "RAY-zər"}]}
 {"guid": "N08_035", "forms": [{"grammatical_form": "noun/en_singular", "text": "doll", "is_base_form": true, "ipa": "/dɒl/", "phonetic": "DOL"}]}
 {"guid": "N08_036", "forms": [{"grammatical_form": "noun/en_singular", "text": "toy", "is_base_form": true, "ipa": "tɔɪ", "phonetic": "TWOY"}]}
-{"guid": "N08_037", "forms": [{"grammatical_form": "noun/en_singular", "text": "chopsticks", "is_base_form": true, "ipa": "/tʃɑpˈstɪks/", "phonetic": "CHAWP-STIXKS"}, {"grammatical_form": "noun/en_plural", "text": "chopsticks", "is_base_form": false}]}
 {"guid": "N08_040", "forms": [{"grammatical_form": "noun/en_singular", "text": "package", "is_base_form": true, "ipa": "/ˈpæk.ɪdʒ/", "phonetic": "PACK-ij"}]}
 {"guid": "N08_041", "forms": [{"grammatical_form": "noun/en_singular", "text": "seat", "is_base_form": true, "ipa": "/siːt/", "phonetic": "SEE-t"}]}
 {"guid": "N08_044", "forms": [{"grammatical_form": "noun/en_singular", "text": "match", "is_base_form": true, "ipa": "/ˈmætʃ/", "phonetic": "MATCH"}]}
@@ -50,14 +43,8 @@
 {"guid": "N08_128", "forms": [{"grammatical_form": "noun/en_singular", "text": "picture frame", "is_base_form": true}]}
 {"guid": "N08_129", "forms": [{"grammatical_form": "noun/en_singular", "text": "flower pot", "is_base_form": true}]}
 {"guid": "N08_130", "forms": [{"grammatical_form": "noun/en_singular", "text": "clothes hanger", "is_base_form": true}]}
-{"guid": "N08_131", "forms": [{"grammatical_form": "noun/en_singular", "text": "seat belt", "is_base_form": true}]}
-{"guid": "N08_132", "forms": [{"grammatical_form": "noun/en_singular", "text": "spare tire", "is_base_form": true}]}
-{"guid": "N08_133", "forms": [{"grammatical_form": "noun/en_singular", "text": "gas tank", "is_base_form": true}]}
-{"guid": "N08_134", "forms": [{"grammatical_form": "noun/en_singular", "text": "credit card", "is_base_form": true}]}
 {"guid": "N08_135", "forms": [{"grammatical_form": "noun/en_singular", "text": "debit card", "is_base_form": true}]}
 {"guid": "N08_136", "forms": [{"grammatical_form": "noun/en_singular", "text": "business card", "is_base_form": true}]}
-{"guid": "N08_137", "forms": [{"grammatical_form": "noun/en_singular", "text": "playing card", "is_base_form": true}]}
-{"guid": "N08_138", "forms": [{"grammatical_form": "noun/en_singular", "text": "football", "is_base_form": true, "ipa": "/ˈfʊtˌbɔl/", "phonetic": "FOOT-bawl"}]}
 {"guid": "N08_139", "forms": [{"grammatical_form": "noun/en_singular", "text": "specimen", "is_base_form": true, "ipa": "/ˈspɛsəmən/", "phonetic": "SPEH-suh-men"}]}
 {"guid": "N08_140", "forms": [{"grammatical_form": "noun/en_singular", "text": "kite", "is_base_form": true, "ipa": "/kaɪt/", "phonetic": "KITE"}]}
 {"guid": "N08_141", "forms": [{"grammatical_form": "noun/en_singular", "text": "dial", "is_base_form": true, "ipa": "/daɪl/", "phonetic": "DYE-ul"}]}
@@ -68,8 +55,6 @@
 {"guid": "N08_146", "forms": [{"grammatical_form": "noun/en_singular", "text": "filament", "is_base_form": true, "ipa": "/ˈfɪləmənt/", "phonetic": "FILL-uh-muhnt"}]}
 {"guid": "N08_147", "forms": [{"grammatical_form": "noun/en_singular", "text": "casing", "is_base_form": true, "ipa": "/ˈkeɪsɪŋ/", "phonetic": "KAY-sing"}]}
 {"guid": "N08_148", "forms": [{"grammatical_form": "noun/en_singular", "text": "socket", "is_base_form": true, "ipa": "/ˈsɑkɪt/", "phonetic": "SOK-it"}]}
-{"guid": "N08_149", "forms": [{"grammatical_form": "noun/en_singular", "text": "teaspoon", "is_base_form": true, "ipa": "/ˈtiˌspun/", "phonetic": "TEE-spoon"}]}
-{"guid": "N08_150", "forms": [{"grammatical_form": "noun/en_singular", "text": "tablespoon", "is_base_form": true, "ipa": "/ˈteɪbəlˌspuːn/", "phonetic": "TAY-bul-spoon"}]}
 {"guid": "N08_151", "forms": [{"grammatical_form": "noun/en_singular", "text": "tureen", "is_base_form": true, "ipa": "/təˈriːn/", "phonetic": "tuh-REEN"}]}
 {"guid": "N08_152", "forms": [{"grammatical_form": "noun/en_singular", "text": "timbale", "is_base_form": true, "ipa": "/tɪmˈbɑːl/", "phonetic": "tim-BAHL"}]}
 {"guid": "N08_153", "forms": [{"grammatical_form": "noun/en_singular", "text": "crayon", "is_base_form": true, "ipa": "/ˈkreɪˌɑn/", "phonetic": "KRAY-on"}]}
@@ -80,17 +65,7 @@
 {"guid": "N08_158", "forms": [{"grammatical_form": "noun/en_singular", "text": "swing", "is_base_form": true, "ipa": "/swɪŋ/", "phonetic": "SWING"}]}
 {"guid": "N08_159", "forms": [{"grammatical_form": "noun/en_singular", "text": "queen", "is_base_form": true, "ipa": "/kwiːn/", "phonetic": "KWEEN"}]}
 {"guid": "N08_160", "forms": [{"grammatical_form": "noun/en_singular", "text": "queen", "is_base_form": true, "ipa": "/kwiːn/", "phonetic": "KWEEN"}]}
-{"guid": "N08_161", "forms": [{"grammatical_form": "noun/en_singular", "text": "goalpost", "is_base_form": true, "ipa": "/ˈɡoʊlˌpoʊst/", "phonetic": "GOHL-post"}]}
 {"guid": "N08_162", "forms": [{"grammatical_form": "noun/en_singular", "text": "crossbar", "is_base_form": true, "ipa": "/ˈkrɔsˌbɑr/", "phonetic": "KRAWS-bar"}]}
-{"guid": "N08_163", "forms": [{"grammatical_form": "noun/en_singular", "text": "net", "is_base_form": true, "ipa": "/nɛt/", "phonetic": "NET"}]}
-{"guid": "N08_164", "forms": [{"grammatical_form": "noun/en_singular", "text": "board", "is_base_form": true, "ipa": "/bɔrd/", "phonetic": "BORD"}]}
-{"guid": "N08_165", "forms": [{"grammatical_form": "noun/en_singular", "text": "piece", "is_base_form": true, "ipa": "/piːs/", "phonetic": "PEES"}]}
-{"guid": "N08_166", "forms": [{"grammatical_form": "noun/en_singular", "text": "counter", "is_base_form": true, "ipa": "/ˈkaʊntər/", "phonetic": "KOWN-ter"}]}
-{"guid": "N08_167", "forms": [{"grammatical_form": "noun/en_singular", "text": "token", "is_base_form": true, "ipa": "/ˈtoʊkən/", "phonetic": "TOH-kuhn"}]}
-{"guid": "N08_168", "forms": [{"grammatical_form": "noun/en_singular", "text": "tile", "is_base_form": true, "ipa": "/taɪl/", "phonetic": "TYLE"}]}
-{"guid": "N08_169", "forms": [{"grammatical_form": "noun/en_singular", "text": "domino", "is_base_form": true, "ipa": "/ˈdɑmənoʊ/", "phonetic": "DOM-uh-noh"}]}
-{"guid": "N08_170", "forms": [{"grammatical_form": "noun/en_singular", "text": "die", "is_base_form": true, "ipa": "/daɪ/", "phonetic": "DYE"}]}
-{"guid": "N08_171", "forms": [{"grammatical_form": "noun/en_singular", "text": "dice", "is_base_form": true, "ipa": "/daɪs/", "phonetic": "DICE"}]}
 {"guid": "N08_172", "forms": [{"grammatical_form": "noun/en_singular", "text": "chessboard", "is_base_form": true, "ipa": "/ˈtʃɛsˌbɔrd/", "phonetic": "CHESS-board"}]}
 {"guid": "N08_173", "forms": [{"grammatical_form": "noun/en_singular", "text": "king", "is_base_form": true, "ipa": "/kɪŋ/", "phonetic": "KING"}]}
 {"guid": "N08_174", "forms": [{"grammatical_form": "noun/en_singular", "text": "rook", "is_base_form": true, "ipa": "/rʊk/", "phonetic": "ROOK"}]}
@@ -147,3 +122,5 @@
 {"guid": "N08_225", "forms": [{"grammatical_form": "noun/en_singular", "text": "treat", "is_base_form": true, "ipa": "/triːt/", "phonetic": "TREET"}]}
 {"guid": "N08_226", "variants": [{"kind": "spelling", "key": "make-up", "forms": [{"grammatical_form": "noun/en_singular", "text": "make-up", "is_base_form": true}]}]}
 {"guid": "N08_227", "forms": [{"grammatical_form": "noun/en_singular", "text": "second hand", "is_base_form": true}]}
+{"guid": "N08_228", "forms": [{"grammatical_form": "noun/en_singular", "text": "shampoo", "is_base_form": true, "ipa": "/ʃæmˈpuː/", "phonetic": "sham-POO"}]}
+{"guid": "N08_229", "forms": [{"grammatical_form": "noun/en_singular", "text": "tank", "is_base_form": true, "ipa": "/tæŋk/", "phonetic": "TANGK"}]}

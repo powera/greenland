@@ -1,27 +1,11 @@
 {"guid": "N10_012", "forms": [{"grammatical_form": "noun/en_singular", "text": "roller coaster", "is_base_form": true}]}
-{"guid": "N10_013", "forms": [{"grammatical_form": "noun/en_singular", "text": "jigsaw puzzle", "is_base_form": true}]}
-{"guid": "N10_014", "forms": [{"grammatical_form": "noun/en_singular", "text": "crossword puzzle", "is_base_form": true}]}
-{"guid": "N10_015", "forms": [{"grammatical_form": "noun/en_singular", "text": "chess board", "is_base_form": true}]}
-{"guid": "N10_016", "forms": [{"grammatical_form": "noun/en_singular", "text": "short story", "is_base_form": true}]}
-{"guid": "N10_017", "forms": [{"grammatical_form": "noun/en_singular", "text": "comic book", "is_base_form": true}]}
-{"guid": "N10_018", "forms": [{"grammatical_form": "noun/en_singular", "text": "talk show", "is_base_form": true}]}
 {"guid": "N10_019", "forms": [{"grammatical_form": "noun/en_singular", "text": "halo", "is_base_form": true, "ipa": "/ˈheɪloʊ/", "phonetic": "HAY-loh"}]}
-{"guid": "N10_020", "forms": [{"grammatical_form": "noun/en_singular", "text": "musical", "is_base_form": true, "ipa": "/ˈmjuzɪkəl/", "phonetic": "MYOO-zi-kuhl"}]}
 {"guid": "N10_021", "forms": [{"grammatical_form": "noun/en_singular", "text": "animation", "is_base_form": true, "ipa": "/ˌænəˈmeɪʃən/", "phonetic": "an-uh-MAY-shun"}]}
-{"guid": "N10_022", "forms": [{"grammatical_form": "noun/en_singular", "text": "novel", "is_base_form": true, "ipa": "/ˈnɑvəl/", "phonetic": "NOV-ul"}]}
-{"guid": "N10_023", "forms": [{"grammatical_form": "noun/en_singular", "text": "melody", "is_base_form": true, "ipa": "/ˈmɛlədi/", "phonetic": "MEL-uh-dee"}]}
-{"guid": "N10_024", "forms": [{"grammatical_form": "noun/en_singular", "text": "literature", "is_base_form": true, "ipa": "/ˈlɪtərətʃər/", "phonetic": "LIT-er-uh-cher"}]}
 {"guid": "N10_025", "forms": [{"grammatical_form": "noun/en_singular", "text": "harp", "is_base_form": true, "ipa": "/hɑrp/", "phonetic": "HARP"}]}
 {"guid": "N10_026", "forms": [{"grammatical_form": "noun/en_singular", "text": "edition", "is_base_form": true, "ipa": "/ɪˈdɪʃən/", "phonetic": "uh-DISH-un"}]}
 {"guid": "N10_027", "forms": [{"grammatical_form": "noun/en_singular", "text": "edition", "is_base_form": true, "ipa": "/ɪˈdɪʃən/", "phonetic": "uh-DISH-un"}]}
-{"guid": "N10_028", "forms": [{"grammatical_form": "noun/en_singular", "text": "drama", "is_base_form": true, "ipa": "/ˈdrɑːmə/", "phonetic": "DRAH-muh"}]}
-{"guid": "N10_029", "forms": [{"grammatical_form": "noun/en_singular", "text": "opera", "is_base_form": true, "ipa": "/ˈɑːpərə/", "phonetic": "OP-er-uh"}]}
 {"guid": "N10_030", "forms": [{"grammatical_form": "noun/en_singular", "text": "arts", "is_base_form": true, "ipa": "/ɑrts/", "phonetic": "AARTS"}]}
-{"guid": "N10_031", "forms": [{"grammatical_form": "noun/en_singular", "text": "comedy", "is_base_form": true, "ipa": "/ˈkɑːmədi/", "phonetic": "KOM-uh-dee"}]}
 {"guid": "N10_032", "forms": [{"grammatical_form": "noun/en_singular", "text": "drum", "is_base_form": true, "ipa": "/drʌm/", "phonetic": "DRUM"}]}
-{"guid": "N10_033", "forms": [{"grammatical_form": "noun/en_singular", "text": "poem", "is_base_form": true, "ipa": "/ˈpoʊəm/", "phonetic": "POH-um"}]}
-{"guid": "N10_034", "forms": [{"grammatical_form": "noun/en_singular", "text": "dialogue", "is_base_form": true, "ipa": "/ˈdaɪəˌlɔɡ/", "phonetic": "DYE-uh-log"}]}
-{"guid": "N10_035", "forms": [{"grammatical_form": "noun/en_singular", "text": "ballet", "is_base_form": true, "ipa": "/bæˈleɪ/", "phonetic": "ba-LAY"}]}
 {"guid": "N10_036", "forms": [{"grammatical_form": "noun/en_singular", "text": "masterpiece", "is_base_form": true, "ipa": "/ˈmæstɚˌpis/", "phonetic": "MAS-ter-pees"}]}
 {"guid": "N10_037", "forms": [{"grammatical_form": "noun/en_singular", "text": "circus", "is_base_form": true, "ipa": "/ˈsɝːkəs/", "phonetic": "SUR-kus"}]}
 {"guid": "N10_038", "forms": [{"grammatical_form": "noun/en_singular", "text": "exhibition", "is_base_form": true, "ipa": "/ˌɛksəˈbɪʃən/", "phonetic": "ek-suh-BISH-un"}]}
@@ -82,3 +66,5 @@
 {"guid": "N10_093", "forms": [{"grammatical_form": "noun/en_singular", "text": "rocket", "is_base_form": true, "ipa": "/ˈrɑkɪt/", "phonetic": "ROK-it"}]}
 {"guid": "N10_094", "forms": [{"grammatical_form": "noun/en_singular", "text": "trophy", "is_base_form": true, "ipa": "/ˈtroʊfi/", "phonetic": "TROH-fee"}]}
 {"guid": "N10_095", "forms": [{"grammatical_form": "noun/en_singular", "text": "medal", "is_base_form": true, "ipa": "/ˈmɛdəl/", "phonetic": "MED-uhl"}]}
+{"guid": "N10_096", "forms": [{"grammatical_form": "noun/en_singular", "text": "piano", "is_base_form": true, "ipa": "/piˈænoʊ/", "phonetic": "pee-AN-oh"}]}
+{"guid": "N10_098", "forms": [{"grammatical_form": "noun/en_singular", "text": "musical instrument", "is_base_form": true}]}

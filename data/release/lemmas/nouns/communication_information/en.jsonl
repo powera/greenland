@@ -22,7 +22,6 @@
 {"guid": "N50_027", "forms": [{"grammatical_form": "noun/en_singular", "text": "photo", "is_base_form": true}, {"grammatical_form": "noun/en_plural", "text": "photos", "is_base_form": false}]}
 {"guid": "N50_039", "forms": [{"grammatical_form": "noun/en_singular", "text": "shopping list", "is_base_form": true}]}
 {"guid": "N50_040", "forms": [{"grammatical_form": "noun/en_singular", "text": "report card", "is_base_form": true}]}
-{"guid": "N50_041", "forms": [{"grammatical_form": "noun/en_singular", "text": "parking ticket", "is_base_form": true}]}
 {"guid": "N50_042", "forms": [{"grammatical_form": "noun/en_singular", "text": "driver's license", "is_base_form": true}]}
 {"guid": "N50_043", "forms": [{"grammatical_form": "noun/en_singular", "text": "boarding pass", "is_base_form": true}]}
 {"guid": "N50_044", "forms": [{"grammatical_form": "noun/en_singular", "text": "middle name", "is_base_form": true}]}
@@ -37,9 +36,7 @@
 {"guid": "N50_053", "forms": [{"grammatical_form": "noun/en_singular", "text": "graph", "is_base_form": true, "ipa": "/ɡræf/", "phonetic": "GRAF"}]}
 {"guid": "N50_054", "forms": [{"grammatical_form": "noun/en_singular", "text": "lemma", "is_base_form": true, "ipa": "/ˈlɛm.ə/", "phonetic": "LEM-uh"}]}
 {"guid": "N50_055", "forms": [{"grammatical_form": "noun/en_singular", "text": "incompleteness", "is_base_form": true, "ipa": "/ˌɪnkəmˈpliːtnəs/", "phonetic": "in-com-PLETE-ness"}]}
-{"guid": "N50_056", "forms": [{"grammatical_form": "noun/en_singular", "text": "boom", "is_base_form": true, "ipa": "/bum/", "phonetic": "BOOM"}]}
 {"guid": "N50_057", "forms": [{"grammatical_form": "noun/en_singular", "text": "episode", "is_base_form": true, "ipa": "/ˈɛpɪsoʊd/", "phonetic": "EP-uh-sohd"}]}
-{"guid": "N50_058", "forms": [{"grammatical_form": "noun/en_singular", "text": "pop", "is_base_form": true, "ipa": "/pɑp/", "phonetic": "POP"}]}
 {"guid": "N50_059", "forms": [{"grammatical_form": "noun/en_singular", "text": "dialogue", "is_base_form": true, "ipa": "/ˈdaɪəˌlɔɡ/", "phonetic": "DYE-uh-log"}]}
 {"guid": "N50_060", "forms": [{"grammatical_form": "noun/en_singular", "text": "dialogue", "is_base_form": true, "ipa": "/ˈdaɪəˌlɔɡ/", "phonetic": "DYE-uh-log"}]}
 {"guid": "N50_061", "forms": [{"grammatical_form": "noun/en_singular", "text": "poetry", "is_base_form": true, "ipa": "/ˈpoʊətri/", "phonetic": "POH-uh-tree"}]}
@@ -74,7 +71,6 @@
 {"guid": "N50_090", "forms": [{"grammatical_form": "noun/en_singular", "text": "narration", "is_base_form": true, "ipa": "/nəˈreɪʃən/", "phonetic": "na-RAI-shun"}]}
 {"guid": "N50_091", "forms": [{"grammatical_form": "noun/en_singular", "text": "transmitter", "is_base_form": true, "ipa": "/trænzˈmɪtər/", "phonetic": "trans-MIT-er"}]}
 {"guid": "N50_092", "forms": [{"grammatical_form": "noun/en_singular", "text": "authentication", "is_base_form": true, "ipa": "/ɔˌθɛntəˈkeɪʃən/", "phonetic": "aw-then-tuh-KAY-shun"}]}
-{"guid": "N50_093", "forms": [{"grammatical_form": "noun/en_singular", "text": "resonance", "is_base_form": true, "ipa": "/ˈrɛzənəns/", "phonetic": "REZ-uh-nuhns"}]}
 {"guid": "N50_094", "forms": [{"grammatical_form": "noun/en_singular", "text": "quotation", "is_base_form": true, "ipa": "/kwoʊˈteɪʃən/", "phonetic": "kwoh-TAY-shun"}]}
 {"guid": "N50_095", "forms": [{"grammatical_form": "noun/en_singular", "text": "harassment", "is_base_form": true, "ipa": "/həˈræsmənt/", "phonetic": "huh-RASS-ment"}]}
 {"guid": "N50_096", "forms": [{"grammatical_form": "noun/en_singular", "text": "citation", "is_base_form": true, "ipa": "/saɪˈteɪʃən/", "phonetic": "sy-TAY-shun"}]}
@@ -109,9 +105,6 @@
 {"guid": "N50_133", "forms": [{"grammatical_form": "noun/en_singular", "text": "vernacular", "is_base_form": true, "ipa": "/vəˈnækjələr/", "phonetic": "vuh-NAK-yuh-ler"}]}
 {"guid": "N50_134", "forms": [{"grammatical_form": "noun/en_singular", "text": "register", "is_base_form": true, "ipa": "/ˈrɛdʒɪstɚ/", "phonetic": "REJ-uh-ster"}]}
 {"guid": "N50_135", "forms": [{"grammatical_form": "noun/en_singular", "text": "corpus", "is_base_form": true, "ipa": "/ˈkɔrpəs/", "phonetic": "KOR-pus"}]}
-{"guid": "N50_141", "forms": [{"grammatical_form": "noun/en_singular", "text": "clap", "is_base_form": true, "ipa": "/klæp/", "phonetic": "KLAP"}]}
-{"guid": "N50_142", "forms": [{"grammatical_form": "noun/en_singular", "text": "English", "is_base_form": true, "ipa": "/ˈɪŋɡlɪʃ/", "phonetic": "ING-glish"}]}
-{"guid": "N50_143", "forms": [{"grammatical_form": "noun/en_singular", "text": "tick", "is_base_form": true, "ipa": "/tɪk/", "phonetic": "TIK"}]}
 {"guid": "N50_144", "forms": [{"grammatical_form": "noun/en_singular", "text": "video", "is_base_form": true, "ipa": "/ˈvɪdiˌoʊ/", "phonetic": "VID-ee-oh"}]}
 {"guid": "N50_145", "forms": [{"grammatical_form": "noun/en_singular", "text": "address", "is_base_form": true, "ipa": "/əˈdrɛs/", "phonetic": "UH-DRES"}]}
 {"guid": "N50_146", "forms": [{"grammatical_form": "noun/en_singular", "text": "chat", "is_base_form": true, "ipa": "/tʃæt/", "phonetic": "CHAT"}]}
@@ -134,3 +127,4 @@
 {"guid": "N50_163", "forms": [{"grammatical_form": "noun/en_singular", "text": "press release", "is_base_form": true}]}
 {"guid": "N50_165", "forms": [{"grammatical_form": "noun/en_singular", "text": "oral translation", "is_base_form": true}]}
 {"guid": "N50_166", "forms": [{"grammatical_form": "noun/en_singular", "text": "background music", "is_base_form": true}]}
+{"guid": "N50_194", "forms": [{"grammatical_form": "noun/en_singular", "text": "vocabulary", "is_base_form": true, "ipa": "/voʊˈkæbjəˌlɛri/", "phonetic": "voh-KAB-yuh-lair-ee"}]}

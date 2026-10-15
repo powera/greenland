@@ -2,17 +2,13 @@
 {"guid": "N15_002", "forms": [{"grammatical_form": "noun/en_singular", "text": "carbon dioxide", "is_base_form": true, "ipa": "/ˈkɑrbən ˌdaɪ ɑːkˌsaɪd/", "phonetic": "CAR-buhn DYE-ox-aid"}]}
 {"guid": "N15_003", "forms": [{"grammatical_form": "noun/en_singular", "text": "lithium", "is_base_form": true, "ipa": "/ˈlɪθ.i.əm/", "phonetic": "LITH-ee-əm"}]}
 {"guid": "N15_009", "forms": [{"grammatical_form": "noun/en_singular", "text": "acid", "is_base_form": true, "ipa": "/ˈæs.ɪd/", "phonetic": "AS-id"}, {"grammatical_form": "noun/en_plural", "text": "acids", "is_base_form": false, "ipa": "/ˈæsɪdz/", "phonetic": "AS-ids"}]}
-{"guid": "N15_011", "forms": [{"grammatical_form": "noun/en_singular", "text": "molecule", "is_base_form": true, "ipa": "/ˈmɑləˌkjuːl/", "phonetic": "MOL-uh-kyool"}]}
-{"guid": "N15_012", "forms": [{"grammatical_form": "noun/en_singular", "text": "ion", "is_base_form": true, "ipa": "/ˈaɪɑn/", "phonetic": "EYE-on"}]}
 {"guid": "N15_013", "forms": [{"grammatical_form": "noun/en_singular", "text": "sodium", "is_base_form": true, "ipa": "/ˈsoʊdiəm/", "phonetic": "SO-dee-um"}]}
 {"guid": "N15_014", "forms": [{"grammatical_form": "noun/en_singular", "text": "carbonate", "is_base_form": true, "ipa": "/ˈkɑrbəˌneɪt/", "phonetic": "KAR-buh-nate"}]}
 {"guid": "N15_015", "forms": [{"grammatical_form": "noun/en_singular", "text": "chloride", "is_base_form": true, "ipa": "/ˈklɔrˌaɪd/", "phonetic": "KLOR-ide"}]}
-{"guid": "N15_016", "forms": [{"grammatical_form": "noun/en_singular", "text": "electron", "is_base_form": true, "ipa": "/ɪˈlɛktrɑn/", "phonetic": "ih-LEK-tron"}]}
 {"guid": "N15_017", "forms": [{"grammatical_form": "noun/en_singular", "text": "carbon", "is_base_form": true, "ipa": "/ˈkɑrbən/", "phonetic": "KAR-bun"}]}
 {"guid": "N15_018", "forms": [{"grammatical_form": "noun/en_singular", "text": "nitrate", "is_base_form": true, "ipa": "/ˈnaɪtreɪt/", "phonetic": "NYE-trayt"}]}
 {"guid": "N15_019", "forms": [{"grammatical_form": "noun/en_singular", "text": "oxide", "is_base_form": true, "ipa": "/ˈɑːksaɪd/", "phonetic": "OK-side"}]}
 {"guid": "N15_020", "forms": [{"grammatical_form": "noun/en_singular", "text": "catalyst", "is_base_form": true, "ipa": "/ˈkætəlɪst/", "phonetic": "KAT-uh-list"}]}
-{"guid": "N15_021", "forms": [{"grammatical_form": "noun/en_singular", "text": "venom", "is_base_form": true, "ipa": "/ˈvɛnəm/", "phonetic": "VEN-um"}]}
 {"guid": "N15_022", "forms": [{"grammatical_form": "noun/en_singular", "text": "compound", "is_base_form": true, "ipa": "/ˈkɑm.paʊnd/", "phonetic": "KOM-pound"}]}
 {"guid": "N15_023", "forms": [{"grammatical_form": "noun/en_singular", "text": "collagen", "is_base_form": true, "ipa": "/ˈkɑːlədʒən/", "phonetic": "KOL-uh-jen"}]}
 {"guid": "N15_024", "forms": [{"grammatical_form": "noun/en_singular", "text": "propellant", "is_base_form": true, "ipa": "/prəˈpɛlənt/", "phonetic": "pruh-PEL-uhnt"}]}

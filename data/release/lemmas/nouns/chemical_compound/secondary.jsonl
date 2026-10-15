@@ -8,17 +8,13 @@
 {"guid": "N15_008", "translations": {"ro": "clor", "pl": "chlor", "th": "คลอรีน", "ms": "klorin", "ta": "குளோறின்", "kn": "ಕ್ಲೋರಿನ್", "uk": "хлор", "bn": "ক্লোরিন", "hi": "क्लोरीन", "tr": "klor"}}
 {"guid": "N15_009", "translations": {"ro": "acid", "pl": "kwas", "th": "กรด", "ms": "asid", "ta": "அமிலம்", "kn": "ಅಮ್ಲ", "uk": "кислота", "bn": "অম্ল", "hi": "अम्ल", "tr": "asit"}}
 {"guid": "N15_010", "translations": {"ro": "bază", "pl": "zasada", "th": "เบส", "ms": "bes", "ta": "கலிம்பு", "kn": "ಅಧಾರಕ", "uk": "основа", "bn": "ক্ষার", "hi": "क्षार", "tr": "baz"}}
-{"guid": "N15_011", "translations": {"ms": "molekul", "hi": "अणु", "tr": "molekül"}}
-{"guid": "N15_012", "translations": {"ms": "ion", "hi": "आयन", "tr": "iyon"}}
 {"guid": "N15_013", "translations": {"ms": "natrium", "hi": "सोडियम", "tr": "sodyum"}}
 {"guid": "N15_014", "translations": {"ms": "karbonat", "hi": "कार्बोनेट", "tr": "karbonat"}}
 {"guid": "N15_015", "translations": {"ms": "klorida", "hi": "क्लोराइड", "tr": "klorür"}}
-{"guid": "N15_016", "translations": {"ms": "elektron", "hi": "इलेक्ट्रॉन", "tr": "elektron"}}
 {"guid": "N15_017", "translations": {"ms": "karbon", "hi": "कार्बन", "tr": "karbon"}}
 {"guid": "N15_018", "translations": {"ms": "nitrat", "hi": "नाइट्रेट", "tr": "nitrat"}}
 {"guid": "N15_019", "translations": {"ms": "oksida", "hi": "ऑक्साइड", "tr": "oksit"}}
 {"guid": "N15_020", "translations": {"ms": "pemangkin", "hi": "उत्प्रेरक", "tr": "katalizör"}}
-{"guid": "N15_021", "translations": {"ms": "bisa", "hi": "विष", "tr": "zehir"}}
 {"guid": "N15_022", "translations": {"ms": "sebatian", "hi": "यौगिक", "tr": "bileşik"}}
 {"guid": "N15_023", "translations": {"ms": "kolagen", "hi": "कोलेजन", "tr": "kolajen"}}
 {"guid": "N15_024", "translations": {"ms": "propelan", "hi": "प्रणोदक", "tr": "itici madde"}}

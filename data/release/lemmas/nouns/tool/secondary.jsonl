@@ -17,30 +17,20 @@
 {"guid": "N12_065", "translations": {"ro": "pensulă", "pl": "pędzel", "th": "แปรงทาสี", "ms": "berus cat", "ta": "வண்ணத்தூரிகை", "kn": "ಬಣ್ಣದ ಕುಂಚ", "uk": "пензель", "bn": "ব্রাশ", "hi": "ब्रश", "tr": "boya fırçası"}}
 {"guid": "N12_066", "translations": {"ro": "unealtă", "pl": "narzędzie", "th": "เครื่องมือ", "ms": "alat", "ta": "கருவி", "kn": "ಉಪಕರಣ", "uk": "інструмент", "bn": "সরঞ্জাম", "hi": "औज़ार", "tr": "alet"}}
 {"guid": "N12_067", "translations": {"ro": "aparat", "pl": "aparat", "th": "อุปกรณ์", "ms": "alat", "ta": "சாதனம்", "kn": "ಸಾಧನ", "uk": "прилад", "bn": "যন্ত্র", "hi": "उपकरण", "tr": "cihaz"}}
-{"guid": "N12_068", "translations": {"ro": "frână", "pl": "hamulec", "th": "เบรก", "ms": "brek", "ta": "பிரேக்", "kn": "ಬ್ರೇಕ್", "uk": "гальмо", "bn": "ব্রেক", "hi": "ब्रेक", "tr": "fren"}}
 {"guid": "N12_069", "translations": {"ro": "lanț", "pl": "łańcuch", "th": "โซ่", "ms": "rantai", "ta": "சங்கிலி", "kn": "ಸರಪಳಿ", "uk": "ланцюг", "bn": "চেইন", "hi": "ज़ंजीर", "tr": "zincir"}}
-{"guid": "N12_070", "translations": {"ro": "motor", "pl": "silnik", "th": "เครื่องยนต์", "ms": "enjin", "ta": "இயந்திரம்", "kn": "ಎಂಜಿನ್", "uk": "двигун", "bn": "ইঞ্জিন", "hi": "इंजन", "tr": "motor"}}
 {"guid": "N12_071", "translations": {"ro": "cârlig", "pl": "hak", "th": "ตะขอ", "ms": "cangkuk", "ta": "கொக்கி", "kn": "ಕೊಕ್ಕೆ", "uk": "гачок", "bn": "কাঞ্জি", "hi": "हुक", "tr": "kanca"}}
 {"guid": "N12_072", "translations": {"ro": "instrument", "pl": "instrument", "th": "เครื่องมือ", "ms": "alat", "ta": "கருவி", "kn": "ಸಾಧನ", "uk": "прилад", "bn": "যন্ত্র", "hi": "उपकरण", "tr": "alet"}}
 {"guid": "N12_073", "translations": {"ro": "plug", "pl": "pług", "th": "คันไถ", "ms": "bajak", "ta": "கலப்பை", "kn": "ನೇಗಿಲು", "uk": "плуг", "bn": "হল", "hi": "हल", "tr": "saban"}}
 {"guid": "N12_074", "translations": {"ro": "pompă", "pl": "pompa", "th": "ปั๊ม", "ms": "pam", "ta": "பம்ப்", "kn": "ಪಂಪ್", "uk": "насос", "bn": "পাম্প", "hi": "पम्प", "tr": "pompa"}}
 {"guid": "N12_075", "translations": {"ro": "cazma", "pl": "szpadel", "th": "พลั่ว", "ms": "penyodok", "ta": "மண்வெட்டி", "kn": "ಗುದ್ದಲಿ", "uk": "лопата", "bn": "ফাঁকা-কোদাল", "hi": "फावड़ा", "tr": "kürek"}}
-{"guid": "N12_076", "translations": {"ro": "roată", "pl": "koło", "th": "ล้อ", "ms": "roda", "ta": "சக்கரம்", "kn": "ಚಕ್ರ", "uk": "колесо", "bn": "চাকা", "hi": "पहिया", "tr": "tekerlek"}}
 {"guid": "N12_077", "translations": {"ro": "ștampilă", "pl": "pieczątka", "th": "ตรายาง", "ms": "cap", "ta": "முத்திரை", "kn": "ಮುದ್ರೆ", "uk": "печатка", "bn": "মুদ্রাক্ষর", "hi": "मुहर", "tr": "damga"}}
 {"guid": "N12_078", "translations": {"ms": "kabel sambungan", "hi": "एक्सटेंशन कॉर्ड", "tr": "uzatma kablosu"}}
-{"guid": "N12_079", "translations": {"ms": "papan pemotong", "hi": "काटने का तख्ता", "tr": "kesme tahtası"}}
-{"guid": "N12_080", "translations": {"ms": "kuali", "hi": "तवा", "tr": "tava"}}
-{"guid": "N12_081", "translations": {"ms": "penggelek doh", "hi": "बेलन", "tr": "oklava"}}
 {"guid": "N12_082", "translations": {"ms": "pembuka tin", "hi": "कैन खोलने वाला", "tr": "konserve açacağı"}}
 {"guid": "N12_083", "translations": {"ms": "pembuka botol", "hi": "बोतल खोलने वाला", "tr": "şişe açacağı"}}
-{"guid": "N12_084", "translations": {"ms": "cawan penyukat", "hi": "मापने वाला कप", "tr": "ölçü kabı"}}
 {"guid": "N12_085", "translations": {"ms": "alat pemadam api", "hi": "अग्निशामक यंत्र", "tr": "yangın söndürücü"}}
-{"guid": "N12_086", "translations": {"ms": "roda stereng", "hi": "स्टीयरिंग व्हील", "tr": "direksiyon simidi"}}
-{"guid": "N12_087", "translations": {"ms": "alat muzik", "hi": "वाद्य यंत्र", "tr": "müzik aleti"}}
 {"guid": "N12_088", "translations": {"ms": "mekanisme", "hi": "तंत्र", "tr": "mekanizma"}}
 {"guid": "N12_089", "translations": {"ms": "trompet", "hi": "तुरही", "tr": "trompet"}}
 {"guid": "N12_090", "translations": {"ms": "biola", "hi": "वायलिन", "tr": "keman"}}
-{"guid": "N12_091", "translations": {"ms": "sirip", "hi": "पंख", "tr": "kanatçık"}}
 {"guid": "N12_092", "translations": {"ms": "pembaris", "hi": "पैमाना", "tr": "cetvel"}}
 {"guid": "N12_093", "translations": {"ms": "kikir", "hi": "रेती", "tr": "eğe"}}
 {"guid": "N12_094", "translations": {"ms": "kabel", "hi": "तार की रस्सी", "tr": "halat"}}
@@ -60,7 +50,6 @@
 {"guid": "N12_108", "translations": {"ms": "fagot", "hi": "बासून", "tr": "fagot"}}
 {"guid": "N12_109", "translations": {"ms": "harmonika", "hi": "माउथ ऑर्गन", "tr": "armonika"}}
 {"guid": "N12_110", "translations": {"ms": "seruling rekorder", "hi": "रिकॉर्डर", "tr": "blok flüt"}}
-{"guid": "N12_111", "translations": {"ms": "pedal", "hi": "पैडल", "tr": "pedal"}}
 {"guid": "N12_112", "translations": {"ms": "alat tiup kayu", "hi": "काष्ठ वाद्य", "tr": "tahta nefesli çalgı"}}
 {"guid": "N12_113", "translations": {"ms": "roda gigi", "hi": "गियर", "tr": "dişli çark"}}
 {"guid": "N12_114", "translations": {"ms": "aci", "hi": "धुरी", "tr": "mil"}}
@@ -72,11 +61,7 @@
 {"guid": "N12_120", "translations": {"ms": "payung terjun", "hi": "पैराशूट", "tr": "paraşüt"}}
 {"guid": "N12_121", "translations": {"ms": "pahat", "hi": "छेनी", "tr": "keski"}}
 {"guid": "N12_122", "translations": {"ms": "pengapit", "hi": "क्लैंप", "tr": "kelepçe"}}
-{"guid": "N12_123", "translations": {"ms": "penapis", "hi": "छलनी", "tr": "elek"}}
 {"guid": "N12_124", "translations": {"ms": "senduk", "hi": "कलछी", "tr": "kepçe"}}
 {"guid": "N12_125", "translations": {"ms": "perkakas", "hi": "बर्तन", "tr": "mutfak gereci"}}
 {"guid": "N12_126", "translations": {"ms": "pengubah", "hi": "संशोधक", "tr": "değiştirici"}}
 {"guid": "N12_127", "translations": {"ms": "ligatur", "hi": "बंधसूत्र", "tr": "ligatür"}}
-{"guid": "N12_128", "translations": {"ms": "raket tenis", "hi": "टेनिस रैकेट", "tr": "tenis raketi"}}
-{"guid": "N12_129", "translations": {"ms": "kasut luncur", "hi": "स्केट", "tr": "paten"}}
-{"guid": "N12_130", "translations": {"ms": "ski", "hi": "स्की", "tr": "kayak"}}

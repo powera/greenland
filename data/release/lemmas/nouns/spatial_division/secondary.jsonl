@@ -1,0 +1,13 @@
+{"guid": "N65_054", "translations": {"ro": "spate", "pl": "tył", "th": "ด้านหลัง", "ms": "bahagian belakang", "ta": "பின்", "kn": "ಹಿನ್ನೆಲೆ", "uk": "зад", "bn": "পেছন", "hi": "पीठ", "tr": "arka"}}
+{"guid": "N65_055", "translations": {"ro": "est", "pl": "wschód", "th": "ตะวันออก", "ms": "timur", "ta": "கிழக்கு", "kn": "ಪೂರ್ವ", "uk": "схід", "bn": "পূর্ব", "hi": "पूर्व", "tr": "doğu"}}
+{"guid": "N65_056", "translations": {"ro": "interior", "pl": "wnętrze", "th": "ภายใน", "ms": "bahagian dalam", "ta": "உள் பகுதி", "kn": "ಒಳಭಾಗ", "uk": "внутрішність", "bn": "অভ্যন্তর", "hi": "अंदर", "tr": "iç"}}
+{"guid": "N65_057", "translations": {"ro": "nord", "pl": "północ", "th": "เหนือ", "ms": "utara", "ta": "வடக்கு", "kn": "ಉತ್ತರ", "uk": "північ", "bn": "উত্তর", "hi": "उत्तّر", "tr": "kuzey"}}
+{"guid": "N65_058", "translations": {"ms": "timur laut", "hi": "उत्तर-पूर्व", "tr": "kuzeydoğu"}}
+{"guid": "N65_059", "translations": {"ms": "barat laut", "hi": "उत्तर-पश्चिम", "tr": "kuzeybatı"}}
+{"guid": "N65_060", "translations": {"ro": "exterior", "pl": "zewnętrze", "th": "ภายนอก", "ms": "luar", "ta": "வெளிப்பகுதி", "kn": "ಬಾಹ್ಯ ಭಾಗ", "uk": "зовні", "bn": "বাহির", "hi": "बाहरी", "tr": "dışarısı"}}
+{"guid": "N65_061", "translations": {"ro": "sud", "pl": "południe", "th": "ใต้", "ms": "selatan", "ta": "தெற்கு", "kn": "ದಕ್ಷಿಣ", "uk": "південь", "bn": "দক্ষিণ", "hi": "दक्षिण", "tr": "güney"}}
+{"guid": "N65_062", "translations": {"ms": "tenggara", "hi": "दक्षिण-पूर्व", "tr": "güneydoğu"}}
+{"guid": "N65_063", "translations": {"ms": "barat daya", "hi": "दक्षिण-पश्चिम", "tr": "güneybatı"}}
+{"guid": "N65_064", "translations": {"ro": "vest", "pl": "zachód", "th": "ตะวันตก", "ms": "barat", "ta": "மேற்கு", "kn": "ಪಶ್ಚಿಮ", "uk": "захід", "bn": "পশ্চিম", "hi": "पश्चिम", "tr": "batı"}}
+{"guid": "N65_065", "translations": {"ms": "sektor", "hi": "क्षेत्र", "tr": "sektör"}}
+{"guid": "N65_066", "translations": {"ms": "bahagian", "hi": "खंड", "tr": "bölüm"}}

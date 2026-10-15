@@ -33,9 +33,7 @@
 {"guid": "N50_053", "grammar_facts": [{"fact_type": "grammatical_gender", "fact_value": "masculine"}]}
 {"guid": "N50_054", "grammar_facts": [{"fact_type": "grammatical_gender", "fact_value": "feminine"}]}
 {"guid": "N50_055", "grammar_facts": [{"fact_type": "grammatical_gender", "fact_value": "masculine"}]}
-{"guid": "N50_056", "grammar_facts": [{"fact_type": "grammatical_gender", "fact_value": "masculine"}]}
 {"guid": "N50_057", "grammar_facts": [{"fact_type": "grammatical_gender", "fact_value": "masculine"}]}
-{"guid": "N50_058", "grammar_facts": [{"fact_type": "grammatical_gender", "fact_value": "masculine"}]}
 {"guid": "N50_059", "grammar_facts": [{"fact_type": "grammatical_gender", "fact_value": "masculine"}]}
 {"guid": "N50_060", "grammar_facts": [{"fact_type": "grammatical_gender", "fact_value": "masculine"}]}
 {"guid": "N50_061", "grammar_facts": [{"fact_type": "grammatical_gender", "fact_value": "feminine"}]}
@@ -61,7 +59,6 @@
 {"guid": "N50_085", "grammar_facts": [{"fact_type": "grammatical_gender", "fact_value": "feminine"}]}
 {"guid": "N50_089", "grammar_facts": [{"fact_type": "grammatical_gender", "fact_value": "masculine"}]}
 {"guid": "N50_090", "grammar_facts": [{"fact_type": "grammatical_gender", "fact_value": "masculine"}]}
-{"guid": "N50_093", "grammar_facts": [{"fact_type": "grammatical_gender", "fact_value": "masculine"}]}
 {"guid": "N50_094", "grammar_facts": [{"fact_type": "grammatical_gender", "fact_value": "feminine"}]}
 {"guid": "N50_095", "grammar_facts": [{"fact_type": "grammatical_gender", "fact_value": "masculine"}]}
 {"guid": "N50_096", "grammar_facts": [{"fact_type": "grammatical_gender", "fact_value": "feminine"}]}
@@ -92,8 +89,6 @@
 {"guid": "N50_136", "grammar_facts": [{"fact_type": "grammatical_gender", "fact_value": "feminine"}]}
 {"guid": "N50_139", "grammar_facts": [{"fact_type": "grammatical_gender", "fact_value": "masculine"}]}
 {"guid": "N50_140", "grammar_facts": [{"fact_type": "grammatical_gender", "fact_value": "masculine"}]}
-{"guid": "N50_141", "grammar_facts": [{"fact_type": "grammatical_gender", "fact_value": "masculine"}]}
-{"guid": "N50_143", "grammar_facts": [{"fact_type": "grammatical_gender", "fact_value": "masculine"}]}
 {"guid": "N50_145", "grammar_facts": [{"fact_type": "grammatical_gender", "fact_value": "masculine"}]}
 {"guid": "N50_147", "grammar_facts": [{"fact_type": "grammatical_gender", "fact_value": "masculine"}]}
 {"guid": "N50_149", "grammar_facts": [{"fact_type": "grammatical_gender", "fact_value": "masculine"}]}
@@ -104,3 +99,4 @@
 {"guid": "N50_157", "grammar_facts": [{"fact_type": "grammatical_gender", "fact_value": "masculine"}]}
 {"guid": "N50_158", "grammar_facts": [{"fact_type": "grammatical_gender", "fact_value": "masculine"}]}
 {"guid": "N50_159", "grammar_facts": [{"fact_type": "grammatical_gender", "fact_value": "masculine"}]}
+{"guid": "N50_194", "grammar_facts": [{"fact_type": "grammatical_gender", "fact_value": "masculine"}]}

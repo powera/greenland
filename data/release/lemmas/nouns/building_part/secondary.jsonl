@@ -13,15 +13,12 @@
 {"guid": "N47_013", "translations": {"ro": "coș de fum", "pl": "komin", "th": "ปล่องไฟ", "ms": "cerobong asap", "ta": "புகைபோக்கி", "kn": "ಚಿಮಣಿ", "uk": "димар", "bn": "চিমনি", "hi": "चिमनी", "tr": "baca", "bs": "dimnjak"}}
 {"guid": "N47_014", "translations": {"ro": "balcon", "pl": "balkon", "th": "ระเบียง", "ms": "balkoni", "ta": "மாடம்", "kn": "ಬಾಲ್ಕನಿ", "uk": "балкон", "bn": "বরান্দা", "hi": "बालকনি", "tr": "balkon", "bs": "balkon"}}
 {"guid": "N47_015", "translations": {"ro": "stâlp", "pl": "filar", "th": "เสาหลัก", "ms": "tiang", "ta": "தூண்", "kn": "ಕಂಬ", "uk": "колона", "bn": "স্তম্ভ", "hi": "स्तंभ", "tr": "sütun", "bs": "stup"}}
-{"guid": "N47_016", "translations": {"ro": "gard", "pl": "płot", "th": "รั้ว", "ms": "pagar", "ta": "வேலி", "kn": "ಬೇಲಿ", "uk": "паркан", "bn": "বেড়া", "hi": "बाड़", "tr": "çit", "bs": "ograda"}}
 {"guid": "N47_017", "translations": {"ro": "treaptă", "pl": "stopień", "th": "ขั้นบันได", "ms": "anak tangga", "ta": "படி", "kn": "ಮೆಟ್ಟಿಲು", "uk": "сходинка", "bn": "ধাপ", "hi": "सीढ़ी का प़ाइয়", "tr": "basamak"}}
 {"guid": "N47_018", "translations": {"ro": "balustradă", "pl": "poręcz", "th": "ราวจับ", "ms": "susur tangan", "ta": "கைப்பிடி", "kn": "ಕೈಪಿಡಿ", "uk": "перила", "bn": "রেলিং", "hi": "रेलिंग", "tr": "korkuluk", "bs": "ograda"}}
 {"guid": "N47_019", "translations": {"ro": "grindă", "pl": "belka", "th": "คาน", "ms": "rasuk", "ta": "உத்தரம்", "kn": "ತೊಲೆ", "uk": "балка", "bn": "বলাকা", "hi": "बीम", "tr": "kiriş", "bs": "greda"}}
 {"guid": "N47_020", "translations": {"ro": "prag", "pl": "próg", "th": "ธรณีประตู", "ms": "ambang pintu", "ta": "வாசல்", "kn": "ಹೊಸ್ತಿಲು", "uk": "поріг", "bn": "দরজার চৌকাঠ", "hi": "दरवाज़े का दरवाजा", "tr": "eşik", "bs": "prag"}}
 {"guid": "N47_021", "translations": {"ro": "colț", "pl": "róg", "th": "มุม", "ms": "sudut", "ta": "மூலை", "kn": "ಮೂಲೆ", "uk": "кут", "bn": "কোণা", "hi": "कोना", "tr": "köşe"}}
-{"guid": "N47_022", "translations": {"ro": "ceas", "pl": "zegar", "th": "นาฬิกา", "ms": "jam", "ta": "கடிகாரம்", "kn": "ಗಡಿಯಾರ", "uk": "годинник", "bn": "ঘড়ি", "hi": "घड़ी", "tr": "saat"}}
 {"guid": "N47_023", "translations": {"ro": "scurgere", "pl": "odpływ", "th": "ท่อระบายน้ำ", "ms": "saluran pembuangan", "ta": "வடிகால்", "kn": "ಚರಂಡಿ", "uk": "зливна труба", "bn": "নর্দমা", "hi": "निकासी नाली", "tr": "drenaj borusu"}}
-{"guid": "N47_024", "translations": {"ro": "țarc", "pl": "zagroda", "th": "คอก", "ms": "kandang", "ta": "தொழுவம்", "kn": "ದೊಡ್ಡಿ", "uk": "хлів", "bn": "পশুখোর", "hi": "अखाड़ा", "tr": "ağıl"}}
 {"guid": "N47_025", "translations": {"ro": "rampa de scări", "pl": "bieg schodów", "th": "ช่วงบันได", "ms": "satu aras tangga", "ta": "படிக்கட்டு வரிசை", "kn": "ಮೆಟ್ಟಿಲ ಸಾಲು", "uk": "сходи", "bn": "সিঁড়ি", "hi": "सीढ़ी", "tr": "merdiven kolu"}}
 {"guid": "N47_026", "translations": {"ms": "bilik menunggu", "hi": "प्रतीक्षा कक्ष", "tr": "bekleme odası", "bs": "čekaonica"}}
 {"guid": "N47_027", "translations": {"ms": "jabatan kecemasan", "hi": "आपातकालीन विभाग", "tr": "acil servis", "bs": "hitna pomoć"}}
@@ -41,3 +38,12 @@
 {"guid": "N47_041", "translations": {"ms": "acuan hiasan", "hi": "सजावटी पट्टी", "tr": "dekoratif silme"}}
 {"guid": "N47_042", "translations": {"ms": "bilik darjah", "hi": "कक्षा-कक्ष", "tr": "derslik"}}
 {"guid": "N47_043", "translations": {"ms": "pintu masuk", "hi": "प्रवेश द्वार", "tr": "giriş"}}
+{"guid": "N47_046", "translations": {"ro": "cameră", "pl": "pokój", "th": "ห้อง", "ms": "bilik", "ta": "அறை", "kn": "ಕೋಣೆ", "uk": "кімната", "bn": "ঘর", "hi": "कमरा", "tr": "oda", "bs": "soba"}}
+{"guid": "N47_047", "translations": {"ro": "baie", "pl": "łazienka", "th": "ห้องน้ำ", "ms": "bilik mandi", "ta": "குளியலறை", "kn": "ಸ್ನಾನಗೃಹ", "uk": "ванна кімната", "bn": "বাথরুম", "hi": "बाथरूम", "tr": "banyo", "bs": "kupatilo"}}
+{"guid": "N47_048", "translations": {"ro": "dormitor", "pl": "sypialnia", "th": "ห้องนอน", "ms": "bilik tidur", "ta": "படுக்கையறை", "kn": "ಮಲಗುವ ಕೋಣೆ", "uk": "спальня", "bn": "বেডরুম", "hi": "शयनकक्ष", "tr": "yatak odası", "bs": "spavaća soba"}}
+{"guid": "N47_049", "translations": {"ro": "sufragerie", "pl": "jadalnia", "th": "ห้องรับประทานอาหาร", "ms": "ruang makan", "ta": "சாப்பாட்டு அறை", "kn": "ಊಟದ ಕೋಣೆ", "uk": "столова", "bn": "ভোজনকক্ষ", "hi": "भोजनकक्ष", "tr": "yemek odası", "bs": "trpezarija"}}
+{"guid": "N47_050", "translations": {"ro": "bucătărie", "pl": "kuchnia", "th": "ครัว", "ms": "dapur", "ta": "சமையலறை", "kn": "ಅಡುಗೆಮನೆ", "uk": "кухня", "bn": "রান্নাঘর", "hi": "रसोईघर", "tr": "mutfak", "bs": "kuhinja"}}
+{"guid": "N47_051", "translations": {"ro": "cameră de zi", "pl": "salon", "th": "ห้องนั่งเล่น", "ms": "ruang tamu", "ta": "அமர்விடம்", "kn": "ಕೂರುವ ಕೋಣೆ", "uk": "вітальня", "bn": "আসবাবঘর", "hi": "बैठकघर", "tr": "oturma odası", "bs": "dnevni boravak"}}
+{"guid": "N47_052", "translations": {"ro": "mansardă", "pl": "strych", "th": "ห้องใต้หลังคา", "ms": "loteng", "ta": "மாடி அறை", "kn": "ಮಾಳಿಗೆ", "uk": "горище", "bn": "ছাদতলা", "hi": "अटारी", "tr": "tavan arası", "bs": "potkrovlje"}}
+{"guid": "N47_053", "translations": {"ro": "subsol", "pl": "piwnica", "th": "ชั้นใต้ดิน", "ms": "ruang bawah tanah", "ta": "நிலவறை", "kn": "ನೆಲಮಾಳಿಗೆ", "uk": "підвал", "bn": "রুমঘরใต้ভূমি", "hi": "तहखाना", "tr": "bodrum", "bs": "podrum"}}
+{"guid": "N47_054", "translations": {"ro": "dulap", "pl": "szafa", "th": "ตู้เสื้อผ้า", "ms": "almari", "ta": "அலமாரி", "kn": "ಕಪಾಟು", "uk": "шафа", "bn": "অলএইভ", "hi": "अलमारी", "tr": "dolap", "bs": "ormar"}}

@@ -7,32 +7,14 @@
 {"guid": "N10_007", "translations": {"ro": "tapiserie", "pl": "gobelin", "th": "ผ้าทอลาย", "ms": "permaidani dinding", "ta": "நெசவுத்திரை", "kn": "ನೇಯ್ಗೆ ಚಿತ್ರ", "uk": "гобелен", "bn": "গোবিলেন", "hi": "गोबलेन", "tr": "duvar halısı"}}
 {"guid": "N10_008", "translations": {"ro": "ceramică", "pl": "ceramika", "th": "เครื่องปั้นดินเผา", "ms": "tembikar", "ta": "மட்பாண்டம்", "kn": "ಮಣ್ಣಿನ ಪಾತ್ರೆ", "uk": "кераміка", "bn": "মৃৎব্যঞ্জন", "hi": "मिट्टी के बर्तन", "tr": "çömlekçilik"}}
 {"guid": "N10_009", "translations": {"ro": "fotografie", "pl": "fotografia", "th": "ภาพถ่าย", "ms": "gambar", "ta": "புகைப்படம்", "kn": "ಛಾಯಾಚಿತ್ರ", "uk": "фотографія", "bn": "ফটোগ্রাফ", "hi": "फोटोग्राफ", "tr": "fotoğraf", "bs": "fotografija"}}
-{"guid": "N10_010", "translations": {"ro": "schiță", "pl": "szkic", "th": "ภาพร่าง", "ms": "lakaran", "ta": "ஓவியக்குறிப்பு", "kn": "ರೇಖಾಚಿತ್ರ", "uk": "ескіз", "bn": "স্কেচ", "hi": "स्केच", "tr": "taslak"}}
-{"guid": "N10_011", "translations": {"ro": "piesă muzicală", "pl": "utwór", "th": "เพลง", "ms": "lagu", "ta": "பாடல்", "kn": "ಹಾಡು", "uk": "трек", "bn": "ট্র্যাক", "hi": "ट्रैक", "tr": "parça", "bs": "pjesma"}}
 {"guid": "N10_012", "translations": {"ms": "kereta api luncur", "hi": "रोलर कोस्टर", "tr": "hız treni"}}
-{"guid": "N10_013", "translations": {"ms": "teka-teki jigsaw", "hi": "जिगसॉ पहेली", "tr": "yapboz"}}
-{"guid": "N10_014", "translations": {"ms": "teka silang kata", "hi": "शब्द पहेली", "tr": "bulmaca"}}
-{"guid": "N10_015", "translations": {"ms": "papan catur", "hi": "शतरंज की बिसात", "tr": "satranç tahtası"}}
-{"guid": "N10_016", "translations": {"ms": "cerita pendek", "hi": "लघुकथा", "tr": "öykü"}}
-{"guid": "N10_017", "translations": {"ms": "buku komik", "hi": "कॉमिक बुक", "tr": "çizgi roman"}}
-{"guid": "N10_018", "translations": {"ms": "rancangan bual bicara", "hi": "टॉक शो", "tr": "sohbet programı"}}
 {"guid": "N10_019", "translations": {"ms": "aureola", "hi": "प्रभामंडल", "tr": "hale"}}
-{"guid": "N10_020", "translations": {"ms": "muzikal", "hi": "संगीतमय नाटक", "tr": "müzikal"}}
 {"guid": "N10_021", "translations": {"ms": "animasi", "hi": "एनिमेशन", "tr": "animasyon"}}
-{"guid": "N10_022", "translations": {"ms": "novel", "hi": "उपन्यास", "tr": "roman"}}
-{"guid": "N10_023", "translations": {"ms": "melodi", "hi": "धुन", "tr": "melodi"}}
-{"guid": "N10_024", "translations": {"ms": "kesusasteraan", "hi": "साहित्य", "tr": "edebiyat"}}
 {"guid": "N10_025", "translations": {"ms": "harpa", "hi": "वीणा", "tr": "arp"}}
 {"guid": "N10_026", "translations": {"ms": "edisi", "hi": "संस्करण", "tr": "baskı"}}
 {"guid": "N10_027", "translations": {"ms": "edisi", "hi": "संस्करण", "tr": "baskı"}}
-{"guid": "N10_028", "translations": {"ms": "drama", "hi": "नाटक", "tr": "drama"}}
-{"guid": "N10_029", "translations": {"ms": "opera", "hi": "ओपेरा", "tr": "opera"}}
 {"guid": "N10_030", "translations": {"ms": "seni", "hi": "कलाएँ", "tr": "sanatlar"}}
-{"guid": "N10_031", "translations": {"ms": "komedi", "hi": "हास्य रचना", "tr": "komedi"}}
 {"guid": "N10_032", "translations": {"ms": "gendang", "hi": "ढोल", "tr": "davul"}}
-{"guid": "N10_033", "translations": {"ms": "puisi", "hi": "कविता", "tr": "şiir"}}
-{"guid": "N10_034", "translations": {"ms": "dialog", "hi": "संवाद", "tr": "diyalog"}}
-{"guid": "N10_035", "translations": {"ms": "balet", "hi": "बैले", "tr": "bale"}}
 {"guid": "N10_036", "translations": {"ms": "karya agung", "hi": "उत्कृष्ट कृति", "tr": "başyapıt"}}
 {"guid": "N10_037", "translations": {"ms": "sarkas", "hi": "सर्कस", "tr": "sirk"}}
 {"guid": "N10_038", "translations": {"ms": "pameran", "hi": "प्रदर्शनी", "tr": "sergi"}}
@@ -91,3 +73,6 @@
 {"guid": "N10_091", "translations": {"ms": "orang salji", "hi": "हिममानव", "tr": "kardan adam"}}
 {"guid": "N10_092", "translations": {"ms": "kalendar", "hi": "कैलेंडर", "tr": "takvim"}}
 {"guid": "N10_093", "translations": {"ms": "roket bunga api", "hi": "आतिशबाज़ी का रॉकेट", "tr": "havai fişek roketi"}}
+{"guid": "N10_096", "translations": {"ms": "piano", "hi": "पियानो", "tr": "piyano"}}
+{"guid": "N10_097", "translations": {"ro": "chitară", "pl": "gitara", "th": "กีตาร์", "ms": "gitar", "ta": "கிடார்", "kn": "ಗಿಟಾರ್", "uk": "гітара", "bn": "গিটার", "hi": "गिटार", "tr": "gitar"}}
+{"guid": "N10_098", "translations": {"ms": "alat muzik", "hi": "वाद्य यंत्र", "tr": "müzik aleti"}}

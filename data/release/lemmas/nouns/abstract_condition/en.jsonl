@@ -1,8 +1,6 @@
 {"guid": "N54_001", "forms": [{"grammatical_form": "noun/en_singular", "text": "peace", "is_base_form": true, "ipa": "/pi:s/", "phonetic": "PEE-s"}]}
 {"guid": "N54_002", "forms": [{"grammatical_form": "noun/en_singular", "text": "luck", "is_base_form": true, "ipa": "/lʌk/", "phonetic": "LUHK"}]}
 {"guid": "N54_003", "forms": [{"grammatical_form": "noun/en_singular", "text": "rest", "is_base_form": true, "ipa": "/rɛst/", "phonetic": "REST"}]}
-{"guid": "N54_004", "forms": [{"grammatical_form": "noun/en_singular", "text": "shadow", "is_base_form": true, "ipa": "/ʃædˈoʊ/", "phonetic": "SHAD-oh"}]}
-{"guid": "N54_005", "forms": [{"grammatical_form": "noun/en_singular", "text": "silence", "is_base_form": true, "ipa": "/ˈsaɪləns/", "phonetic": "SYL-ence"}]}
 {"guid": "N54_006", "forms": [{"grammatical_form": "noun/en_singular", "text": "darkness", "is_base_form": true, "ipa": "/ˈdɑrknəs/", "phonetic": "DARK-ness"}]}
 {"guid": "N54_007", "forms": [{"grammatical_form": "noun/en_singular", "text": "space", "is_base_form": true, "ipa": "spes", "phonetic": "SPES"}]}
 {"guid": "N54_008", "forms": [{"grammatical_form": "noun/en_singular", "text": "evil", "is_base_form": true, "ipa": "/ˈiː.vəl/", "phonetic": "EE-vuhl"}]}
@@ -17,13 +15,8 @@
 {"guid": "N54_017", "forms": [{"grammatical_form": "noun/en_singular", "text": "loss", "is_base_form": true, "ipa": "/lɒs/", "phonetic": "LAWSS"}]}
 {"guid": "N54_018", "forms": [{"grammatical_form": "noun/en_singular", "text": "fate", "is_base_form": true, "ipa": "/feɪt/", "phonetic": "FEY-t"}]}
 {"guid": "N54_021", "forms": [{"grammatical_form": "noun/en_singular", "text": "chaos", "is_base_form": true}]}
-{"guid": "N54_026", "forms": [{"grammatical_form": "noun/en_singular", "text": "student loan", "is_base_form": true}]}
 {"guid": "N54_027", "forms": [{"grammatical_form": "noun/en_singular", "text": "blood pressure", "is_base_form": true}]}
 {"guid": "N54_028", "forms": [{"grammatical_form": "noun/en_singular", "text": "blood type", "is_base_form": true}]}
-{"guid": "N54_029", "forms": [{"grammatical_form": "noun/en_singular", "text": "bank account", "is_base_form": true}]}
-{"guid": "N54_030", "forms": [{"grammatical_form": "noun/en_singular", "text": "savings account", "is_base_form": true}]}
-{"guid": "N54_031", "forms": [{"grammatical_form": "noun/en_singular", "text": "income tax", "is_base_form": true}]}
-{"guid": "N54_032", "forms": [{"grammatical_form": "noun/en_singular", "text": "sales tax", "is_base_form": true}]}
 {"guid": "N54_033", "forms": [{"grammatical_form": "noun/en_singular", "text": "sick leave", "is_base_form": true}]}
 {"guid": "N54_034", "forms": [{"grammatical_form": "noun/en_singular", "text": "world record", "is_base_form": true}]}
 {"guid": "N54_035", "forms": [{"grammatical_form": "noun/en_singular", "text": "computability", "is_base_form": true, "ipa": "/kəmˌpjuːtəˈbɪləti/", "phonetic": "kum-pyoo-tuh-BIL-uh-tee"}]}
@@ -44,7 +37,6 @@
 {"guid": "N54_050", "forms": [{"grammatical_form": "noun/en_singular", "text": "prevalence", "is_base_form": true, "ipa": "/ˈprɛvələns/", "phonetic": "PREV-uh-lens"}]}
 {"guid": "N54_051", "forms": [{"grammatical_form": "noun/en_singular", "text": "divinity", "is_base_form": true, "ipa": "/dɪˈvɪnəti/", "phonetic": "duh-VIN-uh-tee"}]}
 {"guid": "N54_052", "forms": [{"grammatical_form": "noun/en_singular", "text": "security", "is_base_form": true, "ipa": "/sɪˈkjʊrəti/", "phonetic": "sih-KYOOR-uh-tee"}]}
-{"guid": "N54_053", "forms": [{"grammatical_form": "noun/en_singular", "text": "penalty", "is_base_form": true, "ipa": "/ˈpɛnəlti/", "phonetic": "PEN-ul-tee"}]}
 {"guid": "N54_054", "forms": [{"grammatical_form": "noun/en_singular", "text": "violation", "is_base_form": true, "ipa": "/ˌvaɪəˈleɪʃən/", "phonetic": "vy-uh-LAY-shun"}]}
 {"guid": "N54_055", "forms": [{"grammatical_form": "noun/en_singular", "text": "reliance", "is_base_form": true, "ipa": "/rɪˈlaɪəns/", "phonetic": "ri-LY-uhns"}]}
 {"guid": "N54_056", "forms": [{"grammatical_form": "noun/en_singular", "text": "regulation", "is_base_form": true, "ipa": "/ˌrɛɡjəˈleɪʃən/", "phonetic": "reg-yuh-LAY-shun"}]}

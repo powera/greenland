@@ -2,10 +2,6 @@
 {"guid": "N13_002", "forms": [{"grammatical_form": "noun/en_singular", "text": "bridge", "is_base_form": true, "ipa": "/brɪdʒ/", "phonetic": "BRIDGE"}]}
 {"guid": "N13_003", "forms": [{"grammatical_form": "noun/en_singular", "text": "tunnel", "is_base_form": true, "ipa": "/ˈtʌn.əl/", "phonetic": "TUN-nəl"}]}
 {"guid": "N13_004", "forms": [{"grammatical_form": "noun/en_singular", "text": "street", "is_base_form": true, "ipa": "/striːt/", "phonetic": "STREET"}], "variants": [{"kind": "spelling", "key": "Street", "forms": [{"grammatical_form": "noun/en_singular", "text": "Street", "is_base_form": true}]}]}
-{"guid": "N13_013", "forms": [{"grammatical_form": "noun/en_singular", "text": "parking lot", "is_base_form": true}]}
-{"guid": "N13_014", "forms": [{"grammatical_form": "noun/en_singular", "text": "town square", "is_base_form": true}]}
-{"guid": "N13_015", "forms": [{"grammatical_form": "noun/en_singular", "text": "front yard", "is_base_form": true}]}
-{"guid": "N13_016", "forms": [{"grammatical_form": "noun/en_singular", "text": "back yard", "is_base_form": true}]}
 {"guid": "N13_017", "forms": [{"grammatical_form": "noun/en_singular", "text": "traffic light", "is_base_form": true}]}
 {"guid": "N13_018", "forms": [{"grammatical_form": "noun/en_singular", "text": "bus stop", "is_base_form": true}]}
 {"guid": "N13_019", "forms": [{"grammatical_form": "noun/en_singular", "text": "pathway", "is_base_form": true, "ipa": "/ˈpæθˌweɪ/", "phonetic": "PATH-way"}]}
@@ -14,6 +10,11 @@
 {"guid": "N13_022", "forms": [{"grammatical_form": "noun/en_singular", "text": "access", "is_base_form": true, "ipa": "/ˈækˌsɛs/", "phonetic": "AK-sess"}]}
 {"guid": "N13_023", "forms": [{"grammatical_form": "noun/en_singular", "text": "pipeline", "is_base_form": true, "ipa": "/ˈpaɪpˌlaɪn/", "phonetic": "PIPE-line"}]}
 {"guid": "N13_024", "forms": [{"grammatical_form": "noun/en_singular", "text": "motorway", "is_base_form": true, "ipa": "/ˈmoʊtɚˌweɪ/", "phonetic": "MOH-ter-way"}]}
-{"guid": "N13_025", "forms": [{"grammatical_form": "noun/en_singular", "text": "car park", "is_base_form": true, "ipa": "/ˈkɑr ˌpɑrk/", "phonetic": "KAR-park"}]}
 {"guid": "N13_026", "forms": [{"grammatical_form": "noun/en_singular", "text": "goal line", "is_base_form": true, "ipa": "/ˈɡoʊl ˌlaɪn/", "phonetic": "GOHL-lyn"}]}
 {"guid": "N13_027", "forms": [{"grammatical_form": "noun/en_singular", "text": "baseline", "is_base_form": true, "ipa": "/ˈbeɪsˌlaɪn/", "phonetic": "BAYS-line"}]}
+{"guid": "N13_028", "forms": [{"grammatical_form": "noun/en_singular", "text": "path", "is_base_form": true, "ipa": "/pæθ/", "phonetic": "PATH"}]}
+{"guid": "N13_029", "forms": [{"grammatical_form": "noun/en_singular", "text": "ditch", "is_base_form": true, "ipa": "/dɪtʃ/", "phonetic": "DITCH"}]}
+{"guid": "N13_030", "forms": [{"grammatical_form": "noun/en_singular", "text": "track", "is_base_form": true, "ipa": "/træk/", "phonetic": "TRAK"}]}
+{"guid": "N13_031", "forms": [{"grammatical_form": "noun/en_singular", "text": "trail", "is_base_form": true, "ipa": "/treɪl/", "phonetic": "TRAY-l"}]}
+{"guid": "N13_033", "forms": [{"grammatical_form": "noun/en_singular", "text": "fence", "is_base_form": true, "ipa": "/fɛnts/", "phonetic": "FENTS"}]}
+{"guid": "N13_034", "forms": [{"grammatical_form": "noun/en_singular", "text": "canal", "is_base_form": true, "ipa": "/kəˈnæl/", "phonetic": "kuh-NAL"}]}

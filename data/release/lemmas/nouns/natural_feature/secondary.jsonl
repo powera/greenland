@@ -24,22 +24,12 @@
 {"guid": "N11_027", "translations": {"ro": "vânt", "pl": "wiatr", "th": "ลม", "ms": "angin", "ta": "காற்று", "kn": "ಗಾಳಿ", "uk": "вітер", "bn": "হাওয়া", "hi": "हवा", "tr": "rüzgâr", "bs": "vjetar"}}
 {"guid": "N11_028", "translations": {"ro": "furtună", "pl": "burza", "th": "พายุ", "ms": "ribut", "ta": "புயல்", "kn": "ಬಿರುಗಾಳಿ", "uk": "буря", "bn": "ঝড়", "hi": "तूफ़ान", "tr": "fırtına"}}
 {"guid": "N11_029", "translations": {"ro": "ceață", "pl": "mgła", "th": "หมอก", "ms": "kabus", "ta": "மூடுபனி", "kn": "ಮಂಜು", "uk": "туман", "bn": "কুয়াশা", "hi": "धुँওँ/धुंध", "tr": "sis"}}
-{"guid": "N11_030", "translations": {"ro": "gheață", "pl": "lód", "th": "น้ำแข็ง", "ms": "ais", "ta": "பனிக்கட்டி", "kn": "ಮಂಜುಗಡ್ಡೆ", "uk": "лід", "bn": "বরফ", "hi": "बर्फ", "tr": "buz", "bs": "led"}}
 {"guid": "N11_031", "translations": {"ro": "temperatură", "pl": "temperatura", "th": "อุณหภูมิ", "ms": "suhu", "ta": "வெப்பநிலை", "kn": "ತಾಪಮಾನ", "uk": "температура", "bn": "তাপমাত্রা", "hi": "तापमान", "tr": "sıcaklık", "bs": "temperatura"}}
 {"guid": "N11_032", "translations": {"ro": "prognoză", "pl": "prognoza", "th": "พยากรณ์", "ms": "ramalan", "ta": "முன்னறிவிப்பு", "kn": "ಮುನ್ಸೂಚನೆ", "uk": "прогноз", "bn": "পূর্বাভাস", "hi": "पूर्वानुमान", "tr": "tahmin"}}
-{"guid": "N11_035", "translations": {"ro": "foc", "pl": "ogień", "th": "ไฟ", "ms": "api", "ta": "நெருப்பு", "kn": "ಬೆಂಕಿ", "uk": "вогонь", "bn": "আগুন", "hi": "आग", "tr": "ateş", "bs": "vatra"}}
 {"guid": "N11_040", "translations": {"ro": "pantă", "pl": "stok", "th": "ลาดเขา", "ms": "cerun", "ta": "சரிவு", "kn": "ಇಳಿಜಾರು", "uk": "схил", "bn": "ঢাল", "hi": "ढलान", "tr": "yamaç", "bs": "padina"}}
-{"guid": "N11_041", "translations": {"ro": "flacără", "pl": "płomień", "th": "เปลวไฟ", "ms": "nyalaan", "ta": "தீச்சுவாலை", "kn": "ಜ್ವಾಲೆ", "uk": "полум'я", "bn": "লেপসনা", "hi": "लपट", "tr": "alev", "bs": "plamen"}}
 {"guid": "N11_042", "translations": {"ro": "ceață ușoară", "pl": "mgiełka", "th": "หมอกบาง", "ms": "kabus", "ta": "மூடுபனி", "kn": "ತುಂತುರು ಮಂಜು", "uk": "імла", "bn": "কুয়াশা", "hi": "धुंध", "tr": "sis", "bs": "magla"}}
-{"guid": "N11_043", "translations": {"ro": "potecă", "pl": "ścieżka", "th": "ทางเดิน", "ms": "jalan setapak", "ta": "பாதை", "kn": "ಹಾದಿ", "uk": "стежка", "bn": "পথ", "hi": "पथ", "tr": "patika"}}
-{"guid": "N11_044", "translations": {"ro": "șanț", "pl": "rów", "th": "คูน้ำ", "ms": "parit", "ta": "பள்ளம்", "kn": "ಕಂದಕ", "uk": "канавa", "bn": "খাল", "hi": "नाला", "tr": "hendek"}}
-{"guid": "N11_045", "translations": {"ro": "val", "pl": "fala", "th": "คลื่น", "ms": "ombak", "ta": "அலை", "kn": "ಅಲೆ", "uk": "хвиля", "bn": "তরঙ্গ", "hi": "लहर", "tr": "dalga", "bs": "val"}}
-{"guid": "N11_046", "translations": {"ro": "potecă", "pl": "szlak", "th": "เส้นทาง", "ms": "denai", "ta": "நடைபாதை", "kn": "ಕಾಲುದಾರಿ", "uk": "стежка", "bn": "পথ", "hi": "पगडंडी", "tr": "patika"}}
-{"guid": "N11_047", "translations": {"ro": "tunet", "pl": "grzmot", "th": "ฟ้าร้อง", "ms": "guruh", "ta": "இடி", "kn": "ಗುಡುಗು", "uk": "грім", "bn": "বজ্রগর্জন", "hi": "गरज", "tr": "gök gürültüsü", "bs": "grmljavina"}}
-{"guid": "N11_050", "translations": {"ro": "cărare", "pl": "ścieżka", "th": "ทางเดิน", "ms": "laluan", "ta": "பாதை", "kn": "ದಾರಿ", "uk": "стежка", "bn": "পথ", "hi": "पगडंडी", "tr": "patika", "bs": "staza"}}
 {"guid": "N11_051", "translations": {"ro": "câmp", "pl": "pole", "th": "ทุ่ง", "ms": "ladang", "ta": "வயல்", "kn": "ಹೊಲ", "uk": "поле", "bn": "খেত", "hi": "खेत", "tr": "tarla"}}
 {"guid": "N11_052", "translations": {"ro": "pământ", "pl": "ziemia", "th": "พื้นดิน", "ms": "tanah", "ta": "நிலம்", "kn": "ನೆಲ", "uk": "ґрунт", "bn": "মাটি", "hi": "मिट्टी", "tr": "toprak", "bs": "zemlja"}}
-{"guid": "N11_055", "translations": {"ro": "stâncă", "pl": "skała", "th": "หิน", "ms": "tebing batu", "ta": "பாறை", "kn": "ಬಂಡೆ", "uk": "скеля", "bn": "শিলা", "hi": "शिला", "tr": "kaya"}}
 {"guid": "N11_056", "translations": {"ro": "suprafață", "pl": "powierzchnia", "th": "พื้นผิว", "ms": "permukaan", "ta": "மேற்பரப்பு", "kn": "ಮೇಲ್ಮೈ", "uk": "поверхня", "bn": "পৃষ্ঠতল", "hi": "سطح", "tr": "yüzey", "bs": "površina"}}
 {"guid": "N11_057", "translations": {"ro": "pârâu", "pl": "strumień", "th": "ลำธาร", "ms": "anak sungai", "ta": "சிற்றாறு", "kn": "ತೊರೆ", "uk": "струмок", "bn": "নালা", "hi": "नाला", "tr": "dere", "bs": "potok"}}
 {"guid": "N11_058", "translations": {"ro": "țărm", "pl": "brzeg", "th": "ฝั่ง", "ms": "pantai", "ta": "கரை", "kn": "ತೀರ", "uk": "берег", "bn": "তীর", "hi": "किनारा", "tr": "kıyı"}}
@@ -53,14 +43,11 @@
 {"guid": "N11_067", "translations": {"ro": "curent", "pl": "prąd", "th": "กระแสน้ำ", "ms": "arus", "ta": "நீரோட்டம்", "kn": "ಪ್ರವಾಹ", "uk": "потік", "bn": "স্রোত", "hi": "धारा", "tr": "akıntı", "bs": "struja"}}
 {"guid": "N11_068", "translations": {"ro": "lanț muntos", "pl": "łańcuch górski", "th": "เทือกเขา", "ms": "banjaran gunung", "ta": "மலைத்தொடர்", "kn": "ಪರ್ವತಶ್ರೇಣಿ", "uk": "гірський хребет", "bn": "পাহাড়মালা", "hi": "पहाड़ी श्रेणी", "tr": "sıradağ"}}
 {"guid": "N11_069", "translations": {"ro": "izvor", "pl": "źródło", "th": "น้ำพุ", "ms": "mata air", "ta": "நீரூற்று", "kn": "ಒರತೆ", "uk": "джерело", "bn": "উপনদী/জলউৎস না— wait", "hi": "झरना", "tr": "kaynak"}}
-{"guid": "N11_070", "translations": {"ro": "parcelă", "pl": "działka", "th": "แปลงที่ดิน", "ms": "petak tanah", "ta": "நிலம்", "kn": "ನಿವೇಶನ", "uk": "ділянка", "bn": "খণ্ড", "hi": "खतিয়ান", "tr": "arsa", "bs": "parcela"}}
 {"guid": "N11_071", "translations": {"ms": "banjaran gunung", "hi": "पर्वतमाला", "tr": "sıradağ"}}
 {"guid": "N11_072", "translations": {"ms": "terumbu karang", "hi": "प्रवाल भित्ति", "tr": "mercan resifi", "bs": "koraljni greben"}}
 {"guid": "N11_073", "translations": {"ms": "bukit pasir", "hi": "रेत का टीला", "tr": "kum tepesi", "bs": "pješčana dina"}}
 {"guid": "N11_074", "translations": {"ms": "mata air panas", "hi": "गर्म पानी का झरना", "tr": "kaplıca", "bs": "termalni izvor"}}
-{"guid": "N11_075", "translations": {"ms": "bintang jatuh", "hi": "टूटता तारा", "tr": "kayan yıldız", "bs": "zvijezda padalica"}}
 {"guid": "N11_077", "translations": {"ms": "atmosfera", "hi": "वायुमंडल", "tr": "atmosfer"}}
-{"guid": "N11_078", "translations": {"ms": "fasa bulan", "hi": "चंद्रमा की कला", "tr": "Ay evresi"}}
 {"guid": "N11_079", "translations": {"ms": "siklon", "hi": "चक्रवात", "tr": "siklon"}}
 {"guid": "N11_080", "translations": {"ms": "mantel", "hi": "मैंटल", "tr": "manto"}}
 {"guid": "N11_081", "translations": {"ms": "lingkaran cahaya", "hi": "प्रभामंडल", "tr": "hale"}}
@@ -69,7 +56,6 @@
 {"guid": "N11_084", "translations": {"ms": "iklim", "hi": "जलवायु", "tr": "iklim"}}
 {"guid": "N11_085", "translations": {"ms": "puncak", "hi": "चोटी", "tr": "zirve"}}
 {"guid": "N11_086", "translations": {"ms": "pemandangan", "hi": "दृश्य", "tr": "manzara"}}
-{"guid": "N11_087", "translations": {"ms": "fosil", "hi": "जीवाश्म", "tr": "fosil"}}
 {"guid": "N11_088", "translations": {"ms": "kawasan berhutan", "hi": "वनभूमि", "tr": "ağaçlık"}}
 {"guid": "N11_089", "translations": {"ms": "air larian permukaan", "hi": "सतही अपवाह", "tr": "yüzey akışı"}}
 {"guid": "N11_090", "translations": {"ms": "selat", "hi": "जलडमरूमध्य", "tr": "boğaz"}}
@@ -84,3 +70,4 @@
 {"guid": "N11_102", "translations": {"ms": "pusaran", "hi": "भँवर", "tr": "girdap"}}
 {"guid": "N11_103", "translations": {"ms": "hutan rimba", "hi": "जंगल", "tr": "orman"}}
 {"guid": "N11_104", "translations": {"ms": "terusan", "hi": "नहर", "tr": "kanal"}}
+{"guid": "N11_106", "translations": {"ro": "pădure", "pl": "las", "th": "ป่า", "ms": "hutan", "ta": "காடு", "kn": "ಕಾಡು", "uk": "ліс", "bn": "বন", "hi": "जंगल", "tr": "orman"}}

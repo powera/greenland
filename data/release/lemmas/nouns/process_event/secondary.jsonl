@@ -10,11 +10,9 @@
 {"guid": "N24_011", "translations": {"ro": "test", "pl": "test", "th": "การทดสอบ", "ms": "ujian", "ta": "தேர்வு", "kn": "ಪರೀಕ್ಷೆ", "uk": "тест", "bn": "পরীক্ষা", "hi": "परीक्षा", "tr": "sınav"}}
 {"guid": "N24_012", "translations": {"ro": "acțiune", "pl": "działanie", "th": "การกระทำ", "ms": "tindakan", "ta": "செயல்", "kn": "ಕ್ರಿಯೆ", "uk": "дія", "bn": "কর্ম", "hi": "कर्म", "tr": "eylem", "bs": "radnja"}}
 {"guid": "N24_013", "translations": {"ro": "practică", "pl": "praktyka", "th": "ปฏิบัติ", "ms": "latihan", "ta": "பயிற்சி", "kn": "ಪ್ರಯೋಗ", "uk": "практика", "bn": "অভ্যাস", "hi": "अभ्यास", "tr": "alıştırma"}}
-{"guid": "N24_014", "translations": {"ro": "lovitură", "pl": "cios", "th": "การตี", "ms": "pukulan", "ta": "சடி", "kn": "ಘಾತ್ರ", "uk": "удар", "bn": "ঘাত", "hi": "घात", "tr": "darbe"}}
 {"guid": "N24_015", "translations": {"ro": "instruire", "pl": "szkolenie", "th": "การฝึกอบรม", "ms": "latihan", "ta": "பயிற்சி", "kn": "ಶಿಕ್ಷಣ", "uk": "навчання", "bn": "প্রশিক্ষণ", "hi": "प्रशिक्षण", "tr": "eğitim"}}
 {"guid": "N24_016", "translations": {"ro": "mișcare", "pl": "ruch", "th": "การเคลื่อนไหว", "ms": "pergerakan", "ta": "இலக்கு?", "kn": "ಚಲನೆ", "uk": "рух", "bn": "চলাচল", "hi": "गति", "tr": "hareket"}}
 {"guid": "N24_017", "translations": {"ro": "zbor", "pl": "lot", "th": "การบิน", "ms": "penerbangan", "ta": "பறப்பு", "kn": "ಪ್ರಂಚение", "uk": "політ", "bn": "উড়ান", "hi": "उड़ान", "tr": "uçuş", "bs": "let"}}
-{"guid": "N24_018", "translations": {"ro": "sclipire", "pl": "błysk", "th": "วูบวาบของแสง", "ms": "kilatan cahaya", "ta": "ஒளிச்சுடர்", "kn": "ಬೆಳಕು ಹೊಡೆಯುವಿಕೆ", "uk": "спалах", "bn": "চমকপ্রকাশ", "hi": "चमक", "tr": "ışık parlaması"}}
 {"guid": "N24_019", "translations": {"ro": "mișcare", "pl": "ruch", "th": "การเคลื่อนไหว", "ms": "pergerakan", "ta": "சலனம்", "kn": "ಚಲನೆ", "uk": "рух", "bn": "গতি", "hi": "गतिविधि", "tr": "hareket"}}
 {"guid": "N24_020", "translations": {"ro": "atac", "pl": "szturm", "th": "การโจมตี", "ms": "serangan", "ta": "ஆક્રમணம்", "kn": "ಆಕ್ರಮಣ", "uk": "наступ", "bn": "আক্রমণ", "hi": "आक्रमण", "tr": "hücum"}}
 {"guid": "N24_021", "translations": {"ro": "surpriză", "pl": "niespodzianka", "th": "ความประหลาดใจ", "ms": "kejutan", "ta": "அறிலாதเหตุ", "kn": "ಆಶ್ಚರ್ಯ", "uk": "здивування", "bn": "আশ্চর্য", "hi": "आश्चर्य", "tr": "sürpriz"}}
@@ -28,7 +26,6 @@
 {"guid": "N24_029", "translations": {"ro": "examen", "pl": "egzamin", "th": "การสอบ", "ms": "peperiksaan", "ta": "தேர்வு", "kn": "ಪರೀಕ್ಷೆ", "uk": "іспит", "bn": "পরীক্ষা", "hi": "परीक्षा", "tr": "sınav"}}
 {"guid": "N24_030", "translations": {"ro": "proiect", "pl": "projekt", "th": "โครงการ", "ms": "projek", "ta": "திட்டம்", "kn": "ಪ್ರಸ್ತಾವನೆ", "uk": "проект", "bn": "প্রকল্প", "hi": "परियोजना", "tr": "proje"}}
 {"guid": "N24_031", "translations": {"ro": "călătorie", "pl": "podróż", "th": "การเดินทาง", "ms": "perjalanan", "ta": "பயணம்", "kn": "ಪ್ರಯಾಣ", "uk": "подорож", "bn": "ভ্রমণ", "hi": "यात्रा", "tr": "gezi"}}
-{"guid": "N24_032", "translations": {"ro": "bătăi", "pl": "stuk", "th": "เคาะ", "ms": "ketukan", "ta": "அடி", "kn": "ಒತ್ತಾಟ", "uk": "стук", "bn": "ঠকঠকানি", "hi": "ठकठक", "tr": "vurma sesi"}}
 {"guid": "N24_033", "translations": {"ro": "târg", "pl": "targi", "th": "งานแสดงสินค้า", "ms": "pesta", "ta": "மേളம்", "kn": "ಮೇಳ", "uk": "ярмарок", "bn": "মেলা", "hi": "मेलா", "tr": "panayır"}}
 {"guid": "N24_034", "translations": {"ro": "lecție", "pl": "lekcja", "th": "บทเรียน", "ms": "kelas", "ta": "பாடம்", "kn": "ಪಾಠ", "uk": "урок", "bn": "পাঠ", "hi": "पाठ", "tr": "ders", "bs": "čas"}}
 {"guid": "N24_035", "translations": {"ro": "proces", "pl": "proces", "th": "กระบวนการ", "ms": "proses", "ta": "செயற்படிச் செயல்", "kn": "ಪ್ರಕ್ರಿಯೆ", "uk": "процес", "bn": "প্রক্রিয়া", "hi": "प्रक्रिया", "tr": "süreç", "bs": "proces"}}
@@ -42,7 +39,6 @@
 {"guid": "N24_043", "translations": {"ro": "explozie", "pl": "wybuch", "th": "การระเบิด", "ms": "letupan", "ta": "ச्फோடந்", "kn": "ಸ್ಫೋಟ", "uk": "вибух", "bn": "স্ফোট", "hi": "विस्फोट", "tr": "patlama"}}
 {"guid": "N24_044", "translations": {"ro": "competiție", "pl": "konkurs", "th": "การแข่งขัน", "ms": "pertandingan", "ta": "போட்டி", "kn": "ಸ್ಪರ್ಧೆ", "uk": "змагання", "bn": "প্রতিযোগিতা", "hi": "प्रतियोगिता", "tr": "yarışma"}}
 {"guid": "N24_045", "translations": {"ro": "conexiune", "pl": "połączenie", "th": "การเชื่อมต่อ", "ms": "penyambungan", "ta": "சம்பந்தம்", "kn": "ಸಂಪರ್ಕ", "uk": "зв'язок", "bn": "সংযোগ", "hi": "संयोजन", "tr": "bağlama"}}
-{"guid": "N24_046", "translations": {"ro": "fissură", "pl": "pęknięcie", "th": "รอยร้าว", "ms": "retakan", "ta": "பிளவு", "kn": "ಫಾಟು", "uk": "тріщина", "bn": "ফাটল", "hi": "दरार", "tr": "çatlak"}}
 {"guid": "N24_047", "translations": {"ro": "distrugere", "pl": "zniszczenie", "th": "การทำลาย", "ms": "pemusnahan", "ta": "வெட்டுக்குப் பக்கம்", "kn": "ವಿಪದುಷಣೆ", "uk": "знищення", "bn": "ধ্বংস", "hi": "नाश", "tr": "yıkım"}}
 {"guid": "N24_048", "translations": {"ro": "dezvoltare", "pl": "rozwój", "th": "การพัฒนา", "ms": "perkembangan", "ta": "வளர்ச்சி", "kn": "ವಿಕಾಸ", "uk": "розвиток", "bn": "বিকাশ", "hi": "विकास", "tr": "gelişim", "bs": "razvoj"}}
 {"guid": "N24_049", "translations": {"ro": "digestie", "pl": "trawienie", "th": "การย่อยอาหาร", "ms": "pencernaan", "ta": "செரிமுறை", "kn": "ಹಜಮೀಕರಣ", "uk": "травлення", "bn": "হজম", "hi": "पाचन", "tr": "sindirim"}}
@@ -203,3 +199,5 @@
 {"guid": "N24_205", "translations": {"ms": "pemerolehan", "hi": "व्युत्पत्ति", "tr": "türetme"}}
 {"guid": "N24_206", "translations": {"ms": "peromanan", "hi": "रोमन लिप्यंतरण", "tr": "romanizasyon"}}
 {"guid": "N24_207", "translations": {"ms": "pengembaraan", "hi": "रोमांचक अनुभव", "tr": "macera"}}
+{"guid": "N24_231", "translations": {"ms": "lalu lintas", "hi": "यातायात", "tr": "trafik"}}
+{"guid": "N24_232", "translations": {"ms": "pengumpulan", "hi": "एकत्रीकरण", "tr": "toplanma"}}

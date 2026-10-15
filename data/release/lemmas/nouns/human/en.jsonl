@@ -8,7 +8,6 @@
 {"guid": "N01_066", "forms": [{"grammatical_form": "noun/en_singular", "text": "enemy", "is_base_form": true, "ipa": "/ˈɛnəmi/", "phonetic": "EN-uh-mee"}]}
 {"guid": "N01_069", "forms": [{"grammatical_form": "noun/en_singular", "text": "folk", "is_base_form": true, "ipa": "/fəʊk/", "phonetic": "FOH-k"}]}
 {"guid": "N01_070", "forms": [{"grammatical_form": "noun/en_singular", "text": "god", "is_base_form": true, "ipa": "/ɡɔd/", "phonetic": "GOHD"}]}
-{"guid": "N01_072", "forms": [{"grammatical_form": "noun/en_singular", "text": "giant", "is_base_form": true, "ipa": "/ˈdʒaɪ.ənt/", "phonetic": "JY-uh-nt"}]}
 {"guid": "N01_073", "forms": [{"grammatical_form": "noun/en_singular", "text": "fellow", "is_base_form": true, "ipa": "/ˈfɛloʊ/", "phonetic": "FELL-oh"}]}
 {"guid": "N01_074", "forms": [{"grammatical_form": "noun/en_singular", "text": "companion", "is_base_form": true, "ipa": "/ˈkʌmpəˌnɪn/", "phonetic": "COMP-yuh-nin"}]}
 {"guid": "N01_076", "forms": [{"grammatical_form": "noun/en_singular", "text": "baby", "is_base_form": true, "ipa": "/beɪbi/", "phonetic": "BAY-by"}]}
@@ -21,7 +20,6 @@
 {"guid": "N01_089", "forms": [{"grammatical_form": "noun/en_singular", "text": "chief", "is_base_form": true}, {"grammatical_form": "noun/en_plural", "text": "chiefs", "is_base_form": false}]}
 {"guid": "N01_099", "forms": [{"grammatical_form": "noun/en_singular", "text": "best friend", "is_base_form": true}]}
 {"guid": "N01_100", "forms": [{"grammatical_form": "noun/en_singular", "text": "observer", "is_base_form": true, "ipa": "/əbˈzɝvɚ/", "phonetic": "ub-ZUR-ver"}]}
-{"guid": "N01_101", "forms": [{"grammatical_form": "noun/en_singular", "text": "dwarf", "is_base_form": true, "ipa": "/dwɔrf/", "phonetic": "DWORF"}]}
 {"guid": "N01_102", "forms": [{"grammatical_form": "noun/en_singular", "text": "tourist", "is_base_form": true, "ipa": "/ˈtʊrɪst/", "phonetic": "TOOR-ist"}]}
 {"guid": "N01_103", "forms": [{"grammatical_form": "noun/en_singular", "text": "critic", "is_base_form": true, "ipa": "/ˈkrɪtɪk/", "phonetic": "KRIT-ik"}]}
 {"guid": "N01_104", "forms": [{"grammatical_form": "noun/en_singular", "text": "predator", "is_base_form": true, "ipa": "/ˈprɛdətɚ/", "phonetic": "PRED-uh-ter"}]}

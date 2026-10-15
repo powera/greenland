@@ -9,7 +9,6 @@
 {"guid": "N40_011", "translations": {"ro": "camion", "pl": "ciężarówka", "th": "รถบรรทุก", "ms": "trak", "ta": "லாரி", "kn": "ಲಾರಿ", "uk": "вантажівка", "bn": "ট্রাক", "hi": "ट्रक", "tr": "kamyon", "bs": "kamion"}}
 {"guid": "N40_012", "translations": {"ro": "motocicletă", "pl": "motocykl", "th": "รถจักรยานยนต์", "ms": "motosikal", "ta": "மோட்டார் சைக்கிள்", "kn": "ಮೋಟಾರ್ ಸೈಕಲ್", "uk": "мотоцикл", "bn": "মোটরসাইকেল", "hi": "मोटरसाइकिल", "tr": "motosiklet", "bs": "motocikl"}}
 {"guid": "N40_013", "translations": {"ro": "elicopter", "pl": "helikopter", "th": "เฮลิคอปเตอร์", "ms": "helikopter", "ta": "ஹெலிகாப்டர்", "kn": "ಹೆಲಿಕಾಪ್ಟರ್", "uk": "гелікоптер", "bn": "হেলিকপ্টার", "hi": "हेलिकॉप्टर", "tr": "helikopter"}}
-{"guid": "N40_014", "translations": {"ro": "metrou", "pl": "metro", "th": "รถไฟใต้ดิน", "ms": "kereta api bawah tanah", "ta": "மெட்ரோ", "kn": "ಮೆಟ್ರೋ", "uk": "метро", "bn": "মেট্রো", "hi": "मेट्रो", "tr": "metro"}}
 {"guid": "N40_015", "translations": {"ro": "dubă", "pl": "furgonetka", "th": "รถตู้", "ms": "van", "ta": "வேன்", "kn": "ವ್ಯಾನ್", "uk": "фургон", "bn": "ভ্যান", "hi": "वैन", "tr": "minibüs"}}
 {"guid": "N40_016", "translations": {"ro": "tramvai", "pl": "tramwaj", "th": "รถราง", "ms": "trem", "ta": "டிராம்", "kn": "ಟ್ರಾಮ್", "uk": "трамвай", "bn": "ট্রাম", "hi": "ट्राम", "tr": "tramvay"}}
 {"guid": "N40_017", "translations": {"ro": "feribot", "pl": "prom", "th": "เรือข้ามฟาก", "ms": "feri", "ta": "படகு", "kn": "ದೋಣಿ", "uk": "пором", "bn": "ফেরি", "hi": "फेरी", "tr": "feribot"}}
@@ -42,9 +41,7 @@
 {"guid": "N40_044", "translations": {"ms": "kerusi roda", "hi": "व्हीलचेयर", "tr": "tekerlekli sandalye"}}
 {"guid": "N40_045", "translations": {"ms": "kipas pendorong", "hi": "प्रोपेलर", "tr": "pervane"}}
 {"guid": "N40_046", "translations": {"ms": "kapal perang", "hi": "युद्धपोत", "tr": "zırhlı"}}
-{"guid": "N40_047", "translations": {"ms": "papan luncur", "hi": "स्केटबोर्ड", "tr": "kaykay"}}
 {"guid": "N40_048", "translations": {"ms": "belon udara", "hi": "गुब्बारा", "tr": "hava balonu"}}
 {"guid": "N40_049", "translations": {"ms": "jentera bomba", "hi": "दमकल गाड़ी", "tr": "itfaiye aracı"}}
-{"guid": "N40_050", "translations": {"ms": "papan luncur salji", "hi": "स्नोबोर्ड", "tr": "snowboard"}}
 {"guid": "N40_051", "translations": {"ms": "roket", "hi": "रॉकेट", "tr": "roket"}}
 {"guid": "N40_052", "translations": {"ms": "kapal angkasa", "hi": "अंतरिक्ष यान", "tr": "uzay gemisi"}}

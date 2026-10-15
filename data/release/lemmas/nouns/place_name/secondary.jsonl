@@ -1,17 +1,22 @@
-{"guid": "N30_036", "translations": {"ro": "loc", "pl": "miejsce", "th": "สถานที่", "ms": "tempat", "ta": "இடம்", "kn": "ಸ್ಥಳ", "uk": "місце", "bn": "স্থান", "hi": "स्थान", "tr": "yer"}}
-{"guid": "N30_039", "translations": {"ro": "oraș", "pl": "miasto", "th": "เมือง", "ms": "bandar", "ta": "நகரம்", "kn": "ನಗರ", "uk": "місто", "bn": "শহর", "hi": "शहर", "tr": "şehir"}}
-{"guid": "N30_040", "translations": {"ro": "țară", "pl": "kraj", "th": "ประเทศ", "ms": "negara", "ta": "நாடு", "kn": "దేశ", "uk": "держава", "bn": "দেশ", "hi": "देश", "tr": "ülke"}}
-{"guid": "N30_041", "translations": {"ro": "stat", "pl": "państwo", "th": "รัฐ", "ms": "negara", "ta": "மாநாடு", "kn": "ರಾಜ್ಯ", "uk": "держава", "bn": "রাষ্ট্র", "hi": "राज्य", "tr": "devlet"}}
-{"guid": "N30_042", "translations": {"ro": "suprafață", "pl": "obszar", "th": "พื้นที่", "ms": "kawasan", "ta": "பகுதி", "kn": "ಪ್ರದೇಶ", "uk": "площа", "bn": "এলাকা", "hi": "क्षेत्र", "tr": "alan"}}
 {"guid": "N30_043", "translations": {"ro": "teren", "pl": "ziemia", "th": "แผ่นดิน", "ms": "tanah", "ta": "மண்ணு", "kn": "ಭೂಮಿ", "uk": "земля", "bn": "ভূমি", "hi": "भूमि", "tr": "arazi"}}
-{"guid": "N30_047", "translations": {"ro": "nord", "pl": "północ", "th": "เหนือ", "ms": "utara", "ta": "வடக்கு", "kn": "ಉತ್ತರ", "uk": "північ", "bn": "উত্তর", "hi": "उत्तّر", "tr": "kuzey"}}
-{"guid": "N30_048", "translations": {"ro": "sud", "pl": "południe", "th": "ใต้", "ms": "selatan", "ta": "தெற்கு", "kn": "ದಕ್ಷಿಣ", "uk": "південь", "bn": "দক্ষিণ", "hi": "दक्षिण", "tr": "güney"}}
-{"guid": "N30_049", "translations": {"ro": "est", "pl": "wschód", "th": "ตะวันออก", "ms": "timur", "ta": "கிழக்கு", "kn": "ಪೂರ್ವ", "uk": "схід", "bn": "পূর্ব", "hi": "पूर्व", "tr": "doğu"}}
-{"guid": "N30_050", "translations": {"ro": "vest", "pl": "zachód", "th": "ตะวันตก", "ms": "barat", "ta": "மேற்கு", "kn": "ಪಶ್ಚಿಮ", "uk": "захід", "bn": "পশ্চিম", "hi": "पश्चिम", "tr": "batı"}}
-{"guid": "N30_051", "translations": {"ro": "interior", "pl": "wnętrze", "th": "ภายใน", "ms": "bahagian dalam", "ta": "உள் பகுதி", "kn": "ಒಳಭಾಗ", "uk": "внутрішність", "bn": "অভ্যন্তর", "hi": "अंदर", "tr": "iç"}}
-{"guid": "N30_052", "translations": {"ro": "exterior", "pl": "zewnętrze", "th": "ภายนอก", "ms": "luar", "ta": "வெளிப்பகுதி", "kn": "ಬಾಹ್ಯ ಭಾಗ", "uk": "зовні", "bn": "বাহির", "hi": "बाहरी", "tr": "dışarısı"}}
-{"guid": "N30_053", "translations": {"ro": "spate", "pl": "tył", "th": "ด้านหลัง", "ms": "bahagian belakang", "ta": "பின்", "kn": "ಹಿನ್ನೆಲೆ", "uk": "зад", "bn": "পেছন", "hi": "पीठ", "tr": "arka"}}
-{"guid": "N30_054", "translations": {"ms": "timur laut", "hi": "उत्तर-पूर्व", "tr": "kuzeydoğu"}}
-{"guid": "N30_055", "translations": {"ms": "barat laut", "hi": "उत्तर-पश्चिम", "tr": "kuzeybatı"}}
-{"guid": "N30_056", "translations": {"ms": "tenggara", "hi": "दक्षिण-पूर्व", "tr": "güneydoğu"}}
-{"guid": "N30_057", "translations": {"ms": "barat daya", "hi": "दक्षिण-पश्चिम", "tr": "güneybatı"}}
+{"guid": "N30_078", "translations": {"ro": "aeroport", "pl": "lotnisko", "th": "สนามบิน", "ms": "lapangan terbang", "ta": "விமான நிலையம்", "kn": "ವಿಮಾನ ನಿಲ್ದಾಣ", "uk": "аеропорт", "bn": "এয়ারপোর্ট", "hi": "हवाईअड्डा", "tr": "havaalanı", "bs": "aerodrom"}}
+{"guid": "N30_079", "translations": {"ms": "taman hiburan", "hi": "मनोरंजन पार्क", "tr": "eğlence parkı", "bs": "zabavni park"}}
+{"guid": "N30_080", "translations": {"ro": "tabără", "pl": "obóz", "th": "ค่าย", "ms": "kem", "ta": "முகாம்", "kn": "ಶಿಬಿರ", "uk": "табір", "bn": "শিবির", "hi": "शिबির", "tr": "kamp", "bs": "kamp"}}
+{"guid": "N30_081", "translations": {"ro": "cimitir", "pl": "cmentarz", "th": "สุสาน", "ms": "tanah perkuburan", "ta": "கல்லறை", "kn": "ಸ್ಮಶಾನ", "uk": "кляштор?", "bn": "কবরস্থান", "hi": "কবরস্থান", "tr": "mezarlık", "bs": "groblje"}}
+{"guid": "N30_082", "translations": {"ro": "fermă", "pl": "farma", "th": "ฟาร์ม", "ms": "ladang", "ta": "பண்ணை", "kn": "ಕೃಷಿ", "uk": "ферма", "bn": "খামার", "hi": "खेत/फार্ম", "tr": "çiftlik", "bs": "farma"}}
+{"guid": "N30_083", "translations": {"ro": "teren", "pl": "boisko", "th": "สนาม", "ms": "padang", "ta": "மைதானம்", "kn": "ಮೈದಾನ", "uk": "поле", "bn": "বড় মাঠ", "hi": "मैदान", "tr": "saha", "bs": "igralište"}}
+{"guid": "N30_084", "translations": {"ro": "grădină", "pl": "ogród", "th": "สวน", "ms": "taman", "ta": "தோட்டம்", "kn": "ತೋಟ", "uk": "сад", "bn": "বাগান", "hi": "बगीचा", "tr": "bahçe", "bs": "vrt"}}
+{"guid": "N30_085", "translations": {"ro": "parc", "pl": "park", "th": "สวนสาธารณะ", "ms": "taman", "ta": "பூங்கா", "kn": "ಉದ್ಯಾನವನ", "uk": "парк", "bn": "পার্ক", "hi": "उद्यान", "tr": "park", "bs": "park"}}
+{"guid": "N30_086", "translations": {"ro": "patio", "pl": "patio", "th": "ลานบ้าน", "ms": "teres", "ta": "முற்றம்", "kn": "ಅಂಗಳ", "uk": "патіо", "bn": "প্যাটিও", "hi": "पाटियो", "tr": "veranda", "bs": "terasa"}}
+{"guid": "N30_087", "translations": {"ms": "taman permainan", "hi": "खेल का मैदान", "tr": "çocuk oyun alanı"}}
+{"guid": "N30_088", "translations": {"ms": "kolam renang", "hi": "तैराकी का तालाब", "tr": "yüzme havuzu", "bs": "bazen za plivanje"}}
+{"guid": "N30_089", "translations": {"ro": "curte", "pl": "podwórko", "th": "ลาน", "ms": "halaman", "ta": "முற்றம்", "kn": "ಅಂಗಳ", "uk": "двір", "bn": "বাড়ির আঙিনা", "hi": "आँगन", "tr": "avlu", "bs": "dvorište"}}
+{"guid": "N30_090", "translations": {"ro": "grădină zoologică", "pl": "zoo", "th": "สวนสัตว์", "ms": "zoo", "ta": "விலங்குக் காட்சிச்சாலை", "kn": "ಮೃಗಾಲಯ", "uk": "зоопарк", "bn": "জীববিজ্ঞান উদ্যান", "hi": "चिड़ियाघर", "tr": "hayvanat bahçesi", "bs": "zoološki vrt"}}
+{"guid": "N30_091", "translations": {"ro": "parcelă", "pl": "działka", "th": "แปลงที่ดิน", "ms": "petak tanah", "ta": "நிலம்", "kn": "ನಿವೇಶನ", "uk": "ділянка", "bn": "খণ্ড", "hi": "खतিয়ান", "tr": "arsa", "bs": "parcela"}}
+{"guid": "N30_092", "translations": {"ms": "halaman belakang", "hi": "पिछवाड़ा", "tr": "arka bahçe"}}
+{"guid": "N30_093", "translations": {"ms": "tempat letak kereta", "hi": "कार पार्किंग स्थल", "tr": "otopark"}}
+{"guid": "N30_094", "translations": {"ms": "halaman depan", "hi": "सामने का आँगन", "tr": "ön bahçe"}}
+{"guid": "N30_095", "translations": {"ms": "tempat letak kereta", "hi": "पार्किंग स्थल", "tr": "otopark"}}
+{"guid": "N30_096", "translations": {"ms": "dataran bandar", "hi": "नगर चौक", "tr": "kasaba meydanı"}}
+{"guid": "N30_097", "translations": {"ro": "pistă", "pl": "tor", "th": "สนามแข่ง", "ms": "litar perlumbaan", "ta": "பந்தயப்பாதை", "kn": "ಓಟದ ಹಾದಿ", "uk": "трасa", "bn": "ট্র্যাক", "hi": "ट्रैक", "tr": "yarış pisti"}}
+{"guid": "N30_098", "translations": {"ms": "taman hiburan", "hi": "मनोरंजन मेला", "tr": "lunapark"}}

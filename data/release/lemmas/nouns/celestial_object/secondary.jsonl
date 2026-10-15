@@ -7,3 +7,5 @@
 {"guid": "N64_007", "translations": {"ms": "asteroid", "hi": "क्षुद्रग्रह", "tr": "asteroit"}}
 {"guid": "N64_008", "translations": {"ms": "sistem suria", "hi": "सौरमंडल", "tr": "Güneş Sistemi"}}
 {"guid": "N64_009", "translations": {"ms": "bintang supernova", "hi": "सुपरनोवा तारा", "tr": "süpernova yıldızı"}}
+{"guid": "N64_099", "translations": {"ms": "fasa bulan", "hi": "चंद्रमा की कला", "tr": "Ay evresi"}}
+{"guid": "N64_100", "translations": {"ms": "bintang jatuh", "hi": "टूटता तारा", "tr": "kayan yıldız", "bs": "zvijezda padalica"}}

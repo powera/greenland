@@ -38,7 +38,6 @@
 {"guid": "N50_038", "translations": {"ro": "sugestie", "pl": "wskazówka", "th": "คำแนะนำ", "ms": "petua", "ta": "சலுகை", "kn": "ಸಲಹೆ", "uk": "порада", "bn": "পর্দর্শন", "hi": "सुझाव", "tr": "tavsiye"}}
 {"guid": "N50_039", "translations": {"ms": "senarai barang untuk dibeli", "hi": "खरीदारी की सूची", "tr": "alışveriş listesi"}}
 {"guid": "N50_040", "translations": {"ms": "buku laporan prestasi", "hi": "प्रगति पत्र", "tr": "karne"}}
-{"guid": "N50_041", "translations": {"ms": "saman parkir", "hi": "पार्किंग का जुर्माना", "tr": "park cezası"}}
 {"guid": "N50_042", "translations": {"ms": "lesen memandu", "hi": "ड्राइविंग लाइसेंस", "tr": "sürücü belgesi"}}
 {"guid": "N50_043", "translations": {"ms": "pas masuk kapal terbang", "hi": "बोर्डिंग पास", "tr": "biniş kartı"}}
 {"guid": "N50_044", "translations": {"ms": "nama tengah", "hi": "मध्य नाम", "tr": "ikinci ad"}}
@@ -53,9 +52,7 @@
 {"guid": "N50_053", "translations": {"ms": "graf", "hi": "आलेख", "tr": "grafik"}}
 {"guid": "N50_054", "translations": {"ms": "lema", "hi": "उपप्रमेय", "tr": "yardımcı önerme"}}
 {"guid": "N50_055", "translations": {"ms": "ketidaklengkapan", "hi": "अपूर्णता", "tr": "eksiklik"}}
-{"guid": "N50_056", "translations": {"ms": "dentuman", "hi": "धमाका", "tr": "gümbürtü"}}
 {"guid": "N50_057", "translations": {"ms": "episod", "hi": "प्रसंग", "tr": "bölüm"}}
-{"guid": "N50_058", "translations": {"ms": "bunyi letupan kecil", "hi": "पटाख़े जैसी आवाज़", "tr": "patlama sesi"}}
 {"guid": "N50_059", "translations": {"ms": "dialog", "hi": "संवाद", "tr": "diyalog"}}
 {"guid": "N50_060", "translations": {"ms": "dialog", "hi": "संवाद", "tr": "diyalog"}}
 {"guid": "N50_061", "translations": {"ms": "puisi", "hi": "कविता", "tr": "şiir"}}
@@ -90,7 +87,6 @@
 {"guid": "N50_090", "translations": {"ms": "penceritaan", "hi": "कथन", "tr": "anlatım"}}
 {"guid": "N50_091", "translations": {"ms": "pemancar", "hi": "प्रेषक", "tr": "iletici"}}
 {"guid": "N50_092", "translations": {"ms": "pengesahan ketulenan", "hi": "प्रामाणिकता की पुष्टि", "tr": "doğrulama"}}
-{"guid": "N50_093", "translations": {"ms": "gema", "hi": "गुंजन", "tr": "rezonans"}}
 {"guid": "N50_094", "translations": {"ms": "petikan", "hi": "उद्धरण", "tr": "alıntı"}}
 {"guid": "N50_095", "translations": {"ms": "gangguan", "hi": "उत्पीड़न", "tr": "taciz"}}
 {"guid": "N50_096", "translations": {"ms": "rujukan", "hi": "उद्धरण", "tr": "atıf"}}
@@ -131,9 +127,6 @@
 {"guid": "N50_138", "translations": {"ms": "bahasa kreol", "hi": "क्रियोल भाषा", "tr": "kreol dili"}}
 {"guid": "N50_139", "translations": {"ms": "bahasa pijin", "hi": "पिजिन भाषा", "tr": "pidgin dili"}}
 {"guid": "N50_140", "translations": {"ms": "substratum", "hi": "अधःस्तर", "tr": "alt katman"}}
-{"guid": "N50_141", "translations": {"ms": "tepukan", "hi": "ताली की आवाज़", "tr": "alkış sesi"}}
-{"guid": "N50_142", "translations": {"ms": "bahasa Inggeris", "hi": "अंग्रेज़ी", "tr": "İngilizce"}}
-{"guid": "N50_143", "translations": {"ms": "detikan", "hi": "टिक-टिक", "tr": "tıkırtı"}}
 {"guid": "N50_144", "translations": {"ms": "video", "hi": "वीडियो", "tr": "video"}}
 {"guid": "N50_145", "translations": {"ms": "alamat", "hi": "पता", "tr": "adres"}}
 {"guid": "N50_146", "translations": {"ms": "perbualan", "hi": "बातचीत", "tr": "sohbet"}}
@@ -150,3 +143,4 @@
 {"guid": "N50_157", "translations": {"ms": "rangka", "hi": "रूपरेखा", "tr": "taslak"}}
 {"guid": "N50_158", "translations": {"ms": "pujian", "hi": "प्रशंसा", "tr": "övgü"}}
 {"guid": "N50_159", "translations": {"ms": "pujian", "hi": "स्तुति", "tr": "övgü"}}
+{"guid": "N50_194", "translations": {"ms": "perbendaharaan kata", "hi": "शब्दावली", "tr": "kelime dağarcığı"}}

@@ -8,7 +8,6 @@
 {"guid": "N01_066", "translations": {"ro": "inamic", "pl": "wróg", "th": "ศัตรู", "ms": "musuh", "ta": "வரி/எதிரி", "kn": "ಶತ್ರು", "uk": "ворог", "bn": "শত্রু", "hi": "शत्रु", "tr": "düşman"}}
 {"guid": "N01_069", "translations": {"ro": "oameni", "pl": "ludzie", "th": "ประชาชน", "ms": "orang ramai", "ta": "மக்கள்", "kn": "ಜನರು", "uk": "народ", "bn": "জনতা", "hi": "लोग", "tr": "halk"}}
 {"guid": "N01_070", "translations": {"ro": "zeu", "pl": "bóg", "th": "พระเจ้า", "ms": "dewa", "ta": "கடவன்", "kn": "ದೇವರು", "uk": "бог", "bn": "ঈশ্বর", "hi": "भगवान", "tr": "tanrı"}}
-{"guid": "N01_072", "translations": {"ro": "uriaș", "pl": "olbrzym", "th": "ยักษ์", "ms": "gergasi", "ta": "பெரியளவான பெருஞ்சான்று", "kn": "ದೈತ್ಯ", "uk": "гігант", "bn": "দৈত্য", "hi": "दैत्य", "tr": "dev"}}
 {"guid": "N01_073", "translations": {"ro": "băiat", "pl": "chłopak", "th": "เด็กผู้ชาย", "ms": "lelaki", "ta": "சின்னப்பிள்ளை", "kn": "ಹುಡುಗ", "uk": "хлопець", "bn": "ছেলে", "hi": "लड़का", "tr": "erkek"}}
 {"guid": "N01_074", "translations": {"ro": "însoțitor", "pl": "towarzysz", "th": "เพื่อนร่วมทาง", "ms": "teman", "ta": "சூழலாளர்", "kn": "ಸಹಚರ", "uk": "супутник", "bn": "সঙ্গী", "hi": "साथी", "tr": "yol arkadaşı"}}
 {"guid": "N01_076", "translations": {"ro": "bebeluș", "pl": "niemowlę", "th": "ทารก", "ms": "bayi", "ta": "முழுச்சிசு", "kn": "ಶಿಶು", "uk": "немовля", "bn": "শিশু", "hi": "शिशु", "tr": "bebek", "bs": "beba"}}
@@ -35,7 +34,6 @@
 {"guid": "N01_098", "translations": {"ro": "stea", "pl": "gwiazda", "th": "ดารา", "ms": "bintang", "ta": "போர்்டொளி", "kn": "ನಕ್ಷತ್ರ", "uk": "зірка", "bn": "তারা", "hi": "तारा", "tr": "yıldız"}}
 {"guid": "N01_099", "translations": {"ms": "sahabat karib", "hi": "सबसे करीबी दोस्त", "tr": "en iyi arkadaş"}}
 {"guid": "N01_100", "translations": {"ms": "pemerhati", "hi": "पर्यवेक्षक", "tr": "gözlemci"}}
-{"guid": "N01_101", "translations": {"ms": "kerdil", "hi": "बौना", "tr": "cüce"}}
 {"guid": "N01_102", "translations": {"ms": "pelancong", "hi": "पर्यटक", "tr": "turist"}}
 {"guid": "N01_103", "translations": {"ms": "pengkritik", "hi": "आलोचक", "tr": "eleştirmen"}}
 {"guid": "N01_104", "translations": {"ms": "pemangsa", "hi": "शोषक", "tr": "istismarcı"}}

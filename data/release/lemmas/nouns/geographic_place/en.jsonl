@@ -1,13 +1,3 @@
-{"guid": "N56_001", "forms": [{"grammatical_form": "noun/en_singular", "text": "Atlantic Ocean", "is_base_form": true, "ipa": "/ˌætlæn.tɪk ˈoʊʃən/", "phonetic": "AT-lan-tik OH-shun"}]}
-{"guid": "N56_002", "forms": [{"grammatical_form": "noun/en_singular", "text": "Pacific Ocean", "is_base_form": true, "ipa": "pəˈsɪfɪk ˈoʊʃən", "phonetic": "puh-SIF-ik oh-shən"}]}
-{"guid": "N56_003", "forms": [{"grammatical_form": "noun/en_singular", "text": "Indian Ocean", "is_base_form": true, "ipa": "/ˌɪndiːən ˈoʊʃən/", "phonetic": "IN-dee-uhn OH-shun"}]}
-{"guid": "N56_004", "forms": [{"grammatical_form": "noun/en_singular", "text": "Baltic Sea", "is_base_form": true, "ipa": "/ˈbaɪ.lɪk siː/", "phonetic": "BYE-lik SEE"}]}
-{"guid": "N56_005", "forms": [{"grammatical_form": "noun/en_singular", "text": "Mediterranean Sea", "is_base_form": true, "ipa": "/ˌmɛdɪtɛˈriːəniən/", "phonetic": "MED-uh-tuh-REE-uh-nee-uhn"}]}
-{"guid": "N56_006", "forms": [{"grammatical_form": "noun/en_singular", "text": "Arctic Ocean", "is_base_form": true}]}
-{"guid": "N56_007", "forms": [{"grammatical_form": "noun/en_singular", "text": "Sahara", "is_base_form": true}]}
-{"guid": "N56_008", "forms": [{"grammatical_form": "noun/en_singular", "text": "Amazon River", "is_base_form": true}]}
-{"guid": "N56_009", "forms": [{"grammatical_form": "noun/en_singular", "text": "Nile", "is_base_form": true}]}
-{"guid": "N56_010", "forms": [{"grammatical_form": "noun/en_singular", "text": "Alps", "is_base_form": true}]}
 {"guid": "N56_011", "forms": [{"grammatical_form": "noun/en_singular", "text": "national park", "is_base_form": true}]}
 {"guid": "N56_012", "forms": [{"grammatical_form": "noun/en_singular", "text": "north pole", "is_base_form": true}]}
 {"guid": "N56_013", "forms": [{"grammatical_form": "noun/en_singular", "text": "south pole", "is_base_form": true}]}
@@ -39,3 +29,12 @@
 {"guid": "N56_039", "forms": [{"grammatical_form": "noun/en_singular", "text": "village", "is_base_form": true, "ipa": "/ˈvɪlɪdʒ/", "phonetic": "VIL-ij"}]}
 {"guid": "N56_040", "forms": [{"grammatical_form": "noun/en_singular", "text": "world", "is_base_form": true, "ipa": "/wɝld/", "phonetic": "WORLD"}]}
 {"guid": "N56_041", "forms": [{"grammatical_form": "noun/en_singular", "text": "land use", "is_base_form": true}], "variants": [{"kind": "spelling", "key": "land-use", "forms": [{"grammatical_form": "noun/en_singular", "text": "land-use", "is_base_form": true}]}]}
+{"guid": "N56_042", "forms": [{"grammatical_form": "noun/en_singular", "text": "capital", "is_base_form": true, "ipa": "/ˈkæpɪtəl/", "phonetic": "KAP-uh-tul"}]}
+{"guid": "N56_043", "forms": [{"grammatical_form": "noun/en_singular", "text": "city", "is_base_form": true, "ipa": "/ˈsɪti/", "phonetic": "SIT-ee"}], "variants": [{"kind": "spelling", "key": "City", "forms": [{"grammatical_form": "noun/en_singular", "text": "City", "is_base_form": true}]}]}
+{"guid": "N56_044", "forms": [{"grammatical_form": "noun/en_singular", "text": "country", "is_base_form": true, "ipa": "/ˈkʌntri/", "phonetic": "KUN-trē"}]}
+{"guid": "N56_045", "forms": [{"grammatical_form": "noun/en_singular", "text": "place", "is_base_form": true, "ipa": "/pleɪs/", "phonetic": "PLAYS"}]}
+{"guid": "N56_046", "forms": [{"grammatical_form": "noun/en_singular", "text": "area", "is_base_form": true, "ipa": "/ˈɛəriə/", "phonetic": "AIR-ee-ə"}]}
+{"guid": "N56_047", "forms": [{"grammatical_form": "noun/en_singular", "text": "state", "is_base_form": true, "ipa": "/steɪt/", "phonetic": "STAYT"}], "variants": [{"kind": "spelling", "key": "State", "forms": [{"grammatical_form": "noun/en_singular", "text": "State", "is_base_form": true}]}]}
+{"guid": "N56_048", "forms": [{"grammatical_form": "noun/en_singular", "text": "kingdom", "is_base_form": true, "ipa": "/ˈkɪŋdəm/", "phonetic": "KING-duhm"}], "variants": [{"kind": "spelling", "key": "Kingdom", "forms": [{"grammatical_form": "noun/en_singular", "text": "Kingdom", "is_base_form": true}]}]}
+{"guid": "N56_049", "forms": [{"grammatical_form": "noun/en_singular", "text": "province", "is_base_form": true, "ipa": "/ˈprɑː.vɪns/", "phonetic": "PROV-ins"}]}
+{"guid": "N56_050", "forms": [{"grammatical_form": "noun/en_singular", "text": "region", "is_base_form": true, "ipa": "/ˈriːdʒən/", "phonetic": "REE-juhn"}]}

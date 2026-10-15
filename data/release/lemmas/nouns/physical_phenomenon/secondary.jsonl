@@ -1,0 +1,25 @@
+{"guid": "N80_001", "translations": {"ro": "umbră", "pl": "cień", "th": "เงา", "ms": "bayang-bayang", "ta": "நிழல்", "kn": "ನಿಸ್ತುಲ", "uk": "тінь", "bn": "ছায়া", "hi": "छाया", "tr": "gölge"}}
+{"guid": "N80_002", "translations": {"ro": "liniște", "pl": "cisza", "th": "ความเงียบ", "ms": "kesunyian", "ta": "மௌனம்", "kn": "ಮೌನ", "uk": "тиша", "bn": "নীরবতা", "hi": "निशब्दता", "tr": "sessizlik"}}
+{"guid": "N80_003", "translations": {"ms": "dentuman", "hi": "धमाका", "tr": "gümbürtü"}}
+{"guid": "N80_004", "translations": {"ms": "tepukan", "hi": "ताली की आवाज़", "tr": "alkış sesi"}}
+{"guid": "N80_005", "translations": {"ms": "bunyi letupan kecil", "hi": "पटाख़े जैसी आवाज़", "tr": "patlama sesi"}}
+{"guid": "N80_006", "translations": {"ms": "gema", "hi": "गुंजन", "tr": "rezonans"}}
+{"guid": "N80_007", "translations": {"ms": "detikan", "hi": "टिक-टिक", "tr": "tıkırtı"}}
+{"guid": "N80_008", "translations": {"ro": "gravitație", "pl": "grawitacja", "th": "แรงโน้มถ่วง", "ms": "graviti", "ta": "கரைத்திறன்", "kn": "ಗುರುತ್ವಾಕರ್ಷಣಾ", "uk": "гравітація", "bn": "মাধ্যাকর্ষণ", "hi": "गुरुत्वाकर्षण", "tr": "yerçekimi"}}
+{"guid": "N80_009", "translations": {"ro": "zgomot", "pl": "hałas", "th": "เสียงรบกวน", "ms": "bunyi bising", "ta": "ஒலி", "kn": "ಶಬ್ದ", "uk": "шум", "bn": "শব্দ", "hi": "शोर", "tr": "gürültü"}}
+{"guid": "N80_010", "translations": {"ro": "rază", "pl": "promień", "th": "ลำแสง", "ms": "sinar", "ta": "கதிர்", "kn": "ಕಿರಣ", "uk": "промінь", "bn": "তরঙ্গ", "hi": "किरण", "tr": "ışın"}}
+{"guid": "N80_011", "translations": {"ro": "ritm", "pl": "rytm", "th": "จังหวะ", "ms": "irama", "ta": "இதம்", "kn": "ರಿದ್ಮ್", "uk": "ритм", "bn": "রিদম", "hi": "ताल", "tr": "ritim"}}
+{"guid": "N80_012", "translations": {"ro": "sunet", "pl": "dźwięk", "th": "เสียง", "ms": "bunyi", "ta": "இசை", "kn": "ಧ್ವನಿ", "uk": "звук", "bn": "শব্দ", "hi": "ध्वनिः", "tr": "ses"}}
+{"guid": "N80_013", "translations": {"ro": "undă", "pl": "fala", "th": "คลื่น", "ms": "gelombang", "ta": "அலை", "kn": "ಅಲೆ", "uk": "хвиля", "bn": "তরঙ্গ", "hi": "तरंग", "tr": "dalga"}}
+{"guid": "N80_014", "translations": {"ro": "fum", "pl": "dym", "th": "ควัน", "ms": "asap", "ta": "புகை", "kn": "ಹೂಗು", "uk": "дим", "bn": "ধোঁয়া", "hi": "धुआँ", "tr": "duman"}}
+{"guid": "N80_015", "translations": {"ro": "foc", "pl": "ogień", "th": "ไฟ", "ms": "api", "ta": "நெருப்பு", "kn": "ಬೆಂಕಿ", "uk": "вогонь", "bn": "আগুন", "hi": "आग", "tr": "ateş", "bs": "vatra"}}
+{"guid": "N80_016", "translations": {"ro": "flacără", "pl": "płomień", "th": "เปลวไฟ", "ms": "nyalaan", "ta": "தீச்சுவாலை", "kn": "ಜ್ವಾಲೆ", "uk": "полум'я", "bn": "লেপসনা", "hi": "लपट", "tr": "alev", "bs": "plamen"}}
+{"guid": "N80_017", "translations": {"ro": "tunet", "pl": "grzmot", "th": "ฟ้าร้อง", "ms": "guruh", "ta": "இடி", "kn": "ಗುಡುಗು", "uk": "грім", "bn": "বজ্রগর্জন", "hi": "गरज", "tr": "gök gürültüsü", "bs": "grmljavina"}}
+{"guid": "N80_018", "translations": {"ro": "val", "pl": "fala", "th": "คลื่น", "ms": "ombak", "ta": "அலை", "kn": "ಅಲೆ", "uk": "хвиля", "bn": "তরঙ্গ", "hi": "लहर", "tr": "dalga", "bs": "val"}}
+{"guid": "N80_019", "translations": {"ro": "lovitură", "pl": "cios", "th": "การตี", "ms": "pukulan", "ta": "சடி", "kn": "ಘಾತ್ರ", "uk": "удар", "bn": "ঘাত", "hi": "घात", "tr": "darbe"}}
+{"guid": "N80_020", "translations": {"ro": "sclipire", "pl": "błysk", "th": "วูบวาบของแสง", "ms": "kilatan cahaya", "ta": "ஒளிச்சுடர்", "kn": "ಬೆಳಕು ಹೊಡೆಯುವಿಕೆ", "uk": "спалах", "bn": "চমকপ্রকাশ", "hi": "चमक", "tr": "ışık parlaması"}}
+{"guid": "N80_021", "translations": {"ro": "bătăi", "pl": "stuk", "th": "เคาะ", "ms": "ketukan", "ta": "அடி", "kn": "ಒತ್ತಾಟ", "uk": "стук", "bn": "ঠকঠকানি", "hi": "ठकठक", "tr": "vurma sesi"}}
+{"guid": "N80_022", "translations": {"ro": "forță", "pl": "siła", "th": "กำลัง", "ms": "daya", "ta": "சக்தி", "kn": "ಶಕ್ತಿ", "uk": "сила", "bn": "শক্তি", "hi": "शक्ति", "tr": "kuvvet"}}
+{"guid": "N80_023", "translations": {"ro": "căldură", "pl": "ciepło", "th": "ความร้อน", "ms": "haba", "ta": "சூடுபாடு", "kn": "ತಾಪ", "uk": "тепло", "bn": "তাপ", "hi": "ताप", "tr": "ısı"}}
+{"guid": "N80_024", "translations": {"ro": "putere", "pl": "moc", "th": "พลังงานกำลัง", "ms": "kuasa", "ta": "சக்தி", "kn": "ಶಕ್ತಿ", "uk": "потужність", "bn": "শক্তি", "hi": "शक्ति", "tr": "güç"}}
+{"guid": "N80_025", "translations": {"ro": "presiune", "pl": "ciśnienie", "th": "ความดัน", "ms": "tekanan", "ta": "மிளித்துவழுக்காறு", "kn": "ದಾಳಿ", "uk": "тиск", "bn": "চাপ", "hi": "दबाव", "tr": "basınç"}}

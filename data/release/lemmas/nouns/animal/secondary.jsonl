@@ -26,11 +26,9 @@
 {"guid": "N02_026", "translations": {"ro": "ciorârlă", "pl": "wrona", "th": "กา", "ms": "gagak", "ta": "காகம்", "kn": "ಕರಡಿ ತಾರಕ (ಕಾಗೆ)", "uk": "ворона", "bn": "কাক", "hi": "कौवा", "tr": "karga", "bs": "vrana"}}
 {"guid": "N02_027", "translations": {"ro": "vultur", "pl": "orzeł", "th": "เหยี่ยว", "ms": "helang", "ta": "கழுகு", "kn": "ಗರುಡ", "uk": "орел", "bn": "ঈগল", "hi": "गरुड", "tr": "kartal", "bs": "orao"}}
 {"guid": "N02_028", "translations": {"ro": "oaie", "pl": "owca", "th": "แกะ", "ms": "biri-biri", "ta": "மேய்க்கிழமை?", "kn": "मेंಕ (transliteration not allowed?)", "uk": "вівця", "bn": "ভেড়া", "hi": "भेड़", "tr": "koyun", "bs": "ovca"}}
-{"guid": "N02_029", "translations": {"ro": "dragon", "pl": "smok", "th": "มังกร", "ms": "naga", "ta": "டிராகன்", "kn": "ಅಜಗರು", "uk": "дракон", "bn": "ড্রাগন", "hi": "ड्रैगन", "tr": "ejderha", "bs": "zmaj"}}
 {"guid": "N02_030", "translations": {"ro": "animal", "pl": "zwierzę", "th": "สัตว์", "ms": "haiwan", "ta": "விலங்கு", "kn": "ಪ್ರಾಣಿ", "uk": "тварина", "bn": "প্রাণী", "hi": "प्राणी", "tr": "hayvan", "bs": "životinja"}}
 {"guid": "N02_031", "translations": {"ro": "creatură", "pl": "stworzenie", "th": "สิ่งมีชีวิต", "ms": "makhluk", "ta": "உயிரினம்", "kn": "ಜೀವಿ", "uk": "істота", "bn": "সত্তা", "hi": "प्राणी", "tr": "yaratık", "bs": "stvorenje"}}
 {"guid": "N02_032", "translations": {"ro": "fiare", "pl": "zwierz", "th": "สัตว์ร้าย", "ms": "binatang buas", "ta": "விலங்கு", "kn": "ಪ್ರಾಣಿ", "uk": "звір", "bn": "জন্তু", "hi": "जानवर", "tr": "yırtıcı hayvan", "bs": "zvijer"}}
-{"guid": "N02_033", "translations": {"ro": "monstru", "pl": "potwór", "th": "ปีศาจ", "ms": "raksasa", "ta": "பிசாசு", "kn": "ವೈರಾಕ್ಷಸಿ", "uk": "монстр", "bn": "দানব", "hi": "राक्षस", "tr": "canavar", "bs": "čudovište"}}
 {"guid": "N02_034", "translations": {"ro": "pește", "pl": "ryba", "th": "ปลา", "ms": "ikan", "ta": "மீன்", "kn": "ಮೀನು", "uk": "риба", "bn": "মাছ", "hi": "मछली", "tr": "balık", "bs": "riba"}}
 {"guid": "N02_035", "translations": {"ro": "leu", "pl": "lew", "th": "สิงโต", "ms": "singa", "ta": "சிங்கம்", "kn": "ಸಿಂಹ", "uk": "лев", "bn": "সিংহ", "hi": "सिंह", "tr": "aslan", "bs": "lav"}}
 {"guid": "N02_036", "translations": {"ro": "maimuță", "pl": "małpa", "th": "ลิง", "ms": "monyet", "ta": "குரங்கு", "kn": "ಕೋತಿ", "uk": "мавпа", "bn": "বানর", "hi": "बंदर", "tr": "maymun", "bs": "majmun"}}
@@ -107,6 +105,5 @@
 {"guid": "N02_108", "translations": {"ms": "kutu", "hi": "किलनी", "tr": "kene"}}
 {"guid": "N02_109", "translations": {"ms": "anak kucing", "hi": "बिल्ली का बच्चा", "tr": "yavru kedi"}}
 {"guid": "N02_110", "translations": {"ms": "anak anjing", "hi": "पिल्ला", "tr": "yavru köpek"}}
-{"guid": "N02_111", "translations": {"ms": "janggut", "hi": "दाढ़ी", "tr": "sakal"}}
 {"guid": "N02_112", "translations": {"ms": "dinosaur", "hi": "डायनासोर", "tr": "dinozor"}}
 {"guid": "N02_113", "translations": {"ms": "kura-kura darat", "hi": "कछुआ", "tr": "kara kaplumbağası"}}

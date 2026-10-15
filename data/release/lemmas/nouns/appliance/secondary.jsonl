@@ -18,15 +18,9 @@
 {"guid": "N43_018", "translations": {"ro": "ventilator", "pl": "wentylator", "th": "พัดลม", "ms": "kipas angin", "ta": "மின்விசிறி", "kn": "ಫ್ಯಾನ್", "uk": "вентилятор", "bn": "পাখা", "hi": "पंखा", "tr": "vantilatör"}}
 {"guid": "N43_019", "translations": {"ro": "mașină de cusut", "pl": "maszyna do szycia", "th": "จักรเย็บผ้า", "ms": "mesin jahit", "ta": "தையல் இயந்திரம்", "kn": "ಹೊಲಿಗೆ ಯಂತ್ರ", "uk": "швейна машина", "bn": "সেলাই মেশিন", "hi": "सिलाई मशीन", "tr": "dikiş makinesi", "bs": "šivaća mašina"}}
 {"guid": "N43_020", "translations": {"ro": "boiler", "pl": "podgrzewacz wody", "th": "เครื่องทำน้ำร้อน", "ms": "pemanas air", "ta": "நீர் சூடேற்றி", "kn": "ವಾಟರ್ ಹೀಟರ್", "uk": "водонагрівач", "bn": "বিলীয়ার/অক্সিজেন না", "hi": "वाटर हीटर", "tr": "su ısıtıcısı", "bs": "bojler"}}
-{"guid": "N43_021", "translations": {"ms": "mesin daftar tunai", "hi": "कैश रजिस्टर", "tr": "yazar kasa", "bs": "kasa"}}
-{"guid": "N43_022", "translations": {"ms": "tangki", "hi": "टंकी", "tr": "tank"}}
 {"guid": "N43_023", "translations": {"ms": "tandas", "hi": "शौचालय", "tr": "tuvalet"}}
 {"guid": "N43_024", "translations": {"ms": "akordion", "hi": "अकॉर्डियन", "tr": "akordeon"}}
 {"guid": "N43_025", "translations": {"ms": "turbin", "hi": "टरबाइन", "tr": "türbin"}}
-{"guid": "N43_026", "translations": {"ms": "periuk", "hi": "सॉसपैन", "tr": "sos tenceresi"}}
-{"guid": "N43_027", "translations": {"ms": "kuali leper", "hi": "तवा", "tr": "ızgara sacı"}}
 {"guid": "N43_028", "translations": {"ms": "gril ketuhar", "hi": "ओवन ग्रिल", "tr": "fırın ızgarası"}}
-{"guid": "N43_029", "translations": {"ms": "piano", "hi": "पियानो", "tr": "piyano"}}
 {"guid": "N43_030", "translations": {"ms": "pancuran mandi", "hi": "शावर", "tr": "duş"}}
 {"guid": "N43_031", "translations": {"ms": "dapur masak", "hi": "चूल्हा", "tr": "ocak"}}
-{"guid": "N43_032", "translations": {"ms": "syampu", "hi": "शैम्पू", "tr": "şampuan"}}
