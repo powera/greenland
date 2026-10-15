@@ -188,13 +188,23 @@ SUBTYPE_DEFS: Dict[str, Dict[str, SubtypeDef]] = {
         ),
         "food": SubtypeDef(
             prefix="N06",
-            description="Solid consumables",
-            examples=["bread", "apple", "rice", "meat"],
+            description=(
+                "Things eaten, and the ingredients, seasonings, sauces and liquids "
+                "used in cooking or at the table; anything edible that isn't drunk"
+            ),
+            examples=["bread", "apple", "meat", "flour", "paprika", "soy sauce", "broth"],
+            comment=(
+                'First defined as "solid consumables", which sent soy sauce, broth '
+                "and maple syrup to beverage and flour and paprika to "
+                "material_substance. Liquid or powder doesn't matter: soup and syrup "
+                "are food. A culinary ingredient stays food even when it is also a "
+                "material or a compound in other contexts."
+            ),
             group="Food and Consumables",
         ),
         "beverage": SubtypeDef(
             prefix="N42",
-            description="Liquid consumables",
+            description="Drinks: liquids consumed by drinking them",
             examples=["water", "coffee", "tea", "juice"],
             group="Food and Consumables",
         ),
