@@ -237,6 +237,35 @@ def test_deprecated_subtypes_are_withheld_from_classification() -> None:
                 assert subtype in offered
 
 
+def test_kind_of_names_a_top_level_live_subtype_in_the_same_group() -> None:
+    """The category page nests a kind_of subtype under its parent, in one table.
+
+    So the parent has to be rendered in the same group, and nesting stops at
+    one level: a parent that was itself nested would leave its children
+    listed under nothing.
+    """
+    for pos_type, subtypes in SUBTYPE_DEFS.items():
+        for subtype, spec in subtypes.items():
+            if spec.kind_of is None:
+                continue
+            parent = subtypes.get(spec.kind_of)
+            assert parent is not None, f"{pos_type}/{subtype}: unknown kind_of"
+            assert spec.kind_of != subtype
+            assert not parent.deprecated
+            assert parent.group == spec.group, f"{pos_type}/{subtype} is in another group"
+            assert parent.kind_of is None, f"{pos_type}/{subtype}: parent is itself nested"
+
+
+def test_part_of_names_live_subtypes_of_the_same_pos() -> None:
+    for pos_type, subtypes in SUBTYPE_DEFS.items():
+        for subtype, spec in subtypes.items():
+            assert len(set(spec.part_of)) == len(spec.part_of)
+            for whole in spec.part_of:
+                assert whole != subtype
+                assert whole in subtypes, f"{pos_type}/{subtype}: unknown part_of {whole}"
+                assert not subtypes[whole].deprecated
+
+
 def test_render_subtype_list_can_withhold_the_catch_all() -> None:
     assert "- other:" in render_subtype_list("noun")
     without = render_subtype_list("noun", include_catch_all=False)

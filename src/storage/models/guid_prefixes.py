@@ -48,6 +48,16 @@ class SubtypeDef:
             that names it must go on working -- but it is withheld from every
             classification prompt so nothing new is filed under it. The prefix
             is never reissued.
+        kind_of: The broader subtype this one is a narrower kind of: an
+            occupation is a human, so occupation is ``kind_of="human"``. The
+            category page nests it under that subtype. Same POS and same group,
+            and only one level deep: the parent may not itself be a kind of
+            anything.
+        part_of: The subtypes whose members this one's members are parts of: a
+            beak is not an animal but is part of one, so body_part is
+            ``part_of=["human", "animal"]``. Unlike ``kind_of`` it may cross
+            groups and name several. Like ``group``, both relations are
+            presentation only.
     """
 
     prefix: str
@@ -57,6 +67,8 @@ class SubtypeDef:
     member_name: Optional[str] = None
     group: str = "Other"
     deprecated: bool = False
+    kind_of: Optional[str] = None
+    part_of: List[str] = field(default_factory=list)
 
 
 SUBTYPE_DEFS: Dict[str, Dict[str, SubtypeDef]] = {
@@ -72,12 +84,14 @@ SUBTYPE_DEFS: Dict[str, Dict[str, SubtypeDef]] = {
             description="Family members",
             examples=["brother", "uncle", "cousin", "parent"],
             group="People and Living Things",
+            kind_of="human",
         ),
         "occupation": SubtypeDef(
             prefix="N36",
             description="Jobs and professions a person is employed in",
             examples=["teacher", "doctor", "accountant", "referee", "telephone lineman"],
             group="People and Living Things",
+            kind_of="human",
         ),
         "participant_role": SubtypeDef(
             prefix="N63",
@@ -96,6 +110,7 @@ SUBTYPE_DEFS: Dict[str, Dict[str, SubtypeDef]] = {
                 "occupation."
             ),
             group="People and Living Things",
+            kind_of="human",
         ),
         "honorific": SubtypeDef(
             prefix="N48",
@@ -119,6 +134,7 @@ SUBTYPE_DEFS: Dict[str, Dict[str, SubtypeDef]] = {
                 "is beverage."
             ),
             group="People and Living Things",
+            part_of=["human", "animal"],
         ),
         "disease_condition": SubtypeDef(
             prefix="N04",
@@ -143,6 +159,7 @@ SUBTYPE_DEFS: Dict[str, Dict[str, SubtypeDef]] = {
             description="Parts of plants",
             examples=["leaf", "root", "seed", "petal", "bark"],
             group="People and Living Things",
+            part_of=["plant"],
         ),
         "spiritual_being": SubtypeDef(
             prefix="N78",
@@ -195,7 +212,7 @@ SUBTYPE_DEFS: Dict[str, Dict[str, SubtypeDef]] = {
                 "cemetery, farm). A venue and the surface inside it nest: the arena is "
                 "this, its rink is place_name."
             ),
-            group="Physical Objects and Structures",
+            group="Places and Geography",
         ),
         "building_part": SubtypeDef(
             prefix="N47",
@@ -205,13 +222,14 @@ SUBTYPE_DEFS: Dict[str, Dict[str, SubtypeDef]] = {
                 "Rooms had been split between building_structure (bedroom, kitchen) "
                 "and place_name, whose examples named room; every room is filed here."
             ),
-            group="Physical Objects and Structures",
+            group="Places and Geography",
+            part_of=["building_structure"],
         ),
         "furniture": SubtypeDef(
             prefix="N39",
             description="Furniture items",
             examples=["table", "chair", "desk", "sofa", "bed"],
-            group="Physical Objects and Structures",
+            group="Everyday Objects",
         ),
         "small_movable_object": SubtypeDef(
             prefix="N08",
@@ -225,13 +243,13 @@ SUBTYPE_DEFS: Dict[str, Dict[str, SubtypeDef]] = {
                 "which now have subtypes of their own. A personal_item subtype "
                 "(wallet, comb, toothbrush, soap, shampoo) is planned for a later round."
             ),
-            group="Physical Objects and Structures",
+            group="Everyday Objects",
         ),
         "clothing_accessory": SubtypeDef(
             prefix="N09",
             description="Clothing and things worn",
             examples=["shirt", "shoe", "hat", "glove", "ring"],
-            group="Physical Objects and Structures",
+            group="Everyday Objects",
         ),
         "artwork_artifact": SubtypeDef(
             prefix="N10",
@@ -245,7 +263,7 @@ SUBTYPE_DEFS: Dict[str, Dict[str, SubtypeDef]] = {
                 "appliance, activity and this one. A work or genre that is not a "
                 "physical object (novel, sonnet, opera, comedy) is creative_work."
             ),
-            group="Physical Objects and Structures",
+            group="Everyday Objects",
         ),
         "creative_work": SubtypeDef(
             prefix="N69",
@@ -300,7 +318,7 @@ SUBTYPE_DEFS: Dict[str, Dict[str, SubtypeDef]] = {
                 "star; sun, moon, planet and star were stored there before this "
                 "existed."
             ),
-            group="Physical Objects and Structures",
+            group="Nature and the Physical World",
         ),
         "natural_object": SubtypeDef(
             prefix="N74",
@@ -317,7 +335,7 @@ SUBTYPE_DEFS: Dict[str, Dict[str, SubtypeDef]] = {
                 "leaf). nest and web had been animal_grouping_term, and fossil "
                 "natural_feature, for want of anything closer."
             ),
-            group="Physical Objects and Structures",
+            group="Nature and the Physical World",
         ),
         "physical_phenomenon": SubtypeDef(
             prefix="N80",
@@ -333,7 +351,7 @@ SUBTYPE_DEFS: Dict[str, Dict[str, SubtypeDef]] = {
                 "microscopic_entity. fire and flame had been natural_feature, shadow "
                 "abstract_condition, and gravity and sound concept_idea."
             ),
-            group="Physical Objects and Structures",
+            group="Nature and the Physical World",
         ),
         "microscopic_entity": SubtypeDef(
             prefix="N77",
@@ -351,7 +369,7 @@ SUBTYPE_DEFS: Dict[str, Dict[str, SubtypeDef]] = {
                 "molecule, ion, isotope, electron and proton had been "
                 "chemical_compound, and virus disease_condition."
             ),
-            group="Physical Objects and Structures",
+            group="Nature and the Physical World",
         ),
         "means_of_payment": SubtypeDef(
             prefix="N75",
@@ -371,22 +389,26 @@ SUBTYPE_DEFS: Dict[str, Dict[str, SubtypeDef]] = {
                 "a named entity. These had been spread over concept_idea, "
                 "small_movable_object and material_substance."
             ),
-            group="Physical Objects and Structures",
+            group="Everyday Objects",
         ),
         "tool": SubtypeDef(
             prefix="N12",
             description=(
                 "Implements held in the hand and used on a material or object to do a "
                 "job such as cutting, fastening, digging, measuring or shaping, and "
-                "fastening hardware"
+                "fastening hardware; not the things people write or draw with"
             ),
             examples=["hammer", "saw", "screwdriver", "shovel", "nail"],
             comment=(
                 "Was 'hand tools and generic tools', which took anything used for a "
                 "purpose: musical instruments, rackets, pans and engines. Those are "
-                "artwork_artifact, sports_game_equipment, kitchenware and machine_part."
+                "artwork_artifact, sports_game_equipment, kitchenware and machine_part. "
+                "Pens, pencils, crayons and erasers are small_movable_object: the "
+                "review read writing as a job done to paper and kept proposing them "
+                "here. A ruler measures and scissors cut, so both stay here."
             ),
-            group="Physical Objects and Structures",
+            group="Everyday Objects",
+            kind_of="small_movable_object",
         ),
         "sports_game_equipment": SubtypeDef(
             prefix="N70",
@@ -402,7 +424,8 @@ SUBTYPE_DEFS: Dict[str, Dict[str, SubtypeDef]] = {
                 "and skates are this. A playing area is place_name, its lines "
                 "spatial_division."
             ),
-            group="Physical Objects and Structures",
+            group="Everyday Objects",
+            kind_of="small_movable_object",
         ),
         "kitchenware": SubtypeDef(
             prefix="N71",
@@ -415,7 +438,8 @@ SUBTYPE_DEFS: Dict[str, Dict[str, SubtypeDef]] = {
                 "Anything powered (oven, toaster, kettle) is appliance. These had "
                 "been split between small_movable_object, tool and appliance."
             ),
-            group="Physical Objects and Structures",
+            group="Everyday Objects",
+            kind_of="small_movable_object",
         ),
         "machine_part": SubtypeDef(
             prefix="N72",
@@ -427,31 +451,32 @@ SUBTYPE_DEFS: Dict[str, Dict[str, SubtypeDef]] = {
                 "plugs and cables stay electronic_device. button is the push-button "
                 "sense; the clothing button is clothing_accessory."
             ),
-            group="Physical Objects and Structures",
+            group="Everyday Objects",
+            part_of=["vehicle", "electronic_device", "appliance"],
         ),
         "electronic_device": SubtypeDef(
             prefix="N57",
             description="Devices that run on electricity to compute, communicate or record",
             examples=["computer", "telephone", "television", "radio", "camera"],
-            group="Physical Objects and Structures",
+            group="Everyday Objects",
         ),
         "appliance": SubtypeDef(
             prefix="N43",
             description="Kitchen and household appliances",
             examples=["blender", "microwave", "toaster"],
-            group="Physical Objects and Structures",
+            group="Everyday Objects",
         ),
         "weapon": SubtypeDef(
             prefix="N44",
             description="Weapons and arms",
             examples=["sword", "gun", "bow", "shield"],
-            group="Physical Objects and Structures",
+            group="Everyday Objects",
         ),
         "vehicle": SubtypeDef(
             prefix="N40",
             description="Transportation",
             examples=["car", "truck", "bicycle", "boat", "airplane"],
-            group="Physical Objects and Structures",
+            group="Everyday Objects",
         ),
         "path_infrastructure": SubtypeDef(
             prefix="N13",
@@ -460,7 +485,7 @@ SUBTYPE_DEFS: Dict[str, Dict[str, SubtypeDef]] = {
             comment=(
                 "With building_structure and place_name, the things that would be on " "a map."
             ),
-            group="Physical Objects and Structures",
+            group="Places and Geography",
         ),
         "material_substance": SubtypeDef(
             prefix="N14",
@@ -477,6 +502,7 @@ SUBTYPE_DEFS: Dict[str, Dict[str, SubtypeDef]] = {
                 "is made of (atom, molecule, ion) are microscopic_entity."
             ),
             group="Materials and Substances",
+            kind_of="material_substance",
         ),
         "medication_remedy": SubtypeDef(
             prefix="N16",
@@ -494,12 +520,19 @@ SUBTYPE_DEFS: Dict[str, Dict[str, SubtypeDef]] = {
             prefix="N50",
             description="Language, messages, information",
             examples=["word", "language", "message", "news"],
-            group="Abstract Concepts and Ideas",
+            group="Language and Communication",
         ),
         "technology_digital": SubtypeDef(
             prefix="N52",
             description="Digital/computing concepts",
             examples=["internet", "email", "website", "data"],
+            comment=(
+                "Mixes everyday computing words (website, email, app) with terms of "
+                "the field (compiler, bandwidth, encryption), so it sits in the "
+                "abstract catch-all rather than Fields of Study. A rename or split is "
+                "deferred, with place_name's. The 1040 batch also left engineering "
+                "words here (gear, rotor, wiring, waveguide) that are not digital."
+            ),
             group="Abstract Concepts and Ideas",
         ),
         "abstract_condition": SubtypeDef(
@@ -518,7 +551,7 @@ SUBTYPE_DEFS: Dict[str, Dict[str, SubtypeDef]] = {
             prefix="N41",
             description="Activities and hobbies",
             examples=["reading", "cooking", "sports", "dancing", "hiking"],
-            group="Abstract Concepts and Ideas",
+            group="Events, Activities and Time",
         ),
         "performance_technique": SubtypeDef(
             prefix="N61",
@@ -534,7 +567,7 @@ SUBTYPE_DEFS: Dict[str, Dict[str, SubtypeDef]] = {
                 "shot is made, a pick and roll is what the play is for. activity is a "
                 "pursuit (reading, hiking), not one named way of doing something."
             ),
-            group="Abstract Concepts and Ideas",
+            group="Events, Activities and Time",
         ),
         "strategic_tactic": SubtypeDef(
             prefix="N62",
@@ -544,13 +577,13 @@ SUBTYPE_DEFS: Dict[str, Dict[str, SubtypeDef]] = {
             ),
             examples=["fork", "gambit", "pick and roll", "bluff", "pincer movement"],
             comment=("A move the rules define (castling) is rule_defined_event instead."),
-            group="Abstract Concepts and Ideas",
+            group="Events, Activities and Time",
         ),
         "symbolic_element": SubtypeDef(
             prefix="N18",
             description="Symbols, marks and notational elements",
             examples=["digit", "numeral", "graph", "motif", "license plate"],
-            group="Abstract Concepts and Ideas",
+            group="Language and Communication",
         ),
         "quality_attribute": SubtypeDef(
             prefix="N19",
@@ -568,13 +601,13 @@ SUBTYPE_DEFS: Dict[str, Dict[str, SubtypeDef]] = {
             prefix="N59",
             description="Legal doctrines and standards",
             examples=["stare decisis", "probable cause"],
-            group="Abstract Concepts and Ideas",
+            group="Fields of Study",
         ),
         "knowledge_domain": SubtypeDef(
             prefix="N21",
             description="Broad fields of study and bodies of knowledge",
             examples=["biology", "history", "philosophy", "mathematics", "machine learning"],
-            group="Abstract Concepts and Ideas",
+            group="Fields of Study",
         ),
         "quantitative_concept": SubtypeDef(
             prefix="N22",
@@ -628,7 +661,7 @@ SUBTYPE_DEFS: Dict[str, Dict[str, SubtypeDef]] = {
                 "(number, half), and a figure keeps shape (parabola). Numbers "
                 "themselves are numerals: Z01 cardinals, Z02 ordinals."
             ),
-            group="Abstract Concepts and Ideas",
+            group="Fields of Study",
         ),
         "linguistic_concept": SubtypeDef(
             prefix="N67",
@@ -648,7 +681,7 @@ SUBTYPE_DEFS: Dict[str, Dict[str, SubtypeDef]] = {
                 "(comma, grapheme). vowel, consonant and syllable were left where "
                 "they were for now."
             ),
-            group="Abstract Concepts and Ideas",
+            group="Language and Communication",
         ),
         "emotion_feeling": SubtypeDef(
             prefix="N23",
@@ -666,7 +699,7 @@ SUBTYPE_DEFS: Dict[str, Dict[str, SubtypeDef]] = {
             prefix="N24",
             description="Things that happen or unfold over time",
             examples=["war", "flight", "development", "process", "attempt"],
-            group="Processes and Time",
+            group="Events, Activities and Time",
         ),
         "rule_defined_event": SubtypeDef(
             prefix="N60",
@@ -683,13 +716,14 @@ SUBTYPE_DEFS: Dict[str, Dict[str, SubtypeDef]] = {
                 "strategic_tactic. Carved out of process_event, which had taken "
                 "checkmate and double play for want of anything closer."
             ),
-            group="Processes and Time",
+            group="Events, Activities and Time",
+            kind_of="process_event",
         ),
         "time_period": SubtypeDef(
             prefix="N25",
             description="Spans and points of time",
             examples=["year", "hour", "century", "night", "autumn"],
-            group="Processes and Time",
+            group="Events, Activities and Time",
         ),
         "group_people": SubtypeDef(
             prefix="N26",
@@ -840,19 +874,20 @@ SUBTYPE_DEFS: Dict[str, Dict[str, SubtypeDef]] = {
                 "pidgin are linguistic_concept. A person of a nationality is "
                 "nationality."
             ),
-            group="Named Entities",
+            group="Language and Communication",
         ),
         "temporal_name": SubtypeDef(
             prefix="N32",
             description="Named days of the week, months and holidays",
             examples=["Monday", "January", "Christmas", "New Year"],
-            group="Other Categories",
+            group="Events, Activities and Time",
         ),
         "nationality": SubtypeDef(
             prefix="N33",
             description="A person of a nationality or origin",
             examples=["American", "Lithuanian", "Finn", "Englishman", "Pole"],
-            group="Other Categories",
+            group="People and Living Things",
+            kind_of="human",
         ),
         "unit_of_measurement": SubtypeDef(
             prefix="N34",

@@ -91,25 +91,52 @@ def build_category_data(
     group memberships kept in this module, which had drifted: three noun
     subtypes -- legal_document, legal_concept and geographic_place -- were fully
     defined, issuing GUIDs, and appeared nowhere on the page.
+
+    Within a group, a subtype with ``kind_of`` is listed directly under its
+    parent and flagged as nested, so the page has a third layer below the
+    group headings. ``part_of`` is shown as links to the subtypes it names.
     """
     guid_prefixes = SUBTYPE_GUID_PREFIXES.get(pos_type, {})
     descriptions = SUBTYPE_DESCRIPTIONS.get(pos_type, {})
+    defs = SUBTYPE_DEFS.get(pos_type, {})
+
+    def display_name(subtype: str) -> str:
+        return subtype.replace("_", " ").title()
 
     grouped_data = []
     for group_name, subtypes in subtype_groups(pos_type).items():
-        group_items = []
+        children: Dict[str, List[str]] = {}
         for subtype in subtypes:
+            spec = defs.get(subtype)
+            if spec is not None and spec.kind_of is not None:
+                children.setdefault(spec.kind_of, []).append(subtype)
+        ordered: List[str] = []
+        for subtype in subtypes:
+            spec = defs.get(subtype)
+            if spec is not None and spec.kind_of is not None:
+                continue
+            ordered.append(subtype)
+            ordered.extend(children.get(subtype, []))
+
+        group_items = []
+        for subtype in ordered:
+            spec = defs.get(subtype)
             # Handle the special case where enum value might differ from GUID key
             guid_prefix = guid_prefixes.get(subtype, guid_prefixes.get(f"{pos_type}_{subtype}", ""))
             subtype_counts = counts.get(subtype, {"total": 0, "categorized": 0})
             group_items.append(
                 {
                     "name": subtype,
-                    "display_name": subtype.replace("_", " ").title(),
+                    "display_name": display_name(subtype),
                     "description": descriptions.get(subtype, ""),
                     "guid_prefix": guid_prefix,
                     "count": subtype_counts["total"],
                     "categorized_count": subtype_counts["categorized"],
+                    "kind_of": spec.kind_of if spec is not None else None,
+                    "part_of": [
+                        {"name": whole, "display_name": display_name(whole)}
+                        for whole in (spec.part_of if spec is not None else [])
+                    ],
                 }
             )
         grouped_data.append({"group_name": group_name, "items": group_items})
