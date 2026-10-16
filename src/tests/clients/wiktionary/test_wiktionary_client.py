@@ -1237,6 +1237,26 @@ class TestEnglishUtils(unittest.TestCase):
         self.assertEqual(generate_3s_present("go"), "goes")
         self.assertEqual(generate_3s_present("pass"), "passes")
 
+    def test_generate_3s_present_vowel_o_takes_s(self) -> None:
+        """Only consonant + o takes -es; vowel + o takes plain -s."""
+        self.assertEqual(generate_3s_present("veto"), "vetoes")
+        self.assertEqual(generate_3s_present("torpedo"), "torpedoes")
+        self.assertEqual(generate_3s_present("shampoo"), "shampoos")
+        self.assertEqual(generate_3s_present("tattoo"), "tattoos")
+
+    def test_final_ic_takes_k(self) -> None:
+        """A final -ic keeps its /k/ with a "k" before -ed and -ing."""
+        self.assertEqual(generate_past_tense("panic"), "panicked")
+        self.assertEqual(generate_past_tense("traffic"), "trafficked")
+        self.assertEqual(generate_present_participle("picnic"), "picnicking")
+        self.assertEqual(generate_3s_present("mimic"), "mimics")
+
+    def test_stressed_final_ur_doubles(self) -> None:
+        """-cur verbs carry final stress and double ("recur" -> "recurred")."""
+        self.assertEqual(generate_past_tense("recur"), "recurred")
+        self.assertEqual(generate_present_participle("incur"), "incurring")
+        self.assertEqual(generate_past_tense("concur"), "concurred")
+
     def test_generate_3s_present_y_to_ies(self) -> None:
         """Test 3rd person singular with -y -> -ies."""
         self.assertEqual(generate_3s_present("try"), "tries")

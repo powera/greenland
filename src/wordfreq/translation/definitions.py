@@ -136,7 +136,9 @@ def query_definitions(
                     description="A single form/definition of the word",
                     properties={
                         "definition": SchemaProperty(
-                            "string", "The definition of the word for this specific meaning"
+                            "string",
+                            "The meaning of the lemma in this sense, without describing "
+                            "the grammatical form (no 'past tense of ...')",
                         ),
                         "pos": SchemaProperty(
                             "string",
@@ -160,7 +162,9 @@ def query_definitions(
                         # ~28.5k characters, roughly two thirds of the prompt --
                         # to ask about one English word.
                         "is_base_form": SchemaProperty(
-                            "boolean", "Whether this is the base form (infinitive, singular, etc.)"
+                            "boolean",
+                            "Whether the given word is the base form (infinitive, singular, "
+                            "etc.) of this sense's lemma",
                         ),
                         "phonetic_spelling": SchemaProperty(
                             "string", "Phonetic spelling of the word"
