@@ -282,10 +282,10 @@ def approve_as_lemma(
     pending_pos_type = pending.pos_type
     pending_pos_subtype = pending.pos_subtype
     # Read before the pending row is deleted below; applied to the lemma
-    # once process_word() has created it.
+    # once create_sense_lemma() has created it.
     pending_tags = read_pending_import_tags(pending)
     # Read here for the same reason as the tags: the row is deleted below, and
-    # these are applied to the lemma only once process_word() has created it.
+    # these are applied to the lemma only once create_sense_lemma() has created it.
     pending_examples = read_pending_import_example_sentences(pending)
 
     logger.info(f"Approving word '{word}' (sense: {pending_definition[:60]}...)")
@@ -311,7 +311,7 @@ def approve_as_lemma(
             "sense_prominence": pending_prominence,
         }
         # Put the translations the staging call already returned back under the
-        # LLM field names process_word reads, so this branch stays a genuine
+        # LLM field names create_sense_lemma reads, so this branch stays a genuine
         # no-LLM path: without them the lemma would be created untranslated and
         # a later pass would pay again for an answer already bought -- and one
         # the reviewer never saw. Field names come from translation_helpers per
@@ -389,11 +389,10 @@ def approve_as_lemma(
     if pending_examples and not filtered_definitions[0].get("examples"):
         filtered_definitions[0]["examples"] = pending_examples
 
-    # Created here rather than through word_processing.process_word: that is a
-    # token-level bulk importer that returns early, reporting success, for any
-    # word that already has forms -- so approving a second sense of an existing
-    # word created nothing, and the lookup that followed picked up an older
-    # lemma of the same word as if it were new.
+    # Created per sense, not per token: a token-level importer that returned
+    # early for any word that already had forms meant approving a second sense
+    # of an existing word created nothing, and the lookup that followed picked
+    # up an older lemma of the same word as if it were new.
     for def_data in filtered_definitions:
         if not (def_data.get("pos") or "") or not def_data.get("pos_subtype"):
             session.rollback()

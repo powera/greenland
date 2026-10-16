@@ -1,7 +1,7 @@
 """Tests for the es-419 pass-through from the word-import path to LemmaTranslation.
 
 ``DEFINITIONS_PROMPT_LANGUAGES`` has asked the LLM for Latin American Spanish
-alongside lt/es/fr/zh for a while, but ``word_processing.process_word`` built
+alongside lt/es/fr/zh for a while, but the old ``word_processing.process_word`` built
 its ``TranslationSet`` from only four of the five and dropped the es-419 answer
 on the floor, so a word created through the pending-import approval path got no
 es-419 row. These tests cover the parameter on the two CRUD layers it crosses
@@ -71,7 +71,7 @@ def test_add_lemma_omits_es419_when_not_given(session: Session) -> None:
 
 
 def test_add_complete_word_entry_carries_es419_from_translation_set(session: Session) -> None:
-    """The TranslationSet route is what process_word uses; it must not drop es-419."""
+    """The TranslationSet route must not drop es-419."""
     form = add_complete_word_entry(
         session=session,
         token="computer",
