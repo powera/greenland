@@ -1,13 +1,13 @@
 {"guid": "N07_001", "forms": [{"grammatical_form": "noun/en_singular", "text": "house", "is_base_form": true, "ipa": "/haʊs/", "phonetic": "HAW-s"}]}
-{"guid": "N07_002", "forms": [{"grammatical_form": "noun/en_singular", "text": "school", "is_base_form": true, "ipa": "/skʊl/", "phonetic": "SKOOL"}], "variants": [{"kind": "spelling", "key": "School", "forms": [{"grammatical_form": "noun/en_singular", "text": "School", "is_base_form": true}]}]}
+{"guid": "N07_002", "forms": [{"grammatical_form": "noun/en_singular", "text": "school", "is_base_form": true, "ipa": "/skʊl/", "phonetic": "SKOOL"}, {"grammatical_form": "noun/en_possessive_singular", "text": "school's", "is_base_form": false}], "variants": [{"kind": "spelling", "key": "School", "forms": [{"grammatical_form": "noun/en_singular", "text": "School", "is_base_form": true}]}]}
 {"guid": "N07_003", "forms": [{"grammatical_form": "noun/en_singular", "text": "hospital", "is_base_form": true, "ipa": "/ˈhɑːspɪtl/", "phonetic": "HAH-spiht-uhl"}]}
 {"guid": "N07_004", "forms": [{"grammatical_form": "noun/en_singular", "text": "church", "is_base_form": true, "ipa": "/tʃɜːrtʃ/", "phonetic": "CHUR-ch"}]}
 {"guid": "N07_005", "forms": [{"grammatical_form": "noun/en_singular", "text": "store", "is_base_form": true, "ipa": "/stɔːr/", "phonetic": "STOW-er"}]}
 {"guid": "N07_006", "forms": [{"grammatical_form": "noun/en_singular", "text": "restaurant", "is_base_form": true, "ipa": "[ˈɹɛstɹænt]", "phonetic": "RES-τρrænt"}]}
 {"guid": "N07_007", "forms": [{"grammatical_form": "noun/en_singular", "text": "hotel", "is_base_form": true, "ipa": "/həʊˈtɛl/", "phonetic": "HOH-tel"}]}
-{"guid": "N07_008", "forms": [{"grammatical_form": "noun/en_singular", "text": "bank", "is_base_form": true, "ipa": "/bæŋk/", "phonetic": "BANGK"}]}
+{"guid": "N07_008", "forms": [{"grammatical_form": "noun/en_singular", "text": "bank", "is_base_form": true, "ipa": "/bæŋk/", "phonetic": "BANGK"}, {"grammatical_form": "noun/en_possessive_singular", "text": "bank's", "is_base_form": false}]}
 {"guid": "N07_009", "forms": [{"grammatical_form": "noun/en_singular", "text": "library", "is_base_form": true, "ipa": "/ˈlaɪ.brər.i/", "phonetic": "LYB-rə-ree"}], "variants": [{"kind": "spelling", "key": "Library", "forms": [{"grammatical_form": "noun/en_singular", "text": "Library", "is_base_form": true}]}]}
-{"guid": "N07_010", "forms": [{"grammatical_form": "noun/en_singular", "text": "museum", "is_base_form": true, "ipa": "/mjuˈzɪəm/", "phonetic": "MYOO-ze-əm"}, {"grammatical_form": "noun/en_plural", "text": "museums", "is_base_form": false}], "variants": [{"kind": "spelling", "key": "Museum", "forms": [{"grammatical_form": "noun/en_singular", "text": "Museum", "is_base_form": true}]}]}
+{"guid": "N07_010", "forms": [{"grammatical_form": "noun/en_singular", "text": "museum", "is_base_form": true, "ipa": "/mjuˈzɪəm/", "phonetic": "MYOO-ze-əm"}, {"grammatical_form": "noun/en_plural", "text": "museums", "is_base_form": false}, {"grammatical_form": "noun/en_possessive_singular", "text": "museum's", "is_base_form": false}], "variants": [{"kind": "spelling", "key": "Museum", "forms": [{"grammatical_form": "noun/en_singular", "text": "Museum", "is_base_form": true}]}]}
 {"guid": "N07_011", "forms": [{"grammatical_form": "noun/en_singular", "text": "fire station", "is_base_form": true, "ipa": "/faɪərˈsteɪʃən/", "phonetic": "FY-r SOO-ay-shən"}]}
 {"guid": "N07_012", "forms": [{"grammatical_form": "noun/en_singular", "text": "pharmacy", "is_base_form": true, "ipa": " /ˈfɑɹmə.si/", "phonetic": "FAHR-muh-see"}]}
 {"guid": "N07_013", "forms": [{"grammatical_form": "noun/en_singular", "text": "bakery", "is_base_form": true, "ipa": "/ˈbɑː.kɛ.ri/", "phonetic": "BAHK-uh-ree"}]}
@@ -29,9 +29,9 @@
 {"guid": "N07_042", "forms": [{"grammatical_form": "noun/en_singular", "text": "hall", "is_base_form": true, "ipa": "/hɔːl/", "phonetic": "HAW-uhl"}], "variants": [{"kind": "spelling", "key": "Hall", "forms": [{"grammatical_form": "noun/en_singular", "text": "Hall", "is_base_form": true}]}]}
 {"guid": "N07_043", "forms": [{"grammatical_form": "noun/en_singular", "text": "tower", "is_base_form": true, "ipa": "/təʊˈər/", "phonetic": "TOW-uh"}]}
 {"guid": "N07_045", "forms": [{"grammatical_form": "noun/en_singular", "text": "passage", "is_base_form": true, "ipa": "/ˈpæsɪdʒ/", "phonetic": "PASS-idzh"}]}
-{"guid": "N07_046", "forms": [{"grammatical_form": "noun/en_singular", "text": "building", "is_base_form": true, "ipa": "/ˈbɪldɪŋ/", "phonetic": "BILD-ing"}]}
+{"guid": "N07_046", "forms": [{"grammatical_form": "noun/en_singular", "text": "building", "is_base_form": true, "ipa": "/ˈbɪldɪŋ/", "phonetic": "BILD-ing"}, {"grammatical_form": "noun/en_possessive_singular", "text": "building's", "is_base_form": false}]}
 {"guid": "N07_047", "forms": [{"grammatical_form": "noun/en_singular", "text": "chamber", "is_base_form": true, "ipa": "/ˈtʃæm.bɚ/", "phonetic": "CHAM-bər"}]}
-{"guid": "N07_048", "forms": [{"grammatical_form": "noun/en_singular", "text": "cell", "is_base_form": true, "ipa": "/sɛl/", "phonetic": "SEL"}]}
+{"guid": "N07_048", "forms": [{"grammatical_form": "noun/en_singular", "text": "cell", "is_base_form": true, "ipa": "/sɛl/", "phonetic": "SEL"}, {"grammatical_form": "noun/en_possessive_singular", "text": "cell's", "is_base_form": false}]}
 {"guid": "N07_055", "variants": [{"kind": "spelling", "key": "Temple", "forms": [{"grammatical_form": "noun/en_singular", "text": "Temple", "is_base_form": true}]}]}
 {"guid": "N07_057", "forms": [{"grammatical_form": "noun/en_singular", "text": "stadium", "is_base_form": true}, {"grammatical_form": "noun/en_plural", "text": "stadiums", "is_base_form": false}]}
 {"guid": "N07_058", "variants": [{"kind": "spelling", "key": "Palace", "forms": [{"grammatical_form": "noun/en_singular", "text": "Palace", "is_base_form": true}]}]}
@@ -87,3 +87,13 @@
 {"guid": "N07_123", "forms": [{"grammatical_form": "noun/en_singular", "text": "velodrome", "is_base_form": true, "ipa": "/ˈvɛləˌdroʊm/", "phonetic": "VEL-uh-drohm"}]}
 {"guid": "N07_124", "forms": [{"grammatical_form": "noun/en_singular", "text": "ski lift", "is_base_form": true, "ipa": "/ˈskiː ˌlɪft/", "phonetic": "SKEE-LIFT"}]}
 {"guid": "N07_125", "forms": [{"grammatical_form": "noun/en_singular", "text": "dojo", "is_base_form": true, "ipa": "/ˈdoʊdʒoʊ/", "phonetic": "DOH-joh"}]}
+{"guid": "N07_128", "forms": [{"grammatical_form": "noun/en_singular", "text": "enclosed complex", "is_base_form": true}]}
+{"guid": "N07_129", "forms": [{"grammatical_form": "noun/en_singular", "text": "domed building", "is_base_form": true}]}
+{"guid": "N07_131", "forms": [{"grammatical_form": "noun/en_singular", "text": "storage space", "is_base_form": true}]}
+{"guid": "N07_132", "forms": [{"grammatical_form": "noun/en_singular", "text": "amusement arcade", "is_base_form": true}], "variants": [{"kind": "equivalent", "key": "arcade", "forms": [{"grammatical_form": "noun/en_singular", "text": "arcade", "is_base_form": true}]}]}
+{"guid": "N07_133", "forms": [{"grammatical_form": "noun/en_singular", "text": "disco", "is_base_form": true}]}
+{"guid": "N07_134", "variants": [{"kind": "equivalent", "key": "club", "forms": [{"grammatical_form": "noun/en_singular", "text": "club", "is_base_form": true}]}]}
+{"guid": "N07_136", "variants": [{"kind": "equivalent", "key": "accommodation", "forms": [{"grammatical_form": "noun/en_singular", "text": "accommodation", "is_base_form": true}]}]}
+{"guid": "N07_137", "forms": [{"grammatical_form": "noun/en_singular", "text": "prefect's office", "is_base_form": true}]}
+{"guid": "N07_138", "variants": [{"kind": "equivalent", "key": "stronghold", "forms": [{"grammatical_form": "noun/en_singular", "text": "stronghold", "is_base_form": true}]}]}
+{"guid": "N07_139", "forms": [{"grammatical_form": "noun/en_singular", "text": "prentice-hall", "is_base_form": true}]}

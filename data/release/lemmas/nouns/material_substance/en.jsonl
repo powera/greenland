@@ -26,7 +26,7 @@
 {"guid": "N14_028", "forms": [{"grammatical_form": "noun/en_singular", "text": "tin", "is_base_form": true, "ipa": "/tɪn/", "phonetic": "TIN"}]}
 {"guid": "N14_029", "forms": [{"grammatical_form": "noun/en_singular", "text": "wire", "is_base_form": true, "ipa": "/waɪr/", "phonetic": "WIRE"}]}
 {"guid": "N14_030", "forms": [{"grammatical_form": "noun/en_singular", "text": "poison", "is_base_form": true, "ipa": "/ˈpɔɪ.zən/", "phonetic": "POY-zən"}]}
-{"guid": "N14_031", "forms": [{"grammatical_form": "noun/en_singular", "text": "board", "is_base_form": true, "ipa": "/bɔːrd/", "phonetic": "BOHRD"}]}
+{"guid": "N14_031", "forms": [{"grammatical_form": "noun/en_singular", "text": "board", "is_base_form": true, "ipa": "/bɔːrd/", "phonetic": "BOHRD"}, {"grammatical_form": "noun/en_possessive_singular", "text": "board's", "is_base_form": false}]}
 {"guid": "N14_053", "forms": [{"grammatical_form": "noun/en_singular", "text": "cargo", "is_base_form": true}, {"grammatical_form": "noun/en_plural", "text": "cargoes", "is_base_form": false}]}
 {"guid": "N14_064", "forms": [{"grammatical_form": "noun/en_singular", "text": "dish soap", "is_base_form": true}]}
 {"guid": "N14_065", "forms": [{"grammatical_form": "noun/en_singular", "text": "fossil fuel", "is_base_form": true}]}
@@ -37,7 +37,7 @@
 {"guid": "N14_070", "forms": [{"grammatical_form": "noun/en_singular", "text": "vapor", "is_base_form": true, "ipa": "/ˈveɪpɚ/", "phonetic": "VAY-per"}]}
 {"guid": "N14_071", "forms": [{"grammatical_form": "noun/en_singular", "text": "crust", "is_base_form": true, "ipa": "/krʌst/", "phonetic": "KRUST"}]}
 {"guid": "N14_072", "forms": [{"grammatical_form": "noun/en_singular", "text": "mineral", "is_base_form": true, "ipa": "/ˈmɪnərəl/", "phonetic": "MIN-uh-rul"}]}
-{"guid": "N14_073", "forms": [{"grammatical_form": "noun/en_singular", "text": "film", "is_base_form": true, "ipa": "/fɪlm/", "phonetic": "FILM"}]}
+{"guid": "N14_073", "forms": [{"grammatical_form": "noun/en_singular", "text": "film", "is_base_form": true, "ipa": "/fɪlm/", "phonetic": "FILM"}, {"grammatical_form": "noun/en_possessive_singular", "text": "film's", "is_base_form": false}]}
 {"guid": "N14_074", "forms": [{"grammatical_form": "noun/en_singular", "text": "fibre", "is_base_form": true, "ipa": "/ˈfaɪbər/", "phonetic": "FY-ber"}]}
 {"guid": "N14_075", "forms": [{"grammatical_form": "noun/en_singular", "text": "fuel", "is_base_form": true, "ipa": "/ˈfjuəl/", "phonetic": "FYOO-uhl"}]}
 {"guid": "N14_077", "forms": [{"grammatical_form": "noun/en_singular", "text": "terracotta", "is_base_form": true, "ipa": "/ˌtɛrəˈkɑtə/", "phonetic": "ter-uh-KOT-uh"}]}
@@ -60,3 +60,19 @@
 {"guid": "N14_094", "forms": [{"grammatical_form": "noun/en_singular", "text": "newspaper", "is_base_form": true, "ipa": "/ˈnuːzˌpeɪpər/", "phonetic": "NOOZ-pay-per"}]}
 {"guid": "N14_095", "forms": [{"grammatical_form": "noun/en_singular", "text": "venom", "is_base_form": true, "ipa": "/ˈvɛnəm/", "phonetic": "VEN-um"}]}
 {"guid": "N14_096", "forms": [{"grammatical_form": "noun/en_singular", "text": "ice", "is_base_form": true, "ipa": "/aɪs/", "phonetic": "AY-s"}]}
+{"guid": "N14_099", "forms": [{"grammatical_form": "noun/en_singular", "text": "oxide coating", "is_base_form": true}]}
+{"guid": "N14_100", "forms": [{"grammatical_form": "noun/en_singular", "text": "birch wood", "is_base_form": true}]}
+{"guid": "N14_101", "variants": [{"kind": "equivalent", "key": "specimen", "forms": [{"grammatical_form": "noun/en_singular", "text": "specimen", "is_base_form": true}]}]}
+{"guid": "N14_102", "variants": [{"kind": "equivalent", "key": "beech", "forms": [{"grammatical_form": "noun/en_singular", "text": "beech", "is_base_form": true}]}]}
+{"guid": "N14_103", "forms": [{"grammatical_form": "noun/en_singular", "text": "photographic film", "is_base_form": true}], "variants": [{"kind": "equivalent", "key": "film", "forms": [{"grammatical_form": "noun/en_singular", "text": "film", "is_base_form": true}]}]}
+{"guid": "N14_104", "forms": [{"grammatical_form": "noun/en_singular", "text": "soldering flux", "is_base_form": true}], "variants": [{"kind": "equivalent", "key": "flux", "forms": [{"grammatical_form": "noun/en_singular", "text": "flux", "is_base_form": true}]}]}
+{"guid": "N14_107", "forms": [{"grammatical_form": "noun/en_singular", "text": "latex rubber", "is_base_form": true}]}
+{"guid": "N14_108", "forms": [{"grammatical_form": "noun/en_singular", "text": "acrylic paint", "is_base_form": true}]}
+{"guid": "N14_109", "forms": [{"grammatical_form": "noun/en_singular", "text": "flax fiber", "is_base_form": true}]}
+{"guid": "N14_110", "variants": [{"kind": "equivalent", "key": "accretion", "forms": [{"grammatical_form": "noun/en_singular", "text": "accretion", "is_base_form": true}]}]}
+{"guid": "N14_111", "forms": [{"grammatical_form": "noun/en_singular", "text": "natural gas", "is_base_form": true}], "variants": [{"kind": "equivalent", "key": "gas", "forms": [{"grammatical_form": "noun/en_singular", "text": "gas", "is_base_form": true}]}]}
+{"guid": "N14_112", "forms": [{"grammatical_form": "noun/en_singular", "text": "gas", "is_base_form": true}]}
+{"guid": "N14_115", "forms": [{"grammatical_form": "noun/en_singular", "text": "diesel fuel", "is_base_form": true}], "variants": [{"kind": "equivalent", "key": "diesel", "forms": [{"grammatical_form": "noun/en_singular", "text": "diesel", "is_base_form": true}]}]}
+{"guid": "N14_116", "forms": [{"grammatical_form": "noun/en_singular", "text": "aluminum foil", "is_base_form": true}], "variants": [{"kind": "equivalent", "key": "foil", "forms": [{"grammatical_form": "noun/en_singular", "text": "foil", "is_base_form": true}]}]}
+{"guid": "N14_117", "forms": [{"grammatical_form": "noun/en_singular", "text": "silicate mineral", "is_base_form": true}]}
+{"guid": "N14_118", "forms": [{"grammatical_form": "noun/en_singular", "text": "tissue paper", "is_base_form": true}], "variants": [{"kind": "equivalent", "key": "tissue", "forms": [{"grammatical_form": "noun/en_singular", "text": "tissue", "is_base_form": true}]}]}

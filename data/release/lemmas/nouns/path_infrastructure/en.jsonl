@@ -2,6 +2,7 @@
 {"guid": "N13_002", "forms": [{"grammatical_form": "noun/en_singular", "text": "bridge", "is_base_form": true, "ipa": "/brɪdʒ/", "phonetic": "BRIDGE"}]}
 {"guid": "N13_003", "forms": [{"grammatical_form": "noun/en_singular", "text": "tunnel", "is_base_form": true, "ipa": "/ˈtʌn.əl/", "phonetic": "TUN-nəl"}]}
 {"guid": "N13_004", "forms": [{"grammatical_form": "noun/en_singular", "text": "street", "is_base_form": true, "ipa": "/striːt/", "phonetic": "STREET"}], "variants": [{"kind": "spelling", "key": "Street", "forms": [{"grammatical_form": "noun/en_singular", "text": "Street", "is_base_form": true}]}]}
+{"guid": "N13_009", "forms": [{"grammatical_form": "noun/en_possessive_singular", "text": "railroad's", "is_base_form": false}]}
 {"guid": "N13_017", "forms": [{"grammatical_form": "noun/en_singular", "text": "traffic light", "is_base_form": true}]}
 {"guid": "N13_018", "forms": [{"grammatical_form": "noun/en_singular", "text": "bus stop", "is_base_form": true}]}
 {"guid": "N13_019", "forms": [{"grammatical_form": "noun/en_singular", "text": "pathway", "is_base_form": true, "ipa": "/ˈpæθˌweɪ/", "phonetic": "PATH-way"}]}
@@ -18,3 +19,8 @@
 {"guid": "N13_031", "forms": [{"grammatical_form": "noun/en_singular", "text": "trail", "is_base_form": true, "ipa": "/treɪl/", "phonetic": "TRAY-l"}]}
 {"guid": "N13_033", "forms": [{"grammatical_form": "noun/en_singular", "text": "fence", "is_base_form": true, "ipa": "/fɛnts/", "phonetic": "FENTS"}]}
 {"guid": "N13_034", "forms": [{"grammatical_form": "noun/en_singular", "text": "canal", "is_base_form": true, "ipa": "/kəˈnæl/", "phonetic": "kuh-NAL"}]}
+{"guid": "N13_036", "forms": [{"grammatical_form": "noun/en_singular", "text": "railway track", "is_base_form": true}]}
+{"guid": "N13_038", "forms": [{"grammatical_form": "noun/en_singular", "text": "access road", "is_base_form": true}]}
+{"guid": "N13_039", "forms": [{"grammatical_form": "noun/en_singular", "text": "highway exit", "is_base_form": true}], "variants": [{"kind": "equivalent", "key": "exit", "forms": [{"grammatical_form": "noun/en_singular", "text": "exit", "is_base_form": true}]}]}
+{"guid": "N13_041", "forms": [{"grammatical_form": "noun/en_singular", "text": "sewer system", "is_base_form": true}]}
+{"guid": "N13_045", "variants": [{"kind": "equivalent", "key": "terminus", "forms": [{"grammatical_form": "noun/en_singular", "text": "terminus", "is_base_form": true}]}]}

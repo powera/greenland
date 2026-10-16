@@ -9,3 +9,13 @@
 {"guid": "N72_013", "forms": [{"grammatical_form": "noun/en_singular", "text": "steering wheel", "is_base_form": true}]}
 {"guid": "N72_015", "forms": [{"grammatical_form": "noun/en_singular", "text": "magazine", "is_base_form": true, "ipa": "/ˈmæɡəziːn/", "phonetic": "MAG-uh-zeen"}]}
 {"guid": "N72_018", "forms": [{"grammatical_form": "noun/en_singular", "text": "spare tire", "is_base_form": true}]}
+{"guid": "N72_019", "forms": [{"grammatical_form": "noun/en_singular", "text": "fuel tank", "is_base_form": true}]}
+{"guid": "N72_020", "forms": [{"grammatical_form": "noun/en_singular", "text": "control handle", "is_base_form": true}]}
+{"guid": "N72_021", "forms": [{"grammatical_form": "noun/en_singular", "text": "propulsion system", "is_base_form": true}]}
+{"guid": "N72_022", "forms": [{"grammatical_form": "noun/en_singular", "text": "helicopter rotor", "is_base_form": true}], "variants": [{"kind": "equivalent", "key": "rotor", "forms": [{"grammatical_form": "noun/en_singular", "text": "rotor", "is_base_form": true}]}]}
+{"guid": "N72_024", "forms": [{"grammatical_form": "noun/en_singular", "text": "lamp filament", "is_base_form": true}], "variants": [{"kind": "equivalent", "key": "filament", "forms": [{"grammatical_form": "noun/en_singular", "text": "filament", "is_base_form": true}]}]}
+{"guid": "N72_025", "forms": [{"grammatical_form": "noun/en_singular", "text": "ignition system", "is_base_form": true}]}
+{"guid": "N72_027", "forms": [{"grammatical_form": "noun/en_singular", "text": "slide rail", "is_base_form": true}]}
+{"guid": "N72_028", "forms": [{"grammatical_form": "noun/en_singular", "text": "reaction vessel", "is_base_form": true}], "variants": [{"kind": "equivalent", "key": "reactor", "forms": [{"grammatical_form": "noun/en_singular", "text": "reactor", "is_base_form": true}]}]}
+{"guid": "N72_030", "forms": [{"grammatical_form": "noun/en_singular", "text": "diesel engine", "is_base_form": true}]}
+{"guid": "N72_031", "forms": [{"grammatical_form": "noun/en_singular", "text": "heating element", "is_base_form": true}]}

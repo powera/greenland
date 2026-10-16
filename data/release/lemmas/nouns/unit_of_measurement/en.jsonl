@@ -19,3 +19,6 @@
 {"guid": "N34_020", "forms": [{"grammatical_form": "noun/en_singular", "text": "teacupful", "is_base_form": true, "ipa": "/ˈtiːˌkʌp.fʊl/", "phonetic": "TEE-kuhp-fuhl"}]}
 {"guid": "N34_021", "forms": [{"grammatical_form": "noun/en_singular", "text": "dessertspoonful", "is_base_form": true, "ipa": "/dɪˈzɝːtˌspuːnfʊl/", "phonetic": "dih-ZURT-spoon-fuhl"}]}
 {"guid": "N34_022", "forms": [{"grammatical_form": "noun/en_singular", "text": "gallon", "is_base_form": true, "ipa": "/ˈɡælən/", "phonetic": "GAL-un"}]}
+{"guid": "N34_023", "forms": [{"grammatical_form": "noun/en_singular", "text": "imperial gallon", "is_base_form": true}], "variants": [{"kind": "equivalent", "key": "gallon", "forms": [{"grammatical_form": "noun/en_singular", "text": "gallon", "is_base_form": true}]}]}
+{"guid": "N34_024", "variants": [{"kind": "equivalent", "key": "radians", "forms": [{"grammatical_form": "noun/en_singular", "text": "radians", "is_base_form": true}]}]}
+{"guid": "N34_025", "forms": [{"grammatical_form": "noun/en_singular", "text": "light-year", "is_base_form": true}], "variants": [{"kind": "equivalent", "key": "light-years", "forms": [{"grammatical_form": "noun/en_singular", "text": "light-years", "is_base_form": true}]}]}

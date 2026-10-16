@@ -14,3 +14,7 @@
 {"guid": "A15_029", "forms": [{"grammatical_form": "adjective/en_positive", "text": "third-highest", "is_base_form": true, "ipa": "/ˌθɝd ˈhaɪəst/", "phonetic": "THURD-HY-ist"}]}
 {"guid": "A15_030", "variants": [{"kind": "spelling", "key": "non-linear", "forms": [{"grammatical_form": "adjective/en_positive", "text": "non-linear", "is_base_form": true}]}]}
 {"guid": "A15_031", "forms": [{"grammatical_form": "adjective/en_positive", "text": "firstborn", "is_base_form": true}], "variants": [{"kind": "spelling", "key": "first-born", "forms": [{"grammatical_form": "adjective/en_positive", "text": "first-born", "is_base_form": true}]}]}
+{"guid": "A15_032", "forms": [{"grammatical_form": "adjective/en_positive", "text": "upper", "is_base_form": true}]}
+{"guid": "A15_033", "forms": [{"grammatical_form": "adjective/en_positive", "text": "low-level", "is_base_form": true}]}
+{"guid": "A15_034", "forms": [{"grammatical_form": "adjective/en_positive", "text": "fastest-growing", "is_base_form": true}]}
+{"guid": "A15_035", "forms": [{"grammatical_form": "adjective/en_positive", "text": "one-act", "is_base_form": true}]}

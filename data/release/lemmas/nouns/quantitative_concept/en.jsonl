@@ -8,7 +8,7 @@
 {"guid": "N22_010", "forms": [{"grammatical_form": "noun/en_singular", "text": "figure", "is_base_form": true, "ipa": "fɪɡ(ə)r", "phonetic": "FIH-gur"}]}
 {"guid": "N22_011", "forms": [{"grammatical_form": "noun/en_singular", "text": "speed", "is_base_form": true, "ipa": "/spɪd/", "phonetic": "SPIHD"}]}
 {"guid": "N22_012", "forms": [{"grammatical_form": "noun/en_singular", "text": "level", "is_base_form": true, "ipa": "/ˈlɛvəl/", "phonetic": "LEV-əl"}]}
-{"guid": "N22_013", "forms": [{"grammatical_form": "noun/en_singular", "text": "group", "is_base_form": true, "ipa": "/ɡruːp/", "phonetic": "GROO-p"}]}
+{"guid": "N22_013", "forms": [{"grammatical_form": "noun/en_singular", "text": "group", "is_base_form": true, "ipa": "/ɡruːp/", "phonetic": "GROO-p"}, {"grammatical_form": "noun/en_possessive_singular", "text": "group's", "is_base_form": false}]}
 {"guid": "N22_014", "forms": [{"grammatical_form": "noun/en_singular", "text": "length", "is_base_form": true, "ipa": "/lɛŋθ/", "phonetic": "LENG-th"}]}
 {"guid": "N22_015", "forms": [{"grammatical_form": "noun/en_singular", "text": "size", "is_base_form": true, "ipa": "/saɪz/", "phonetic": "SIZ"}]}
 {"guid": "N22_016", "forms": [{"grammatical_form": "noun/en_singular", "text": "piece", "is_base_form": true, "ipa": "/piːs/", "phonetic": "PEE-s"}]}
@@ -20,7 +20,7 @@
 {"guid": "N22_024", "forms": [{"grammatical_form": "noun/en_singular", "text": "mass", "is_base_form": true, "ipa": "/mæs/", "phonetic": "MASS"}]}
 {"guid": "N22_025", "forms": [{"grammatical_form": "noun/en_singular", "text": "lot", "is_base_form": true, "ipa": "/lɑːt/", "phonetic": "LOH-t"}]}
 {"guid": "N22_026", "forms": [{"grammatical_form": "noun/en_singular", "text": "bit", "is_base_form": true, "ipa": "/bɪt/", "phonetic": "BIT"}]}
-{"guid": "N22_027", "forms": [{"grammatical_form": "noun/en_singular", "text": "count", "is_base_form": true, "ipa": "/kaʊnt/", "phonetic": "KAUNT"}]}
+{"guid": "N22_027", "forms": [{"grammatical_form": "noun/en_singular", "text": "count", "is_base_form": true, "ipa": "/kaʊnt/", "phonetic": "KAUNT"}, {"grammatical_form": "noun/en_possessive_singular", "text": "count's", "is_base_form": false}]}
 {"guid": "N22_042", "forms": [{"grammatical_form": "noun/en_singular", "text": "speed limit", "is_base_form": true}]}
 {"guid": "N22_043", "forms": [{"grammatical_form": "noun/en_singular", "text": "sea level", "is_base_form": true}], "variants": [{"kind": "spelling", "key": "sea-level", "forms": [{"grammatical_form": "noun/en_singular", "text": "sea-level", "is_base_form": true}]}]}
 {"guid": "N22_044", "forms": [{"grammatical_form": "noun/en_singular", "text": "life expectancy", "is_base_form": true}]}
@@ -47,14 +47,14 @@
 {"guid": "N22_075", "forms": [{"grammatical_form": "noun/en_singular", "text": "prevalence", "is_base_form": true, "ipa": "/ˈprɛvələns/", "phonetic": "PREV-uh-lens"}]}
 {"guid": "N22_076", "forms": [{"grammatical_form": "noun/en_singular", "text": "octave", "is_base_form": true, "ipa": "/ˈɑk.tɪv/", "phonetic": "OK-tiv"}]}
 {"guid": "N22_077", "forms": [{"grammatical_form": "noun/en_singular", "text": "albedo", "is_base_form": true, "ipa": "/ælˈbiːdoʊ/", "phonetic": "al-BEE-doh"}]}
-{"guid": "N22_078", "forms": [{"grammatical_form": "noun/en_singular", "text": "plurality", "is_base_form": true, "ipa": "/pləˈræləti/", "phonetic": "pluh-RA-luh-tee"}]}
+{"guid": "N22_078", "forms": [{"grammatical_form": "noun/en_singular", "text": "plurality", "is_base_form": true, "ipa": "/pləˈræləti/", "phonetic": "pluh-RA-luh-tee"}, {"grammatical_form": "noun/en_possessive_singular", "text": "plurality's", "is_base_form": false}]}
 {"guid": "N22_079", "forms": [{"grammatical_form": "noun/en_singular", "text": "reimbursement", "is_base_form": true, "ipa": "/ˌriːɪmˈbɝːsmənt/", "phonetic": "ree-im-BURS-munt"}]}
 {"guid": "N22_080", "forms": [{"grammatical_form": "noun/en_singular", "text": "difference", "is_base_form": true, "ipa": "/ˈdɪfərəns/", "phonetic": "DIF-er-ens"}]}
 {"guid": "N22_081", "forms": [{"grammatical_form": "noun/en_singular", "text": "total", "is_base_form": true, "ipa": "/ˈtoʊtəl/", "phonetic": "TOH-tuhl"}]}
 {"guid": "N22_082", "forms": [{"grammatical_form": "noun/en_singular", "text": "average", "is_base_form": true, "ipa": "/ˈævərɪdʒ/", "phonetic": "AV-er-ij"}]}
 {"guid": "N22_083", "forms": [{"grammatical_form": "noun/en_singular", "text": "average", "is_base_form": true, "ipa": "/ˈævərɪdʒ/", "phonetic": "AV-er-ij"}]}
-{"guid": "N22_085", "forms": [{"grammatical_form": "noun/en_singular", "text": "majority", "is_base_form": true, "ipa": "/məˈdʒɔrəti/", "phonetic": "muh-JOR-uh-tee"}]}
-{"guid": "N22_086", "forms": [{"grammatical_form": "noun/en_singular", "text": "majority", "is_base_form": true, "ipa": "/məˈdʒɔrəti/", "phonetic": "muh-JOR-uh-tee"}]}
+{"guid": "N22_085", "forms": [{"grammatical_form": "noun/en_singular", "text": "majority", "is_base_form": true, "ipa": "/məˈdʒɔrəti/", "phonetic": "muh-JOR-uh-tee"}, {"grammatical_form": "noun/en_possessive_singular", "text": "majority's", "is_base_form": false}]}
+{"guid": "N22_086", "forms": [{"grammatical_form": "noun/en_singular", "text": "majority", "is_base_form": true, "ipa": "/məˈdʒɔrəti/", "phonetic": "muh-JOR-uh-tee"}, {"grammatical_form": "noun/en_possessive_singular", "text": "majority's", "is_base_form": false}]}
 {"guid": "N22_088", "forms": [{"grammatical_form": "noun/en_singular", "text": "content", "is_base_form": true, "ipa": "/ˈkɑn.tɛnt/", "phonetic": "KON-tent"}]}
 {"guid": "N22_089", "forms": [{"grammatical_form": "noun/en_singular", "text": "height", "is_base_form": true, "ipa": "/haɪt/", "phonetic": "HYTE"}]}
 {"guid": "N22_090", "forms": [{"grammatical_form": "noun/en_singular", "text": "extent", "is_base_form": true, "ipa": "/ɪkˈstɛnt/", "phonetic": "ik-STENT"}]}
@@ -64,7 +64,7 @@
 {"guid": "N22_094", "forms": [{"grammatical_form": "noun/en_singular", "text": "tempo", "is_base_form": true, "ipa": "/ˈtɛmpoʊ/", "phonetic": "TEM-poh"}]}
 {"guid": "N22_095", "forms": [{"grammatical_form": "noun/en_singular", "text": "time control", "is_base_form": true, "ipa": "/ˈtaɪm kənˌtroʊl/", "phonetic": "TIME-kuhn-TROHL"}]}
 {"guid": "N22_096", "forms": [{"grammatical_form": "noun/en_singular", "text": "love", "is_base_form": true, "ipa": "/lʌv/", "phonetic": "LUHV"}]}
-{"guid": "N22_097", "forms": [{"grammatical_form": "noun/en_singular", "text": "count", "is_base_form": true, "ipa": "/kaʊnt/", "phonetic": "KOWNT"}]}
+{"guid": "N22_097", "forms": [{"grammatical_form": "noun/en_singular", "text": "count", "is_base_form": true, "ipa": "/kaʊnt/", "phonetic": "KOWNT"}, {"grammatical_form": "noun/en_possessive_singular", "text": "count's", "is_base_form": false}]}
 {"guid": "N22_098", "forms": [{"grammatical_form": "noun/en_singular", "text": "batting average", "is_base_form": true, "ipa": "/ˈbætɪŋ ˌævərɪdʒ/", "phonetic": "BAT-ing AV-er-ij"}]}
 {"guid": "N22_099", "forms": [{"grammatical_form": "noun/en_singular", "text": "run", "is_base_form": true, "ipa": "/rʌn/", "phonetic": "RUN"}]}
 {"guid": "N22_100", "forms": [{"grammatical_form": "noun/en_singular", "text": "par", "is_base_form": true, "ipa": "/pɑr/", "phonetic": "PAR"}]}
@@ -86,3 +86,13 @@
 {"guid": "N22_117", "forms": [{"grammatical_form": "noun/en_singular", "text": "literacy rate", "is_base_form": true}]}
 {"guid": "N22_118", "forms": [{"grammatical_form": "noun/en_singular", "text": "place value", "is_base_form": true}]}
 {"guid": "N22_119", "forms": [{"grammatical_form": "noun/en_singular", "text": "portion", "is_base_form": true, "ipa": "/ˈpɔrʃən/", "phonetic": "POR-shun"}]}
+{"guid": "N22_120", "forms": [{"grammatical_form": "noun/en_singular", "text": "null value", "is_base_form": true}], "variants": [{"kind": "equivalent", "key": "null", "forms": [{"grammatical_form": "noun/en_singular", "text": "null", "is_base_form": true}]}]}
+{"guid": "N22_121", "forms": [{"grammatical_form": "noun/en_singular", "text": "order of magnitude", "is_base_form": true}]}
+{"guid": "N22_122", "variants": [{"kind": "equivalent", "key": "measurement", "forms": [{"grammatical_form": "noun/en_singular", "text": "measurement", "is_base_form": true}]}]}
+{"guid": "N22_126", "variants": [{"kind": "equivalent", "key": "economy", "forms": [{"grammatical_form": "noun/en_singular", "text": "economy", "is_base_form": true}]}]}
+{"guid": "N22_127", "forms": [{"grammatical_form": "noun/en_singular", "text": "imperial system", "is_base_form": true}]}
+{"guid": "N22_128", "forms": [{"grammatical_form": "noun/en_singular", "text": "market penetration", "is_base_form": true}]}
+{"guid": "N22_129", "forms": [{"grammatical_form": "noun/en_singular", "text": "square footage", "is_base_form": true}]}
+{"guid": "N22_131", "variants": [{"kind": "equivalent", "key": "height", "forms": [{"grammatical_form": "noun/en_singular", "text": "height", "is_base_form": true}]}]}
+{"guid": "N22_132", "forms": [{"grammatical_form": "noun/en_singular", "text": "high-end", "is_base_form": true}]}
+{"guid": "N22_136", "forms": [{"grammatical_form": "noun/en_singular", "text": "camera exposure", "is_base_form": true}], "variants": [{"kind": "equivalent", "key": "exposure", "forms": [{"grammatical_form": "noun/en_singular", "text": "exposure", "is_base_form": true}]}]}

@@ -1,15 +1,16 @@
-{"guid": "N25_001", "forms": [{"grammatical_form": "noun/en_singular", "text": "life", "is_base_form": true, "ipa": "/laɪf/", "phonetic": "LYF"}, {"grammatical_form": "noun/en_plural", "text": "lives", "is_base_form": false}]}
-{"guid": "N25_002", "forms": [{"grammatical_form": "noun/en_singular", "text": "day", "is_base_form": true, "ipa": "/deɪ/", "phonetic": "DEE"}]}
-{"guid": "N25_003", "forms": [{"grammatical_form": "noun/en_singular", "text": "night", "is_base_form": true, "ipa": "/naɪt/", "phonetic": "NYT"}]}
-{"guid": "N25_004", "forms": [{"grammatical_form": "noun/en_singular", "text": "morning", "is_base_form": true, "ipa": "/ˈmɔːrnɪŋ/", "phonetic": "MOHR-nihng"}]}
+{"guid": "N25_001", "forms": [{"grammatical_form": "noun/en_singular", "text": "life", "is_base_form": true, "ipa": "/laɪf/", "phonetic": "LYF"}, {"grammatical_form": "noun/en_plural", "text": "lives", "is_base_form": false}, {"grammatical_form": "noun/en_possessive_singular", "text": "life's", "is_base_form": false}]}
+{"guid": "N25_002", "forms": [{"grammatical_form": "noun/en_singular", "text": "day", "is_base_form": true, "ipa": "/deɪ/", "phonetic": "DEE"}, {"grammatical_form": "noun/en_possessive_singular", "text": "day's", "is_base_form": false}]}
+{"guid": "N25_003", "forms": [{"grammatical_form": "noun/en_singular", "text": "night", "is_base_form": true, "ipa": "/naɪt/", "phonetic": "NYT"}, {"grammatical_form": "noun/en_possessive_singular", "text": "night's", "is_base_form": false}]}
+{"guid": "N25_004", "forms": [{"grammatical_form": "noun/en_singular", "text": "morning", "is_base_form": true, "ipa": "/ˈmɔːrnɪŋ/", "phonetic": "MOHR-nihng"}, {"grammatical_form": "noun/en_possessive_singular", "text": "morning's", "is_base_form": false}]}
 {"guid": "N25_005", "forms": [{"grammatical_form": "noun/en_singular", "text": "evening", "is_base_form": true, "ipa": "/ˈiːvnɪŋ/", "phonetic": "EE-ving"}]}
 {"guid": "N25_006", "forms": [{"grammatical_form": "noun/en_singular", "text": "decade", "is_base_form": true, "ipa": "/ˈdek.əd/", "phonetic": "DEK-əd"}]}
-{"guid": "N25_007", "forms": [{"grammatical_form": "noun/en_singular", "text": "year", "is_base_form": true, "ipa": "/jɪr/", "phonetic": "YIR"}]}
-{"guid": "N25_008", "forms": [{"grammatical_form": "noun/en_singular", "text": "month", "is_base_form": true, "ipa": "/mʌnθ/", "phonetic": "MONTH"}]}
-{"guid": "N25_010", "forms": [{"grammatical_form": "noun/en_singular", "text": "hour", "is_base_form": true, "ipa": "/ˈaʊər/", "phonetic": "OW-er"}]}
+{"guid": "N25_007", "forms": [{"grammatical_form": "noun/en_singular", "text": "year", "is_base_form": true, "ipa": "/jɪr/", "phonetic": "YIR"}, {"grammatical_form": "noun/en_possessive_singular", "text": "year's", "is_base_form": false}]}
+{"guid": "N25_008", "forms": [{"grammatical_form": "noun/en_singular", "text": "month", "is_base_form": true, "ipa": "/mʌnθ/", "phonetic": "MONTH"}, {"grammatical_form": "noun/en_possessive_singular", "text": "month's", "is_base_form": false}]}
+{"guid": "N25_009", "forms": [{"grammatical_form": "noun/en_possessive_singular", "text": "week's", "is_base_form": false}]}
+{"guid": "N25_010", "forms": [{"grammatical_form": "noun/en_singular", "text": "hour", "is_base_form": true, "ipa": "/ˈaʊər/", "phonetic": "OW-er"}, {"grammatical_form": "noun/en_possessive_singular", "text": "hour's", "is_base_form": false}]}
 {"guid": "N25_011", "forms": [{"grammatical_form": "noun/en_singular", "text": "minute", "is_base_form": true, "ipa": "/ˈmɪnɪt/", "phonetic": "MIN-it"}]}
-{"guid": "N25_012", "forms": [{"grammatical_form": "noun/en_singular", "text": "moment", "is_base_form": true, "ipa": "/ˈmoʊ.mənt/", "phonetic": "MOH-muhnt"}]}
-{"guid": "N25_013", "forms": [{"grammatical_form": "noun/en_singular", "text": "death", "is_base_form": true, "ipa": "/dɛθ/", "phonetic": "DEETH"}]}
+{"guid": "N25_012", "forms": [{"grammatical_form": "noun/en_singular", "text": "moment", "is_base_form": true, "ipa": "/ˈmoʊ.mənt/", "phonetic": "MOH-muhnt"}, {"grammatical_form": "noun/en_possessive_singular", "text": "moment's", "is_base_form": false}]}
+{"guid": "N25_013", "forms": [{"grammatical_form": "noun/en_singular", "text": "death", "is_base_form": true, "ipa": "/dɛθ/", "phonetic": "DEETH"}, {"grammatical_form": "noun/en_possessive_singular", "text": "death's", "is_base_form": false}]}
 {"guid": "N25_020", "forms": [{"grammatical_form": "noun/en_singular", "text": "past", "is_base_form": true, "ipa": "/pæst/", "phonetic": "PAST"}]}
 {"guid": "N25_021", "forms": [{"grammatical_form": "noun/en_singular", "text": "age", "is_base_form": true, "ipa": "/eɪdʒ/", "phonetic": "AYJ"}]}
 {"guid": "N25_022", "forms": [{"grammatical_form": "noun/en_singular", "text": "future", "is_base_form": true, "ipa": "ˈfjuːtʃər", "phonetic": "FYOOO-choo-uh"}]}
@@ -50,3 +51,11 @@
 {"guid": "N25_063", "forms": [{"grammatical_form": "noun/en_singular", "text": "opening", "is_base_form": true, "ipa": "/ˈoʊpənɪŋ/", "phonetic": "OH-puh-ning"}]}
 {"guid": "N25_064", "forms": [{"grammatical_form": "noun/en_singular", "text": "middlegame", "is_base_form": true, "ipa": "/ˈmɪdəlˌɡeɪm/", "phonetic": "MID-ul-game"}]}
 {"guid": "N25_065", "forms": [{"grammatical_form": "noun/en_singular", "text": "stoppage time", "is_base_form": true, "ipa": "/ˈstɑpɪdʒ taɪm/", "phonetic": "STOP-ij time"}]}
+{"guid": "N25_066", "forms": [{"grammatical_form": "noun/en_singular", "text": "maturity date", "is_base_form": true}], "variants": [{"kind": "equivalent", "key": "maturity", "forms": [{"grammatical_form": "noun/en_singular", "text": "maturity", "is_base_form": true}]}]}
+{"guid": "N25_068", "forms": [{"grammatical_form": "noun/en_singular", "text": "service life", "is_base_form": true}], "variants": [{"kind": "equivalent", "key": "lifetime", "forms": [{"grammatical_form": "noun/en_singular", "text": "lifetime", "is_base_form": true}]}]}
+{"guid": "N25_070", "forms": [{"grammatical_form": "noun/en_singular", "text": "incubation period", "is_base_form": true}]}
+{"guid": "N25_072", "forms": [{"grammatical_form": "noun/en_singular", "text": "half-life", "is_base_form": true}]}
+{"guid": "N25_076", "forms": [{"grammatical_form": "noun/en_singular", "text": "probationary period", "is_base_form": true}], "variants": [{"kind": "equivalent", "key": "trial", "forms": [{"grammatical_form": "noun/en_singular", "text": "trial", "is_base_form": true}]}]}
+{"guid": "N25_077", "forms": [{"grammatical_form": "noun/en_singular", "text": "half-life", "is_base_form": true}]}
+{"guid": "N25_078", "forms": [{"grammatical_form": "noun/en_singular", "text": "quarter hour", "is_base_form": true}]}
+{"guid": "N25_079", "forms": [{"grammatical_form": "noun/en_singular", "text": "run-up", "is_base_form": true}]}

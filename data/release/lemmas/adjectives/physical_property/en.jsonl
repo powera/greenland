@@ -40,7 +40,6 @@
 {"guid": "A18_041", "forms": [{"grammatical_form": "adjective/en_positive", "text": "awake", "is_base_form": true}]}
 {"guid": "A18_042", "forms": [{"grammatical_form": "adjective/en_positive", "text": "interested", "is_base_form": true, "ipa": "/ˈɪntrəstɪd/", "phonetic": "IN-truh-stid"}]}
 {"guid": "A18_043", "forms": [{"grammatical_form": "adjective/en_positive", "text": "frozen", "is_base_form": true, "ipa": "/ˈfrozen/", "phonetic": "FREE-zhuhn"}]}
-{"guid": "A18_045", "forms": [{"grammatical_form": "adjective/en_positive", "text": "named", "is_base_form": true, "ipa": "/neɪmd/", "phonetic": "NAYM-d"}]}
 {"guid": "A18_046", "forms": [{"grammatical_form": "adjective/en_positive", "text": "light", "is_base_form": true, "ipa": "/laɪt/", "phonetic": "LYTE"}]}
 {"guid": "A18_047", "forms": [{"grammatical_form": "adjective/en_positive", "text": "dead", "is_base_form": true, "ipa": "[dˈɛd]", "phonetic": "DED"}]}
 {"guid": "A18_048", "forms": [{"grammatical_form": "adjective/en_positive", "text": "open", "is_base_form": true, "ipa": "ˈoʊpən", "phonetic": "OH-pən"}]}
@@ -127,3 +126,6 @@
 {"guid": "A18_144", "forms": [{"grammatical_form": "adjective/en_positive", "text": "chromatic", "is_base_form": true, "ipa": "/kroʊˈmætɪk/", "phonetic": "kroh-MAT-ik"}]}
 {"guid": "A18_145", "forms": [{"grammatical_form": "adjective/en_positive", "text": "black-and-white", "is_base_form": true, "ipa": "/ˌblæk ən ˈwaɪt/", "phonetic": "black-and-WHITE"}]}
 {"guid": "A18_146", "forms": [{"grammatical_form": "adjective/en_positive", "text": "blond", "is_base_form": true, "ipa": "/blɑnd/", "phonetic": "BLOND"}]}
+{"guid": "A18_152", "forms": [{"grammatical_form": "adjective/en_positive", "text": "stand-alone", "is_base_form": true}]}
+{"guid": "A18_153", "forms": [{"grammatical_form": "adjective/en_positive", "text": "slow-moving", "is_base_form": true}]}
+{"guid": "A18_154", "forms": [{"grammatical_form": "adjective/en_positive", "text": "steam-powered", "is_base_form": true}]}

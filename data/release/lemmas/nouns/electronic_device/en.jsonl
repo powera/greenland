@@ -1,4 +1,5 @@
 {"guid": "N57_002", "forms": [{"grammatical_form": "noun/en_singular", "text": "photo camera", "is_base_form": true}]}
+{"guid": "N57_005", "forms": [{"grammatical_form": "noun/en_possessive_singular", "text": "speaker's", "is_base_form": false}]}
 {"guid": "N57_006", "forms": [{"grammatical_form": "noun/en_singular", "text": "headphones", "is_base_form": true}, {"grammatical_form": "noun/en_plural", "text": "headphones", "is_base_form": false}]}
 {"guid": "N57_011", "forms": [{"grammatical_form": "noun/en_singular", "text": "video camera", "is_base_form": true}]}
 {"guid": "N57_019", "forms": [{"grammatical_form": "noun/en_singular", "text": "remote control", "is_base_form": true}]}
@@ -33,3 +34,14 @@
 {"guid": "N57_052", "forms": [{"grammatical_form": "noun/en_singular", "text": "shot clock", "is_base_form": true, "ipa": "/ˈʃɑt klɑk/", "phonetic": "SHOT-klok"}]}
 {"guid": "N57_053", "forms": [{"grammatical_form": "noun/en_singular", "text": "touchpad", "is_base_form": true, "ipa": "/ˈtʌtʃˌpæd/", "phonetic": "TUCH-pad"}]}
 {"guid": "N57_054", "forms": [{"grammatical_form": "noun/en_singular", "text": "cash register", "is_base_form": true}]}
+{"guid": "N57_055", "forms": [{"grammatical_form": "noun/en_singular", "text": "media player", "is_base_form": true}]}
+{"guid": "N57_056", "forms": [{"grammatical_form": "noun/en_singular", "text": "arcade game", "is_base_form": true}]}
+{"guid": "N57_058", "forms": [{"grammatical_form": "noun/en_singular", "text": "integrated circuit", "is_base_form": true}], "variants": [{"kind": "equivalent", "key": "chip", "forms": [{"grammatical_form": "noun/en_singular", "text": "chip", "is_base_form": true}]}]}
+{"guid": "N57_059", "forms": [{"grammatical_form": "noun/en_singular", "text": "light-emitting diode", "is_base_form": true}]}
+{"guid": "N57_060", "forms": [{"grammatical_form": "noun/en_singular", "text": "game controller", "is_base_form": true}], "variants": [{"kind": "equivalent", "key": "controller", "forms": [{"grammatical_form": "noun/en_singular", "text": "controller", "is_base_form": true}]}]}
+{"guid": "N57_061", "forms": [{"grammatical_form": "noun/en_singular", "text": "handheld device", "is_base_form": true}], "variants": [{"kind": "equivalent", "key": "handheld", "forms": [{"grammatical_form": "noun/en_singular", "text": "handheld", "is_base_form": true}]}]}
+{"guid": "N57_062", "forms": [{"grammatical_form": "noun/en_singular", "text": "neon lighting", "is_base_form": true}], "variants": [{"kind": "equivalent", "key": "neon", "forms": [{"grammatical_form": "noun/en_singular", "text": "neon", "is_base_form": true}]}]}
+{"guid": "N57_064", "forms": [{"grammatical_form": "noun/en_singular", "text": "computer processor", "is_base_form": true}], "variants": [{"kind": "equivalent", "key": "processor", "forms": [{"grammatical_form": "noun/en_singular", "text": "processor", "is_base_form": true}]}]}
+{"guid": "N57_065", "forms": [{"grammatical_form": "noun/en_singular", "text": "CD", "is_base_form": true}]}
+{"guid": "N57_066", "forms": [{"grammatical_form": "noun/en_singular", "text": "telephone handset", "is_base_form": true}], "variants": [{"kind": "equivalent", "key": "receiver", "forms": [{"grammatical_form": "noun/en_singular", "text": "receiver", "is_base_form": true}]}]}
+{"guid": "N57_067", "forms": [{"grammatical_form": "noun/en_singular", "text": "tablet computer", "is_base_form": true}], "variants": [{"kind": "equivalent", "key": "tablet", "forms": [{"grammatical_form": "noun/en_singular", "text": "tablet", "is_base_form": true}]}]}

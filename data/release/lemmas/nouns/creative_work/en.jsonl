@@ -4,10 +4,22 @@
 {"guid": "N69_004", "forms": [{"grammatical_form": "noun/en_singular", "text": "dialogue", "is_base_form": true, "ipa": "/ˈdaɪəˌlɔɡ/", "phonetic": "DYE-uh-log"}]}
 {"guid": "N69_005", "forms": [{"grammatical_form": "noun/en_singular", "text": "drama", "is_base_form": true, "ipa": "/ˈdrɑːmə/", "phonetic": "DRAH-muh"}]}
 {"guid": "N69_006", "forms": [{"grammatical_form": "noun/en_singular", "text": "literature", "is_base_form": true, "ipa": "/ˈlɪtərətʃər/", "phonetic": "LIT-er-uh-cher"}]}
-{"guid": "N69_007", "forms": [{"grammatical_form": "noun/en_singular", "text": "melody", "is_base_form": true, "ipa": "/ˈmɛlədi/", "phonetic": "MEL-uh-dee"}]}
+{"guid": "N69_007", "forms": [{"grammatical_form": "noun/en_singular", "text": "melody", "is_base_form": true, "ipa": "/ˈmɛlədi/", "phonetic": "MEL-uh-dee"}], "variants": [{"kind": "equivalent", "key": "tune", "forms": [{"grammatical_form": "noun/en_singular", "text": "tune", "is_base_form": true}]}]}
 {"guid": "N69_008", "forms": [{"grammatical_form": "noun/en_singular", "text": "musical", "is_base_form": true, "ipa": "/ˈmjuzɪkəl/", "phonetic": "MYOO-zi-kuhl"}]}
-{"guid": "N69_009", "forms": [{"grammatical_form": "noun/en_singular", "text": "novel", "is_base_form": true, "ipa": "/ˈnɑvəl/", "phonetic": "NOV-ul"}]}
+{"guid": "N69_009", "forms": [{"grammatical_form": "noun/en_singular", "text": "novel", "is_base_form": true, "ipa": "/ˈnɑvəl/", "phonetic": "NOV-ul"}, {"grammatical_form": "noun/en_possessive_singular", "text": "novel's", "is_base_form": false}]}
 {"guid": "N69_010", "forms": [{"grammatical_form": "noun/en_singular", "text": "opera", "is_base_form": true, "ipa": "/ˈɑːpərə/", "phonetic": "OP-er-uh"}]}
 {"guid": "N69_011", "forms": [{"grammatical_form": "noun/en_singular", "text": "poem", "is_base_form": true, "ipa": "/ˈpoʊəm/", "phonetic": "POH-um"}]}
 {"guid": "N69_012", "forms": [{"grammatical_form": "noun/en_singular", "text": "short story", "is_base_form": true}]}
 {"guid": "N69_014", "forms": [{"grammatical_form": "noun/en_singular", "text": "talk show", "is_base_form": true}]}
+{"guid": "N69_017", "forms": [{"grammatical_form": "noun/en_singular", "text": "animated film", "is_base_form": true}], "variants": [{"kind": "equivalent", "key": "animation", "forms": [{"grammatical_form": "noun/en_singular", "text": "animation", "is_base_form": true}]}]}
+{"guid": "N69_018", "forms": [{"grammatical_form": "noun/en_singular", "text": "theme tune", "is_base_form": true}]}
+{"guid": "N69_019", "forms": [{"grammatical_form": "noun/en_singular", "text": "dramatic fiction", "is_base_form": true}]}
+{"guid": "N69_020", "forms": [{"grammatical_form": "noun/en_singular", "text": "nursery rhyme", "is_base_form": true}]}
+{"guid": "N69_021", "variants": [{"kind": "equivalent", "key": "version", "forms": [{"grammatical_form": "noun/en_singular", "text": "version", "is_base_form": true}]}]}
+{"guid": "N69_023", "forms": [{"grammatical_form": "noun/en_singular", "text": "comic relief", "is_base_form": true}]}
+{"guid": "N69_025", "forms": [{"grammatical_form": "noun/en_singular", "text": "burlesque show", "is_base_form": true}], "variants": [{"kind": "equivalent", "key": "burlesque", "forms": [{"grammatical_form": "noun/en_singular", "text": "burlesque", "is_base_form": true}]}]}
+{"guid": "N69_026", "forms": [{"grammatical_form": "noun/en_singular", "text": "musical motif", "is_base_form": true}]}
+{"guid": "N69_027", "forms": [{"grammatical_form": "noun/en_singular", "text": "raga performance", "is_base_form": true}]}
+{"guid": "N69_028", "forms": [{"grammatical_form": "noun/en_singular", "text": "hip-hop music", "is_base_form": true}], "variants": [{"kind": "equivalent", "key": "hip-hop", "forms": [{"grammatical_form": "noun/en_singular", "text": "hip-hop", "is_base_form": true}]}]}
+{"guid": "N69_030", "forms": [{"grammatical_form": "noun/en_singular", "text": "fantasy fiction", "is_base_form": true}], "variants": [{"kind": "equivalent", "key": "fantasy", "forms": [{"grammatical_form": "noun/en_singular", "text": "fantasy", "is_base_form": true}]}]}
+{"guid": "N69_031", "variants": [{"kind": "equivalent", "key": "memoirs", "forms": [{"grammatical_form": "noun/en_singular", "text": "memoirs", "is_base_form": true}]}]}

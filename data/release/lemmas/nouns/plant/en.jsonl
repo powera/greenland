@@ -10,6 +10,7 @@
 {"guid": "N05_011", "forms": [{"grammatical_form": "noun/en_singular", "text": "fern", "is_base_form": true, "ipa": "/fɝn/", "phonetic": "FURN"}]}
 {"guid": "N05_012", "forms": [{"grammatical_form": "noun/en_singular", "text": "pine", "is_base_form": true, "ipa": "/paɪn/", "phonetic": "PYNE"}]}
 {"guid": "N05_013", "forms": [{"grammatical_form": "noun/en_singular", "text": "palm", "is_base_form": true, "ipa": "/pɑːlm/", "phonetic": "PALM"}]}
+{"guid": "N05_014", "forms": [{"grammatical_form": "noun/en_possessive_singular", "text": "plant's", "is_base_form": false}]}
 {"guid": "N05_018", "forms": [{"grammatical_form": "noun/en_singular", "text": "reed", "is_base_form": true, "ipa": "/riːd/", "phonetic": "REED"}]}
 {"guid": "N05_019", "forms": [{"grammatical_form": "noun/en_singular", "text": "birch", "is_base_form": true, "ipa": "/bɝtʃ/", "phonetic": "BURCH"}]}
 {"guid": "N05_020", "forms": [{"grammatical_form": "noun/en_singular", "text": "crop", "is_base_form": true, "ipa": "/krɑp/", "phonetic": "KROP"}]}
@@ -32,3 +33,5 @@
 {"guid": "N05_037", "forms": [{"grammatical_form": "noun/en_singular", "text": "pecan", "is_base_form": true, "ipa": "/pɪˈkɑn/", "phonetic": "puh-KAHN"}]}
 {"guid": "N05_038", "forms": [{"grammatical_form": "noun/en_singular", "text": "arrowroot", "is_base_form": true, "ipa": "/ˈɛroʊˌruːt/", "phonetic": "AIR-oh-root"}]}
 {"guid": "N05_039", "forms": [{"grammatical_form": "noun/en_singular", "text": "cereal", "is_base_form": true, "ipa": "/ˈsɪriəl/", "phonetic": "SEER-ee-uhl"}]}
+{"guid": "N05_040", "forms": [{"grammatical_form": "noun/en_singular", "text": "annual plant", "is_base_form": true}], "variants": [{"kind": "equivalent", "key": "annual", "forms": [{"grammatical_form": "noun/en_singular", "text": "annual", "is_base_form": true}]}]}
+{"guid": "N05_044", "variants": [{"kind": "equivalent", "key": "chives", "forms": [{"grammatical_form": "noun/en_singular", "text": "chives", "is_base_form": true}]}]}

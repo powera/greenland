@@ -1,23 +1,30 @@
-{"guid": "N01_055", "forms": [{"grammatical_form": "noun/en_singular", "text": "man", "is_base_form": true, "ipa": "/mæn/", "phonetic": "MAN"}, {"grammatical_form": "noun/en_plural", "text": "men", "is_base_form": false}]}
-{"guid": "N01_056", "forms": [{"grammatical_form": "noun/en_singular", "text": "woman", "is_base_form": true, "ipa": "/ˈwʊmən/", "phonetic": "WOO-mən"}, {"grammatical_form": "noun/en_plural", "text": "women", "is_base_form": false}]}
-{"guid": "N01_057", "forms": [{"grammatical_form": "noun/en_singular", "text": "boy", "is_base_form": true, "ipa": "/bɔɪ/", "phonetic": "BOY"}]}
-{"guid": "N01_058", "forms": [{"grammatical_form": "noun/en_singular", "text": "girl", "is_base_form": true, "ipa": "/ɡɝl/", "phonetic": "GURL"}]}
-{"guid": "N01_059", "forms": [{"grammatical_form": "noun/en_singular", "text": "friend", "is_base_form": true, "ipa": "fɹɛnd", "phonetic": "FRĒND"}]}
-{"guid": "N01_060", "forms": [{"grammatical_form": "noun/en_singular", "text": "person", "is_base_form": true, "ipa": "/ˈpɝːsən/", "phonetic": "PUR-suhn"}, {"grammatical_form": "noun/en_plural", "text": "people", "is_base_form": false}]}
+{"guid": "N01_055", "forms": [{"grammatical_form": "noun/en_singular", "text": "man", "is_base_form": true, "ipa": "/mæn/", "phonetic": "MAN"}, {"grammatical_form": "noun/en_plural", "text": "men", "is_base_form": false}, {"grammatical_form": "noun/en_possessive_plural", "text": "men's", "is_base_form": false}, {"grammatical_form": "noun/en_possessive_singular", "text": "man's", "is_base_form": false}]}
+{"guid": "N01_056", "forms": [{"grammatical_form": "noun/en_singular", "text": "woman", "is_base_form": true, "ipa": "/ˈwʊmən/", "phonetic": "WOO-mən"}, {"grammatical_form": "noun/en_plural", "text": "women", "is_base_form": false}, {"grammatical_form": "noun/en_possessive_plural", "text": "women's", "is_base_form": false}, {"grammatical_form": "noun/en_possessive_singular", "text": "woman's", "is_base_form": false}]}
+{"guid": "N01_057", "forms": [{"grammatical_form": "noun/en_singular", "text": "boy", "is_base_form": true, "ipa": "/bɔɪ/", "phonetic": "BOY"}, {"grammatical_form": "noun/en_possessive_singular", "text": "boy's", "is_base_form": false}]}
+{"guid": "N01_058", "forms": [{"grammatical_form": "noun/en_singular", "text": "girl", "is_base_form": true, "ipa": "/ɡɝl/", "phonetic": "GURL"}, {"grammatical_form": "noun/en_possessive_singular", "text": "girl's", "is_base_form": false}]}
+{"guid": "N01_059", "forms": [{"grammatical_form": "noun/en_singular", "text": "friend", "is_base_form": true, "ipa": "fɹɛnd", "phonetic": "FRĒND"}, {"grammatical_form": "noun/en_possessive_singular", "text": "friend's", "is_base_form": false}]}
+{"guid": "N01_060", "forms": [{"grammatical_form": "noun/en_singular", "text": "person", "is_base_form": true, "ipa": "/ˈpɝːsən/", "phonetic": "PUR-suhn"}, {"grammatical_form": "noun/en_plural", "text": "people", "is_base_form": false}, {"grammatical_form": "noun/en_possessive_plural", "text": "people's", "is_base_form": false}, {"grammatical_form": "noun/en_possessive_singular", "text": "person's", "is_base_form": false}]}
 {"guid": "N01_065", "forms": [{"grammatical_form": "noun/en_singular", "text": "human", "is_base_form": true, "ipa": "/ˈhjuːmən/", "phonetic": "HOO-mən"}]}
-{"guid": "N01_066", "forms": [{"grammatical_form": "noun/en_singular", "text": "enemy", "is_base_form": true, "ipa": "/ˈɛnəmi/", "phonetic": "EN-uh-mee"}]}
+{"guid": "N01_066", "forms": [{"grammatical_form": "noun/en_singular", "text": "enemy", "is_base_form": true, "ipa": "/ˈɛnəmi/", "phonetic": "EN-uh-mee"}, {"grammatical_form": "noun/en_possessive_singular", "text": "enemy's", "is_base_form": false}]}
 {"guid": "N01_069", "forms": [{"grammatical_form": "noun/en_singular", "text": "folk", "is_base_form": true, "ipa": "/fəʊk/", "phonetic": "FOH-k"}]}
 {"guid": "N01_070", "forms": [{"grammatical_form": "noun/en_singular", "text": "god", "is_base_form": true, "ipa": "/ɡɔd/", "phonetic": "GOHD"}]}
-{"guid": "N01_073", "forms": [{"grammatical_form": "noun/en_singular", "text": "fellow", "is_base_form": true, "ipa": "/ˈfɛloʊ/", "phonetic": "FELL-oh"}]}
-{"guid": "N01_074", "forms": [{"grammatical_form": "noun/en_singular", "text": "companion", "is_base_form": true, "ipa": "/ˈkʌmpəˌnɪn/", "phonetic": "COMP-yuh-nin"}]}
-{"guid": "N01_076", "forms": [{"grammatical_form": "noun/en_singular", "text": "baby", "is_base_form": true, "ipa": "/beɪbi/", "phonetic": "BAY-by"}]}
+{"guid": "N01_073", "forms": [{"grammatical_form": "noun/en_singular", "text": "fellow", "is_base_form": true, "ipa": "/ˈfɛloʊ/", "phonetic": "FELL-oh"}, {"grammatical_form": "noun/en_possessive_singular", "text": "fellow's", "is_base_form": false}]}
+{"guid": "N01_074", "forms": [{"grammatical_form": "noun/en_singular", "text": "companion", "is_base_form": true, "ipa": "/ˈkʌmpəˌnɪn/", "phonetic": "COMP-yuh-nin"}, {"grammatical_form": "noun/en_possessive_singular", "text": "companion's", "is_base_form": false}]}
+{"guid": "N01_076", "forms": [{"grammatical_form": "noun/en_singular", "text": "baby", "is_base_form": true, "ipa": "/beɪbi/", "phonetic": "BAY-by"}, {"grammatical_form": "noun/en_possessive_singular", "text": "baby's", "is_base_form": false}]}
 {"guid": "N01_077", "forms": [{"grammatical_form": "noun/en_singular", "text": "stranger", "is_base_form": true, "ipa": "/ˈstreɪndʒər/", "phonetic": "STRAYN-dʒər"}]}
-{"guid": "N01_079", "forms": [{"grammatical_form": "noun/en_singular", "text": "prisoner", "is_base_form": true, "ipa": "/ˈprɪznər/", "phonetic": "PRIZ-nər"}]}
-{"guid": "N01_080", "forms": [{"grammatical_form": "noun/en_plural", "text": "children", "is_base_form": false}]}
+{"guid": "N01_079", "forms": [{"grammatical_form": "noun/en_singular", "text": "prisoner", "is_base_form": true, "ipa": "/ˈprɪznər/", "phonetic": "PRIZ-nər"}, {"grammatical_form": "noun/en_possessive_singular", "text": "prisoner's", "is_base_form": false}]}
+{"guid": "N01_080", "forms": [{"grammatical_form": "noun/en_plural", "text": "children", "is_base_form": false}, {"grammatical_form": "noun/en_possessive_plural", "text": "children's", "is_base_form": false}, {"grammatical_form": "noun/en_possessive_singular", "text": "child's", "is_base_form": false}]}
+{"guid": "N01_082", "forms": [{"grammatical_form": "noun/en_possessive_singular", "text": "neighbor's", "is_base_form": false}]}
 {"guid": "N01_084", "forms": [{"grammatical_form": "noun/en_singular", "text": "hero", "is_base_form": true}, {"grammatical_form": "noun/en_plural", "text": "heroes", "is_base_form": false}]}
-{"guid": "N01_087", "variants": [{"kind": "spelling", "key": "King", "forms": [{"grammatical_form": "noun/en_singular", "text": "King", "is_base_form": true}]}]}
-{"guid": "N01_088", "variants": [{"kind": "spelling", "key": "Prince", "forms": [{"grammatical_form": "noun/en_singular", "text": "Prince", "is_base_form": true}]}]}
+{"guid": "N01_085", "forms": [{"grammatical_form": "noun/en_possessive_singular", "text": "victim's", "is_base_form": false}]}
+{"guid": "N01_086", "forms": [{"grammatical_form": "noun/en_possessive_singular", "text": "youth's", "is_base_form": false}]}
+{"guid": "N01_087", "forms": [{"grammatical_form": "noun/en_possessive_singular", "text": "king's", "is_base_form": false}], "variants": [{"kind": "spelling", "key": "King", "forms": [{"grammatical_form": "noun/en_singular", "text": "King", "is_base_form": true}]}]}
+{"guid": "N01_088", "forms": [{"grammatical_form": "noun/en_possessive_singular", "text": "prince's", "is_base_form": false}], "variants": [{"kind": "spelling", "key": "Prince", "forms": [{"grammatical_form": "noun/en_singular", "text": "Prince", "is_base_form": true}]}]}
 {"guid": "N01_089", "forms": [{"grammatical_form": "noun/en_singular", "text": "chief", "is_base_form": true}, {"grammatical_form": "noun/en_plural", "text": "chiefs", "is_base_form": false}]}
+{"guid": "N01_090", "forms": [{"grammatical_form": "noun/en_possessive_singular", "text": "expert's", "is_base_form": false}]}
+{"guid": "N01_093", "forms": [{"grammatical_form": "noun/en_possessive_singular", "text": "owner's", "is_base_form": false}]}
+{"guid": "N01_097", "forms": [{"grammatical_form": "noun/en_possessive_singular", "text": "servant's", "is_base_form": false}]}
+{"guid": "N01_098", "forms": [{"grammatical_form": "noun/en_possessive_singular", "text": "star's", "is_base_form": false}]}
 {"guid": "N01_099", "forms": [{"grammatical_form": "noun/en_singular", "text": "best friend", "is_base_form": true}]}
 {"guid": "N01_100", "forms": [{"grammatical_form": "noun/en_singular", "text": "observer", "is_base_form": true, "ipa": "/əbˈzɝvɚ/", "phonetic": "ub-ZUR-ver"}]}
 {"guid": "N01_102", "forms": [{"grammatical_form": "noun/en_singular", "text": "tourist", "is_base_form": true, "ipa": "/ˈtʊrɪst/", "phonetic": "TOOR-ist"}]}
@@ -27,15 +34,15 @@
 {"guid": "N01_106", "forms": [{"grammatical_form": "noun/en_singular", "text": "heir", "is_base_form": true, "ipa": "/ɛr/", "phonetic": "AIR"}]}
 {"guid": "N01_107", "forms": [{"grammatical_form": "noun/en_singular", "text": "successor", "is_base_form": true, "ipa": "/səkˈsɛsər/", "phonetic": "suk-SESS-er"}]}
 {"guid": "N01_108", "forms": [{"grammatical_form": "noun/en_singular", "text": "exile", "is_base_form": true, "ipa": "/ˈɛɡzaɪl/", "phonetic": "EKS-ile"}]}
-{"guid": "N01_109", "forms": [{"grammatical_form": "noun/en_singular", "text": "player", "is_base_form": true, "ipa": "/ˈpleɪər/", "phonetic": "PLAY-er"}]}
-{"guid": "N01_110", "forms": [{"grammatical_form": "noun/en_singular", "text": "user", "is_base_form": true, "ipa": "/ˈjuːzər/", "phonetic": "YOO-zer"}]}
+{"guid": "N01_109", "forms": [{"grammatical_form": "noun/en_singular", "text": "player", "is_base_form": true, "ipa": "/ˈpleɪər/", "phonetic": "PLAY-er"}, {"grammatical_form": "noun/en_possessive_singular", "text": "player's", "is_base_form": false}]}
+{"guid": "N01_110", "forms": [{"grammatical_form": "noun/en_singular", "text": "user", "is_base_form": true, "ipa": "/ˈjuːzər/", "phonetic": "YOO-zer"}, {"grammatical_form": "noun/en_possessive_singular", "text": "user's", "is_base_form": false}]}
 {"guid": "N01_111", "forms": [{"grammatical_form": "noun/en_singular", "text": "alcoholic", "is_base_form": true, "ipa": "/ˌæl.kəˈhɔː.lɪk/", "phonetic": "al-kuh-HAW-lik"}]}
 {"guid": "N01_112", "forms": [{"grammatical_form": "noun/en_singular", "text": "liberal", "is_base_form": true, "ipa": "/ˈlɪbərəl/", "phonetic": "LIB-er-uhl"}]}
 {"guid": "N01_113", "forms": [{"grammatical_form": "noun/en_singular", "text": "subordinate", "is_base_form": true, "ipa": "/səˈbɔːrdənət/", "phonetic": "suh-BOR-duh-nit"}]}
 {"guid": "N01_114", "forms": [{"grammatical_form": "noun/en_singular", "text": "conservative", "is_base_form": true, "ipa": "/kənˈsɝːvətɪv/", "phonetic": "kuhn-SER-vuh-tiv"}]}
 {"guid": "N01_115", "forms": [{"grammatical_form": "noun/en_singular", "text": "undergraduate", "is_base_form": true, "ipa": "/ˌʌndərˈɡrædʒuət/", "phonetic": "un-der-GRAD-joo-it"}]}
 {"guid": "N01_116", "forms": [{"grammatical_form": "noun/en_singular", "text": "criminal", "is_base_form": true, "ipa": "/ˈkrɪmənəl/", "phonetic": "KRIM-uh-nul"}]}
-{"guid": "N01_117", "forms": [{"grammatical_form": "noun/en_singular", "text": "citizen", "is_base_form": true, "ipa": "/ˈsɪtɪzən/", "phonetic": "SIT-uh-zun"}]}
+{"guid": "N01_117", "forms": [{"grammatical_form": "noun/en_singular", "text": "citizen", "is_base_form": true, "ipa": "/ˈsɪtɪzən/", "phonetic": "SIT-uh-zun"}, {"grammatical_form": "noun/en_possessive_singular", "text": "citizen's", "is_base_form": false}]}
 {"guid": "N01_118", "forms": [{"grammatical_form": "noun/en_singular", "text": "narrator", "is_base_form": true, "ipa": "/ˈnæreɪtər/", "phonetic": "NAIR-ay-ter"}]}
 {"guid": "N01_119", "forms": [{"grammatical_form": "noun/en_singular", "text": "modernist", "is_base_form": true, "ipa": "/ˈmɑdərnɪst/", "phonetic": "MOD-ern-ist"}]}
 {"guid": "N01_120", "forms": [{"grammatical_form": "noun/en_singular", "text": "protagonist", "is_base_form": true, "ipa": "/proʊˈtæɡənɪst/", "phonetic": "pro-TAG-uh-nist"}]}
@@ -52,19 +59,19 @@
 {"guid": "N01_131", "forms": [{"grammatical_form": "noun/en_singular", "text": "lesbian", "is_base_form": true, "ipa": "/ˈlɛzbiən/", "phonetic": "LEZ-bee-un"}]}
 {"guid": "N01_132", "forms": [{"grammatical_form": "noun/en_singular", "text": "controller", "is_base_form": true, "ipa": "/kənˈtroʊlər/", "phonetic": "kun-TROH-ler"}]}
 {"guid": "N01_133", "forms": [{"grammatical_form": "noun/en_singular", "text": "runner", "is_base_form": true, "ipa": "/ˈrʌnər/", "phonetic": "RUHN-er"}]}
-{"guid": "N01_134", "forms": [{"grammatical_form": "noun/en_singular", "text": "petitioner", "is_base_form": true, "ipa": "/pəˈtɪʃənɚ/", "phonetic": "puh-TISH-uh-ner"}]}
-{"guid": "N01_135", "forms": [{"grammatical_form": "noun/en_singular", "text": "respondent", "is_base_form": true, "ipa": "/rɪˈspɑndənt/", "phonetic": "ri-SPON-duhnt"}]}
-{"guid": "N01_136", "forms": [{"grammatical_form": "noun/en_singular", "text": "debtor", "is_base_form": true, "ipa": "/ˈdɛtər/", "phonetic": "DET-er"}]}
-{"guid": "N01_137", "forms": [{"grammatical_form": "noun/en_singular", "text": "taxpayer", "is_base_form": true, "ipa": "/ˈtæksˌpeɪər/", "phonetic": "TAKS-pay-er"}]}
-{"guid": "N01_138", "forms": [{"grammatical_form": "noun/en_singular", "text": "applicant", "is_base_form": true, "ipa": "/ˈæplɪkənt/", "phonetic": "AP-li-kunt"}]}
-{"guid": "N01_139", "forms": [{"grammatical_form": "noun/en_singular", "text": "applicant", "is_base_form": true, "ipa": "/ˈæplɪkənt/", "phonetic": "AP-li-kunt"}]}
-{"guid": "N01_140", "forms": [{"grammatical_form": "noun/en_singular", "text": "juror", "is_base_form": true, "ipa": "/ˈdʒʊrər/", "phonetic": "JOOR-er"}]}
-{"guid": "N01_141", "forms": [{"grammatical_form": "noun/en_singular", "text": "beneficiary", "is_base_form": true, "ipa": "/ˌbɛnəˈfɪʃiˌɛri/", "phonetic": "ben-uh-FISH-ee-air-ee"}]}
-{"guid": "N01_142", "forms": [{"grammatical_form": "noun/en_singular", "text": "beneficiary", "is_base_form": true, "ipa": "/ˌbɛnəˈfɪʃiˌɛri/", "phonetic": "ben-uh-FISH-ee-air-ee"}]}
+{"guid": "N01_134", "forms": [{"grammatical_form": "noun/en_singular", "text": "petitioner", "is_base_form": true, "ipa": "/pəˈtɪʃənɚ/", "phonetic": "puh-TISH-uh-ner"}, {"grammatical_form": "noun/en_possessive_singular", "text": "petitioner's", "is_base_form": false}]}
+{"guid": "N01_135", "forms": [{"grammatical_form": "noun/en_singular", "text": "respondent", "is_base_form": true, "ipa": "/rɪˈspɑndənt/", "phonetic": "ri-SPON-duhnt"}, {"grammatical_form": "noun/en_possessive_singular", "text": "respondent's", "is_base_form": false}]}
+{"guid": "N01_136", "forms": [{"grammatical_form": "noun/en_singular", "text": "debtor", "is_base_form": true, "ipa": "/ˈdɛtər/", "phonetic": "DET-er"}, {"grammatical_form": "noun/en_possessive_singular", "text": "debtor's", "is_base_form": false}]}
+{"guid": "N01_137", "forms": [{"grammatical_form": "noun/en_singular", "text": "taxpayer", "is_base_form": true, "ipa": "/ˈtæksˌpeɪər/", "phonetic": "TAKS-pay-er"}, {"grammatical_form": "noun/en_possessive_singular", "text": "taxpayer's", "is_base_form": false}]}
+{"guid": "N01_138", "forms": [{"grammatical_form": "noun/en_singular", "text": "applicant", "is_base_form": true, "ipa": "/ˈæplɪkənt/", "phonetic": "AP-li-kunt"}, {"grammatical_form": "noun/en_possessive_singular", "text": "applicant's", "is_base_form": false}]}
+{"guid": "N01_139", "forms": [{"grammatical_form": "noun/en_singular", "text": "applicant", "is_base_form": true, "ipa": "/ˈæplɪkənt/", "phonetic": "AP-li-kunt"}, {"grammatical_form": "noun/en_possessive_singular", "text": "applicant's", "is_base_form": false}]}
+{"guid": "N01_140", "forms": [{"grammatical_form": "noun/en_singular", "text": "juror", "is_base_form": true, "ipa": "/ˈdʒʊrər/", "phonetic": "JOOR-er"}, {"grammatical_form": "noun/en_possessive_singular", "text": "juror's", "is_base_form": false}]}
+{"guid": "N01_141", "forms": [{"grammatical_form": "noun/en_singular", "text": "beneficiary", "is_base_form": true, "ipa": "/ˌbɛnəˈfɪʃiˌɛri/", "phonetic": "ben-uh-FISH-ee-air-ee"}, {"grammatical_form": "noun/en_possessive_singular", "text": "beneficiary's", "is_base_form": false}]}
+{"guid": "N01_142", "forms": [{"grammatical_form": "noun/en_singular", "text": "beneficiary", "is_base_form": true, "ipa": "/ˌbɛnəˈfɪʃiˌɛri/", "phonetic": "ben-uh-FISH-ee-air-ee"}, {"grammatical_form": "noun/en_possessive_singular", "text": "beneficiary's", "is_base_form": false}]}
 {"guid": "N01_143", "forms": [{"grammatical_form": "noun/en_singular", "text": "guardian ad litem", "is_base_form": true}]}
 {"guid": "N01_144", "forms": [{"grammatical_form": "noun/en_singular", "text": "amicus curiae", "is_base_form": true}]}
-{"guid": "N01_148", "forms": [{"grammatical_form": "noun/en_singular", "text": "individual", "is_base_form": true, "ipa": "/ˌɪndəˈvɪdʒuəl/", "phonetic": "in-duh-VIJ-oo-uhl"}]}
-{"guid": "N01_149", "forms": [{"grammatical_form": "noun/en_singular", "text": "member", "is_base_form": true, "ipa": "/ˈmɛmbɚ/", "phonetic": "MEM-ber"}]}
+{"guid": "N01_148", "forms": [{"grammatical_form": "noun/en_singular", "text": "individual", "is_base_form": true, "ipa": "/ˌɪndəˈvɪdʒuəl/", "phonetic": "in-duh-VIJ-oo-uhl"}, {"grammatical_form": "noun/en_possessive_singular", "text": "individual's", "is_base_form": false}]}
+{"guid": "N01_149", "forms": [{"grammatical_form": "noun/en_singular", "text": "member", "is_base_form": true, "ipa": "/ˈmɛmbɚ/", "phonetic": "MEM-ber"}, {"grammatical_form": "noun/en_possessive_singular", "text": "member's", "is_base_form": false}]}
 {"guid": "N01_150", "forms": [{"grammatical_form": "noun/en_singular", "text": "co-founder", "is_base_form": true, "ipa": "/ˌkoʊˈfaʊndɚ/", "phonetic": "KOH-FOWN-der"}]}
 {"guid": "N01_151", "forms": [{"grammatical_form": "noun/en_singular", "text": "hunter-gatherer", "is_base_form": true, "ipa": "/ˈhʌntɚ ˌɡæðɚɚ/", "phonetic": "HUN-ter-GATH-er-er"}]}
 {"guid": "N01_152", "forms": [{"grammatical_form": "noun/en_singular", "text": "co-author", "is_base_form": true, "ipa": "/koʊˈɔːθər/", "phonetic": "koh-AW-ther"}]}
@@ -79,10 +86,37 @@
 {"guid": "N01_163", "forms": [{"grammatical_form": "noun/en_singular", "text": "classmate", "is_base_form": true, "ipa": "/ˈklæsˌmeɪt/", "phonetic": "KLASS-mayt"}]}
 {"guid": "N01_164", "forms": [{"grammatical_form": "noun/en_singular", "text": "pirate", "is_base_form": true, "ipa": "/ˈpaɪrət/", "phonetic": "PIE-rut"}]}
 {"guid": "N01_165", "forms": [{"grammatical_form": "noun/en_singular", "text": "furry", "is_base_form": true, "ipa": "/ˈfɝi/", "phonetic": "FUR-ee"}]}
-{"guid": "N01_166", "forms": [{"grammatical_form": "noun/en_singular", "text": "student", "is_base_form": true, "ipa": "/ˈstuːdənt/", "phonetic": "STOO-dent"}]}
+{"guid": "N01_166", "forms": [{"grammatical_form": "noun/en_singular", "text": "student", "is_base_form": true, "ipa": "/ˈstuːdənt/", "phonetic": "STOO-dent"}, {"grammatical_form": "noun/en_possessive_singular", "text": "student's", "is_base_form": false}]}
 {"guid": "N01_167", "forms": [{"grammatical_form": "noun/en_singular", "text": "winner", "is_base_form": true, "ipa": "/ˈwɪnɚ/", "phonetic": "WIN-er"}]}
-{"guid": "N01_168", "forms": [{"grammatical_form": "noun/en_singular", "text": "passenger", "is_base_form": true, "ipa": "/ˈpæsəndʒɚ/", "phonetic": "PASS-en-jer"}]}
-{"guid": "N01_169", "forms": [{"grammatical_form": "noun/en_singular", "text": "passenger", "is_base_form": true, "ipa": "/ˈpæsəndʒɚ/", "phonetic": "PASS-en-jer"}]}
+{"guid": "N01_168", "forms": [{"grammatical_form": "noun/en_singular", "text": "passenger", "is_base_form": true, "ipa": "/ˈpæsəndʒɚ/", "phonetic": "PASS-en-jer"}, {"grammatical_form": "noun/en_possessive_singular", "text": "passenger's", "is_base_form": false}]}
+{"guid": "N01_169", "forms": [{"grammatical_form": "noun/en_singular", "text": "passenger", "is_base_form": true, "ipa": "/ˈpæsəndʒɚ/", "phonetic": "PASS-en-jer"}, {"grammatical_form": "noun/en_possessive_singular", "text": "passenger's", "is_base_form": false}]}
 {"guid": "N01_170", "forms": [{"grammatical_form": "noun/en_singular", "text": "astronaut", "is_base_form": true, "ipa": "/ˈæstrəˌnɔt/", "phonetic": "AS-truh-nawt"}]}
 {"guid": "N01_171", "forms": [{"grammatical_form": "noun/en_singular", "text": "queen", "is_base_form": true, "ipa": "/kwiːn/", "phonetic": "KWEEN"}]}
 {"guid": "N01_172", "forms": [{"grammatical_form": "noun/en_singular", "text": "spectator", "is_base_form": true, "ipa": "/ˈspɛkˌteɪtər/", "phonetic": "SPEK-tay-ter"}]}
+{"guid": "N01_181", "variants": [{"kind": "equivalent", "key": "prey", "forms": [{"grammatical_form": "noun/en_singular", "text": "prey", "is_base_form": true}]}]}
+{"guid": "N01_186", "forms": [{"grammatical_form": "noun/en_possessive_singular", "text": "player's", "is_base_form": false}]}
+{"guid": "N01_187", "forms": [{"grammatical_form": "noun/en_singular", "text": "good sport", "is_base_form": true}]}
+{"guid": "N01_188", "forms": [{"grammatical_form": "noun/en_singular", "text": "drug user", "is_base_form": true}]}
+{"guid": "N01_189", "forms": [{"grammatical_form": "noun/en_possessive_singular", "text": "user's", "is_base_form": false}]}
+{"guid": "N01_192", "forms": [{"grammatical_form": "noun/en_possessive_singular", "text": "defendant's", "is_base_form": false}]}
+{"guid": "N01_193", "forms": [{"grammatical_form": "noun/en_possessive_singular", "text": "plaintiff's", "is_base_form": false}]}
+{"guid": "N01_195", "forms": [{"grammatical_form": "noun/en_singular", "text": "community member", "is_base_form": true}], "variants": [{"kind": "equivalent", "key": "citizen", "forms": [{"grammatical_form": "noun/en_singular", "text": "citizen", "is_base_form": true}]}]}
+{"guid": "N01_204", "forms": [{"grammatical_form": "noun/en_possessive_singular", "text": "respondent's", "is_base_form": false}]}
+{"guid": "N01_207", "forms": [{"grammatical_form": "noun/en_singular", "text": "stand-in", "is_base_form": true}], "variants": [{"kind": "equivalent", "key": "double", "forms": [{"grammatical_form": "noun/en_singular", "text": "double", "is_base_form": true}]}]}
+{"guid": "N01_208", "variants": [{"kind": "equivalent", "key": "origin", "forms": [{"grammatical_form": "noun/en_singular", "text": "origin", "is_base_form": true}]}]}
+{"guid": "N01_210", "forms": [{"grammatical_form": "noun/en_singular", "text": "anti-communist", "is_base_form": true}]}
+{"guid": "N01_211", "forms": [{"grammatical_form": "noun/en_singular", "text": "non-white", "is_base_form": true}]}
+{"guid": "N01_212", "forms": [{"grammatical_form": "noun/en_singular", "text": "mixed-race person", "is_base_form": true}]}
+{"guid": "N01_216", "forms": [{"grammatical_form": "noun/en_singular", "text": "poster child", "is_base_form": true}]}
+{"guid": "N01_219", "forms": [{"grammatical_form": "noun/en_possessive_singular", "text": "recipient's", "is_base_form": false}]}
+{"guid": "N01_220", "forms": [{"grammatical_form": "noun/en_possessive_singular", "text": "player's", "is_base_form": false}]}
+{"guid": "N01_221", "variants": [{"kind": "equivalent", "key": "adolescents", "forms": [{"grammatical_form": "noun/en_singular", "text": "adolescents", "is_base_form": true}]}]}
+{"guid": "N01_222", "variants": [{"kind": "equivalent", "key": "adherents", "forms": [{"grammatical_form": "noun/en_singular", "text": "adherents", "is_base_form": true}]}]}
+{"guid": "N01_224", "forms": [{"grammatical_form": "noun/en_possessive_singular", "text": "alien's", "is_base_form": false}]}
+{"guid": "N01_225", "forms": [{"grammatical_form": "noun/en_singular", "text": "alto", "is_base_form": true}]}
+{"guid": "N01_226", "variants": [{"kind": "equivalent", "key": "emigrants", "forms": [{"grammatical_form": "noun/en_singular", "text": "emigrants", "is_base_form": true}]}]}
+{"guid": "N01_227", "variants": [{"kind": "equivalent", "key": "medalists", "forms": [{"grammatical_form": "noun/en_singular", "text": "medalists", "is_base_form": true}]}]}
+{"guid": "N01_229", "forms": [{"grammatical_form": "noun/en_possessive_singular", "text": "kid's", "is_base_form": false}]}
+{"guid": "N01_231", "forms": [{"grammatical_form": "noun/en_possessive_singular", "text": "learner's", "is_base_form": false}], "variants": [{"kind": "equivalent", "key": "student", "forms": [{"grammatical_form": "noun/en_singular", "text": "student", "is_base_form": true}]}]}
+{"guid": "N01_232", "forms": [{"grammatical_form": "noun/en_singular", "text": "person with dwarfism", "is_base_form": true}], "variants": [{"kind": "equivalent", "key": "dwarf", "forms": [{"grammatical_form": "noun/en_singular", "text": "dwarf", "is_base_form": true}]}]}
+{"guid": "N01_233", "forms": [{"grammatical_form": "noun/en_possessive_singular", "text": "alien's", "is_base_form": false}]}

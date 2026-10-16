@@ -24,3 +24,8 @@
 {"guid": "N66_025", "forms": [{"grammatical_form": "noun/en_singular", "text": "homology", "is_base_form": true, "ipa": "/həˈmɑlədʒi/", "phonetic": "huh-MOL-uh-jee"}]}
 {"guid": "N66_026", "forms": [{"grammatical_form": "noun/en_singular", "text": "cohomology", "is_base_form": true, "ipa": "/ˌkoʊhoʊˈmɑːlədʒi/", "phonetic": "koh-hoh-MOL-uh-jee"}]}
 {"guid": "N66_027", "forms": [{"grammatical_form": "noun/en_singular", "text": "vertex", "is_base_form": true}]}
+{"guid": "N66_028", "forms": [{"grammatical_form": "noun/en_singular", "text": "vertex", "is_base_form": true}]}
+{"guid": "N66_035", "forms": [{"grammatical_form": "noun/en_singular", "text": "momentum", "is_base_form": true}]}
+{"guid": "N66_036", "forms": [{"grammatical_form": "noun/en_singular", "text": "atomic orbital", "is_base_form": true}], "variants": [{"kind": "equivalent", "key": "orbital", "forms": [{"grammatical_form": "noun/en_singular", "text": "orbital", "is_base_form": true}]}]}
+{"guid": "N66_038", "forms": [{"grammatical_form": "noun/en_singular", "text": "coefficient alpha", "is_base_form": true}], "variants": [{"kind": "equivalent", "key": "alpha", "forms": [{"grammatical_form": "noun/en_singular", "text": "alpha", "is_base_form": true}]}]}
+{"guid": "N66_039", "forms": [{"grammatical_form": "noun/en_singular", "text": "cohomology groups", "is_base_form": true}]}

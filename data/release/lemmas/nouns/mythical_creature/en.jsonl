@@ -1,4 +1,4 @@
 {"guid": "N79_001", "forms": [{"grammatical_form": "noun/en_singular", "text": "dragon", "is_base_form": true, "ipa": "/ˈdræɡ.ə.n/", "phonetic": "DRAG-uhn"}]}
 {"guid": "N79_002", "forms": [{"grammatical_form": "noun/en_singular", "text": "monster", "is_base_form": true, "ipa": "/ˈmɒnstər/", "phonetic": "MON-s-tuh-er"}]}
 {"guid": "N79_003", "forms": [{"grammatical_form": "noun/en_singular", "text": "dwarf", "is_base_form": true, "ipa": "/dwɔrf/", "phonetic": "DWORF"}]}
-{"guid": "N79_004", "forms": [{"grammatical_form": "noun/en_singular", "text": "giant", "is_base_form": true, "ipa": "/ˈdʒaɪ.ənt/", "phonetic": "JY-uh-nt"}]}
+{"guid": "N79_004", "forms": [{"grammatical_form": "noun/en_singular", "text": "giant", "is_base_form": true, "ipa": "/ˈdʒaɪ.ənt/", "phonetic": "JY-uh-nt"}, {"grammatical_form": "noun/en_possessive_singular", "text": "giant's", "is_base_form": false}]}

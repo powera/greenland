@@ -26,3 +26,6 @@
 {"guid": "A08_026", "forms": [{"grammatical_form": "adjective/en_positive", "text": "vernacular", "is_base_form": true, "ipa": "/vəˈnækjələr/", "phonetic": "vuh-NAK-yuh-ler"}]}
 {"guid": "A08_027", "forms": [{"grammatical_form": "adjective/en_positive", "text": "English", "is_base_form": true, "ipa": "/ˈɪŋɡlɪʃ/", "phonetic": "ING-glish"}]}
 {"guid": "A08_028", "variants": [{"kind": "spelling", "key": "multi-national", "forms": [{"grammatical_form": "adjective/en_positive", "text": "multi-national", "is_base_form": true}]}]}
+{"guid": "A08_061", "forms": [{"grammatical_form": "adjective/en_positive", "text": "middle-class", "is_base_form": true}]}
+{"guid": "A08_062", "forms": [{"grammatical_form": "adjective/en_positive", "text": "working-class", "is_base_form": true}]}
+{"guid": "A08_063", "forms": [{"grammatical_form": "adjective/en_positive", "text": "upper-class", "is_base_form": true}]}

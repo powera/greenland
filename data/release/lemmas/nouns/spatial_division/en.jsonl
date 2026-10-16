@@ -36,10 +36,10 @@
 {"guid": "N65_036", "forms": [{"grammatical_form": "noun/en_singular", "text": "territory", "is_base_form": true, "ipa": "/ˈtɛrɪˌtɔri/", "phonetic": "TAIR-uh-tor-ee"}]}
 {"guid": "N65_037", "forms": [{"grammatical_form": "noun/en_singular", "text": "try line", "is_base_form": true, "ipa": "/ˈtraɪ laɪn/", "phonetic": "TRY-line"}]}
 {"guid": "N65_038", "forms": [{"grammatical_form": "noun/en_singular", "text": "corner", "is_base_form": true, "ipa": "/ˈkɔrnər/", "phonetic": "KOR-ner"}]}
-{"guid": "N65_040", "forms": [{"grammatical_form": "noun/en_singular", "text": "river", "is_base_form": true, "ipa": "/ˈrɪvər/", "phonetic": "RIV-er"}]}
+{"guid": "N65_040", "forms": [{"grammatical_form": "noun/en_singular", "text": "river", "is_base_form": true, "ipa": "/ˈrɪvər/", "phonetic": "RIV-er"}, {"grammatical_form": "noun/en_possessive_singular", "text": "river's", "is_base_form": false}]}
 {"guid": "N65_041", "forms": [{"grammatical_form": "noun/en_singular", "text": "palace", "is_base_form": true, "ipa": "/ˈpæl.ɪs/", "phonetic": "PAL-iss"}]}
 {"guid": "N65_042", "forms": [{"grammatical_form": "noun/en_singular", "text": "attack line", "is_base_form": true, "ipa": "/əˈtæk laɪn/", "phonetic": "uh-TAK-line"}]}
-{"guid": "N65_043", "forms": [{"grammatical_form": "noun/en_singular", "text": "river", "is_base_form": true, "ipa": "/ˈrɪvər/", "phonetic": "RIV-er"}]}
+{"guid": "N65_043", "forms": [{"grammatical_form": "noun/en_singular", "text": "river", "is_base_form": true, "ipa": "/ˈrɪvər/", "phonetic": "RIV-er"}, {"grammatical_form": "noun/en_possessive_singular", "text": "river's", "is_base_form": false}]}
 {"guid": "N65_044", "forms": [{"grammatical_form": "noun/en_singular", "text": "point", "is_base_form": true, "ipa": "/pɔɪnt/", "phonetic": "POINT"}]}
 {"guid": "N65_045", "forms": [{"grammatical_form": "noun/en_singular", "text": "bar", "is_base_form": true, "ipa": "/bɑr/", "phonetic": "BAR"}]}
 {"guid": "N65_046", "forms": [{"grammatical_form": "noun/en_singular", "text": "home board", "is_base_form": true, "ipa": "/ˈhoʊm bɔrd/", "phonetic": "HOHM-board"}]}
@@ -61,4 +61,9 @@
 {"guid": "N65_063", "variants": [{"kind": "spelling", "key": "south-west", "forms": [{"grammatical_form": "noun/en_base", "text": "south-west", "is_base_form": true}]}]}
 {"guid": "N65_064", "forms": [{"grammatical_form": "noun/en_singular", "text": "west", "is_base_form": true, "ipa": "/wɛst/", "phonetic": "WEST"}], "variants": [{"kind": "spelling", "key": "West", "forms": [{"grammatical_form": "noun/en_singular", "text": "West", "is_base_form": true}]}]}
 {"guid": "N65_065", "forms": [{"grammatical_form": "noun/en_singular", "text": "sector", "is_base_form": true, "ipa": "/ˈsɛktɚ/", "phonetic": "SEK-ter"}]}
-{"guid": "N65_066", "forms": [{"grammatical_form": "noun/en_singular", "text": "section", "is_base_form": true, "ipa": "/ˈsɛkʃən/", "phonetic": "SEK-shun"}]}
+{"guid": "N65_066", "forms": [{"grammatical_form": "noun/en_singular", "text": "section", "is_base_form": true, "ipa": "/ˈsɛkʃən/", "phonetic": "SEK-shun"}, {"grammatical_form": "noun/en_possessive_singular", "text": "section's", "is_base_form": false}]}
+{"guid": "N65_069", "forms": [{"grammatical_form": "noun/en_singular", "text": "margins", "is_base_form": true}]}
+{"guid": "N65_070", "forms": [{"grammatical_form": "noun/en_singular", "text": "parking space", "is_base_form": true}]}
+{"guid": "N65_072", "forms": [{"grammatical_form": "noun/en_singular", "text": "golf hazard", "is_base_form": true}], "variants": [{"kind": "equivalent", "key": "hazard", "forms": [{"grammatical_form": "noun/en_singular", "text": "hazard", "is_base_form": true}]}]}
+{"guid": "N65_074", "forms": [{"grammatical_form": "noun/en_singular", "text": "downhill slope", "is_base_form": true}]}
+{"guid": "N65_075", "forms": [{"grammatical_form": "noun/en_singular", "text": "focus", "is_base_form": true}]}

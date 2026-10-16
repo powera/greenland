@@ -40,14 +40,12 @@
 {"guid": "A18_041", "translations": {"ro": "treaz", "pl": "przebudzony", "th": "ตื่น", "ms": "terjaga", "ta": "விழிப்பான", "kn": "ಎಚ್ಚರವಾದ", "uk": "несплячий", "bn": "জাগ্রত", "hi": "जागृत", "tr": "uyanık"}}
 {"guid": "A18_042", "translations": {"ro": "interesat", "pl": "zainteresowany", "th": "สนใจ", "ms": "berminat", "ta": "ஆர்வமுள்ள", "kn": "ಆಸಕ್ತ", "uk": "зацікавлений", "bn": "আগ্রহী", "hi": "रुच", "tr": "ilgili"}}
 {"guid": "A18_043", "translations": {"ro": "înghețat", "pl": "zamrożony", "th": "แช่แข็ง", "ms": "beku", "ta": "உறைந்த", "kn": "ಹೆಪ್ಪುಗಟ್ಟಿದ", "uk": "замерзлий", "bn": "জমাট", "hi": "जमāया", "tr": "donmuş", "bs": "smrznut"}}
-{"guid": "A18_045", "translations": {"ro": "numit", "pl": "nazwany", "th": "ที่ชื่อว่า", "ms": "bernama", "ta": "பெயரிடப்பட்ட", "kn": "ಹೆಸರಿಸಲಾದ", "uk": "іменований", "bn": "নামক", "hi": "नामित", "tr": "adlı"}}
 {"guid": "A18_046", "translations": {"ro": "ușor", "pl": "lekki", "th": "เบา", "ms": "ringan", "ta": "இலகுவான", "kn": "ಹಗುರವಾದ", "uk": "легкий", "bn": "হালকা", "hi": "हल्का", "tr": "hafif", "bs": "lagan"}}
 {"guid": "A18_047", "translations": {"ro": "mort", "pl": "martwy", "th": "ตาย", "ms": "mati", "ta": "இறந்த", "kn": "ಸತ್ತ", "uk": "мертвий", "bn": "মৃত", "hi": "मृत", "tr": "ölü", "bs": "mrtav"}}
 {"guid": "A18_048", "translations": {"ro": "deschis", "pl": "otwarty", "th": "เปิด", "ms": "terbuka", "ta": "திறந்த", "kn": "ತೆರೆದ", "uk": "відкритий", "bn": "খোলা", "hi": "खुला", "tr": "açık", "bs": "otvoren"}}
 {"guid": "A18_049", "translations": {"ro": "ciudat", "pl": "dziwny", "th": "แปลก", "ms": "pelik", "ta": "விசித்திரமான", "kn": "ವಿಚಿತ್ರ", "uk": "дивний", "bn": "অদ্ভুত", "hi": "अजीब", "tr": "garip", "bs": "čudan"}}
 {"guid": "A18_050", "translations": {"ro": "stâng", "pl": "lewy", "th": "ซ้าย", "ms": "kiri", "ta": "இடது", "kn": "ಎಡ", "uk": "лівий", "bn": "বাম", "hi": "बायाँ", "tr": "sol", "bs": "lijevi"}}
 {"guid": "A18_051", "translations": {"ro": "pierdut", "pl": "zgubiony", "th": "หลงทาง", "ms": "hilang", "ta": "தொலைந்த", "kn": "ಕಳೆದುಹೋದ", "uk": "загублений", "bn": "হারা", "hi": "खोया", "tr": "kayıp", "bs": "izgubljen"}}
-{"guid": "A18_052", "translations": {"ro": "plecat", "pl": "nieobecny", "th": "ไปแล้ว", "ms": "tiada", "ta": "போனவன்", "kn": "ಹೋದ", "uk": "зниклий", "bn": "নিরুদ্দিষ্ট", "hi": "অতীত", "tr": "gitmiş"}}
 {"guid": "A18_053", "translations": {"ro": "spart", "pl": "złamany", "th": "แตก", "ms": "rosak", "ta": "உடைந்த", "kn": "ಮುರಿದ", "uk": "поламаний", "bn": "ভঙ্গ", "hi": "टूटा", "tr": "bozuk", "bs": "slomljen"}}
 {"guid": "A18_054", "translations": {"ro": "închis", "pl": "zamknięty", "th": "ปิด", "ms": "tertutup", "ta": "மூடிய", "kn": "ಮುಚ್ಚಿದ", "uk": "закритий", "bn": "বন্ধ", "hi": "बंद", "tr": "kapalı", "bs": "zatvoren"}}
 {"guid": "A18_055", "translations": {"ro": "plat", "pl": "płaski", "th": "แบน", "ms": "rata", "ta": "தட்டையான", "kn": "ಚಪ್ಪಟೆ", "uk": "плоский", "bn": "সমতল", "hi": "समतल", "tr": "düz", "bs": "ravan"}}

@@ -42,3 +42,8 @@
 {"guid": "N47_052", "forms": [{"grammatical_form": "noun/en_singular", "text": "attic", "is_base_form": true, "ipa": "/ˈætɪk/", "phonetic": "AT-tik"}]}
 {"guid": "N47_053", "forms": [{"grammatical_form": "noun/en_singular", "text": "basement", "is_base_form": true, "ipa": "/ˈbæs.ɪ.mənt/", "phonetic": "BAS-i-mənt"}]}
 {"guid": "N47_054", "forms": [{"grammatical_form": "noun/en_singular", "text": "closet", "is_base_form": true, "ipa": "/ˈkloʊzɪt/", "phonetic": "KLOZ-it"}]}
+{"guid": "N47_056", "forms": [{"grammatical_form": "noun/en_singular", "text": "circus ring", "is_base_form": true}]}
+{"guid": "N47_057", "variants": [{"kind": "equivalent", "key": "toilet", "forms": [{"grammatical_form": "noun/en_singular", "text": "toilet", "is_base_form": true}]}]}
+{"guid": "N47_058", "forms": [{"grammatical_form": "noun/en_singular", "text": "double room", "is_base_form": true}]}
+{"guid": "N47_059", "forms": [{"grammatical_form": "noun/en_singular", "text": "downstairs", "is_base_form": true}]}
+{"guid": "N47_060", "forms": [{"grammatical_form": "noun/en_singular", "text": "ticket office", "is_base_form": true}], "variants": [{"kind": "equivalent", "key": "box-office", "forms": [{"grammatical_form": "noun/en_singular", "text": "box-office", "is_base_form": true}]}]}

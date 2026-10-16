@@ -17,8 +17,8 @@
 {"guid": "N19_017", "forms": [{"grammatical_form": "noun/en_singular", "text": "reasonableness", "is_base_form": true, "ipa": "/ˈriːzənəbəlnəs/", "phonetic": "REE-zuh-nuh-buhl-nuhs"}]}
 {"guid": "N19_018", "forms": [{"grammatical_form": "noun/en_singular", "text": "fairness", "is_base_form": true, "ipa": "/ˈfɛrnəs/", "phonetic": "FAIR-niss"}]}
 {"guid": "N19_019", "forms": [{"grammatical_form": "noun/en_singular", "text": "dangerousness", "is_base_form": true, "ipa": "/ˈdeɪndʒərəsnəs/", "phonetic": "DAYN-jer-us-ness"}]}
-{"guid": "N19_020", "forms": [{"grammatical_form": "noun/en_singular", "text": "standard", "is_base_form": true, "ipa": "/ˈstændɚd/", "phonetic": "STAN-derd"}]}
-{"guid": "N19_021", "forms": [{"grammatical_form": "noun/en_singular", "text": "difference", "is_base_form": true, "ipa": "/ˈdɪfərəns/", "phonetic": "DIF-er-ens"}]}
+{"guid": "N19_020", "forms": [{"grammatical_form": "noun/en_singular", "text": "standard", "is_base_form": true, "ipa": "/ˈstændɚd/", "phonetic": "STAN-derd"}], "variants": [{"kind": "equivalent", "key": "benchmark", "forms": [{"grammatical_form": "noun/en_singular", "text": "benchmark", "is_base_form": true}]}]}
+{"guid": "N19_021", "forms": [{"grammatical_form": "noun/en_singular", "text": "difference", "is_base_form": true, "ipa": "/ˈdɪfərəns/", "phonetic": "DIF-er-ens"}], "variants": [{"kind": "equivalent", "key": "distinction", "forms": [{"grammatical_form": "noun/en_singular", "text": "distinction", "is_base_form": true}]}]}
 {"guid": "N19_022", "forms": [{"grammatical_form": "noun/en_singular", "text": "appearance", "is_base_form": true, "ipa": "/əˈpɪrəns/", "phonetic": "uh-PEER-uhns"}]}
 {"guid": "N19_023", "forms": [{"grammatical_form": "noun/en_singular", "text": "self-esteem", "is_base_form": true, "ipa": "/ˌsɛlf əˈstiːm/", "phonetic": "self-es-TEEM"}]}
 {"guid": "N19_024", "forms": [{"grammatical_form": "noun/en_singular", "text": "pre-eminence", "is_base_form": true, "ipa": "/ˌpriːˈɛmənəns/", "phonetic": "pree-EM-uh-nents"}]}
@@ -26,3 +26,17 @@
 {"guid": "N19_026", "forms": [{"grammatical_form": "noun/en_singular", "text": "personal best", "is_base_form": true, "ipa": "/ˈpɝːsənəl bɛst/", "phonetic": "PUR-suh-nuhl BEST"}]}
 {"guid": "N19_027", "forms": [{"grammatical_form": "noun/en_singular", "text": "sportsmanship", "is_base_form": true, "ipa": "/ˈspɔrtsmənˌʃɪp/", "phonetic": "SPORTS-muhn-ship"}]}
 {"guid": "N19_028", "forms": [{"grammatical_form": "noun/en_singular", "text": "influence", "is_base_form": true, "ipa": "/ˈɪnfluəns/", "phonetic": "IN-floo-ens"}]}
+{"guid": "N19_033", "forms": [{"grammatical_form": "noun/en_singular", "text": "motor coordination", "is_base_form": true}], "variants": [{"kind": "equivalent", "key": "coordination", "forms": [{"grammatical_form": "noun/en_singular", "text": "coordination", "is_base_form": true}]}]}
+{"guid": "N19_039", "forms": [{"grammatical_form": "noun/en_singular", "text": "dramatic effect", "is_base_form": true}]}
+{"guid": "N19_040", "forms": [{"grammatical_form": "noun/en_singular", "text": "poetic quality", "is_base_form": true}]}
+{"guid": "N19_044", "forms": [{"grammatical_form": "noun/en_singular", "text": "customer loyalty", "is_base_form": true}], "variants": [{"kind": "equivalent", "key": "loyalty", "forms": [{"grammatical_form": "noun/en_singular", "text": "loyalty", "is_base_form": true}]}]}
+{"guid": "N19_046", "variants": [{"kind": "equivalent", "key": "signal", "forms": [{"grammatical_form": "noun/en_singular", "text": "signal", "is_base_form": true}]}]}
+{"guid": "N19_048", "variants": [{"kind": "equivalent", "key": "insight", "forms": [{"grammatical_form": "noun/en_singular", "text": "insight", "is_base_form": true}]}]}
+{"guid": "N19_054", "forms": [{"grammatical_form": "noun/en_singular", "text": "postmodern style", "is_base_form": true}]}
+{"guid": "N19_061", "forms": [{"grammatical_form": "noun/en_singular", "text": "self-confidence", "is_base_form": true}]}
+{"guid": "N19_063", "forms": [{"grammatical_form": "noun/en_singular", "text": "grammatical correctness", "is_base_form": true}], "variants": [{"kind": "equivalent", "key": "grammar", "forms": [{"grammatical_form": "noun/en_singular", "text": "grammar", "is_base_form": true}]}]}
+{"guid": "N19_066", "variants": [{"kind": "equivalent", "key": "hint", "forms": [{"grammatical_form": "noun/en_singular", "text": "hint", "is_base_form": true}]}]}
+{"guid": "N19_067", "variants": [{"kind": "equivalent", "key": "handling", "forms": [{"grammatical_form": "noun/en_singular", "text": "handling", "is_base_form": true}]}]}
+{"guid": "N19_068", "variants": [{"kind": "equivalent", "key": "presumption", "forms": [{"grammatical_form": "noun/en_singular", "text": "presumption", "is_base_form": true}]}]}
+{"guid": "N19_069", "variants": [{"kind": "equivalent", "key": "determination", "forms": [{"grammatical_form": "noun/en_singular", "text": "determination", "is_base_form": true}]}]}
+{"guid": "N19_072", "forms": [{"grammatical_form": "noun/en_singular", "text": "make-up", "is_base_form": true}]}
