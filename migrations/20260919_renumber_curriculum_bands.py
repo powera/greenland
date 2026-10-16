@@ -39,12 +39,9 @@ is the normal direction. Run that afterwards.
 from __future__ import annotations
 
 import argparse
-import shutil
 import sys
 from dataclasses import dataclass
-from datetime import date
 from pathlib import Path
-from typing import Optional
 
 ROOT = Path(__file__).resolve().parent.parent
 SRC = ROOT / "src"
@@ -53,6 +50,7 @@ if str(SRC) not in sys.path:
 
 import constants
 from storage.backend import DataSourceConfig, create_session
+from storage.backup import create_backup
 from storage.crud.sentence import calculate_minimum_level
 from storage.models.schema import Lemma, LemmaDifficultyOverride, Phrase, Sentence
 
@@ -93,19 +91,6 @@ def new_level(old_level: int) -> int:
         # Already migrated.
         return old_level
     return constants.NAMED_DIFFICULTY_LEVEL_MIN + (old_level - OLD_NAMED_MIN) * NAMED_LEVEL_STRIDE
-
-
-def backup_database(config: DataSourceConfig) -> Optional[Path]:
-    """Copy the SQLite file next to itself with a dated suffix."""
-    db_path = Path(config.sqlite_path) if config.sqlite_path else None
-    if db_path is None or not db_path.exists():
-        return None
-    stamp = date.today().strftime("%Y%m%d")
-    backup_path = db_path.with_name(f"{db_path.name}.bak-{stamp}-renumber-bands")
-    if backup_path.exists():
-        return backup_path
-    shutil.copy2(db_path, backup_path)
-    return backup_path
 
 
 def migrate(config: DataSourceConfig, *, dry_run: bool) -> MigrationResult:
@@ -194,9 +179,7 @@ def main() -> int:
     )
 
     if not args.dry_run and not args.no_backup:
-        backup_path = backup_database(config)
-        if backup_path is not None:
-            print(f"Backed up database to {backup_path}")
+        print(f"Backed up database to {create_backup(config, 'renumber-bands')}")
 
     result = migrate(config, dry_run=args.dry_run)
 

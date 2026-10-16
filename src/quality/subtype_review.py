@@ -46,7 +46,6 @@ added to the same TSV as ``second_*`` columns; ``apply`` is not touched.
 
 import argparse
 import csv
-import datetime
 import json
 import logging
 import sys
@@ -64,8 +63,8 @@ import constants
 import util.prompt_loader
 from clients.unified_client import UnifiedLLMClient
 from quality.level_outliers import match_word
-from reports.curriculum_bands import backup_database
 from storage.backend import BackendType, DataSourceConfig, create_session
+from storage.backup import create_backup
 from storage.crud.lemma import handle_lemma_type_subtype_change
 from storage.models.guid_prefixes import (
     SUBTYPE_DEFS,
@@ -603,7 +602,11 @@ def apply_rows(
 
 
 def run_apply(
-    session: Session, db_path: Path, tsv_path: Path, dry_run: bool, backup_first: bool
+    session: Session,
+    config: DataSourceConfig,
+    tsv_path: Path,
+    dry_run: bool,
+    backup_first: bool,
 ) -> int:
     """The ``--apply`` CLI path: optionally back up, apply, and report."""
     with tsv_path.open(encoding="utf-8", newline="") as handle:
@@ -612,10 +615,7 @@ def run_apply(
         logger.info("No rows marked apply in %s", tsv_path)
         return 0
     if backup_first and not dry_run:
-        try:
-            backup = backup_database(db_path, "subtype-review")
-        except FileExistsError:
-            backup = backup_database(db_path, f"subtype-review-{datetime.datetime.now():%H%M%S}")
+        backup = create_backup(config, "subtype-review")
         logger.info("Backed up the database to %s", backup)
     result = apply_rows(session, rows, commit=not dry_run)
     for move in result.applied:
@@ -943,7 +943,7 @@ def main() -> int:
     session = create_session(config)
 
     if args.apply:
-        return run_apply(session, args.db_path, args.apply, args.dry_run, args.backup)
+        return run_apply(session, config, args.apply, args.dry_run, args.backup)
 
     if args.second_opinion:
         second_client = None if args.dry_run else UnifiedLLMClient.from_config(config)

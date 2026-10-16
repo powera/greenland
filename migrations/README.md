@@ -42,7 +42,7 @@ their base levels, and regenerate the target-language overrides. These commands
 are for the later population step; implementing the migration does not run them.
 
 ```bash
-sqlite3 data/wordfreq/linguistics.sqlite ".backup 'data/wordfreq/linguistics.sqlite.bak-20261009-geography-senses'"
+PYTHONPATH=src python -m storage.backup create --label geography-senses
 GREENLAND_DISABLE_LLM=1 PYTHONPATH=src python migrations/20261009_add_geography_senses.py --set-base-levels --apply
 GREENLAND_DISABLE_LLM=1 PYTHONPATH=src python src/scripts/apply_country_overrides.py apply-all
 GREENLAND_DISABLE_LLM=1 PYTHONPATH=src python -m storage.release.cli export lemmas levels

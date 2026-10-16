@@ -18,6 +18,8 @@ operations, query helpers, and a pluggable backend abstraction.
 - `migrations/`, `migrate.py` — schema migrations and release-data export
 - `translation_helpers.py` — all language code constants and conversion
   functions; import from here instead of defining local mappings
+- `backup.py` — the only way to back up the SQLite database: major/minor
+  tiers under `data/wordfreq/backups/`, and a manual retention `prune`
 - `connection_pool.py` — thread-safe session pooling
 - `legacy.py` — backward-compatibility wrapper for the old `Word` model
 

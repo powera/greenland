@@ -19,11 +19,8 @@ frequent); inside a bucket the current curriculum order stands.
 """
 
 import math
-import sqlite3
 from collections import defaultdict
 from dataclasses import dataclass, field
-from datetime import date
-from pathlib import Path
 from typing import Mapping, Optional, Sequence
 
 from sqlalchemy.orm import Session
@@ -255,17 +252,6 @@ def family_reserved_level(lemma: Lemma) -> Optional[int]:
         elif "female" in disambiguation:
             lemma_text = "female cousin"
     return FAMILY_LEVEL_BY_TEXT.get(lemma_text)
-
-
-def backup_database(database_path: Path, label: str) -> Path:
-    """Create a WAL-consistent dated SQLite backup before applying changes."""
-    backup_path = database_path.with_name(f"{database_path.name}.bak-{date.today():%Y%m%d}-{label}")
-    if backup_path.exists():
-        raise FileExistsError(f"Refusing to replace existing backup: {backup_path}")
-    with sqlite3.connect(database_path) as source_connection:
-        with sqlite3.connect(backup_path) as backup_connection:
-            source_connection.backup(backup_connection)
-    return backup_path
 
 
 def apply_moves(session: Session, moves: Sequence[PlannedMove], *, source: str) -> None:

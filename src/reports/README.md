@@ -8,7 +8,8 @@ Reports over the linguistic database. Run each one with
 
 - **curriculum_bands.py**: a shared library, not a script. It holds the band rules for the core (1-30)
   and named (100-499) bands: missing frequency data sorts as uncommon, and tiers only break ties. It also
-  has `backup_database` and `apply_moves`, which write hand-chosen level moves with an operation log.
+  has `apply_moves`, which writes hand-chosen level moves with an operation log. Back up first with
+  `storage.backup`.
 - **level_warnings.py**: the level report. Warns about core levels outside 20-50 words (ideal 25-40),
   headwords with two senses in the core, scattered subtypes, obscure early words and senses taught out
   of order. Warnings only; levels are placed by hand.
