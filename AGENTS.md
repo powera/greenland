@@ -12,15 +12,24 @@ updir imports (e.g., "from ..common_args import").
 * To run scripts, always use PYTHONPATH and never use cd commands: PYTHONPATH=src python src/agents/dramblys.py --help
 * If you are running without GREENLAND_DISABLE_LLM, you should always persist to the local
 database; if it will be useful also write the stdout/stderr to temp files.
-* Before "risky" local database changes, make a copy of the SQLITE database.  Include the date
-and a 10-20char explanation of the task; ie. linguistics.sqlite.bak-20260101-add-sentences
-The database runs in WAL mode: committed writes sit in linguistics.sqlite-wal until a
-checkpoint, often for days, so a plain `cp` of linguistics.sqlite silently copies a stale
-snapshot.  Back up with `sqlite3 data/wordfreq/linguistics.sqlite ".backup <dest>"` (or
-`VACUUM INTO`), which reads through the WAL and is safe while other clients (Barsukas, an
-agent) have the database open.  Restoring is the reverse hazard: only copy a backup over
-linguistics.sqlite with every client stopped, and delete the -wal and -shm files at the
-same time, or the old WAL is replayed onto the restored file.
+* Before "risky" local database changes, back up the SQLITE database with a 10-20char
+explanation of the task:
+  PYTHONPATH=src python -m storage.backup create --label add-sentences
+This writes data/wordfreq/backups/minor/linguistics.sqlite.bak-20260101-add-sentences.
+src/storage/backup.py is the only way to take a backup, in scripts too (call
+storage.backup.create_backup); do not call sqlite3 ".backup", VACUUM INTO, or Connection.backup
+yourself.  There are two tiers.  Minor is the default.  Use `--tier major` only for an
+irreversible structural change (dropping a table, a rebuild, a bulk delete) or when the user
+asks; say which tier you used.  Majors are kept indefinitely; minors can be removed by
+`python -m storage.backup prune --apply` (older than 72 hours and 5 newer minors), which is
+only run by hand - never prune without the user asking.
+Never copy, move, or overwrite the database files themselves (`cp`, `mv`, shutil) without
+coordinating with the user first.  The database runs in WAL mode: committed writes sit in
+linguistics.sqlite-wal until a checkpoint, often for days, so a file copy of linguistics.sqlite
+silently captures a stale snapshot, and the Barsukas server usually has the database open.
+Restoring is the reverse hazard: only copy a backup over linguistics.sqlite with Barsukas and
+every other client stopped, and delete the -wal and -shm files at the same time, or the old
+WAL is replayed onto the restored file.
 * Tests are in src/tests. Any changes to src/clients or src/storage/crud require
 tests.  Changes to src/barsukas should not have tests unless requested by the user.
 * Before creating a Git commit, always run black and mypy on modified Python files to ensure

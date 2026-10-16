@@ -42,12 +42,10 @@ database, so this runs safely under either kill switch.
 from __future__ import annotations
 
 import argparse
-import shutil
 import sys
 from dataclasses import dataclass, field
-from datetime import date
 from pathlib import Path
-from typing import List, Optional, Tuple
+from typing import List, Tuple
 
 ROOT = Path(__file__).resolve().parent.parent
 SRC = ROOT / "src"
@@ -55,6 +53,7 @@ if str(SRC) not in sys.path:
     sys.path.insert(0, str(SRC))
 
 from storage.backend import DataSourceConfig, create_session
+from storage.backup import create_backup
 from storage.models.imports import PendingImport
 from words.add_word import source_word_from_note
 
@@ -78,21 +77,6 @@ class MigrationResult:
     already_set: int = 0
     #: ``(queried_word, english_word)`` for the first few fills.
     samples: List[Tuple[str, str]] = field(default_factory=list)
-
-
-def backup_database(config: DataSourceConfig) -> Optional[Path]:
-    """Copy the SQLite file next to itself with a dated suffix."""
-    if config.sqlite_path is None:
-        return None
-    db_path = Path(config.sqlite_path)
-    if not db_path.exists():
-        return None
-    stamp = date.today().strftime("%Y%m%d")
-    backup_path = db_path.with_name(f"{db_path.name}.bak-{stamp}-pending-queried-word")
-    if backup_path.exists():
-        return backup_path
-    shutil.copy2(db_path, backup_path)
-    return backup_path
 
 
 def migrate(config: DataSourceConfig, *, dry_run: bool, refresh: bool) -> MigrationResult:
@@ -152,9 +136,7 @@ def main() -> int:
     )
 
     if not args.dry_run and not args.no_backup:
-        backup_path = backup_database(config)
-        if backup_path is not None:
-            print(f"Backup: {backup_path}")
+        print(f"Backup: {create_backup(config, 'pending-queried-word')}")
 
     result = migrate(config, dry_run=args.dry_run, refresh=args.refresh)
 

@@ -9,9 +9,7 @@ if str(SOURCE_ROOT) not in sys.path:
     sys.path.insert(0, str(SOURCE_ROOT))
 
 import argparse
-from datetime import datetime
 import json
-import sqlite3
 from typing import Dict, Tuple
 
 from sqlalchemy.orm import Session
@@ -19,6 +17,7 @@ from sqlalchemy.orm import Session
 from constants import WORDFREQ_DB_PATH
 from storage.backend import create_session
 from storage.backend.config import BackendType, DataSourceConfig
+from storage.backup import create_backup
 from storage.config.lemma_fact_registry import RETIRED_LEMMA_FACT_TYPES, validate_lemma_fact
 from storage.models.schema import Lemma
 from storage.release.lemma import apply_lemma_facts, build_concept_label
@@ -99,13 +98,7 @@ def migrate(config: DataSourceConfig, release_dir: Path, *, apply: bool = False)
     try:
         changed, retired = stage_import(session, release_dir)
         if apply and (changed or retired):
-            backup = database.with_name(
-                f"{database.name}.bak-{datetime.now():%Y%m%d-%H%M%S-%f}-import-noun-facts"
-            )
-            with sqlite3.connect(f"{database.as_uri()}?mode=ro", uri=True) as source:
-                with sqlite3.connect(backup) as destination:
-                    source.backup(destination)
-            print(f"Backup: {backup}")
+            print(f"Backup: {create_backup(config, 'import-noun-facts')}")
             session.commit()
         else:
             session.rollback()
