@@ -261,7 +261,10 @@ def generate_variant_forms(
 
 
 def generate(
-    config: DataSourceConfig, dry_run: bool = False, languages: Optional[List[str]] = None
+    config: DataSourceConfig,
+    dry_run: bool = False,
+    languages: Optional[List[str]] = None,
+    pos_types: Optional[List[str]] = None,
 ) -> Dict[str, Dict[str, int]]:
     """Add missing mechanical forms for every supported language.
 
@@ -275,18 +278,27 @@ def generate(
     """
     session = create_session(config)
     try:
-        return generate_for_session(session, dry_run=dry_run, languages=languages)
+        return generate_for_session(
+            session, dry_run=dry_run, languages=languages, pos_types=pos_types
+        )
     finally:
         session.close()
 
 
 def generate_for_session(
-    session: Session, dry_run: bool = False, languages: Optional[List[str]] = None
+    session: Session,
+    dry_run: bool = False,
+    languages: Optional[List[str]] = None,
+    pos_types: Optional[List[str]] = None,
 ) -> Dict[str, Dict[str, int]]:
     """Add missing mechanical forms to an already-open session.
 
     The session is committed (unless *dry_run*) but not closed: it belongs to
     the caller.
+
+    *pos_types* narrows the run to those parts of speech (default: every one
+    the language supports).  Variant forms are skipped when it is given: they
+    are rebuilt per language, not per part of speech.
 
     Existing forms and facts are never overwritten, so this is additive and
     safe to re-run against a database that has already been generated into.
@@ -295,7 +307,9 @@ def generate_for_session(
     stats: Dict[str, Dict[str, int]] = {}
 
     for language_code in selected:
-        pos_types = SUPPORTED[language_code]
+        language_pos_types = [
+            pos for pos in SUPPORTED[language_code] if pos_types is None or pos in pos_types
+        ]
         counts = {
             "lemmas_seen": 0,
             "lemmas_written": 0,
@@ -305,7 +319,9 @@ def generate_for_session(
         }
         stats[language_code] = counts
 
-        lemmas: List[Lemma] = session.query(Lemma).filter(Lemma.pos_type.in_(list(pos_types))).all()
+        lemmas: List[Lemma] = (
+            session.query(Lemma).filter(Lemma.pos_type.in_(language_pos_types)).all()
+        )
 
         for lemma in lemmas:
             counts["lemmas_seen"] += 1
@@ -390,9 +406,10 @@ def generate_for_session(
         # A variant inflects by the same rules as the lemma it belongs to,
         # so its derivable slots are rebuilt here too -- otherwise the
         # release would ship "greyer" beside a "grayer" it withholds.
-        counts["variant_forms_added"] = generate_variant_forms(
-            session, language_code, dry_run=dry_run
-        )["forms_added"]
+        if pos_types is None:
+            counts["variant_forms_added"] = generate_variant_forms(
+                session, language_code, dry_run=dry_run
+            )["forms_added"]
 
     if not dry_run:
         session.commit()
@@ -415,10 +432,19 @@ def main() -> None:
         choices=sorted(SUPPORTED),
         help="Limit to one language (repeatable; default: every supported language)",
     )
+    parser.add_argument(
+        "--pos",
+        dest="pos_types",
+        action="append",
+        choices=sorted({pos for pos_types in SUPPORTED.values() for pos in pos_types}),
+        help="Limit to one part of speech (repeatable; default: every supported one)",
+    )
     args = parser.parse_args()
 
     config = DataSourceConfig(backend_type=BackendType.SQLITE, sqlite_path=args.db_path)
-    stats = generate(config, dry_run=args.dry_run, languages=args.languages)
+    stats = generate(
+        config, dry_run=args.dry_run, languages=args.languages, pos_types=args.pos_types
+    )
 
     prefix = "would add" if args.dry_run else "added"
     total = 0

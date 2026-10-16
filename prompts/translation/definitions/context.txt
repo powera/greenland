@@ -30,6 +30,11 @@ For lemmatization (finding the base form):
 - For nouns: the singular form (e.g., "cats" → "cat")
 - For verbs: the infinitive form without "to" (e.g., "running" → "run")
 - For adjectives and adverbs: the positive form (e.g., "better" → "good")
+- Judge each sense separately: when the given word is the base form of its own lemma in one sense, it is the base form there, even if the same spelling is an inflection of a different word in other senses
+
+For the definition text:
+- Give the meaning itself, as a definition of the lemma
+- Do not begin with a description of the grammatical form, such as "past tense of" or "plural of"; the lemma and base-form fields carry that
 
 Example sentences for each definition
 - These should use the exact word provided, not a differently-formatted form.
@@ -38,14 +43,15 @@ Example sentences for each definition
 For translations:
 - For each language, provide a translation that specifically matches the given definition, not other meanings of the word
 - For English:
-  - Give the standard English term that names this sense, which is not always the word you were asked about
+  - Give the standard English term that names this sense; usually that is the word you were asked about, repeated unchanged
   - When the given word is a clipping, abbreviation, or colloquial stand-in, give the full term: for "gas", the motor-fuel sense is "gasoline" and the heating/cooking-fuel sense is "natural gas"
-  - When the given word is already the standard term for the sense, repeat it unchanged
+  - Do not just pick a synonym. Replace the given word only when it is rare or obscure for this sense and a simpler, common word has unambiguously the same meaning
+  - A synonym that is more frequent, more formal, or close in meaning but not identical is not a replacement: keep the given word
   - This is not lemmatization, which the separate "lemma" field already covers: give the term that names the sense, not the given word's uninflected form
   - Give nouns bare, with no article, in the singular
   - Provide verbs in the infinitive without "to"
 - When multiple translations are possible, choose the most common or appropriate one
-- Prefer the everyday term a learner would meet over a technical, specialized, or category term for the same thing
+- For the other languages, prefer the everyday term a learner would meet over a technical, specialized, or category term for the same thing
 - For Chinese:
   - Prefer two-character terms for clarity and naturalness
   - Use single-character terms for common basic vocabulary (e.g., 酒 for wine, 牛 for cow, 茶 for tea, 水 for water)

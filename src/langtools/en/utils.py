@@ -12,12 +12,14 @@ _STRESSED_FINAL_SYLLABLE_VERBS: Set[str] = {
     "begin",
     "commit",
     "compel",
+    "concur",
     "control",
     "defer",
     "emit",
     "equip",
     "excel",
     "forget",
+    "incur",
     "infer",
     "occur",
     "omit",
@@ -26,6 +28,7 @@ _STRESSED_FINAL_SYLLABLE_VERBS: Set[str] = {
     "prefer",
     "propel",
     "rebel",
+    "recur",
     "refer",
     "regret",
     "submit",
@@ -223,8 +226,9 @@ def generate_3s_present(verb: str) -> str:
     if verb.endswith("y") and len(verb) > 1 and verb[-2] not in "aeiou":
         return verb[:-1] + "ies"
 
-    # Verbs ending in -o add -es
-    if verb.endswith("o"):
+    # Verbs ending in consonant + o add -es ("go" -> "goes", "veto" ->
+    # "vetoes"); vowel + o takes plain -s ("shampoo" -> "shampoos").
+    if verb.endswith("o") and len(verb) > 1 and verb[-2] not in _VOWELS:
         return verb + "es"
 
     # Regular: add -s
@@ -251,6 +255,11 @@ def generate_past_tense(verb: str) -> str:
     # Ends in consonant + y: change y to -ied
     if verb.endswith("y") and len(verb) > 1 and verb[-2] not in "aeiou":
         return verb[:-1] + "ied"
+
+    # A final "-ic" takes a "k" to keep the /k/ before a front vowel
+    # ("panic" -> "panicked", "traffic" -> "trafficked").
+    if verb.endswith("ic"):
+        return verb + "ked"
 
     # Single consonant after single short vowel in a stressed final syllable:
     # double the consonant
@@ -281,6 +290,10 @@ def generate_present_participle(verb: str) -> str:
     # Ends in -e (not -ee, -ye, -oe): drop the e
     if verb.endswith("e") and len(verb) > 1 and verb[-2] not in "eyo":
         return verb[:-1] + "ing"
+
+    # A final "-ic" takes a "k" ("panic" -> "panicking")
+    if verb.endswith("ic"):
+        return verb + "king"
 
     # Single consonant after single short vowel in a stressed final syllable:
     # double the consonant

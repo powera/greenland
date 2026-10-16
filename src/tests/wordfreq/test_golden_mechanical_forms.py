@@ -155,6 +155,26 @@ class GoldenMechanicalFormsTest(unittest.TestCase):
         self.assertEqual(first["en"]["forms_added"], 2)
         self.assertEqual(second["en"]["forms_added"], 0)
 
+    def test_pos_types_limits_the_pass(self) -> None:
+        """A verb-only pass fills the verb and leaves the noun untouched."""
+        noun = self._noun("pharmacist", "N36_906")
+        verb = Lemma(lemma_text="walk", definition_text="walk", pos_type="verb", guid="V01_900")
+        self.session.add(verb)
+        self.session.commit()
+        for fact_type in ("past", "past_participle"):
+            add_grammar_fact(
+                self.session,
+                lemma_id=verb.id,
+                language_code="en",
+                fact_type=fact_type,
+                fact_value="walked",
+            )
+
+        generate_for_session(self.session, languages=["en"], pos_types=["verb"])
+
+        self.assertEqual(self._en_forms(noun), {})
+        self.assertEqual(self._en_forms(verb)["verb/en_past_participle"], "walked")
+
 
 class GoldenLoaderOrderTest(unittest.TestCase):
     """Where the pass sits in the golden load, and on what kind of session."""
