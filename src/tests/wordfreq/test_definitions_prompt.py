@@ -53,3 +53,29 @@ def test_definitions_prompt_uses_registered_subtypes_and_five_targets(
     sense_properties: Dict[str, Any] = definitions_property.array_items_schema.properties
     assert "spanish_translation" in sense_properties
     assert "spanish_latam_translation" in sense_properties
+
+
+def test_definitions_prompt_without_subtype_lists_none(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    monkeypatch.setattr(
+        "wordfreq.translation.definitions.linguistic_db.log_query",
+        lambda *args, **kwargs: None,
+    )
+    client = _CapturingClient()
+
+    _definitions, success = query_definitions(
+        client, "country", lambda: object(), model="test-model", ask_subtype=False
+    )
+
+    assert success is True
+    assert client.context is not None
+    assert "SUBTYPES" not in client.context
+    assert "electronic_device" not in client.context
+
+    assert client.schema is not None
+    definitions_property = client.schema.properties["definitions"]
+    assert definitions_property.array_items_schema is not None
+    sense_properties: Dict[str, Any] = definitions_property.array_items_schema.properties
+    assert "pos_subtype" not in sense_properties
+    assert "pos" in sense_properties

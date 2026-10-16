@@ -11,7 +11,7 @@ catch-all ``*_other`` subtypes to the pending-import queue.
 
 import json
 from pathlib import Path
-from typing import Any, Dict, Generator, List, Tuple
+from typing import Any, Dict, Generator, List, Optional, Tuple
 
 import pytest
 from sqlalchemy import create_engine
@@ -78,18 +78,42 @@ def config() -> DataSourceConfig:
 
 
 class _FakeClient:
-    """Stand-in for LinguisticClient that returns canned definitions."""
+    """Stand-in for LinguisticClient that returns canned definitions.
+
+    add_word makes two kinds of call: one senses call, which comes back without
+    subtypes, then one subtype call per selected open-class sense. The canned
+    definitions carry their subtype; the senses call strips it and the subtype
+    call answers with it, looked up by definition text.
+    """
 
     def __init__(self, definitions: List[Dict[str, Any]]) -> None:
         self._definitions = definitions
+        self._subtypes = {
+            sense.get("definition"): sense.get("pos_subtype") for sense in definitions
+        }
         self.model = "test-model"
         self.calls = 0
         self.last_kwargs: Dict[str, Any] = {}
+        self.subtype_calls: List[Tuple[str, str]] = []
+        self.fail_subtype_call = False
 
     def query_definitions(self, word: str, **kwargs: Any) -> Tuple[List[Dict[str, Any]], bool]:
         self.calls += 1
         self.last_kwargs = kwargs
-        return self._definitions, bool(self._definitions)
+        senses = [
+            {key: value for key, value in sense.items() if key != "pos_subtype"}
+            for sense in self._definitions
+        ]
+        return senses, bool(senses)
+
+    def query_sense_subtype(
+        self, word: str, definition: str, pos_type: str
+    ) -> Tuple[Optional[str], bool]:
+        self.subtype_calls.append((definition, pos_type))
+        if self.fail_subtype_call:
+            return None, False
+        subtype = self._subtypes.get(definition)
+        return subtype, subtype is not None
 
 
 @pytest.fixture()
@@ -535,6 +559,43 @@ def test_add_word_stamps_explicit_difficulty_level(
     lemmas = session.query(Lemma).filter(Lemma.lemma_text == "bank").all()
     assert len(lemmas) == 2
     assert {lemma.difficulty_level for lemma in lemmas} == {420}
+
+
+def test_add_word_asks_subtype_per_selected_open_class_sense(
+    session: Session, config: DataSourceConfig, patch_client: Any
+) -> None:
+    fake = patch_client(
+        [
+            _def("a domesticated carnivore", pos="noun", pos_subtype="animal"),
+            _def("in the direction of", pos="preposition", pos_subtype="preposition"),
+            _def("an obscure nautical sense", pos="noun", prominence="rare"),
+        ]
+    )
+    _seed_word_token(session, "dog", rank=300)
+
+    result = add_word(session, "dog", config=config)
+
+    assert result.status == "created"
+    assert fake.last_kwargs.get("ask_subtype") is False
+    # The rare sense was not selected and the preposition has no choice to
+    # make, so only the first sense paid for a subtype call.
+    assert fake.subtype_calls == [("a domesticated carnivore", "noun")]
+    subtypes = {lemma.pos_subtype for lemma in session.query(Lemma).all()}
+    assert subtypes == {"animal", "preposition_other"}
+
+
+def test_add_word_subtype_call_failure_writes_nothing(
+    session: Session, config: DataSourceConfig, patch_client: Any
+) -> None:
+    fake = patch_client([_def("a domesticated carnivore", pos="noun", pos_subtype="animal")])
+    fake.fail_subtype_call = True
+    _seed_word_token(session, "dog", rank=300)
+
+    result = add_word(session, "dog", config=config)
+
+    assert result.status == "error"
+    assert "subtype call failed" in (result.error or "")
+    assert session.query(Lemma).count() == 0
 
 
 def test_add_word_creates_lemma(

@@ -16,10 +16,20 @@ from storage.models.schema import (
     SENSE_PROMINENCE_UNCOMMON,
     SENSE_PROMINENCE_VERY_COMMON,
 )
+from storage.models.guid_prefixes import render_subtype_list
 from storage.utils.enums import get_subtype_values_for_pos
-from wordfreq.translation.constants import VALID_POS_TYPES
+from wordfreq.translation.constants import MAJOR_POS_TYPES, VALID_POS_TYPES
 
 logger = logging.getLogger(__name__)
+
+# Parts of speech with a real choice of subtype, which build_subtype_prompt's
+# call makes.  numeral has no catch-all, only cardinal and ordinal; every other
+# closed class has "<pos>_other" as its only subtype and needs no call.
+SUBTYPED_POS_TYPES = frozenset({*MAJOR_POS_TYPES, "numeral"})
+
+# The open-class catch-all as the subtype enums and lists spell it; add_word's
+# _normalize_subtype turns it into "<pos>_other".
+_CATCH_ALL_SUBTYPE = "other"
 
 # Language codes whose "<language>_translation" fields the definitions schema
 # below requests. Callers that pick a translation field by language code should
@@ -104,6 +114,7 @@ def query_definitions(
     model: Optional[str] = None,
     example_sentence: Optional[str] = None,
     pos_type: Optional[str] = None,
+    ask_subtype: bool = True,
 ) -> Tuple[List[Dict[str, Any]], bool]:
     """
     Query LLM for definitions, POS, and lemma information.
@@ -116,6 +127,11 @@ def query_definitions(
         pos_type: Ask only for the senses of this part of speech ("verb" for
             "place", whose noun is already stored). A request, not a filter:
             callers that need one POS must still drop what else comes back.
+        ask_subtype: Also ask for each sense's ``pos_subtype``. This call can
+            only list every part of speech's subtypes as bare names, and from
+            the names alone the model often picks the wrong one or the
+            catch-all. With False the senses come back without a subtype, and
+            the caller asks for it per sense with :func:`query_sense_subtype`.
 
     Returns:
         Tuple of (list of definition data, success flag)
@@ -143,10 +159,19 @@ def query_definitions(
                             "The part of speech for this definition (noun, verb, etc.)",
                             enum=list(VALID_POS_TYPES),
                         ),
-                        "pos_subtype": SchemaProperty(
-                            "string",
-                            "A subtype for the part of speech",
-                            enum=linguistic_db.get_all_pos_subtypes(),
+                        # Without ask_subtype the caller asks per sense
+                        # afterwards (query_sense_subtype), where one POS's
+                        # subtypes can be shown with their descriptions.
+                        **(
+                            {
+                                "pos_subtype": SchemaProperty(
+                                    "string",
+                                    "A subtype for the part of speech",
+                                    enum=linguistic_db.get_all_pos_subtypes(),
+                                )
+                            }
+                            if ask_subtype
+                            else {}
                         ),
                         "lemma": SchemaProperty(
                             "string", "The base form (lemma) for this definition"
@@ -236,14 +261,18 @@ def query_definitions(
         },
     )
 
-    context_template = util.prompt_loader.get_context("translation", "definitions")
-    context = context_template.format(
-        noun_subtypes=", ".join(get_subtype_values_for_pos("noun")),
-        verb_subtypes=", ".join(get_subtype_values_for_pos("verb")),
-        adjective_subtypes=", ".join(get_subtype_values_for_pos("adjective")),
-        adverb_subtypes=", ".join(get_subtype_values_for_pos("adverb")),
-    )
-    prompt_template = util.prompt_loader.get_prompt("translation", "definitions")
+    if ask_subtype:
+        context = util.prompt_loader.get_context("translation", "definitions").format(
+            noun_subtypes=", ".join(get_subtype_values_for_pos("noun")),
+            verb_subtypes=", ".join(get_subtype_values_for_pos("verb")),
+            adjective_subtypes=", ".join(get_subtype_values_for_pos("adjective")),
+            adverb_subtypes=", ".join(get_subtype_values_for_pos("adverb")),
+        )
+        prompt_template = util.prompt_loader.get_prompt("translation", "definitions")
+    else:
+        # The same prompt with the subtype lists left out.
+        context = util.prompt_loader.get_context("translation", "definitions_senses")
+        prompt_template = util.prompt_loader.get_prompt("translation", "definitions_senses")
     prompt = prompt_template.format(word=word)
     if pos_type:
         prompt += f"\n\nList only the senses in which '{word}' is used as a {pos_type}."
@@ -289,3 +318,104 @@ def query_definitions(
         # More specific error logging
         logger.error(f"Error querying definitions for '{word}': {type(e).__name__}: {e}")
         return [], False
+
+
+def build_subtype_prompt(
+    word: str,
+    definition: str,
+    pos_type: str,
+    *,
+    domain: Optional[str] = None,
+    include_catch_all: bool = True,
+) -> Tuple[str, str, Schema]:
+    """Build the context, prompt and schema for one sense's subtype-only call.
+
+    It shows only ``pos_type``'s subtypes, each with its description and
+    examples.  Asked in the senses call, every part of speech's subtypes had
+    to be listed, and as bare names: well over a hundred glosses would be too
+    much for one call, and from the names alone the model filed referee as a
+    participant_role and gave volley the catch-all.
+
+    Args:
+        word: The English word or term.
+        definition: The definition of the sense being classified.
+        pos_type: Its part of speech; one of :data:`SUBTYPED_POS_TYPES`.
+        domain: The field a specialized term belongs to ("chess"), for
+            add_sense.  Without it the prompt is for general vocabulary.
+        include_catch_all: Offer the ``other`` catch-all.  add_word offers it
+            and queues a sense that takes it for review; add_sense withholds
+            it, since a domain term always has a real subtype.
+    """
+    prompt_type = "sense_subtype" if domain is not None else "definitions_subtype"
+    context = util.prompt_loader.get_context("translation", prompt_type).format(
+        pos_type=pos_type,
+        pos_type_upper=pos_type.upper(),
+        subtype_list=render_subtype_list(pos_type, include_catch_all=include_catch_all),
+    )
+    prompt = util.prompt_loader.get_prompt("translation", prompt_type).format(
+        word=word, domain=domain, pos_type=pos_type, definition=definition
+    )
+    offered = [
+        value
+        for value in get_subtype_values_for_pos(pos_type)
+        if include_catch_all or value != _CATCH_ALL_SUBTYPE
+    ]
+    schema = Schema(
+        name="SenseSubtype",
+        description="The subtype of one sense's part of speech",
+        properties={
+            "pos_subtype": SchemaProperty(
+                "string", f"The {pos_type} subtype of this sense", enum=offered
+            )
+        },
+    )
+    return context, prompt, schema
+
+
+def query_sense_subtype(
+    client: Any,
+    word: str,
+    definition: str,
+    pos_type: str,
+    get_session_func: Callable,
+    model: Optional[str] = None,
+) -> Tuple[Optional[str], bool]:
+    """Ask for the subtype of one general-vocabulary sense, catch-all included.
+
+    The second step after ``query_definitions(..., ask_subtype=False)``: one
+    call per sense, for a part of speech in :data:`SUBTYPED_POS_TYPES`.
+
+    Returns:
+        (the subtype as the enum spells it -- ``other`` for the catch-all --
+        or None, success flag)
+    """
+    context, prompt, schema = build_subtype_prompt(word, definition, pos_type)
+    model_name: str = cast(str, model or getattr(client, "model", constants.DEFAULT_MODEL))
+
+    try:
+        response = client.generate_chat(
+            prompt=prompt, model=model_name, json_schema=schema, context=context
+        )
+    except Exception as e:
+        logger.error(f"Error querying the subtype of '{word}': {type(e).__name__}: {e}")
+        return None, False
+
+    session = get_session_func()
+    try:
+        linguistic_db.log_query(
+            session,
+            word=word,
+            query_type="definitions_subtype",
+            prompt=prompt,
+            response=json.dumps(response.structured_data),
+            model=model_name,
+        )
+    except Exception as log_err:
+        logger.error(f"Failed to log successful query: {log_err}")
+
+    data = response.structured_data
+    subtype = data.get("pos_subtype") if isinstance(data, dict) else None
+    if not isinstance(subtype, str) or not subtype:
+        logger.warning(f"Invalid subtype response for '{word}'")
+        return None, False
+    return subtype, True

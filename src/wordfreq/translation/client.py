@@ -134,6 +134,7 @@ class LinguisticClient:
         word: str,
         example_sentence: Optional[str] = None,
         pos_type: Optional[str] = None,
+        ask_subtype: bool = True,
     ) -> Tuple[List[Dict[str, Any]], bool]:
         """Query LLM for definitions, POS, and lemma information."""
         return definitions.query_definitions(
@@ -143,6 +144,15 @@ class LinguisticClient:
             self.model,
             example_sentence=example_sentence,
             pos_type=pos_type,
+            ask_subtype=ask_subtype,
+        )
+
+    def query_sense_subtype(
+        self, word: str, definition: str, pos_type: str
+    ) -> Tuple[Optional[str], bool]:
+        """Query LLM for the subtype of one sense, after an ask_subtype=False call."""
+        return definitions.query_sense_subtype(
+            self.client, word, definition, pos_type, self.get_session, self.model
         )
 
     # Translation queries
