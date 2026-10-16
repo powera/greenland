@@ -3,9 +3,9 @@
 This is the intelligent word-addition pipeline: given a bare English word, it
 queries the LLM for the word's senses, decides which senses are worth adding
 (sized by the word's corpus frequency and capped for closed-class parts of
-speech), collapses senses the LLM over-split, and writes one lemma per surviving
-sense with a freshly minted GUID and the translations the definitions call
-already returned.
+speech), collapses senses the LLM over-split, asks for each surviving sense's
+subtype in a call of its own, and writes one lemma per surviving sense with a
+freshly minted GUID and the translations the definitions call already returned.
 
 It is the single implementation of that pipeline. The HTTP endpoint
 ``POST /api/v1/words/add`` calls :func:`add_word`; batch scripts should too,
@@ -66,6 +66,7 @@ from wordfreq.translation.client import LinguisticClient
 from wordfreq.translation.constants import MAJOR_POS_TYPES
 from wordfreq.translation.definitions import (
     SENSE_PROMINENCE_ORDER,
+    SUBTYPED_POS_TYPES,
     select_senses_to_add,
 )
 from words.lemma_creation import (
@@ -440,7 +441,8 @@ def _normalize_subtype(pos_type: str, pos_subtype: Optional[str]) -> Optional[st
     interjection; the same mismatch exists for preposition, conjunction,
     pronoun, article and determiner, so normalize them all here.
 
-    The definitions schema constrains ``pos`` and ``pos_subtype`` independently:
+    The single-call definitions schema (``ask_subtype=True``, which add_word no
+    longer uses) constrains ``pos`` and ``pos_subtype`` independently:
     its subtype enum is the union of every POS's values. A small model can
     therefore return a schema-valid but incompatible pair, such as adjective +
     ``completeness`` (an adverb subtype). Fall back to the selected POS's
@@ -734,13 +736,48 @@ def _query_senses(
     sense of another part of speech that comes back anyway is dropped: the
     model treats the request as a preference, and a stray noun sense of "place"
     would otherwise be written beside the noun already stored.
+
+    The senses come back without a subtype; :func:`_query_subtypes` asks for
+    it once selection has settled which senses survive.
     """
-    definitions_list, success = client.query_definitions(word, pos_type=pos_type)
+    definitions_list, success = client.query_definitions(word, pos_type=pos_type, ask_subtype=False)
     if not success or not definitions_list:
         return []
     if pos_type is None:
         return list(definitions_list)
     return [sense for sense in definitions_list if (sense.get("pos") or "").lower() == pos_type]
+
+
+def _query_subtypes(
+    client: LinguisticClient, word: str, senses: List[Dict[str, Any]]
+) -> Optional[str]:
+    """Fill in each selected sense's ``pos_subtype``, one LLM call per sense.
+
+    The senses call can only list every part of speech's subtypes as bare
+    names, and from the names alone the model often filed a sense under the
+    wrong subtype or the catch-all. This call shows the one part of speech's
+    subtypes with their descriptions and examples. The catch-all stays on
+    offer: a sense that takes it goes to the pending queue as before.
+
+    Only selected senses pay for it, and only those with a real choice
+    (:data:`SUBTYPED_POS_TYPES`). A closed class gets its part of speech, which
+    :func:`_normalize_subtype` turns into its only subtype, ``<pos>_other``.
+
+    Returns:
+        An error message if a call failed, else None. Every call is made before
+        anything is written, so a failure leaves nothing half-added.
+    """
+    for sense in senses:
+        pos_type = (sense.get("pos") or "").lower()
+        definition_text = str(sense.get("definition") or "").strip()
+        if pos_type not in SUBTYPED_POS_TYPES or not definition_text:
+            sense["pos_subtype"] = pos_type
+            continue
+        subtype, success = client.query_sense_subtype(word, definition_text, pos_type)
+        if not success:
+            return f"subtype call failed for sense {definition_text[:60]!r}"
+        sense["pos_subtype"] = subtype
+    return None
 
 
 def _pos_already_present(session: Session, word: str, pos_type: str) -> bool:
@@ -833,9 +870,9 @@ def add_word(
 
     Runs the full pipeline: existence guard, one LLM call for the word's senses,
     a POS-directed frequency lookup, frequency-sized and closed-class-capped
-    sense selection, translation-duplicate collapse, then one lemma per
-    surviving sense with a minted GUID and the translations the definitions call
-    returned.
+    sense selection, translation-duplicate collapse, one subtype call per
+    surviving open-class sense, then one lemma per surviving sense with a
+    minted GUID and the translations the definitions call returned.
 
     Note the order: the frequency lookup follows the LLM call rather than
     preceding it, because knowing which inflections to search the corpora for
@@ -917,6 +954,18 @@ def add_word(
             frequency_rank=frequency_rank,
             frequency_rank_source=rank_source,
             dropped_senses=dropped,
+        )
+
+    # Before validation, which routes catch-all senses to review by subtype.
+    subtype_error = _query_subtypes(client, normalized, senses)
+    if subtype_error is not None:
+        return AddWordResult(
+            word=normalized,
+            status="error",
+            frequency_rank=frequency_rank,
+            frequency_rank_source=rank_source,
+            dropped_senses=dropped,
+            error=subtype_error,
         )
 
     # Validate the whole selected batch before committing its first sense. The

@@ -1,0 +1,10 @@
+You are a linguistic taxonomy expert classifying one sense of an English word for a vocabulary database.
+
+You are given the word, its part of speech and the definition of one of its senses. Choose the {pos_type} subtype that describes what this sense names - a person, an object, a place, an action, a state, a quality - judging from the definition, not from the word's other meanings. The same spelling can belong to different subtypes in different senses.
+
+Choose "other" only when none of the listed subtypes fits this sense.
+
+{pos_type_upper} SUBTYPES:
+{subtype_list}
+
+Respond only with a structured JSON object following the schema provided.

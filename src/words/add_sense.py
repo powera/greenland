@@ -47,7 +47,7 @@ from storage.backend.config import DataSourceConfig
 from storage.crud.lemma_tags import add_tags, normalize_tags, read_tags
 from storage.crud.operation_log import FieldChange, log_field_changes, log_translation_change
 from storage.crud.variant_form import add_variant_form
-from storage.models.guid_prefixes import SUBTYPE_GUID_PREFIXES, render_subtype_list
+from storage.models.guid_prefixes import SUBTYPE_GUID_PREFIXES
 from storage.models.schema import SENSE_PROMINENCE_RARE, Lemma
 from storage.models.variant_form import VARIANT_KIND_ABBREVIATION
 from storage.queries.lemma import get_english_senses
@@ -56,9 +56,9 @@ from storage.translation_helpers import (
     convert_llm_response_to_lang_codes,
     ensure_english_translation,
 )
-from storage.utils.enums import get_subtype_values_for_pos
 from storage.utils.guid import generate_guid, run_lemma_write
-from wordfreq.translation.constants import MAJOR_POS_TYPES, VALID_POS_TYPES
+from wordfreq.translation.constants import VALID_POS_TYPES
+from wordfreq.translation.definitions import SUBTYPED_POS_TYPES, build_subtype_prompt
 from wordfreq.translation.word_processing import determine_default_grammatical_form
 from words.add_word import (
     _needs_subtype_review,
@@ -82,21 +82,6 @@ DIFFICULTY_LEVEL = -1
 # numbered from 1 in the prompt so that 0 can mean "none" without a nullable.
 NOT_COVERED = 0
 
-# The open-class catch-all as the subtype lists spell it; _normalize_subtype
-# turns it into "<pos>_other".  Withheld from this prompt entirely.  add_word
-# queues a catch-all sense for review, but a domain term always has a real
-# subtype -- the sports import filed layups and bicycle kicks as noun_other
-# when nothing better was on offer -- so here it is not offered at all, and a
-# sense that comes back with one anyway is refused rather than written.  The
-# closed classes are unaffected: they answer with the bare POS name.
-_CATCH_ALL_SUBTYPE = "other"
-
-# Parts of speech with a real choice of subtype, which the second call makes.
-# numeral has no catch-all, only cardinal and ordinal; every other closed class
-# has "<pos>_other" as its only subtype and needs no call.
-_SUBTYPED_POS_TYPES = frozenset({*MAJOR_POS_TYPES, "numeral"})
-
-
 # A translation the model rates below this is not stored but recorded in
 # uncertain_llm_results, which the translation coverage pass (voras --populate)
 # skips unless --retry-uncertain. The model is asked for a confidence per language
@@ -110,11 +95,6 @@ _SUBTYPED_POS_TYPES = frozenset({*MAJOR_POS_TYPES, "numeral"})
 # descriptions passed off as terms (lt "atšokusio kamuolio atkovojimas" for a
 # rebound) were rated 0.82 and below.
 TRANSLATION_CONFIDENCE_FLOOR = 0.85
-
-
-def _offered_subtypes(values: Sequence[str]) -> List[str]:
-    """``values`` without the open-class catch-all."""
-    return [value for value in values if value != _CATCH_ALL_SUBTYPE]
 
 
 @dataclass
@@ -260,40 +240,6 @@ def build_sense_prompt(
         existing_senses=_describe_existing(existing),
     )
     return context, prompt, _sense_schema()
-
-
-def build_subtype_prompt(
-    word: str, domain: str, definition: str, pos_type: str
-) -> tuple[str, str, Schema]:
-    """Build the context, prompt and schema for the second, subtype-only call.
-
-    It shows only ``pos_type``'s subtypes, each with its description and
-    examples.  Put in the first call, every part of speech's subtypes had to
-    be listed, and as bare names: well over a hundred glosses would be too
-    much for every call, and from the names alone the model filed referee as a
-    participant_role and gave volley the catch-all.  The catch-all is withheld,
-    as add_sense refuses it for an open-class word anyway.
-    """
-    context = util.prompt_loader.get_context("translation", "sense_subtype").format(
-        pos_type=pos_type,
-        pos_type_upper=pos_type.upper(),
-        subtype_list=render_subtype_list(pos_type, include_catch_all=False),
-    )
-    prompt = util.prompt_loader.get_prompt("translation", "sense_subtype").format(
-        word=word, domain=domain, pos_type=pos_type, definition=definition
-    )
-    schema = Schema(
-        name="SenseSubtype",
-        description="The subtype of one sense's part of speech",
-        properties={
-            "pos_subtype": SchemaProperty(
-                "string",
-                f"The {pos_type} subtype of this sense",
-                enum=_offered_subtypes(get_subtype_values_for_pos(pos_type)),
-            )
-        },
-    )
-    return context, prompt, schema
 
 
 def _already_present(
@@ -539,10 +485,19 @@ def add_sense(
         new_subtype: Optional[str] = pos_subtype
     else:
         raw_subtype: Optional[str] = new_pos_type
-        if new_pos_type in _SUBTYPED_POS_TYPES:
+        if new_pos_type in SUBTYPED_POS_TYPES:
             # The second call: only a new sense pays for it, not a covered one.
+            # The catch-all is withheld: add_word queues a catch-all sense for
+            # review, but a domain term always has a real subtype -- the
+            # sports import filed layups and bicycle kicks as noun_other when
+            # nothing better was on offer -- and one that comes back with it
+            # anyway is refused below rather than written.
             subtype_context, subtype_prompt, subtype_schema = build_subtype_prompt(
-                normalized, domain.strip(), definition_text, new_pos_type
+                normalized,
+                definition_text,
+                new_pos_type,
+                domain=domain.strip(),
+                include_catch_all=False,
             )
             try:
                 subtype_response = llm_client.generate_chat(

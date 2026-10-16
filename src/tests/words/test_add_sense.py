@@ -27,7 +27,8 @@ from storage.models.schema import SENSE_PROMINENCE_RARE
 from storage.models.uncertain_llm_result import TOPIC_TRANSLATION
 from storage.models.variant_form import VARIANT_KIND_ABBREVIATION, VariantForm
 from storage.translation_helpers import get_translation
-from words.add_sense import add_sense, build_sense_prompt, build_subtype_prompt
+from wordfreq.translation.definitions import build_subtype_prompt
+from words.add_sense import add_sense, build_sense_prompt
 from words.translation_populate import missing_translation_languages
 
 pytestmark = pytest.mark.usefixtures("require_lemma_write_scope")
@@ -576,7 +577,11 @@ class TestSubtypeGuidance:
 
     def test_subtype_call_describes_only_its_part_of_speech(self) -> None:
         context, prompt, schema = build_subtype_prompt(
-            "volley", "tennis", "In tennis, a shot hit before the ball bounces.", "noun"
+            "volley",
+            "In tennis, a shot hit before the ball bounces.",
+            "noun",
+            domain="tennis",
+            include_catch_all=False,
         )
 
         assert "- participant_role: A slot a person fills" in context
@@ -585,3 +590,13 @@ class TestSubtypeGuidance:
         assert "- physical_action:" not in context  # a verb subtype
         assert "'volley' as a term of tennis" in prompt
         assert "other" not in (schema.properties["pos_subtype"].enum or [])
+
+    def test_general_subtype_call_offers_the_catch_all(self) -> None:
+        context, prompt, schema = build_subtype_prompt(
+            "find", "To consider or judge something to be so.", "verb"
+        )
+
+        assert "- other:" in context
+        assert "- animal:" not in context  # a noun subtype
+        assert "term of" not in prompt
+        assert "other" in (schema.properties["pos_subtype"].enum or [])
