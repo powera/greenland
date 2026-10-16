@@ -3,8 +3,8 @@
 {"guid": "N40_003", "forms": [{"grammatical_form": "noun/en_singular", "text": "train", "is_base_form": true, "ipa": "/treɪn/", "phonetic": "TRAY-n"}]}
 {"guid": "N40_006", "forms": [{"grammatical_form": "noun/en_singular", "text": "airplane", "is_base_form": true, "ipa": "/ˈeɪrpleɪn/", "phonetic": "AIR-playn"}]}
 {"guid": "N40_007", "forms": [{"grammatical_form": "noun/en_singular", "text": "bicycle", "is_base_form": true, "ipa": "/ˈbaɪsɪkəl/", "phonetic": "BY-suh-kuhl"}]}
-{"guid": "N40_008", "forms": [{"grammatical_form": "noun/en_singular", "text": "boat", "is_base_form": true, "ipa": "/boʊt/", "phonetic": "BOW-t"}]}
-{"guid": "N40_009", "forms": [{"grammatical_form": "noun/en_singular", "text": "ship", "is_base_form": true, "ipa": "/ʃɪp/", "phonetic": "SHIP"}]}
+{"guid": "N40_008", "forms": [{"grammatical_form": "noun/en_singular", "text": "boat", "is_base_form": true, "ipa": "/boʊt/", "phonetic": "BOW-t"}, {"grammatical_form": "noun/en_possessive_singular", "text": "boat's", "is_base_form": false}]}
+{"guid": "N40_009", "forms": [{"grammatical_form": "noun/en_singular", "text": "ship", "is_base_form": true, "ipa": "/ʃɪp/", "phonetic": "SHIP"}, {"grammatical_form": "noun/en_possessive_singular", "text": "ship's", "is_base_form": false}]}
 {"guid": "N40_010", "forms": [{"grammatical_form": "noun/en_singular", "text": "taxi", "is_base_form": true, "ipa": "/ˈtæksi/", "phonetic": "TAX-ee"}]}
 {"guid": "N40_011", "forms": [{"grammatical_form": "noun/en_singular", "text": "truck", "is_base_form": true, "ipa": "/trʌk/", "phonetic": "TRUK"}]}
 {"guid": "N40_012", "forms": [{"grammatical_form": "noun/en_singular", "text": "motorcycle", "is_base_form": true, "ipa": "/ˈmoʊ.t̬ɚ.saɪ.kl/", "phonetic": "MOH-tur-sigh-kl"}]}
@@ -38,3 +38,6 @@
 {"guid": "N40_053", "forms": [{"grammatical_form": "noun/en_singular", "text": "broom wagon", "is_base_form": true, "ipa": "/ˈbruːm ˌwæɡən/", "phonetic": "BROOM WAG-uhn"}]}
 {"guid": "N40_054", "forms": [{"grammatical_form": "noun/en_singular", "text": "chairlift", "is_base_form": true, "ipa": "/ˈtʃɛrˌlɪft/", "phonetic": "CHAIR-lift"}]}
 {"guid": "N40_055", "forms": [{"grammatical_form": "noun/en_singular", "text": "gondola", "is_base_form": true, "ipa": "/ˈɡɑːn.də.lə/", "phonetic": "gon-DOH-luh"}]}
+{"guid": "N40_056", "forms": [{"grammatical_form": "noun/en_singular", "text": "road roller", "is_base_form": true}], "variants": [{"kind": "equivalent", "key": "roller", "forms": [{"grammatical_form": "noun/en_singular", "text": "roller", "is_base_form": true}]}]}
+{"guid": "N40_057", "forms": [{"grammatical_form": "noun/en_singular", "text": "express train", "is_base_form": true}], "variants": [{"kind": "equivalent", "key": "express", "forms": [{"grammatical_form": "noun/en_singular", "text": "express", "is_base_form": true}]}]}
+{"guid": "N40_059", "forms": [{"grammatical_form": "noun/en_singular", "text": "local train", "is_base_form": true}], "variants": [{"kind": "equivalent", "key": "local", "forms": [{"grammatical_form": "noun/en_singular", "text": "local", "is_base_form": true}]}]}

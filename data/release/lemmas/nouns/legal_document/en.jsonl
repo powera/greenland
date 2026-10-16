@@ -4,3 +4,9 @@
 {"guid": "N58_004", "forms": [{"grammatical_form": "noun/en_singular", "text": "mandamus", "is_base_form": true}]}
 {"guid": "N58_005", "forms": [{"grammatical_form": "noun/en_singular", "text": "quo warranto", "is_base_form": true}]}
 {"guid": "N58_007", "forms": [{"grammatical_form": "noun/en_singular", "text": "permit", "is_base_form": true, "ipa": "/ˈpɝːmɪt/", "phonetic": "PER-mit"}]}
+{"guid": "N58_008", "forms": [{"grammatical_form": "noun/en_singular", "text": "insurance policy", "is_base_form": true}], "variants": [{"kind": "equivalent", "key": "policy", "forms": [{"grammatical_form": "noun/en_singular", "text": "policy", "is_base_form": true}]}]}
+{"guid": "N58_012", "forms": [{"grammatical_form": "noun/en_singular", "text": "employment agreement", "is_base_form": true}], "variants": [{"kind": "equivalent", "key": "contract", "forms": [{"grammatical_form": "noun/en_singular", "text": "contract", "is_base_form": true}]}]}
+{"guid": "N58_016", "forms": [{"grammatical_form": "noun/en_singular", "text": "registration certificate", "is_base_form": true}]}
+{"guid": "N58_017", "forms": [{"grammatical_form": "noun/en_singular", "text": "summons", "is_base_form": true}], "variants": [{"kind": "equivalent", "key": "citation", "forms": [{"grammatical_form": "noun/en_singular", "text": "citation", "is_base_form": true}]}]}
+{"guid": "N58_020", "forms": [{"grammatical_form": "noun/en_singular", "text": "habeas corpus", "is_base_form": true}]}
+{"guid": "N58_021", "forms": [{"grammatical_form": "noun/en_singular", "text": "release form", "is_base_form": true}]}

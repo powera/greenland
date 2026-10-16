@@ -103,3 +103,4 @@
 {"guid": "N61_104", "forms": [{"grammatical_form": "noun/en_singular", "text": "bicycle kick", "is_base_form": true, "ipa": "/ˈbaɪsɪkəl kɪk/", "phonetic": "BYE-sih-kuhl KIK"}]}
 {"guid": "N61_105", "forms": [{"grammatical_form": "noun/en_singular", "text": "slide tackle", "is_base_form": true, "ipa": "/ˈslaɪd ˌtækəl/", "phonetic": "SLIDE TAK-uhl"}]}
 {"guid": "N61_106", "forms": [{"grammatical_form": "noun/en_singular", "text": "clearance", "is_base_form": true, "ipa": "/ˈklɪrəns/", "phonetic": "KLEER-uhns"}]}
+{"guid": "N61_107", "forms": [{"grammatical_form": "noun/en_singular", "text": "ball rotation", "is_base_form": true}]}

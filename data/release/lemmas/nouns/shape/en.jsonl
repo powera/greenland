@@ -1,6 +1,6 @@
-{"guid": "N37_001", "forms": [{"grammatical_form": "noun/en_singular", "text": "circle", "is_base_form": true, "ipa": "/ˈsɜːrkəl/", "phonetic": "SER-kuhl"}]}
+{"guid": "N37_001", "forms": [{"grammatical_form": "noun/en_singular", "text": "circle", "is_base_form": true, "ipa": "/ˈsɜːrkəl/", "phonetic": "SER-kuhl"}, {"grammatical_form": "noun/en_possessive_singular", "text": "circle's", "is_base_form": false}]}
 {"guid": "N37_002", "forms": [{"grammatical_form": "noun/en_singular", "text": "square", "is_base_form": true, "ipa": "skwɛər", "phonetic": "SKWEE-ər"}]}
-{"guid": "N37_003", "forms": [{"grammatical_form": "noun/en_singular", "text": "triangle", "is_base_form": true, "ipa": "/ˈtrɪ.æŋ.ɡəl/", "phonetic": "TRIH-angel"}]}
+{"guid": "N37_003", "forms": [{"grammatical_form": "noun/en_singular", "text": "triangle", "is_base_form": true, "ipa": "/ˈtrɪ.æŋ.ɡəl/", "phonetic": "TRIH-angel"}, {"grammatical_form": "noun/en_possessive_singular", "text": "triangle's", "is_base_form": false}]}
 {"guid": "N37_004", "forms": [{"grammatical_form": "noun/en_singular", "text": "rectangle", "is_base_form": true, "ipa": "/ɹˈɛk.t̬əŋ.kəl/", "phonetic": "REK-tuh-nguhl"}]}
 {"guid": "N37_005", "forms": [{"grammatical_form": "noun/en_singular", "text": "oval", "is_base_form": true, "ipa": "/ˈoʊvəl/", "phonetic": "OH-vuh"}]}
 {"guid": "N37_006", "forms": [{"grammatical_form": "noun/en_singular", "text": "cube", "is_base_form": true, "ipa": "kjuːb", "phonetic": "KOO-b"}]}
@@ -11,6 +11,7 @@
 {"guid": "N37_011", "forms": [{"grammatical_form": "noun/en_singular", "text": "hexagon", "is_base_form": true, "ipa": "/ˈhɛks.əɡən/", "phonetic": "HEX-suh-guh-n"}]}
 {"guid": "N37_012", "forms": [{"grammatical_form": "noun/en_singular", "text": "pentagon", "is_base_form": true, "ipa": "ˌpɛnˈtɒɡɒn", "phonetic": "PENT-uh-gone"}]}
 {"guid": "N37_013", "forms": [{"grammatical_form": "noun/en_singular", "text": "octagon", "is_base_form": true, "ipa": "/ˈɑːktəɡɒn/", "phonetic": "AHK-tuh-ghahn"}]}
+{"guid": "N37_018", "forms": [{"grammatical_form": "noun/en_possessive_singular", "text": "star's", "is_base_form": false}]}
 {"guid": "N37_019", "forms": [{"grammatical_form": "noun/en_singular", "text": "tangent", "is_base_form": true, "ipa": "/ˈtændʒənt/", "phonetic": "TAN-jent"}]}
 {"guid": "N37_020", "forms": [{"grammatical_form": "noun/en_singular", "text": "quadrilateral", "is_base_form": true, "ipa": "/ˌkwɑdrəˈlætərəl/", "phonetic": "kwah-druh-LAT-er-uhl"}]}
 {"guid": "N37_021", "forms": [{"grammatical_form": "noun/en_singular", "text": "polygon", "is_base_form": true, "ipa": "/ˈpɑːlɪɡɑːn/", "phonetic": "POL-ih-gahn"}]}

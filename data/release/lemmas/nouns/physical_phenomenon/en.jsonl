@@ -19,3 +19,7 @@
 {"guid": "N80_023", "forms": [{"grammatical_form": "noun/en_singular", "text": "heat", "is_base_form": true, "ipa": "/hiːt/", "phonetic": "HEET"}]}
 {"guid": "N80_024", "forms": [{"grammatical_form": "noun/en_singular", "text": "power", "is_base_form": true, "ipa": "/ˈpaʊ.ɚ/", "phonetic": "POW-uh"}]}
 {"guid": "N80_025", "forms": [{"grammatical_form": "noun/en_singular", "text": "pressure", "is_base_form": true, "ipa": "/ˈprɛʃ.ər/", "phonetic": "PRESH-uh"}]}
+{"guid": "N80_027", "forms": [{"grammatical_form": "noun/en_singular", "text": "vacuum", "is_base_form": true}]}
+{"guid": "N80_028", "forms": [{"grammatical_form": "noun/en_singular", "text": "electromagnetic spectrum", "is_base_form": true}], "variants": [{"kind": "equivalent", "key": "spectrum", "forms": [{"grammatical_form": "noun/en_singular", "text": "spectrum", "is_base_form": true}]}]}
+{"guid": "N80_034", "forms": [{"grammatical_form": "noun/en_singular", "text": "electromagnetic interaction", "is_base_form": true}], "variants": [{"kind": "equivalent", "key": "electromagnetism", "forms": [{"grammatical_form": "noun/en_singular", "text": "electromagnetism", "is_base_form": true}]}]}
+{"guid": "N80_036", "forms": [{"grammatical_form": "noun/en_singular", "text": "electric dipole", "is_base_form": true}], "variants": [{"kind": "equivalent", "key": "dipole", "forms": [{"grammatical_form": "noun/en_singular", "text": "dipole", "is_base_form": true}]}]}

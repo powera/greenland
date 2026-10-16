@@ -51,3 +51,6 @@
 {"guid": "N09_058", "forms": [{"grammatical_form": "noun/en_singular", "text": "gi", "is_base_form": true, "ipa": "/ɡiː/", "phonetic": "GHEE"}]}
 {"guid": "N09_059", "forms": [{"grammatical_form": "noun/en_singular", "text": "belt", "is_base_form": true, "ipa": "/bɛlt/", "phonetic": "BELT"}]}
 {"guid": "N09_060", "forms": [{"grammatical_form": "noun/en_singular", "text": "black belt", "is_base_form": true, "ipa": "/ˌblæk ˈbɛlt/", "phonetic": "BLAK-BELT"}]}
+{"guid": "N09_061", "forms": [{"grammatical_form": "noun/en_singular", "text": "swim fin", "is_base_form": true}], "variants": [{"kind": "equivalent", "key": "fin", "forms": [{"grammatical_form": "noun/en_singular", "text": "fin", "is_base_form": true}]}]}
+{"guid": "N09_062", "forms": [{"grammatical_form": "noun/en_singular", "text": "polo shirt", "is_base_form": true}]}
+{"guid": "N09_064", "forms": [{"grammatical_form": "noun/en_singular", "text": "ice skate", "is_base_form": true}], "variants": [{"kind": "equivalent", "key": "ice skates", "forms": [{"grammatical_form": "noun/en_singular", "text": "ice skates", "is_base_form": true}]}]}

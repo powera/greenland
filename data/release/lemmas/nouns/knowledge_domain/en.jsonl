@@ -93,3 +93,10 @@
 {"guid": "N21_124", "forms": [{"grammatical_form": "noun/en_singular", "text": "orthography", "is_base_form": true, "ipa": "/ɔrˈθɑɡrəfi/", "phonetic": "or-THOG-ruh-fee"}]}
 {"guid": "N21_125", "forms": [{"grammatical_form": "noun/en_singular", "text": "rock music", "is_base_form": true, "ipa": "/ˈrɑk ˌmjuzɪk/", "phonetic": "ROK MYOO-zik"}]}
 {"guid": "N21_126", "forms": [{"grammatical_form": "noun/en_singular", "text": "regression analysis", "is_base_form": true}]}
+{"guid": "N21_130", "forms": [{"grammatical_form": "noun/en_singular", "text": "religious studies", "is_base_form": true}]}
+{"guid": "N21_133", "forms": [{"grammatical_form": "noun/en_singular", "text": "the arts", "is_base_form": true}], "variants": [{"kind": "equivalent", "key": "culture", "forms": [{"grammatical_form": "noun/en_singular", "text": "culture", "is_base_form": true}]}]}
+{"guid": "N21_134", "forms": [{"grammatical_form": "noun/en_singular", "text": "state of the art", "is_base_form": true}]}
+{"guid": "N21_136", "forms": [{"grammatical_form": "noun/en_singular", "text": "physical anthropology", "is_base_form": true}]}
+{"guid": "N21_137", "forms": [{"grammatical_form": "noun/en_singular", "text": "cultural anthropology", "is_base_form": true}]}
+{"guid": "N21_142", "forms": [{"grammatical_form": "noun/en_singular", "text": "domain ontology", "is_base_form": true}], "variants": [{"kind": "equivalent", "key": "ontology", "forms": [{"grammatical_form": "noun/en_singular", "text": "ontology", "is_base_form": true}]}]}
+{"guid": "N21_147", "forms": [{"grammatical_form": "noun/en_singular", "text": "philosophical skepticism", "is_base_form": true}], "variants": [{"kind": "equivalent", "key": "skepticism", "forms": [{"grammatical_form": "noun/en_singular", "text": "skepticism", "is_base_form": true}]}]}

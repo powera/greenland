@@ -170,3 +170,24 @@
 {"guid": "N06_188", "forms": [{"grammatical_form": "noun/en_singular", "text": "vegetable", "is_base_form": true, "ipa": "/ˈvɛdʒtəbəl/", "phonetic": "VEJ-tuh-bul"}]}
 {"guid": "N06_189", "forms": [{"grammatical_form": "noun/en_singular", "text": "biscuit", "is_base_form": true, "ipa": "/ˈbɪskɪt/", "phonetic": "BIS-kit"}]}
 {"guid": "N06_190", "forms": [{"grammatical_form": "noun/en_singular", "text": "cookie", "is_base_form": true, "ipa": "/ˈkʊki/", "phonetic": "KOO-kee"}]}
+{"guid": "N06_191", "forms": [{"grammatical_form": "noun/en_singular", "text": "pastry crust", "is_base_form": true}], "variants": [{"kind": "equivalent", "key": "crust", "forms": [{"grammatical_form": "noun/en_singular", "text": "crust", "is_base_form": true}]}]}
+{"guid": "N06_192", "forms": [{"grammatical_form": "noun/en_singular", "text": "dietary fibre", "is_base_form": true}], "variants": [{"kind": "equivalent", "key": "fibre", "forms": [{"grammatical_form": "noun/en_singular", "text": "fibre", "is_base_form": true}]}]}
+{"guid": "N06_194", "forms": [{"grammatical_form": "noun/en_singular", "text": "crayfish meat", "is_base_form": true}]}
+{"guid": "N06_195", "forms": [{"grammatical_form": "noun/en_singular", "text": "potato chip", "is_base_form": true}]}
+{"guid": "N06_197", "variants": [{"kind": "equivalent", "key": "portion", "forms": [{"grammatical_form": "noun/en_singular", "text": "portion", "is_base_form": true}]}]}
+{"guid": "N06_198", "forms": [{"grammatical_form": "noun/en_singular", "text": "custard filling", "is_base_form": true}]}
+{"guid": "N06_199", "forms": [{"grammatical_form": "noun/en_singular", "text": "cayenne pepper", "is_base_form": true}]}
+{"guid": "N06_201", "forms": [{"grammatical_form": "noun/en_singular", "text": "tapioca pudding", "is_base_form": true}], "variants": [{"kind": "equivalent", "key": "tapioca", "forms": [{"grammatical_form": "noun/en_singular", "text": "tapioca", "is_base_form": true}]}]}
+{"guid": "N06_202", "forms": [{"grammatical_form": "noun/en_singular", "text": "tapioca pearls", "is_base_form": true}]}
+{"guid": "N06_203", "forms": [{"grammatical_form": "noun/en_singular", "text": "bird suet", "is_base_form": true}]}
+{"guid": "N06_204", "forms": [{"grammatical_form": "noun/en_singular", "text": "ground meat", "is_base_form": true}], "variants": [{"kind": "equivalent", "key": "mince", "forms": [{"grammatical_form": "noun/en_singular", "text": "mince", "is_base_form": true}]}]}
+{"guid": "N06_206", "forms": [{"grammatical_form": "noun/en_singular", "text": "halibut meat", "is_base_form": true}]}
+{"guid": "N06_207", "forms": [{"grammatical_form": "noun/en_singular", "text": "caramel sauce", "is_base_form": true}], "variants": [{"kind": "equivalent", "key": "caramel", "forms": [{"grammatical_form": "noun/en_singular", "text": "caramel", "is_base_form": true}]}]}
+{"guid": "N06_210", "forms": [{"grammatical_form": "noun/en_singular", "text": "arrowroot starch", "is_base_form": true}]}
+{"guid": "N06_212", "forms": [{"grammatical_form": "noun/en_singular", "text": "maraschino cherry", "is_base_form": true}], "variants": [{"kind": "equivalent", "key": "maraschino", "forms": [{"grammatical_form": "noun/en_singular", "text": "maraschino", "is_base_form": true}]}]}
+{"guid": "N06_213", "variants": [{"kind": "equivalent", "key": "mush", "forms": [{"grammatical_form": "noun/en_singular", "text": "mush", "is_base_form": true}]}]}
+{"guid": "N06_215", "variants": [{"kind": "equivalent", "key": "croutons", "forms": [{"grammatical_form": "noun/en_singular", "text": "croutons", "is_base_form": true}]}]}
+{"guid": "N06_216", "variants": [{"kind": "equivalent", "key": "meatballs", "forms": [{"grammatical_form": "noun/en_singular", "text": "meatballs", "is_base_form": true}]}]}
+{"guid": "N06_218", "forms": [{"grammatical_form": "noun/en_singular", "text": "breakfast cereal", "is_base_form": true}], "variants": [{"kind": "equivalent", "key": "cereal", "forms": [{"grammatical_form": "noun/en_singular", "text": "cereal", "is_base_form": true}]}]}
+{"guid": "N06_219", "variants": [{"kind": "equivalent", "key": "olives", "forms": [{"grammatical_form": "noun/en_singular", "text": "olives", "is_base_form": true}]}]}
+{"guid": "N06_220", "forms": [{"grammatical_form": "noun/en_singular", "text": "mix", "is_base_form": true}]}

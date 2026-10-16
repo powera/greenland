@@ -36,3 +36,6 @@
 {"guid": "N23_042", "forms": [{"grammatical_form": "noun/en_singular", "text": "empathy", "is_base_form": true, "ipa": "/ˈɛmpəθi/", "phonetic": "EM-puh-thee"}]}
 {"guid": "N23_043", "forms": [{"grammatical_form": "noun/en_singular", "text": "veneration", "is_base_form": true, "ipa": "/ˌvɛnəˈreɪʃən/", "phonetic": "ven-uh-RAY-shun"}]}
 {"guid": "N23_044", "forms": [{"grammatical_form": "noun/en_singular", "text": "fun", "is_base_form": true, "ipa": "/fʌn/", "phonetic": "FUN"}]}
+{"guid": "N23_046", "variants": [{"kind": "equivalent", "key": "equilibrium", "forms": [{"grammatical_form": "noun/en_singular", "text": "equilibrium", "is_base_form": true}]}]}
+{"guid": "N23_049", "forms": [{"grammatical_form": "noun/en_singular", "text": "self-consciousness", "is_base_form": true}]}
+{"guid": "N23_050", "variants": [{"kind": "equivalent", "key": "security", "forms": [{"grammatical_form": "noun/en_singular", "text": "security", "is_base_form": true}]}]}

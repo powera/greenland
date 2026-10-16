@@ -14,3 +14,4 @@
 {"guid": "N71_016", "forms": [{"grammatical_form": "noun/en_singular", "text": "sieve", "is_base_form": true, "ipa": "/sɪv/", "phonetic": "SIV"}]}
 {"guid": "N71_018", "forms": [{"grammatical_form": "noun/en_singular", "text": "cup", "is_base_form": true, "ipa": "/kʌp/", "phonetic": "KUP"}]}
 {"guid": "N71_019", "forms": [{"grammatical_form": "noun/en_singular", "text": "plate", "is_base_form": true, "ipa": "/plɛɪt/", "phonetic": "PLAY-it"}]}
+{"guid": "N71_021", "forms": [{"grammatical_form": "noun/en_singular", "text": "casserole dish", "is_base_form": true}], "variants": [{"kind": "equivalent", "key": "casserole", "forms": [{"grammatical_form": "noun/en_singular", "text": "casserole", "is_base_form": true}]}]}

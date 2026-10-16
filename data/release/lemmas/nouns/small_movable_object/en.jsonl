@@ -1,4 +1,4 @@
-{"guid": "N08_005", "forms": [{"grammatical_form": "noun/en_singular", "text": "book", "is_base_form": true, "ipa": "/bʊk/", "phonetic": "BOOK"}]}
+{"guid": "N08_005", "forms": [{"grammatical_form": "noun/en_singular", "text": "book", "is_base_form": true, "ipa": "/bʊk/", "phonetic": "BOOK"}, {"grammatical_form": "noun/en_possessive_singular", "text": "book's", "is_base_form": false}]}
 {"guid": "N08_006", "forms": [{"grammatical_form": "noun/en_singular", "text": "key", "is_base_form": true, "ipa": "/kiː/", "phonetic": "KEE"}]}
 {"guid": "N08_007", "forms": [{"grammatical_form": "noun/en_singular", "text": "cell phone", "is_base_form": true, "ipa": "/sɛl ˈfoʊn/", "phonetic": "SEL-fohn"}]}
 {"guid": "N08_008", "forms": [{"grammatical_form": "noun/en_singular", "text": "watch", "is_base_form": true, "ipa": "/wɒtʃ/", "phonetic": "WA-ch"}]}
@@ -67,7 +67,7 @@
 {"guid": "N08_160", "forms": [{"grammatical_form": "noun/en_singular", "text": "queen", "is_base_form": true, "ipa": "/kwiːn/", "phonetic": "KWEEN"}]}
 {"guid": "N08_162", "forms": [{"grammatical_form": "noun/en_singular", "text": "crossbar", "is_base_form": true, "ipa": "/ˈkrɔsˌbɑr/", "phonetic": "KRAWS-bar"}]}
 {"guid": "N08_172", "forms": [{"grammatical_form": "noun/en_singular", "text": "chessboard", "is_base_form": true, "ipa": "/ˈtʃɛsˌbɔrd/", "phonetic": "CHESS-board"}]}
-{"guid": "N08_173", "forms": [{"grammatical_form": "noun/en_singular", "text": "king", "is_base_form": true, "ipa": "/kɪŋ/", "phonetic": "KING"}]}
+{"guid": "N08_173", "forms": [{"grammatical_form": "noun/en_singular", "text": "king", "is_base_form": true, "ipa": "/kɪŋ/", "phonetic": "KING"}, {"grammatical_form": "noun/en_possessive_singular", "text": "king's", "is_base_form": false}]}
 {"guid": "N08_174", "forms": [{"grammatical_form": "noun/en_singular", "text": "rook", "is_base_form": true, "ipa": "/rʊk/", "phonetic": "ROOK"}]}
 {"guid": "N08_175", "forms": [{"grammatical_form": "noun/en_singular", "text": "bishop", "is_base_form": true, "ipa": "/ˈbɪʃəp/", "phonetic": "BISH-up"}]}
 {"guid": "N08_176", "forms": [{"grammatical_form": "noun/en_singular", "text": "knight", "is_base_form": true, "ipa": "/naɪt/", "phonetic": "NYTE"}]}
@@ -76,7 +76,7 @@
 {"guid": "N08_179", "forms": [{"grammatical_form": "noun/en_singular", "text": "rim", "is_base_form": true, "ipa": "/rɪm/", "phonetic": "RIM"}]}
 {"guid": "N08_180", "forms": [{"grammatical_form": "noun/en_singular", "text": "backboard", "is_base_form": true, "ipa": "/ˈbækˌbɔrd/", "phonetic": "BAK-bord"}]}
 {"guid": "N08_181", "forms": [{"grammatical_form": "noun/en_singular", "text": "ace", "is_base_form": true, "ipa": "/eɪs/", "phonetic": "AYS"}]}
-{"guid": "N08_182", "forms": [{"grammatical_form": "noun/en_singular", "text": "king", "is_base_form": true, "ipa": "/kɪŋ/", "phonetic": "KING"}]}
+{"guid": "N08_182", "forms": [{"grammatical_form": "noun/en_singular", "text": "king", "is_base_form": true, "ipa": "/kɪŋ/", "phonetic": "KING"}, {"grammatical_form": "noun/en_possessive_singular", "text": "king's", "is_base_form": false}]}
 {"guid": "N08_183", "forms": [{"grammatical_form": "noun/en_singular", "text": "jack", "is_base_form": true, "ipa": "/dʒæk/", "phonetic": "JAK"}]}
 {"guid": "N08_184", "forms": [{"grammatical_form": "noun/en_singular", "text": "joker", "is_base_form": true, "ipa": "/ˈdʒoʊkər/", "phonetic": "JOH-kuhr"}]}
 {"guid": "N08_185", "forms": [{"grammatical_form": "noun/en_singular", "text": "face card", "is_base_form": true, "ipa": "/ˈfeɪs kɑrd/", "phonetic": "FAYS-kard"}]}
@@ -87,8 +87,8 @@
 {"guid": "N08_190", "forms": [{"grammatical_form": "noun/en_singular", "text": "bail", "is_base_form": true, "ipa": "/beɪl/", "phonetic": "BAYL"}]}
 {"guid": "N08_191", "forms": [{"grammatical_form": "noun/en_singular", "text": "checker", "is_base_form": true, "ipa": "/ˈtʃɛkər/", "phonetic": "CHEK-er"}]}
 {"guid": "N08_192", "forms": [{"grammatical_form": "noun/en_singular", "text": "checkerboard", "is_base_form": true, "ipa": "/ˈtʃɛkərˌbɔrd/", "phonetic": "CHEK-er-bord"}]}
-{"guid": "N08_193", "forms": [{"grammatical_form": "noun/en_singular", "text": "man", "is_base_form": true, "ipa": "/mæn/", "phonetic": "MAN"}]}
-{"guid": "N08_194", "forms": [{"grammatical_form": "noun/en_singular", "text": "king", "is_base_form": true, "ipa": "/kɪŋ/", "phonetic": "KING"}]}
+{"guid": "N08_193", "forms": [{"grammatical_form": "noun/en_singular", "text": "man", "is_base_form": true, "ipa": "/mæn/", "phonetic": "MAN"}, {"grammatical_form": "noun/en_possessive_singular", "text": "man's", "is_base_form": false}]}
+{"guid": "N08_194", "forms": [{"grammatical_form": "noun/en_singular", "text": "king", "is_base_form": true, "ipa": "/kɪŋ/", "phonetic": "KING"}, {"grammatical_form": "noun/en_possessive_singular", "text": "king's", "is_base_form": false}]}
 {"guid": "N08_195", "forms": [{"grammatical_form": "noun/en_singular", "text": "puck", "is_base_form": true, "ipa": "/pʌk/", "phonetic": "PUHK"}]}
 {"guid": "N08_196", "forms": [{"grammatical_form": "noun/en_singular", "text": "flagstick", "is_base_form": true, "ipa": "/ˈflæɡˌstɪk/", "phonetic": "FLAG-stik"}]}
 {"guid": "N08_197", "forms": [{"grammatical_form": "noun/en_singular", "text": "goban", "is_base_form": true, "ipa": "/ˈɡoʊˌbɑn/", "phonetic": "GOH-bahn"}]}
@@ -104,9 +104,9 @@
 {"guid": "N08_207", "forms": [{"grammatical_form": "noun/en_singular", "text": "general", "is_base_form": true, "ipa": "/ˈdʒɛnərəl/", "phonetic": "JEN-uh-ruhl"}]}
 {"guid": "N08_208", "forms": [{"grammatical_form": "noun/en_singular", "text": "advisor", "is_base_form": true, "ipa": "/ədˈvaɪzər/", "phonetic": "ad-VY-zer"}]}
 {"guid": "N08_209", "forms": [{"grammatical_form": "noun/en_singular", "text": "elephant", "is_base_form": true, "ipa": "/ˈɛləfənt/", "phonetic": "EL-uh-funt"}]}
-{"guid": "N08_210", "forms": [{"grammatical_form": "noun/en_singular", "text": "horse", "is_base_form": true, "ipa": "/hɔrs/", "phonetic": "HORS"}]}
+{"guid": "N08_210", "forms": [{"grammatical_form": "noun/en_singular", "text": "horse", "is_base_form": true, "ipa": "/hɔrs/", "phonetic": "HORS"}, {"grammatical_form": "noun/en_possessive_singular", "text": "horse's", "is_base_form": false}]}
 {"guid": "N08_211", "forms": [{"grammatical_form": "noun/en_singular", "text": "chariot", "is_base_form": true, "ipa": "/ˈtʃɛriət/", "phonetic": "CHAIR-ee-ut"}]}
-{"guid": "N08_212", "forms": [{"grammatical_form": "noun/en_singular", "text": "soldier", "is_base_form": true, "ipa": "/ˈsoʊldʒər/", "phonetic": "SOHL-jer"}]}
+{"guid": "N08_212", "forms": [{"grammatical_form": "noun/en_singular", "text": "soldier", "is_base_form": true, "ipa": "/ˈsoʊldʒər/", "phonetic": "SOHL-jer"}, {"grammatical_form": "noun/en_possessive_singular", "text": "soldier's", "is_base_form": false}]}
 {"guid": "N08_213", "forms": [{"grammatical_form": "noun/en_singular", "text": "derailleur", "is_base_form": true, "ipa": "/ˌdɪˈreɪlər/", "phonetic": "duh-RAY-ler"}]}
 {"guid": "N08_214", "forms": [{"grammatical_form": "noun/en_singular", "text": "antenna", "is_base_form": true, "ipa": "/ænˈtɛnə/", "phonetic": "an-TEN-uh"}]}
 {"guid": "N08_215", "forms": [{"grammatical_form": "noun/en_singular", "text": "kicker", "is_base_form": true, "ipa": "/ˈkɪkər/", "phonetic": "KIK-er"}]}
@@ -119,8 +119,13 @@
 {"guid": "N08_222", "forms": [{"grammatical_form": "noun/en_singular", "text": "flower", "is_base_form": true, "ipa": "/ˈflaʊər/", "phonetic": "FLOW-er"}]}
 {"guid": "N08_223", "forms": [{"grammatical_form": "noun/en_singular", "text": "tatami", "is_base_form": true, "ipa": "/təˈtɑːmi/", "phonetic": "tuh-TAH-mee"}]}
 {"guid": "N08_224", "forms": [{"grammatical_form": "noun/en_singular", "text": "doubling cube", "is_base_form": true, "ipa": "/ˈdʌbəlɪŋ kjuːb/", "phonetic": "DUH-buh-ling KYOOB"}]}
-{"guid": "N08_225", "forms": [{"grammatical_form": "noun/en_singular", "text": "treat", "is_base_form": true, "ipa": "/triːt/", "phonetic": "TREET"}]}
+{"guid": "N08_225", "forms": [{"grammatical_form": "noun/en_singular", "text": "treat", "is_base_form": true, "ipa": "/triːt/", "phonetic": "TREET"}], "variants": [{"kind": "equivalent", "key": "delight", "forms": [{"grammatical_form": "noun/en_singular", "text": "delight", "is_base_form": true}]}]}
 {"guid": "N08_226", "variants": [{"kind": "spelling", "key": "make-up", "forms": [{"grammatical_form": "noun/en_singular", "text": "make-up", "is_base_form": true}]}]}
 {"guid": "N08_227", "forms": [{"grammatical_form": "noun/en_singular", "text": "second hand", "is_base_form": true}]}
 {"guid": "N08_228", "forms": [{"grammatical_form": "noun/en_singular", "text": "shampoo", "is_base_form": true, "ipa": "/ʃæmˈpuː/", "phonetic": "sham-POO"}]}
 {"guid": "N08_229", "forms": [{"grammatical_form": "noun/en_singular", "text": "tank", "is_base_form": true, "ipa": "/tæŋk/", "phonetic": "TANGK"}]}
+{"guid": "N08_232", "forms": [{"grammatical_form": "noun/en_singular", "text": "drum", "is_base_form": true}]}
+{"guid": "N08_234", "forms": [{"grammatical_form": "noun/en_singular", "text": "matching counterpart", "is_base_form": true}]}
+{"guid": "N08_235", "forms": [{"grammatical_form": "noun/en_singular", "text": "hair roller", "is_base_form": true}]}
+{"guid": "N08_237", "forms": [{"grammatical_form": "noun/en_singular", "text": "exercise mat", "is_base_form": true}], "variants": [{"kind": "equivalent", "key": "mat", "forms": [{"grammatical_form": "noun/en_singular", "text": "mat", "is_base_form": true}]}]}
+{"guid": "N08_238", "forms": [{"grammatical_form": "noun/en_singular", "text": "facial tissue", "is_base_form": true}], "variants": [{"kind": "equivalent", "key": "tissue", "forms": [{"grammatical_form": "noun/en_singular", "text": "tissue", "is_base_form": true}]}]}

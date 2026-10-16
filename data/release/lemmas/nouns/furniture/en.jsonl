@@ -12,3 +12,4 @@
 {"guid": "N39_021", "forms": [{"grammatical_form": "noun/en_singular", "text": "cupboard", "is_base_form": true, "ipa": "/ˈkʌbərd/", "phonetic": "KUP-bord"}]}
 {"guid": "N39_022", "forms": [{"grammatical_form": "noun/en_singular", "text": "rug", "is_base_form": true, "ipa": "/rʌɡ/", "phonetic": "RUG"}]}
 {"guid": "N39_023", "forms": [{"grammatical_form": "noun/en_singular", "text": "sofa", "is_base_form": true, "ipa": "/ˈsoʊfə/", "phonetic": "SOH-fuh"}], "variants": [{"kind": "equivalent", "key": "couch", "forms": [{"grammatical_form": "noun/en_singular", "text": "couch", "is_base_form": true, "ipa": "/kʌtʃ/", "phonetic": "KOTCH"}]}]}
+{"guid": "N39_024", "forms": [{"grammatical_form": "noun/en_singular", "text": "carpet runner", "is_base_form": true}]}

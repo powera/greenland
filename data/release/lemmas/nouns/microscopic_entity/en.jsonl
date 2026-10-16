@@ -1,3 +1,7 @@
 {"guid": "N77_001", "forms": [{"grammatical_form": "noun/en_singular", "text": "electron", "is_base_form": true, "ipa": "/ɪˈlɛktrɑn/", "phonetic": "ih-LEK-tron"}]}
 {"guid": "N77_002", "forms": [{"grammatical_form": "noun/en_singular", "text": "ion", "is_base_form": true, "ipa": "/ˈaɪɑn/", "phonetic": "EYE-on"}]}
 {"guid": "N77_003", "forms": [{"grammatical_form": "noun/en_singular", "text": "molecule", "is_base_form": true, "ipa": "/ˈmɑləˌkjuːl/", "phonetic": "MOL-uh-kyool"}]}
+{"guid": "N77_004", "forms": [{"grammatical_form": "noun/en_singular", "text": "subatomic particle", "is_base_form": true}], "variants": [{"kind": "equivalent", "key": "particle", "forms": [{"grammatical_form": "noun/en_singular", "text": "particle", "is_base_form": true}]}]}
+{"guid": "N77_009", "forms": [{"grammatical_form": "noun/en_singular", "text": "neutrino", "is_base_form": true}]}
+{"guid": "N77_011", "forms": [{"grammatical_form": "noun/en_singular", "text": "micro-organisms", "is_base_form": true}]}
+{"guid": "N77_013", "variants": [{"kind": "equivalent", "key": "fermions", "forms": [{"grammatical_form": "noun/en_singular", "text": "fermions", "is_base_form": true}]}]}

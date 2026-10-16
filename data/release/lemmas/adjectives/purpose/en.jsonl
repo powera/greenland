@@ -39,3 +39,17 @@
 {"guid": "A09_039", "forms": [{"grammatical_form": "adjective/en_positive", "text": "post-secondary", "is_base_form": true, "ipa": "/ˌpoʊst ˈsɛkənˌdɛri/", "phonetic": "pohst-SEK-un-DAIR-ee"}]}
 {"guid": "A09_040", "forms": [{"grammatical_form": "adjective/en_positive", "text": "organizational", "is_base_form": true, "ipa": "/ˌɔrɡənəˈzeɪʃənəl/", "phonetic": "OR-guh-nuh-ZAY-shuh-nuhl"}]}
 {"guid": "A09_041", "forms": [{"grammatical_form": "adjective/en_positive", "text": "methodological", "is_base_form": true, "ipa": "/ˌmɛθədəˈlɑdʒɪkəl/", "phonetic": "meth-uh-duh-LOJ-uh-kul"}]}
+{"guid": "A09_042", "forms": [{"grammatical_form": "adjective/en_positive", "text": "nuclear", "is_base_form": true}]}
+{"guid": "A09_047", "forms": [{"grammatical_form": "adjective/en_positive", "text": "high-tech", "is_base_form": true}]}
+{"guid": "A09_048", "forms": [{"grammatical_form": "adjective/en_positive", "text": "state-run", "is_base_form": true}]}
+{"guid": "A09_049", "forms": [{"grammatical_form": "adjective/en_positive", "text": "socio-political", "is_base_form": true}]}
+{"guid": "A09_050", "forms": [{"grammatical_form": "adjective/en_positive", "text": "open-ended", "is_base_form": true}]}
+{"guid": "A09_051", "forms": [{"grammatical_form": "adjective/en_positive", "text": "on-line", "is_base_form": true}]}
+{"guid": "A09_052", "forms": [{"grammatical_form": "adjective/en_positive", "text": "labor-intensive", "is_base_form": true}]}
+{"guid": "A09_053", "forms": [{"grammatical_form": "adjective/en_positive", "text": "cross-country", "is_base_form": true}]}
+{"guid": "A09_054", "forms": [{"grammatical_form": "adjective/en_positive", "text": "co-produced", "is_base_form": true}]}
+{"guid": "A09_055", "forms": [{"grammatical_form": "adjective/en_positive", "text": "three-way", "is_base_form": true}]}
+{"guid": "A09_056", "forms": [{"grammatical_form": "adjective/en_positive", "text": "top-down", "is_base_form": true}]}
+{"guid": "A09_057", "forms": [{"grammatical_form": "adjective/en_positive", "text": "open-source", "is_base_form": true}]}
+{"guid": "A09_058", "forms": [{"grammatical_form": "adjective/en_positive", "text": "one-man", "is_base_form": true}]}
+{"guid": "A09_059", "forms": [{"grammatical_form": "adjective/en_positive", "text": "computer-generated", "is_base_form": true}]}

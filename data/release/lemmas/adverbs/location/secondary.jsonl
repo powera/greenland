@@ -20,7 +20,6 @@
 {"guid": "D07_020", "translations": {"ro": "direct", "pl": "bezpośrednio", "th": "โดยตรง", "ms": "terus", "ta": "நேரடியாக", "kn": "ನೇರವಾಗಿ", "uk": "безпосередньо", "bn": "সরাসরি", "hi": "प्रत्यक्ष रूप से", "tr": "doğrudan"}}
 {"guid": "D07_021", "translations": {"ro": "peste tot", "pl": "gdziekolwiek", "th": "ที่ใดก็ได้", "ms": "di mana-mana", "ta": "எந்தயிடத்திலும்", "kn": "ಯಾವುದಾದರು ಸ್ಥಳದಲ್ಲಿ", "uk": "будь-де", "bn": "কোথাও", "hi": "कहीं भी", "tr": "herhangi bir yerde"}}
 {"guid": "D07_022", "translations": {"ro": "deoparte", "pl": "na_bok", "th": "ข้าง", "ms": "ke tepi", "ta": "பக்கத்தில்", "kn": "ಬದಿಗೆ", "uk": "поряд", "bn": "পাশে", "hi": "बगल में", "tr": "bir yana"}}
-{"guid": "D07_023", "translations": {"ro": "înainte", "pl": "naprzód", "th": "ไปข้างหน้า", "ms": "ke hadapan", "ta": "முன்நிகழ்", "kn": "ಮುಂದೆ", "uk": "уперед", "bn": "আগে", "hi": "आगे", "tr": "ileri"}}
 {"guid": "D07_024", "translations": {"ro": "departe", "pl": "osobno", "th": "ห่างกัน", "ms": "berjauhan", "ta": "தொலைவில்", "kn": "ದೂರವಾಗಿ", "uk": "окремо", "bn": "দূরে", "hi": "अलग", "tr": "ayrı"}}
 {"guid": "D07_025", "translations": {"ro": "afară", "pl": "na zewnątrz", "th": "ข้างนอก", "ms": "di luar", "ta": "வெளியில்", "kn": "ಬೆಹಗಡೆ (ಬೆಹುದೆ)", "uk": "назовні", "bn": "বাইরে", "hi": "बाहर", "tr": "dışarıda"}}
 {"guid": "D07_026", "translations": {"ro": "în sus", "pl": "do góry", "th": "ขึ้น", "ms": "ke atas", "ta": "மேல்", "kn": "ಮೇಲೆ", "uk": "угору", "bn": "উপর", "hi": "ऊपर", "tr": "yukarı"}}

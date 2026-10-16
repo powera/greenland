@@ -25,12 +25,21 @@
 {"guid": "N18_038", "forms": [{"grammatical_form": "noun/en_singular", "text": "stripe", "is_base_form": true, "ipa": "/straɪp/", "phonetic": "STRYPE"}]}
 {"guid": "N18_039", "forms": [{"grammatical_form": "noun/en_singular", "text": "club", "is_base_form": true, "ipa": "/klʌb/", "phonetic": "KLUB"}]}
 {"guid": "N18_040", "forms": [{"grammatical_form": "noun/en_singular", "text": "finish line", "is_base_form": true, "ipa": "/ˈfɪnɪʃ laɪn/", "phonetic": "FIN-ish line"}]}
-{"guid": "N18_041", "forms": [{"grammatical_form": "noun/en_singular", "text": "heart", "is_base_form": true, "ipa": "/hɑrt/", "phonetic": "HART"}]}
+{"guid": "N18_041", "forms": [{"grammatical_form": "noun/en_singular", "text": "heart", "is_base_form": true, "ipa": "/hɑrt/", "phonetic": "HART"}, {"grammatical_form": "noun/en_possessive_singular", "text": "heart's", "is_base_form": false}]}
 {"guid": "N18_042", "forms": [{"grammatical_form": "noun/en_singular", "text": "diamond", "is_base_form": true, "ipa": "/ˈdaɪ.mənd/", "phonetic": "DYE-mund"}]}
 {"guid": "N18_043", "forms": [{"grammatical_form": "noun/en_singular", "text": "bell", "is_base_form": true, "ipa": "/bɛl/", "phonetic": "BEL"}]}
 {"guid": "N18_044", "forms": [{"grammatical_form": "noun/en_singular", "text": "turn", "is_base_form": true, "ipa": "/tɝn/", "phonetic": "TURN"}]}
 {"guid": "N18_045", "forms": [{"grammatical_form": "noun/en_singular", "text": "bamboo", "is_base_form": true, "ipa": "/bæmˈbuː/", "phonetic": "bam-BOO"}]}
-{"guid": "N18_046", "forms": [{"grammatical_form": "noun/en_singular", "text": "circle", "is_base_form": true, "ipa": "/ˈsɝkəl/", "phonetic": "SUR-kuhl"}]}
+{"guid": "N18_046", "forms": [{"grammatical_form": "noun/en_singular", "text": "circle", "is_base_form": true, "ipa": "/ˈsɝkəl/", "phonetic": "SUR-kuhl"}, {"grammatical_form": "noun/en_possessive_singular", "text": "circle's", "is_base_form": false}]}
 {"guid": "N18_047", "forms": [{"grammatical_form": "noun/en_singular", "text": "wind", "is_base_form": true, "ipa": "/wɪnd/", "phonetic": "WIND"}]}
 {"guid": "N18_049", "forms": [{"grammatical_form": "noun/en_singular", "text": "pie chart", "is_base_form": true}]}
 {"guid": "N18_050", "forms": [{"grammatical_form": "noun/en_singular", "text": "tenor part", "is_base_form": true}]}
+{"guid": "N18_052", "forms": [{"grammatical_form": "noun/en_singular", "text": "binomial name", "is_base_form": true}], "variants": [{"kind": "equivalent", "key": "binomial", "forms": [{"grammatical_form": "noun/en_singular", "text": "binomial", "is_base_form": true}]}]}
+{"guid": "N18_054", "variants": [{"kind": "equivalent", "key": "engraving", "forms": [{"grammatical_form": "noun/en_singular", "text": "engraving", "is_base_form": true}]}]}
+{"guid": "N18_055", "forms": [{"grammatical_form": "noun/en_singular", "text": "motif", "is_base_form": true}]}
+{"guid": "N18_056", "variants": [{"kind": "equivalent", "key": "accent", "forms": [{"grammatical_form": "noun/en_singular", "text": "accent", "is_base_form": true}]}]}
+{"guid": "N18_058", "forms": [{"grammatical_form": "noun/en_singular", "text": "punctuation mark", "is_base_form": true}]}
+{"guid": "N18_059", "forms": [{"grammatical_form": "noun/en_singular", "text": "platinum certification", "is_base_form": true}], "variants": [{"kind": "equivalent", "key": "platinum", "forms": [{"grammatical_form": "noun/en_singular", "text": "platinum", "is_base_form": true}]}]}
+{"guid": "N18_060", "forms": [{"grammatical_form": "noun/en_singular", "text": "speech bubble", "is_base_form": true}], "variants": [{"kind": "equivalent", "key": "balloon", "forms": [{"grammatical_form": "noun/en_singular", "text": "balloon", "is_base_form": true}]}]}
+{"guid": "N18_062", "forms": [{"grammatical_form": "noun/en_singular", "text": "capital letter", "is_base_form": true}], "variants": [{"kind": "equivalent", "key": "capital", "forms": [{"grammatical_form": "noun/en_singular", "text": "capital", "is_base_form": true}]}]}
+{"guid": "N18_063", "forms": [{"grammatical_form": "noun/en_singular", "text": "alto part", "is_base_form": true}]}

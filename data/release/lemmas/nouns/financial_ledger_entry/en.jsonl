@@ -9,3 +9,9 @@
 {"guid": "N76_013", "forms": [{"grammatical_form": "noun/en_singular", "text": "pay", "is_base_form": true, "ipa": "/peɪ/", "phonetic": "PEY"}]}
 {"guid": "N76_018", "forms": [{"grammatical_form": "noun/en_singular", "text": "cost", "is_base_form": true, "ipa": "/kɔst/", "phonetic": "KAWST"}]}
 {"guid": "N76_019", "forms": [{"grammatical_form": "noun/en_singular", "text": "minimum wage", "is_base_form": true}]}
+{"guid": "N76_023", "forms": [{"grammatical_form": "noun/en_singular", "text": "shipping cost", "is_base_form": true}]}
+{"guid": "N76_026", "variants": [{"kind": "equivalent", "key": "security", "forms": [{"grammatical_form": "noun/en_singular", "text": "security", "is_base_form": true}]}]}
+{"guid": "N76_029", "forms": [{"grammatical_form": "noun/en_singular", "text": "receipts", "is_base_form": true}]}
+{"guid": "N76_033", "variants": [{"kind": "equivalent", "key": "legacy", "forms": [{"grammatical_form": "noun/en_singular", "text": "legacy", "is_base_form": true}]}]}
+{"guid": "N76_034", "forms": [{"grammatical_form": "noun/en_singular", "text": "processing fee", "is_base_form": true}]}
+{"guid": "N76_037", "forms": [{"grammatical_form": "noun/en_singular", "text": "certificate of deposit", "is_base_form": true}], "variants": [{"kind": "equivalent", "key": "CD", "forms": [{"grammatical_form": "noun/en_singular", "text": "CD", "is_base_form": true}]}]}

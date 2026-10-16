@@ -68,3 +68,13 @@
 {"guid": "N10_095", "forms": [{"grammatical_form": "noun/en_singular", "text": "medal", "is_base_form": true, "ipa": "/ˈmɛdəl/", "phonetic": "MED-uhl"}]}
 {"guid": "N10_096", "forms": [{"grammatical_form": "noun/en_singular", "text": "piano", "is_base_form": true, "ipa": "/piˈænoʊ/", "phonetic": "pee-AN-oh"}]}
 {"guid": "N10_098", "forms": [{"grammatical_form": "noun/en_singular", "text": "musical instrument", "is_base_form": true}]}
+{"guid": "N10_100", "variants": [{"kind": "equivalent", "key": "composition", "forms": [{"grammatical_form": "noun/en_singular", "text": "composition", "is_base_form": true}]}]}
+{"guid": "N10_102", "variants": [{"kind": "equivalent", "key": "performance", "forms": [{"grammatical_form": "noun/en_singular", "text": "performance", "is_base_form": true}]}]}
+{"guid": "N10_104", "forms": [{"grammatical_form": "noun/en_singular", "text": "calligraphic style", "is_base_form": true}]}
+{"guid": "N10_105", "forms": [{"grammatical_form": "noun/en_singular", "text": "soundtrack album", "is_base_form": true}]}
+{"guid": "N10_109", "forms": [{"grammatical_form": "noun/en_singular", "text": "landscape painting", "is_base_form": true}]}
+{"guid": "N10_110", "variants": [{"kind": "equivalent", "key": "relics", "forms": [{"grammatical_form": "noun/en_singular", "text": "relics", "is_base_form": true}]}]}
+{"guid": "N10_111", "forms": [{"grammatical_form": "noun/en_singular", "text": "relief", "is_base_form": true}]}
+{"guid": "N10_112", "variants": [{"kind": "equivalent", "key": "cymbals", "forms": [{"grammatical_form": "noun/en_singular", "text": "cymbals", "is_base_form": true}]}]}
+{"guid": "N10_114", "forms": [{"grammatical_form": "noun/en_singular", "text": "music mix", "is_base_form": true}]}
+{"guid": "N10_115", "forms": [{"grammatical_form": "noun/en_singular", "text": "alto", "is_base_form": true}]}

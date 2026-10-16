@@ -5,7 +5,7 @@
 {"guid": "N24_005", "forms": [{"grammatical_form": "noun/en_singular", "text": "journey", "is_base_form": true, "ipa": "/ˈdʒɜːrni/", "phonetic": "JUR-nee"}]}
 {"guid": "N24_007", "forms": [{"grammatical_form": "noun/en_singular", "text": "step", "is_base_form": true, "ipa": "stɛp", "phonetic": "STEP"}]}
 {"guid": "N24_008", "forms": [{"grammatical_form": "noun/en_singular", "text": "attack", "is_base_form": true, "ipa": "/əˈtæk/", "phonetic": "uh-TACK"}]}
-{"guid": "N24_009", "forms": [{"grammatical_form": "noun/en_singular", "text": "party", "is_base_form": true, "ipa": "/ˈpɑːr.ti/", "phonetic": "PAR-ti"}]}
+{"guid": "N24_009", "forms": [{"grammatical_form": "noun/en_singular", "text": "party", "is_base_form": true, "ipa": "/ˈpɑːr.ti/", "phonetic": "PAR-ti"}, {"grammatical_form": "noun/en_possessive_singular", "text": "party's", "is_base_form": false}]}
 {"guid": "N24_010", "forms": [{"grammatical_form": "noun/en_singular", "text": "race", "is_base_form": true, "ipa": "/res/", "phonetic": "REH-se"}]}
 {"guid": "N24_011", "forms": [{"grammatical_form": "noun/en_singular", "text": "test", "is_base_form": true, "ipa": "/tɛst/", "phonetic": "TEST"}]}
 {"guid": "N24_012", "forms": [{"grammatical_form": "noun/en_singular", "text": "action", "is_base_form": true, "ipa": "/ˈæk.ʃən/", "phonetic": "AK-shən"}]}
@@ -18,6 +18,7 @@
 {"guid": "N24_022", "forms": [{"grammatical_form": "noun/en_singular", "text": "change", "is_base_form": true, "ipa": "/tʃeɪndʒ/", "phonetic": "CHAYNJ"}]}
 {"guid": "N24_023", "forms": [{"grammatical_form": "noun/en_singular", "text": "escape", "is_base_form": true, "ipa": "/ɪsˈkeɪp/", "phonetic": "IH-skayp"}]}
 {"guid": "N24_024", "forms": [{"grammatical_form": "noun/en_singular", "text": "meeting", "is_base_form": true, "ipa": "/ˈmiːtɪŋ/", "phonetic": "MEE-ting"}]}
+{"guid": "N24_025", "forms": [{"grammatical_form": "noun/en_possessive_singular", "text": "show's", "is_base_form": false}]}
 {"guid": "N24_026", "forms": [{"grammatical_form": "noun/en_singular", "text": "beginning", "is_base_form": true, "ipa": "/bɪˈɡɪn.ɪŋ/", "phonetic": "bi-GIN-ing"}]}
 {"guid": "N24_072", "forms": [{"grammatical_form": "noun/en_singular", "text": "final exam", "is_base_form": true}]}
 {"guid": "N24_073", "forms": [{"grammatical_form": "noun/en_singular", "text": "traffic jam", "is_base_form": true}]}
@@ -114,7 +115,7 @@
 {"guid": "N24_165", "forms": [{"grammatical_form": "noun/en_singular", "text": "refrigeration", "is_base_form": true, "ipa": "/rɪˌfrɪdʒəˈreɪʃən/", "phonetic": "ree-FRIJ-uh-RAY-shun"}]}
 {"guid": "N24_166", "forms": [{"grammatical_form": "noun/en_singular", "text": "ignition", "is_base_form": true, "ipa": "/ɪɡˈnɪʃən/", "phonetic": "ig-NISH-un"}]}
 {"guid": "N24_167", "forms": [{"grammatical_form": "noun/en_singular", "text": "extrusion", "is_base_form": true, "ipa": "/ɪkˈstruːʒən/", "phonetic": "ik-STROO-zhun"}]}
-{"guid": "N24_168", "forms": [{"grammatical_form": "noun/en_singular", "text": "standardization", "is_base_form": true, "ipa": "/ˌstændɚəˈzeɪʃən/", "phonetic": "stan-der-uh-ZAY-shun"}]}
+{"guid": "N24_168", "forms": [{"grammatical_form": "noun/en_singular", "text": "standardization", "is_base_form": true, "ipa": "/ˌstændɚəˈzeɪʃən/", "phonetic": "stan-der-uh-ZAY-shun"}], "variants": [{"kind": "equivalent", "key": "standard-setting", "forms": [{"grammatical_form": "noun/en_singular", "text": "standard-setting", "is_base_form": true}]}]}
 {"guid": "N24_169", "forms": [{"grammatical_form": "noun/en_singular", "text": "takeoff", "is_base_form": true, "ipa": "/ˈteɪkˌɔf/", "phonetic": "TAYK-awf"}]}
 {"guid": "N24_170", "forms": [{"grammatical_form": "noun/en_singular", "text": "bonding", "is_base_form": true, "ipa": "/ˈbɑndɪŋ/", "phonetic": "BON-ding"}]}
 {"guid": "N24_171", "forms": [{"grammatical_form": "noun/en_singular", "text": "convection", "is_base_form": true, "ipa": "/kənˈvɛkʃən/", "phonetic": "kun-VEK-shun"}]}
@@ -174,3 +175,55 @@
 {"guid": "N24_230", "variants": [{"kind": "equivalent", "key": "multiplication", "forms": [{"grammatical_form": "noun/en_singular", "text": "multiplication", "is_base_form": true}]}]}
 {"guid": "N24_231", "forms": [{"grammatical_form": "noun/en_singular", "text": "traffic", "is_base_form": true, "ipa": "/ˈtræfɪk/", "phonetic": "TRAF-ik"}]}
 {"guid": "N24_232", "forms": [{"grammatical_form": "noun/en_singular", "text": "concentration", "is_base_form": true, "ipa": "/ˌkɑnsənˈtreɪʃən/", "phonetic": "kon-sen-TRAY-shun"}]}
+{"guid": "N24_235", "variants": [{"kind": "equivalent", "key": "decay", "forms": [{"grammatical_form": "noun/en_singular", "text": "decay", "is_base_form": true}]}]}
+{"guid": "N24_237", "forms": [{"grammatical_form": "noun/en_singular", "text": "gender transition", "is_base_form": true}]}
+{"guid": "N24_238", "forms": [{"grammatical_form": "noun/en_singular", "text": "carbon emissions", "is_base_form": true}]}
+{"guid": "N24_239", "forms": [{"grammatical_form": "noun/en_singular", "text": "second-round election", "is_base_form": true}], "variants": [{"kind": "equivalent", "key": "runoff", "forms": [{"grammatical_form": "noun/en_singular", "text": "runoff", "is_base_form": true}]}]}
+{"guid": "N24_240", "forms": [{"grammatical_form": "noun/en_singular", "text": "chemical synthesis", "is_base_form": true}], "variants": [{"kind": "equivalent", "key": "synthesis", "forms": [{"grammatical_form": "noun/en_singular", "text": "synthesis", "is_base_form": true}]}]}
+{"guid": "N24_241", "forms": [{"grammatical_form": "noun/en_singular", "text": "forced migration", "is_base_form": true}], "variants": [{"kind": "equivalent", "key": "displacement", "forms": [{"grammatical_form": "noun/en_singular", "text": "displacement", "is_base_form": true}]}]}
+{"guid": "N24_244", "variants": [{"kind": "equivalent", "key": "flux", "forms": [{"grammatical_form": "noun/en_singular", "text": "flux", "is_base_form": true}]}]}
+{"guid": "N24_247", "variants": [{"kind": "equivalent", "key": "performance", "forms": [{"grammatical_form": "noun/en_singular", "text": "performance", "is_base_form": true}]}]}
+{"guid": "N24_248", "variants": [{"kind": "equivalent", "key": "exhibition", "forms": [{"grammatical_form": "noun/en_singular", "text": "exhibition", "is_base_form": true}]}]}
+{"guid": "N24_250", "variants": [{"kind": "equivalent", "key": "restoration", "forms": [{"grammatical_form": "noun/en_singular", "text": "restoration", "is_base_form": true}]}]}
+{"guid": "N24_252", "variants": [{"kind": "equivalent", "key": "victory", "forms": [{"grammatical_form": "noun/en_singular", "text": "victory", "is_base_form": true}]}]}
+{"guid": "N24_254", "variants": [{"kind": "equivalent", "key": "invasion", "forms": [{"grammatical_form": "noun/en_singular", "text": "invasion", "is_base_form": true}]}]}
+{"guid": "N24_255", "variants": [{"kind": "equivalent", "key": "invasion", "forms": [{"grammatical_form": "noun/en_singular", "text": "invasion", "is_base_form": true}]}]}
+{"guid": "N24_256", "variants": [{"kind": "equivalent", "key": "protocol", "forms": [{"grammatical_form": "noun/en_singular", "text": "protocol", "is_base_form": true}]}]}
+{"guid": "N24_257", "variants": [{"kind": "equivalent", "key": "exit", "forms": [{"grammatical_form": "noun/en_singular", "text": "exit", "is_base_form": true}]}]}
+{"guid": "N24_258", "forms": [{"grammatical_form": "noun/en_singular", "text": "sexual penetration", "is_base_form": true}], "variants": [{"kind": "equivalent", "key": "penetration", "forms": [{"grammatical_form": "noun/en_singular", "text": "penetration", "is_base_form": true}]}]}
+{"guid": "N24_259", "forms": [{"grammatical_form": "noun/en_singular", "text": "runoff election", "is_base_form": true}], "variants": [{"kind": "equivalent", "key": "runoff", "forms": [{"grammatical_form": "noun/en_singular", "text": "runoff", "is_base_form": true}]}]}
+{"guid": "N24_264", "variants": [{"kind": "equivalent", "key": "exhaustion", "forms": [{"grammatical_form": "noun/en_singular", "text": "exhaustion", "is_base_form": true}]}]}
+{"guid": "N24_265", "variants": [{"kind": "equivalent", "key": "justification", "forms": [{"grammatical_form": "noun/en_singular", "text": "justification", "is_base_form": true}]}]}
+{"guid": "N24_266", "variants": [{"kind": "equivalent", "key": "removal", "forms": [{"grammatical_form": "noun/en_singular", "text": "removal", "is_base_form": true}]}]}
+{"guid": "N24_267", "variants": [{"kind": "equivalent", "key": "removal", "forms": [{"grammatical_form": "noun/en_singular", "text": "removal", "is_base_form": true}]}]}
+{"guid": "N24_270", "variants": [{"kind": "equivalent", "key": "tempo", "forms": [{"grammatical_form": "noun/en_singular", "text": "tempo", "is_base_form": true}]}]}
+{"guid": "N24_271", "forms": [{"grammatical_form": "noun/en_singular", "text": "long-running story", "is_base_form": true}], "variants": [{"kind": "equivalent", "key": "saga", "forms": [{"grammatical_form": "noun/en_singular", "text": "saga", "is_base_form": true}]}]}
+{"guid": "N24_275", "forms": [{"grammatical_form": "noun/en_singular", "text": "key change", "is_base_form": true}]}
+{"guid": "N24_276", "forms": [{"grammatical_form": "noun/en_singular", "text": "signal modulation", "is_base_form": true}], "variants": [{"kind": "equivalent", "key": "modulation", "forms": [{"grammatical_form": "noun/en_singular", "text": "modulation", "is_base_form": true}]}]}
+{"guid": "N24_278", "forms": [{"grammatical_form": "noun/en_singular", "text": "space mission", "is_base_form": true}]}
+{"guid": "N24_279", "forms": [{"grammatical_form": "noun/en_singular", "text": "engine starting", "is_base_form": true}], "variants": [{"kind": "equivalent", "key": "ignition", "forms": [{"grammatical_form": "noun/en_singular", "text": "ignition", "is_base_form": true}]}]}
+{"guid": "N24_282", "forms": [{"grammatical_form": "noun/en_singular", "text": "electrolysis", "is_base_form": true}]}
+{"guid": "N24_295", "forms": [{"grammatical_form": "noun/en_singular", "text": "take-off", "is_base_form": true}]}
+{"guid": "N24_296", "variants": [{"kind": "equivalent", "key": "rebirth", "forms": [{"grammatical_form": "noun/en_singular", "text": "rebirth", "is_base_form": true}]}]}
+{"guid": "N24_298", "forms": [{"grammatical_form": "noun/en_singular", "text": "mathematical derivation", "is_base_form": true}], "variants": [{"kind": "equivalent", "key": "derivation", "forms": [{"grammatical_form": "noun/en_singular", "text": "derivation", "is_base_form": true}]}]}
+{"guid": "N24_301", "variants": [{"kind": "equivalent", "key": "timetable", "forms": [{"grammatical_form": "noun/en_singular", "text": "timetable", "is_base_form": true}]}]}
+{"guid": "N24_302", "variants": [{"kind": "equivalent", "key": "swing", "forms": [{"grammatical_form": "noun/en_singular", "text": "swing", "is_base_form": true}]}]}
+{"guid": "N24_308", "variants": [{"kind": "equivalent", "key": "extinction", "forms": [{"grammatical_form": "noun/en_singular", "text": "extinction", "is_base_form": true}]}]}
+{"guid": "N24_310", "variants": [{"kind": "equivalent", "key": "descent", "forms": [{"grammatical_form": "noun/en_singular", "text": "descent", "is_base_form": true}]}]}
+{"guid": "N24_313", "variants": [{"kind": "equivalent", "key": "conditioning", "forms": [{"grammatical_form": "noun/en_singular", "text": "conditioning", "is_base_form": true}]}]}
+{"guid": "N24_315", "forms": [{"grammatical_form": "noun/en_singular", "text": "well drilling", "is_base_form": true}]}
+{"guid": "N24_316", "forms": [{"grammatical_form": "noun/en_singular", "text": "economic stimulus", "is_base_form": true}], "variants": [{"kind": "equivalent", "key": "stimulus", "forms": [{"grammatical_form": "noun/en_singular", "text": "stimulus", "is_base_form": true}]}]}
+{"guid": "N24_317", "forms": [{"grammatical_form": "noun/en_singular", "text": "sexual assault", "is_base_form": true}], "variants": [{"kind": "equivalent", "key": "violation", "forms": [{"grammatical_form": "noun/en_singular", "text": "violation", "is_base_form": true}]}]}
+{"guid": "N24_318", "forms": [{"grammatical_form": "noun/en_possessive_singular", "text": "prosecution's", "is_base_form": false}]}
+{"guid": "N24_322", "forms": [{"grammatical_form": "noun/en_singular", "text": "orbital hybridization", "is_base_form": true}], "variants": [{"kind": "equivalent", "key": "hybridization", "forms": [{"grammatical_form": "noun/en_singular", "text": "hybridization", "is_base_form": true}]}]}
+{"guid": "N24_323", "forms": [{"grammatical_form": "noun/en_singular", "text": "ultrasound scan", "is_base_form": true}], "variants": [{"kind": "equivalent", "key": "ultrasound", "forms": [{"grammatical_form": "noun/en_singular", "text": "ultrasound", "is_base_form": true}]}]}
+{"guid": "N24_328", "variants": [{"kind": "equivalent", "key": "adjudication", "forms": [{"grammatical_form": "noun/en_singular", "text": "adjudication", "is_base_form": true}]}]}
+{"guid": "N24_330", "forms": [{"grammatical_form": "noun/en_singular", "text": "trial period", "is_base_form": true}], "variants": [{"kind": "equivalent", "key": "probation", "forms": [{"grammatical_form": "noun/en_singular", "text": "probation", "is_base_form": true}]}]}
+{"guid": "N24_334", "forms": [{"grammatical_form": "noun/en_singular", "text": "build-up", "is_base_form": true}]}
+{"guid": "N24_335", "variants": [{"kind": "equivalent", "key": "break-up", "forms": [{"grammatical_form": "noun/en_singular", "text": "break-up", "is_base_form": true}]}]}
+{"guid": "N24_336", "forms": [{"grammatical_form": "noun/en_singular", "text": "surface runoff", "is_base_form": true}], "variants": [{"kind": "equivalent", "key": "run-off", "forms": [{"grammatical_form": "noun/en_singular", "text": "run-off", "is_base_form": true}]}]}
+{"guid": "N24_337", "forms": [{"grammatical_form": "noun/en_singular", "text": "take-off", "is_base_form": true}]}
+{"guid": "N24_338", "forms": [{"grammatical_form": "noun/en_singular", "text": "set-up", "is_base_form": true}]}
+{"guid": "N24_339", "variants": [{"kind": "equivalent", "key": "set-up", "forms": [{"grammatical_form": "noun/en_singular", "text": "set-up", "is_base_form": true}]}]}
+{"guid": "N24_344", "variants": [{"kind": "equivalent", "key": "quadrature", "forms": [{"grammatical_form": "noun/en_singular", "text": "quadrature", "is_base_form": true}]}]}
+{"guid": "N24_345", "forms": [{"grammatical_form": "noun/en_singular", "text": "failure to act", "is_base_form": true}], "variants": [{"kind": "equivalent", "key": "omission", "forms": [{"grammatical_form": "noun/en_singular", "text": "omission", "is_base_form": true}]}]}

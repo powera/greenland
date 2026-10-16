@@ -2,7 +2,7 @@
 {"guid": "N17_035", "forms": [{"grammatical_form": "noun/en_singular", "text": "problem", "is_base_form": true, "ipa": "/ˈprɑːbləm/", "phonetic": "PROH-bluhm"}]}
 {"guid": "N17_060", "forms": [{"grammatical_form": "noun/en_singular", "text": "solution", "is_base_form": true, "ipa": "/səˈluːʃn/", "phonetic": "SOO-loo-shn"}]}
 {"guid": "N17_072", "forms": [{"grammatical_form": "noun/en_singular", "text": "magic", "is_base_form": true, "ipa": "/ˈmædʒ.ɪk/", "phonetic": "MAD-jik"}]}
-{"guid": "N17_076", "forms": [{"grammatical_form": "noun/en_singular", "text": "body", "is_base_form": true, "ipa": "/ˈbɑdi/", "phonetic": "BAH-dee"}]}
+{"guid": "N17_076", "forms": [{"grammatical_form": "noun/en_singular", "text": "body", "is_base_form": true, "ipa": "/ˈbɑdi/", "phonetic": "BAH-dee"}, {"grammatical_form": "noun/en_possessive_singular", "text": "body's", "is_base_form": false}]}
 {"guid": "N17_080", "forms": [{"grammatical_form": "noun/en_singular", "text": "matter", "is_base_form": true, "ipa": "[ˈmætər]", "phonetic": "MAT-ər"}]}
 {"guid": "N17_081", "forms": [{"grammatical_form": "noun/en_singular", "text": "fact", "is_base_form": true, "ipa": "fact", "phonetic": "FAKT"}]}
 {"guid": "N17_087", "forms": [{"grammatical_form": "noun/en_singular", "text": "sight", "is_base_form": true, "ipa": "/saɪt/", "phonetic": "SIGH-t"}]}
@@ -13,21 +13,21 @@
 {"guid": "N17_106", "forms": [{"grammatical_form": "noun/en_singular", "text": "order", "is_base_form": true, "ipa": "/ˈɔːr.dɚ/", "phonetic": "AWR-dur"}]}
 {"guid": "N17_107", "forms": [{"grammatical_form": "noun/en_singular", "text": "form", "is_base_form": true, "ipa": "/fɔːrm/", "phonetic": "FOHRM"}]}
 {"guid": "N17_108", "forms": [{"grammatical_form": "noun/en_singular", "text": "command", "is_base_form": true, "ipa": "/kəˈmænd/", "phonetic": " kuh-MAND"}]}
-{"guid": "N17_109", "forms": [{"grammatical_form": "noun/en_singular", "text": "system", "is_base_form": true, "ipa": "/ˈsɪs.təm/", "phonetic": "SISS-təm"}]}
+{"guid": "N17_109", "forms": [{"grammatical_form": "noun/en_singular", "text": "system", "is_base_form": true, "ipa": "/ˈsɪs.təm/", "phonetic": "SISS-təm"}, {"grammatical_form": "noun/en_possessive_singular", "text": "system's", "is_base_form": false}]}
 {"guid": "N17_111", "forms": [{"grammatical_form": "noun/en_singular", "text": "smell", "is_base_form": true, "ipa": "/smɛl/", "phonetic": "SMEL"}]}
 {"guid": "N17_112", "forms": [{"grammatical_form": "noun/en_singular", "text": "deal", "is_base_form": true, "ipa": "/diːl/", "phonetic": "DEE-l"}]}
 {"guid": "N17_114", "forms": [{"grammatical_form": "noun/en_singular", "text": "direction", "is_base_form": true, "ipa": "/dɪˈrɛkʃən/", "phonetic": "DI-REK-shən"}]}
 {"guid": "N17_116", "forms": [{"grammatical_form": "noun/en_singular", "text": "purpose", "is_base_form": true, "ipa": "/ˈpɝpəs/", "phonetic": "PUR-puh-s"}]}
 {"guid": "N17_118", "forms": [{"grammatical_form": "noun/en_singular", "text": "job", "is_base_form": true, "ipa": "/dʒɒb/", "phonetic": "JO-b"}]}
 {"guid": "N17_119", "forms": [{"grammatical_form": "noun/en_singular", "text": "authority", "is_base_form": true, "ipa": "/ɔːθɚɪˈtaɪ/", "phonetic": "AWTH-uh-ree-TY"}]}
-{"guid": "N17_123", "forms": [{"grammatical_form": "noun/en_singular", "text": "plan", "is_base_form": true, "ipa": "/plæn/", "phonetic": "P-LAN"}]}
+{"guid": "N17_123", "forms": [{"grammatical_form": "noun/en_singular", "text": "plan", "is_base_form": true, "ipa": "/plæn/", "phonetic": "P-LAN"}, {"grammatical_form": "noun/en_possessive_singular", "text": "plan's", "is_base_form": false}]}
 {"guid": "N17_124", "forms": [{"grammatical_form": "noun/en_singular", "text": "talent", "is_base_form": true, "ipa": "/ˈtæl.ənt/", "phonetic": "TAL-uhnt"}]}
 {"guid": "N17_126", "forms": [{"grammatical_form": "noun/en_singular", "text": "view", "is_base_form": true, "ipa": "/vjuː/", "phonetic": "VYOO"}]}
 {"guid": "N17_129", "forms": [{"grammatical_form": "noun/en_singular", "text": "smile", "is_base_form": true, "ipa": "/ˈsmaɪl/", "phonetic": "SMY-l"}]}
 {"guid": "N17_130", "forms": [{"grammatical_form": "noun/en_singular", "text": "spell", "is_base_form": true, "ipa": "/spɛl/", "phonetic": "SPELL"}]}
 {"guid": "N17_131", "forms": [{"grammatical_form": "noun/en_singular", "text": "universe", "is_base_form": true, "ipa": "/ˌjuː.nɪˈvɜːs/", "phonetic": "yoo-NEH-vers"}]}
 {"guid": "N17_137", "forms": [{"grammatical_form": "noun/en_singular", "text": "choice", "is_base_form": true, "ipa": "/tʃɔɪs/", "phonetic": "CHOYS"}]}
-{"guid": "N17_142", "forms": [{"grammatical_form": "noun/en_singular", "text": "rule", "is_base_form": true, "ipa": "/ruːl/", "phonetic": "ROO-l"}]}
+{"guid": "N17_142", "forms": [{"grammatical_form": "noun/en_singular", "text": "rule", "is_base_form": true, "ipa": "/ruːl/", "phonetic": "ROO-l"}, {"grammatical_form": "noun/en_possessive_singular", "text": "rule's", "is_base_form": false}]}
 {"guid": "N17_150", "forms": [{"grammatical_form": "noun/en_singular", "text": "position", "is_base_form": true, "ipa": "/ˈpəʊ.zə.ʃən/", "phonetic": "POH-zhuhn-shuhn"}]}
 {"guid": "N17_156", "forms": [{"grammatical_form": "noun/en_singular", "text": "manner", "is_base_form": true, "ipa": "/ˈmænr/", "phonetic": "MAN-ur"}]}
 {"guid": "N17_158", "forms": [{"grammatical_form": "noun/en_singular", "text": "stuff", "is_base_form": true, "ipa": "/stʌf/", "phonetic": "STUF"}]}
@@ -38,7 +38,7 @@
 {"guid": "N17_173", "forms": [{"grammatical_form": "noun/en_singular", "text": "situation", "is_base_form": true, "ipa": "/sɪˈtuː.ə.ʃən/", "phonetic": "sih-TOO-uh-shuhn"}]}
 {"guid": "N17_178", "forms": [{"grammatical_form": "noun/en_singular", "text": "tone", "is_base_form": true, "ipa": "/toʊn/", "phonetic": "TOH-n"}]}
 {"guid": "N17_183", "forms": [{"grammatical_form": "noun/en_singular", "text": "source", "is_base_form": true, "ipa": "/sɔːrs/", "phonetic": "SOR-s"}]}
-{"guid": "N17_184", "forms": [{"grammatical_form": "noun/en_singular", "text": "program", "is_base_form": true, "ipa": "/ˈpɹoʊɡræm/", "phonetic": "PROH-gruhm"}]}
+{"guid": "N17_184", "forms": [{"grammatical_form": "noun/en_singular", "text": "program", "is_base_form": true, "ipa": "/ˈpɹoʊɡræm/", "phonetic": "PROH-gruhm"}, {"grammatical_form": "noun/en_possessive_singular", "text": "program's", "is_base_form": false}]}
 {"guid": "N17_187", "forms": [{"grammatical_form": "noun/en_singular", "text": "base", "is_base_form": true, "ipa": "/beɪs/", "phonetic": "BAI-seh"}]}
 {"guid": "N17_188", "forms": [{"grammatical_form": "noun/en_singular", "text": "color", "is_base_form": true, "ipa": "/ˈkʌlər/", "phonetic": "KULL-ər"}]}
 {"guid": "N17_190", "forms": [{"grammatical_form": "noun/en_singular", "text": "mark", "is_base_form": true, "ipa": "[/mɑːrk/, /mɑːk/]", "phonetic": "MAWK"}]}
@@ -49,9 +49,13 @@
 {"guid": "N17_204", "forms": [{"grammatical_form": "noun/en_singular", "text": "cover", "is_base_form": true, "ipa": "/kʌvɚ/", "phonetic": "KUV-er"}]}
 {"guid": "N17_207", "forms": [{"grammatical_form": "noun/en_singular", "text": "mine", "is_base_form": true, "ipa": "/maɪn/", "phonetic": "MYN"}]}
 {"guid": "N17_208", "forms": [{"grammatical_form": "noun/en_singular", "text": "bottom", "is_base_form": true, "ipa": "/ˈbɑːtəm/", "phonetic": "BOH-tuhm"}]}
+{"guid": "N17_209", "forms": [{"grammatical_form": "noun/en_possessive_singular", "text": "state's", "is_base_form": false}]}
 {"guid": "N17_229", "forms": [{"grammatical_form": "noun/en_singular", "text": "sales", "is_base_form": true}, {"grammatical_form": "noun/en_plural", "text": "sales", "is_base_form": false}]}
-{"guid": "N17_264", "variants": [{"kind": "spelling", "key": "Organization", "forms": [{"grammatical_form": "noun/en_singular", "text": "Organization", "is_base_form": true}]}]}
+{"guid": "N17_239", "forms": [{"grammatical_form": "noun/en_possessive_singular", "text": "soul's", "is_base_form": false}]}
+{"guid": "N17_240", "forms": [{"grammatical_form": "noun/en_possessive_singular", "text": "town's", "is_base_form": false}]}
+{"guid": "N17_264", "forms": [{"grammatical_form": "noun/en_possessive_singular", "text": "organization's", "is_base_form": false}], "variants": [{"kind": "spelling", "key": "Organization", "forms": [{"grammatical_form": "noun/en_singular", "text": "Organization", "is_base_form": true}]}]}
 {"guid": "N17_274", "forms": [{"grammatical_form": "noun/en_singular", "text": "sex", "is_base_form": true}]}
+{"guid": "N17_284", "forms": [{"grammatical_form": "noun/en_possessive_singular", "text": "thing's", "is_base_form": false}]}
 {"guid": "N17_297", "forms": [{"grammatical_form": "noun/en_singular", "text": "birth control", "is_base_form": true}]}
 {"guid": "N17_298", "forms": [{"grammatical_form": "noun/en_singular", "text": "human right", "is_base_form": true}]}
 {"guid": "N17_299", "forms": [{"grammatical_form": "noun/en_singular", "text": "free speech", "is_base_form": true}]}
@@ -90,3 +94,30 @@
 {"guid": "N17_343", "forms": [{"grammatical_form": "noun/en_singular", "text": "subject matter", "is_base_form": true}], "variants": [{"kind": "spelling", "key": "subject-matter", "forms": [{"grammatical_form": "noun/en_singular", "text": "subject-matter", "is_base_form": true}]}]}
 {"guid": "N17_344", "variants": [{"kind": "spelling", "key": "non-violence", "forms": [{"grammatical_form": "noun/en_singular", "text": "non-violence", "is_base_form": true}]}]}
 {"guid": "N17_346", "forms": [{"grammatical_form": "noun/en_singular", "text": "number one", "is_base_form": true}], "variants": [{"kind": "spelling", "key": "number-one", "forms": [{"grammatical_form": "noun/en_singular", "text": "number-one", "is_base_form": true}]}]}
+{"guid": "N17_352", "forms": [{"grammatical_form": "noun/en_singular", "text": "self-reference", "is_base_form": true}]}
+{"guid": "N17_354", "forms": [{"grammatical_form": "noun/en_singular", "text": "testing ground", "is_base_form": true}], "variants": [{"kind": "equivalent", "key": "laboratory", "forms": [{"grammatical_form": "noun/en_singular", "text": "laboratory", "is_base_form": true}]}]}
+{"guid": "N17_355", "variants": [{"kind": "equivalent", "key": "pathway", "forms": [{"grammatical_form": "noun/en_singular", "text": "pathway", "is_base_form": true}]}]}
+{"guid": "N17_356", "forms": [{"grammatical_form": "noun/en_singular", "text": "political center", "is_base_form": true}]}
+{"guid": "N17_357", "variants": [{"kind": "equivalent", "key": "scent", "forms": [{"grammatical_form": "noun/en_singular", "text": "scent", "is_base_form": true}]}]}
+{"guid": "N17_358", "forms": [{"grammatical_form": "noun/en_singular", "text": "political centre", "is_base_form": true}]}
+{"guid": "N17_361", "variants": [{"kind": "equivalent", "key": "conquest", "forms": [{"grammatical_form": "noun/en_singular", "text": "conquest", "is_base_form": true}]}]}
+{"guid": "N17_364", "forms": [{"grammatical_form": "noun/en_singular", "text": "professional ethics", "is_base_form": true}]}
+{"guid": "N17_366", "variants": [{"kind": "equivalent", "key": "stimulus", "forms": [{"grammatical_form": "noun/en_singular", "text": "stimulus", "is_base_form": true}]}]}
+{"guid": "N17_368", "forms": [{"grammatical_form": "noun/en_singular", "text": "color scheme", "is_base_form": true}]}
+{"guid": "N17_373", "forms": [{"grammatical_form": "noun/en_singular", "text": "political theater", "is_base_form": true}], "variants": [{"kind": "equivalent", "key": "kabuki", "forms": [{"grammatical_form": "noun/en_singular", "text": "kabuki", "is_base_form": true}]}]}
+{"guid": "N17_374", "forms": [{"grammatical_form": "noun/en_singular", "text": "subspecies", "is_base_form": true}]}
+{"guid": "N17_376", "variants": [{"kind": "equivalent", "key": "pest", "forms": [{"grammatical_form": "noun/en_singular", "text": "pest", "is_base_form": true}]}]}
+{"guid": "N17_377", "forms": [{"grammatical_form": "noun/en_singular", "text": "phylum", "is_base_form": true}]}
+{"guid": "N17_378", "forms": [{"grammatical_form": "noun/en_singular", "text": "subgenus", "is_base_form": true}]}
+{"guid": "N17_380", "forms": [{"grammatical_form": "noun/en_singular", "text": "typical example", "is_base_form": true}], "variants": [{"kind": "equivalent", "key": "prototype", "forms": [{"grammatical_form": "noun/en_singular", "text": "prototype", "is_base_form": true}]}]}
+{"guid": "N17_382", "forms": [{"grammatical_form": "noun/en_singular", "text": "neural wiring", "is_base_form": true}], "variants": [{"kind": "equivalent", "key": "wiring", "forms": [{"grammatical_form": "noun/en_singular", "text": "wiring", "is_base_form": true}]}]}
+{"guid": "N17_383", "forms": [{"grammatical_form": "noun/en_possessive_singular", "text": "individual's", "is_base_form": false}]}
+{"guid": "N17_393", "forms": [{"grammatical_form": "noun/en_singular", "text": "deciding factor", "is_base_form": true}], "variants": [{"kind": "equivalent", "key": "determinant", "forms": [{"grammatical_form": "noun/en_singular", "text": "determinant", "is_base_form": true}]}]}
+{"guid": "N17_394", "variants": [{"kind": "equivalent", "key": "core", "forms": [{"grammatical_form": "noun/en_singular", "text": "core", "is_base_form": true}]}]}
+{"guid": "N17_395", "forms": [{"grammatical_form": "noun/en_singular", "text": "design theme", "is_base_form": true}], "variants": [{"kind": "equivalent", "key": "theme", "forms": [{"grammatical_form": "noun/en_singular", "text": "theme", "is_base_form": true}]}]}
+{"guid": "N17_396", "variants": [{"kind": "equivalent", "key": "sanction", "forms": [{"grammatical_form": "noun/en_singular", "text": "sanction", "is_base_form": true}]}]}
+{"guid": "N17_397", "forms": [{"grammatical_form": "noun/en_singular", "text": "terminus", "is_base_form": true}]}
+{"guid": "N17_403", "forms": [{"grammatical_form": "noun/en_singular", "text": "focus", "is_base_form": true}]}
+{"guid": "N17_405", "variants": [{"kind": "equivalent", "key": "taxa", "forms": [{"grammatical_form": "noun/en_singular", "text": "taxa", "is_base_form": true}]}]}
+{"guid": "N17_407", "forms": [{"grammatical_form": "noun/en_singular", "text": "makeshift solution", "is_base_form": true}]}
+{"guid": "N17_408", "variants": [{"kind": "equivalent", "key": "regard", "forms": [{"grammatical_form": "noun/en_singular", "text": "regard", "is_base_form": true}]}]}

@@ -1,5 +1,5 @@
-{"guid": "N50_001", "forms": [{"grammatical_form": "noun/en_singular", "text": "word", "is_base_form": true, "ipa": "/wɝːd/", "phonetic": "WOR-d"}]}
-{"guid": "N50_002", "forms": [{"grammatical_form": "noun/en_singular", "text": "language", "is_base_form": true, "ipa": "/ˈlæŋɡɪdʒ/", "phonetic": "LANG-uh-jeez"}]}
+{"guid": "N50_001", "forms": [{"grammatical_form": "noun/en_singular", "text": "word", "is_base_form": true, "ipa": "/wɝːd/", "phonetic": "WOR-d"}, {"grammatical_form": "noun/en_possessive_singular", "text": "word's", "is_base_form": false}]}
+{"guid": "N50_002", "forms": [{"grammatical_form": "noun/en_singular", "text": "language", "is_base_form": true, "ipa": "/ˈlæŋɡɪdʒ/", "phonetic": "LANG-uh-jeez"}, {"grammatical_form": "noun/en_possessive_singular", "text": "language's", "is_base_form": false}]}
 {"guid": "N50_003", "forms": [{"grammatical_form": "noun/en_singular", "text": "voice", "is_base_form": true, "ipa": "/vɔɪs/", "phonetic": "VOY-s"}]}
 {"guid": "N50_004", "forms": [{"grammatical_form": "noun/en_singular", "text": "question", "is_base_form": true, "ipa": "kwestchən", "phonetic": "KWEH-schən"}]}
 {"guid": "N50_005", "forms": [{"grammatical_form": "noun/en_singular", "text": "answer", "is_base_form": true, "ipa": "/ˈɔːnswər/", "phonetic": "AWNS-wur"}]}
@@ -7,13 +7,13 @@
 {"guid": "N50_007", "forms": [{"grammatical_form": "noun/en_singular", "text": "example", "is_base_form": true, "ipa": "/ɪgˈzæmp(ə)l/", "phonetic": "ig-ZAMP-ul"}]}
 {"guid": "N50_008", "forms": [{"grammatical_form": "noun/en_singular", "text": "information", "is_base_form": true, "ipa": "/ɪnˌfɔːrˈmeɪ.ʃən/", "phonetic": "in-FOR-may-shun"}]}
 {"guid": "N50_009", "forms": [{"grammatical_form": "noun/en_singular", "text": "news", "is_base_form": true, "ipa": "/ˈnuːz/", "phonetic": "NOOZ"}]}
-{"guid": "N50_010", "forms": [{"grammatical_form": "noun/en_singular", "text": "name", "is_base_form": true, "ipa": "/neɪm/", "phonetic": "NEY-m"}]}
+{"guid": "N50_010", "forms": [{"grammatical_form": "noun/en_singular", "text": "name", "is_base_form": true, "ipa": "/neɪm/", "phonetic": "NEY-m"}, {"grammatical_form": "noun/en_possessive_singular", "text": "name's", "is_base_form": false}]}
 {"guid": "N50_011", "forms": [{"grammatical_form": "noun/en_singular", "text": "chapter", "is_base_form": true, "ipa": "/ˈtʃæp.tər/", "phonetic": "CHAP-tər"}]}
 {"guid": "N50_012", "forms": [{"grammatical_form": "noun/en_singular", "text": "message", "is_base_form": true, "ipa": "/ˈmɛsɪdʒ/", "phonetic": "MESS-ij"}]}
 {"guid": "N50_013", "forms": [{"grammatical_form": "noun/en_singular", "text": "speech", "is_base_form": true, "ipa": "/spɪtʃ/", "phonetic": "SPI-chee"}]}
 {"guid": "N50_014", "forms": [{"grammatical_form": "noun/en_singular", "text": "note", "is_base_form": true, "ipa": "/noʊt/", "phonetic": "NOH-t"}]}
 {"guid": "N50_015", "forms": [{"grammatical_form": "noun/en_singular", "text": "song", "is_base_form": true, "ipa": "/sɒŋ/", "phonetic": "SOHN"}]}
-{"guid": "N50_016", "forms": [{"grammatical_form": "noun/en_singular", "text": "report", "is_base_form": true, "ipa": "/rɪˈpɔːrt/", "phonetic": "ri-PORT"}]}
+{"guid": "N50_016", "forms": [{"grammatical_form": "noun/en_singular", "text": "report", "is_base_form": true, "ipa": "/rɪˈpɔːrt/", "phonetic": "ri-PORT"}, {"grammatical_form": "noun/en_possessive_singular", "text": "report's", "is_base_form": false}]}
 {"guid": "N50_017", "forms": [{"grammatical_form": "noun/en_singular", "text": "tale", "is_base_form": true, "ipa": "/teɪl/", "phonetic": "TAY-l"}]}
 {"guid": "N50_018", "forms": [{"grammatical_form": "noun/en_singular", "text": "subject", "is_base_form": true, "ipa": "/ˈsʌbdʒɛkt/", "phonetic": "SUB-dzhikt"}]}
 {"guid": "N50_019", "forms": [{"grammatical_form": "noun/en_singular", "text": "warning", "is_base_form": true, "ipa": "/ˈwɔːr.nɪŋ/", "phonetic": "WAHR-ning"}]}
@@ -45,10 +45,10 @@
 {"guid": "N50_064", "forms": [{"grammatical_form": "noun/en_singular", "text": "manuscript", "is_base_form": true, "ipa": "/ˈmænjəˌskrɪpt/", "phonetic": "MAN-yuh-skript"}]}
 {"guid": "N50_065", "forms": [{"grammatical_form": "noun/en_singular", "text": "intonation", "is_base_form": true, "ipa": "/ˌɪntəˈneɪʃən/", "phonetic": "in-tuh-NAY-shun"}]}
 {"guid": "N50_066", "forms": [{"grammatical_form": "noun/en_singular", "text": "signal", "is_base_form": true, "ipa": "/ˈsɪɡnəl/", "phonetic": "SIG-nuhl"}]}
-{"guid": "N50_067", "forms": [{"grammatical_form": "noun/en_singular", "text": "code", "is_base_form": true, "ipa": "/koʊd/", "phonetic": "KOHD"}]}
+{"guid": "N50_067", "forms": [{"grammatical_form": "noun/en_singular", "text": "code", "is_base_form": true, "ipa": "/koʊd/", "phonetic": "KOHD"}, {"grammatical_form": "noun/en_possessive_singular", "text": "code's", "is_base_form": false}]}
 {"guid": "N50_068", "forms": [{"grammatical_form": "noun/en_singular", "text": "tradition", "is_base_form": true, "ipa": "/trəˈdɪʃən/", "phonetic": "truh-DISH-un"}]}
 {"guid": "N50_069", "forms": [{"grammatical_form": "noun/en_singular", "text": "slang", "is_base_form": true, "ipa": "/slæŋ/", "phonetic": "SLANG"}]}
-{"guid": "N50_070", "forms": [{"grammatical_form": "noun/en_singular", "text": "policy", "is_base_form": true, "ipa": "/ˈpɑːləsi/", "phonetic": "POL-uh-see"}]}
+{"guid": "N50_070", "forms": [{"grammatical_form": "noun/en_singular", "text": "policy", "is_base_form": true, "ipa": "/ˈpɑːləsi/", "phonetic": "POL-uh-see"}, {"grammatical_form": "noun/en_possessive_singular", "text": "policy's", "is_base_form": false}]}
 {"guid": "N50_071", "forms": [{"grammatical_form": "noun/en_singular", "text": "petition", "is_base_form": true, "ipa": "/pəˈtɪʃən/", "phonetic": "puh-TISH-un"}]}
 {"guid": "N50_072", "forms": [{"grammatical_form": "noun/en_singular", "text": "complaint", "is_base_form": true, "ipa": "/kəmˈpleɪnt/", "phonetic": "kuhm-PLAYNT"}]}
 {"guid": "N50_073", "forms": [{"grammatical_form": "noun/en_singular", "text": "plea", "is_base_form": true, "ipa": "/pliː/", "phonetic": "PLEE"}]}
@@ -128,3 +128,41 @@
 {"guid": "N50_165", "forms": [{"grammatical_form": "noun/en_singular", "text": "oral translation", "is_base_form": true}]}
 {"guid": "N50_166", "forms": [{"grammatical_form": "noun/en_singular", "text": "background music", "is_base_form": true}]}
 {"guid": "N50_194", "forms": [{"grammatical_form": "noun/en_singular", "text": "vocabulary", "is_base_form": true, "ipa": "/voʊˈkæbjəˌlɛri/", "phonetic": "voh-KAB-yuh-lair-ee"}]}
+{"guid": "N50_196", "variants": [{"kind": "equivalent", "key": "exposure", "forms": [{"grammatical_form": "noun/en_singular", "text": "exposure", "is_base_form": true}]}]}
+{"guid": "N50_197", "variants": [{"kind": "equivalent", "key": "exposure", "forms": [{"grammatical_form": "noun/en_singular", "text": "exposure", "is_base_form": true}]}]}
+{"guid": "N50_198", "forms": [{"grammatical_form": "noun/en_singular", "text": "frequency spectrum", "is_base_form": true}], "variants": [{"kind": "equivalent", "key": "spectrum", "forms": [{"grammatical_form": "noun/en_singular", "text": "spectrum", "is_base_form": true}]}]}
+{"guid": "N50_201", "forms": [{"grammatical_form": "noun/en_singular", "text": "rhyming word", "is_base_form": true}]}
+{"guid": "N50_204", "variants": [{"kind": "equivalent", "key": "depiction", "forms": [{"grammatical_form": "noun/en_singular", "text": "depiction", "is_base_form": true}]}]}
+{"guid": "N50_205", "variants": [{"kind": "equivalent", "key": "tract", "forms": [{"grammatical_form": "noun/en_singular", "text": "tract", "is_base_form": true}]}]}
+{"guid": "N50_206", "variants": [{"kind": "equivalent", "key": "title", "forms": [{"grammatical_form": "noun/en_singular", "text": "title", "is_base_form": true}]}]}
+{"guid": "N50_209", "forms": [{"grammatical_form": "noun/en_singular", "text": "product presentation", "is_base_form": true}], "variants": [{"kind": "equivalent", "key": "packaging", "forms": [{"grammatical_form": "noun/en_singular", "text": "packaging", "is_base_form": true}]}]}
+{"guid": "N50_210", "forms": [{"grammatical_form": "noun/en_singular", "text": "cable television", "is_base_form": true}], "variants": [{"kind": "equivalent", "key": "cable", "forms": [{"grammatical_form": "noun/en_singular", "text": "cable", "is_base_form": true}]}]}
+{"guid": "N50_211", "forms": [{"grammatical_form": "noun/en_singular", "text": "slang term", "is_base_form": true}]}
+{"guid": "N50_212", "forms": [{"grammatical_form": "noun/en_singular", "text": "social-media post", "is_base_form": true}], "variants": [{"kind": "equivalent", "key": "status", "forms": [{"grammatical_form": "noun/en_singular", "text": "status", "is_base_form": true}]}]}
+{"guid": "N50_214", "forms": [{"grammatical_form": "noun/en_singular", "text": "ballot paper", "is_base_form": true}], "variants": [{"kind": "equivalent", "key": "ballot", "forms": [{"grammatical_form": "noun/en_singular", "text": "ballot", "is_base_form": true}]}]}
+{"guid": "N50_215", "variants": [{"kind": "equivalent", "key": "recommendation", "forms": [{"grammatical_form": "noun/en_singular", "text": "recommendation", "is_base_form": true}]}]}
+{"guid": "N50_216", "variants": [{"kind": "equivalent", "key": "counterpoint", "forms": [{"grammatical_form": "noun/en_singular", "text": "counterpoint", "is_base_form": true}]}]}
+{"guid": "N50_217", "forms": [{"grammatical_form": "noun/en_singular", "text": "libretto", "is_base_form": true}]}
+{"guid": "N50_218", "forms": [{"grammatical_form": "noun/en_singular", "text": "voice-over", "is_base_form": true}], "variants": [{"kind": "equivalent", "key": "narration", "forms": [{"grammatical_form": "noun/en_singular", "text": "narration", "is_base_form": true}]}]}
+{"guid": "N50_220", "forms": [{"grammatical_form": "noun/en_singular", "text": "linking word", "is_base_form": true}], "variants": [{"kind": "equivalent", "key": "connective", "forms": [{"grammatical_form": "noun/en_singular", "text": "connective", "is_base_form": true}]}]}
+{"guid": "N50_221", "forms": [{"grammatical_form": "noun/en_singular", "text": "archaeological evidence", "is_base_form": true}]}
+{"guid": "N50_222", "forms": [{"grammatical_form": "noun/en_singular", "text": "chronological account", "is_base_form": true}]}
+{"guid": "N50_224", "forms": [{"grammatical_form": "noun/en_singular", "text": "price quote", "is_base_form": true}], "variants": [{"kind": "equivalent", "key": "quotation", "forms": [{"grammatical_form": "noun/en_singular", "text": "quotation", "is_base_form": true}]}]}
+{"guid": "N50_229", "forms": [{"grammatical_form": "noun/en_singular", "text": "findings", "is_base_form": true}]}
+{"guid": "N50_231", "variants": [{"kind": "equivalent", "key": "expression", "forms": [{"grammatical_form": "noun/en_singular", "text": "expression", "is_base_form": true}]}]}
+{"guid": "N50_235", "forms": [{"grammatical_form": "noun/en_singular", "text": "intensive questioning", "is_base_form": true}], "variants": [{"kind": "equivalent", "key": "cross-examination", "forms": [{"grammatical_form": "noun/en_singular", "text": "cross-examination", "is_base_form": true}]}]}
+{"guid": "N50_236", "forms": [{"grammatical_form": "noun/en_singular", "text": "grammar book", "is_base_form": true}], "variants": [{"kind": "equivalent", "key": "grammar", "forms": [{"grammatical_form": "noun/en_singular", "text": "grammar", "is_base_form": true}]}]}
+{"guid": "N50_237", "forms": [{"grammatical_form": "noun/en_singular", "text": "word list", "is_base_form": true}]}
+{"guid": "N50_239", "forms": [{"grammatical_form": "noun/en_singular", "text": "word origin", "is_base_form": true}], "variants": [{"kind": "equivalent", "key": "etymology", "forms": [{"grammatical_form": "noun/en_singular", "text": "etymology", "is_base_form": true}]}]}
+{"guid": "N50_240", "forms": [{"grammatical_form": "noun/en_singular", "text": "romanization system", "is_base_form": true}], "variants": [{"kind": "equivalent", "key": "romanization", "forms": [{"grammatical_form": "noun/en_singular", "text": "romanization", "is_base_form": true}]}]}
+{"guid": "N50_243", "forms": [{"grammatical_form": "noun/en_singular", "text": "appointment book", "is_base_form": true}], "variants": [{"kind": "equivalent", "key": "diary", "forms": [{"grammatical_form": "noun/en_singular", "text": "diary", "is_base_form": true}]}]}
+{"guid": "N50_247", "variants": [{"kind": "equivalent", "key": "texts", "forms": [{"grammatical_form": "noun/en_singular", "text": "texts", "is_base_form": true}]}]}
+{"guid": "N50_248", "variants": [{"kind": "equivalent", "key": "suppression", "forms": [{"grammatical_form": "noun/en_singular", "text": "suppression", "is_base_form": true}]}]}
+{"guid": "N50_251", "forms": [{"grammatical_form": "noun/en_singular", "text": "dissenting opinion", "is_base_form": true}]}
+{"guid": "N50_254", "forms": [{"grammatical_form": "noun/en_singular", "text": "e-mail", "is_base_form": true}]}
+{"guid": "N50_255", "forms": [{"grammatical_form": "noun/en_singular", "text": "third-person narration", "is_base_form": true}], "variants": [{"kind": "equivalent", "key": "third-person", "forms": [{"grammatical_form": "noun/en_singular", "text": "third-person", "is_base_form": true}]}]}
+{"guid": "N50_256", "variants": [{"kind": "equivalent", "key": "script", "forms": [{"grammatical_form": "noun/en_singular", "text": "script", "is_base_form": true}]}]}
+{"guid": "N50_259", "forms": [{"grammatical_form": "noun/en_singular", "text": "musical accompaniment", "is_base_form": true}], "variants": [{"kind": "equivalent", "key": "accompaniment", "forms": [{"grammatical_form": "noun/en_singular", "text": "accompaniment", "is_base_form": true}]}]}
+{"guid": "N50_260", "forms": [{"grammatical_form": "noun/en_singular", "text": "song lyric", "is_base_form": true}], "variants": [{"kind": "equivalent", "key": "lyric", "forms": [{"grammatical_form": "noun/en_singular", "text": "lyric", "is_base_form": true}]}]}
+{"guid": "N50_261", "variants": [{"kind": "equivalent", "key": "indictment", "forms": [{"grammatical_form": "noun/en_singular", "text": "indictment", "is_base_form": true}]}]}
+{"guid": "N50_262", "forms": [{"grammatical_form": "noun/en_singular", "text": "electronic mail", "is_base_form": true}], "variants": [{"kind": "equivalent", "key": "e-mail", "forms": [{"grammatical_form": "noun/en_singular", "text": "e-mail", "is_base_form": true}]}]}

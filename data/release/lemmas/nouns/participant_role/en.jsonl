@@ -1,6 +1,6 @@
-{"guid": "N63_001", "forms": [{"grammatical_form": "noun/en_singular", "text": "captain", "is_base_form": true, "ipa": "/ˈkæptən/", "phonetic": "KAP-tin"}]}
+{"guid": "N63_001", "forms": [{"grammatical_form": "noun/en_singular", "text": "captain", "is_base_form": true, "ipa": "/ˈkæptən/", "phonetic": "KAP-tin"}, {"grammatical_form": "noun/en_possessive_singular", "text": "captain's", "is_base_form": false}]}
 {"guid": "N63_002", "forms": [{"grammatical_form": "noun/en_singular", "text": "teammate", "is_base_form": true, "ipa": "/ˈtiːmˌmeɪt/", "phonetic": "TEEM-mayt"}]}
-{"guid": "N63_003", "forms": [{"grammatical_form": "noun/en_singular", "text": "opponent", "is_base_form": true, "ipa": "/əˈpoʊnənt/", "phonetic": "uh-POH-nent"}]}
+{"guid": "N63_003", "forms": [{"grammatical_form": "noun/en_singular", "text": "opponent", "is_base_form": true, "ipa": "/əˈpoʊnənt/", "phonetic": "uh-POH-nent"}, {"grammatical_form": "noun/en_possessive_singular", "text": "opponent's", "is_base_form": false}]}
 {"guid": "N63_004", "forms": [{"grammatical_form": "noun/en_singular", "text": "athlete", "is_base_form": true, "ipa": "/ˈæθˌliːt/", "phonetic": "ATH-leet"}]}
 {"guid": "N63_005", "forms": [{"grammatical_form": "noun/en_singular", "text": "rookie", "is_base_form": true, "ipa": "/ˈrʊki/", "phonetic": "ROO-kee"}]}
 {"guid": "N63_006", "forms": [{"grammatical_form": "noun/en_singular", "text": "substitute", "is_base_form": true, "ipa": "/ˈsʌbstəˌtuːt/", "phonetic": "SUB-stuh-toot"}]}
@@ -79,3 +79,4 @@
 {"guid": "N63_079", "forms": [{"grammatical_form": "noun/en_singular", "text": "sweeper", "is_base_form": true, "ipa": "/ˈswiːpər/", "phonetic": "SWEE-per"}]}
 {"guid": "N63_080", "forms": [{"grammatical_form": "noun/en_singular", "text": "wall", "is_base_form": true, "ipa": "/wɔl/", "phonetic": "WAWL"}]}
 {"guid": "N63_081", "forms": [{"grammatical_form": "noun/en_singular", "text": "influence", "is_base_form": true, "ipa": "/ˈɪnfluəns/", "phonetic": "IN-floo-ens"}]}
+{"guid": "N63_082", "forms": [{"grammatical_form": "noun/en_singular", "text": "base runner", "is_base_form": true}]}

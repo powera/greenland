@@ -749,3 +749,10 @@
 {"guid": "N16_761", "forms": [{"grammatical_form": "noun/en_singular", "text": "Rotarix", "is_base_form": true}]}
 {"guid": "N16_762", "forms": [{"grammatical_form": "noun/en_singular", "text": "Comirnaty", "is_base_form": true}]}
 {"guid": "N16_763", "forms": [{"grammatical_form": "noun/en_singular", "text": "Spikevax", "is_base_form": true}]}
+{"guid": "N16_765", "forms": [{"grammatical_form": "noun/en_singular", "text": "collagen supplement", "is_base_form": true}]}
+{"guid": "N16_766", "forms": [{"grammatical_form": "noun/en_singular", "text": "testosterone medication", "is_base_form": true}]}
+{"guid": "N16_767", "forms": [{"grammatical_form": "noun/en_singular", "text": "medical cannabis", "is_base_form": true}]}
+{"guid": "N16_769", "forms": [{"grammatical_form": "noun/en_singular", "text": "iodine antiseptic", "is_base_form": true}]}
+{"guid": "N16_770", "forms": [{"grammatical_form": "noun/en_singular", "text": "barium", "is_base_form": true}]}
+{"guid": "N16_771", "forms": [{"grammatical_form": "noun/en_singular", "text": "gadolinium-based contrast agent", "is_base_form": true}], "variants": [{"kind": "equivalent", "key": "gadolinium", "forms": [{"grammatical_form": "noun/en_singular", "text": "gadolinium", "is_base_form": true}]}]}
+{"guid": "N16_772", "forms": [{"grammatical_form": "noun/en_singular", "text": "radiation therapy", "is_base_form": true}]}

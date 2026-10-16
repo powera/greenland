@@ -39,7 +39,7 @@
 {"guid": "N54_052", "forms": [{"grammatical_form": "noun/en_singular", "text": "security", "is_base_form": true, "ipa": "/sɪˈkjʊrəti/", "phonetic": "sih-KYOOR-uh-tee"}]}
 {"guid": "N54_054", "forms": [{"grammatical_form": "noun/en_singular", "text": "violation", "is_base_form": true, "ipa": "/ˌvaɪəˈleɪʃən/", "phonetic": "vy-uh-LAY-shun"}]}
 {"guid": "N54_055", "forms": [{"grammatical_form": "noun/en_singular", "text": "reliance", "is_base_form": true, "ipa": "/rɪˈlaɪəns/", "phonetic": "ri-LY-uhns"}]}
-{"guid": "N54_056", "forms": [{"grammatical_form": "noun/en_singular", "text": "regulation", "is_base_form": true, "ipa": "/ˌrɛɡjəˈleɪʃən/", "phonetic": "reg-yuh-LAY-shun"}]}
+{"guid": "N54_056", "forms": [{"grammatical_form": "noun/en_singular", "text": "regulation", "is_base_form": true, "ipa": "/ˌrɛɡjəˈleɪʃən/", "phonetic": "reg-yuh-LAY-shun"}, {"grammatical_form": "noun/en_possessive_singular", "text": "regulation's", "is_base_form": false}]}
 {"guid": "N54_057", "forms": [{"grammatical_form": "noun/en_singular", "text": "imprisonment", "is_base_form": true, "ipa": "/ɪmˈprɪzənmənt/", "phonetic": "im-PRIZ-un-munt"}]}
 {"guid": "N54_058", "forms": [{"grammatical_form": "noun/en_singular", "text": "confinement", "is_base_form": true, "ipa": "/kənˈfaɪnmənt/", "phonetic": "kun-FINE-ment"}]}
 {"guid": "N54_059", "forms": [{"grammatical_form": "noun/en_singular", "text": "burden", "is_base_form": true, "ipa": "/ˈbɝdən/", "phonetic": "BUR-dun"}]}
@@ -72,3 +72,25 @@
 {"guid": "N54_088", "forms": [{"grammatical_form": "noun/en_singular", "text": "celibacy", "is_base_form": true, "ipa": "/ˈsɛləbəsi/", "phonetic": "SEL-uh-buh-see"}]}
 {"guid": "N54_090", "forms": [{"grammatical_form": "noun/en_singular", "text": "caution", "is_base_form": true, "ipa": "/ˈkɔʃən/", "phonetic": "KAW-shun"}]}
 {"guid": "N54_091", "forms": [{"grammatical_form": "noun/en_singular", "text": "title", "is_base_form": true, "ipa": "/ˈtaɪtəl/", "phonetic": "TY-tuhl"}]}
+{"guid": "N54_095", "forms": [{"grammatical_form": "noun/en_singular", "text": "market equilibrium", "is_base_form": true}], "variants": [{"kind": "equivalent", "key": "equilibrium", "forms": [{"grammatical_form": "noun/en_singular", "text": "equilibrium", "is_base_form": true}]}]}
+{"guid": "N54_098", "forms": [{"grammatical_form": "noun/en_singular", "text": "environmental deterioration", "is_base_form": true}], "variants": [{"kind": "equivalent", "key": "degradation", "forms": [{"grammatical_form": "noun/en_singular", "text": "degradation", "is_base_form": true}]}]}
+{"guid": "N54_099", "variants": [{"kind": "equivalent", "key": "summit", "forms": [{"grammatical_form": "noun/en_singular", "text": "summit", "is_base_form": true}]}]}
+{"guid": "N54_100", "forms": [{"grammatical_form": "noun/en_singular", "text": "circus", "is_base_form": true}]}
+{"guid": "N54_107", "forms": [{"grammatical_form": "noun/en_singular", "text": "ethnic identity", "is_base_form": true}]}
+{"guid": "N54_109", "variants": [{"kind": "equivalent", "key": "violation", "forms": [{"grammatical_form": "noun/en_singular", "text": "violation", "is_base_form": true}]}]}
+{"guid": "N54_110", "forms": [{"grammatical_form": "noun/en_singular", "text": "relief", "is_base_form": true}]}
+{"guid": "N54_111", "variants": [{"kind": "equivalent", "key": "privilege", "forms": [{"grammatical_form": "noun/en_singular", "text": "privilege", "is_base_form": true}]}]}
+{"guid": "N54_112", "variants": [{"kind": "equivalent", "key": "failure", "forms": [{"grammatical_form": "noun/en_singular", "text": "failure", "is_base_form": true}]}]}
+{"guid": "N54_114", "forms": [{"grammatical_form": "noun/en_singular", "text": "red tape", "is_base_form": true}]}
+{"guid": "N54_115", "variants": [{"kind": "equivalent", "key": "domination", "forms": [{"grammatical_form": "noun/en_singular", "text": "domination", "is_base_form": true}]}]}
+{"guid": "N54_116", "variants": [{"kind": "equivalent", "key": "vortex", "forms": [{"grammatical_form": "noun/en_singular", "text": "vortex", "is_base_form": true}]}]}
+{"guid": "N54_120", "variants": [{"kind": "equivalent", "key": "community", "forms": [{"grammatical_form": "noun/en_singular", "text": "community", "is_base_form": true}]}]}
+{"guid": "N54_121", "forms": [{"grammatical_form": "noun/en_singular", "text": "anti-Semitism", "is_base_form": true}]}
+{"guid": "N54_122", "forms": [{"grammatical_form": "noun/en_singular", "text": "emotional independence", "is_base_form": true}], "variants": [{"kind": "equivalent", "key": "self-sufficiency", "forms": [{"grammatical_form": "noun/en_singular", "text": "self-sufficiency", "is_base_form": true}]}]}
+{"guid": "N54_123", "forms": [{"grammatical_form": "noun/en_singular", "text": "economic self-sufficiency", "is_base_form": true}], "variants": [{"kind": "equivalent", "key": "self-sufficiency", "forms": [{"grammatical_form": "noun/en_singular", "text": "self-sufficiency", "is_base_form": true}]}]}
+{"guid": "N54_124", "forms": [{"grammatical_form": "noun/en_singular", "text": "afterlife", "is_base_form": true}]}
+{"guid": "N54_126", "forms": [{"grammatical_form": "noun/en_singular", "text": "vacuum", "is_base_form": true}]}
+{"guid": "N54_133", "variants": [{"kind": "equivalent", "key": "custody", "forms": [{"grammatical_form": "noun/en_singular", "text": "custody", "is_base_form": true}]}]}
+{"guid": "N54_135", "forms": [{"grammatical_form": "noun/en_singular", "text": "gas", "is_base_form": true}]}
+{"guid": "N54_137", "forms": [{"grammatical_form": "noun/en_singular", "text": "co-occurrence", "is_base_form": true}], "variants": [{"kind": "equivalent", "key": "conjunction", "forms": [{"grammatical_form": "noun/en_singular", "text": "conjunction", "is_base_form": true}]}]}
+{"guid": "N54_139", "variants": [{"kind": "equivalent", "key": "abuse", "forms": [{"grammatical_form": "noun/en_singular", "text": "abuse", "is_base_form": true}]}]}

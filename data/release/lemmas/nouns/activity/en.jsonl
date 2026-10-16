@@ -60,7 +60,7 @@
 {"guid": "N41_090", "forms": [{"grammatical_form": "noun/en_singular", "text": "ritual", "is_base_form": true, "ipa": "/ˈrɪtʃuəl/", "phonetic": "RICH-oo-uhl"}]}
 {"guid": "N41_091", "forms": [{"grammatical_form": "noun/en_singular", "text": "worship", "is_base_form": true, "ipa": "/ˈwɝːʃɪp/", "phonetic": "WUR-ship"}]}
 {"guid": "N41_092", "forms": [{"grammatical_form": "noun/en_singular", "text": "fasting", "is_base_form": true, "ipa": "/ˈfæstɪŋ/", "phonetic": "FAST-ing"}]}
-{"guid": "N41_093", "forms": [{"grammatical_form": "noun/en_singular", "text": "provision", "is_base_form": true, "ipa": "/prəˈvɪʒən/", "phonetic": "pruh-VIZH-un"}]}
+{"guid": "N41_093", "forms": [{"grammatical_form": "noun/en_singular", "text": "provision", "is_base_form": true, "ipa": "/prəˈvɪʒən/", "phonetic": "pruh-VIZH-un"}, {"grammatical_form": "noun/en_possessive_singular", "text": "provision's", "is_base_form": false}]}
 {"guid": "N41_094", "forms": [{"grammatical_form": "noun/en_singular", "text": "ballot", "is_base_form": true, "ipa": "/ˈbælət/", "phonetic": "BAL-uht"}]}
 {"guid": "N41_095", "forms": [{"grammatical_form": "noun/en_singular", "text": "commerce", "is_base_form": true, "ipa": "/ˈkɑːmɝːs/", "phonetic": "KAH-mers"}]}
 {"guid": "N41_096", "forms": [{"grammatical_form": "noun/en_singular", "text": "refusal", "is_base_form": true, "ipa": "/rɪˈfjuːzəl/", "phonetic": "rih-FYOO-zul"}]}
@@ -147,3 +147,35 @@
 {"guid": "N41_177", "forms": [{"grammatical_form": "noun/en_singular", "text": "Greco-Roman", "is_base_form": true, "ipa": "/ˌɡriːkoʊ ˈroʊmən/", "phonetic": "GREE-ko ROH-muhn"}]}
 {"guid": "N41_178", "forms": [{"grammatical_form": "noun/en_singular", "text": "treat", "is_base_form": true, "ipa": "/triːt/", "phonetic": "TREET"}]}
 {"guid": "N41_180", "forms": [{"grammatical_form": "noun/en_singular", "text": "spelling bee", "is_base_form": true}]}
+{"guid": "N41_182", "forms": [{"grammatical_form": "noun/en_singular", "text": "short ride", "is_base_form": true}]}
+{"guid": "N41_183", "variants": [{"kind": "equivalent", "key": "traffic", "forms": [{"grammatical_form": "noun/en_singular", "text": "traffic", "is_base_form": true}]}]}
+{"guid": "N41_185", "forms": [{"grammatical_form": "noun/en_singular", "text": "exhibition match", "is_base_form": true}], "variants": [{"kind": "equivalent", "key": "exhibition", "forms": [{"grammatical_form": "noun/en_singular", "text": "exhibition", "is_base_form": true}]}]}
+{"guid": "N41_186", "variants": [{"kind": "equivalent", "key": "collection", "forms": [{"grammatical_form": "noun/en_singular", "text": "collection", "is_base_form": true}]}]}
+{"guid": "N41_187", "forms": [{"grammatical_form": "noun/en_singular", "text": "ecological restoration", "is_base_form": true}]}
+{"guid": "N41_192", "variants": [{"kind": "equivalent", "key": "packaging", "forms": [{"grammatical_form": "noun/en_singular", "text": "packaging", "is_base_form": true}]}]}
+{"guid": "N41_193", "forms": [{"grammatical_form": "noun/en_singular", "text": "exercise circuit", "is_base_form": true}], "variants": [{"kind": "equivalent", "key": "circuit", "forms": [{"grammatical_form": "noun/en_singular", "text": "circuit", "is_base_form": true}]}]}
+{"guid": "N41_195", "variants": [{"kind": "equivalent", "key": "weaving", "forms": [{"grammatical_form": "noun/en_singular", "text": "weaving", "is_base_form": true}]}]}
+{"guid": "N41_198", "forms": [{"grammatical_form": "noun/en_singular", "text": "religious service", "is_base_form": true}]}
+{"guid": "N41_199", "forms": [{"grammatical_form": "noun/en_singular", "text": "self-assertion", "is_base_form": true}]}
+{"guid": "N41_201", "forms": [{"grammatical_form": "noun/en_singular", "text": "collage-making", "is_base_form": true}]}
+{"guid": "N41_202", "forms": [{"grammatical_form": "noun/en_singular", "text": "burlesque performance", "is_base_form": true}], "variants": [{"kind": "equivalent", "key": "burlesque", "forms": [{"grammatical_form": "noun/en_singular", "text": "burlesque", "is_base_form": true}]}]}
+{"guid": "N41_203", "forms": [{"grammatical_form": "noun/en_singular", "text": "watercolor painting", "is_base_form": true}], "variants": [{"kind": "equivalent", "key": "watercolor", "forms": [{"grammatical_form": "noun/en_singular", "text": "watercolor", "is_base_form": true}]}]}
+{"guid": "N41_204", "variants": [{"kind": "equivalent", "key": "compilation", "forms": [{"grammatical_form": "noun/en_singular", "text": "compilation", "is_base_form": true}]}]}
+{"guid": "N41_205", "forms": [{"grammatical_form": "noun/en_singular", "text": "fresco painting", "is_base_form": true}], "variants": [{"kind": "equivalent", "key": "fresco", "forms": [{"grammatical_form": "noun/en_singular", "text": "fresco", "is_base_form": true}]}]}
+{"guid": "N41_206", "forms": [{"grammatical_form": "noun/en_singular", "text": "ballroom dancing", "is_base_form": true}]}
+{"guid": "N41_209", "forms": [{"grammatical_form": "noun/en_singular", "text": "archaeological dig", "is_base_form": true}], "variants": [{"kind": "equivalent", "key": "excavation", "forms": [{"grammatical_form": "noun/en_singular", "text": "excavation", "is_base_form": true}]}]}
+{"guid": "N41_213", "variants": [{"kind": "equivalent", "key": "registration", "forms": [{"grammatical_form": "noun/en_singular", "text": "registration", "is_base_form": true}]}]}
+{"guid": "N41_221", "forms": [{"grammatical_form": "noun/en_singular", "text": "empirical method", "is_base_form": true}], "variants": [{"kind": "equivalent", "key": "empiricism", "forms": [{"grammatical_form": "noun/en_singular", "text": "empiricism", "is_base_form": true}]}]}
+{"guid": "N41_222", "variants": [{"kind": "equivalent", "key": "clap", "forms": [{"grammatical_form": "noun/en_singular", "text": "clap", "is_base_form": true}]}]}
+{"guid": "N41_223", "variants": [{"kind": "equivalent", "key": "cultivation", "forms": [{"grammatical_form": "noun/en_singular", "text": "cultivation", "is_base_form": true}]}]}
+{"guid": "N41_224", "variants": [{"kind": "equivalent", "key": "cultivation", "forms": [{"grammatical_form": "noun/en_singular", "text": "cultivation", "is_base_form": true}]}]}
+{"guid": "N41_226", "forms": [{"grammatical_form": "noun/en_singular", "text": "game campaign", "is_base_form": true}], "variants": [{"kind": "equivalent", "key": "campaign", "forms": [{"grammatical_form": "noun/en_singular", "text": "campaign", "is_base_form": true}]}]}
+{"guid": "N41_228", "forms": [{"grammatical_form": "noun/en_singular", "text": "physical conditioning", "is_base_form": true}], "variants": [{"kind": "equivalent", "key": "conditioning", "forms": [{"grammatical_form": "noun/en_singular", "text": "conditioning", "is_base_form": true}]}]}
+{"guid": "N41_232", "forms": [{"grammatical_form": "noun/en_singular", "text": "qualifying competition", "is_base_form": true}], "variants": [{"kind": "equivalent", "key": "trial", "forms": [{"grammatical_form": "noun/en_singular", "text": "trial", "is_base_form": true}]}]}
+{"guid": "N41_236", "forms": [{"grammatical_form": "noun/en_singular", "text": "basso continuo", "is_base_form": true}], "variants": [{"kind": "equivalent", "key": "continuo", "forms": [{"grammatical_form": "noun/en_singular", "text": "continuo", "is_base_form": true}]}]}
+{"guid": "N41_237", "forms": [{"grammatical_form": "noun/en_singular", "text": "electrolysis", "is_base_form": true}]}
+{"guid": "N41_238", "variants": [{"kind": "equivalent", "key": "emption", "forms": [{"grammatical_form": "noun/en_singular", "text": "emption", "is_base_form": true}]}]}
+{"guid": "N41_241", "forms": [{"grammatical_form": "noun/en_singular", "text": "nonviolent action", "is_base_form": true}], "variants": [{"kind": "equivalent", "key": "non-violence", "forms": [{"grammatical_form": "noun/en_singular", "text": "non-violence", "is_base_form": true}]}]}
+{"guid": "N41_244", "forms": [{"grammatical_form": "noun/en_singular", "text": "indoor cycling", "is_base_form": true}], "variants": [{"kind": "equivalent", "key": "spinning", "forms": [{"grammatical_form": "noun/en_singular", "text": "spinning", "is_base_form": true}]}]}
+{"guid": "N41_247", "forms": [{"grammatical_form": "noun/en_singular", "text": "make-up", "is_base_form": true}]}
+{"guid": "N41_248", "forms": [{"grammatical_form": "noun/en_singular", "text": "run-up", "is_base_form": true}]}

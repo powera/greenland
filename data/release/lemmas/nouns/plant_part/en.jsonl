@@ -23,3 +23,5 @@
 {"guid": "N38_026", "forms": [{"grammatical_form": "noun/en_singular", "text": "xylem", "is_base_form": true, "ipa": "/ˈzaɪləm/", "phonetic": "ZY-lem"}]}
 {"guid": "N38_027", "forms": [{"grammatical_form": "noun/en_singular", "text": "rough", "is_base_form": true, "ipa": "/rʌf/", "phonetic": "RUHF"}]}
 {"guid": "N38_028", "forms": [{"grammatical_form": "noun/en_singular", "text": "divot", "is_base_form": true, "ipa": "/ˈdɪvət/", "phonetic": "DIV-uht"}]}
+{"guid": "N38_030", "forms": [{"grammatical_form": "noun/en_singular", "text": "hop flower", "is_base_form": true}], "variants": [{"kind": "equivalent", "key": "hop", "forms": [{"grammatical_form": "noun/en_singular", "text": "hop", "is_base_form": true}]}]}
+{"guid": "N38_031", "forms": [{"grammatical_form": "noun/en_singular", "text": "chive leaves", "is_base_form": true}]}

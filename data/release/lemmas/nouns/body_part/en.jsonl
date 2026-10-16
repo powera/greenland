@@ -26,7 +26,7 @@
 {"guid": "N03_027", "forms": [{"grammatical_form": "noun/en_singular", "text": "hair", "is_base_form": true, "ipa": "/hɛər/", "phonetic": "HEER"}]}
 {"guid": "N03_028", "forms": [{"grammatical_form": "noun/en_singular", "text": "bone", "is_base_form": true, "ipa": "/boʊn/", "phonetic": "BOWN"}]}
 {"guid": "N03_029", "forms": [{"grammatical_form": "noun/en_singular", "text": "muscle", "is_base_form": true, "ipa": "/ˈmʌsəl/", "phonetic": "MUZ-sul"}]}
-{"guid": "N03_030", "forms": [{"grammatical_form": "noun/en_singular", "text": "heart", "is_base_form": true, "ipa": "/hɜrt/", "phonetic": "HURT"}]}
+{"guid": "N03_030", "forms": [{"grammatical_form": "noun/en_singular", "text": "heart", "is_base_form": true, "ipa": "/hɜrt/", "phonetic": "HURT"}, {"grammatical_form": "noun/en_possessive_singular", "text": "heart's", "is_base_form": false}]}
 {"guid": "N03_031", "forms": [{"grammatical_form": "noun/en_singular", "text": "lung", "is_base_form": true, "ipa": "/lʌŋ/", "phonetic": "LONG"}]}
 {"guid": "N03_032", "forms": [{"grammatical_form": "noun/en_singular", "text": "brain", "is_base_form": true, "ipa": "/breɪn/", "phonetic": "BRAIN"}]}
 {"guid": "N03_033", "forms": [{"grammatical_form": "noun/en_singular", "text": "kidney", "is_base_form": true, "ipa": "/ˈkɪdni/", "phonetic": "KIH-dnee"}]}
@@ -78,3 +78,7 @@
 {"guid": "N03_102", "forms": [{"grammatical_form": "noun/en_singular", "text": "circumcision", "is_base_form": true, "ipa": "/ˌsɝːkəmˈsɪʒən/", "phonetic": "sur-kum-SIZH-un"}]}
 {"guid": "N03_104", "forms": [{"grammatical_form": "noun/en_singular", "text": "beard", "is_base_form": true, "ipa": "/bɪrd/", "phonetic": "BEERD"}]}
 {"guid": "N03_106", "forms": [{"grammatical_form": "noun/en_singular", "text": "beard", "is_base_form": true, "ipa": "/bɪrd/", "phonetic": "BEERD"}]}
+{"guid": "N03_114", "forms": [{"grammatical_form": "noun/en_singular", "text": "epithelium", "is_base_form": true}]}
+{"guid": "N03_115", "forms": [{"grammatical_form": "noun/en_singular", "text": "pelvic cavity", "is_base_form": true}]}
+{"guid": "N03_119", "forms": [{"grammatical_form": "noun/en_singular", "text": "eye socket", "is_base_form": true}]}
+{"guid": "N03_120", "forms": [{"grammatical_form": "noun/en_singular", "text": "relics", "is_base_form": true}]}

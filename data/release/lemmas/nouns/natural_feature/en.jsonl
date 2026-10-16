@@ -1,13 +1,13 @@
 {"guid": "N11_001", "forms": [{"grammatical_form": "noun/en_singular", "text": "mountain", "is_base_form": true, "ipa": "/ˈmaʊn.t̬ən/", "phonetic": "MOHN-tin"}]}
 {"guid": "N11_002", "forms": [{"grammatical_form": "noun/en_singular", "text": "hill", "is_base_form": true, "ipa": "hɪl", "phonetic": "HIL"}], "variants": [{"kind": "spelling", "key": "Hill", "forms": [{"grammatical_form": "noun/en_singular", "text": "Hill", "is_base_form": true}]}]}
 {"guid": "N11_003", "forms": [{"grammatical_form": "noun/en_singular", "text": "valley", "is_base_form": true, "ipa": "/ˈvæli/", "phonetic": "VAL-y"}], "variants": [{"kind": "spelling", "key": "Valley", "forms": [{"grammatical_form": "noun/en_singular", "text": "Valley", "is_base_form": true}]}]}
-{"guid": "N11_004", "forms": [{"grammatical_form": "noun/en_singular", "text": "river", "is_base_form": true, "ipa": "/ˈrɪvər/", "phonetic": "RIV-ər"}], "variants": [{"kind": "spelling", "key": "River", "forms": [{"grammatical_form": "noun/en_singular", "text": "River", "is_base_form": true}]}]}
-{"guid": "N11_005", "forms": [{"grammatical_form": "noun/en_singular", "text": "lake", "is_base_form": true, "ipa": "/leɪk/", "phonetic": "LAYK"}], "variants": [{"kind": "spelling", "key": "Lake", "forms": [{"grammatical_form": "noun/en_singular", "text": "Lake", "is_base_form": true}]}]}
+{"guid": "N11_004", "forms": [{"grammatical_form": "noun/en_singular", "text": "river", "is_base_form": true, "ipa": "/ˈrɪvər/", "phonetic": "RIV-ər"}, {"grammatical_form": "noun/en_possessive_singular", "text": "river's", "is_base_form": false}], "variants": [{"kind": "spelling", "key": "River", "forms": [{"grammatical_form": "noun/en_singular", "text": "River", "is_base_form": true}]}]}
+{"guid": "N11_005", "forms": [{"grammatical_form": "noun/en_singular", "text": "lake", "is_base_form": true, "ipa": "/leɪk/", "phonetic": "LAYK"}, {"grammatical_form": "noun/en_possessive_singular", "text": "lake's", "is_base_form": false}], "variants": [{"kind": "spelling", "key": "Lake", "forms": [{"grammatical_form": "noun/en_singular", "text": "Lake", "is_base_form": true}]}]}
 {"guid": "N11_006", "forms": [{"grammatical_form": "noun/en_singular", "text": "ocean", "is_base_form": true, "ipa": "/ˈoʊʃən/", "phonetic": "OH-shən"}]}
 {"guid": "N11_007", "forms": [{"grammatical_form": "noun/en_singular", "text": "sea", "is_base_form": true, "ipa": "/siː/", "phonetic": "SEE"}], "variants": [{"kind": "spelling", "key": "Sea", "forms": [{"grammatical_form": "noun/en_singular", "text": "Sea", "is_base_form": true}]}]}
 {"guid": "N11_008", "forms": [{"grammatical_form": "noun/en_singular", "text": "beach", "is_base_form": true, "ipa": "/biːtʃ/", "phonetic": "BEECH"}]}
 {"guid": "N11_009", "forms": [{"grammatical_form": "noun/en_singular", "text": "coast", "is_base_form": true, "ipa": "/kəʊst/", "phonetic": "KOH-st"}]}
-{"guid": "N11_010", "forms": [{"grammatical_form": "noun/en_singular", "text": "island", "is_base_form": true, "ipa": "/ˈaɪlænd/", "phonetic": "EYE-land"}], "variants": [{"kind": "spelling", "key": "Island", "forms": [{"grammatical_form": "noun/en_singular", "text": "Island", "is_base_form": true}]}]}
+{"guid": "N11_010", "forms": [{"grammatical_form": "noun/en_singular", "text": "island", "is_base_form": true, "ipa": "/ˈaɪlænd/", "phonetic": "EYE-land"}, {"grammatical_form": "noun/en_possessive_singular", "text": "island's", "is_base_form": false}], "variants": [{"kind": "spelling", "key": "Island", "forms": [{"grammatical_form": "noun/en_singular", "text": "Island", "is_base_form": true}]}]}
 {"guid": "N11_011", "forms": [{"grammatical_form": "noun/en_singular", "text": "peninsula", "is_base_form": true, "ipa": "/pɛnɪˈsjuːlə/", "phonetic": "PEH-nih-SHOO-uhl"}]}
 {"guid": "N11_012", "forms": [{"grammatical_form": "noun/en_singular", "text": "desert", "is_base_form": true, "ipa": " /ˈdɛz.ɚt/", "phonetic": "DEZ-ert"}]}
 {"guid": "N11_013", "forms": [{"grammatical_form": "noun/en_singular", "text": "plateau", "is_base_form": true, "ipa": "/plɑːˈtæw/", "phonetic": "PLAH-tow"}]}
@@ -32,6 +32,7 @@
 {"guid": "N11_056", "forms": [{"grammatical_form": "noun/en_singular", "text": "surface", "is_base_form": true, "ipa": "/sɝːfɪs/", "phonetic": "SUR-fis"}]}
 {"guid": "N11_057", "forms": [{"grammatical_form": "noun/en_singular", "text": "stream", "is_base_form": true, "ipa": "strɪm", "phonetic": "STREAM"}]}
 {"guid": "N11_058", "forms": [{"grammatical_form": "noun/en_singular", "text": "shore", "is_base_form": true, "ipa": "ʃɔːr", "phonetic": "SHOHR"}]}
+{"guid": "N11_060", "forms": [{"grammatical_form": "noun/en_possessive_singular", "text": "bank's", "is_base_form": false}]}
 {"guid": "N11_071", "forms": [{"grammatical_form": "noun/en_singular", "text": "mountain range", "is_base_form": true}]}
 {"guid": "N11_072", "forms": [{"grammatical_form": "noun/en_singular", "text": "coral reef", "is_base_form": true}]}
 {"guid": "N11_073", "forms": [{"grammatical_form": "noun/en_singular", "text": "sand dune", "is_base_form": true}]}
@@ -61,3 +62,8 @@
 {"guid": "N11_104", "forms": [{"grammatical_form": "noun/en_singular", "text": "channel", "is_base_form": true, "ipa": "/ˈtʃænəl/", "phonetic": "CHAN-uhl"}]}
 {"guid": "N11_105", "forms": [{"grammatical_form": "noun/en_singular", "text": "moguls", "is_base_form": true, "ipa": "/ˈmɑːɡəlz/", "phonetic": "MAW-gulz"}]}
 {"guid": "N11_106", "forms": [{"grammatical_form": "noun/en_singular", "text": "forest", "is_base_form": true, "ipa": "/fɔːrɛst/", "phonetic": "FOR-est"}]}
+{"guid": "N11_107", "forms": [{"grammatical_form": "noun/en_singular", "text": "rock structure", "is_base_form": true}], "variants": [{"kind": "equivalent", "key": "formation", "forms": [{"grammatical_form": "noun/en_singular", "text": "formation", "is_base_form": true}]}]}
+{"guid": "N11_108", "forms": [{"grammatical_form": "noun/en_singular", "text": "ozone layer", "is_base_form": true}]}
+{"guid": "N11_109", "forms": [{"grammatical_form": "noun/en_singular", "text": "shale deposit", "is_base_form": true}]}
+{"guid": "N11_110", "forms": [{"grammatical_form": "noun/en_singular", "text": "elements", "is_base_form": true}], "variants": [{"kind": "equivalent", "key": "element", "forms": [{"grammatical_form": "noun/en_singular", "text": "element", "is_base_form": true}]}]}
+{"guid": "N11_111", "forms": [{"grammatical_form": "noun/en_singular", "text": "headwaters", "is_base_form": true}]}

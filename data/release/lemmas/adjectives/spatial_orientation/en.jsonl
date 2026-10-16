@@ -33,3 +33,8 @@
 {"guid": "A21_033", "forms": [{"grammatical_form": "adjective/en_positive", "text": "locative", "is_base_form": true, "ipa": "/ˈlɑkətɪv/", "phonetic": "LOK-uh-tiv"}]}
 {"guid": "A21_034", "forms": [{"grammatical_form": "adjective/en_positive", "text": "face down", "is_base_form": true, "ipa": "/ˌfeɪs ˈdaʊn/", "phonetic": "FAYS-DOWN"}]}
 {"guid": "A21_035", "forms": [{"grammatical_form": "adjective/en_positive", "text": "orthodox", "is_base_form": true, "ipa": "/ˈɔrθəˌdɑks/", "phonetic": "OR-thuh-doks"}]}
+{"guid": "A21_038", "forms": [{"grammatical_form": "adjective/en_positive", "text": "direct", "is_base_form": true}]}
+{"guid": "A21_039", "forms": [{"grammatical_form": "adjective/en_positive", "text": "long-distance", "is_base_form": true}]}
+{"guid": "A21_040", "forms": [{"grammatical_form": "adjective/en_positive", "text": "long-range", "is_base_form": true}]}
+{"guid": "A21_041", "forms": [{"grammatical_form": "adjective/en_positive", "text": "one-way", "is_base_form": true}]}
+{"guid": "A21_042", "forms": [{"grammatical_form": "adjective/en_positive", "text": "two-way", "is_base_form": true}]}
