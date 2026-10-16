@@ -152,7 +152,7 @@ def query_definitions(
                             "string", "The base form (lemma) for this definition"
                         ),
                         # No grammatical_form property: this prompt analyses one
-                        # English word per definition and process_word records a
+                        # English word per definition and add_word records a
                         # single form, so the form follows from pos_type and is
                         # derived by determine_default_grammatical_form. Listing
                         # the enum here meant sending all 1238 GrammaticalForm

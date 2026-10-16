@@ -42,7 +42,9 @@ from storage.backend.config import BackendType, DataSourceConfig
 from storage.models.imports import PendingImport
 from storage.models.schema import DerivativeForm, Lemma, WordToken
 from storage.queries.lemma import filter_existing_english_words
+from storage.translation_helpers import convert_llm_response_to_lang_codes
 from wordfreq.translation.client import LinguisticClient
+from words.add_word import add_word
 
 # Configure logging
 configure_logging()
@@ -410,10 +412,13 @@ Only include words where you're confident they have a {pos_subtype} {pos_type} m
                     if success and definitions_list:
                         for defn in definitions_list:
                             if (
-                                defn.get("pos_type") == pos_type
+                                defn.get("pos") == pos_type
                                 and defn.get("pos_subtype") == pos_subtype
                             ):
-                                translation = defn.get("translations", {}).get(target_language, "")
+                                translation = (
+                                    convert_llm_response_to_lang_codes(defn).get(target_language)
+                                    or ""
+                                )
                                 break
 
                     if not translation:
@@ -442,15 +447,27 @@ Only include words where you're confident they have a {pos_subtype} {pos_type} m
                     failed += 1
                     session.rollback()
             else:
-                # Process the word directly to get all definitions
-                success = client.process_word(word, refresh=False)
+                # Add the word's senses of this part of speech; add_word skips a
+                # word that already has one.
+                add_result = add_word(
+                    session,
+                    word,
+                    config=self.config,
+                    source=f"dramblys_subtype_{pos_subtype}",
+                    pos_type=pos_type,
+                )
 
-                if success:
+                if add_result.status == "already_exists":
+                    skipped += 1
+                    logger.info(f"'{word}' already has a {pos_type} sense, skipping")
+                elif add_result.status in ("created", "pending_review"):
                     successful += 1
-                    logger.info(f"Successfully added '{word}'")
+                    logger.info(f"Added '{word}' ({add_result.status})")
                 else:
                     failed += 1
-                    logger.error(f"Failed to add '{word}'")
+                    logger.error(
+                        f"Failed to add '{word}': {add_result.status} {add_result.error or ''}"
+                    )
 
             # Throttle
             if i < len(matches):
@@ -695,8 +712,7 @@ Only include words where you're confident they have a {pos_subtype} {pos_type} m
                 "sample": words_to_process[:20],
             }
 
-        # Initialize client for LLM-based processing
-        client = LinguisticClient(model=model, db_path=self.db_path, debug=self.debug)
+        session = self.get_session()
 
         # Process each word
         successful = 0
@@ -708,18 +724,22 @@ Only include words where you're confident they have a {pos_subtype} {pos_type} m
                 f"\n[{i}/{len(words_to_process)}] Processing: '{word}' (rank: {word_info['overall_rank']})"
             )
 
-            success = client.process_word(word, refresh=False)
+            add_result = add_word(session, word, config=self.config, model=model, source="dramblys")
 
-            if success:
+            if add_result.status in ("created", "pending_review", "already_exists"):
                 successful += 1
-                logger.info(f"Successfully processed '{word}'")
+                logger.info(f"Processed '{word}' ({add_result.status})")
             else:
                 failed += 1
-                logger.error(f"Failed to process '{word}'")
+                logger.error(
+                    f"Failed to process '{word}': {add_result.status} {add_result.error or ''}"
+                )
 
             # Throttle to avoid overloading the API
             if i < len(words_to_process):
                 time.sleep(throttle)
+
+        session.close()
 
         logger.info(f"\n{'='*60}")
         logger.info(f"Fix complete:")

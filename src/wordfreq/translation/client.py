@@ -15,7 +15,6 @@ from storage.backend import create_session
 from wordfreq.translation import (
     definitions,
     translations,
-    word_processing,
 )
 from wordfreq.translation.constants import DEFAULT_MODEL
 
@@ -181,8 +180,3 @@ class LinguisticClient:
             languages,
             self.model,
         )
-
-    # Word processing
-    def process_word(self, word: str, refresh: bool = False) -> bool:
-        """Process a word to get linguistic information and store in database."""
-        return word_processing.process_word(self.client, word, self.get_session, refresh)

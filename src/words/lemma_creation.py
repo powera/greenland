@@ -9,9 +9,8 @@ English base form, which is everything the lemma needs to be usable.
 
 It is shared by :func:`words.add_word.add_word` and by pending-import approval,
 so a word added directly and a word approved from the queue are written the
-same way.  It does not go through ``wordfreq.translation.word_processing``,
-whose ``process_word`` is a token-level bulk importer: it skips any token that
-already has forms, so it cannot add a second sense to an existing word.
+same way.  It works per sense rather than per token, so it can add a second
+sense to a word that already has forms.
 
 This module deliberately imports nothing from ``words.pending_imports``, so the
 approval code can import it at module scope.
