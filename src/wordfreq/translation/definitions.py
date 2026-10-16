@@ -136,9 +136,7 @@ def query_definitions(
                     description="A single form/definition of the word",
                     properties={
                         "definition": SchemaProperty(
-                            "string",
-                            "The meaning of the lemma in this sense, without describing "
-                            "the grammatical form (no 'past tense of ...')",
+                            "string", "The meaning of the lemma in this sense"
                         ),
                         "pos": SchemaProperty(
                             "string",
