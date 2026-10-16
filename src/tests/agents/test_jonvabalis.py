@@ -26,7 +26,6 @@ from agents.jonvabalis import (
     is_spacing_variant,
     queried_word_variant,
     is_subtype_review,
-    queried_word_is_missing,
     select_pending_rows,
     spacing_key,
 )
@@ -142,10 +141,6 @@ class TestRowKinds(JonvabalisTestCase):
         self.assertTrue(is_subtype_review(self.stage("capital", notes=SUBTYPE_REVIEW_NOTE)))
         self.assertFalse(is_subtype_review(self.stage("realm", "world")))
 
-    def test_a_spacing_variant_is_not_waiting_on_its_queried_word(self) -> None:
-        self.assertFalse(queried_word_is_missing(self.session, self.stage("breakup", "break-up")))
-        self.assertTrue(queried_word_is_missing(self.session, self.stage("destroy", "consumed")))
-
 
 class TestSelectPendingRows(JonvabalisTestCase):
     def setUp(self) -> None:
@@ -161,7 +156,11 @@ class TestSelectPendingRows(JonvabalisTestCase):
             "capital", notes=SUBTYPE_REVIEW_NOTE, pos_subtype="noun_other"
         )
         self.spacing_neither_lemma = self.stage("breakup", "break-up")
-        self.queried_missing = self.stage("destroy", "consumed")
+        # add_word queued every sense of "gather", so it has no lemma yet.
+        self.queried_not_lemma = self.stage("accumulate", "gather")
+        self.subtype_review_not_lemma = self.stage(
+            "ledger", "ledger", notes=SUBTYPE_REVIEW_NOTE, pos_subtype="noun_other"
+        )
 
     def selected_ids(self, **kwargs: Any) -> set:
         return {row.id for row in select_pending_rows(self.session, 100, **kwargs)}
@@ -173,12 +172,15 @@ class TestSelectPendingRows(JonvabalisTestCase):
                 self.new_head_word.id,
                 self.subtype_review_existing.id,
                 self.spacing_neither_lemma.id,
+                self.queried_not_lemma.id,
+                self.subtype_review_not_lemma.id,
             },
         )
 
     def test_only_subtype_review(self) -> None:
         self.assertEqual(
-            self.selected_ids(only=ONLY_SUBTYPE_REVIEW), {self.subtype_review_existing.id}
+            self.selected_ids(only=ONLY_SUBTYPE_REVIEW),
+            {self.subtype_review_existing.id, self.subtype_review_not_lemma.id},
         )
 
     def test_only_spacing_variants(self) -> None:

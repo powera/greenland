@@ -43,6 +43,10 @@ TOMBSTONE_REASON_RELEASE_REMOVAL: str = "release_removal"
 #: A GUID reassigned by hand, e.g. through the Barsukas edit form.
 TOMBSTONE_REASON_MANUAL_CORRECTION: str = "manual_correction"
 
+#: The lemma restated a sense another lemma already holds and was deleted.
+#: Unlike a synonym merge, nothing of it is kept on the surviving lemma.
+TOMBSTONE_REASON_DUPLICATE_SENSE: str = "duplicate_sense"
+
 TOMBSTONE_REASONS: frozenset[str] = frozenset(
     {
         TOMBSTONE_REASON_TYPE_CHANGE,
@@ -54,6 +58,7 @@ TOMBSTONE_REASONS: frozenset[str] = frozenset(
         TOMBSTONE_REASON_RELEASE_HISTORY_GAP,
         TOMBSTONE_REASON_RELEASE_REMOVAL,
         TOMBSTONE_REASON_MANUAL_CORRECTION,
+        TOMBSTONE_REASON_DUPLICATE_SENSE,
     }
 )
 

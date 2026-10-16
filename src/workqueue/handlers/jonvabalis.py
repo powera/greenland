@@ -23,7 +23,6 @@ from agents.jonvabalis import (
     build_context,
     build_prompt,
     prompt_senses,
-    queried_word_is_missing,
     shown_lemma_ids,
 )
 from clients.lib import schema_from_dict
@@ -60,8 +59,6 @@ def _prepare_review(
     pending = _current_row(session, state)
     if isinstance(pending, Done):
         return pending
-    if queried_word_is_missing(session, pending):
-        return Done("skipped", f"queried word {pending.queried_word!r} is not a lemma yet")
     existing_senses, proposed_senses = prompt_senses(session, pending)
     state["shown_lemma_ids"] = shown_lemma_ids(existing_senses, proposed_senses)
     return LLMCall(

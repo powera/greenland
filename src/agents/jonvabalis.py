@@ -46,9 +46,12 @@ where they contain the chosen head word.  The proposed word is often only a
 near-synonym ("representative" for a brand ambassador), so the model is asked
 whether the queried word itself carries the meaning before moving it.
 
-A row queried under a word that is not yet a lemma ("consumed", with no
-"consume") is skipped without an LLM call: it is a minor sense of a word whose
-main senses have never been added, and add_word should add those first.
+A row whose queried word is not a lemma at all is reviewed like any other.
+add_word has already run for that word and queued every sense it found --
+"gather" glossed as "accumulate", "draw together", ... -- so nothing else will
+add it.  Each sense is filed under the queried word or the proposed one by the
+same head-word questions, and the first one filed under the queried word
+becomes its first lemma.
 
 The review prompt does not ask for a level.  Placing one sense among
 thousands of lemmas needs the whole level band in view, which a single-row
@@ -421,9 +424,9 @@ def select_pending_rows(
 ) -> List[PendingImport]:
     """Return the queued lemma rows this agent can review.
 
-    That is rows whose proposed head word is not yet a lemma and whose queried
-    word is; plus subtype-review rows, whatever the head word; plus spacing
-    variants, whatever either word.  ``only`` (one of ``ONLY_KINDS``) narrows
+    That is rows whose proposed head word is not yet a lemma, whether or not
+    the queried word is; plus subtype-review rows and spacing variants,
+    whatever either word.  ``only`` (one of ``ONLY_KINDS``) narrows
     it to one of the latter two kinds, and ``pos_type`` to one part of speech.
 
     Explicit ``pending_ids`` are returned as given, so a specific row can be
@@ -435,10 +438,6 @@ def select_pending_rows(
         return query.filter(PendingImport.id.in_(list(pending_ids))).all()
 
     existing_lemma_texts = session.query(Lemma.lemma_text)
-    # See queried_word_is_missing: such rows wait for add_word.
-    queried_word_exists = PendingImport.queried_word.is_(None) | PendingImport.queried_word.in_(
-        existing_lemma_texts
-    )
     subtype_review = PendingImport.notes.contains(SUBTYPE_REVIEW_NOTE)
     spacing_variant = (
         PendingImport.queried_word.isnot(None)
@@ -450,14 +449,12 @@ def select_pending_rows(
     )
 
     if only == ONLY_SUBTYPE_REVIEW:
-        query = query.filter(subtype_review & queried_word_exists)
+        query = query.filter(subtype_review)
     elif only == ONLY_SPACING_VARIANTS:
         query = query.filter(spacing_variant)
     else:
         query = query.filter(
-            (~PendingImport.english_word.in_(existing_lemma_texts) & queried_word_exists)
-            | (subtype_review & queried_word_exists)
-            | spacing_variant
+            ~PendingImport.english_word.in_(existing_lemma_texts) | subtype_review | spacing_variant
         )
     if pos_type:
         query = query.filter(PendingImport.pos_type == pos_type)
@@ -523,21 +520,6 @@ def prompt_senses(
 def shown_lemma_ids(*sense_lists: Sequence[Dict[str, Any]]) -> List[int]:
     """The ids of every lemma a prompt showed, for :meth:`JonvabalisAgent.approve_distinct`."""
     return sorted({sense["lemma_id"] for senses in sense_lists for sense in senses})
-
-
-def queried_word_is_missing(session: Session, pending: PendingImport) -> bool:
-    """Whether the row was queried under a word that is not yet a lemma.
-
-    Such a row ("consumed" -> "destroy", with no "consume" in the database) is
-    one sense of a word whose main senses have never been added.  Resolving it
-    here would make a minor sense the word's first lemma, so it waits until the
-    word itself goes through add_word.  A row with no queried word at all has
-    nothing to wait for, and nor does a spacing variant: there the queried
-    word is the proposed word, written differently.
-    """
-    if not pending.queried_word or is_spacing_variant(pending):
-        return False
-    return session.query(Lemma.id).filter(Lemma.lemma_text == pending.queried_word).first() is None
 
 
 def spellings_of(pending: PendingImport) -> List[str]:
@@ -675,7 +657,10 @@ def build_context(pos_type: Optional[str]) -> str:
         "labels. Only an existing sense with the same pos_type as this row can cover it: "
         "the adverb 'worldwide' (sold worldwide) is not covered by the adjective "
         "'worldwide' (a worldwide campaign), nor the noun 'firstborn' (their firstborn) by "
-        "the adjective. If it is covered, answer 'duplicate' and name the lemma id. "
+        "the adjective. Subtype plays no part in this comparison: a sense with the same "
+        "meaning is covered even when its pos_subtype differs, since the proposed subtype "
+        "is often a guess or a placeholder. "
+        "If it is covered, answer 'duplicate' and name the lemma id. "
         "Then say how the proposed head word relates to that sense, in "
         "proposed_word_relation: 'equivalent' only if it substitutes for the queried word "
         "in most sentences using this sense, and this is its main meaning ('allocate' for "
@@ -861,22 +846,6 @@ class JonvabalisAgent:
                     pending.queried_word,
                     pending.english_word,
                 )
-                if queried_word_is_missing(session, pending):
-                    # Checked before the LLM call: the answer is known already.
-                    results.append(
-                        {
-                            "pending_id": pending.id,
-                            "queried_word": pending.queried_word,
-                            "proposed_head_word": pending.english_word,
-                            "proposed_pos_subtype": pending.pos_subtype,
-                            "decision": {},
-                            "outcome": self.leave_in_queue(
-                                f"queried word {pending.queried_word!r} is not a lemma yet; "
-                                "add it with add_word first"
-                            ),
-                        }
-                    )
-                    continue
                 result = self.review_row(session, pending)
                 result["outcome"] = self.apply_decision(
                     session, pending, result["decision"], result["shown_lemma_ids"]
