@@ -45,7 +45,7 @@ from sqlalchemy import (
 )
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
-from storage.elements.interfaces import LanguageValue
+from storage.elements.interfaces import ElementRef, LanguageValue
 from storage.models.schema import Base
 
 # Closed vocabulary for Name.kind. Extend this tuple rather than inventing
@@ -145,6 +145,9 @@ class Name(Base):
     translations = relationship(
         "NameTranslation", back_populates="name", cascade="all, delete-orphan"
     )
+    derivative_forms = relationship(
+        "NameDerivativeForm", back_populates="name", cascade="all, delete-orphan"
+    )
 
     @property
     def kind_label(self) -> str:
@@ -223,4 +226,69 @@ class NameTranslation(Base):
         return (
             f"<NameTranslation(name_id={self.name_id}, "
             f"language_code={self.language_code!r}, translation={self.translation!r})>"
+        )
+
+
+class NameDerivativeForm(Base):
+    """One surface form of a name in one language ("John", "John's", "Džonui").
+
+    The name-side twin of :class:`~storage.models.schema.DerivativeForm`, with
+    the same column names so code written against one reads the other; only
+    the owner differs (``name_id`` where a lemma form has ``lemma_id``). It is a
+    separate table rather than a nullable owner on ``derivative_forms`` because
+    every lemma pipeline that reads forms would otherwise have to learn to skip
+    names. Consumers that should see both go through
+    :mod:`storage.token_forms`.
+    """
+
+    __tablename__ = "name_derivative_forms"
+    __table_args__ = (
+        UniqueConstraint(
+            "name_id",
+            "language_code",
+            "grammatical_form",
+            "derivative_form_text",
+            name="uq_name_derivative_form",
+        ),
+    )
+
+    id: Mapped[int] = mapped_column(Integer, primary_key=True, autoincrement=True)
+    name_id: Mapped[int] = mapped_column(
+        Integer, ForeignKey("names.id", ondelete="CASCADE"), nullable=False, index=True
+    )
+    derivative_form_text: Mapped[str] = mapped_column(String, nullable=False, index=True)
+
+    # Set by storage.token_forms linking; NULL until a matching WordToken exists.
+    word_token_id: Mapped[Optional[int]] = mapped_column(
+        ForeignKey("word_tokens.id"), nullable=True, index=True
+    )
+    language_code: Mapped[str] = mapped_column(String, nullable=False, index=True)
+    grammatical_form: Mapped[str] = mapped_column(String, nullable=False)
+    is_base_form: Mapped[bool] = mapped_column(Boolean, default=False)
+
+    ipa_pronunciation: Mapped[Optional[str]] = mapped_column(String, nullable=True)
+    phonetic_pronunciation: Mapped[Optional[str]] = mapped_column(String, nullable=True)
+
+    verified: Mapped[bool] = mapped_column(Boolean, default=False)
+    notes: Mapped[Optional[str]] = mapped_column(Text, nullable=True)
+    added_at: Mapped[datetime.datetime] = mapped_column(TIMESTAMP, server_default=func.now())
+    updated_at: Mapped[datetime.datetime] = mapped_column(
+        TIMESTAMP, server_default=func.now(), onupdate=func.now()
+    )
+
+    name = relationship("Name", back_populates="derivative_forms")
+
+    @property
+    def surface_text(self) -> str:
+        """The form as written; the :class:`~storage.elements.interfaces.SurfaceForm` view."""
+        return self.derivative_form_text
+
+    @property
+    def owner(self) -> ElementRef:
+        return ElementRef(element_type="name", element_id=self.name_id)
+
+    def __repr__(self) -> str:
+        return (
+            f"<NameDerivativeForm(name_id={self.name_id}, language_code={self.language_code!r}, "
+            f"form={self.derivative_form_text!r}, grammatical_form={self.grammatical_form!r})>"
         )

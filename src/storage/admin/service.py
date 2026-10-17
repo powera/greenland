@@ -435,8 +435,8 @@ class DatabaseAdminService:
                 return {"dry_run": True, "success": True, "unlinked_derivative_forms": unlinked}
             counts = link_forms_to_tokens(session)
             logger.info(
-                f"Linked {counts['derivative_forms']} derivative forms and "
-                f"{counts['variant_forms']} variant forms to word tokens"
+                "Linked forms to word tokens: "
+                + ", ".join(f"{count} {table}" for table, count in counts.items())
             )
             return {"dry_run": False, "success": True, "linked": counts}
         except Exception as e:

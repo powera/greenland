@@ -25,7 +25,7 @@ from sentences.link_writer import (
     link_sentence_words,
     release_sentence_word_hints,
 )
-from sentences.pending_staging import stage_unlinked_words
+from sentences.pending_staging import known_as_name_or_concept, stage_unlinked_words
 from storage.crud.name_entity import create_name
 from storage.models.imports import PendingImport, SentencePendingImport
 from words.pending_imports.approval import delete_pending_import
@@ -712,6 +712,26 @@ class TestDeletingAPendingImport(WriterTestCase):
 
         self.assertEqual(released, 1)
         self.assertEqual(self.hints(), [])
+
+
+class KnownAsNameTest(unittest.TestCase):
+    """Dedup step 5 matches a name by any of its forms, case-sensitively."""
+
+    def setUp(self) -> None:
+        engine = create_engine("sqlite:///:memory:")
+        Base.metadata.create_all(engine)
+        self.session = Session(engine)
+        create_name(self.session, name_text="John", kind="given_name")
+
+    def tearDown(self) -> None:
+        self.session.close()
+
+    def test_possessive_counts_as_known(self) -> None:
+        self.assertTrue(known_as_name_or_concept(self.session, "John"))
+        self.assertTrue(known_as_name_or_concept(self.session, "John's"))
+
+    def test_lowercase_word_is_not_the_name(self) -> None:
+        self.assertFalse(known_as_name_or_concept(self.session, "john"))
 
 
 if __name__ == "__main__":

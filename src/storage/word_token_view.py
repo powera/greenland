@@ -26,48 +26,61 @@ A token is reached from a lemma two ways, and both are collected here:
 Both are claimants on the token's frequency, which is why
 ``wordfreq.lexeme_frequency.get_token_share`` counts both, and why this module
 reports both rather than only the derivative forms.
+
+A token can also be spelled by a proper name, through ``NameDerivativeForm``
+("John", "John's"). A name is not a sense and takes no share of the frequency,
+but it does claim the token: it is listed as an attachment and keeps the token
+off :func:`unlinked_word_tokens`. The form tables are iterated from
+``storage.token_forms.TOKEN_FORM_SOURCES`` rather than named here.
 """
 
 from __future__ import annotations
 
-from dataclasses import dataclass, field
-from typing import Dict, List, Optional
+from dataclasses import dataclass, field, replace
+from typing import Any, Dict, List, Optional
 
 from sqlalchemy.orm import Session
 
+from storage.models.name_entity import Name
 from storage.models.schema import (
-    DerivativeForm,
     ExternalLexemeAnnotation,
     Lemma,
     WordToken,
 )
-from storage.models.variant_form import VariantForm
-
-# How a lemma reaches this token.  A lemma may do both (a variant spelling that
-# is also an inflected form), in which case it appears once per attachment.
-ATTACHMENT_DERIVATIVE: str = "derivative"
-ATTACHMENT_VARIANT: str = "variant"
+from storage.token_forms import (
+    ATTACHMENT_DERIVATIVE,
+    ATTACHMENT_NAME,
+    ATTACHMENT_VARIANT,
+    TOKEN_FORM_SOURCES,
+    claimed_word_token_ids,
+)
 
 
 @dataclass(frozen=True)
 class TokenAttachment:
-    """One lemma's claim on this token, through one form row.
+    """One element's claim on this token, through one form row.
+
+    The element is a lemma (``element_type == "lemma"``) or a proper name
+    (``"name"``). The ``lemma_*`` fields are named for the common case:
+    ``lemma_text`` is the name's text for a name, ``pos_type`` its kind label,
+    and ``lemma_id``, ``definition_text`` and ``sense_prominence`` are None.
 
     ``share`` is this lemma's portion of the token's frequency, as computed by
     ``wordfreq.lexeme_frequency.get_token_share``.  It is filled in only when
     the caller asks for shares; otherwise it is None, because computing it
     costs a query per token and most callers listing many tokens do not need it.
+    A name never has a share.
     """
 
-    lemma_id: int
+    lemma_id: Optional[int]
     lemma_text: str
-    definition_text: str
-    pos_type: str
+    definition_text: Optional[str]
+    pos_type: Optional[str]
     disambiguation: Optional[str]
     # None when the sense has never been rated; readers treat that as "common".
     sense_prominence: Optional[str]
     guid: Optional[str]
-    attachment_kind: str  # ATTACHMENT_DERIVATIVE or ATTACHMENT_VARIANT
+    attachment_kind: str  # an ATTACHMENT_* constant from storage.token_forms
     form_id: int
     form_text: str
     grammatical_form: Optional[str]
@@ -78,6 +91,8 @@ class TokenAttachment:
     variant_kind: Optional[str] = None
     variant_key: Optional[str] = None
     share: Optional[float] = None
+    element_type: str = "lemma"
+    name_id: Optional[int] = None
 
     @property
     def display_text(self) -> str:
@@ -140,7 +155,7 @@ class WordTokenView:
         """Distinct lemma ids attached to this token, in first-seen order."""
         seen: List[int] = []
         for attachment in self.attachments:
-            if attachment.lemma_id not in seen:
+            if attachment.lemma_id is not None and attachment.lemma_id not in seen:
                 seen.append(attachment.lemma_id)
         return seen
 
@@ -175,68 +190,73 @@ def corpus_name_for_source(source: str) -> Optional[str]:
 
 
 def _attachments_for_token(session: Session, word_token_id: int) -> List[TokenAttachment]:
-    """Collect every lemma claim on a token, from both form tables."""
+    """Collect every claim on a token, from each table in TOKEN_FORM_SOURCES."""
     attachments: List[TokenAttachment] = []
 
-    derivative_rows = (
-        session.query(DerivativeForm, Lemma)
-        .join(Lemma, DerivativeForm.lemma_id == Lemma.id)
-        .filter(DerivativeForm.word_token_id == word_token_id)
-        .all()
-    )
-    for form, lemma in derivative_rows:
-        attachments.append(
-            TokenAttachment(
-                lemma_id=lemma.id,
-                lemma_text=lemma.lemma_text,
-                definition_text=lemma.definition_text,
-                pos_type=lemma.pos_type,
-                disambiguation=lemma.disambiguation,
-                sense_prominence=lemma.sense_prominence,
-                guid=lemma.guid,
-                attachment_kind=ATTACHMENT_DERIVATIVE,
-                form_id=form.id,
-                form_text=form.derivative_form_text,
-                grammatical_form=form.grammatical_form,
-                is_base_form=bool(form.is_base_form),
-            )
-        )
+    for source in TOKEN_FORM_SOURCES:
+        forms = session.query(source.model).filter(source.model.word_token_id == word_token_id)
+        for form in forms.all():
+            attachments.append(_attachment_for_form(session, form, source.attachment_kind))
 
-    variant_rows = (
-        session.query(VariantForm, Lemma)
-        .join(Lemma, VariantForm.lemma_id == Lemma.id)
-        .filter(VariantForm.word_token_id == word_token_id)
-        .all()
-    )
-    for variant, lemma in variant_rows:
-        attachments.append(
-            TokenAttachment(
-                lemma_id=lemma.id,
-                lemma_text=lemma.lemma_text,
-                definition_text=lemma.definition_text,
-                pos_type=lemma.pos_type,
-                disambiguation=lemma.disambiguation,
-                sense_prominence=lemma.sense_prominence,
-                guid=lemma.guid,
-                attachment_kind=ATTACHMENT_VARIANT,
-                form_id=variant.id,
-                form_text=variant.variant_form_text,
-                # VariantForm carries a real grammatical slot in the same
-                # vocabulary as DerivativeForm; variant_kind is a separate
-                # axis and is reported in its own field.
-                grammatical_form=variant.grammatical_form,
-                is_base_form=bool(variant.is_base_form),
-                variant_kind=variant.variant_kind,
-                variant_key=variant.variant_key,
-            )
-        )
-
-    # Base forms first, then by lemma then form text, so the page opens on the
+    # Base forms first, then by owner then form text, so the page opens on the
     # dictionary headword rather than an arbitrary inflection.
     attachments.sort(
-        key=lambda a: (not a.is_base_form, a.lemma_text, a.lemma_id, a.form_text, a.form_id)
+        key=lambda a: (
+            not a.is_base_form,
+            a.lemma_text,
+            a.element_type,
+            a.lemma_id or a.name_id or 0,
+            a.form_text,
+            a.form_id,
+        )
     )
     return attachments
+
+
+def _attachment_for_form(session: Session, form: Any, attachment_kind: str) -> TokenAttachment:
+    """Build one attachment from a SurfaceForm row and the element that owns it."""
+    owner = form.owner
+    if owner.element_type == "name":
+        name = session.get(Name, owner.element_id)
+        assert name is not None, f"name form {form.id} has no name"
+        return TokenAttachment(
+            lemma_id=None,
+            lemma_text=name.name_text,
+            definition_text=None,
+            pos_type=name.kind_label,
+            disambiguation=name.disambiguation,
+            sense_prominence=None,
+            guid=name.guid,
+            attachment_kind=attachment_kind,
+            form_id=form.id,
+            form_text=form.surface_text,
+            grammatical_form=form.grammatical_form,
+            is_base_form=bool(form.is_base_form),
+            element_type="name",
+            name_id=name.id,
+        )
+
+    lemma = session.get(Lemma, owner.element_id)
+    assert lemma is not None, f"{attachment_kind} form {form.id} has no lemma"
+    return TokenAttachment(
+        lemma_id=lemma.id,
+        lemma_text=lemma.lemma_text,
+        definition_text=lemma.definition_text,
+        pos_type=lemma.pos_type,
+        disambiguation=lemma.disambiguation,
+        sense_prominence=lemma.sense_prominence,
+        guid=lemma.guid,
+        attachment_kind=attachment_kind,
+        form_id=form.id,
+        form_text=form.surface_text,
+        # VariantForm carries a real grammatical slot in the same vocabulary as
+        # DerivativeForm; variant_kind is a separate axis, reported in its own
+        # field (and absent on the other form tables).
+        grammatical_form=form.grammatical_form,
+        is_base_form=bool(form.is_base_form),
+        variant_kind=getattr(form, "variant_kind", None),
+        variant_key=getattr(form, "variant_key", None),
+    )
 
 
 def _corpus_stats_for_token(session: Session, word_token_id: int) -> List[TokenCorpusStat]:
@@ -281,31 +301,13 @@ def _with_shares(session: Session, view: WordTokenView) -> WordTokenView:
     # One lookup per lemma, not per attachment: a lemma reaching the token
     # through both a derivative form and a variant spelling is one claimant
     # with one share, and get_token_share already counts it once.
+    # A name is not a sense and has no share; its attachment keeps share=None.
     shares: Dict[int, float] = {}
-    for attachment in view.attachments:
-        if attachment.lemma_id not in shares:
-            shares[attachment.lemma_id] = get_token_share(
-                session, view.word_token.id, attachment.lemma_id
-            )
+    for lemma_id in view.lemma_ids:
+        shares[lemma_id] = get_token_share(session, view.word_token.id, lemma_id)
 
     attachments = [
-        TokenAttachment(
-            lemma_id=a.lemma_id,
-            lemma_text=a.lemma_text,
-            definition_text=a.definition_text,
-            pos_type=a.pos_type,
-            disambiguation=a.disambiguation,
-            sense_prominence=a.sense_prominence,
-            guid=a.guid,
-            attachment_kind=a.attachment_kind,
-            form_id=a.form_id,
-            form_text=a.form_text,
-            grammatical_form=a.grammatical_form,
-            is_base_form=a.is_base_form,
-            variant_kind=a.variant_kind,
-            variant_key=a.variant_key,
-            share=shares[a.lemma_id],
-        )
+        replace(a, share=shares[a.lemma_id]) if a.lemma_id is not None else a
         for a in view.attachments
     ]
     return WordTokenView(
@@ -410,12 +412,12 @@ def unlinked_word_tokens(
 ) -> List[WordToken]:
     """Return the most frequent tokens no lemma claims, best rank first.
 
-    A token is "linked" when some lemma reaches it through a
-    :class:`DerivativeForm` or a :class:`VariantForm` -- the same two
-    attachments :func:`_attachments_for_token` collects.  A token with neither
-    is vocabulary the corpora measured but the database has no sense for, which
-    is what makes this listing a work queue: the top of it is the next word
-    worth adding.
+    A token is "linked" when some form row claims it -- any table in
+    ``storage.token_forms.TOKEN_FORM_SOURCES``, the same claims
+    :func:`_attachments_for_token` collects: a lemma's derivative or variant
+    form, or a name's form.  A token with none is a word the corpora measured
+    but the database does not know, which is what makes this listing a work
+    queue: the top of it is the next word worth adding.
 
     Tokens with no ``frequency_rank`` are excluded rather than sorted last: the
     rank is a dense ordinal written by
@@ -431,18 +433,10 @@ def unlinked_word_tokens(
     Filtering happens in Python, so the query fetches a multiple of ``limit``
     to leave room for what the filter drops.
     """
-    linked_derivative = session.query(DerivativeForm.word_token_id).filter(
-        DerivativeForm.word_token_id.isnot(None)
-    )
-    linked_variant = session.query(VariantForm.word_token_id).filter(
-        VariantForm.word_token_id.isnot(None)
-    )
-
     query = session.query(WordToken).filter(
         WordToken.language_code == language_code,
         WordToken.frequency_rank.isnot(None),
-        ~WordToken.id.in_(linked_derivative),
-        ~WordToken.id.in_(linked_variant),
+        ~WordToken.id.in_(claimed_word_token_ids(session)),
     )
     if max_rank is not None:
         query = query.filter(WordToken.frequency_rank <= max_rank)
@@ -468,6 +462,7 @@ def unlinked_word_tokens(
 
 __all__ = [
     "ATTACHMENT_DERIVATIVE",
+    "ATTACHMENT_NAME",
     "ATTACHMENT_VARIANT",
     "TokenAttachment",
     "TokenCorpusStat",

@@ -54,8 +54,8 @@ def run(dry_run: bool, config_args: argparse.Namespace) -> int:
         unresolved = (
             session.query(DerivativeForm).filter(DerivativeForm.word_token_id.is_(None)).count()
         )
-        print(f"Linked {counts['derivative_forms']} derivative forms to existing word tokens")
-        print(f"Linked {counts['variant_forms']} variant forms to existing word tokens")
+        for table_name, linked in counts.items():
+            print(f"Linked {linked} {table_name} rows to existing word tokens")
         print(f"Remaining derivative forms with no matching WordToken: {unresolved}")
         return counts["derivative_forms"]
     finally:

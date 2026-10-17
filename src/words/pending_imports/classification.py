@@ -42,7 +42,7 @@ from sqlalchemy.orm import Session
 from clients.types import Schema, SchemaProperty
 from storage.crud.concept import get_concept_by_slug
 from storage.crud.pending_import_senses import read_pending_import_context_sentence
-from storage.crud.name_entity import find_name
+from storage.crud.name_entity import find_name_by_form
 from storage.models.concept import normalize_concept_slug
 from storage.models.imports import (
     PENDING_IMPORT_TARGET_KINDS,
@@ -160,7 +160,7 @@ def suggest_target_kind(
             reason="empty term",
         )
 
-    existing_name = find_name(session, normalize_name_text(normalized))
+    existing_name = find_name_by_form(session, normalize_name_text(normalized))
     if existing_name is not None:
         return TargetKindSuggestion(
             target_kind=TARGET_KIND_NAME,

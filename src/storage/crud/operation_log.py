@@ -123,6 +123,7 @@ NAME_UPDATE = "name_update"
 NAME_DELETE = "name_delete"
 NAME_TRANSLATION_CREATE = "name_translation_create"
 NAME_TRANSLATION_UPDATE = "name_translation_update"
+NAME_DERIVATIVE_FORM_CREATE = "name_derivative_form_create"
 
 
 @dataclass(frozen=True)

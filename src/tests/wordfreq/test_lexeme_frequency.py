@@ -6,6 +6,8 @@ import pytest
 from sqlalchemy import create_engine
 from sqlalchemy.orm import Session
 
+import storage.models  # noqa: F401  (registers the name tables)
+from storage.crud.name_entity import create_name
 from storage.lexeme import get_lexeme
 from storage.models.schema import (
     SENSE_PROMINENCE_COMMON,
@@ -475,5 +477,24 @@ def test_link_forms_prefers_the_exact_spelling_over_a_case_twin(
             for form in session.query(DerivativeForm).all()
         }
         assert linked == {"May": "May", "may": "may"}
+    finally:
+        session.close()
+
+
+def test_link_forms_links_name_forms_too() -> None:
+    """A name created before its tokens existed is linked by the bulk pass."""
+    session = _make_session()
+    try:
+        name = create_name(session, name_text="John", kind="given_name")
+        session.add(WordToken(token="John", language_code="en", frequency_rank=1399))
+        session.add(WordToken(token="John's", language_code="en", frequency_rank=9000))
+        session.commit()
+
+        counts = link_forms_to_word_tokens(session)
+
+        assert counts["name_derivative_forms"] == 2
+        assert counts["derivative_forms"] == 0
+        assert {form.word_token_id is not None for form in name.derivative_forms} == {True}
+        assert link_forms_to_word_tokens(session)["name_derivative_forms"] == 0
     finally:
         session.close()

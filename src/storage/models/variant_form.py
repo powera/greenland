@@ -85,6 +85,7 @@ from sqlalchemy import (
 )
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
+from storage.elements.interfaces import ElementRef
 from storage.models.schema import Base
 
 # Variant kind for alternate spellings of the same word ("grey"/"gray").
@@ -195,3 +196,12 @@ class VariantForm(Base):
     # Relationships
     lemma = relationship("Lemma", back_populates="variant_forms")
     word_token = relationship("WordToken")
+
+    @property
+    def surface_text(self) -> str:
+        """The spelling; the :class:`~storage.elements.interfaces.SurfaceForm` view."""
+        return self.variant_form_text
+
+    @property
+    def owner(self) -> ElementRef:
+        return ElementRef(element_type="lemma", element_id=self.lemma_id)

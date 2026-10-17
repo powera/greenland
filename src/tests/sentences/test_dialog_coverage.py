@@ -145,6 +145,16 @@ def test_registered_name_beats_a_same_spelled_lemma(session: Session) -> None:
     assert as_word.lemma_text == "rose"
 
 
+def test_possessive_of_a_registered_name_is_the_name(session: Session) -> None:
+    """ "John's" resolves through the name's forms, not as a missing word."""
+    name = create_name(session, name_text="John", kind="given_name")
+
+    token = classify_token(session, "John's", target_level=3)
+
+    assert token.status == STATUS_NAME
+    assert token.name_id == name.id
+
+
 def test_cast_name_counts_before_it_is_registered(session: Session) -> None:
     token = classify_token(session, "George", target_level=3, cast_names={"George"})
 

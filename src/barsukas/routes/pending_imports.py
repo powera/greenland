@@ -48,6 +48,7 @@ from sqlalchemy.orm import Query
 
 from storage.backend.config import DataSourceConfig
 from storage.crud.derivative_form import add_derivative_form
+from storage.crud.name_entity import find_name_by_form
 from storage.crud.pending_import_senses import (
     read_pending_import_context_sentence,
     read_pending_import_example_sentences,
@@ -647,6 +648,9 @@ def api_duplicates() -> ResponseReturnValue:
     - A direct match: an existing lemma with the same lemma_text and pos_type.
     - A form match: the pending english_word appears as a DerivativeForm
       (language_code='en') of an existing lemma with the same pos_type.
+    - A name match: the pending english_word is already a Name or one of its
+      forms. The "matched_lemma_*" fields then describe the name (its GUID,
+      text and kind).
 
     Only pending imports destined to become lemmas, and only those where
     definition == english_word (no real definition yet), are checked: a name or
@@ -654,7 +658,7 @@ def api_duplicates() -> ResponseReturnValue:
     and staged imports with real definitions need human review regardless.
 
     Returns {"data": [...]} where each item has pending import fields plus
-    "match_type" ("direct" or "form"), "matched_lemma_guid", "matched_lemma_text".
+    "match_type" ("direct", "form" or "name"), "matched_lemma_guid", "matched_lemma_text".
     """
     from storage.models.schema import DerivativeForm
     from storage.models import Lemma
@@ -722,6 +726,26 @@ def api_duplicates() -> ResponseReturnValue:
                     "matched_lemma_guid": matched_lemma.guid,
                     "matched_lemma_text": matched_lemma.lemma_text,
                     "matched_pos_type": matched_lemma.pos_type,
+                }
+            )
+            continue
+
+        # 3. Name match: the word is already a name ("John", "John's"), so
+        # approving it as a lemma would put the same word in both tables.
+        # Case-sensitive, so "mark" is not taken for the name "Mark".
+        name_match = find_name_by_form(g.db, item.english_word)
+        if name_match:
+            results.append(
+                {
+                    "id": item.id,
+                    "english_word": item.english_word,
+                    "pos_type": item.pos_type,
+                    "source": item.source,
+                    "added_at": item.added_at.isoformat() if item.added_at else None,
+                    "match_type": "name",
+                    "matched_lemma_guid": name_match.guid,
+                    "matched_lemma_text": name_match.name_text,
+                    "matched_pos_type": name_match.kind,
                 }
             )
 

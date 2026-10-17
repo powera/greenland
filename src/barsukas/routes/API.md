@@ -277,7 +277,7 @@ One of `lemma` (vocabulary, the default), `name` (proper noun), or `concept`
 (encyclopedia entry). Only the lemma path makes an LLM call on approval.
 
 - `GET /pending-imports/api/duplicates`
-  - Find pending imports that are duplicates of existing lemmas (direct match or form-of-lemma match).
+  - Find pending imports that are duplicates of existing lemmas (direct match or form-of-lemma match), or of an existing name or name form (`match_type: "name"`).
   - Only checks imports with `target_kind == "lemma"` where `definition == english_word` (not yet staged).
   - Each result has: pending import fields + `match_type` ("direct"/"form"), `matched_lemma_guid`, `matched_lemma_text`, `matched_pos_type`.
 

@@ -48,7 +48,7 @@ from sqlalchemy.orm import Session
 from sentences.analysis import SUBSTRING_MATCH_LANGUAGES
 from sentences.import_workflow import PART_OF_SPEECH_MAP
 from storage.crud.concept import get_concept_by_slug
-from storage.crud.name_entity import find_name
+from storage.crud.name_entity import find_name_by_form
 from storage.models.concept import normalize_concept_slug
 from storage.models.imports import PendingImport
 from storage.models.name_entity import normalize_name_text
@@ -158,7 +158,7 @@ def known_as_name_or_concept(session: Session, gloss: str) -> bool:
     lemma, so without this check the next staging pass would stage the term
     again and the workflow would never settle.
     """
-    if find_name(session, normalize_name_text(gloss)) is not None:
+    if find_name_by_form(session, normalize_name_text(gloss)) is not None:
         return True
     return get_concept_by_slug(session, normalize_concept_slug(gloss)) is not None
 
