@@ -103,6 +103,40 @@ class MechanicalFilterTest(unittest.TestCase):
             is_derivable(self.session, lemma, _form("noun/en_plural", "dogs", phonetic="DAWGZ"))
         )
 
+    def test_possessives_are_derivable(self) -> None:
+        """ "dog's"/"dogs'" are local-database forms only, never release rows."""
+        lemma = self._noun("dog", "N01_008")
+        self.assertTrue(
+            is_derivable(self.session, lemma, _form("noun/en_possessive_singular", "dog's"))
+        )
+        self.assertTrue(
+            is_derivable(self.session, lemma, _form("noun/en_possessive_plural", "dogs'"))
+        )
+
+    def test_proper_noun_possessive_is_derivable(self) -> None:
+        """The plural rules decline "Shanghai", but its possessive is still regular."""
+        lemma = Lemma(
+            lemma_text="Shanghai", definition_text="Shanghai", pos_type="noun", guid="N01_009"
+        )
+        self.session.add(lemma)
+        self.session.commit()
+        self.assertEqual(
+            derivable_form_keys(self.session, lemma, "en"),
+            {("noun/en_possessive_singular", "Shanghai's")},
+        )
+
+    def test_possessive_follows_the_stored_irregular_plural(self) -> None:
+        """ "children's" is derivable from the stored "children", which is kept."""
+        lemma = self._noun("child", "N01_010")
+        stored = _form("noun/en_plural", "children")
+        stored.lemma_id = lemma.id
+        self.session.add(stored)
+        self.session.commit()
+        self.assertTrue(
+            is_derivable(self.session, lemma, _form("noun/en_possessive_plural", "children's"))
+        )
+        self.assertFalse(is_derivable(self.session, lemma, stored))
+
     def test_unknown_slot_is_kept(self) -> None:
         """A slot the builder never emits has nothing to compare against."""
         lemma = self._noun("dog", "N01_003")

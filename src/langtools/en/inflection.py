@@ -172,6 +172,56 @@ def build_noun_forms(
     return {"singular": singular, "plural": generate_regular_plural(singular)}
 
 
+def _is_possessable(noun: str) -> bool:
+    """Whether a possessive can be spelled by appending to *noun*.
+
+    Unlike the plural, the possessive attaches to the end of the whole phrase
+    ("ice cream's", "mother-in-law's", "Shanghai's"), so multi-word and proper
+    nouns are fine.  Excluded: abbreviations ending in a period ("Mr."), text
+    with a disambiguation ("head (of cattle)") or digits, and text already
+    ending in an apostrophe ("hold 'em").
+    """
+    if not noun or not noun[0].isalpha():
+        return False
+    if noun.endswith((".", "'")):
+        return False
+    return not any(character in "()" or character.isdigit() for character in noun)
+
+
+def _plural_possessive(plural: str) -> str:
+    return f"{plural}'" if plural.endswith("s") else f"{plural}'s"
+
+
+def build_possessive_forms(
+    singular: str,
+    plural: Optional[str] = None,
+    plurale_tantum: bool = False,
+) -> Optional[Dict[str, str]]:
+    """Build ``possessive_singular``/``possessive_plural`` from a noun's forms.
+
+    Three rules cover nearly every noun:
+
+    1. "'s" on the singular, sibilant or not ("world's", "boss's", "James's").
+    2. A bare apostrophe on a plural ending in "s" ("students'").
+    3. "'s" on a plural that does not ("children's", "mothers-in-law's").
+
+    A plurale tantum ("scissors"), or any noun whose singular and plural are
+    one spelling ending in "s" ("species"), has only the plural possessive.
+    Whether the noun has a plural at all is decided upstream, so
+    ``possessive_plural`` is only built when *plural* is given.  Returns
+    ``None`` when the text cannot take an appended possessive.
+    """
+    noun = singular.strip()
+    if not _is_possessable(noun):
+        return None
+    if plurale_tantum or (plural and plural.strip() == noun and noun.endswith("s")):
+        return {"possessive_plural": _plural_possessive((plural or noun).strip())}
+    forms = {"possessive_singular": f"{noun}'s"}
+    if plural and plural.strip():
+        forms["possessive_plural"] = _plural_possessive(plural.strip())
+    return forms
+
+
 # ---------------------------------------------------------------------------
 # Adjectives
 # ---------------------------------------------------------------------------
