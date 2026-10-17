@@ -139,6 +139,78 @@ def get_token_share(session: Session, word_token_id: int, lemma_id: int) -> floa
     return own / total
 
 
+def get_bulk_lexeme_token_shares(
+    session: Session, language_code: str = "en"
+) -> Dict[int, Dict[int, float]]:
+    """Load form ownership and sense shares once for a whole-language rank pass.
+
+    Claimants include every language, matching ``get_token_share``. Only forms
+    in the requested language contribute to a lexeme's ranks. As with
+    ``get_lexeme``, a variant-only lemma without a derivative form is ineligible.
+    Repeated grammatical slots contribute one claim; the strongest derivative
+    or variant claim wins, including the archaic-variant discount.
+    """
+    eligible: set[int] = set()
+    tokens_by_lemma: Dict[int, set[int]] = {}
+    weights_by_token: Dict[int, Dict[int, float]] = {}
+    derivative_rows = (
+        session.query(
+            DerivativeForm.lemma_id,
+            DerivativeForm.word_token_id,
+            DerivativeForm.language_code,
+            Lemma.sense_prominence,
+        )
+        .join(Lemma, Lemma.id == DerivativeForm.lemma_id)
+        .all()
+    )
+    for lemma_id, token_id, form_language, prominence in derivative_rows:
+        if form_language == language_code:
+            eligible.add(lemma_id)
+        if token_id is None:
+            continue
+        if form_language == language_code:
+            tokens_by_lemma.setdefault(lemma_id, set()).add(token_id)
+        claims = weights_by_token.setdefault(token_id, {})
+        claims[lemma_id] = max(claims.get(lemma_id, 0.0), _weight_for(prominence))
+    variant_rows = (
+        session.query(
+            VariantForm.lemma_id,
+            VariantForm.word_token_id,
+            VariantForm.language_code,
+            VariantForm.variant_kind,
+            Lemma.sense_prominence,
+        )
+        .join(Lemma, Lemma.id == VariantForm.lemma_id)
+        .filter(VariantForm.word_token_id.isnot(None))
+        .all()
+    )
+    for (
+        variant_lemma_id,
+        variant_token_id,
+        variant_language,
+        kind,
+        variant_prominence,
+    ) in variant_rows:
+        if variant_language == language_code:
+            tokens_by_lemma.setdefault(variant_lemma_id, set()).add(variant_token_id)
+        variant_weight = _weight_for(variant_prominence)
+        if kind == VARIANT_KIND_ARCHAIC:
+            variant_weight *= ARCHAIC_VARIANT_WEIGHT_FACTOR
+        variant_claims = weights_by_token.setdefault(variant_token_id, {})
+        variant_claims[variant_lemma_id] = max(
+            variant_claims.get(variant_lemma_id, 0.0), variant_weight
+        )
+    totals = {token: sum(claims.values()) for token, claims in weights_by_token.items()}
+    return {
+        owner: {
+            token: weights_by_token[token].get(owner, 0.0) / totals[token] if totals[token] else 0.0
+            for token in tokens
+        }
+        for owner, tokens in tokens_by_lemma.items()
+        if owner in eligible
+    }
+
+
 @dataclass(frozen=True)
 class FormFrequency:
     """One rolled-up DerivativeForm contribution to a lexeme's frequency."""
