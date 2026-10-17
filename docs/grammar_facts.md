@@ -48,18 +48,26 @@ with the rule should not be added.
 | `verb_transitivity` | classification | `transitive`, `intransitive`, `ditransitive`, `ambitransitive` |
 | `verb_reflexivity` | classification | `inherently_reflexive`, `optionally_reflexive`, `non_reflexive` |
 | `gradability` | classification | `synthetic` (-er/-est), `periphrastic` (more/most), `non_gradable` |
-| `number_type` | classification, set only when exceptional | `plurale_tantum`, `singulare_tantum`, `uncountable`, `both` |
+| `number_type` | classification | `regular`, `plurale_tantum`, `singulare_tantum` (legacy values: `uncountable`, `both`) |
 | `declension_class` | classification | `1`–`5` (Lithuanian; derived, not exported) |
 | `measure_words` | classification | a Chinese classifier, optionally `个 (alt: 只, 头)` |
 | `fanciful_collective` | classification | an ornamental English collective ("a murder of crows") |
 | `infinitive`, `3s_present`, `3s_past`, `1s_present`, `1s_past`, `1s_future`, `past`, `past_participle` | principal part | the form's text |
 | `plural`, `feminine_form`, `comparative`, `superlative`, `verb_form_<slot>` | override | the form's text |
 
-`number_type` is the one classification that is recorded only when it is
-exceptional, because nearly every noun is ordinary.  The form builders read it
+`number_type` is recorded explicitly, including `regular` when checked. Missing
+means unclassified, not ordinary. Mass/count usage belongs to `countability`,
+not the number paradigm. The form builders read it
 the same way in every language: a plurale tantum (*jeans*, *gafas*,
 *lunettes*) repeats the word in both the singular and plural slots, and
 `uncountable` or `singulare_tantum` produce the singular only.
+
+[Lape2](lape2.md) generates missing facts together across languages. Its form
+checks also store explicit `plural_status`, `feminine_form_status`,
+`comparative_status` and `superlative_status` classifications: `regular`
+(mechanically reproducible), `override`, or `not_applicable`. These completion
+decisions ship with grammar facts; only forms needing an override get a new
+override row.
 
 ## Gender
 

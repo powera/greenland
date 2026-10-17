@@ -222,7 +222,12 @@ def count_schema_tokens(schema_dict: Dict[str, Any]) -> int:
     return len(encoder.encode(json.dumps(schema_dict)))
 
 
-def _check_schema_size(schema_dict: Dict[str, Any], schema_name: str, provider: str) -> None:
+def _check_schema_size(
+    schema_dict: Dict[str, Any],
+    schema_name: str,
+    provider: str,
+    max_schema_tokens: Optional[int] = None,
+) -> None:
     """Raise if the serialized schema is too large to send on every request.
 
     Args:
@@ -233,8 +238,11 @@ def _check_schema_size(schema_dict: Dict[str, Any], schema_name: str, provider: 
     Raises:
         SchemaTooLargeError: If the schema exceeds MAX_SCHEMA_TOKENS
     """
+    limit = MAX_SCHEMA_TOKENS if max_schema_tokens is None else max_schema_tokens
+    if limit < 1:
+        raise ValueError("Schema token budget must be positive")
     token_count = count_schema_tokens(schema_dict)
-    if token_count > MAX_SCHEMA_TOKENS:
+    if token_count > limit:
         largest = _largest_enums(schema_dict)
         detail = ""
         if largest:
@@ -243,7 +251,7 @@ def _check_schema_size(schema_dict: Dict[str, Any], schema_name: str, provider: 
             )
         raise SchemaTooLargeError(
             f"{provider} schema {schema_name!r} is {token_count} tokens, over the "
-            f"{MAX_SCHEMA_TOKENS} limit. A schema is sent on every request that uses "
+            f"{limit} limit. A schema is sent on every request that uses "
             f"it, so this is a per-call cost.{detail}"
         )
 
@@ -442,7 +450,7 @@ def to_openai_schema(schema: Schema) -> Dict[str, Any]:
     _recursive_clean_for_openai(result)
     # Ensure all nested objects have additionalProperties set (required by OpenAI)
     _ensure_additional_properties(result)
-    _check_schema_size(result, schema.name, "OpenAI")
+    _check_schema_size(result, schema.name, "OpenAI", schema.max_schema_tokens)
     return result
 
 
@@ -534,7 +542,7 @@ def to_anthropic_schema(schema: Schema) -> Dict[str, Any]:
 
         result["properties"][name] = property_schema
 
-    _check_schema_size(result, schema.name, "Anthropic")
+    _check_schema_size(result, schema.name, "Anthropic", schema.max_schema_tokens)
     return result
 
 
@@ -636,7 +644,7 @@ def to_gemini_schema(schema: Schema) -> Dict[str, Any]:
     # Add propertyOrdering required by Gemini
     result["propertyOrdering"] = list(schema.properties.keys())
 
-    _check_schema_size(result, schema.name, "Gemini")
+    _check_schema_size(result, schema.name, "Gemini", schema.max_schema_tokens)
     return result
 
 
@@ -729,7 +737,7 @@ def to_ollama_schema(schema: Schema) -> Dict[str, Any]:
 
         result["properties"][name] = property_schema
 
-    _check_schema_size(result, schema.name, "Ollama")
+    _check_schema_size(result, schema.name, "Ollama", schema.max_schema_tokens)
     return result
 
 

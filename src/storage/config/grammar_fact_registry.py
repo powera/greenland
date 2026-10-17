@@ -338,10 +338,31 @@ GRAMMAR_FACT_DEFINITIONS: Dict[str, GrammarFactDefinition] = {
 }
 
 
+# Durable completion of Lape2's form checks. A missing override alone cannot
+# distinguish an unchecked word from a confirmed mechanically reproducible one.
+# Keep these out of the legacy scalar generator list until Lape2 replaces it.
+FORM_CHECK_FACT_TYPES: Tuple[str, ...] = ("plural", "feminine_form", "comparative", "superlative")
+for checked_form_type in FORM_CHECK_FACT_TYPES:
+    checked_form_definition = GRAMMAR_FACT_DEFINITIONS[checked_form_type]
+    status_fact_type = f"{checked_form_type}_status"
+    GRAMMAR_FACT_DEFINITIONS[status_fact_type] = GrammarFactDefinition(
+        fact_type=status_fact_type,
+        languages=checked_form_definition.languages,
+        required_pos=checked_form_definition.required_pos,
+        display_label=f"{checked_form_definition.display_label} Check",
+        description="Explicit form check: regular (mechanically reproducible), override, or not_applicable",
+    )
+
+
 #: Fact types written to, and read back from, ``data/release/lemmas/{lang}.jsonl``.
 #: Nothing mechanical reproduces these, so a rebuild without them loses data.
 #: Keep the reason on each entry; see the module docstring for the rule.
 EXPORTED_FACT_TYPES: Tuple[str, ...] = (
+    # A model confirmed these checks; spelling rules cannot recover that decision.
+    "plural_status",
+    "feminine_form_status",
+    "comparative_status",
+    "superlative_status",
     # Principal parts. A conjugator takes these as input; they are not
     # derivable from the lemma.
     "infinitive",  # lt
