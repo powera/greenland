@@ -28,9 +28,12 @@ class TestOpenAITTSClient(unittest.TestCase):
         # Mock the API key loading
         self.mock_api_key = "sk-test-key-123"
 
+    @patch("clients.audio.openai_tts.clients.lib.assert_llm_calls_enabled", return_value=None)
     @patch("clients.audio.openai_tts.requests.post")
     @patch("clients.audio.openai_tts.load_key")
-    def test_generate_audio_success(self, mock_load_key: MagicMock, mock_post: MagicMock) -> None:
+    def test_generate_audio_success(
+        self, mock_load_key: MagicMock, mock_post: MagicMock, mock_guard: MagicMock
+    ) -> None:
         """Test successful audio generation."""
         mock_load_key.return_value = self.mock_api_key
 
@@ -41,7 +44,9 @@ class TestOpenAITTSClient(unittest.TestCase):
         mock_post.return_value = mock_response
 
         client = OpenAITTSClient()
-        result = client.generate_audio(text="labas", voice=Voice.ASH, language_code="lt")
+        result = client.generate_audio(
+            text="labas", voice=Voice.ASH, language_code="lt", model="gpt-4o-mini-tts"
+        )
 
         # Verify result
         self.assertTrue(result.success)
@@ -56,17 +61,19 @@ class TestOpenAITTSClient(unittest.TestCase):
         call_args = mock_post.call_args
         self.assertIn("json", call_args.kwargs)
         payload = call_args.kwargs["json"]
-        # Assert against the constant, not a literal: the model is still
-        # gpt-4o-mini-tts but is pinned to a dated snapshot that changes.
-        self.assertEqual(payload["model"], DEFAULT_MODEL)
-        self.assertTrue(DEFAULT_MODEL.startswith("gpt-4o-mini-tts"))
+        # Explicit legacy models keep using the speech endpoint.
+        self.assertEqual(payload["model"], "gpt-4o-mini-tts")
+        self.assertEqual(DEFAULT_MODEL, "gpt-realtime-2.1-mini")
         self.assertEqual(payload["input"], "labas")
         self.assertEqual(payload["voice"], "ash")
         self.assertIn("instructions", payload)
 
+    @patch("clients.audio.openai_tts.clients.lib.assert_llm_calls_enabled", return_value=None)
     @patch("clients.audio.openai_tts.requests.post")
     @patch("clients.audio.openai_tts.load_key")
-    def test_generate_audio_api_error(self, mock_load_key: MagicMock, mock_post: MagicMock) -> None:
+    def test_generate_audio_api_error(
+        self, mock_load_key: MagicMock, mock_post: MagicMock, mock_guard: MagicMock
+    ) -> None:
         """Test handling of API errors."""
         mock_load_key.return_value = self.mock_api_key
 
@@ -77,7 +84,9 @@ class TestOpenAITTSClient(unittest.TestCase):
         mock_post.return_value = mock_response
 
         client = OpenAITTSClient()
-        result = client.generate_audio(text="labas", voice=Voice.ASH, language_code="lt")
+        result = client.generate_audio(
+            text="labas", voice=Voice.ASH, language_code="lt", model="gpt-4o-mini-tts"
+        )
 
         # Verify error handling
         self.assertFalse(result.success)
@@ -86,10 +95,11 @@ class TestOpenAITTSClient(unittest.TestCase):
         assert result.error is not None
         self.assertIn("429", result.error)
 
+    @patch("clients.audio.openai_tts.clients.lib.assert_llm_calls_enabled", return_value=None)
     @patch("clients.audio.openai_tts.requests.post")
     @patch("clients.audio.openai_tts.load_key")
     def test_generate_audio_with_speed(
-        self, mock_load_key: MagicMock, mock_post: MagicMock
+        self, mock_load_key: MagicMock, mock_post: MagicMock, mock_guard: MagicMock
     ) -> None:
         """Test audio generation with custom speed."""
         mock_load_key.return_value = self.mock_api_key
@@ -101,7 +111,7 @@ class TestOpenAITTSClient(unittest.TestCase):
 
         client = OpenAITTSClient()
         result = client.generate_audio(
-            text="labas", voice=Voice.NOVA, language_code="lt", speed=0.75
+            text="labas", voice=Voice.NOVA, language_code="lt", speed=0.75, model="gpt-4o-mini-tts"
         )
 
         # Verify speed parameter was included
@@ -109,10 +119,11 @@ class TestOpenAITTSClient(unittest.TestCase):
         payload = call_args.kwargs["json"]
         self.assertEqual(payload["speed"], 0.75)
 
+    @patch("clients.audio.openai_tts.clients.lib.assert_llm_calls_enabled", return_value=None)
     @patch("clients.audio.openai_tts.requests.post")
     @patch("clients.audio.openai_tts.load_key")
     def test_language_specific_instructions(
-        self, mock_load_key: MagicMock, mock_post: MagicMock
+        self, mock_load_key: MagicMock, mock_post: MagicMock, mock_guard: MagicMock
     ) -> None:
         """Test that language-specific instructions are used."""
         mock_load_key.return_value = self.mock_api_key
@@ -125,21 +136,24 @@ class TestOpenAITTSClient(unittest.TestCase):
         client = OpenAITTSClient()
 
         # Test Lithuanian
-        result = client.generate_audio(text="labas", language_code="lt")
+        result = client.generate_audio(text="labas", language_code="lt", model="gpt-4o-mini-tts")
         call_args = mock_post.call_args
         payload = call_args.kwargs["json"]
         self.assertIn("Lithuanian", payload["instructions"])
 
         # Test Chinese
         mock_post.reset_mock()
-        result = client.generate_audio(text="你好", language_code="zh")
+        result = client.generate_audio(text="你好", language_code="zh", model="gpt-4o-mini-tts")
         call_args = mock_post.call_args
         payload = call_args.kwargs["json"]
         self.assertIn("Chinese", payload["instructions"])
 
+    @patch("clients.audio.openai_tts.clients.lib.assert_llm_calls_enabled", return_value=None)
     @patch("clients.audio.openai_tts.requests.post")
     @patch("clients.audio.openai_tts.load_key")
-    def test_audio_format_parameter(self, mock_load_key: MagicMock, mock_post: MagicMock) -> None:
+    def test_audio_format_parameter(
+        self, mock_load_key: MagicMock, mock_post: MagicMock, mock_guard: MagicMock
+    ) -> None:
         """Test different audio format options."""
         mock_load_key.return_value = self.mock_api_key
 
@@ -151,14 +165,18 @@ class TestOpenAITTSClient(unittest.TestCase):
         client = OpenAITTSClient()
 
         # Test MP3 format (default)
-        result = client.generate_audio(text="test", audio_format=AudioFormat.MP3)
+        result = client.generate_audio(
+            text="test", audio_format=AudioFormat.MP3, model="gpt-4o-mini-tts"
+        )
         call_args = mock_post.call_args
         payload = call_args.kwargs["json"]
         self.assertEqual(payload["response_format"], "mp3")
 
         # Test WAV format
         mock_post.reset_mock()
-        result = client.generate_audio(text="test", audio_format=AudioFormat.WAV)
+        result = client.generate_audio(
+            text="test", audio_format=AudioFormat.WAV, model="gpt-4o-mini-tts"
+        )
         call_args = mock_post.call_args
         payload = call_args.kwargs["json"]
         self.assertEqual(payload["response_format"], "wav")
@@ -219,3 +237,88 @@ class TestAudioGenerationResult(unittest.TestCase):
 
 if __name__ == "__main__":
     unittest.main()
+
+
+class TestRealtimeTTS(unittest.TestCase):
+    """Exercise streamed GA events without credentials or outbound calls."""
+
+    @patch("clients.audio.openai_tts.clients.lib.assert_llm_calls_enabled")
+    @patch("websocket.create_connection")
+    def test_stream_and_wav(self, mock_connect: MagicMock, mock_guard: MagicMock) -> None:
+        import base64
+        import io
+        import json
+        import wave
+
+        pcm = b"\x01\x00" * 24
+        connection = mock_connect.return_value
+        connection.recv.side_effect = [
+            json.dumps({"type": "session.created"}),
+            json.dumps({"type": "session.updated"}),
+            json.dumps(
+                {"type": "response.output_audio.delta", "delta": base64.b64encode(pcm).decode()}
+            ),
+            json.dumps({"type": "response.done", "response": {"status": "completed"}}),
+        ]
+        result = OpenAITTSClient(api_key="fake").generate_audio(
+            "labas",
+            voice=Voice.ASH,
+            audio_format=AudioFormat.WAV,
+            character_description="A calm speaker",
+        )
+        self.assertTrue(result.success, result.error)
+        with wave.open(io.BytesIO(result.audio_data), "rb") as wav_file:
+            self.assertEqual(wav_file.getframerate(), 24000)
+            self.assertEqual(wav_file.readframes(24), pcm)
+        events = [json.loads(call.args[0]) for call in connection.send.call_args_list]
+        self.assertEqual(events[0]["session"]["audio"]["output"]["voice"], "ash")
+        self.assertIn("A calm speaker", events[1]["response"]["instructions"])
+        self.assertIn("labas", events[1]["response"]["instructions"])
+        self.assertEqual(events[1]["response"]["input"], [])
+        self.assertIn(DEFAULT_MODEL, mock_connect.call_args.args[0])
+        connection.close.assert_called_once()
+
+    @patch("clients.audio.openai_tts.clients.lib.assert_llm_calls_enabled")
+    @patch("websocket.create_connection")
+    def test_failed_streams(self, mock_connect: MagicMock, mock_guard: MagicMock) -> None:
+        import json
+
+        for terminal in [
+            {"type": "error", "error": {"message": "bad request"}},
+            {"type": "response.done", "response": {"status": "incomplete"}},
+            {"type": "response.done", "response": {"status": "completed"}},
+        ]:
+            with self.subTest(terminal=terminal):
+                connection = mock_connect.return_value
+                connection.reset_mock()
+                connection.recv.side_effect = [json.dumps(terminal)]
+                result = OpenAITTSClient(api_key="fake").generate_audio("labas")
+                self.assertFalse(result.success)
+                self.assertEqual(result.audio_data, b"")
+                connection.close.assert_called_once()
+
+    @patch("clients.audio.openai_tts.clients.lib.assert_llm_calls_enabled")
+    @patch("websocket.create_connection")
+    def test_unsupported_voice(self, mock_connect: MagicMock, mock_guard: MagicMock) -> None:
+        result = OpenAITTSClient(api_key="fake").generate_audio("labas", voice=Voice.NOVA)
+        self.assertFalse(result.success)
+        mock_connect.assert_not_called()
+
+    @patch("websocket.create_connection")
+    def test_kill_switch(self, mock_connect: MagicMock) -> None:
+        from clients.lib import LLMCallsDisabledError
+
+        with self.assertRaises(LLMCallsDisabledError):
+            OpenAITTSClient(api_key="fake").generate_audio("labas")
+        mock_connect.assert_not_called()
+
+    @patch("clients.audio.openai_tts.subprocess.run")
+    def test_transcode_speed(self, mock_run: MagicMock) -> None:
+        from clients.audio.openai_tts import _encode_pcm
+
+        mock_run.return_value.stdout = b"mp3"
+        self.assertEqual(_encode_pcm(b"\x00\x00", AudioFormat.MP3, 0.25, 60), b"mp3")
+        command = mock_run.call_args.args[0]
+        self.assertIn("atempo=0.5,atempo=0.5", command)
+        self.assertIn("libmp3lame", command)
+        self.assertEqual(mock_run.call_args.kwargs["input"], b"\x00\x00")

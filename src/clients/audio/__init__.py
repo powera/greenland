@@ -2,7 +2,7 @@
 """Audio generation client API for TTS services.
 
 Supports multiple TTS backends:
-- OpenAI TTS (gpt-4o-mini-tts)
+- OpenAI TTS (gpt-realtime-2.1-mini)
 - Gemini 3.8 TTS
 - Amazon Polly (Neural)
 - Azure Cognitive Services TTS

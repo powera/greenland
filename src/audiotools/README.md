@@ -105,3 +105,22 @@ emits a manifest the review tools consume.
   are not checked in here; they live in the `audio/` submodule under
   `outetts/outetts_voices/`. Set `OUTETTS_VOICES_DIR` to point at them.
   OuteTTS is deprioritized in favor of the OpenAI path in `gen_lithuanian_word_audio.py`.
+
+## OpenAI TTS migration (October 2026)
+
+The default is `gpt-realtime-2.1-mini`, using the GA Realtime WebSocket API.
+Install `websocket-client` (included in project dependencies) and `ffmpeg` for
+MP3/Opus/AAC/FLAC output and speed adjustment. WAV and PCM at normal speed need
+no converter. Output is 24 kHz mono PCM before encoding.
+
+The client reads the supplied text verbatim with the existing language/persona
+instructions, collects audio deltas, and requires a completed response before
+returning success. Realtime is generative; review pronunciation and text fidelity
+before a bulk rollout. No live quality evaluation is part of the offline tests.
+
+Realtime does not support nova, onyx, or fable. New primary female (`gpt-*-f1`)
+recordings use coral instead of nova; existing cached recordings are unchanged.
+Explicit unsupported voice requests fail without silently substituting a voice.
+Legacy speech models can still be explicitly selected until their shutdown on
+January 6, 2027. See https://developers.openai.com/api/docs/deprecations and
+https://developers.openai.com/api/docs/guides/realtime-conversations.

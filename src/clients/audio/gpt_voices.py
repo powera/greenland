@@ -25,7 +25,7 @@ from langtools.dialect_overrides import (
     get_tts_locale,
 )
 
-from .types import Voice
+from clients.audio.types import Voice
 
 
 @dataclass
@@ -53,8 +53,8 @@ OPENAI_VOICE_INFO: Dict[Voice, GptVoiceInfo] = {
         variant=1,
         description="Male, deep voice",
     ),
-    Voice.NOVA: GptVoiceInfo(
-        openai_voice=Voice.NOVA,
+    Voice.CORAL: GptVoiceInfo(
+        openai_voice=Voice.CORAL,
         gender="f",
         variant=1,
         description="Female, clear/bright tone",
@@ -83,12 +83,6 @@ OPENAI_VOICE_INFO: Dict[Voice, GptVoiceInfo] = {
         variant=4,
         description="Male, expressive/storytelling voice",
     ),
-    Voice.CORAL: GptVoiceInfo(
-        openai_voice=Voice.CORAL,
-        gender="f",
-        variant=4,
-        description="Female voice",
-    ),
     Voice.SAGE: GptVoiceInfo(
         openai_voice=Voice.SAGE,
         gender="f",
@@ -106,7 +100,7 @@ OPENAI_VOICE_INFO: Dict[Voice, GptVoiceInfo] = {
 
 # Default voice assignments per gender
 # These are the recommended voices to use
-DEFAULT_FEMALE_VOICE = Voice.NOVA  # Primary female
+DEFAULT_FEMALE_VOICE = Voice.CORAL  # Primary female
 DEFAULT_MALE_VOICE = Voice.ASH  # Primary male
 SECONDARY_FEMALE_VOICE = Voice.ALLOY  # Secondary female (deeper)
 SECONDARY_MALE_VOICE = Voice.ECHO  # Secondary male
@@ -127,79 +121,79 @@ class GptVoice(Enum):
     """
 
     # Lithuanian voices
-    GPT_LT_F1 = ("lt", "f", 1, Voice.NOVA)
+    GPT_LT_F1 = ("lt", "f", 1, Voice.CORAL)
     GPT_LT_F2 = ("lt", "f", 2, Voice.ALLOY)
     GPT_LT_M1 = ("lt", "m", 1, Voice.ASH)
     GPT_LT_M2 = ("lt", "m", 2, Voice.ECHO)
 
     # Chinese (Mandarin) voices
-    GPT_ZH_F1 = ("zh", "f", 1, Voice.NOVA)
+    GPT_ZH_F1 = ("zh", "f", 1, Voice.CORAL)
     GPT_ZH_F2 = ("zh", "f", 2, Voice.ALLOY)
     GPT_ZH_M1 = ("zh", "m", 1, Voice.ASH)
     GPT_ZH_M2 = ("zh", "m", 2, Voice.ECHO)
 
     # Spanish voices
-    GPT_ES_F1 = ("es", "f", 1, Voice.NOVA)
+    GPT_ES_F1 = ("es", "f", 1, Voice.CORAL)
     GPT_ES_F2 = ("es", "f", 2, Voice.ALLOY)
     GPT_ES_M1 = ("es", "m", 1, Voice.ASH)
     GPT_ES_M2 = ("es", "m", 2, Voice.ECHO)
 
     # French voices
-    GPT_FR_F1 = ("fr", "f", 1, Voice.NOVA)
+    GPT_FR_F1 = ("fr", "f", 1, Voice.CORAL)
     GPT_FR_F2 = ("fr", "f", 2, Voice.ALLOY)
     GPT_FR_M1 = ("fr", "m", 1, Voice.ASH)
     GPT_FR_M2 = ("fr", "m", 2, Voice.ECHO)
 
     # Italian voices
-    GPT_IT_F1 = ("it", "f", 1, Voice.NOVA)
+    GPT_IT_F1 = ("it", "f", 1, Voice.CORAL)
     GPT_IT_F2 = ("it", "f", 2, Voice.ALLOY)
     GPT_IT_M1 = ("it", "m", 1, Voice.ASH)
     GPT_IT_M2 = ("it", "m", 2, Voice.ECHO)
 
     # Portuguese voices
-    GPT_PT_F1 = ("pt", "f", 1, Voice.NOVA)
+    GPT_PT_F1 = ("pt", "f", 1, Voice.CORAL)
     GPT_PT_F2 = ("pt", "f", 2, Voice.ALLOY)
     GPT_PT_M1 = ("pt", "m", 1, Voice.ASH)
     GPT_PT_M2 = ("pt", "m", 2, Voice.ECHO)
 
     # Dutch voices
-    GPT_NL_F1 = ("nl", "f", 1, Voice.NOVA)
+    GPT_NL_F1 = ("nl", "f", 1, Voice.CORAL)
     GPT_NL_F2 = ("nl", "f", 2, Voice.ALLOY)
     GPT_NL_M1 = ("nl", "m", 1, Voice.ASH)
     GPT_NL_M2 = ("nl", "m", 2, Voice.ECHO)
 
     # German voices
-    GPT_DE_F1 = ("de", "f", 1, Voice.NOVA)
+    GPT_DE_F1 = ("de", "f", 1, Voice.CORAL)
     GPT_DE_F2 = ("de", "f", 2, Voice.ALLOY)
     GPT_DE_M1 = ("de", "m", 1, Voice.ASH)
     GPT_DE_M2 = ("de", "m", 2, Voice.ECHO)
 
     # Swedish voices
-    GPT_SV_F1 = ("sv", "f", 1, Voice.NOVA)
+    GPT_SV_F1 = ("sv", "f", 1, Voice.CORAL)
     GPT_SV_F2 = ("sv", "f", 2, Voice.ALLOY)
     GPT_SV_M1 = ("sv", "m", 1, Voice.ASH)
     GPT_SV_M2 = ("sv", "m", 2, Voice.ECHO)
 
     # Bosnian voices
-    GPT_BS_F1 = ("bs", "f", 1, Voice.NOVA)
+    GPT_BS_F1 = ("bs", "f", 1, Voice.CORAL)
     GPT_BS_F2 = ("bs", "f", 2, Voice.ALLOY)
     GPT_BS_M1 = ("bs", "m", 1, Voice.ASH)
     GPT_BS_M2 = ("bs", "m", 2, Voice.ECHO)
 
     # Albanian voices
-    GPT_SQ_F1 = ("sq", "f", 1, Voice.NOVA)
+    GPT_SQ_F1 = ("sq", "f", 1, Voice.CORAL)
     GPT_SQ_F2 = ("sq", "f", 2, Voice.ALLOY)
     GPT_SQ_M1 = ("sq", "m", 1, Voice.ASH)
     GPT_SQ_M2 = ("sq", "m", 2, Voice.ECHO)
 
     # Croatian voices
-    GPT_HR_F1 = ("hr", "f", 1, Voice.NOVA)
+    GPT_HR_F1 = ("hr", "f", 1, Voice.CORAL)
     GPT_HR_F2 = ("hr", "f", 2, Voice.ALLOY)
     GPT_HR_M1 = ("hr", "m", 1, Voice.ASH)
     GPT_HR_M2 = ("hr", "m", 2, Voice.ECHO)
 
     # Slovenian voices
-    GPT_SL_F1 = ("sl", "f", 1, Voice.NOVA)
+    GPT_SL_F1 = ("sl", "f", 1, Voice.CORAL)
     GPT_SL_F2 = ("sl", "f", 2, Voice.ALLOY)
     GPT_SL_M1 = ("sl", "m", 1, Voice.ASH)
     GPT_SL_M2 = ("sl", "m", 2, Voice.ECHO)
@@ -256,7 +250,7 @@ class GptVoice(Enum):
 
     @property
     def openai_voice_name(self) -> str:
-        """Get the OpenAI voice name (e.g., 'nova', 'ash')."""
+        """Get the OpenAI voice name (e.g., 'coral', 'ash')."""
         return self.openai_voice.value
 
     @classmethod

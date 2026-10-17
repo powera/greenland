@@ -19,6 +19,9 @@ class Voice(Enum):
     ONYX = "onyx"
     SAGE = "sage"
     SHIMMER = "shimmer"
+    VERSE = "verse"
+    MARIN = "marin"
+    CEDAR = "cedar"
 
 
 class AudioFormat(Enum):

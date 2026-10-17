@@ -63,8 +63,8 @@ class TestGptVoiceEnum(unittest.TestCase):
     def test_openai_voice_property(self) -> None:
         """Test openai_voice property returns correct Voice enum."""
         # F1 voices use Nova
-        self.assertEqual(GptVoice.GPT_LT_F1.openai_voice, Voice.NOVA)
-        self.assertEqual(GptVoice.GPT_ZH_F1.openai_voice, Voice.NOVA)
+        self.assertEqual(GptVoice.GPT_LT_F1.openai_voice, Voice.CORAL)
+        self.assertEqual(GptVoice.GPT_ZH_F1.openai_voice, Voice.CORAL)
 
         # F2 voices use Alloy
         self.assertEqual(GptVoice.GPT_LT_F2.openai_voice, Voice.ALLOY)
@@ -89,7 +89,7 @@ class TestGptVoiceEnum(unittest.TestCase):
 
     def test_openai_voice_name_property(self) -> None:
         """Test openai_voice_name returns the string value."""
-        self.assertEqual(GptVoice.GPT_LT_F1.openai_voice_name, "nova")
+        self.assertEqual(GptVoice.GPT_LT_F1.openai_voice_name, "coral")
         self.assertEqual(GptVoice.GPT_LT_M1.openai_voice_name, "ash")
         self.assertEqual(GptVoice.GPT_LT_F2.openai_voice_name, "alloy")
         self.assertEqual(GptVoice.GPT_LT_M2.openai_voice_name, "echo")
@@ -202,7 +202,7 @@ class TestGptVoiceLookup(unittest.TestCase):
 
     def test_from_openai_voice(self) -> None:
         """Test looking up by OpenAI voice and language."""
-        voice = GptVoice.from_openai_voice(Voice.NOVA, "lt")
+        voice = GptVoice.from_openai_voice(Voice.CORAL, "lt")
         self.assertEqual(voice, GptVoice.GPT_LT_F1)
 
         voice = GptVoice.from_openai_voice(Voice.ASH, "zh")
@@ -210,7 +210,7 @@ class TestGptVoiceLookup(unittest.TestCase):
 
     def test_from_openai_voice_resolves_storage_dialect(self) -> None:
         """Storage dialects use their base language's speaker definitions."""
-        voice = GptVoice.from_openai_voice(Voice.NOVA, "zh-tw")
+        voice = GptVoice.from_openai_voice(Voice.CORAL, "zh-tw")
         self.assertEqual(voice, GptVoice.GPT_ZH_F1)
 
         voice = GptVoice.from_openai_voice(Voice.ASH, "es-419")
