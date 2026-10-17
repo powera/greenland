@@ -33,6 +33,7 @@ Legend:
 | Language | `tokenize` | `split_contractions` | `candidate_lemmas` |
 |---|---:|---:|---:|
 | zh | ✅ jieba | ⭕ | ✅ |
+| en | ◐ | ✅ | ⭕ |
 | fr | ◐ | ✅ | ✅ |
 | it | ◐ | ✅ | ✅ |
 | de | ◐ | ✅ | ✅ |

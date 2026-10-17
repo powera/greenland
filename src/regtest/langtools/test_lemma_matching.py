@@ -154,7 +154,8 @@ CONTRACTIONS: List[Tuple[str, str, List[str]]] = [
     ("de", "zum", ["zu", "dem"]),
     ("es", "del", ["de", "el"]),
     ("nl", "z'n", ["zijn"]),
-    ("en", "don't", ["don't"]),
+    ("en", "don't", ["do", "not"]),
+    ("en", "world's", ["world's"]),
 ]
 
 
