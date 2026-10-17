@@ -24,7 +24,7 @@ from sqlalchemy.orm import Session, sessionmaker
 
 import storage.models  # noqa: F401
 from storage.backend.config import BackendType, DataSourceConfig
-from storage.models import Base, Lemma
+from storage.models import Base, DerivativeForm, Lemma
 from storage.models.operation_log import OperationLog
 from storage.translation_helpers import get_translation
 from words.add_term import TRANSLATION_LANGUAGES, add_term
@@ -168,6 +168,44 @@ class TestCreation:
 
         assert result.term == "ex post facto"
         assert session.query(Lemma).filter(Lemma.lemma_text == "ex post facto").count() == 1
+
+
+class TestEnglishForms:
+    def _en_forms(self, session: Session, text: str) -> Dict[str, str]:
+        lemma = session.query(Lemma).filter(Lemma.lemma_text == text).one()
+        rows = session.query(DerivativeForm).filter(
+            DerivativeForm.lemma_id == lemma.id, DerivativeForm.language_code == "en"
+        )
+        return {row.grammatical_form: row.derivative_form_text for row in rows}
+
+    def test_a_declined_term_still_gets_its_base_form(
+        self, session: Session, config: DataSourceConfig
+    ) -> None:
+        """The rules cannot inflect "ex post facto", but it still needs a base row."""
+        _add(session, config, _FakeClient(_all_languages()))
+
+        assert self._en_forms(session, "ex post facto") == {
+            "adjective/en_positive": "ex post facto"
+        }
+
+    def test_a_regular_noun_gets_its_mechanical_forms(
+        self, session: Session, config: DataSourceConfig
+    ) -> None:
+        _add(
+            session,
+            config,
+            _FakeClient(_all_languages("subpoena")),
+            term="subpoena",
+            pos_type="noun",
+            pos_subtype="legal_document",
+            definition="a writ ordering a person to attend a court",
+        )
+
+        forms = self._en_forms(session, "subpoena")
+        assert forms["noun/en_singular"] == "subpoena"
+        assert forms["noun/en_possessive_singular"] == "subpoena's"
+        base_rows = session.query(DerivativeForm).filter(DerivativeForm.is_base_form.is_(True))
+        assert base_rows.count() == 1
 
 
 class TestTranslationsThatDiffer:

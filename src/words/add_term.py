@@ -213,6 +213,11 @@ def add_term(
         session.add(new_lemma)
         session.flush()
         ensure_english_translation(session, new_lemma)
+        # Imported here: words.lemma_creation imports wordfreq.translation,
+        # the cycle described at TRANSLATION_LANGUAGES.
+        from words.lemma_creation import attach_english_forms
+
+        attach_english_forms(session, new_lemma, source=source)
 
         log_translation_change(
             session=session,

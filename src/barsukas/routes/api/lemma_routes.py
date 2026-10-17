@@ -67,6 +67,7 @@ from storage.translation_helpers import (
     set_translation,
 )
 from storage.utils.guid import LemmaWriteBusyError, generate_guid, run_lemma_write
+from words.lemma_creation import attach_english_forms
 from workqueue.task_queue import TaskStatus, TaskType, enqueue_task
 from barsukas.routes.api import bp
 
@@ -979,6 +980,7 @@ def add_lemmas() -> ResponseReturnValue:
             g.db.add(new_lemma)
             g.db.flush()
             ensure_english_translation(g.db, new_lemma)
+            attach_english_forms(g.db, new_lemma, source=Config.OPERATION_LOG_SOURCE)
 
             log_translation_change(
                 session=g.db,

@@ -56,6 +56,7 @@ from words.emoji import (
     emoji_values,
     normalize_emoji_input,
 )
+from words.lemma_creation import attach_english_forms
 from storage.translation_helpers import (
     DEFAULT_GENERATION_LANGUAGES,
     ensure_english_translation,
@@ -176,6 +177,7 @@ def add_lemma() -> ResponseReturnValue:
             g.db.add(new_lemma)
             g.db.flush()  # Get the ID
             ensure_english_translation(g.db, new_lemma)
+            attach_english_forms(g.db, new_lemma, source=Config.OPERATION_LOG_SOURCE)
 
             # Log the creation
             log_translation_change(
