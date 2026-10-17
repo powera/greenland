@@ -328,7 +328,7 @@ class WirewordSentenceExporter:
                 # filters by level puts it last rather than first.
                 #
                 # This must not be MAX_DIFFICULTY_LEVEL + 1: that constant is
-                # the widest *valid* value (1299, the top of the topic band),
+                # the widest *valid* value (1399, the staging level),
                 # so +1 lands the sentinel deep inside the curriculum's own
                 # numbering instead of beyond it. The sentinel is a number no
                 # real level reaches; see the band comment in constants.py.

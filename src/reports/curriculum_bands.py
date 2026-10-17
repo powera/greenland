@@ -145,7 +145,7 @@ def band_of(level: Optional[int]) -> str:
         return "core"
     if constants.NAMED_DIFFICULTY_LEVEL_MIN <= level <= constants.GENERAL_DIFFICULTY_LEVEL_MAX:
         return "named"
-    if constants.TOPIC_DIFFICULTY_LEVEL_MIN <= level <= constants.MAX_DIFFICULTY_LEVEL:
+    if constants.TOPIC_DIFFICULTY_LEVEL_MIN <= level <= constants.TOPIC_DIFFICULTY_LEVEL_MAX:
         return "topic"
     return "gap"
 

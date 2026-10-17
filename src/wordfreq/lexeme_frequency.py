@@ -40,8 +40,14 @@ from storage.models.schema import (
     Lemma,
     WordToken,
 )
-from storage.models.variant_form import VariantForm
+from storage.models.variant_form import VARIANT_KIND_ARCHAIC, VariantForm
 from wordfreq.frequency.corpus import get_enabled_corpus_configs
+
+# Multiplier on a lemma's weight when its only claim on a token is an archaic
+# variant.  "art" is both the noun and the thou-form of "be"; in any modern
+# corpus nearly every "art" is the noun.  A token claimed by nothing else still
+# goes wholly to its lemma ("saith" -> say), since shares are relative.
+ARCHAIC_VARIANT_WEIGHT_FACTOR: float = 0.01
 
 
 def _token_sort_key(token: WordToken) -> Tuple[int, int, int]:
@@ -167,24 +173,34 @@ def get_token_share(session: Session, word_token_id: int, lemma_id: int) -> floa
 
     A token attached to only one lemma always returns 1.0, regardless of that
     lemma's prominence label. A token with no attachments returns 0.0 (no
-    lexeme owns the frequency).
+    lexeme owns the frequency). A claim made only through an archaic variant is
+    scaled by ``ARCHAIC_VARIANT_WEIGHT_FACTOR``.
     """
-    rows = (
+    derivative_rows = (
         session.query(Lemma.id, Lemma.sense_prominence)
         .join(DerivativeForm, DerivativeForm.lemma_id == Lemma.id)
         .filter(DerivativeForm.word_token_id == word_token_id)
         .distinct()
         .all()
-    ) + (
-        session.query(Lemma.id, Lemma.sense_prominence)
+    )
+    variant_rows = (
+        session.query(Lemma.id, Lemma.sense_prominence, VariantForm.variant_kind)
         .join(VariantForm, VariantForm.lemma_id == Lemma.id)
         .filter(VariantForm.word_token_id == word_token_id)
         .distinct()
         .all()
     )
-    if not rows:
+    if not derivative_rows and not variant_rows:
         return 0.0
-    weights = {lid: _weight_for(prom) for lid, prom in rows}
+    # A lemma may claim the token more than once; its strongest claim counts.
+    weights: Dict[int, float] = {}
+    for lid, prom in derivative_rows:
+        weights[lid] = max(weights.get(lid, 0.0), _weight_for(prom))
+    for lid, prom, kind in variant_rows:
+        weight = _weight_for(prom)
+        if kind == VARIANT_KIND_ARCHAIC:
+            weight *= ARCHAIC_VARIANT_WEIGHT_FACTOR
+        weights[lid] = max(weights.get(lid, 0.0), weight)
     total = sum(weights.values())
     if total == 0:
         return 0.0

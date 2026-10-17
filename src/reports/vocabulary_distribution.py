@@ -62,7 +62,7 @@ def check_difficulty_level_distribution(session: Any) -> Dict[str, Any]:
             .filter(
                 Lemma.difficulty_level.between(
                     constants.MIN_DIFFICULTY_LEVEL,
-                    constants.MAX_DIFFICULTY_LEVEL,
+                    constants.TOPIC_DIFFICULTY_LEVEL_MAX,
                 ),
                 Lemma.guid.isnot(None),
             )

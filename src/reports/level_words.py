@@ -33,7 +33,9 @@ BAND_TITLES = {
         f"Named units ({constants.NAMED_DIFFICULTY_LEVEL_MIN}-"
         f"{constants.GENERAL_DIFFICULTY_LEVEL_MAX})"
     ),
-    "topic": f"Topic ({constants.TOPIC_DIFFICULTY_LEVEL_MIN}-{constants.MAX_DIFFICULTY_LEVEL})",
+    "topic": (
+        f"Topic ({constants.TOPIC_DIFFICULTY_LEVEL_MIN}-{constants.TOPIC_DIFFICULTY_LEVEL_MAX})"
+    ),
     "gap": "Outside every band",
     "excluded": "Excluded",
 }

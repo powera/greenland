@@ -17,8 +17,13 @@ from storage.models.schema import (
     Lemma,
     WordToken,
 )
-from storage.models.variant_form import VARIANT_KIND_SPELLING, VariantForm
+from storage.models.variant_form import (
+    VARIANT_KIND_ARCHAIC,
+    VARIANT_KIND_SPELLING,
+    VariantForm,
+)
 from wordfreq.lexeme_frequency import (
+    ARCHAIC_VARIANT_WEIGHT_FACTOR,
     get_lexeme_form_ranks,
     get_lexeme_frequency,
     get_token_share,
@@ -258,11 +263,12 @@ def _add_variant(
     *,
     word_token: WordToken | None = None,
     language_code: str = "en",
+    variant_kind: str = VARIANT_KIND_SPELLING,
 ) -> VariantForm:
     variant = VariantForm(
         lemma_id=lemma.id,
         language_code=language_code,
-        variant_kind=VARIANT_KIND_SPELLING,
+        variant_kind=variant_kind,
         variant_key=variant_key,
         grammatical_form=grammatical_form,
         variant_form_text=text,
@@ -324,6 +330,54 @@ def test_variant_only_token_is_still_owned_by_its_lemma() -> None:
         assert lexeme is not None
         rollup = get_lexeme_frequency(session, lexeme, "testcorpus")
         assert rollup.total_frequency == pytest.approx(350.0)
+    finally:
+        session.close()
+
+
+def test_archaic_variant_claim_is_down_weighted() -> None:
+    """ "art" is the noun and the thou-form of "be"; the noun keeps nearly all of it."""
+    session = _make_session()
+    try:
+        art = _add_lemma(session, "art", "N01_001")
+        be = _add_lemma(session, "be", "V01_001", pos_type="verb")
+        token = _add_token_with_freq(session, "art", "testcorpus", 100.0)
+        _add_form(session, art, "art", "singular", word_token=token, is_base_form=True)
+        _add_variant(
+            session,
+            be,
+            "art",
+            "archaic",
+            "verb/en_2s_present",
+            word_token=token,
+            variant_kind=VARIANT_KIND_ARCHAIC,
+        )
+        session.commit()
+
+        factor = ARCHAIC_VARIANT_WEIGHT_FACTOR
+        assert get_token_share(session, token.id, be.id) == pytest.approx(factor / (1 + factor))
+        assert get_token_share(session, token.id, art.id) == pytest.approx(1 / (1 + factor))
+    finally:
+        session.close()
+
+
+def test_archaic_variant_alone_owns_its_token() -> None:
+    """With no competing claim, "saith" goes wholly to "say"."""
+    session = _make_session()
+    try:
+        say = _add_lemma(session, "say", "V01_002", pos_type="verb")
+        token = _add_token_with_freq(session, "saith", "testcorpus", 10.0)
+        _add_variant(
+            session,
+            say,
+            "saith",
+            "archaic",
+            "verb/en_3s_present",
+            word_token=token,
+            variant_kind=VARIANT_KIND_ARCHAIC,
+        )
+        session.commit()
+
+        assert get_token_share(session, token.id, say.id) == pytest.approx(1.0)
     finally:
         session.close()
 
