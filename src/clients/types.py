@@ -102,6 +102,9 @@ class Schema:
     name: str
     description: str
     properties: Dict[str, SchemaProperty]
+    # Local input-schema cost budget, not an API field or output-token limit.
+    # None retains the shared default; multi-language callers can opt in higher.
+    max_schema_tokens: Optional[int] = None
 
     def required_properties(self) -> List[str]:
         """Get list of required property names."""

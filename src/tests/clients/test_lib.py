@@ -5,6 +5,7 @@ import json
 import os
 import sys
 import unittest
+from unittest.mock import patch
 from typing import Any, Dict
 
 sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), "../..")))
@@ -557,6 +558,25 @@ class SchemaSizeLimitTestCase(unittest.TestCase):
 
         with self.assertRaises(SchemaTooLargeError):
             to_openai_schema(self._schema_with_enum(500))
+
+    def test_explicit_budget_is_local_and_enforced_for_every_provider(self) -> None:
+        schema = self._schema_with_enum(1)
+        schema.max_schema_tokens = 3072
+        for converter in (
+            to_openai_schema,
+            to_anthropic_schema,
+            to_gemini_schema,
+            to_ollama_schema,
+        ):
+            with self.subTest(converter=converter.__name__):
+                with patch("clients.lib.count_schema_tokens", return_value=2500):
+                    converted = converter(schema)
+                    self.assertNotIn("max_schema_tokens", json.dumps(converted))
+                    with self.assertRaises(SchemaTooLargeError):
+                        converter(self._schema_with_enum(1))
+                with patch("clients.lib.count_schema_tokens", return_value=3073):
+                    with self.assertRaisesRegex(SchemaTooLargeError, "3072"):
+                        converter(schema)
 
 
 if __name__ == "__main__":

@@ -1,0 +1,10 @@
+Complete the requested grammar for this lexical sense.
+
+Sense and existing translations:
+{source}
+
+Already stored facts (do not overwrite):
+{known}
+
+Requested questions:
+{questions}
