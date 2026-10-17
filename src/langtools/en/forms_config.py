@@ -52,6 +52,8 @@ ADVERB_CONFIG: Dict[str, Any] = {
 GRAMMATICAL_FORM_OVERRIDES: Dict[str, str] = {
     "ADVERB_EN_BASE": "adverb/en_base",
     "ARTICLE_EN_BASE": "article/en_base",
+    "NOUN_EN_POSSESSIVE_SINGULAR": "noun/en_possessive_singular",
+    "NOUN_EN_POSSESSIVE_PLURAL": "noun/en_possessive_plural",
     "NUMERAL_EN_CARDINAL": "numeral/en_cardinal",
     "NUMERAL_EN_ORDINAL": "numeral/en_ordinal",
     "PRONOUN_EN_OBJECTIVE": "pronoun/en_objective",

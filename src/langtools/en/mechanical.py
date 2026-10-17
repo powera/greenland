@@ -10,7 +10,12 @@ from typing import Any, Callable, Dict, Optional, Tuple
 from sqlalchemy.orm import Session
 
 from langtools.en.conjugation import expand_verb_forms
-from langtools.en.inflection import build_adjective_forms, build_adverb_forms, build_noun_forms
+from langtools.en.inflection import (
+    build_adjective_forms,
+    build_adverb_forms,
+    build_noun_forms,
+    build_possessive_forms,
+)
 from langtools.mechanical_forms import Paradigm, read_facts
 
 POS_TYPES: Tuple[str, ...] = ("noun", "adjective", "adverb", "verb")
@@ -31,6 +36,8 @@ FORM_KEYS: Dict[str, Dict[str, str]] = {
     "noun": {
         "singular": "noun/en_singular",
         "plural": "noun/en_plural",
+        "possessive_singular": "noun/en_possessive_singular",
+        "possessive_plural": "noun/en_possessive_plural",
     },
     "adjective": {
         "positive": "adjective/en_positive",
@@ -52,6 +59,24 @@ FORM_KEYS: Dict[str, Dict[str, str]] = {
 }
 
 
+def _stored_plural(session: Session, lemma: Any) -> Optional[str]:
+    """The lemma's stored ``noun/en_plural`` text, if it has one."""
+    # Imported lazily, like read_facts: langtools does not load storage models
+    # at import time.
+    from storage.models.schema import DerivativeForm
+
+    row = (
+        session.query(DerivativeForm.derivative_form_text)
+        .filter(
+            DerivativeForm.lemma_id == lemma.id,
+            DerivativeForm.language_code == "en",
+            DerivativeForm.grammatical_form == "noun/en_plural",
+        )
+        .first()
+    )
+    return row[0] if row else None
+
+
 def build_paradigm(
     session: Session, lemma: Any, pos_type: str, language_code: str, word: str
 ) -> Paradigm:
@@ -60,7 +85,17 @@ def build_paradigm(
         countability, number_type, irregular_plural = read_facts(
             session, lemma.id, "en", "countability", "number_type", "plural"
         )
-        return build_noun_forms(word, countability, number_type, irregular_plural), {}
+        forms = build_noun_forms(word, countability, number_type, irregular_plural)
+        # The plural the database already holds wins over the rule's: it may be
+        # one the rules declined ("cactus"), and the possessive must agree
+        # with the plural actually stored.
+        plural = _stored_plural(session, lemma) or (forms or {}).get("plural")
+        possessives = build_possessive_forms(
+            word, plural, plurale_tantum=number_type == "plurale_tantum"
+        )
+        if forms is None and possessives is None:
+            return None, {}
+        return {**(forms or {}), **(possessives or {})}, {}
 
     if pos_type in ("adjective", "adverb"):
         gradability, comparative, superlative = read_facts(
@@ -101,7 +136,11 @@ def build_variant_paradigm(
     """
     if pos_type == "noun":
         (countability,) = read_facts(session, lemma.id, "en", "countability")
-        return build_noun_forms(text, countability, None, None)
+        forms = build_noun_forms(text, countability, None, None)
+        possessives = build_possessive_forms(text, (forms or {}).get("plural"))
+        if forms is None and possessives is None:
+            return None
+        return {**(forms or {}), **(possessives or {})}
     if pos_type in ("adjective", "adverb"):
         (gradability,) = read_facts(session, lemma.id, "en", "gradability")
         builder: Callable[..., Optional[Dict[str, str]]] = (

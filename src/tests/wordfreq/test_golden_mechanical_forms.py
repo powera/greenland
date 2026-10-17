@@ -106,7 +106,12 @@ class GoldenMechanicalFormsTest(unittest.TestCase):
 
         self.assertEqual(
             self._en_forms(lemma),
-            {"noun/en_singular": "pharmacist", "noun/en_plural": "pharmacists"},
+            {
+                "noun/en_singular": "pharmacist",
+                "noun/en_plural": "pharmacists",
+                "noun/en_possessive_singular": "pharmacist's",
+                "noun/en_possessive_plural": "pharmacists'",
+            },
         )
         lexeme = get_lexeme(self.session, lemma.id, "en")
         assert lexeme is not None
@@ -123,7 +128,12 @@ class GoldenMechanicalFormsTest(unittest.TestCase):
 
         self.assertEqual(
             self._en_forms(lemma),
-            {"noun/en_singular": "child", "noun/en_plural": "children"},
+            {
+                "noun/en_singular": "child",
+                "noun/en_plural": "children",
+                "noun/en_possessive_singular": "child's",
+                "noun/en_possessive_plural": "children's",
+            },
         )
 
     def test_the_pass_is_the_inverse_of_the_export_filter(self) -> None:
@@ -152,7 +162,8 @@ class GoldenMechanicalFormsTest(unittest.TestCase):
         first = generate_for_session(self.session, languages=["en"])
         second = generate_for_session(self.session, languages=["en"])
 
-        self.assertEqual(first["en"]["forms_added"], 2)
+        # singular, plural and their two possessives
+        self.assertEqual(first["en"]["forms_added"], 4)
         self.assertEqual(second["en"]["forms_added"], 0)
 
     def test_pos_types_limits_the_pass(self) -> None:
