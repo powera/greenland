@@ -6,17 +6,18 @@ from sqlalchemy.orm import Session
 from sqlalchemy.sql import func
 
 from storage.models.schema import DerivativeForm, Lemma, WordToken
-from storage.models.variant_form import VariantForm
+from storage.token_forms import claimed_word_token_ids
 
 
 def get_processing_stats(session: Session) -> Dict[str, Any]:
     """Get statistics about the current processing state.
 
-    ``tokens_with_derivative_forms`` counts tokens some lemma claims, which is
-    the coverage question worth asking. A lemma reaches a token through a
-    ``DerivativeForm`` *or* a ``VariantForm`` -- the same two attachments
-    ``storage.word_token_view`` collects -- so both count, or the British
-    spelling of a word would read as uncovered vocabulary.
+    ``tokens_with_derivative_forms`` counts tokens some form row claims, which
+    is the coverage question worth asking. Every table in
+    ``storage.token_forms.TOKEN_FORM_SOURCES`` counts -- a lemma's derivative
+    or variant form, or a name's form -- the same claims
+    ``storage.word_token_view`` collects, or the British spelling of a word
+    (or "John") would read as uncovered vocabulary.
 
     Counting is over *distinct* tokens: a token with five inflections attached
     is one covered token, not five. Counting the join's rows instead let this
@@ -24,15 +25,9 @@ def get_processing_stats(session: Session) -> Dict[str, Any]:
     """
     total_word_tokens = session.query(func.count(WordToken.id)).scalar()
 
-    claimed_by_derivative = session.query(DerivativeForm.word_token_id).filter(
-        DerivativeForm.word_token_id.isnot(None)
-    )
-    claimed_by_variant = session.query(VariantForm.word_token_id).filter(
-        VariantForm.word_token_id.isnot(None)
-    )
     tokens_with_derivative_forms = (
         session.query(func.count(WordToken.id))
-        .filter(WordToken.id.in_(claimed_by_derivative.union(claimed_by_variant)))
+        .filter(WordToken.id.in_(claimed_word_token_ids(session)))
         .scalar()
     )
 

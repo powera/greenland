@@ -448,6 +448,15 @@ class DerivativeForm(Base):
     word_token = relationship("WordToken", back_populates="derivative_forms")
     lemma = relationship("Lemma", back_populates="derivative_forms")
 
+    @property
+    def surface_text(self) -> str:
+        """The form as written; the :class:`~storage.elements.interfaces.SurfaceForm` view."""
+        return self.derivative_form_text
+
+    @property
+    def owner(self) -> ElementRef:
+        return ElementRef(element_type="lemma", element_id=self.lemma_id)
+
 
 class Sentence(Base):
     """Model for storing sentence metadata.

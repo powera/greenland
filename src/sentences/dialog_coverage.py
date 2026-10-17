@@ -33,7 +33,7 @@ from langtools.en.utils import candidate_base_forms
 from langtools.grammatical_words import is_function_word, is_grammatical_word
 from langtools.tokenizer import tokenize
 from sentences.candidate_lookup import find_lemmas_for_token
-from storage.crud.name_entity import find_name
+from storage.crud.name_entity import find_name, find_name_by_form
 from storage.models.name_entity import normalize_name_text
 from storage.models.schema import Lemma
 
@@ -276,7 +276,8 @@ def classify_token(
                 status=STATUS_NAME,
                 name_id=existing.id if existing is not None else None,
             )
-        registered = find_name(session, normalized_name)
+        # By form, not just text: "John's" is John.
+        registered = find_name_by_form(session, normalized_name, language_code)
         if registered is not None:
             return TokenCoverage(surface=cleaned, status=STATUS_NAME, name_id=registered.id)
 

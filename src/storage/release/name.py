@@ -103,6 +103,10 @@ def to_release_record(name: Name) -> Dict[str, Any]:
     record["translations"] = translations
     if translation_metadata:
         record["translation_metadata"] = translation_metadata
+    # name.derivative_forms is not exported: today every form is the base or
+    # the rule-built possessive, which create_name regenerates on import (as
+    # derivable lemma forms are withheld). Forms that are content -- a
+    # Lithuanian declension table, say -- would go in a "forms" list here.
     if name.notes:
         record["notes"] = name.notes
     if name.verified:

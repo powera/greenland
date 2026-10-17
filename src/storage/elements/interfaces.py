@@ -106,6 +106,37 @@ class LanguageValueElement(Element, Protocol):
     def language_values(self) -> Sequence[LanguageValue]: ...
 
 
+class SurfaceForm(Protocol):
+    """One written form of an element that can claim a corpus ``WordToken``.
+
+    Satisfied by ``DerivativeForm`` and ``VariantForm`` (owned by a lemma) and
+    by ``NameDerivativeForm`` (owned by a name). Code that only needs "which
+    element spells this token, and how" takes this rather than a concrete
+    model; :mod:`storage.token_forms` lists the tables that implement it.
+    """
+
+    @property
+    def id(self) -> int: ...
+
+    @property
+    def word_token_id(self) -> int | None: ...
+
+    @property
+    def language_code(self) -> str: ...
+
+    @property
+    def grammatical_form(self) -> str | None: ...
+
+    @property
+    def is_base_form(self) -> bool: ...
+
+    @property
+    def surface_text(self) -> str: ...
+
+    @property
+    def owner(self) -> ElementRef: ...
+
+
 class CompositeElement(Element, Protocol):
     """An element composed from references to other elements."""
 

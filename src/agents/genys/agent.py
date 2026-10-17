@@ -39,6 +39,7 @@ from storage.backend.config import DataSourceConfig
 from storage.crud.sentence import add_sentence
 from storage.crud.sentence_translation import add_sentence_translation
 from storage.crud.lemma_tags import serialize_tags_for_column
+from storage.crud.name_entity import find_name_by_form
 from storage.models.imports import PendingImport
 from words.pending_imports.staging import create_pending_import
 from storage.models.schema import DerivativeForm, Lemma
@@ -495,6 +496,13 @@ class GenysAgent:
                             .first()
                         }
                     if form_lemma_ids:
+                        stats["already_in_database"] += 1
+                        continue
+
+                    # Already a name ("John", "John's"): staging it again would
+                    # only queue a second copy. Case-sensitive, so the original
+                    # gloss rather than the lowercased one.
+                    if find_name_by_form(session, english_gloss) is not None:
                         stats["already_in_database"] += 1
                         continue
 

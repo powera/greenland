@@ -41,6 +41,7 @@ from storage.models.schema import (
     WordToken,
 )
 from storage.models.variant_form import VARIANT_KIND_ARCHAIC, VariantForm
+from storage.token_forms import link_unlinked_forms
 from wordfreq.frequency.corpus import get_enabled_corpus_configs
 
 # Multiplier on a lemma's weight when its only claim on a token is an archaic
@@ -48,20 +49,6 @@ from wordfreq.frequency.corpus import get_enabled_corpus_configs
 # corpus nearly every "art" is the noun.  A token claimed by nothing else still
 # goes wholly to its lemma ("saith" -> say), since shares are relative.
 ARCHAIC_VARIANT_WEIGHT_FACTOR: float = 0.01
-
-
-def _token_sort_key(token: WordToken) -> Tuple[int, int, int]:
-    """Order case-variant tokens best-first for the case-insensitive fallback.
-
-    A ranked token beats an unranked one, then the better (lower) rank wins,
-    then the lower id, so the choice never depends on query order. An unranked
-    token is one no corpus reached -- typically a tier import's capitalized
-    spelling -- and is the worse thing to link a form to.
-    """
-    rank = token.frequency_rank
-    if rank is None:
-        return (1, 0, token.id)
-    return (0, rank, token.id)
 
 
 def link_forms_to_word_tokens(session: Session, language_code: str = "en") -> Dict[str, int]:
@@ -75,82 +62,26 @@ def link_forms_to_word_tokens(session: Session, language_code: str = "en") -> Di
     roll up zero -- combined ranks then quietly collapse to the tier signals
     (CEFR / Cambridge YLE / Basic English) alone.
 
-    Both ``derivative_forms`` and ``variant_forms`` are linked: a variant counts
-    toward its lemma (see the module docstring), so leaving variants unlinked
-    would drop the British spelling of a word from its own frequency.
+    Every table in ``storage.token_forms.TOKEN_FORM_SOURCES`` is linked: a
+    variant counts toward its lemma (see the module docstring), so leaving
+    variants unlinked would drop the British spelling of a word from its own
+    frequency, and a name's forms are what take "John" off the unlinked-token
+    list.
 
-    A form's own spelling is matched first, and only then its lowercased one.
-    Both spellings can exist as tokens -- ``uq_word_token_language`` is
-    case-sensitive, and the corpora now count "March" apart from "march" -- so
-    an exact match is the difference between the month's rank and the verb's.
-
-    Where only a differently-cased token exists, the fallback picks
-    deterministically: a ranked row beats an unranked one, then the better
-    rank, then the lower id. It used to be whichever row the unordered query
-    happened to return first, which is how the "London" lemma ended up on a
-    rankless tier-import row while "China" landed on its corpus-ranked one.
+    Matching is ``storage.token_forms.WordTokenResolver``: a form's own spelling
+    first, then its lowercased one, with a deterministic pick among case
+    variants. It used to be whichever row the unordered query happened to
+    return first, which is how the "London" lemma ended up on a rankless
+    tier-import row while "China" landed on its corpus-ranked one.
 
     Only rows whose FK is currently NULL are touched, so this is idempotent and
     safe to re-run.
 
-    Returns a dict of ``{"derivative_forms": n, "variant_forms": n}``.
+    Returns ``{table_name: n}``: ``derivative_forms``, ``variant_forms`` and
+    ``name_derivative_forms``.
     """
-    tokens = session.query(WordToken).filter(WordToken.language_code == language_code).all()
-
-    token_id_by_exact: Dict[str, int] = {}
-    best_by_lower: Dict[str, WordToken] = {}
-    for token in tokens:
-        token_id_by_exact[token.token] = token.id
-        lowered = token.token.lower()
-        incumbent = best_by_lower.get(lowered)
-        if incumbent is None or _token_sort_key(token) < _token_sort_key(incumbent):
-            best_by_lower[lowered] = token
-    token_id_by_lower: Dict[str, int] = {
-        lowered: token.id for lowered, token in best_by_lower.items()
-    }
-
-    def resolve(text: str) -> Optional[int]:
-        """The best token id for one form's surface text, or None."""
-        if not text:
-            return None
-        exact = token_id_by_exact.get(text)
-        if exact is not None:
-            return exact
-        return token_id_by_lower.get(text.lower())
-
-    counts: Dict[str, int] = {"derivative_forms": 0, "variant_forms": 0}
-    if not token_id_by_exact:
-        return counts
-
-    derivative_forms = (
-        session.query(DerivativeForm)
-        .filter(
-            DerivativeForm.language_code == language_code,
-            DerivativeForm.word_token_id.is_(None),
-        )
-        .all()
-    )
-    for derivative_form in derivative_forms:
-        token_id = resolve(derivative_form.derivative_form_text or "")
-        if token_id is not None:
-            derivative_form.word_token_id = token_id
-            counts["derivative_forms"] += 1
-
-    variant_forms = (
-        session.query(VariantForm)
-        .filter(
-            VariantForm.language_code == language_code,
-            VariantForm.word_token_id.is_(None),
-        )
-        .all()
-    )
-    for variant_form in variant_forms:
-        token_id = resolve(variant_form.variant_form_text or "")
-        if token_id is not None:
-            variant_form.word_token_id = token_id
-            counts["variant_forms"] += 1
-
-    if counts["derivative_forms"] or counts["variant_forms"]:
+    counts = link_unlinked_forms(session, language_code)
+    if any(counts.values()):
         session.commit()
     return counts
 

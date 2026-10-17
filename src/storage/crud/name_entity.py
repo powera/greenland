@@ -13,9 +13,11 @@ from typing import Any, List, Optional, cast
 from sqlalchemy import func
 from sqlalchemy.orm import Session
 
+from langtools.en.inflection import build_possessive_forms
 from storage.crud.operation_log import (
     NAME_CREATE,
     NAME_DELETE,
+    NAME_DERIVATIVE_FORM_CREATE,
     NAME_TRANSLATION_CREATE,
     NAME_TRANSLATION_UPDATE,
     NAME_UPDATE,
@@ -28,9 +30,17 @@ from storage.models.name_entity import (
     NAME_GENDERS,
     NAME_KINDS,
     Name,
+    NameDerivativeForm,
     NameTranslation,
     normalize_name_text,
 )
+from storage.token_forms import link_form_to_word_token
+
+# grammatical_form values for a name's English forms. They are the proper-noun
+# lemma slots (the values langtools.en.mechanical writes for "Shanghai"), so a
+# name's forms and a lemma's read alike.
+NAME_EN_BASE_FORM: str = "noun/en_singular"
+NAME_EN_POSSESSIVE_FORM: str = "noun/en_possessive_singular"
 
 logger = logging.getLogger(__name__)
 
@@ -63,6 +73,152 @@ def find_name(session: Session, name_text: str, kind: Optional[str] = None) -> O
     if kind is not None:
         query = query.filter(Name.kind == kind)
     return cast(Optional[Name], query.first())
+
+
+def find_name_by_form(session: Session, text: str, language_code: str = "en") -> Optional[Name]:
+    """Find a name by its text or by any of its forms ("John" or "John's").
+
+    A superset of :func:`find_name` for callers matching a surface token from
+    running text, where the possessive is as likely as the bare name. Matching
+    stays case-sensitive, so "john" finds nothing.
+
+    Args:
+        session: Database session.
+        text: Surface text; normalized before lookup.
+        language_code: Language of the form to match.
+
+    Returns:
+        The matching Name, or None.
+    """
+    normalized = normalize_name_text(text)
+    if not normalized:
+        return None
+    by_text = find_name(session, normalized)
+    if by_text is not None:
+        return by_text
+    return cast(
+        Optional[Name],
+        session.query(Name)
+        .join(NameDerivativeForm, NameDerivativeForm.name_id == Name.id)
+        .filter(
+            NameDerivativeForm.language_code == language_code,
+            NameDerivativeForm.derivative_form_text == normalized,
+        )
+        .order_by(Name.id)
+        .first(),
+    )
+
+
+def add_name_derivative_form(
+    session: Session,
+    name: Name,
+    *,
+    derivative_form_text: str,
+    language_code: str,
+    grammatical_form: str,
+    is_base_form: bool = False,
+    source: Optional[str] = None,
+) -> NameDerivativeForm:
+    """Add one form of a name, or return the existing identical row.
+
+    Idempotent on the table's unique key. A new row is linked to its
+    ``WordToken`` at once when one exists (exact case only; see
+    ``storage.token_forms``).
+
+    Args:
+        session: Database session (the caller commits).
+        name: The owning name (must be flushed).
+        derivative_form_text: The form as written ("John's").
+        language_code: Language of the form.
+        grammatical_form: Slot in the DerivativeForm vocabulary.
+        is_base_form: Whether this is the name's own spelling.
+        source: Who is creating this, for the operation log. None skips logging.
+
+    Returns:
+        The NameDerivativeForm row.
+    """
+    form_text = normalize_name_text(derivative_form_text)
+    if not form_text:
+        raise ValueError("A name form needs non-empty text")
+    existing = (
+        session.query(NameDerivativeForm)
+        .filter(
+            NameDerivativeForm.name_id == name.id,
+            NameDerivativeForm.language_code == language_code,
+            NameDerivativeForm.grammatical_form == grammatical_form,
+            NameDerivativeForm.derivative_form_text == form_text,
+        )
+        .first()
+    )
+    if existing is not None:
+        return cast(NameDerivativeForm, existing)
+
+    form = NameDerivativeForm(
+        name_id=name.id,
+        derivative_form_text=form_text,
+        language_code=language_code,
+        grammatical_form=grammatical_form,
+        is_base_form=is_base_form,
+    )
+    session.add(form)
+    link_form_to_word_token(session, form)
+    session.flush()
+
+    if source is not None:
+        log_entity_operation(
+            session,
+            source=source,
+            operation_type=NAME_DERIVATIVE_FORM_CREATE,
+            entity_guid=name.guid,
+            word_token_id=form.word_token_id,
+            fact={
+                "language_code": language_code,
+                "form": form_text,
+                "grammatical_form": grammatical_form,
+                "is_base_form": is_base_form,
+            },
+        )
+    return form
+
+
+def attach_name_forms(
+    session: Session, name: Name, source: Optional[str] = None
+) -> List[NameDerivativeForm]:
+    """Write a name's mechanically derivable English forms.
+
+    The base form (the name's own text) and the singular possessive ("John's",
+    "James's"); a name has no plural. Both are rule-built with no LLM call,
+    which is why the release export withholds them and import regenerates them.
+    Safe to re-run.
+
+    Returns:
+        The name's English forms, base form first.
+    """
+    forms = [
+        add_name_derivative_form(
+            session,
+            name,
+            derivative_form_text=name.name_text,
+            language_code="en",
+            grammatical_form=NAME_EN_BASE_FORM,
+            is_base_form=True,
+            source=source,
+        )
+    ]
+    possessives = build_possessive_forms(name.name_text) or {}
+    possessive = possessives.get("possessive_singular")
+    if possessive:
+        forms.append(
+            add_name_derivative_form(
+                session,
+                name,
+                derivative_form_text=possessive,
+                language_code="en",
+                grammatical_form=NAME_EN_POSSESSIVE_FORM,
+                source=source,
+            )
+        )
+    return forms
 
 
 def list_names(
@@ -181,6 +337,7 @@ def create_name(
             },
         )
 
+    attach_name_forms(session, name, source=source)
     return name
 
 

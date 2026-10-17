@@ -63,9 +63,16 @@
                     {% for attachment in view.attachments %}
                     <tr>
                         <td>
-                            <a href="{{ url_for('lemmas.view_lemma', lemma_id=attachment.lemma_id) }}">
-                                {{ attachment.display_text }}
-                            </a>
+                            {% if attachment.element_type == 'name' %}
+                                <a href="{{ url_for('names.detail', name_id=attachment.name_id) }}">
+                                    {{ attachment.display_text }}
+                                </a>
+                                <span class="badge bg-secondary">name</span>
+                            {% else %}
+                                <a href="{{ url_for('lemmas.view_lemma', lemma_id=attachment.lemma_id) }}">
+                                    {{ attachment.display_text }}
+                                </a>
+                            {% endif %}
                             {% if attachment.is_base_form %}
                                 <span class="badge bg-light text-dark border">base</span>
                             {% endif %}
@@ -74,7 +81,7 @@
                             {% endif %}
                         </td>
                         <td class="text-muted small">{{ attachment.pos_type }}</td>
-                        <td class="small">{{ attachment.definition_text }}</td>
+                        <td class="small">{{ attachment.definition_text or '' }}</td>
                         <td>
                             {% if attachment.attachment_kind == 'variant' %}
                                 <span class="badge bg-info text-dark"
