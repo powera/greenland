@@ -43,14 +43,14 @@ def test_detect_names_needs_mid_sentence_evidence() -> None:
     assert detect_names(analyze_text(verse), min_mid_sentence=3) == {}
 
 
-def test_names_are_excluded_from_content_counts_per_book() -> None:
+def test_names_are_diagnostic_and_remain_in_content_counts() -> None:
     novel = "He met Rose. Everyone liked Rose because Rose was kind to Rose."
     garden = "She picked a rose. The rose smelled sweet and the rose was red."
     novel_analysis = make_book("1_Novel", novel)
     garden_analysis = make_book("2_Garden", garden)
 
     assert "rose" in novel_analysis.names
-    assert novel_analysis.content_counts["rose"] == 0
+    assert novel_analysis.content_counts["rose"] == 4
     assert "rose" not in garden_analysis.names
     assert garden_analysis.content_counts["rose"] == 3
 

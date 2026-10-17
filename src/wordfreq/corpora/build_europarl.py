@@ -30,7 +30,7 @@ are folded before counting ("programme" counts as "program"); see
 ``legal_scotus`` vocabulary, joined by the database's English forms under
 ``--phrases-from-db``.  ``--show-folds N`` prints the folds for review.
 
-Per-document name detection is off (see ``NO_NAME_DETECTION``): capitalized
+Name detection is diagnostic: capitalized
 words count like any other, and ``--min-chapters`` is what keeps one debate's
 proper nouns out.
 
@@ -81,47 +81,6 @@ DEFAULT_FULL_WEIGHT_CHAPTER_TOKENS = 3000
 # A topic corpus like wiki_society (5500), not a general one like the novels:
 # a corpus's word count is also its weight in combined_rank.
 DEFAULT_MAX_WORDS = 5500
-
-
-# Per-document name detection is off.  It exists for the character who fills
-# one novel and appears in no other ("Ahab"), and the min-chapters floor
-# already keeps a word confined to a few debates out of the list.  What the
-# rule catches here instead is words capitalized in *every* debate --
-# "Commission", "European", "Greece" -- which are the corpus's vocabulary.
-# No capitalization share exceeds 1.0, so this threshold never fires.
-NO_NAME_DETECTION = 1.1
-
-# With name detection off, the people debated about come through: "Barroso"
-# (2586), "Prodi", "Poettering", and name particles like "Van" and "De".  They
-# sit low in the list, while the capitalized vocabulary worth keeping --
-# "European", "Commission", "Greece" (988), "Kosovo" -- ranks higher.  A
-# capitalized entry is kept only at or above this rank.  A stopgap for this
-# corpus, not a general rule.
-DEFAULT_MAX_CAPITALIZED_RANK = 2000
-
-
-def drop_low_ranked_capitalized(
-    frequencies: Dict[str, int], max_rank: int, max_words: Optional[int]
-) -> Tuple[Dict[str, int], int]:
-    """Drop capitalized entries ranked below ``max_rank``, then cap the list.
-
-    Rank is the entry's position in the full, uncapped list.  "I" is exempt:
-    it is capitalized by rule, not because it is a name.
-
-    Returns:
-        The filtered frequencies (at most ``max_words``) and how many
-        capitalized entries were dropped within them.
-    """
-    kept: Dict[str, int] = {}
-    dropped = 0
-    for rank, (word, count) in enumerate(frequencies.items(), start=1):
-        if max_words is not None and len(kept) >= max_words:
-            break
-        if rank > max_rank and word[:1].isupper() and word != "I":
-            dropped += 1
-            continue
-        kept[word] = count
-    return kept, dropped
 
 
 # The American-English reference for spelling folds: a US corpus's vocabulary,
@@ -272,15 +231,7 @@ def main() -> int:
         action="store_false",
         help='Do not join "will <verb>" and "more <adj>" into single tokens',
     )
-    parser.add_argument(
-        "--max-capitalized-rank",
-        type=int,
-        default=DEFAULT_MAX_CAPITALIZED_RANK,
-        help=(
-            "Drop capitalized entries ranked below this "
-            f"(default: {DEFAULT_MAX_CAPITALIZED_RANK})"
-        ),
-    )
+
     parser.add_argument(
         "--no-fold-spellings",
         dest="fold_spellings",
@@ -340,34 +291,23 @@ def main() -> int:
             analyze_book(
                 slug,
                 fold_text(text, spelling_map),
-                capitalization_ratio=NO_NAME_DETECTION,
                 phrases=phrases,
             )
         )
         if index % 500 == 0:
             logger.info("[%d/%d] chapters analyzed", index, len(documents))
 
-    # Built uncapped, so the list can be refilled to --max-words once the
-    # low-ranked capitalized entries are dropped.
     payload = build_corpus_payload(
         analyses,
         corpus_name=CORPUS_NAME,
         min_books=args.min_chapters,
-        max_words=None,
+        max_words=args.max_words,
         full_weight_tokens=args.full_weight_tokens,
         min_uppercase_count=args.min_uppercase_count,
         min_uppercase_share=args.min_uppercase_share,
         generator="wordfreq.corpora.build_europarl",
     )
-    payload["global_word_frequency"], dropped = drop_low_ranked_capitalized(
-        payload["global_word_frequency"], args.max_capitalized_rank, args.max_words
-    )
-    payload["generation"]["max_words"] = args.max_words
-    payload["generation"]["max_capitalized_rank"] = args.max_capitalized_rank
     payload["generation"]["spelling_folds"] = len(spelling_map)
-    logger.info(
-        "Dropped %d capitalized entries ranked below %d", dropped, args.max_capitalized_rank
-    )
 
     frequencies = payload["global_word_frequency"]
     print(f"\nCorpus: {CORPUS_NAME}")

@@ -8,7 +8,7 @@ dialogue.  Both directions are asserted below.
 
 from collections import Counter
 
-from wordfreq.corpora.build_wpalh import remove_pooled_names
+from wordfreq.corpora.build_wpalh import record_pooled_names
 from wordfreq.corpora.frequency_build import analyze_book
 from wordfreq.corpora.wpalh_text import (
     apply_ocr_corrections,
@@ -176,9 +176,11 @@ def test_pooled_names_catch_informants_named_rarely_per_interview() -> None:
         for index in range(4)
     ]
     assert all("lovett" in analysis.content_counts for analysis in analyses)
-    moved = remove_pooled_names(analyses)
+    moved = record_pooled_names(analyses)
     assert moved["lovett"] == 8
-    assert all("lovett" not in analysis.content_counts for analysis in analyses)
+    assert all(analysis.content_counts["lovett"] == 2 for analysis in analyses)
+    assert all(analysis.names["lovett"] == 2 for analysis in analyses)
+    record_pooled_names(analyses)
     assert all(analysis.names["lovett"] == 2 for analysis in analyses)
     assert "store" in analyses[0].content_counts
 

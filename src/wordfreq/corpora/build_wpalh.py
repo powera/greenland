@@ -236,22 +236,8 @@ def correct_ocr(
     return corrected, corrections, misreadings
 
 
-def remove_pooled_names(analyses: List[BookAnalysis]) -> Dict[str, int]:
-    """Treat as names the words the whole collection capitalizes, in every interview.
-
-    ``analyze_book`` decides names one document at a time and needs a word
-    mid-sentence at least four times in that document to judge it.  A novel
-    mentions its characters hundreds of times; a 1,500-word interview names
-    the informant ("Mr. Lovett") two or three times, so it slips through and
-    is published as the word "lovett".  Pooling the capitalization evidence
-    over all interviews and applying the same test catches those names.
-
-    Mutates each analysis: pooled names move from the content counts to
-    ``names``.
-
-    Returns:
-        Each pooled name and its total count across the interviews.
-    """
+def record_pooled_names(analyses: List[BookAnalysis]) -> Dict[str, int]:
+    """Record pooled name diagnostics without removing any word occurrences."""
     pooled = TextStats()
     for analysis in analyses:
         pooled.counts.update(analysis.stats.counts)
@@ -261,10 +247,8 @@ def remove_pooled_names(analyses: List[BookAnalysis]) -> Dict[str, int]:
     moved: Counter[str] = Counter()
     for analysis in analyses:
         for word in names.keys() & analysis.content_counts.keys():
-            count = analysis.content_counts.pop(word)
-            analysis.upper_counts.pop(word, None)
-            analysis.lower_counts.pop(word, None)
-            analysis.names[word] = analysis.names.get(word, 0) + count
+            count = analysis.content_counts[word]
+            analysis.names[word] = count
             moved[word] += count
     return dict(moved)
 
@@ -457,9 +441,9 @@ def main() -> int:
         if index % 500 == 0:
             logger.info("[%d/%d] interviews analyzed", index, len(kept))
 
-    pooled_names = remove_pooled_names(analyses)
+    pooled_names = record_pooled_names(analyses)
     logger.info(
-        "Pooled name detection: %d more names (%d occurrences)",
+        "Pooled name diagnostics: %d names (%d occurrences; retained)",
         len(pooled_names),
         sum(pooled_names.values()),
     )
