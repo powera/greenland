@@ -8,7 +8,7 @@ from sqlalchemy import create_engine
 from sqlalchemy.engine import Engine
 from sqlalchemy.orm import Session, sessionmaker
 
-from reports.missing_words import check_high_frequency_missing_words
+from reports.missing_words import check_high_frequency_missing_words, is_valid_frequency_candidate
 from storage.models import Base, Lemma, PendingImport, WordToken
 
 
@@ -86,3 +86,13 @@ def test_existing_word_wins_over_stale_pending_import(session: Session) -> None:
 
     assert results["pending_count"] == 0
     assert results["missing_count"] == 0
+
+
+@pytest.mark.parametrize("token", ["de", "De", "al", "et", "etc", "I'm", "I'll", "don't"])
+def test_non_lexical_tokens_are_not_candidates(token: str) -> None:
+    assert not is_valid_frequency_candidate(token)
+
+
+@pytest.mark.parametrize("token", ["self", "non", "re"])
+def test_words_and_hyphen_prefixes_are_still_candidates(token: str) -> None:
+    assert is_valid_frequency_candidate(token)
