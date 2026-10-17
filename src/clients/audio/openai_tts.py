@@ -1,6 +1,12 @@
 #!/usr/bin/python3
 """OpenAI TTS client for audio generation."""
 
+import base64
+import io
+import json
+import subprocess
+import shutil
+import wave
 import logging
 import time
 from pathlib import Path
@@ -8,7 +14,7 @@ from typing import Any, Optional
 
 import requests
 
-import constants
+import clients.lib
 from clients.keys import load_key
 from langtools.dialect_overrides import (
     get_parent_language,
@@ -16,7 +22,7 @@ from langtools.dialect_overrides import (
     normalize_language_code,
 )
 
-from .types import AudioFormat, AudioGenerationResult, Voice
+from clients.audio.types import AudioFormat, AudioGenerationResult, Voice
 
 # Configure logging
 logging.basicConfig(
@@ -25,7 +31,10 @@ logging.basicConfig(
 logger = logging.getLogger(__name__)
 
 # Model configuration
-DEFAULT_MODEL = "gpt-4o-mini-tts-2025-12-15"
+DEFAULT_MODEL = "gpt-realtime-2.1-mini"
+REALTIME_VOICES = frozenset(
+    {"alloy", "ash", "ballad", "coral", "echo", "sage", "shimmer", "verse", "marin", "cedar"}
+)
 API_BASE = "https://api.openai.com/v1"
 DEFAULT_TIMEOUT = 60
 
@@ -99,10 +108,70 @@ def get_instructions(language_code: str, is_sentence: bool = False) -> str:
     return _load_prompt(prompt_type, language_code)
 
 
+def _encode_pcm(data: bytes, audio_format: AudioFormat, speed: float, timeout: int) -> bytes:
+    """Encode 24 kHz mono signed 16-bit PCM; preserve the public format/speed contract."""
+    if speed == 1.0:
+        if audio_format == AudioFormat.PCM:
+            return data
+        if audio_format == AudioFormat.WAV:
+            buffer = io.BytesIO()
+            with wave.open(buffer, "wb") as wav_file:
+                wav_file.setnchannels(1)
+                wav_file.setsampwidth(2)
+                wav_file.setframerate(24000)
+                wav_file.writeframes(data)
+            return buffer.getvalue()
+    formats = {
+        AudioFormat.MP3: ["-c:a", "libmp3lame", "-f", "mp3"],
+        AudioFormat.OPUS: ["-c:a", "libopus", "-f", "ogg"],
+        AudioFormat.AAC: ["-c:a", "aac", "-f", "adts"],
+        AudioFormat.FLAC: ["-f", "flac"],
+        AudioFormat.WAV: ["-f", "wav"],
+        AudioFormat.PCM: ["-f", "s16le"],
+    }
+    # Chaining factors keeps compatibility with ffmpeg versions whose atempo range is 0.5–2.
+    filters: list[str] = []
+    factor = speed
+    while factor < 0.5:
+        filters.append("atempo=0.5")
+        factor /= 0.5
+    while factor > 2.0:
+        filters.append("atempo=2.0")
+        factor /= 2.0
+    filters.append(f"atempo={factor}")
+    result = subprocess.run(
+        [
+            "ffmpeg",
+            "-hide_banner",
+            "-loglevel",
+            "error",
+            "-f",
+            "s16le",
+            "-ar",
+            "24000",
+            "-ac",
+            "1",
+            "-i",
+            "pipe:0",
+            "-af",
+            ",".join(filters),
+            *formats[audio_format],
+            "pipe:1",
+        ],
+        input=data,
+        capture_output=True,
+        timeout=timeout,
+        check=True,
+    )
+    return result.stdout
+
+
 class OpenAITTSClient:
     """Client for generating audio using OpenAI TTS API."""
 
-    def __init__(self, timeout: int = DEFAULT_TIMEOUT, debug: bool = False):
+    def __init__(
+        self, timeout: int = DEFAULT_TIMEOUT, debug: bool = False, api_key: Optional[str] = None
+    ) -> None:
         """
         Initialize OpenAI TTS client.
 
@@ -116,7 +185,7 @@ class OpenAITTSClient:
             logger.setLevel(logging.DEBUG)
             logger.debug("Initialized OpenAITTSClient in debug mode")
 
-        self.api_key = load_key("openai", required=False)
+        self.api_key = api_key or load_key("openai", required=False)
         if self.api_key:
             self.headers = {
                 "Authorization": f"Bearer {self.api_key}",
@@ -124,6 +193,99 @@ class OpenAITTSClient:
             }
         else:
             self.headers = {}
+
+    def _generate_realtime(
+        self,
+        text: str,
+        voice: Voice,
+        model: str,
+        instructions: str,
+        audio_format: AudioFormat,
+        speed: float,
+    ) -> bytes:
+        """Collect GA Realtime PCM output and encode it for existing callers."""
+        from websocket import create_connection
+
+        if voice.value not in REALTIME_VOICES:
+            raise ValueError(
+                f"Voice {voice.value} is unavailable in Realtime; choose ash, alloy, or echo"
+            )
+        if not 0.25 <= speed <= 4.0:
+            raise ValueError("Speed must be between 0.25 and 4.0")
+        if (
+            audio_format not in {AudioFormat.PCM, AudioFormat.WAV} or speed != 1.0
+        ) and not shutil.which("ffmpeg"):
+            raise ValueError("ffmpeg is required for encoded audio or speed adjustment")
+        connection = create_connection(
+            f"wss://api.openai.com/v1/realtime?model={model}",
+            header={"Authorization": f"Bearer {self.api_key}"},
+            timeout=self.timeout,
+        )
+        deadline = time.monotonic() + self.timeout
+        chunks: list[bytes] = []
+        try:
+            connection.send(
+                json.dumps(
+                    {
+                        "type": "session.update",
+                        "session": {
+                            "type": "realtime",
+                            "output_modalities": ["audio"],
+                            "audio": {
+                                "output": {
+                                    "voice": voice.value,
+                                    "format": {"type": "audio/pcm", "rate": 24000},
+                                }
+                            },
+                        },
+                    }
+                )
+            )
+            requested = False
+            while True:
+                remaining = deadline - time.monotonic()
+                if remaining <= 0:
+                    raise TimeoutError("Realtime TTS timed out")
+                connection.settimeout(remaining)
+                raw_event = connection.recv()
+                if not raw_event:
+                    raise ValueError("Realtime connection closed before response.done")
+                event = json.loads(raw_event)
+                event_type = event.get("type")
+                if event_type == "error":
+                    raise ValueError(f"Realtime TTS error: {event.get('error')}")
+                if event_type == "session.updated" and not requested:
+                    connection.send(
+                        json.dumps(
+                            {
+                                "type": "response.create",
+                                "response": {
+                                    "conversation": "none",
+                                    "input": [],
+                                    "output_modalities": ["audio"],
+                                    "instructions": instructions
+                                    + "\nRead exactly the following text aloud. "
+                                    "Do not translate, answer, explain, or add any words.\n" + text,
+                                },
+                            }
+                        )
+                    )
+                    requested = True
+                elif event_type == "response.output_audio.delta":
+                    chunks.append(base64.b64decode(event["delta"], validate=True))
+                elif event_type == "response.done":
+                    response_data = event.get("response", {})
+                    if response_data.get("status") != "completed":
+                        raise ValueError(
+                            f"Realtime TTS did not complete: {response_data.get('status_details')}"
+                        )
+                    break
+        finally:
+            connection.close()
+        pcm_data = b"".join(chunks)
+        if not pcm_data:
+            raise ValueError("Realtime TTS returned no audio")
+        return _encode_pcm(pcm_data, audio_format, speed, self.timeout)
 
     def generate_audio(
         self,
@@ -155,6 +317,8 @@ class OpenAITTSClient:
         Raises:
             RuntimeError: If API key is not available
         """
+        clients.lib.assert_llm_calls_enabled("openai-tts")
+
         # Check if API key is available
         if not self.api_key:
             raise RuntimeError("OpenAI API key not available. Please ensure the key file exists.")
@@ -186,6 +350,18 @@ class OpenAITTSClient:
             payload["speed"] = speed
 
         try:
+            if model.startswith("gpt-realtime"):
+                audio_data = self._generate_realtime(
+                    text, voice, model, instructions, audio_format, speed
+                )
+                return AudioGenerationResult(
+                    audio_data=audio_data,
+                    text=text,
+                    voice=voice,
+                    language_code=language_code,
+                    model=model,
+                    duration_ms=(time.time() - start_time) * 1000,
+                )
             # Make API request
             url = f"{API_BASE}/audio/speech"
 

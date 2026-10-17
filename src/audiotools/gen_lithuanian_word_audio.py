@@ -12,7 +12,7 @@ Usage:
     python gen_lithuanian_word_audio.py --batch words.txt --voice alloy
     python gen_lithuanian_word_audio.py --batch words.txt --multi-voice  # automatically enables --organize-by-voice
     python gen_lithuanian_word_audio.py --batch words.txt --output-dir ./audio --organize-by-voice
-    python gen_lithuanian_word_audio.py --batch words.txt --speed 0.75 --voice nova
+    python gen_lithuanian_word_audio.py --batch words.txt --speed 0.75 --voice coral
     python gen_lithuanian_word_audio.py --batch words.txt --force  # overwrite existing files
 """
 
@@ -23,31 +23,28 @@ import time
 from pathlib import Path
 from typing import List, Optional, Dict, Tuple, Set
 
-try:
-    import openai
-except ImportError:
-    print("OpenAI library not installed. Install with: pip install openai")
-    sys.exit(1)
 
 from audiotools.file_utils import (
     ensure_output_directory,
     read_words_from_file,
 )
-from clients.audio.openai_tts import get_instructions
+from clients.audio.openai_tts import DEFAULT_MODEL, OpenAITTSClient
+from clients.audio.types import Voice
 from clients.keys import load_key_from_path
 from langtools.lt.utils import sanitize_lithuanian_word
 
-MODEL = "gpt-4o-mini-tts"
+MODEL = DEFAULT_MODEL
+_tts_client: Optional[OpenAITTSClient] = None
 
 # Define voice groups
 VOICE_GROUPS = {
-    "masculine": ["onyx", "echo"],
-    "feminine": ["nova", "shimmer"],
-    "ambiguous": ["alloy", "fable"],
+    "masculine": ["ash", "echo"],
+    "feminine": ["coral", "shimmer"],
+    "ambiguous": ["alloy", "sage"],
 }
 
 # Default voices for multi-voice generation (one from each group)
-DEFAULT_MULTI_VOICES = ["onyx", "nova", "alloy"]
+DEFAULT_MULTI_VOICES = ["ash", "coral", "alloy"]
 
 
 def generate_audio(
@@ -62,7 +59,7 @@ def generate_audio(
     Generate audio pronunciation for a Lithuanian word using OpenAI TTS.
 
     :param word: Lithuanian word to pronounce
-    :param voice: OpenAI voice to use (alloy, echo, fable, onyx, nova, shimmer)
+    :param voice: OpenAI voice to use (alloy, ash, echo, coral, sage, shimmer)
     :param output_dir: Directory to save the audio file
     :param organize_by_voice: Whether to organize files in subdirectories by voice
     :param force: Whether to overwrite existing files
@@ -97,17 +94,12 @@ def generate_audio(
         print(f"Generating audio for: {word} (voice: {voice})")
 
         # Create the TTS request with optimized settings for Lithuanian pronunciation
-        response = openai.audio.speech.create(
-            model=MODEL,
-            voice=voice,
-            input=word,
-            response_format="mp3",
-            instructions=get_instructions("lt"),
-        )
-
-        # Save the audio file
-        with open(file_path, "wb") as f:
-            f.write(response.content)
+        tts_client = _tts_client or OpenAITTSClient()
+        result = tts_client.generate_audio(text=word, voice=Voice(voice), model=MODEL)
+        if not result.success:
+            print(f"Error generating audio: {result.error}")
+            return False
+        file_path.write_bytes(result.audio_data)
 
         print(f"Saved: {file_path}")
 
@@ -159,7 +151,7 @@ def main() -> None:
         "--voice",
         type=str,
         default="alloy",
-        choices=["alloy", "echo", "fable", "onyx", "nova", "shimmer"],
+        choices=["alloy", "ash", "echo", "coral", "sage", "shimmer"],
         help="OpenAI voice to use (default: alloy)",
     )
     parser.add_argument(
@@ -219,7 +211,8 @@ def main() -> None:
         )
         sys.exit(1)
 
-    openai.api_key = api_key
+    global _tts_client
+    _tts_client = OpenAITTSClient(api_key=api_key)
 
     # Create output directory
     output_dir = ensure_output_directory(args.output_dir)

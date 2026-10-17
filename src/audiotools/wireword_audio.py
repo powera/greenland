@@ -92,11 +92,8 @@ import hashlib
 from datetime import datetime, timezone
 import re
 
-try:
-    from openai import OpenAI
-except ImportError:
-    print("Error: OpenAI library not found. Install with: pip install openai")
-    sys.exit(1)
+from clients.audio.openai_tts import DEFAULT_MODEL, OpenAITTSClient
+from clients.audio.types import AudioFormat, Voice
 
 # Get the directory where this script is located
 SCRIPT_DIR = Path(__file__).parent
@@ -118,7 +115,7 @@ SUPPORTED_LANGUAGES = {
 # No mapping needed - this matches the actual directory structure
 
 # Available OpenAI TTS voices
-AVAILABLE_VOICES = ["alloy", "echo", "fable", "onyx", "nova", "shimmer", "ash"]
+AVAILABLE_VOICES = ["alloy", "echo", "shimmer", "ash"]
 
 # Default voices for multi-voice mode
 DEFAULT_MULTI_VOICES = ["ash", "alloy", "echo"]
@@ -127,7 +124,7 @@ DEFAULT_MULTI_VOICES = ["ash", "alloy", "echo"]
 DEFAULT_VOICE = "ash"
 
 # OpenAI TTS model
-TTS_MODEL = "gpt-4o-mini-tts"
+TTS_MODEL = DEFAULT_MODEL
 
 # Audio format
 AUDIO_FORMAT = "mp3"
@@ -338,28 +335,19 @@ def generate_audio_openai(
         True if successful, False otherwise
     """
     try:
-        client = OpenAI(api_key=api_key)
-
-        # Get language name for instructions
-        language_name = SUPPORTED_LANGUAGES[language]["name"]
-
-        # Build request parameters
-        request_params = {
-            "model": model,
-            "voice": voice,
-            "input": text,
-            "response_format": AUDIO_FORMAT,
-        }
-
-        # Add instructions field for gpt-4o-mini-tts
-        if model == "gpt-4o-mini-tts":
-            request_params["instructions"] = f"Speak in {language_name}."
-
-        response = client.audio.speech.create(**request_params)
-
-        # Write audio to file
+        client = OpenAITTSClient(api_key=api_key)
+        result = client.generate_audio(
+            text=text,
+            voice=Voice(voice),
+            language_code=language,
+            model=model,
+            audio_format=AudioFormat(AUDIO_FORMAT),
+        )
+        if not result.success:
+            print(f"Error generating audio: {result.error}")
+            return False
         output_path.parent.mkdir(parents=True, exist_ok=True)
-        response.stream_to_file(str(output_path))
+        output_path.write_bytes(result.audio_data)
 
         return True
 
@@ -908,7 +896,7 @@ Examples:
     parser.add_argument(
         "--model",
         type=str,
-        choices=["gpt-4o-mini-tts", "tts-1", "tts-1-hd"],
+        choices=[DEFAULT_MODEL, "gpt-4o-mini-tts", "tts-1", "tts-1-hd"],
         default=TTS_MODEL,
         help=f"OpenAI TTS model to use (default: {TTS_MODEL})",
     )
