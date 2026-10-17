@@ -287,21 +287,43 @@ def _build_corpus_rank_table(
     session: Session,
     corpus_name: str,
     lemma_ids: List[int],
+    token_shares: Optional[Dict[int, Dict[int, float]]] = None,
 ) -> Dict[int, int]:
-    """Each lemma's rank in this corpus, combined from its forms' stored ranks.
+    """Roll up one corpus in memory, without per-lemma or per-form queries.
 
-    Returns ``{lemma_id: rank}``. Lemmas with no ranked form in this corpus are
-    omitted. The values are rank-like numbers rather than positions in an
-    ordering: ties and gaps are both expected, and each entry is computed
-    independently of the others.
+    A full refresh passes the same ownership snapshot to every corpus. The
+    single-lemma API stays independent for interactive edits and parity checks.
     """
-    exponent = get_corpus_zipf_exponent(session, corpus_name)
+    from wordfreq.lexeme_frequency import get_bulk_lexeme_token_shares
 
+    if token_shares is None:
+        token_shares = get_bulk_lexeme_token_shares(session)
+    exponent = get_corpus_zipf_exponent(session, corpus_name)
+    # This ceiling depends only on the corpus, never on the current lemma.
+    unknown_rank = get_corpus_unknown_rank(session, corpus_name)
+    rows = (
+        session.query(ExternalLexemeAnnotation.word_token_id, ExternalLexemeAnnotation.ordinal_rank)
+        .filter(
+            ExternalLexemeAnnotation.source == f"wordfreq_{corpus_name}",
+            ExternalLexemeAnnotation.ordinal_rank.isnot(None),
+        )
+        .all()
+    )
+    ranks_by_token: Dict[int, List[int]] = {}
+    for token_id, ordinal_rank in rows:
+        if ordinal_rank is not None and ordinal_rank > 0:
+            # Keep separate annotation rows just as the single-lemma API does.
+            ranks_by_token.setdefault(token_id, []).append(ordinal_rank)
     table: Dict[int, int] = {}
     for lemma_id in lemma_ids:
-        rank = get_lemma_corpus_rank(session, lemma_id, corpus_name, exponent)
+        rank_shares = [
+            (rank, share)
+            for token, share in token_shares.get(lemma_id, {}).items()
+            for rank in ranks_by_token.get(token, [])
+        ]
+        rank = combine_weighted_ranks(rank_shares, exponent)
         if rank is not None:
-            table[lemma_id] = rank
+            table[lemma_id] = min(rank, unknown_rank)
     return table
 
 
@@ -616,10 +638,15 @@ def calculate_lemma_combined_ranks(
     corpus_weights = _corpus_weights(session)
     logger.info(f"Active corpora ({len(corpus_weights)}): " f"{sorted(corpus_weights.keys())}")
 
+    from wordfreq.lexeme_frequency import get_bulk_lexeme_token_shares
+
+    token_shares = get_bulk_lexeme_token_shares(session) if corpus_weights else {}
     per_corpus_ranks: Dict[str, Dict[int, int]] = {}
     for corpus_name in corpus_weights:
         logger.info(f"Ranking lemmas within corpus '{corpus_name}'...")
-        per_corpus_ranks[corpus_name] = _build_corpus_rank_table(session, corpus_name, lemma_ids)
+        per_corpus_ranks[corpus_name] = _build_corpus_rank_table(
+            session, corpus_name, lemma_ids, token_shares
+        )
 
     # Per-corpus "unknown" rank: applied when a lemma has no rollup in a given
     # corpus. Without this floor, a word that appears only in a small corpus
