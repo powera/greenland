@@ -20,6 +20,7 @@ from util.stopwords import (
     COMMON_VERBS,
     CONTRACTIONS,
     MISC_WORDS,
+    NON_LEXICAL_TOKENS,
     all_stopwords,
 )
 
@@ -75,7 +76,9 @@ def is_valid_frequency_candidate(word: str) -> bool:
         return False
     if word_lower in MISC_WORDS:
         return False
-    if word in CONTRACTIONS:
+    if word_lower in NON_LEXICAL_TOKENS:
+        return False
+    if word_lower in CONTRACTIONS:
         return False
     if not any(character.isalpha() for character in word):
         return False
