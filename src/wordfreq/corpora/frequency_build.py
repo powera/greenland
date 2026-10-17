@@ -1,40 +1,9 @@
-"""Build corpus word-frequency JSON from downloaded Gutenberg books.
+"""Shared corpus frequency generation with observed spelling and document weighting.
 
-The output matches the existing ``data/wordfreq/*.json`` corpus files:
-
-.. code-block:: json
-
-    {
-      "global_word_frequency": {"the": 406936, ...},
-      "name_frequency": {"<id>_<Title>": {"elizabeth": 88, ...}, ...},
-      "books_processed": ["<id>_<Title>", ...],
-      "total_unique_words": 27758,
-      "total_names_identified": 37795
-    }
-
-Two decisions matter for how representative the result is.
-
-**Proper nouns are removed per book.**  A word counts as a name in a given book
-when its occurrences away from a sentence or line start are almost always
-capitalized (see :mod:`wordfreq.corpora.gutenberg_text`).  This is decided book
-by book, so "rose" can be a character in one novel and a flower in the next.
-Removed words are reported in ``name_frequency`` rather than silently dropped.
-
-**Capitalized and lowercase spellings are counted separately.**  A word whose
-capitalized uses are frequent enough is published twice, as "march" and as
-"March", so a lemma spelled with a capital has a token of its own to link to.
-Sentence-initial occurrences carry no evidence and are apportioned between the
-two by the ratio the mid-sentence ones show (see
-:meth:`wordfreq.corpora.gutenberg_text.TextStats.case_split`).  This is what
-the lowercased-whitelist approach could not do: crediting the month "May" with
-every use of the modal verb is worse than leaving it out.
-
-**Words are ranked by their average rate across books, not by pooled counts.**
-Pooling lets one long book dictate a word's rank - the reason "whale" sat at
-rank ~150 in the old 19th-century corpus, on the strength of a single novel.
-Averaging each book's rate divides such a word by the number of books, while a
-word that is genuinely common everywhere keeps its rank.  ``min_books`` then
-drops anything that never spread beyond a couple of books.
+Name detection is diagnostic: names stay in the vocabulary. Casing is resolved
+from ordinary-prose evidence before ranking. Sentence/line starts contribute
+ambiguous initial capitals; uppercase passages contribute counts but no spelling
+evidence. Per-document rates and minimum coverage limit individual texts' influence.
 """
 
 import json
@@ -42,8 +11,24 @@ import logging
 import os
 from collections import Counter
 from dataclasses import dataclass, field
-from typing import Any, Collection, Dict, FrozenSet, List, Literal, Optional, Sequence, Tuple
+from typing import (
+    Any,
+    Collection,
+    Dict,
+    FrozenSet,
+    List,
+    Literal,
+    Mapping,
+    Optional,
+    Sequence,
+    Tuple,
+)
 
+from wordfreq.corpora.casing import (
+    KNOWN_DISTINCT_SPELLINGS,
+    pooled_spelling_evidence,
+    resolve_spellings,
+)
 from wordfreq.corpora.gutenberg_text import (
     TextStats,
     analyze_text,
@@ -113,21 +98,17 @@ class BookAnalysis:
         slug: ``<id>_<Title>`` key used in the corpus JSON.
         stats: Token counts and capitalization evidence.
         names: Every detected proper noun mapped to its count in this book.
-        content_counts: Token counts with the detected names removed.
-        upper_counts: Of ``content_counts``, the share written capitalized.
-        lower_counts: Of ``content_counts``, the share written lowercase.
+        content_counts: All token counts, including diagnostic names.
     """
 
     slug: str
     stats: TextStats
     names: Dict[str, int] = field(default_factory=dict)
     content_counts: Counter[str] = field(default_factory=Counter)
-    upper_counts: Counter[str] = field(default_factory=Counter)
-    lower_counts: Counter[str] = field(default_factory=Counter)
 
     @property
     def content_tokens(self) -> int:
-        """Number of non-name tokens in the book."""
+        """Number of tokens in the document, including diagnostic names."""
         return sum(self.content_counts.values())
 
 
@@ -184,7 +165,7 @@ def analyze_book(
     phrases: Optional[Dict[str, int]] = None,
     canonical_phrases: Optional[Dict[str, str]] = None,
 ) -> BookAnalysis:
-    """Strip Gutenberg boilerplate, tokenize and split names from vocabulary.
+    """Strip Gutenberg boilerplate, tokenize and diagnose names without removing them.
 
     ``phrases`` (from ``gutenberg_text.build_phrase_index``) makes known
     multi-word forms count as one token, so "ice cream" is measured as itself
@@ -202,31 +183,15 @@ def analyze_book(
         min_mid_sentence=min_mid_sentence,
         extra_never_names=extra_never_names,
     )
-    content_counts = Counter(
-        {word: count for word, count in stats.counts.items() if word not in names}
-    )
-
-    # Round to integers once, here, so every later stage works in whole counts.
-    upper_counts = Counter[str]()
-    lower_counts = Counter[str]()
-    for word in content_counts:
-        upper_total, lower_total = stats.case_split(word)
-        upper = int(round(upper_total))
-        if upper:
-            upper_counts[word] = upper
-        # Give the rounding remainder to the lowercase side, so the two always
-        # add back up to content_counts[word].
-        lower = content_counts[word] - upper
-        if lower:
-            lower_counts[word] = lower
+    # Name detection is diagnostic. Document weighting and coverage, rather
+    # than capitalization, limit individual characters' influence on ranks.
+    content_counts = stats.counts.copy()
 
     return BookAnalysis(
         slug=slug,
         stats=stats,
         names=names,
         content_counts=content_counts,
-        upper_counts=upper_counts,
-        lower_counts=lower_counts,
     )
 
 
@@ -237,25 +202,9 @@ def _book_weight(analysis: BookAnalysis, full_weight_tokens: int) -> float:
     return min(1.0, analysis.content_tokens / full_weight_tokens)
 
 
-def titlecase_token(word: str) -> str:
-    """Capitalize each whitespace-separated word, leaving the rest alone.
-
-    ``str.title`` treats an apostrophe as a word boundary, so "court's" comes
-    back as "Court'S" and "int'l" as "Int'L" -- 71 such entries in a single
-    build of the SCOTUS corpus, where possessives are everywhere.  Splitting on
-    whitespace alone keeps the possessive intact and still titlecases each word
-    of a multi-word token ("united states" -> "United States").
-
-    "O'Connor" is therefore published as "O'connor".  That is the lesser
-    error: the tokenizer records only that a token's first character was
-    uppercase, so the interior capital was never recoverable here anyway.
-    """
-    return " ".join(part[:1].upper() + part[1:] for part in word.split(" "))
-
-
 def _score_counters(
     analyses: Sequence[BookAnalysis],
-    counters: Sequence[Counter[str]],
+    counters: Sequence[Mapping[str, float]],
     *,
     weighting: Weighting,
     total_tokens: int,
@@ -264,16 +213,17 @@ def _score_counters(
     """Score one set of per-book counters, scaled to the whole corpus.
 
     ``counters`` runs parallel to ``analyses`` and says *which* count to
-    aggregate -- the whole of a book's content, or just its uppercase or
-    lowercase share.  Rates are always taken against the book's full
+    aggregate -- the whole of a book's content, or its resolved spellings.
+    Rates are always taken against the book's full
     ``content_tokens``, never against the counter's own sum, so the two case
     sides stay on one scale and add back up to the word's combined score.
     """
     if weighting == "pooled":
-        pooled = Counter[str]()
+        pooled: Dict[str, float] = {}
         for counter in counters:
-            pooled.update(counter)
-        return {word: float(count) for word, count in pooled.items()}
+            for surface, count in counter.items():
+                pooled[surface] = pooled.get(surface, 0.0) + count
+        return pooled
 
     weights = [_book_weight(analysis, full_weight_tokens) for analysis in analyses]
     weight_total = sum(weights)
@@ -368,77 +318,61 @@ def aggregate_case_frequencies(
     full_weight_tokens: int = DEFAULT_FULL_WEIGHT_TOKENS,
     min_uppercase_count: int = DEFAULT_MIN_UPPERCASE_COUNT,
     min_uppercase_share: float = DEFAULT_MIN_UPPERCASE_SHARE,
+    known_spellings: Collection[str] = (),
 ) -> Tuple[Dict[str, int], int]:
-    """Aggregate as :func:`aggregate_frequencies`, but split by capitalization.
+    """Rank observed spellings after allocating ambiguous casing.
 
-    A word whose capitalized uses clear both thresholds is published twice: as
-    its lowercase spelling, and as a titlecased entry carrying the uppercase
-    share.  That is what separates the month "March" from the verb "march",
-    which no lowercased count can do -- a whitelist keyed on the lowercased
-    string would hand the month the verb's frequency.
-
-    Both thresholds matter.  ``min_uppercase_share`` keeps an ordinary word
-    that merely follows a full stop from sprouting a capitalized twin, and
-    ``min_uppercase_count`` stops a rare word doing so on a couple of
-    occurrences.  A word clearing neither is published exactly as before.
-
-    Titlecasing is the only reconstruction available: the tokenizer records
-    that a token's first character was uppercase, not what its true spelling
-    was, so "DNA" and "iPhone" cannot be recovered here.
-
-    Args:
-        min_uppercase_count: Minimum scaled uppercase count to publish the
-            capitalized entry.
-        min_uppercase_share: Minimum share of the word's total that must be
-            capitalized to publish the capitalized entry.
-
-    Returns:
-        ``(frequencies, total_unique_words)``, as
-        :func:`aggregate_frequencies`, with capitalized entries merged in.
+    Rare unsupported capitals fold into the lowercase spelling, conserving
+    their score. Known case-sensitive vocabulary can survive below the share
+    threshold. Other spellings need reliable evidence across documents as well
+    as sufficient count/share; uppercase formatting supplies no such evidence.
     """
     if not analyses:
         return {}, 0
-
+    known_forms = KNOWN_DISTINCT_SPELLINGS | frozenset(known_spellings)
+    evidence = pooled_spelling_evidence([analysis.stats for analysis in analyses])
+    counters = [resolve_spellings(analysis.stats, evidence, known_forms) for analysis in analyses]
     total_tokens = sum(analysis.content_tokens for analysis in analyses)
+    scores = _score_counters(
+        analyses,
+        counters,
+        weighting=weighting,
+        total_tokens=total_tokens,
+        full_weight_tokens=full_weight_tokens,
+    )
     book_count = Counter[str]()
+    spelling_documents = Counter[str]()
     for analysis in analyses:
         book_count.update(analysis.content_counts.keys())
-    total_unique_words = len(book_count)
-
-    effective_min_books = max(1, min(min_books, len(analyses)))
-
-    def score_side(counters: Sequence[Counter[str]]) -> Dict[str, float]:
-        return _score_counters(
-            analyses,
-            counters,
-            weighting=weighting,
-            total_tokens=total_tokens,
-            full_weight_tokens=full_weight_tokens,
+        spelling_documents.update(
+            surface for forms in analysis.stats.spelling_counts.values() for surface in forms
         )
-
-    upper_scores = score_side([analysis.upper_counts for analysis in analyses])
-    lower_scores = score_side([analysis.lower_counts for analysis in analyses])
-
-    # min_books is judged on the word as a whole, as it always was: it exists to
-    # drop one book's invented vocabulary, and a word that spread across the
-    # corpus has done so whichever way it is written.
+    effective_min_books = max(1, min(min_books, len(analyses)))
+    total_scores: Dict[str, float] = {}
+    for surface, score in scores.items():
+        total_scores[surface.lower()] = total_scores.get(surface.lower(), 0.0) + score
     combined: Dict[str, float] = {}
-    for word in book_count:
+    for surface, score in scores.items():
+        word = surface.lower()
         if book_count[word] < effective_min_books:
             continue
-        upper = upper_scores.get(word, 0.0)
-        lower = lower_scores.get(word, 0.0)
-        total = upper + lower
-        if total <= 0:
-            continue
-        if upper >= min_uppercase_count and upper / total >= min_uppercase_share:
-            combined[titlecase_token(word)] = upper
-            if lower > 0:
-                combined[word] = lower
-        else:
-            combined[word] = total
-
-    return _publish(combined, max_words), total_unique_words
+        reliable_count = evidence.get(word, Counter())[surface]
+        keep_case = surface in known_forms and (reliable_count > 0 or surface == "I")
+        # Initial-capital words can teach their sentence-start spelling to
+        # other documents. Unknown all-capital acronyms require ordinary-prose
+        # evidence in multiple documents, so one shouted word cannot do that.
+        required_spelling_documents = (
+            effective_min_books if surface.isupper() and len(surface) > 1 else 1
+        )
+        keep_case = keep_case or (
+            reliable_count > 0
+            and score >= min_uppercase_count
+            and score / total_scores[word] >= min_uppercase_share
+            and spelling_documents[surface] >= required_spelling_documents
+        )
+        published = surface if surface == word or keep_case else word
+        combined[published] = combined.get(published, 0.0) + score
+    return _publish(combined, max_words), len(book_count)
 
 
 def build_corpus_payload(
@@ -453,12 +387,13 @@ def build_corpus_payload(
     min_uppercase_count: int = DEFAULT_MIN_UPPERCASE_COUNT,
     min_uppercase_share: float = DEFAULT_MIN_UPPERCASE_SHARE,
     generator: str = "wordfreq.corpora.build_gutenberg",
+    known_spellings: Collection[str] = (),
 ) -> Dict[str, Any]:
     """Assemble the corpus JSON payload from analyzed books.
 
-    ``generator`` names the builder for the ``generation`` block; it defaults
-    to the Gutenberg builder, which is what every corpus but ``legal_scotus``
-    is made by.
+    ``generator`` names the builder for the ``generation`` block. Every builder
+    shares this casing/weighting path. ``known_spellings`` adds explicit known
+    vocabulary to the built-in case-sensitive exceptions.
 
     ``global_word_frequency`` carries capitalized and lowercase spellings as
     separate entries; see :func:`aggregate_case_frequencies`.
@@ -471,6 +406,7 @@ def build_corpus_payload(
         full_weight_tokens=full_weight_tokens,
         min_uppercase_count=min_uppercase_count,
         min_uppercase_share=min_uppercase_share,
+        known_spellings=known_spellings,
     )
 
     name_frequency: Dict[str, Dict[str, int]] = {}
@@ -502,6 +438,9 @@ def build_corpus_payload(
             "total_tokens": sum(analysis.content_tokens for analysis in analyses),
             "books": len(analyses),
             "generator": generator,
+            "casing_version": 2,
+            "known_case_spellings": sorted(KNOWN_DISTINCT_SPELLINGS | frozenset(known_spellings)),
+            "name_detection": "diagnostic",
         },
     }
 

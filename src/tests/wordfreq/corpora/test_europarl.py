@@ -10,12 +10,10 @@ import tarfile
 from pathlib import Path
 
 from wordfreq.corpora.build_europarl import (
-    NO_NAME_DETECTION,
-    drop_low_ranked_capitalized,
     read_selected_chapters,
 )
 from wordfreq.corpora.download_europarl import extract_languages, member_target
-from wordfreq.corpora.frequency_build import analyze_book
+from wordfreq.corpora.frequency_build import analyze_book, build_corpus_payload
 from wordfreq.corpora.europarl_select import (
     ChapterSummary,
     eligible,
@@ -269,19 +267,12 @@ def test_extract_then_build_from_selection(tmp_path: Path) -> None:
     assert "fishermen" in documents[0][1]
 
 
-def test_low_ranked_capitalized_entries_are_dropped_and_list_refilled() -> None:
-    frequencies = {"the": 100, "European": 90, "I": 80, "vote": 70, "Barroso": 60, "quota": 50}
-    kept, dropped = drop_low_ranked_capitalized(frequencies, max_rank=2, max_words=4)
-    assert kept == {"the": 100, "European": 90, "I": 80, "vote": 70}
-    assert dropped == 0
-    kept, dropped = drop_low_ranked_capitalized(frequencies, max_rank=4, max_words=5)
-    assert list(kept) == ["the", "European", "I", "vote", "quota"]
-    assert dropped == 1
-
-
-def test_name_detection_off_keeps_capitalized_words() -> None:
-    text = "We ask the Commission and the Council to act. " * 6
-    assert "commission" in analyze_book("plain", text).names
-    kept = analyze_book("europarl", text, capitalization_ratio=NO_NAME_DETECTION)
-    assert not kept.names
-    assert "commission" in kept.content_counts
+def test_capitalized_vocabulary_remains_without_a_rank_cutoff() -> None:
+    text = "We ask the Commission and the Council to act on ECU. " * 10
+    analyses = [analyze_book(f"debate{index}", text) for index in range(3)]
+    payload = build_corpus_payload(analyses, corpus_name="eu_parliament_debates")
+    frequencies = payload["global_word_frequency"]
+    assert "commission" in analyses[0].names
+    assert "Commission" in frequencies
+    assert "ECU" in frequencies
+    assert "Ecu" not in frequencies

@@ -21,10 +21,49 @@ hyphenated lemmas, forms or variants. The tokenizer joins only the phrases in
 the index `--phrases-from-db` reads from the database at build time (see
 `lemma_phrases.py`), so "ice cream" stays "ice" + "cream" in a corpus built
 before the lemma existed. Capitalized lemmas mostly need no database input: a
-capitalized spelling is published as its own entry whenever its corpus use
-supports it. The Gutenberg builder also keeps the database's day, month, city
-and region names as ordinary vocabulary (`proper_noun_vocabulary.py`), so a
-new name of that kind is a reason to rebuild those five corpora.
+capitalized spelling is published as its own entry whenever reliable corpus
+spelling evidence supports it. Names are retained; their detection is diagnostic.
+
+### Shared casing rules (generation version 2)
+
+All six frequency builders use the same tokenizer, spelling allocation, and
+publication rules. The tokenizer retains observed spellings such as `NGO`,
+`LGBTQ`, `O'Connor`, `pH`, and `iPhone` instead of reconstructing title case.
+Lowercase keys remain useful for phrase matching and grouping related spellings;
+the cooccurrence tokenizer keeps its existing lowercase interface.
+
+* First-letter capitals at sentence/line starts are ambiguous. Their counts are
+  split between lowercase and initial-capital forms using reliable evidence
+  pooled across documents. They never inflate an all-capital acronym's count.
+  With no usable evidence, these occurrences count toward the lowercase form.
+* Lowercase, acronym, and mixed-case occurrences provide evidence even at a
+  sentence start. Passages separated by sentence punctuation or newlines with
+  at least two words and at least 80% all-capital words are treated as forced
+  uppercase formatting: their counts are allocated using ordinary-prose spelling
+  evidence, rather than teaching the generator that `THE` is an acronym.
+* Unsupported rare capitals fold into the lowercase count. Distinct forms
+  normally need the existing count/share thresholds and reliable spelling
+  evidence. Unknown all-capital acronyms additionally need reliable evidence in
+  at least the configured minimum number of documents (clamped to the number
+  analyzed). The matching word's document coverage always applies. Initial-capital
+  words can use one document's evidence to allocate other documents' sentence starts.
+* A small explicit exception set in `casing.py` preserves case-sensitive words
+  such as `US/us`, `IT/it`, and `AIDS/aids` even below the share threshold.
+  Exceptions require actual reliable occurrences; they never create an acronym
+  from lowercase text. `build_corpus_payload(known_spellings=...)` can add known
+  vocabulary, recorded in generation metadata for reproducibility.
+* Names stay in the frequency counts. Per-document weighting and minimum
+  document coverage limit individual texts' influence. WPALH's pooled names
+  are also diagnostic; OpenStax and Europarl no longer apply separate
+  capitalization-based exclusion filters. Their former
+  `--min-capitalized-chapters`, `--min-capitalized-books`, `--show-dropped`, and
+  `--max-capitalized-rank` options have been removed.
+
+Allocation keeps fractional estimates until final publication, avoiding biased
+rounding across short documents. List-size limits apply after casing decisions.
+These heuristics separate observed spellings, not semantic senses within a
+spelling. A later rebuild/reimport must also reconcile obsolete database tokens;
+changing the generator does not remove existing `Ngo` or `Lgbtq` rows.
 
 A full rebuild is offline once the caches below exist, makes no LLM calls,
 and writes only the JSON files, which are in version control. It took about
@@ -149,7 +188,7 @@ jurisdictions without naming them; and a short list covers isolated
 abbreviations (`Inc.`, `Cf.`, `e. g.`), which have no neighbour for the run
 rule to catch. A 20-case sample holds 539 distinct abbreviation-shaped tokens,
 so a list alone was never going to be complete. Party names stay in: the
-per-document capitalization rule already routes them to `name_frequency`, and
+per-document capitalization rule records them in `name_frequency` without removing them, and
 removing them would take the surrounding syntax with them.
 
 Editorial brackets are unwrapped before tokenizing. Quotations are altered in
@@ -184,12 +223,8 @@ what the builder reads, so it can be reviewed and hand-edited like the wiki
 lists. The chair's speeches, stage directions and opening vocatives ("Mr
 President, ladies and gentlemen,") are stripped before counting.
 
-Per-document name detection is off. It exists for a character confined to one
-novel; here `--min-chapters` already keeps one debate's names out, and what
-the rule caught instead was words capitalized in every debate ("Commission",
-"European", "Greece"). The people debated about then come through ("Barroso",
-"Prodi", particles like "Van"); as a stopgap, a capitalized entry is kept
-only within the top 2000 ranks (`--max-capitalized-rank`).
+Name detection is diagnostic. Capitalized terms use the shared spelling rules;
+there is no separate rank cutoff for capitalized vocabulary.
 
 The text is British English and the database is American, so British
 spellings are folded before counting ("programme" counts as "program"; see
@@ -264,16 +299,9 @@ the computing books keep their prose without their listings), citation and
 link-to-website notes, teacher-edition notes, front and back matter, and
 image credits at the end of captions.
 
-**Capitalized entries must spread.** Per-document name detection is off, as
-for Europarl: it would remove "Congress" and "Senate", which are capitalized
-in every chapter of American Government. Instead a capitalized entry must be
-written capitalized in at least 4 chapters spanning at least 2 books
-(`--min-capitalized-chapters`, `--min-capitalized-books`). Lincoln appears in
-24 chapters of 8 books and is kept (rank ~2100 in `openstax_society`); Blaine
-and Conkling appear in one chapter each and are dropped. The cost is on the
-science side, where some names belong to one book only: Uranus, Sirius and
-Orion (Astronomy), Coulomb (Physics) and Krebs (Biology) are dropped as
-capitalized entries.
+**Capitalized entries use the shared casing rules.** Names remain in the
+counts, subject to ordinary chapter coverage and weighting. The old extra
+capitalized-chapter/book exclusion filters are removed.
 
 ## The WPA life-histories corpus
 
@@ -319,7 +347,8 @@ layer; nothing here runs OCR.  The cleanup, in `wpalh_text.py`:
   "ler"), and some of it lands on rare real words ("hose" is mostly "those").
 * **Names are pooled across interviews.**  The per-document test needs four
   mid-sentence uses; an interview names its informant two or three times.
-  Pooling the capitalization evidence catches about 3,000 more names.
+  Pooling the capitalization evidence records additional diagnostics without
+  removing the names from the frequency counts.
 
 The result is ~4.8M tokens from 2,623 interviews.  Registered in
 `CORPUS_CONFIGS` at weight 0.5, with the other topic corpora.

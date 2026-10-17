@@ -5,15 +5,12 @@ The fixtures copy the markup the real books use, including the apparatus the
 extractor has to drop.
 """
 
-from collections import Counter
 from pathlib import Path
 
 import pytest
 
-from wordfreq.corpora.build_openstax import capitalized_spread, drop_narrow_capitalized
 from wordfreq.corpora.download_openstax import collection_path, license_problems
-from wordfreq.corpora.frequency_build import BookAnalysis
-from wordfreq.corpora.gutenberg_text import TextStats
+from wordfreq.corpora.frequency_build import analyze_book, build_corpus_payload
 from wordfreq.corpora.openstax_books import (
     OPENSTAX_CORPORA,
     OpenStaxBook,
@@ -300,32 +297,11 @@ def test_license_check_requires_cc_by(tmp_path: Path) -> None:
     assert [problem.split(":")[0] for problem in problems] == ["nc", "gone"]
 
 
-# --- Capitalized entries must spread -----------------------------------------
-
-
-def _analysis(slug: str, upper: dict[str, int]) -> BookAnalysis:
-    return BookAnalysis(slug=slug, stats=TextStats(), upper_counts=Counter(upper))
-
-
-def test_capitalized_entries_must_spread_across_chapters_and_books() -> None:
+def test_names_and_acronyms_use_the_shared_casing_rules() -> None:
     analyses = [
-        _analysis("us_history/10", {"lincoln": 30, "conkling": 12}),
-        _analysis("us_history/11", {"lincoln": 20}),
-        _analysis("us_history/12", {"lincoln": 5}),
-        _analysis("american_government/02", {"lincoln": 3}),
-        _analysis("us_history/20", {"blaine": 9}),
-        _analysis("us_history/21", {"blaine": 4}),
-        _analysis("us_history/22", {"blaine": 2}),
-        _analysis("us_history/23", {"blaine": 2}),
+        analyze_book(f"history/{index}", "They met Lincoln and an NGO. " * 10) for index in range(3)
     ]
-    spread = capitalized_spread(analyses)
-    assert spread["lincoln"] == (4, 2)
-    assert spread["blaine"] == (4, 1)
-
-    frequencies = {"the": 900, "I": 50, "Lincoln": 40, "Blaine": 30, "Conkling": 20, "war": 10}
-    kept, dropped = drop_narrow_capitalized(
-        frequencies, spread, min_chapters=4, min_books=2, max_words=4
-    )
-
-    assert list(kept) == ["the", "I", "Lincoln", "war"]
-    assert dropped == ["Blaine", "Conkling"]
+    payload = build_corpus_payload(analyses, corpus_name="openstax_society")
+    assert "Lincoln" in payload["global_word_frequency"]
+    assert "NGO" in payload["global_word_frequency"]
+    assert "Ngo" not in payload["global_word_frequency"]

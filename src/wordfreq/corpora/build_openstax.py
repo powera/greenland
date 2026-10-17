@@ -20,14 +20,8 @@ expository English that defines each term as it introduces it.  The unit of
 analysis is the chapter (see :mod:`wordfreq.corpora.openstax_text`), and
 everything after extraction is the shared ``frequency_build`` path.
 
-Per-document name detection is off, as for ``eu_parliament_debates``: it
-would take "Congress", "Senate" and "Constitution", which are capitalized in
-every chapter of American Government and are the corpus's vocabulary.
-Instead a capitalized entry must *spread*: appear capitalized in at least
-``--min-capitalized-chapters`` chapters of at least ``--min-capitalized-books``
-books.  That keeps "Lincoln" -- U.S. History's Civil War chapters, American
-Government, Political Science -- and drops "Conkling" and "Blaine", who belong
-to one chapter of one book.
+Names remain in the shared frequency pipeline; chapter coverage and weighting
+limit terms confined to individual documents. Casing uses ordinary-prose evidence.
 
 No network.  No database access either, unless ``--phrases-from-db`` is passed.
 """
@@ -35,9 +29,8 @@ No network.  No database access either, unless ``--phrases-from-db`` is passed.
 import argparse
 import logging
 import sys
-from collections import Counter
 from pathlib import Path
-from typing import Dict, List, Optional, Sequence, Set, Tuple
+from typing import Dict, List, Optional, Sequence, Tuple
 
 if str(Path(__file__).parent.parent.parent) not in sys.path:
     sys.path.insert(0, str(Path(__file__).parent.parent.parent))
@@ -48,13 +41,12 @@ from wordfreq.corpora.download_openstax import collection_path, default_cache_di
 from wordfreq.corpora.frequency_build import (
     DEFAULT_MIN_UPPERCASE_COUNT,
     DEFAULT_MIN_UPPERCASE_SHARE,
-    BookAnalysis,
     analyze_book,
     build_corpus_payload,
     write_corpus_json,
 )
 from wordfreq.corpora.openstax_books import OPENSTAX_CORPORA, OpenStaxBook, get_books
-from wordfreq.corpora.openstax_text import read_chapters, split_chapter_slug
+from wordfreq.corpora.openstax_text import read_chapters
 
 logger = logging.getLogger(__name__)
 
@@ -69,15 +61,6 @@ DEFAULT_FULL_WEIGHT_CHAPTER_TOKENS = 5000
 # A topic corpus, like wiki_society and eu_parliament_debates: a corpus's word
 # count is also its weight in combined_rank.
 DEFAULT_MAX_WORDS = 5500
-
-# A capitalized entry must appear capitalized in this many chapters, spread
-# over this many books.  See the module docstring.
-DEFAULT_MIN_CAPITALIZED_CHAPTERS = 4
-DEFAULT_MIN_CAPITALIZED_BOOKS = 2
-
-# No capitalization share exceeds 1.0, so per-document name detection never
-# fires.  See the module docstring.
-NO_NAME_DETECTION = 1.1
 
 
 def read_book_chapters(cache_dir: Path, books: Sequence[OpenStaxBook]) -> List[Tuple[str, str]]:
@@ -102,51 +85,6 @@ def read_book_chapters(cache_dir: Path, books: Sequence[OpenStaxBook]) -> List[T
         )
         documents.extend(chapters)
     return documents
-
-
-def capitalized_spread(analyses: Sequence[BookAnalysis]) -> Dict[str, Tuple[int, int]]:
-    """``{word: (chapters, books)}`` where the word is written capitalized.
-
-    Keys are the lowercase token, as ``upper_counts`` holds them.
-    """
-    chapters: Counter[str] = Counter()
-    books: Dict[str, Set[str]] = {}
-    for analysis in analyses:
-        book, _ = split_chapter_slug(analysis.slug)
-        for word in analysis.upper_counts:
-            chapters[word] += 1
-            books.setdefault(word, set()).add(book)
-    return {word: (count, len(books[word])) for word, count in chapters.items()}
-
-
-def drop_narrow_capitalized(
-    frequencies: Dict[str, int],
-    spread: Dict[str, Tuple[int, int]],
-    *,
-    min_chapters: int,
-    min_books: int,
-    max_words: Optional[int],
-) -> Tuple[Dict[str, int], List[str]]:
-    """Drop capitalized entries that did not spread, then cap the list.
-
-    "I" is exempt: it is capitalized by rule, not because it is a name.
-
-    Returns:
-        The filtered frequencies (at most ``max_words``) and the dropped
-        entries that ranked within them, in rank order.
-    """
-    kept: Dict[str, int] = {}
-    dropped: List[str] = []
-    for word, count in frequencies.items():
-        if max_words is not None and len(kept) >= max_words:
-            break
-        if word[:1].isupper() and word != "I":
-            chapters, books = spread.get(word.lower(), (0, 0))
-            if chapters < min_chapters or books < min_books:
-                dropped.append(word)
-                continue
-        kept[word] = count
-    return kept, dropped
 
 
 def _load_phrases(args: argparse.Namespace) -> Dict[str, int]:
@@ -190,21 +128,7 @@ def main() -> int:
         default=DEFAULT_MIN_CHAPTERS,
         help=f"Chapters a word must appear in (default: {DEFAULT_MIN_CHAPTERS})",
     )
-    parser.add_argument(
-        "--min-capitalized-chapters",
-        type=int,
-        default=DEFAULT_MIN_CAPITALIZED_CHAPTERS,
-        help=(
-            "Chapters a capitalized entry must appear capitalized in "
-            f"(default: {DEFAULT_MIN_CAPITALIZED_CHAPTERS})"
-        ),
-    )
-    parser.add_argument(
-        "--min-capitalized-books",
-        type=int,
-        default=DEFAULT_MIN_CAPITALIZED_BOOKS,
-        help=("Books those chapters must span " f"(default: {DEFAULT_MIN_CAPITALIZED_BOOKS})"),
-    )
+
     parser.add_argument(
         "--full-weight-tokens",
         type=int,
@@ -241,12 +165,7 @@ def main() -> int:
         action="store_false",
         help='Do not join "will <verb>" and "more <adj>" into single tokens',
     )
-    parser.add_argument(
-        "--show-dropped",
-        type=int,
-        default=0,
-        help="Print this many of the capitalized entries dropped for not spreading",
-    )
+
     parser.add_argument("--top", type=int, default=25, help="Top words to print")
     parser.add_argument("--dry-run", action="store_true", help="Report without writing")
     add_backend_args(parser)
@@ -269,34 +188,19 @@ def main() -> int:
         logger.error("No chapters could be read from %s", cache_dir)
         return 1
 
-    analyses = [
-        analyze_book(slug, text, capitalization_ratio=NO_NAME_DETECTION, phrases=phrases)
-        for slug, text in documents
-    ]
+    analyses = [analyze_book(slug, text, phrases=phrases) for slug, text in documents]
 
-    # Built uncapped, so the list can be refilled to --max-words once the
-    # capitalized entries that did not spread are dropped.
     payload = build_corpus_payload(
         analyses,
         corpus_name=args.corpus,
         min_books=args.min_chapters,
-        max_words=None,
+        max_words=args.max_words,
         full_weight_tokens=args.full_weight_tokens,
         min_uppercase_count=args.min_uppercase_count,
         min_uppercase_share=args.min_uppercase_share,
         generator="wordfreq.corpora.build_openstax",
     )
-    payload["global_word_frequency"], dropped = drop_narrow_capitalized(
-        payload["global_word_frequency"],
-        capitalized_spread(analyses),
-        min_chapters=args.min_capitalized_chapters,
-        min_books=args.min_capitalized_books,
-        max_words=args.max_words,
-    )
     generation = payload["generation"]
-    generation["max_words"] = args.max_words
-    generation["min_capitalized_chapters"] = args.min_capitalized_chapters
-    generation["min_capitalized_books"] = args.min_capitalized_books
     generation["books_pinned"] = {book.slug: book.commit for book in get_books(args.corpus)}
 
     frequencies = payload["global_word_frequency"]
@@ -305,9 +209,6 @@ def main() -> int:
     print(f"  tokens counted:    {generation['total_tokens']:,}")
     print(f"  unique words:      {payload['total_unique_words']:,}")
     print(f"  words written:     {len(frequencies):,}")
-    print(f"  capitalized dropped (not spread): {len(dropped):,}")
-    if args.show_dropped:
-        print("  " + ", ".join(dropped[: args.show_dropped]))
     print(f"\n  Top {args.top} words:")
     for rank, (word, value) in enumerate(list(frequencies.items())[: args.top], start=1):
         print(f"    {rank:>3}. {word:<16} {value:,}")

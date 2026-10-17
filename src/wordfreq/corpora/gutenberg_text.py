@@ -1,23 +1,13 @@
-"""Plain-text handling for Project Gutenberg books.
+"""Shared corpus tokenization and spelling evidence, plus Gutenberg extraction.
 
-Two jobs live here, both purely mechanical (no network, no database):
-
-* :func:`strip_gutenberg_boilerplate` removes the licence header/footer and the
-  transcription apparatus, so only the book's own prose is counted.
-* :func:`analyze_text` tokenizes what is left and records, per word, how often
-  it appears capitalized *away from a sentence boundary*.  That capitalization
-  signal is what :mod:`wordfreq.corpora.frequency_build` uses to tell proper
-  nouns apart from ordinary vocabulary.
-
-The same signal is kept in a second, finer form.  Every occurrence is filed as
-certainly lowercase, certainly capitalized, or uncertain (at a sentence or line
-start, where the position forces the capital);
-:meth:`TextStats.case_split` then apportions the uncertain ones by the ratio the
-decided ones show.  That is what lets a corpus count "London" apart from
-"london", rather than collapsing both into one lowercased entry.
+Frequency builders preserve observed spellings. Only first-letter capitals at
+sentence/line starts, and casing forced by uppercase passages, are ambiguous.
+The lowercase compatibility stream remains available for phrase/cooccurrence
+matching. Name detection consumes capitalization evidence as a diagnostic.
 """
 
 import re
+from bisect import bisect_right
 import unicodedata
 from collections import Counter
 from dataclasses import dataclass, field
@@ -353,12 +343,12 @@ def build_canonical_phrase_index(
     return index
 
 
-def iter_tokens(
+def iter_spelling_tokens(
     text: str,
     phrases: Optional[Dict[str, int]] = None,
     canonical_phrases: Optional[Dict[str, str]] = None,
 ) -> Iterator[Tuple[str, bool, bool]]:
-    """Yield ``(lowercase_token, is_capitalized, is_sentence_initial)`` triples.
+    """Yield ``(observed_spelling, is_sentence_initial, forced_case)`` triples.
 
     Tokens containing digits, single letters other than ``a``/``i``/``o``, and
     the roman numerals in :data:`ROMAN_NUMERALS` are skipped entirely.
@@ -394,6 +384,16 @@ def iter_tokens(
     # Materialize the token stream first: a phrase match needs to look ahead,
     # which a bare finditer loop cannot do.
     collected: List[Tuple[str, bool, bool]] = []
+    # A heading or shouted sentence is formatting, not evidence for acronyms.
+    forced_spans: List[Tuple[int, int]] = []
+    for passage in re.finditer(r"[^\n.!?]+", text):
+        passage_words = [item.group() for item in RAW_TOKEN_RE.finditer(passage.group())]
+        if (
+            len(passage_words) >= 2
+            and sum(word.isupper() for word in passage_words) / len(passage_words) >= 0.8
+        ):
+            forced_spans.append(passage.span())
+    forced_starts = [span[0] for span in forced_spans]
     for match in RAW_TOKEN_RE.finditer(text):
         raw = match.group(0)
         if CONTAINS_DIGIT_RE.search(raw):
@@ -411,7 +411,9 @@ def iter_tokens(
             lowered = lowered.strip("'")
             if not lowered:
                 continue
-        collected.append((lowered, raw[0].isupper(), _is_sentence_initial(text, match.start())))
+        span_index = bisect_right(forced_starts, match.start()) - 1
+        forced = span_index >= 0 and match.start() < forced_spans[span_index][1]
+        collected.append((raw.strip("'"), _is_sentence_initial(text, match.start()), forced))
 
     if not phrases:
         yield from collected
@@ -426,7 +428,7 @@ def iter_tokens(
         # hypothetical "New" and a longer name wins over a shorter prefix.
         for length in range(min(longest, total - position), 1, -1):
             candidate = " ".join(
-                collected[index][0] for index in range(position, position + length)
+                collected[index][0].lower() for index in range(position, position + length)
             )
             if phrases.get(candidate) == length:
                 matched_length = length
@@ -436,10 +438,19 @@ def iter_tokens(
             joined = " ".join(
                 collected[index][0] for index in range(position, position + matched_length)
             )
-            _, is_capitalized, is_sentence_initial = collected[position]
-            if canonical_phrases:
-                joined = canonical_phrases.get(joined, joined)
-            yield joined, is_capitalized, is_sentence_initial
+            _, is_sentence_initial, _ = collected[position]
+            forced_case = any(
+                collected[index][2] for index in range(position, position + matched_length)
+            )
+            if canonical_phrases and joined.lower() in canonical_phrases:
+                canonical = canonical_phrases[joined.lower()]
+                if joined.isupper():
+                    joined = canonical.upper()
+                elif joined[0].isupper():
+                    joined = canonical[:1].upper() + canonical[1:]
+                else:
+                    joined = canonical
+            yield joined, is_sentence_initial, forced_case
             position += matched_length
             continue
 
@@ -447,26 +458,37 @@ def iter_tokens(
         position += 1
 
 
+def iter_tokens(
+    text: str,
+    phrases: Optional[Dict[str, int]] = None,
+    canonical_phrases: Optional[Dict[str, str]] = None,
+) -> Iterator[Tuple[str, bool, bool]]:
+    """Compatibility stream for phrase/cooccurrence callers using lowercase keys.
+
+    Frequency generation uses :func:`iter_spelling_tokens` to retain spelling.
+    """
+    for surface, sentence_initial, _ in iter_spelling_tokens(text, phrases, canonical_phrases):
+        yield surface.lower(), surface[0].isupper(), sentence_initial
+
+
 @dataclass
 class TextStats:
-    """Token counts for one text, with the capitalization evidence per word.
+    """Token counts and casing evidence for one document.
 
-    Attributes:
-        token_total: Total number of tokens counted.
-        counts: Occurrences of each lowercased word.
-        mid_sentence_total: Occurrences away from a sentence/line start.
-        mid_sentence_capitalized: Of those, how many were capitalized.
-        lower_counts: Occurrences that are certainly lowercase -- mid-sentence
-            and uncapitalized.
-        upper_counts: Occurrences that are certainly capitalized -- mid-sentence
-            and capitalized.
-        uncertain_counts: Occurrences at a sentence or line start, where the
-            position forces a capital and so carries no evidence either way.
+    ``spelling_counts`` retains reliable observed spellings by lowercase key.
+    ``initial_counts`` contains ambiguous first-letter capitals at sentence/line
+    starts; ``forced_counts`` contains uppercase formatting. These three sources
+    partition ``counts``. Allocation uses corpus-wide evidence in ``casing.py``.
 
-    The three case counters partition :attr:`counts` exactly: every occurrence
-    lands in one of them.
+    ``lower_counts``, ``upper_counts``, ``uncertain_counts`` and the mid-sentence
+    counters retain the diagnostic/legacy capitalization interface. Upper counts
+    now include informative acronym and mixed-case spellings at sentence starts.
     """
 
+    # Reliable observed spellings, grouped by their lowercase matching key.
+    spelling_counts: Dict[str, Counter[str]] = field(default_factory=dict)
+    initial_counts: Counter[str] = field(default_factory=Counter)
+    forced_counts: Counter[str] = field(default_factory=Counter)
     token_total: int = 0
     counts: Counter[str] = field(default_factory=Counter)
     mid_sentence_total: Counter[str] = field(default_factory=Counter)
@@ -497,9 +519,10 @@ class TextStats:
 
         When a word never appears mid-sentence there is no ratio to apply, and
         the whole of it goes to the lowercase side. That matches what the
-        proper-noun filter does with the same absence of evidence:
-        :meth:`capitalization_ratio` returns ``None`` and ``detect_names``
-        leaves the word in the ordinary vocabulary.
+        name diagnostic does with the same absence of evidence:
+        :meth:`capitalization_ratio` returns ``None``. Production frequency
+        generation uses observed spellings and corpus-wide evidence instead
+        of this legacy two-way diagnostic.
 
         Returns:
             ``(upper_total, lower_total)``, summing to ``counts[word]``.
@@ -529,15 +552,33 @@ def analyze_text(
     its lemma.  See :func:`iter_tokens`.
     """
     stats = TextStats()
-    for token, is_capitalized, is_sentence_initial in iter_tokens(text, phrases, canonical_phrases):
+    for surface, sentence_initial, forced_case in iter_spelling_tokens(
+        text, phrases, canonical_phrases
+    ):
+        token = surface.lower()
         stats.token_total += 1
         stats.counts[token] += 1
-        if is_sentence_initial:
+        # Only an initial capital is ambiguous at a sentence start. DNA and pH
+        # carry spelling evidence there too. Lowercase is never forced by position.
+        initial_form = surface[:1].upper() + surface[1:].lower()
+        ambiguous = (
+            sentence_initial
+            and surface == initial_form
+            and (len(surface) > 1 or token in {"a", "o"})
+        )
+        if forced_case or ambiguous:
             stats.uncertain_counts[token] += 1
+            if forced_case:
+                stats.forced_counts[token] += 1
+            else:
+                stats.initial_counts[token] += 1
             continue
-        stats.mid_sentence_total[token] += 1
-        if is_capitalized:
-            stats.mid_sentence_capitalized[token] += 1
+        stats.spelling_counts.setdefault(token, Counter())[surface] += 1
+        if not sentence_initial:
+            stats.mid_sentence_total[token] += 1
+            if surface[0].isupper():
+                stats.mid_sentence_capitalized[token] += 1
+        if surface != token:
             stats.upper_counts[token] += 1
         else:
             stats.lower_counts[token] += 1
