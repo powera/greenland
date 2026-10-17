@@ -213,7 +213,7 @@ PLACEMENT_SOURCE = "jonvabalis/level-placement"
 # Where a new sense is stored until its level is assessed: nothing else sits
 # above the 1000-1299 topic band, so the senses parked here are easy to find
 # and rebalance lower later.
-PARKING_LEVEL = 1399
+PARKING_LEVEL = constants.STAGING_DIFFICULTY_LEVEL
 
 # Operation-log type of the entry recording where a lemma's queued row came
 # from; see review_fact.

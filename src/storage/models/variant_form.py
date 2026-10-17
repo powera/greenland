@@ -108,6 +108,13 @@ VARIANT_KIND_EXPANDED: str = "expanded"
 # for "distribute" has not answered it with "allocate".
 VARIANT_KIND_EQUIVALENT: str = "equivalent"
 
+# An obsolete form kept so old texts parse: "saith" and "hath", "goest" for the
+# thou-form of "go".  Only the slots that differ from the modern paradigm are
+# stored.  Not an accepted answer, and its claim on a shared token is
+# down-weighted (see wordfreq.lexeme_frequency.get_token_share) so that "art"
+# stays the noun rather than a form of "be".
+VARIANT_KIND_ARCHAIC: str = "archaic"
+
 # The kinds a learner may type and be right.  Every kind above is currently in
 # this set -- each one is a way of writing the lemma itself -- but naming the
 # set keeps that judgement in one place, so a future kind that is *not* an
