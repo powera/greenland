@@ -587,26 +587,52 @@ def _entry_label(sense_list: SenseList, entry: SenseEntry) -> str | None:
     return entry.disambiguation or sense_list.label
 
 
-def _check_sense_lists(sense_lists: Sequence[SenseList]) -> None:
-    """Reject a script that lists one headword twice, unless by part of speech.
+def _distinguishable(
+    first: tuple[SenseList, SenseEntry], second: tuple[SenseList, SenseEntry]
+) -> bool:
+    """Whether the server can tell two listings of one headword apart on a re-run.
 
-    Even under two labels this is refused: the server recognises a sense a
-    previous run created by its tags, and two senses of one headword sharing
-    a list's tags would be indistinguishable on the re-run.  The exception is
-    one entry per part of speech, each with ``pos`` set: the server only
-    matches senses of the given part of speech, so the noun's tags cannot
-    stand in for the verb.  An entry without ``pos`` would match either.
+    It recognises a sense a previous run left by its label or by carrying every
+    requested tag.  Two entries are safe if each fixes a different part of
+    speech -- the server then matches only senses of that part of speech -- or
+    if they carry different labels and neither list's tags include the other's,
+    as for "Greek" the person and "Greek" the language.
     """
-    pos_by_term: dict[str, List[str | None]] = {}
+    (first_list, first_entry), (second_list, second_entry) = first, second
+    if first_entry.pos and second_entry.pos and first_entry.pos != second_entry.pos:
+        return True
+    first_tags = {tag.strip().lower() for tag in first_list.tags}
+    second_tags = {tag.strip().lower() for tag in second_list.tags}
+    if first_tags <= second_tags or second_tags <= first_tags:
+        return False
+    first_label = _entry_label(first_list, first_entry)
+    second_label = _entry_label(second_list, second_entry)
+    return (
+        first_label is not None
+        and second_label is not None
+        and first_label.lower() != second_label.lower()
+    )
+
+
+def _check_sense_lists(sense_lists: Sequence[SenseList]) -> None:
+    """Reject a script that lists one headword twice indistinguishably.
+
+    Two senses of one headword sharing a list's tags would be indistinguishable
+    on the re-run, so the same list may hold a headword twice only once per
+    part of speech, each entry with ``pos`` set; an entry without ``pos`` would
+    match either.  See :func:`_distinguishable` for listings in two lists.
+    """
+    listings_by_term: dict[str, List[tuple[SenseList, SenseEntry]]] = {}
     for sense_list in sense_lists:
         for entry in sense_list.entries:
             _entry_label(sense_list, entry)
-            pos_by_term.setdefault(_normalized(entry.term), []).append(entry.pos)
-    for term, listed_pos in pos_by_term.items():
-        if len(listed_pos) == 1:
-            continue
-        if None in listed_pos or len(set(listed_pos)) != len(listed_pos):
-            raise ValueError(f"{term!r} is listed more than once; give each entry a different pos")
+            listings_by_term.setdefault(_normalized(entry.term), []).append((sense_list, entry))
+    for term, listings in listings_by_term.items():
+        for index, listing in enumerate(listings):
+            if not all(_distinguishable(listing, other) for other in listings[index + 1 :]):
+                raise ValueError(
+                    f"{term!r} is listed more than once; give each entry a different pos"
+                )
 
 
 def print_sense_plan(sense_list: SenseList) -> None:

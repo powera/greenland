@@ -60,13 +60,13 @@ def test_country_promotion_differs_between_lithuanian_and_chinese() -> None:
 def test_person_adjective_and_language_senses_follow_country(session: Session) -> None:
     person = _add(session, "Lithuanian", "nationality")
     adjective = _add(session, "Lithuanian", "origin", "adjective")
-    language = _add(session, "Lithuanian", "communication_information")
+    language = _add(session, "Lithuanian", "language_name")
     generic_origin = _add(session, "national", "origin", "adjective")
     for lemma in [person, adjective, language]:
         assert lemma.guid is not None
         assert _levels(session, "lt")[lemma.guid] == 15
         assert _levels(session, "zh")[lemma.guid] == (
-            233 if lemma.pos_subtype == "communication_information" else 232
+            233 if lemma.pos_subtype == "language_name" else 232
         )
     assert generic_origin.guid not in _levels(session, "lt")
 
@@ -81,7 +81,7 @@ def test_existing_demonym_headwords_are_recognized(session: Session) -> None:
 
 def test_shared_language_emits_one_change_using_earliest_association(session: Session) -> None:
     # Portuguese is associated with Portugal (main batch) and Brazil (tier 1).
-    portuguese = _add(session, "Portuguese", "communication_information", level=400)
+    portuguese = _add(session, "Portuguese", "language_name", level=400)
     summary = CountryOverrideManager(session).preview_changes("es-419")
     assert [(change.guid, change.proposed_level) for change in summary.changes] == [
         (portuguese.guid, 15)
@@ -90,17 +90,46 @@ def test_shared_language_emits_one_change_using_earliest_association(session: Se
 
 
 def test_extended_language_stays_extended_despite_country_promotion(session: Session) -> None:
-    assamese = _add(session, "Assamese", "communication_information", level=1031)
-    mongolian = _add(session, "Mongolian", "communication_information", level=1031)
-    igbo = _add(session, "Igbo person", "nationality", level=1031)
+    assamese = _add(session, "Assamese", "language_name", level=1033)
+    mongolian = _add(session, "Mongolian", "language_name", level=1033)
+    igbo = _add(session, "Igbo person", "nationality", level=1032)
     assert assamese.guid is not None and mongolian.guid is not None and igbo.guid is not None
     levels = _levels(session, "zh")
-    assert levels[assamese.guid] == levels[mongolian.guid] == levels[igbo.guid] == 1031
+    assert levels[assamese.guid] == levels[mongolian.guid] == 1033
+    assert levels[igbo.guid] == 1032
+
+
+def test_new_main_country_senses_follow_promotion(session: Session) -> None:
+    greek_person = _add(session, "Greek", "nationality", level=232)
+    greek_language = _add(session, "Greek", "language_name", level=233)
+    mexican = _add(session, "Mexican", "origin", "adjective", level=232)
+    assert greek_person.guid and greek_language.guid and mexican.guid
+    assert _levels(session, "lt")[greek_person.guid] == 232
+    assert _levels(session, "lt")[greek_language.guid] == 233
+    assert _levels(session, "es-419")[mexican.guid] == 15
+
+
+def test_country_sense_requires_its_disambiguation(session: Session) -> None:
+    state = _add(session, "Georgia", "region", level=240)
+    country = Lemma(
+        guid="TEST_noun_Georgia_country",
+        lemma_text="Georgia",
+        definition_text="The country of Georgia.",
+        pos_type="noun",
+        pos_subtype="region",
+        difficulty_level=1031,
+        disambiguation="country",
+    )
+    session.add(country)
+    session.flush()
+    levels = _levels(session, "zh")
+    assert state.guid not in levels
+    assert country.guid is not None and levels[country.guid] == 1031
 
 
 def test_apply_replaces_old_derived_levels_and_preserves_manual_override(session: Session) -> None:
     lithuania = _add(session, "Lithuania", "region", level=245)
-    chinese = _add(session, "Chinese", "communication_information")
+    chinese = _add(session, "Chinese", "language_name")
     session.add_all(
         [
             LemmaDifficultyOverride(

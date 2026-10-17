@@ -40,7 +40,7 @@ from storage.crud.difficulty_override import (
     get_difficulty_override,
 )
 from storage.models.schema import Lemma, LemmaDifficultyOverride
-from words.difficulty.geography_catalog import GEOGRAPHY_SENSES, MAIN_COUNTRY_NAMES, find_sense
+from words.difficulty.geography_catalog import GEOGRAPHY_SENSES, find_sense
 from words.difficulty.country_word_priorities import (
     CONTINENT_NAMES,
     COUNTRY_NAMES,
@@ -127,7 +127,7 @@ class CountryOverrideManager:
         "region",
         "nationality",
         "origin",
-        "communication_information",
+        "language_name",
         "group_people",
     }
 
@@ -151,7 +151,7 @@ class CountryOverrideManager:
             elif lemma.pos_type == "noun" and lemma.pos_subtype == "region":
                 if lemma.lemma_text in CONTINENT_NAMES:
                     results.append((lemma, (lemma.lemma_text,), TIER_2_LEVEL, "continent"))
-                elif lemma.lemma_text in COUNTRY_NAMES | MAIN_COUNTRY_NAMES:
+                elif lemma.lemma_text in COUNTRY_NAMES:
                     results.append((lemma, (lemma.lemma_text,), TIER_2_LEVEL, "country"))
         return results
 
@@ -188,6 +188,8 @@ class CountryOverrideManager:
             TIER_3_LEVEL: 0,
             232: 0,
             233: 0,
+            1032: 0,
+            1033: 0,
         }
 
         geography_words = self._geography_words()

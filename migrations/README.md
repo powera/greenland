@@ -53,3 +53,13 @@ and L1031 for extended senses. Lithuanian and Chinese keep different country
 priorities. Shared languages use the earliest associated country tier, but
 extended languages are not promoted solely because a related country is early.
 These rules are also used when WireWord export applies country overrides.
+
+## Extended geography level split
+
+`20261017_split_extended_geography_levels.py` splits extended geography the way
+231-233 are split: 1031 countries, 1032 people and ethnic groups, 1033
+languages. It names the three levels and moves the catalog senses still at
+1031 (Mongolian, Igbo, Assamese). Run it before
+`scripts/wordlists/import_geography_catalog.py`, which adds the rest of the
+catalog through `add_sense`. The 20261009 migration is superseded by that
+script and should not be re-applied.

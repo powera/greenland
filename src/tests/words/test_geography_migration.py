@@ -31,7 +31,7 @@ def test_rerun_preserves_existing_senses_and_separates_language() -> None:
             "English",
             "Existing reviewed English language",
             "noun",
-            "communication_information",
+            "language_name",
             difficulty_level=400,
         )
         original_guid = existing.guid
@@ -49,10 +49,10 @@ def test_rerun_preserves_existing_senses_and_separates_language() -> None:
                 [
                     sense
                     for sense in GEOGRAPHY_SENSES
-                    if sense.pos_subtype == "communication_information" and sense.base_level == 233
+                    if sense.pos_subtype == "language_name" and sense.base_level == 233
                 ]
             )
-            == 22
+            == 35
         )
 
 
@@ -74,7 +74,7 @@ def test_generic_origin_adjectives_are_not_geography() -> None:
         find_sense(Lemma(lemma_text="regional", pos_type="adjective", pos_subtype="origin")) is None
     )
     igbo = next(sense for sense in GEOGRAPHY_SENSES if sense.lemma_text == "Igbo person")
-    assert igbo.base_level == 1031
+    assert igbo.base_level == 1032
     assert "ethnic" in igbo.definition
 
 
@@ -90,7 +90,7 @@ def test_optional_base_normalization_is_logged_and_rollback_safe() -> None:
             "English",
             "English language",
             "noun",
-            "communication_information",
+            "language_name",
             difficulty_level=400,
         )
         country = add_lemma(

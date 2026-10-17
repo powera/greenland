@@ -64,14 +64,26 @@ CATALOG_NATIONALITIES = Cohort(
 CATALOG_LANGUAGES = Cohort(
     "catalog_languages",
     "languages of the catalog's main countries",
-    ("communication_information",),
+    ("language_name",),
     233,
 )
-CATALOG_EXTENDED = Cohort(
-    "catalog_extended",
-    "the geography catalog's extended-tier countries and their words",
-    ("region", "nationality", "origin", "communication_information"),
+CATALOG_EXTENDED_COUNTRIES = Cohort(
+    "catalog_extended_countries",
+    "the geography catalog's other countries and territories",
+    ("region",),
     1031,
+)
+CATALOG_EXTENDED_NATIONALITIES = Cohort(
+    "catalog_extended_nationalities",
+    "people and origin adjectives of the other countries, and ethnic groups",
+    ("nationality", "origin"),
+    1032,
+)
+CATALOG_EXTENDED_LANGUAGES = Cohort(
+    "catalog_extended_languages",
+    "the geography catalog's other major languages",
+    ("language_name",),
+    1033,
 )
 
 # Tiers 1 and 2 sit in mixed core levels, so only tiers 3-5 own a level.
@@ -93,7 +105,9 @@ COHORTS: tuple[Cohort, ...] = (
     CATALOG_COUNTRIES,
     CATALOG_NATIONALITIES,
     CATALOG_LANGUAGES,
-    CATALOG_EXTENDED,
+    CATALOG_EXTENDED_COUNTRIES,
+    CATALOG_EXTENDED_NATIONALITIES,
+    CATALOG_EXTENDED_LANGUAGES,
     *FAMILY_TIERS,
 )
 
