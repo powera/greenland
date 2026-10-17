@@ -255,6 +255,27 @@ def attach_english_base_form(
     )
 
 
+def attach_english_forms(
+    session: Session, lemma: Lemma, *, source: str, sense: Optional[Dict[str, Any]] = None
+) -> None:
+    """Give a new lemma its English base form plus the forms the rules derive.
+
+    For the creation paths that take a lemma as given -- add_term and the
+    manual adds -- rather than from an LLM sense, so ``sense`` is usually None
+    and the base form carries no pronunciation.  Without this the lemma has no
+    DerivativeForm at all: invisible to token frequency, to the duplicate
+    guard's form lookup, and to the lexeme facade until a later forms pass.
+    The mechanical step adds whatever the rules can spell (plural, possessives,
+    comparatives); a text the rules decline, such as a hyphenated adjective,
+    keeps only its base form.
+    """
+    attach_english_base_form(session, lemma, sense or {}, source=source)
+    # Imported here: the generator pulls in every langtools builder.
+    from words.mechanical_forms import generate_lemma_forms
+
+    generate_lemma_forms(session, lemma, "en")
+
+
 def create_sense_lemma(
     session: Session,
     word: str,
