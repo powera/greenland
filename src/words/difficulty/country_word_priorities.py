@@ -18,7 +18,7 @@ words appearing together every 5 or so levels.
 from typing import Dict, List, Optional, Set
 
 from langtools.dialect_overrides import get_translation_language
-from words.difficulty.geography_catalog import MAIN_COUNTRY_NAMES
+from words.difficulty.geography_catalog import CATALOG_COUNTRY_NAMES, MAIN_COUNTRY_NAMES
 
 # =============================================================================
 # LEVEL GROUPINGS
@@ -28,63 +28,13 @@ from words.difficulty.geography_catalog import MAIN_COUNTRY_NAMES
 # These anchors are spread across the expanded general curriculum.
 TIER_1_LEVEL = 15  # Target-language home countries and close neighbors
 TIER_2_LEVEL = 231  # Main geography batch
-TIER_3_LEVEL = 1031  # Extended countries, languages and related senses
+TIER_3_LEVEL = 1031  # Extended countries; their people at 1032, languages at 1033
 
-# Exact stored region lemmas that are countries.  ``region`` also contains US
-# states and continents. States do not receive country-priority overrides;
-# continents always travel with the second country tier.
-COUNTRY_NAMES: Set[str] = {
-    "Argentina",
-    "Australia",
-    "Austria",
-    "Belgium",
-    "Brazil",
-    "Canada",
-    "Chile",
-    "China",
-    "Cuba",
-    "Denmark",
-    "Egypt",
-    "England",
-    "Estonia",
-    "Ethiopia",
-    "Finland",
-    "France",
-    "Germany",
-    "Greece",
-    "Hungary",
-    "India",
-    "Indonesia",
-    "Iran",
-    "Iraq",
-    "Ireland",
-    "Israel",
-    "Italy",
-    "Japan",
-    "Latvia",
-    "Lithuania",
-    "Mexico",
-    "Morocco",
-    "Netherlands",
-    "Norway",
-    "Peru",
-    "Philippines",
-    "Poland",
-    "Portugal",
-    "Russia",
-    "Scotland",
-    "South Africa",
-    "South Korea",
-    "Spain",
-    "Sweden",
-    "Switzerland",
-    "Thailand",
-    "Turkey",
-    "Ukraine",
-    "United States",
-    "Vietnam",
-    "Wales",
-}
+# Exact stored region lemmas that are main-batch countries: the catalog's 231
+# countries.  ``region`` also contains US states and continents. States do not
+# receive country-priority overrides; continents always travel with the second
+# country tier.
+COUNTRY_NAMES: Set[str] = set(MAIN_COUNTRY_NAMES)
 
 CONTINENT_NAMES: Set[str] = {
     "Africa",
@@ -604,7 +554,7 @@ def get_country_level_for_language(country_label: str, target_language: str) -> 
     # Main-batch membership is curated, not a population/frequency ranking.
     # A country need not be explicitly listed for every target language to
     # remain in the main batch; only the early promotions are language-specific.
-    if country_label in COUNTRY_NAMES or country_label in MAIN_COUNTRY_NAMES:
+    if country_label in COUNTRY_NAMES:
         return TIER_2_LEVEL
     return TIER_3_LEVEL
 
@@ -628,8 +578,7 @@ def validate_configuration() -> List[str]:
     """
     issues: List[str] = []
 
-    # Known countries from the data file
-    known_countries = COUNTRY_NAMES | MAIN_COUNTRY_NAMES
+    known_countries = CATALOG_COUNTRY_NAMES
 
     for lang_code, priorities in COUNTRY_PRIORITIES.items():
         mentioned_countries: Set[str] = set()

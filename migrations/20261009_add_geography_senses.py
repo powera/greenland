@@ -5,6 +5,11 @@ Defaults to a rollback-only preview. Use --apply after reviewing the plan and
 making a WAL-safe SQLite backup. Existing GUIDs, translations and overrides are
 preserved. Add --set-base-levels to normalize existing reviewed geography base
 levels to 231/1031; the country level manager handles language-specific promotion.
+
+Superseded (2026-10-17): the catalog has since grown to every country, and its
+additions go through scripts/wordlists/import_geography_catalog.py, which also
+translates them.  Re-running this with --apply would mint all of them here,
+untranslated.
 """
 
 import argparse
@@ -63,7 +68,7 @@ def add_missing_senses(
             notes="Reviewed geography starter inventory; translations require separate review.",
         )
         lemma.disambiguation = (
-            "language" if sense.pos_subtype == "communication_information" else sense.pos_subtype
+            "language" if sense.pos_subtype == "language_name" else sense.pos_subtype
         )
         log_entity_operation(
             session,
