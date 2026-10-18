@@ -291,7 +291,7 @@ def test_dry_run_does_not_persist(tmp_path: Path) -> None:
         session.close()
 
 
-def test_rerun_updates_annotation_in_place(tmp_path: Path) -> None:
+def test_rerun_replaces_the_source(tmp_path: Path) -> None:
     session = _make_session()
     try:
         bootstrap_tier_definitions(session, sources=["cambridge_yle"])
@@ -319,11 +319,81 @@ def test_rerun_updates_annotation_in_place(tmp_path: Path) -> None:
             )
         )
         report = run_import(session, CambridgeYleImporter(file_path=str(f2)))
-        assert report.annotations_updated == 1
-        assert report.annotations_inserted == 0
+        assert report.annotations_inserted == 1
         assert session.query(ExternalLexemeAnnotation).count() == 1
         assert session.query(ExternalLexemeAnnotation).one().tier_name == "starters"
         assert session.query(LemmaTier).one().tier_name == "starters"
+    finally:
+        session.close()
+
+
+def test_rerun_drops_rows_the_file_no_longer_lists(tmp_path: Path) -> None:
+    session = _make_session()
+    try:
+        bootstrap_tier_definitions(session, sources=["cambridge_yle"])
+        _add_lemma(session, "cat", "N07_002", pos_type="noun")
+        _add_lemma(session, "dog", "N07_003", pos_type="noun")
+        session.commit()
+
+        both = _write_yle_fixture(
+            tmp_path,
+            [
+                {"word": "cat", "pos": ["n"], "level": "starters", "themes": []},
+                {"word": "dog", "pos": ["n"], "level": "starters", "themes": []},
+            ],
+        )
+        run_import(session, CambridgeYleImporter(file_path=str(both)))
+        assert session.query(LemmaTier).count() == 2
+
+        cat_only = tmp_path / "cat_only.json"
+        cat_only.write_text(
+            json.dumps(
+                {
+                    "source": "t",
+                    "entries": [{"word": "cat", "pos": ["n"], "level": "starters", "themes": []}],
+                }
+            )
+        )
+        run_import(session, CambridgeYleImporter(file_path=str(cat_only)))
+
+        tokens = [
+            token
+            for (token,) in session.query(WordToken.token)
+            .join(ExternalLexemeAnnotation, ExternalLexemeAnnotation.word_token_id == WordToken.id)
+            .all()
+        ]
+        assert tokens == ["cat"]
+        assert session.query(ExternalLexemeAnnotationLemma).count() == 1
+        assert [tier.lemma.lemma_text for tier in session.query(LemmaTier).all()] == ["cat"]
+    finally:
+        session.close()
+
+
+def test_rerun_leaves_other_sources_alone(tmp_path: Path) -> None:
+    session = _make_session()
+    try:
+        bootstrap_tier_definitions(session, sources=["cambridge_yle"])
+        lemma = _add_lemma(session, "cat", "N07_004", pos_type="noun")
+        token = WordToken(token="cat", language_code="en")
+        session.add(token)
+        session.flush()
+        session.add(ExternalLexemeAnnotation(word_token_id=token.id, source="cefr", tier_name="A1"))
+        session.add(LemmaTier(lemma_id=lemma.id, source="cefr", tier_name="A1"))
+        session.commit()
+
+        fixture = _write_yle_fixture(
+            tmp_path, [{"word": "cat", "pos": ["n"], "level": "starters", "themes": []}]
+        )
+        run_import(session, CambridgeYleImporter(file_path=str(fixture)))
+
+        sources = sorted(source for (source,) in session.query(LemmaTier.source).all())
+        assert sources == ["cambridge_yle", "cefr"]
+        assert (
+            session.query(ExternalLexemeAnnotation)
+            .filter(ExternalLexemeAnnotation.source == "cefr")
+            .count()
+            == 1
+        )
     finally:
         session.close()
 
