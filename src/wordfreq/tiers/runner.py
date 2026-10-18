@@ -1,6 +1,7 @@
 """Shared import driver for tier sources.
 
-For each TierEntry from an importer:
+An import replaces its source: every annotation, lemma link and LemmaTier row
+for the source is deleted first, then for each TierEntry from an importer:
 
 1. Get-or-create a WordToken for ``(entry.word, entry.language_code)``.
 2. Upsert an ExternalLexemeAnnotation row keyed by
@@ -88,6 +89,31 @@ class _ImportCaches:
     lemma_links: set[tuple[int, int]] = field(default_factory=set)
     # (lemma_id, source) -> LemmaTier
     lemma_tiers: Dict[tuple[int, str], LemmaTier] = field(default_factory=dict)
+
+
+def _delete_source_rows(session: Session, source: str) -> None:
+    """Delete every annotation, lemma link and LemmaTier row for ``source``.
+
+    An import replaces its source rather than merging into it.  Upserting by
+    ``(word_token_id, source, pos_hint, sense_hint)`` left behind any row the
+    current file no longer produces -- a word dropped from the list, or a row
+    whose token id was reused after the word tokens were deleted and reloaded,
+    which then tagged an unrelated word.  ``LemmaTier`` rows are written only
+    by this runner, so they are rebuilt here too.
+
+    Links are deleted explicitly before their annotations: SQLite's
+    ``ON DELETE CASCADE`` is not relied on.  Does not commit.
+    """
+    annotation_ids = session.query(ExternalLexemeAnnotation.id).filter(
+        ExternalLexemeAnnotation.source == source
+    )
+    session.query(ExternalLexemeAnnotationLemma).filter(
+        ExternalLexemeAnnotationLemma.annotation_id.in_(annotation_ids)
+    ).delete(synchronize_session=False)
+    session.query(ExternalLexemeAnnotation).filter(
+        ExternalLexemeAnnotation.source == source
+    ).delete(synchronize_session=False)
+    session.query(LemmaTier).filter(LemmaTier.source == source).delete(synchronize_session=False)
 
 
 def _build_import_caches(session: Session, source: str) -> _ImportCaches:
@@ -341,8 +367,10 @@ def run_import(
         bootstrap_tier_definitions(session, sources=[source])
 
     known_tiers = _known_tier_names(session, source)
-    caches = _build_import_caches(session, source)
+    # Load before deleting, so an unreadable file leaves the old rows in place.
     entries = importer.load_entries()
+    _delete_source_rows(session, source)
+    caches = _build_import_caches(session, source)
     report = ImportReport(source=source, total=len(entries))
 
     # Split out entries with an unknown tier so they neither create word tokens
