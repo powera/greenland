@@ -551,6 +551,10 @@ class SenseEntry(NamedTuple):
     model.  It is what lets one headword appear twice -- "dunk" as the noun and
     as the verb -- since the server then matches existing senses of that part
     of speech only.
+
+    ``prominence`` overrides the ``sense_prominence`` the server would give a
+    new sense from its level ("uncommon" below 1000, "rare" from 1000 up), for
+    a sense that is the headword's everyday meaning.
     """
 
     term: str
@@ -560,6 +564,7 @@ class SenseEntry(NamedTuple):
     abbreviation: str | None = None
     move: bool = False
     pos: str | None = None
+    prominence: str | None = None
 
 
 class SenseList(NamedTuple):
@@ -651,6 +656,8 @@ def print_sense_plan(sense_list: SenseList) -> None:
             notes.append(f"abbr {entry.abbreviation}")
         if entry.move:
             notes.append("move if present")
+        if entry.prominence:
+            notes.append(entry.prominence)
         suffix = f"  [{'; '.join(notes)}]" if notes else ""
         print(f"{rank:3}. {shown}{suffix}")
         if entry.hint:
@@ -690,6 +697,7 @@ def execute_senses(sense_list: SenseList, model: str, limit: int | None) -> List
                 relevel_existing=entry.move,
                 pos_subtype=sense_list.pos_subtype,
                 pos_type=entry.pos,
+                sense_prominence=entry.prominence,
             )
         except BarsukasAPIError as error:
             print(f"  failed: {error}")

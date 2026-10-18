@@ -369,6 +369,7 @@ def add_sense(
     relevel_existing: bool = False,
     pos_subtype: Optional[str] = None,
     pos_type: Optional[str] = None,
+    sense_prominence: Optional[str] = None,
     timeout: float = LLM_TIMEOUT_SECONDS,
 ) -> Any:
     """Add the sense an English word has in one field -- "check" in chess.
@@ -389,7 +390,9 @@ def add_sense(
     whose members must share one; the model is then not asked for it.
     ``pos_type`` fixes only the part of speech, for a headword the field uses
     as both noun and verb ("dunk"); the model still chooses the subtype, and
-    only senses of that part of speech can match.
+    only senses of that part of speech can match. ``sense_prominence`` overrides
+    the prominence a new sense gets, which is otherwise ``uncommon``
+    below level 1000 and ``rare`` from 1000 up.
 
     ``data["status"]`` is ``created``, ``covered`` (matched and tagged),
     ``moved`` (matched and moved) or ``already_exists`` (matched without a call).
@@ -413,6 +416,8 @@ def add_sense(
         payload["pos_subtype"] = pos_subtype
     if pos_type:
         payload["pos_type"] = pos_type
+    if sense_prominence:
+        payload["sense_prominence"] = sense_prominence
     return post_json(f"{API_V1_PREFIX}/senses/add", payload, timeout=timeout)
 
 

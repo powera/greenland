@@ -23,12 +23,16 @@ from storage.backend.config import BackendType, DataSourceConfig
 from storage.crud.lemma_tags import read_tags
 from storage.crud.uncertain_llm_result import get_uncertain_llm_result
 from storage.models import Base, DerivativeForm, Lemma
-from storage.models.schema import SENSE_PROMINENCE_RARE
+from storage.models.schema import (
+    SENSE_PROMINENCE_COMMON,
+    SENSE_PROMINENCE_RARE,
+    SENSE_PROMINENCE_UNCOMMON,
+)
 from storage.models.uncertain_llm_result import TOPIC_TRANSLATION
 from storage.models.variant_form import VARIANT_KIND_ABBREVIATION, VariantForm
 from storage.translation_helpers import get_translation
 from wordfreq.translation.definitions import build_subtype_prompt
-from words.add_sense import add_sense, build_sense_prompt
+from words.add_sense import add_sense, build_sense_prompt, default_sense_prominence
 from words.translation_populate import missing_translation_languages
 
 pytestmark = pytest.mark.usefixtures("require_lemma_write_scope")
@@ -161,6 +165,51 @@ class TestCreation:
         assert read_tags(lemma) == ["chess", "sports_games"]
         assert get_translation(session, lemma, "lt") == "šachas"
         assert session.query(Lemma).filter(Lemma.lemma_text == "check").count() == 2
+
+    def test_general_level_sense_defaults_to_uncommon(
+        self, session: Session, config: DataSourceConfig
+    ) -> None:
+        result = _add(session, config, _FakeClient(_chess_check()), difficulty_level=278)
+
+        lemma = session.query(Lemma).filter(Lemma.guid == result.guid).one()
+        assert lemma.sense_prominence == SENSE_PROMINENCE_UNCOMMON
+
+    def test_explicit_prominence_overrides_the_level_default(
+        self, session: Session, config: DataSourceConfig
+    ) -> None:
+        result = _add(
+            session,
+            config,
+            _FakeClient(_chess_check()),
+            sense_prominence=SENSE_PROMINENCE_COMMON,
+        )
+
+        lemma = session.query(Lemma).filter(Lemma.guid == result.guid).one()
+        assert lemma.sense_prominence == SENSE_PROMINENCE_COMMON
+
+    def test_unknown_prominence_is_refused_before_any_call(
+        self, session: Session, config: DataSourceConfig
+    ) -> None:
+        client = _FakeClient(_chess_check())
+
+        result = _add(session, config, client, sense_prominence="frequent")
+
+        assert result.status == "error"
+        assert client.calls == []
+        assert session.query(Lemma).filter(Lemma.lemma_text == "check").count() == 1
+
+    @pytest.mark.parametrize(
+        ("difficulty_level", "expected"),
+        [
+            (1, SENSE_PROMINENCE_UNCOMMON),
+            (999, SENSE_PROMINENCE_UNCOMMON),
+            (1000, SENSE_PROMINENCE_RARE),
+            (1399, SENSE_PROMINENCE_RARE),
+            (-1, SENSE_PROMINENCE_RARE),
+        ],
+    )
+    def test_default_prominence_by_level(self, difficulty_level: int, expected: str) -> None:
+        assert default_sense_prominence(difficulty_level) == expected
 
     def test_low_confidence_translation_is_left_missing(
         self, session: Session, config: DataSourceConfig

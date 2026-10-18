@@ -29,10 +29,13 @@ and with ``relevel_existing`` it is also moved to the caller's level and given
 the caller's disambiguation -- the chess queen, created at a general level
 before the chess vocabulary had a home, moves to the chess level.
 
-New senses are stored with ``sense_prominence`` "rare". They are not rare in
-their field, but the rating is relative to the headword's other senses, and
-it is what keeps "checked" and "checking" in general text from rolling up to
-the chess sense.
+A new sense's ``sense_prominence`` follows its level unless the caller names
+one (:func:`default_sense_prominence`). A topic-level sense is
+"rare": it is not rare in its field, but the rating is relative to the
+headword's other senses, and it is what keeps "checked" and "checking" in
+general text from rolling up to the chess sense. A sense placed in a general
+level below 1000 -- "lamb" the animal beside "lamb (meat)" -- is ordinary
+vocabulary, and "uncommon" lets it take a real share of its surface form.
 """
 
 import logging
@@ -41,6 +44,7 @@ from typing import Any, Dict, List, Optional, Sequence, Tuple
 
 from sqlalchemy.orm import Session
 
+import constants
 import util.prompt_loader
 from clients.types import Schema, SchemaProperty
 from storage.backend.config import DataSourceConfig
@@ -48,7 +52,12 @@ from storage.crud.lemma_tags import add_tags, normalize_tags, read_tags
 from storage.crud.operation_log import FieldChange, log_field_changes, log_translation_change
 from storage.crud.variant_form import add_variant_form
 from storage.models.guid_prefixes import SUBTYPE_GUID_PREFIXES
-from storage.models.schema import SENSE_PROMINENCE_RARE, Lemma
+from storage.models.schema import (
+    SENSE_PROMINENCE_RARE,
+    SENSE_PROMINENCE_UNCOMMON,
+    SENSE_PROMINENCE_VALUES,
+    Lemma,
+)
 from storage.models.variant_form import VARIANT_KIND_ABBREVIATION
 from storage.queries.lemma import get_english_senses
 from storage.translation_helpers import (
@@ -201,6 +210,18 @@ def _describe_existing(senses: Sequence[Lemma]) -> str:
     return "\n".join(lines)
 
 
+def default_sense_prominence(difficulty_level: int) -> str:
+    """The prominence a sense added at ``difficulty_level`` gets when none is named.
+
+    "uncommon" in the curriculum levels below the topic band, "rare" from 1000
+    up -- and for an unset or excluded level (-1), which says nothing about how
+    ordinary the sense is.
+    """
+    if constants.MIN_DIFFICULTY_LEVEL <= difficulty_level < constants.TOPIC_DIFFICULTY_LEVEL_MIN:
+        return SENSE_PROMINENCE_UNCOMMON
+    return SENSE_PROMINENCE_RARE
+
+
 def pos_type_for_subtype(pos_subtype: str) -> Optional[str]:
     """The one part of speech ``pos_subtype`` belongs to, or None if not exactly one."""
     owners = [pos for pos, subtypes in SUBTYPE_GUID_PREFIXES.items() if pos_subtype in subtypes]
@@ -335,6 +356,7 @@ def add_sense(
     relevel_existing: bool = False,
     pos_subtype: Optional[str] = None,
     pos_type: Optional[str] = None,
+    sense_prominence: Optional[str] = None,
     source: str = "add_sense",
     client: Optional[Any] = None,
 ) -> AddSenseResult:
@@ -366,6 +388,9 @@ def add_sense(
             chooses the subtype. Only senses of this part of speech are
             candidates for an existing match. Must agree with ``pos_subtype``
             when both are given.
+        sense_prominence: Prominence stored on a new sense. None takes
+            :func:`default_sense_prominence` for ``difficulty_level``. A
+            matched sense moved by ``relevel_existing`` is still set "rare".
         source: Provenance recorded in the operation log.
         client: Pre-built LLM client, for tests.
 
@@ -380,6 +405,13 @@ def add_sense(
     if not domain.strip():
         return AddSenseResult(word=normalized, status="error", error="domain must not be empty")
     requested_tags = list(tags or [])
+    if sense_prominence is not None and sense_prominence not in SENSE_PROMINENCE_VALUES:
+        return AddSenseResult(
+            word=normalized,
+            status="error",
+            error=f"unknown sense_prominence {sense_prominence!r}",
+        )
+    prominence = sense_prominence or default_sense_prominence(difficulty_level)
     fixed_pos_type: Optional[str] = None
     if pos_type is not None:
         if pos_type not in VALID_POS_TYPES:
@@ -547,7 +579,7 @@ def add_sense(
                 pos_subtype=new_subtype,
                 guid=guid,
                 difficulty_level=difficulty_level,
-                sense_prominence=SENSE_PROMINENCE_RARE,
+                sense_prominence=prominence,
                 confidence=0.0,
                 verified=False,
             )
