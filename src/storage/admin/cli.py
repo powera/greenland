@@ -46,15 +46,22 @@ def get_argument_parser() -> argparse.ArgumentParser:
     mode_group.add_argument(
         "--clear-wordfreq",
         action="store_true",
-        help="Delete every corpus-derived row (word tokens, wordfreq annotations, "
-        "form links). Lemmas, forms and tier data are kept",
+        help="Hard clear: delete every word token and everything pointing at one "
+        "(form links, wordfreq and tier annotations). Renumbers tokens on reload; "
+        "run --import-tiers afterwards. Lemmas and forms are kept",
     )
     mode_group.add_argument(
         "--repopulate",
         action="store_true",
-        help="Clear all wordfreq data and rebuild it end to end: sync config, load "
-        "corpora, link forms, import tiers, calculate ranks. The single entry point "
-        "for a full refresh from the corpus files",
+        help="Reset corpus ranks and rebuild them end to end: sync config, load "
+        "corpora, import tiers, link forms, calculate ranks. Keeps word token ids. "
+        "The single entry point for a full refresh from the corpus files",
+    )
+    parser.add_argument(
+        "--hard",
+        action="store_true",
+        help="With --repopulate: hard-clear first (as --clear-wordfreq), deleting "
+        "and renumbering every word token. Only when explicitly needed",
     )
     return parser
 
@@ -75,6 +82,9 @@ def main() -> None:
     config = get_data_source_config(args)
     service = DatabaseAdminService(config)
 
+    if args.hard and not args.repopulate:
+        parser.error("--hard is only valid with --repopulate")
+
     if args.check:
         service.run_check(output_file=args.output)
         return
@@ -92,7 +102,9 @@ def main() -> None:
     elif args.clear_wordfreq:
         result = service.clear_wordfreq_data(dry_run=args.dry_run)
     elif args.repopulate:
-        result = service.initialize_database(dry_run=args.dry_run, clear=True)
+        result = service.initialize_database(
+            dry_run=args.dry_run, clear=not args.hard, hard_clear=args.hard
+        )
     else:
         service.run_check(output_file=args.output)
         return
