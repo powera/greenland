@@ -52,7 +52,7 @@ if str(ROOT) not in sys.path:
 from api import BarsukasAPIError
 from api.batch_operations import pending_import_words
 from api.constants import BASE_URL
-from api.lemmas import add_sense, add_term, add_word, words_exist
+from api.lemmas import add_sense, add_term, add_word, get_lemma, set_lemma_difficulty, words_exist
 
 DEFAULT_MODEL = "gpt-6-luna"
 
@@ -728,11 +728,54 @@ def execute_senses(sense_list: SenseList, model: str, limit: int | None) -> List
     return failures
 
 
+class LevelMove(NamedTuple):
+    """An existing lemma, named by GUID, to move to a list's level.
+
+    For a sense the database already has under the right meaning -- "herd"
+    parked at staging -- which only needs a level.  It goes through
+    ``set_lemma_difficulty`` and nothing else changes; the add-sense
+    ``move`` flag is for a sense found by the model, and also resets its
+    prominence.  ``headword`` is checked against the lemma before it moves,
+    so a GUID copied from a stale release file cannot move the wrong word.
+    """
+
+    guid: str
+    headword: str
+    level: int
+
+
+def print_move_plan(moves: Sequence[LevelMove]) -> None:
+    print(f"Existing lemmas to move: {len(moves)}")
+    for move in moves:
+        print(f"  {move.guid} {move.headword} -> {move.level}")
+
+
+def execute_moves(moves: Sequence[LevelMove]) -> List[str]:
+    """Move each lemma in ``moves`` to its level, returning the ones that failed."""
+    failures: List[str] = []
+    for move in moves:
+        lemma = _response_data(get_lemma(move.guid), operation=f"reading {move.guid}")
+        if not isinstance(lemma, dict):
+            raise RuntimeError(f"Reading {move.guid} returned invalid data: {lemma!r}")
+        lemma_text = str(lemma.get("lemma_text", ""))
+        if _normalized(lemma_text) != _normalized(move.headword):
+            failures.append(f"{move.guid}: is {lemma_text!r}, not {move.headword!r}")
+            continue
+        current = lemma.get("difficulty_level")
+        if current == move.level:
+            print(f"  {move.guid} {lemma_text}: already at {move.level}")
+            continue
+        set_lemma_difficulty(move.guid, move.level)
+        print(f"  {move.guid} {lemma_text}: {current} -> {move.level}")
+    return failures
+
+
 def run_sense_import(
     sense_lists: Sequence[SenseList],
     description: str,
     term_groups: Sequence[tuple[int, Sequence[TermEntry]]] = (),
     term_tags: Sequence[str] | None = None,
+    moves: Sequence[LevelMove] = (),
 ) -> int:
     """Entry point for a domain-sense import script.
 
@@ -743,6 +786,8 @@ def run_sense_import(
     ``term_groups`` are ``(level, entries)`` of fully specified terms, run
     after the senses through ``add_term`` -- brand names beside the generics
     they name, where sense discovery would file the brand under its generic.
+
+    ``moves`` are existing lemmas moved by GUID, after the senses and terms.
     """
     _check_sense_lists(sense_lists)
     sense_terms = {_normalized(entry.term) for sl in sense_lists for entry in sl.entries}
@@ -762,6 +807,9 @@ def run_sense_import(
         print("Fully specified terms:")
         print_term_plan(term_group, level)
         print()
+    if moves:
+        print_move_plan(moves)
+        print()
     if not args.execute:
         print("No API calls made. Re-run with --execute only after approval.")
         return 0
@@ -777,6 +825,8 @@ def run_sense_import(
                 execute_terms(
                     term_group, level, args.model, args.limit, tags=term_tags, queued=queued
                 )
+        if moves:
+            failures.extend(execute_moves(moves))
     except (BarsukasAPIError, RuntimeError, requests.exceptions.RequestException) as error:
         print(f"Import stopped: {error}", file=sys.stderr)
         return 1
