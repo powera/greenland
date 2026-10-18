@@ -26,7 +26,7 @@ from storage.models.schema import (  # Ensure Corpus model is imported
     ExternalLexemeAnnotationLemma,
     WordToken,
 )
-from storage.models.variant_form import VariantForm
+from storage.token_forms import TOKEN_FORM_SOURCES
 from storage.translation_helpers import has_translation_clause
 import storage.admin.legacy_json_import as legacy_json_import
 
@@ -241,28 +241,91 @@ class DatabaseAdminService:
         )
         return result
 
+    def reset_wordfreq_ranks(self, dry_run: bool = False) -> Dict[str, Any]:
+        """Drop the corpus rank data, keeping every ``WordToken`` and its id.
+
+        The normal clear before a reload.  Removes the ``wordfreq_*``
+        annotations (and their lemma links) and sets every
+        ``WordToken.frequency_rank`` to NULL; the load and the rank pass then
+        refill both against the same token ids.  A spelling the rebuilt corpora
+        no longer attest -- "france" once "France" is counted apart -- keeps its
+        row but gets no corpus rank back, so it sinks to the bottom of every
+        ranked listing instead of scoring off a stale count.
+
+        Token ids are the reason not to delete the tokens themselves: forms,
+        names and tier annotations all point at them, and a delete-and-reload
+        hands the old ids to unrelated words.  :meth:`clear_wordfreq_data` does
+        that deliberately, and only when asked.
+
+        Args:
+            dry_run: Report the counts without changing anything.
+
+        Returns:
+            Dictionary of the row counts removed or reset (or that would be).
+        """
+        logger.info(f"Resetting wordfreq ranks (dry_run={dry_run})...")
+        session = self.get_session()
+        try:
+            wordfreq_annotation_ids = session.query(ExternalLexemeAnnotation.id).filter(
+                ExternalLexemeAnnotation.source.like("wordfreq_%")
+            )
+            counts: Dict[str, Any] = {
+                "annotations": wordfreq_annotation_ids.count(),
+                "ranked_word_tokens": session.query(WordToken)
+                .filter(WordToken.frequency_rank.isnot(None))
+                .count(),
+                "dry_run": dry_run,
+            }
+
+            if dry_run:
+                logger.info(f"Would reset: {counts}")
+                return counts
+
+            # Links first: SQLite's ON DELETE CASCADE is not relied on.
+            session.query(ExternalLexemeAnnotationLemma).filter(
+                ExternalLexemeAnnotationLemma.annotation_id.in_(wordfreq_annotation_ids)
+            ).delete(synchronize_session=False)
+            session.query(ExternalLexemeAnnotation).filter(
+                ExternalLexemeAnnotation.source.like("wordfreq_%")
+            ).delete(synchronize_session=False)
+            session.query(WordToken).filter(WordToken.frequency_rank.isnot(None)).update(
+                {WordToken.frequency_rank: None}, synchronize_session=False
+            )
+            session.commit()
+
+            logger.info(f"Reset wordfreq ranks: {counts}")
+            return counts
+        except Exception as e:
+            session.rollback()
+            logger.error(f"Failed to reset wordfreq ranks: {e}")
+            return {"success": False, "error": str(e), "dry_run": dry_run}
+        finally:
+            session.close()
+
     def clear_wordfreq_data(self, dry_run: bool = False) -> Dict[str, Any]:
-        """Delete every corpus-derived row, so a reload starts from nothing.
+        """Delete every ``WordToken`` and everything that points at one.
 
-        The corpus importer updates the rows a corpus file still mentions and
-        leaves the rest alone, so a spelling a rebuild dropped keeps its old
-        ``WordToken`` and its stale rank for ever.  After the corpora began
-        counting "France" apart from "france", the lowercase rows survived that
-        way -- no corpus attested them any more, but 38 lemmas were still
-        linked to them and still scoring off their stale ranks.
+        A hard clear, for an explicit request only; a normal reload uses
+        :meth:`reset_wordfreq_ranks`, which keeps token ids stable.  Deleting
+        the tokens renumbers them on reload, so every reference to a token id
+        must go first -- SQLite foreign keys are not enforced and are not
+        relied on to catch a dangling one.
 
-        Removes, in FK-safe order:
+        Removes, in this order:
 
-        1. ``derivative_forms.word_token_id`` / ``variant_forms.word_token_id``
-           are set NULL.  The forms themselves are dictionary data and are kept;
-           only the link is corpus-derived, and step 4 of
-           :meth:`initialize_database` rebuilds it.
-        2. ``external_lexeme_annotations`` rows under a ``wordfreq_*`` source,
-           and their ``external_lexeme_annotation_lemmas`` links.  Tier sources
-           (CEFR / YLE / Basic English) are **not** corpus data and are left
-           alone -- they come from :meth:`import_tiers`.
-        3. Every ``WordToken``.  These are wholly corpus-derived; the load
-           recreates the ones the current files attest.
+        1. ``word_token_id`` on every form table in
+           ``storage.token_forms.TOKEN_FORM_SOURCES`` is set NULL.  The forms
+           themselves are dictionary data and are kept; the link step of
+           :meth:`initialize_database` rebuilds the links.
+        2. Every ``external_lexeme_annotation_lemmas`` row, then every
+           ``external_lexeme_annotations`` row -- tier sources (CEFR / YLE /
+           Basic English) included, because they point at tokens too.  Run
+           :meth:`import_tiers` afterwards to restore them; ``LemmaTier`` rows
+           are keyed by lemma and are left for that import to replace.
+        3. Every ``WordToken``.
+
+        ``operation_logs.word_token_id`` is a historical record with no foreign
+        key and is left as it is.
 
         Args:
             dry_run: Report the counts without deleting anything.
@@ -273,43 +336,31 @@ class DatabaseAdminService:
         logger.info(f"Clearing wordfreq data (dry_run={dry_run})...")
         session = self.get_session()
         try:
-            wordfreq_annotations = session.query(ExternalLexemeAnnotation).filter(
-                ExternalLexemeAnnotation.source.like("wordfreq_%")
-            )
             counts: Dict[str, Any] = {
-                "derivative_form_links": session.query(DerivativeForm)
-                .filter(DerivativeForm.word_token_id.isnot(None))
-                .count(),
-                "variant_form_links": session.query(VariantForm)
-                .filter(VariantForm.word_token_id.isnot(None))
-                .count(),
-                "annotations": wordfreq_annotations.count(),
-                "word_tokens": session.query(WordToken).count(),
-                "dry_run": dry_run,
+                f"{source.table_name}_links": session.query(source.model)
+                .filter(source.model.word_token_id.isnot(None))
+                .count()
+                for source in TOKEN_FORM_SOURCES
             }
+            counts["annotation_lemma_links"] = session.query(ExternalLexemeAnnotationLemma).count()
+            counts["annotations"] = session.query(ExternalLexemeAnnotation).count()
+            counts["word_tokens"] = session.query(WordToken).count()
+            counts["dry_run"] = dry_run
 
             if dry_run:
                 logger.info(f"Would clear: {counts}")
                 return counts
 
-            annotation_ids = [row.id for row in wordfreq_annotations.all()]
-            if annotation_ids:
-                session.query(ExternalLexemeAnnotationLemma).filter(
-                    ExternalLexemeAnnotationLemma.annotation_id.in_(annotation_ids)
-                ).delete(synchronize_session=False)
-
-            # Drop the FK references before the rows they point at.
-            session.query(DerivativeForm).filter(DerivativeForm.word_token_id.isnot(None)).update(
-                {DerivativeForm.word_token_id: None}, synchronize_session=False
-            )
-            session.query(VariantForm).filter(VariantForm.word_token_id.isnot(None)).update(
-                {VariantForm.word_token_id: None}, synchronize_session=False
-            )
-
-            wordfreq_annotations.delete(synchronize_session=False)
+            for source in TOKEN_FORM_SOURCES:
+                session.query(source.model).filter(source.model.word_token_id.isnot(None)).update(
+                    {source.model.word_token_id: None}, synchronize_session=False
+                )
+            session.query(ExternalLexemeAnnotationLemma).delete(synchronize_session=False)
+            session.query(ExternalLexemeAnnotation).delete(synchronize_session=False)
             session.query(WordToken).delete(synchronize_session=False)
             session.commit()
 
+            counts["tiers_need_reimport"] = True
             logger.info(f"Cleared wordfreq data: {counts}")
             return counts
         except Exception as e:
@@ -663,7 +714,9 @@ class DatabaseAdminService:
 
         return result
 
-    def initialize_database(self, dry_run: bool = False, clear: bool = False) -> Dict[str, Any]:
+    def initialize_database(
+        self, dry_run: bool = False, clear: bool = False, hard_clear: bool = False
+    ) -> Dict[str, Any]:
         """
         Perform complete database initialization.
 
@@ -681,11 +734,13 @@ class DatabaseAdminService:
 
         Args:
             dry_run: If True, report what would be done without making changes
-            clear: Delete every corpus-derived row first, so the reload starts
-                from nothing.  Without it the load updates what the current
-                corpus files mention and leaves anything they have dropped in
-                place, stale rank included -- see :meth:`clear_wordfreq_data`.
-                Lemmas, forms and tier data are never touched either way.
+            clear: Drop the corpus rank data first (:meth:`reset_wordfreq_ranks`),
+                so a corpus removed from the config leaves no rows behind.
+                Token ids, form links and tier data are kept.  Each corpus load
+                already replaces its own source's rows either way.
+            hard_clear: Delete every ``WordToken`` and every reference to one
+                first (:meth:`clear_wordfreq_data`).  Renumbers the tokens; for
+                an explicit request only.  Takes precedence over ``clear``.
 
         Returns:
             Dictionary with initialization results
@@ -717,11 +772,14 @@ class DatabaseAdminService:
         else:
             results["tables_initialized"] = "skipped (dry_run)"
 
-        # Step 2: Optionally drop everything corpus-derived, so spellings the
+        # Step 2: Optionally drop the corpus-derived data, so spellings the
         # current files no longer attest do not survive with a stale rank.
-        if clear:
-            logger.info("Step 2: Clearing existing wordfreq data...")
+        if hard_clear:
+            logger.info("Step 2: Hard-clearing wordfreq data (tokens renumbered)...")
             results["wordfreq_cleared"] = self.clear_wordfreq_data(dry_run=dry_run)
+        elif clear:
+            logger.info("Step 2: Resetting wordfreq ranks...")
+            results["wordfreq_cleared"] = self.reset_wordfreq_ranks(dry_run=dry_run)
         else:
             results["wordfreq_cleared"] = "skipped (clear=False)"
 
