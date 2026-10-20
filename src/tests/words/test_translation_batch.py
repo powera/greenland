@@ -12,6 +12,7 @@ import pytest
 from sqlalchemy import create_engine
 from sqlalchemy.orm import Session
 
+import constants
 from clients.batch_queue import (
     BatchQueue,
     BatchQueueManager,
@@ -20,6 +21,7 @@ from clients.batch_queue import (
     create_batch_database_session,
 )
 from clients.openai.client import build_responses_request
+from storage.crud.difficulty_override import add_difficulty_override
 from storage.crud.uncertain_llm_result import get_uncertain_llm_result, record_uncertain_llm_result
 from storage.models.schema import Base, Lemma
 from storage.models.uncertain_llm_result import REASON_LOW_CONFIDENCE, TOPIC_TRANSLATION
@@ -180,6 +182,21 @@ def test_states_skip_uncertain_languages_unless_retried(session: Session) -> Non
 
     assert [state["languages"] for state in skipped] == [["hi"]]
     assert [state["languages"] for state in retried] == [["hi", "vi"]]
+
+
+def test_states_never_ask_for_excluded_languages(session: Session) -> None:
+    lemma = _add_lemma(session, "at", {"fr": "à"})
+    add_difficulty_override(session, lemma.id, "lt", constants.EXCLUDE_DIFFICULTY_LEVEL)
+    add_difficulty_override(session, lemma.id, "hi", 12)
+    session.commit()
+
+    skipped, _complete = translation_populate_states(session, [lemma], ["lt", "hi"])
+    retried, _complete = translation_populate_states(
+        session, [lemma], ["lt", "hi"], retry_uncertain=True
+    )
+
+    assert [state["languages"] for state in skipped] == [["hi"]]
+    assert [state["languages"] for state in retried] == [["hi"]]
 
 
 def test_lemma_with_only_uncertain_gaps_is_not_asked(
