@@ -6,7 +6,12 @@ from typing import Any, Dict, List, Optional
 from sqlalchemy import select
 from sqlalchemy.orm import Session
 
-from storage.crud.operation_log import log_translation_change
+from storage.crud.operation_log import (
+    LEMMA_UPDATE,
+    FieldChange,
+    log_field_changes,
+    log_translation_change,
+)
 from storage.models.schema import (
     SENSE_PROMINENCE_VALUES,
     DerivativeForm,
@@ -198,6 +203,27 @@ def update_lemma(
                     new_translation=new_value,
                 )
 
+    # Captured before the assignments so the log records the real diff. Only
+    # fields this call was given are candidates, so "not passed" never reads as
+    # "cleared"; log_field_changes drops the ones whose value did not change.
+    requested_fields: Dict[str, Any] = {
+        "lemma_text": lemma_text,
+        "definition_text": definition_text,
+        "pos_type": pos_type,
+        "pos_subtype": pos_subtype,
+        "difficulty_level": difficulty_level,
+        "frequency_rank": frequency_rank,
+        "tags": json.dumps(tags) if tags is not None else None,
+        "confidence": confidence,
+        "verified": verified,
+        "notes": notes,
+    }
+    field_changes = [
+        FieldChange(field_name, getattr(lemma, field_name), new_field_value)
+        for field_name, new_field_value in requested_fields.items()
+        if new_field_value is not None
+    ]
+
     if lemma_text is not None:
         lemma.lemma_text = lemma_text
     if definition_text is not None:
@@ -219,6 +245,15 @@ def update_lemma(
         lemma.verified = verified
     if notes is not None:
         lemma.notes = notes
+
+    log_field_changes(
+        session,
+        source=source or "lemma-crud/update",
+        operation_type=LEMMA_UPDATE,
+        entity_guid=lemma.guid,
+        changes=field_changes,
+        lemma_id=lemma.id,
+    )
 
     session.commit()
     return True
