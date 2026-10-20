@@ -1,7 +1,8 @@
-{"guid": "N25_001", "grammar_facts": [{"fact_type": "grammatical_gender", "fact_value": "masculine"}]}
-{"guid": "N25_002", "grammar_facts": [{"fact_type": "grammatical_gender", "fact_value": "feminine"}]}
+{"guid": "N25_001", "grammar_facts": [{"fact_type": "grammatical_gender", "fact_value": "masculine"}, {"fact_type": "countability", "fact_value": "countable"}, {"fact_type": "number_type", "fact_value": "regular"}]}
+{"guid": "N25_002", "grammar_facts": [{"fact_type": "grammatical_gender", "fact_value": "feminine"}, {"fact_type": "countability", "fact_value": "countable"}, {"fact_type": "number_type", "fact_value": "regular"}]}
 {"guid": "N25_004", "grammar_facts": [{"fact_type": "grammatical_gender", "fact_value": "masculine"}]}
 {"guid": "N25_005", "grammar_facts": [{"fact_type": "grammatical_gender", "fact_value": "masculine"}]}
+{"guid": "N25_007", "forms": [{"grammatical_form": "noun/lt_nominative_plural", "text": "metai", "is_base_form": false}, {"grammatical_form": "noun/lt_genitive_plural", "text": "metų", "is_base_form": false}, {"grammatical_form": "noun/lt_dative_plural", "text": "metams", "is_base_form": false}, {"grammatical_form": "noun/lt_accusative_plural", "text": "metus", "is_base_form": false}, {"grammatical_form": "noun/lt_instrumental_plural", "text": "metais", "is_base_form": false}, {"grammatical_form": "noun/lt_locative_plural", "text": "metuose", "is_base_form": false}, {"grammatical_form": "noun/lt_vocative_plural", "text": "metai", "is_base_form": false}], "grammar_facts": [{"fact_type": "grammatical_gender", "fact_value": "masculine"}, {"fact_type": "countability", "fact_value": "countable"}, {"fact_type": "number_type", "fact_value": "plurale_tantum"}]}
 {"guid": "N25_009", "grammar_facts": [{"fact_type": "grammatical_gender", "fact_value": "feminine"}]}
 {"guid": "N25_010", "grammar_facts": [{"fact_type": "grammatical_gender", "fact_value": "feminine"}]}
 {"guid": "N25_011", "grammar_facts": [{"fact_type": "grammatical_gender", "fact_value": "feminine"}]}
@@ -12,7 +13,7 @@
 {"guid": "N25_029", "synonyms": [{"grammatical_form": "synonym", "text": "laikotarpis"}]}
 {"guid": "N25_030", "grammar_facts": [{"fact_type": "grammatical_gender", "fact_value": "feminine"}]}
 {"guid": "N25_031", "grammar_facts": [{"fact_type": "grammatical_gender", "fact_value": "feminine"}]}
-{"guid": "N25_036", "grammar_facts": [{"fact_type": "grammatical_gender", "fact_value": "feminine"}]}
+{"guid": "N25_036", "grammar_facts": [{"fact_type": "grammatical_gender", "fact_value": "feminine"}, {"fact_type": "countability", "fact_value": "countable"}, {"fact_type": "number_type", "fact_value": "regular"}]}
 {"guid": "N25_044", "grammar_facts": [{"fact_type": "grammatical_gender", "fact_value": "feminine"}]}
 {"guid": "N25_045", "grammar_facts": [{"fact_type": "grammatical_gender", "fact_value": "feminine"}]}
 {"guid": "N25_046", "grammar_facts": [{"fact_type": "grammatical_gender", "fact_value": "masculine"}]}

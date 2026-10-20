@@ -17,3 +17,5 @@
 {"guid": "P99_017", "forms": [{"grammatical_form": "lemma", "text": "everything", "is_base_form": true}]}
 {"guid": "P99_018", "forms": [{"grammatical_form": "lemma", "text": "none", "is_base_form": true}]}
 {"guid": "P99_019", "forms": [{"grammatical_form": "pronoun/en_subjective", "text": "anything", "is_base_form": true}]}
+{"guid": "P99_020", "forms": [{"grammatical_form": "pronoun/en_subjective", "text": "others", "is_base_form": true, "ipa": "/ˈʌðɚz/", "phonetic": "UH-thurz"}]}
+{"guid": "P99_021", "forms": [{"grammatical_form": "pronoun/en_subjective", "text": "ones", "is_base_form": true, "ipa": "/wʌnz/", "phonetic": "WUNZ"}]}

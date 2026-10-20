@@ -47,3 +47,5 @@
 {"guid": "N47_058", "forms": [{"grammatical_form": "noun/en_singular", "text": "double room", "is_base_form": true}]}
 {"guid": "N47_059", "forms": [{"grammatical_form": "noun/en_singular", "text": "downstairs", "is_base_form": true}]}
 {"guid": "N47_060", "forms": [{"grammatical_form": "noun/en_singular", "text": "ticket office", "is_base_form": true}], "variants": [{"kind": "equivalent", "key": "box-office", "forms": [{"grammatical_form": "noun/en_singular", "text": "box-office", "is_base_form": true}]}]}
+{"guid": "N47_061", "forms": [{"grammatical_form": "noun/en_singular", "text": "stall", "is_base_form": true, "ipa": "/stɔl/", "phonetic": "STAWL"}]}
+{"guid": "N47_062", "forms": [{"grammatical_form": "noun/en_singular", "text": "hayloft", "is_base_form": true, "ipa": "/ˈheɪˌlɔft/", "phonetic": "HAY-loft"}]}

@@ -10,3 +10,4 @@
 {"guid": "N58_017", "forms": [{"grammatical_form": "noun/en_singular", "text": "summons", "is_base_form": true}], "variants": [{"kind": "equivalent", "key": "citation", "forms": [{"grammatical_form": "noun/en_singular", "text": "citation", "is_base_form": true}]}]}
 {"guid": "N58_020", "forms": [{"grammatical_form": "noun/en_singular", "text": "habeas corpus", "is_base_form": true}]}
 {"guid": "N58_021", "forms": [{"grammatical_form": "noun/en_singular", "text": "release form", "is_base_form": true}]}
+{"guid": "N58_023", "forms": [{"grammatical_form": "noun/en_singular", "text": "article", "is_base_form": true, "ipa": "/ˈɑrtɪkəl/", "phonetic": "AR-ti-kuhl"}]}

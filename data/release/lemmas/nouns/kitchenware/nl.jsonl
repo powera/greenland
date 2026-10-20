@@ -1,0 +1,5 @@
+{"guid": "N71_003", "grammar_facts": [{"fact_type": "number_type", "fact_value": "regular"}, {"fact_type": "plural", "fact_value": "vorken"}, {"fact_type": "plural_status", "fact_value": "override"}]}
+{"guid": "N71_004", "grammar_facts": [{"fact_type": "number_type", "fact_value": "regular"}, {"fact_type": "plural", "fact_value": "lepels"}, {"fact_type": "plural_status", "fact_value": "override"}]}
+{"guid": "N71_017", "grammar_facts": [{"fact_type": "number_type", "fact_value": "regular"}, {"fact_type": "plural", "fact_value": "kommen"}, {"fact_type": "plural_status", "fact_value": "override"}]}
+{"guid": "N71_018", "grammar_facts": [{"fact_type": "number_type", "fact_value": "regular"}, {"fact_type": "plural", "fact_value": "kopjes"}, {"fact_type": "plural_status", "fact_value": "override"}]}
+{"guid": "N71_019", "grammar_facts": [{"fact_type": "number_type", "fact_value": "regular"}, {"fact_type": "plural", "fact_value": "borden"}, {"fact_type": "plural_status", "fact_value": "override"}]}

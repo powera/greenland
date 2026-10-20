@@ -1,4 +1,4 @@
-{"guid": "V02_001", "grammar_facts": [{"fact_type": "infinitive", "fact_value": "gaminti"}, {"fact_type": "3s_present", "fact_value": "gamina"}, {"fact_type": "3s_past", "fact_value": "gamino"}]}
+{"guid": "V02_001", "grammar_facts": [{"fact_type": "infinitive", "fact_value": "gaminti"}, {"fact_type": "3s_present", "fact_value": "gamina"}, {"fact_type": "3s_past", "fact_value": "gamino"}, {"fact_type": "verb_reflexivity", "fact_value": "non_reflexive"}]}
 {"guid": "V02_002", "grammar_facts": [{"fact_type": "infinitive", "fact_value": "statyti"}, {"fact_type": "3s_present", "fact_value": "stato"}, {"fact_type": "3s_past", "fact_value": "statė"}]}
 {"guid": "V02_003", "grammar_facts": [{"fact_type": "infinitive", "fact_value": "kurti"}, {"fact_type": "3s_present", "fact_value": "kuria"}, {"fact_type": "3s_past", "fact_value": "kūrė"}]}
 {"guid": "V02_004", "grammar_facts": [{"fact_type": "infinitive", "fact_value": "rašyti"}, {"fact_type": "3s_present", "fact_value": "rašo"}, {"fact_type": "3s_past", "fact_value": "rašė"}]}

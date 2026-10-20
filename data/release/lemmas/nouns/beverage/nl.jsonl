@@ -1,0 +1,6 @@
+{"guid": "N42_001", "grammar_facts": [{"fact_type": "number_type", "fact_value": "regular"}, {"fact_type": "plural", "fact_value": "waters"}, {"fact_type": "plural_status", "fact_value": "override"}]}
+{"guid": "N42_002", "grammar_facts": [{"fact_type": "number_type", "fact_value": "regular"}, {"fact_type": "plural", "fact_value": "koffies"}, {"fact_type": "plural_status", "fact_value": "override"}]}
+{"guid": "N42_003", "grammar_facts": [{"fact_type": "number_type", "fact_value": "regular"}, {"fact_type": "plural", "fact_value": "thees"}, {"fact_type": "plural_status", "fact_value": "override"}]}
+{"guid": "N42_006", "grammar_facts": [{"fact_type": "number_type", "fact_value": "regular"}, {"fact_type": "plural", "fact_value": "melken"}, {"fact_type": "plural_status", "fact_value": "override"}]}
+{"guid": "N42_007", "grammar_facts": [{"fact_type": "number_type", "fact_value": "regular"}, {"fact_type": "plural", "fact_value": "frisdranken"}, {"fact_type": "plural_status", "fact_value": "override"}]}
+{"guid": "N42_009", "grammar_facts": [{"fact_type": "number_type", "fact_value": "regular"}, {"fact_type": "plural", "fact_value": "citroenlimonades"}, {"fact_type": "plural_status", "fact_value": "override"}]}

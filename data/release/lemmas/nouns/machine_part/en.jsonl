@@ -19,3 +19,5 @@
 {"guid": "N72_028", "forms": [{"grammatical_form": "noun/en_singular", "text": "reaction vessel", "is_base_form": true}], "variants": [{"kind": "equivalent", "key": "reactor", "forms": [{"grammatical_form": "noun/en_singular", "text": "reactor", "is_base_form": true}]}]}
 {"guid": "N72_030", "forms": [{"grammatical_form": "noun/en_singular", "text": "diesel engine", "is_base_form": true}]}
 {"guid": "N72_031", "forms": [{"grammatical_form": "noun/en_singular", "text": "heating element", "is_base_form": true}]}
+{"guid": "N72_032", "forms": [{"grammatical_form": "noun/en_singular", "text": "baler", "is_base_form": true, "ipa": "/ˈbeɪlər/", "phonetic": "BAY-ler"}]}
+{"guid": "N72_033", "forms": [{"grammatical_form": "noun/en_singular", "text": "combine harvester", "is_base_form": true, "ipa": "/ˈkɑmˌbaɪn ˈhɑrvəstər/", "phonetic": "KUM-bine HAR-ves-ter"}]}

@@ -52,3 +52,6 @@
 {"guid": "A17_052", "forms": [{"grammatical_form": "adjective/en_positive", "text": "cloudy", "is_base_form": true, "ipa": "/ˈklaʊdi/", "phonetic": "KLOW-dee"}]}
 {"guid": "A17_053", "forms": [{"grammatical_form": "adjective/en_positive", "text": "tidy", "is_base_form": true, "ipa": "/ˈtaɪdi/", "phonetic": "TY-dee"}]}
 {"guid": "A17_054", "forms": [{"grammatical_form": "adjective/en_positive", "text": "foggy", "is_base_form": true, "ipa": "/ˈfɑːɡi/", "phonetic": "FOG-ee"}]}
+{"guid": "A17_055", "forms": [{"grammatical_form": "adjective/en_positive", "text": "active", "is_base_form": true, "ipa": "/ˈæk.tɪv/", "phonetic": "AK-tiv"}]}
+{"guid": "A17_056", "forms": [{"grammatical_form": "adjective/en_positive", "text": "rare", "is_base_form": true, "ipa": "/rɛr/", "phonetic": "RAIR"}]}
+{"guid": "A17_057", "forms": [{"grammatical_form": "adjective/en_positive", "text": "fallow", "is_base_form": true, "ipa": "/ˈfæloʊ/", "phonetic": "FAL-oh"}]}

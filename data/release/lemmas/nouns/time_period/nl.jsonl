@@ -1,1 +1,5 @@
+{"guid": "N25_001", "grammar_facts": [{"fact_type": "number_type", "fact_value": "regular"}, {"fact_type": "plural", "fact_value": "levens"}, {"fact_type": "plural_status", "fact_value": "override"}]}
+{"guid": "N25_002", "grammar_facts": [{"fact_type": "number_type", "fact_value": "regular"}, {"fact_type": "plural", "fact_value": "dagen"}, {"fact_type": "plural_status", "fact_value": "override"}]}
+{"guid": "N25_007", "grammar_facts": [{"fact_type": "number_type", "fact_value": "regular"}, {"fact_type": "plural", "fact_value": "jaren"}, {"fact_type": "plural_status", "fact_value": "override"}]}
 {"guid": "N25_029", "synonyms": [{"grammatical_form": "synonym", "text": "periode"}]}
+{"guid": "N25_036", "grammar_facts": [{"fact_type": "number_type", "fact_value": "regular"}, {"fact_type": "plural", "fact_value": "datums"}, {"fact_type": "plural_status", "fact_value": "override"}]}

@@ -1,0 +1,3 @@
+{"guid": "D04_016", "grammar_facts": [{"fact_type": "comparative", "fact_value": "plus tôt"}, {"fact_type": "comparative_status", "fact_value": "override"}, {"fact_type": "superlative", "fact_value": "le plus tôt"}, {"fact_type": "superlative_status", "fact_value": "override"}]}
+{"guid": "D04_017", "grammar_facts": [{"fact_type": "comparative", "fact_value": "plus tard"}, {"fact_type": "comparative_status", "fact_value": "override"}, {"fact_type": "superlative", "fact_value": "le plus tard"}, {"fact_type": "superlative_status", "fact_value": "override"}]}
+{"guid": "D04_021", "grammar_facts": [{"fact_type": "comparative_status", "fact_value": "not_applicable"}, {"fact_type": "superlative_status", "fact_value": "not_applicable"}]}

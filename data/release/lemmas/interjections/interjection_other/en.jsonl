@@ -7,9 +7,8 @@
 {"guid": "I99_007", "forms": [{"grammatical_form": "interjection/base", "text": "you're welcome", "is_base_form": true, "ipa": "/jər ˈwɛl.kəm/", "phonetic": "YUR WEL-kəm"}]}
 {"guid": "I99_008", "forms": [{"grammatical_form": "interjection/base", "text": "sorry", "is_base_form": true, "ipa": "/ˈsɔr.i/", "phonetic": "SOR-ee"}]}
 {"guid": "I99_009", "forms": [{"grammatical_form": "interjection/base", "text": "hello", "is_base_form": true, "ipa": "/həˈloʊ/", "phonetic": "HEH-lou"}]}
-{"guid": "I99_010", "forms": [{"grammatical_form": "interjection/base", "text": "goodbye", "is_base_form": true, "ipa": "/ˈɡʊdˌbaɪ/", "phonetic": "GOOD-bye"}]}
+{"guid": "I99_010", "forms": [{"grammatical_form": "interjection/base", "text": "goodbye", "is_base_form": true, "ipa": "/ˈɡʊdˌbaɪ/", "phonetic": "GOOD-bye"}], "synonyms": [{"grammatical_form": "synonym", "text": "good-bye"}]}
 {"guid": "I99_011", "forms": [{"grammatical_form": "interjection/base", "text": "wow", "is_base_form": true}]}
 {"guid": "I99_012", "forms": [{"grammatical_form": "interjection/base", "text": "ouch", "is_base_form": true}]}
 {"guid": "I99_013", "forms": [{"grammatical_form": "interjection/base", "text": "congratulations", "is_base_form": true}]}
-{"guid": "I99_014", "forms": [{"grammatical_form": "interjection/base", "text": "good-bye", "is_base_form": true, "ipa": "/ˌɡʊdˈbaɪ/", "phonetic": "good-BYE"}]}
 {"guid": "I99_015", "forms": [{"grammatical_form": "interjection/base", "text": "fore", "is_base_form": true, "ipa": "/fɔr/", "phonetic": "FOR"}]}

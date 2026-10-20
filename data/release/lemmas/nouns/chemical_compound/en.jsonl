@@ -156,3 +156,5 @@
 {"guid": "N15_171", "forms": [{"grammatical_form": "noun/en_singular", "text": "hydroxide ion", "is_base_form": true}]}
 {"guid": "N15_172", "forms": [{"grammatical_form": "noun/en_singular", "text": "methyl group", "is_base_form": true}]}
 {"guid": "N15_173", "forms": [{"grammatical_form": "noun/en_singular", "text": "polar molecule", "is_base_form": true}], "variants": [{"kind": "equivalent", "key": "dipole", "forms": [{"grammatical_form": "noun/en_singular", "text": "dipole", "is_base_form": true}]}]}
+{"guid": "N15_174", "forms": [{"grammatical_form": "noun/en_singular", "text": "pesticide", "is_base_form": true, "ipa": "/ˈpɛstəˌsaɪd/", "phonetic": "PES-tuh-side"}]}
+{"guid": "N15_175", "forms": [{"grammatical_form": "noun/en_singular", "text": "herbicide", "is_base_form": true, "ipa": "/ˈɝːbəˌsaɪd/", "phonetic": "HER-buh-side"}]}

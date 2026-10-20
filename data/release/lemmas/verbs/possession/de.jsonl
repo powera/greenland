@@ -1,0 +1,5 @@
+{"guid": "V06_001", "grammar_facts": [{"fact_type": "verb_reflexivity", "fact_value": "non_reflexive"}, {"fact_type": "auxiliary_verb", "fact_value": "sein"}, {"fact_type": "past_participle", "fact_value": "gewesen"}]}
+{"guid": "V06_002", "grammar_facts": [{"fact_type": "verb_reflexivity", "fact_value": "non_reflexive"}, {"fact_type": "auxiliary_verb", "fact_value": "haben"}, {"fact_type": "past_participle", "fact_value": "gehabt"}]}
+{"guid": "V06_004", "grammar_facts": [{"fact_type": "verb_reflexivity", "fact_value": "non_reflexive"}, {"fact_type": "auxiliary_verb", "fact_value": "haben"}, {"fact_type": "past_participle", "fact_value": "gekauft"}]}
+{"guid": "V06_006", "grammar_facts": [{"fact_type": "verb_reflexivity", "fact_value": "non_reflexive"}, {"fact_type": "auxiliary_verb", "fact_value": "haben"}, {"fact_type": "past_participle", "fact_value": "genommen"}]}
+{"guid": "V06_007", "grammar_facts": [{"fact_type": "verb_reflexivity", "fact_value": "non_reflexive"}, {"fact_type": "auxiliary_verb", "fact_value": "haben"}, {"fact_type": "past_participle", "fact_value": "verkauft"}]}

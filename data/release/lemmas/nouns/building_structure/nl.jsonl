@@ -1,0 +1,10 @@
+{"guid": "N07_001", "grammar_facts": [{"fact_type": "number_type", "fact_value": "regular"}, {"fact_type": "plural", "fact_value": "huizen"}, {"fact_type": "plural_status", "fact_value": "override"}]}
+{"guid": "N07_002", "grammar_facts": [{"fact_type": "number_type", "fact_value": "regular"}, {"fact_type": "plural", "fact_value": "scholen"}, {"fact_type": "plural_status", "fact_value": "override"}]}
+{"guid": "N07_003", "grammar_facts": [{"fact_type": "number_type", "fact_value": "regular"}, {"fact_type": "plural", "fact_value": "ziekenhuizen"}, {"fact_type": "plural_status", "fact_value": "override"}]}
+{"guid": "N07_005", "grammar_facts": [{"fact_type": "number_type", "fact_value": "regular"}, {"fact_type": "plural", "fact_value": "winkels"}, {"fact_type": "plural_status", "fact_value": "override"}]}
+{"guid": "N07_006", "grammar_facts": [{"fact_type": "number_type", "fact_value": "regular"}, {"fact_type": "plural", "fact_value": "restaurants"}, {"fact_type": "plural_status", "fact_value": "override"}]}
+{"guid": "N07_007", "grammar_facts": [{"fact_type": "number_type", "fact_value": "regular"}, {"fact_type": "plural", "fact_value": "hotels"}, {"fact_type": "plural_status", "fact_value": "override"}]}
+{"guid": "N07_008", "grammar_facts": [{"fact_type": "number_type", "fact_value": "regular"}, {"fact_type": "plural", "fact_value": "banken"}, {"fact_type": "plural_status", "fact_value": "override"}]}
+{"guid": "N07_009", "grammar_facts": [{"fact_type": "number_type", "fact_value": "regular"}, {"fact_type": "plural", "fact_value": "bibliotheken"}, {"fact_type": "plural_status", "fact_value": "override"}]}
+{"guid": "N07_010", "grammar_facts": [{"fact_type": "number_type", "fact_value": "regular"}, {"fact_type": "plural", "fact_value": "musea"}, {"fact_type": "plural_status", "fact_value": "override"}]}
+{"guid": "N07_011", "grammar_facts": [{"fact_type": "number_type", "fact_value": "regular"}, {"fact_type": "plural", "fact_value": "brandweerkazernes"}, {"fact_type": "plural_status", "fact_value": "override"}]}

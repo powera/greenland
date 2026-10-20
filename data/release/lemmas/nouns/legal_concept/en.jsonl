@@ -50,15 +50,13 @@
 {"guid": "N59_055", "forms": [{"grammatical_form": "noun/en_singular", "text": "state law", "is_base_form": true}], "variants": [{"kind": "spelling", "key": "state-law", "forms": [{"grammatical_form": "noun/en_singular", "text": "state-law", "is_base_form": true}]}]}
 {"guid": "N59_056", "forms": [{"grammatical_form": "noun/en_singular", "text": "bail bond", "is_base_form": true}], "variants": [{"kind": "equivalent", "key": "bond", "forms": [{"grammatical_form": "noun/en_singular", "text": "bond", "is_base_form": true}]}]}
 {"guid": "N59_058", "forms": [{"grammatical_form": "noun/en_singular", "text": "status", "is_base_form": true}]}
-{"guid": "N59_059", "forms": [{"grammatical_form": "noun/en_possessive_singular", "text": "statute's", "is_base_form": false}]}
 {"guid": "N59_060", "variants": [{"kind": "equivalent", "key": "provision", "forms": [{"grammatical_form": "noun/en_singular", "text": "provision", "is_base_form": true}]}]}
-{"guid": "N59_066", "forms": [{"grammatical_form": "noun/en_possessive_singular", "text": "regulation's", "is_base_form": false}]}
 {"guid": "N59_071", "forms": [{"grammatical_form": "noun/en_singular", "text": "ballot measure", "is_base_form": true}], "variants": [{"kind": "equivalent", "key": "proposition", "forms": [{"grammatical_form": "noun/en_singular", "text": "proposition", "is_base_form": true}]}]}
 {"guid": "N59_072", "forms": [{"grammatical_form": "noun/en_singular", "text": "right to privacy", "is_base_form": true}]}
 {"guid": "N59_074", "forms": [{"grammatical_form": "noun/en_singular", "text": "legal immunity", "is_base_form": true}]}
 {"guid": "N59_079", "forms": [{"grammatical_form": "noun/en_singular", "text": "competition law", "is_base_form": true}], "variants": [{"kind": "equivalent", "key": "antitrust", "forms": [{"grammatical_form": "noun/en_singular", "text": "antitrust", "is_base_form": true}]}]}
 {"guid": "N59_083", "forms": [{"grammatical_form": "noun/en_singular", "text": "sentence reduction", "is_base_form": true}]}
 {"guid": "N59_092", "forms": [{"grammatical_form": "noun/en_singular", "text": "constitutional amendment", "is_base_form": true}], "variants": [{"kind": "equivalent", "key": "amendment", "forms": [{"grammatical_form": "noun/en_singular", "text": "amendment", "is_base_form": true}]}]}
-{"guid": "N59_093", "forms": [{"grammatical_form": "noun/en_possessive_singular", "text": "ordinance's", "is_base_form": false}]}
 {"guid": "N59_096", "forms": [{"grammatical_form": "noun/en_singular", "text": "child custody", "is_base_form": true}], "variants": [{"kind": "equivalent", "key": "custody", "forms": [{"grammatical_form": "noun/en_singular", "text": "custody", "is_base_form": true}]}]}
 {"guid": "N59_102", "forms": [{"grammatical_form": "noun/en_singular", "text": "obiter dictum", "is_base_form": true}]}
+{"guid": "N59_103", "forms": [{"grammatical_form": "noun/en_singular", "text": "right", "is_base_form": true, "ipa": "/raɪt/", "phonetic": "RYTE"}]}

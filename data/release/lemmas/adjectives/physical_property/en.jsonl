@@ -28,7 +28,7 @@
 {"guid": "A18_028", "forms": [{"grammatical_form": "adjective/en_positive", "text": "usual", "is_base_form": true, "ipa": "/ˈjuːʒuəl/", "phonetic": "YOO-zhoo-uhl"}]}
 {"guid": "A18_029", "forms": [{"grammatical_form": "adjective/en_positive", "text": "loud", "is_base_form": true, "ipa": "/laʊd/", "phonetic": "LO-wd"}]}
 {"guid": "A18_030", "forms": [{"grammatical_form": "adjective/en_positive", "text": "dim", "is_base_form": true, "ipa": "/dɪm/", "phonetic": "DIM"}]}
-{"guid": "A18_031", "forms": [{"grammatical_form": "adjective/en_positive", "text": "hungry", "is_base_form": true, "ipa": "/hʌŋɡri/", "phonetic": "HUNG-ree"}]}
+{"guid": "A18_031", "forms": [{"grammatical_form": "adjective/en_positive", "text": "hungry", "is_base_form": true, "ipa": "/hʌŋɡri/", "phonetic": "HUNG-ree"}], "grammar_facts": [{"fact_type": "gradability", "fact_value": "periphrastic"}, {"fact_type": "comparative", "fact_value": "hungrier"}, {"fact_type": "comparative_status", "fact_value": "override"}, {"fact_type": "superlative", "fact_value": "hungriest"}, {"fact_type": "superlative_status", "fact_value": "override"}]}
 {"guid": "A18_032", "forms": [{"grammatical_form": "adjective/en_positive", "text": "ill", "is_base_form": true, "ipa": "/ɪl/", "phonetic": "IH-uhl"}]}
 {"guid": "A18_033", "forms": [{"grammatical_form": "adjective/en_positive", "text": "shining", "is_base_form": true, "ipa": "/ˈʃaɪnɪŋ/", "phonetic": "SHY-nin"}]}
 {"guid": "A18_034", "forms": [{"grammatical_form": "adjective/en_positive", "text": "familiar", "is_base_form": true, "ipa": "fəˈmɛl.i.ər", "phonetic": "fuh-MELL-ee-er"}]}
@@ -62,6 +62,8 @@
 {"guid": "A18_068", "forms": [{"grammatical_form": "adjective/en_positive", "text": "quiet", "is_base_form": true, "ipa": "/ˈkwaɪət/", "phonetic": "KWAHY-t"}]}
 {"guid": "A18_069", "forms": [{"grammatical_form": "adjective/en_positive", "text": "hard", "is_base_form": true, "ipa": "/hɑrd/", "phonetic": "HARD"}]}
 {"guid": "A18_070", "forms": [{"grammatical_form": "adjective/en_positive", "text": "dirty", "is_base_form": true, "ipa": "/dɜrti/", "phonetic": "DUR-ti"}]}
+{"guid": "A18_072", "grammar_facts": [{"fact_type": "gradability", "fact_value": "synthetic"}, {"fact_type": "comparative_status", "fact_value": "regular"}, {"fact_type": "superlative_status", "fact_value": "regular"}]}
+{"guid": "A18_073", "grammar_facts": [{"fact_type": "gradability", "fact_value": "synthetic"}, {"fact_type": "comparative_status", "fact_value": "regular"}, {"fact_type": "superlative_status", "fact_value": "regular"}]}
 {"guid": "A18_080", "forms": [{"grammatical_form": "adjective/en_positive", "text": "wooden", "is_base_form": true}]}
 {"guid": "A18_084", "forms": [{"grammatical_form": "adjective/en_positive", "text": "invertible", "is_base_form": true, "ipa": "/ɪnˈvɝːtəbəl/", "phonetic": "in-VUR-tuh-bul"}]}
 {"guid": "A18_085", "forms": [{"grammatical_form": "adjective/en_positive", "text": "gravitational", "is_base_form": true, "ipa": "/ˌɡrævəˈteɪʃənəl/", "phonetic": "grav-uh-TAY-shuh-nuhl"}]}
@@ -129,3 +131,6 @@
 {"guid": "A18_152", "forms": [{"grammatical_form": "adjective/en_positive", "text": "stand-alone", "is_base_form": true}]}
 {"guid": "A18_153", "forms": [{"grammatical_form": "adjective/en_positive", "text": "slow-moving", "is_base_form": true}]}
 {"guid": "A18_154", "forms": [{"grammatical_form": "adjective/en_positive", "text": "steam-powered", "is_base_form": true}]}
+{"guid": "A18_155", "forms": [{"grammatical_form": "adjective/en_positive", "text": "active", "is_base_form": true, "ipa": "/ˈæk.tɪv/", "phonetic": "AK-tiv"}]}
+{"guid": "A18_156", "forms": [{"grammatical_form": "adjective/en_positive", "text": "active", "is_base_form": true, "ipa": "/ˈæk.tɪv/", "phonetic": "AK-tiv"}]}
+{"guid": "A18_157", "forms": [{"grammatical_form": "adjective/en_positive", "text": "effective", "is_base_form": true, "ipa": "/ɪˈfɛktɪv/", "phonetic": "ih-FEK-tiv"}]}

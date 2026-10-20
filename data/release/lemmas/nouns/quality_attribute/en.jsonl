@@ -40,3 +40,7 @@
 {"guid": "N19_068", "variants": [{"kind": "equivalent", "key": "presumption", "forms": [{"grammatical_form": "noun/en_singular", "text": "presumption", "is_base_form": true}]}]}
 {"guid": "N19_069", "variants": [{"kind": "equivalent", "key": "determination", "forms": [{"grammatical_form": "noun/en_singular", "text": "determination", "is_base_form": true}]}]}
 {"guid": "N19_072", "forms": [{"grammatical_form": "noun/en_singular", "text": "make-up", "is_base_form": true}]}
+{"guid": "N19_076", "forms": [{"grammatical_form": "noun/en_singular", "text": "feature", "is_base_form": true, "ipa": "/ˈfiːtʃər/", "phonetic": "FEE-cher"}]}
+{"guid": "N19_077", "forms": [{"grammatical_form": "noun/en_singular", "text": "ability", "is_base_form": true, "ipa": "/əˈbɪləti/", "phonetic": "uh-BIL-uh-tee"}]}
+{"guid": "N19_078", "forms": [{"grammatical_form": "noun/en_singular", "text": "ability", "is_base_form": true, "ipa": "/əˈbɪləti/", "phonetic": "uh-BIL-uh-tee"}]}
+{"guid": "N19_079", "forms": [{"grammatical_form": "noun/en_singular", "text": "self-reliance", "is_base_form": true}]}

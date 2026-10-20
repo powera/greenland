@@ -1,0 +1,11 @@
+{"guid": "N02_001", "grammar_facts": [{"fact_type": "number_type", "fact_value": "regular"}, {"fact_type": "plural", "fact_value": "honden"}, {"fact_type": "plural_status", "fact_value": "override"}]}
+{"guid": "N02_002", "grammar_facts": [{"fact_type": "number_type", "fact_value": "regular"}, {"fact_type": "plural", "fact_value": "katten"}, {"fact_type": "plural_status", "fact_value": "override"}]}
+{"guid": "N02_003", "grammar_facts": [{"fact_type": "number_type", "fact_value": "regular"}, {"fact_type": "plural", "fact_value": "vogels"}, {"fact_type": "plural_status", "fact_value": "override"}]}
+{"guid": "N02_004", "grammar_facts": [{"fact_type": "number_type", "fact_value": "regular"}, {"fact_type": "plural", "fact_value": "paarden"}, {"fact_type": "plural_status", "fact_value": "override"}]}
+{"guid": "N02_005", "grammar_facts": [{"fact_type": "number_type", "fact_value": "regular"}, {"fact_type": "plural", "fact_value": "koeien"}, {"fact_type": "plural_status", "fact_value": "override"}]}
+{"guid": "N02_006", "grammar_facts": [{"fact_type": "number_type", "fact_value": "regular"}, {"fact_type": "plural", "fact_value": "varkens"}, {"fact_type": "plural_status", "fact_value": "override"}]}
+{"guid": "N02_007", "grammar_facts": [{"fact_type": "number_type", "fact_value": "regular"}, {"fact_type": "plural", "fact_value": "kippen"}, {"fact_type": "plural_status", "fact_value": "override"}]}
+{"guid": "N02_008", "grammar_facts": [{"fact_type": "number_type", "fact_value": "regular"}, {"fact_type": "plural", "fact_value": "muizen"}, {"fact_type": "plural_status", "fact_value": "override"}]}
+{"guid": "N02_009", "grammar_facts": [{"fact_type": "number_type", "fact_value": "regular"}, {"fact_type": "plural", "fact_value": "beren"}, {"fact_type": "plural_status", "fact_value": "override"}]}
+{"guid": "N02_010", "grammar_facts": [{"fact_type": "number_type", "fact_value": "regular"}, {"fact_type": "plural", "fact_value": "wolven"}, {"fact_type": "plural_status", "fact_value": "override"}]}
+{"guid": "N02_034", "grammar_facts": [{"fact_type": "number_type", "fact_value": "regular"}, {"fact_type": "plural", "fact_value": "vissen"}, {"fact_type": "plural_status", "fact_value": "override"}]}

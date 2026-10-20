@@ -1,9 +1,9 @@
-{"guid": "N55_001", "forms": [{"grammatical_form": "noun/en_singular", "text": "government", "is_base_form": true, "ipa": "/ˈɡʌv.ər.nənt/", "phonetic": "GOV-uh-runt"}, {"grammatical_form": "noun/en_possessive_singular", "text": "government's", "is_base_form": false}], "variants": [{"kind": "spelling", "key": "Government", "forms": [{"grammatical_form": "noun/en_singular", "text": "Government", "is_base_form": true}]}]}
-{"guid": "N55_002", "forms": [{"grammatical_form": "noun/en_singular", "text": "law", "is_base_form": true, "ipa": "lɔː", "phonetic": "LAW"}, {"grammatical_form": "noun/en_possessive_singular", "text": "law's", "is_base_form": false}]}
-{"guid": "N55_003", "forms": [{"grammatical_form": "noun/en_singular", "text": "society", "is_base_form": true, "ipa": "/ˈsoʊ.sɪ.ɛ.ə.t̬i/", "phonetic": "SOH-sih-EE-uh-tee"}, {"grammatical_form": "noun/en_possessive_singular", "text": "society's", "is_base_form": false}]}
-{"guid": "N55_004", "forms": [{"grammatical_form": "noun/en_singular", "text": "public", "is_base_form": true, "ipa": "/ˈpʌb.lɪk/", "phonetic": "PUH-blik"}, {"grammatical_form": "noun/en_possessive_singular", "text": "public's", "is_base_form": false}]}
+{"guid": "N55_001", "forms": [{"grammatical_form": "noun/en_singular", "text": "government", "is_base_form": true, "ipa": "/ˈɡʌv.ər.nənt/", "phonetic": "GOV-uh-runt"}], "variants": [{"kind": "spelling", "key": "Government", "forms": [{"grammatical_form": "noun/en_singular", "text": "Government", "is_base_form": true}]}]}
+{"guid": "N55_002", "forms": [{"grammatical_form": "noun/en_singular", "text": "law", "is_base_form": true, "ipa": "lɔː", "phonetic": "LAW"}]}
+{"guid": "N55_003", "forms": [{"grammatical_form": "noun/en_singular", "text": "society", "is_base_form": true, "ipa": "/ˈsoʊ.sɪ.ɛ.ə.t̬i/", "phonetic": "SOH-sih-EE-uh-tee"}]}
+{"guid": "N55_004", "forms": [{"grammatical_form": "noun/en_singular", "text": "public", "is_base_form": true, "ipa": "/ˈpʌb.lɪk/", "phonetic": "PUH-blik"}]}
 {"guid": "N55_009", "forms": [{"grammatical_form": "noun/en_singular", "text": "business", "is_base_form": true, "ipa": "/ˈbɪznɪs/", "phonetic": "BIZ-nis"}]}
-{"guid": "N55_010", "forms": [{"grammatical_form": "noun/en_singular", "text": "company", "is_base_form": true, "ipa": "/ˈkʌmpəni/", "phonetic": "KOMP-uh-nee"}, {"grammatical_form": "noun/en_possessive_singular", "text": "company's", "is_base_form": false}], "variants": [{"kind": "spelling", "key": "Company", "forms": [{"grammatical_form": "noun/en_singular", "text": "Company", "is_base_form": true}]}]}
+{"guid": "N55_010", "forms": [{"grammatical_form": "noun/en_singular", "text": "company", "is_base_form": true, "ipa": "/ˈkʌmpəni/", "phonetic": "KOMP-uh-nee"}], "variants": [{"kind": "spelling", "key": "Company", "forms": [{"grammatical_form": "noun/en_singular", "text": "Company", "is_base_form": true}]}]}
 {"guid": "N55_011", "forms": [{"grammatical_form": "noun/en_singular", "text": "service", "is_base_form": true, "ipa": "/ˈsɜːrvɪs/", "phonetic": "SER-viss"}]}
 {"guid": "N55_012", "forms": [{"grammatical_form": "noun/en_singular", "text": "trade", "is_base_form": true, "ipa": "/ˈtreɪd/", "phonetic": "TRAHD"}]}
 {"guid": "N55_014", "forms": [{"grammatical_form": "noun/en_singular", "text": "army", "is_base_form": true, "ipa": "/ˈɑːɹmi/", "phonetic": "AAHM-ee"}], "variants": [{"kind": "spelling", "key": "Army", "forms": [{"grammatical_form": "noun/en_singular", "text": "Army", "is_base_form": true}]}]}
@@ -11,11 +11,10 @@
 {"guid": "N55_016", "forms": [{"grammatical_form": "noun/en_singular", "text": "council", "is_base_form": true, "ipa": "/ˈkaʊn.səl/", "phonetic": "KOWN-səl"}], "variants": [{"kind": "spelling", "key": "Council", "forms": [{"grammatical_form": "noun/en_singular", "text": "Council", "is_base_form": true}]}]}
 {"guid": "N55_017", "forms": [{"grammatical_form": "noun/en_singular", "text": "crowd", "is_base_form": true, "ipa": "/kraʊd/", "phonetic": "CROWD"}]}
 {"guid": "N55_018", "forms": [{"grammatical_form": "noun/en_singular", "text": "fleet", "is_base_form": true, "ipa": "/fliːt/", "phonetic": "FLEET"}]}
-{"guid": "N55_020", "forms": [{"grammatical_form": "noun/en_possessive_singular", "text": "court's", "is_base_form": false}], "variants": [{"kind": "spelling", "key": "Court", "forms": [{"grammatical_form": "noun/en_singular", "text": "Court", "is_base_form": true}]}]}
+{"guid": "N55_020", "variants": [{"kind": "spelling", "key": "Court", "forms": [{"grammatical_form": "noun/en_singular", "text": "Court", "is_base_form": true}]}]}
 {"guid": "N55_021", "variants": [{"kind": "spelling", "key": "Parliament", "forms": [{"grammatical_form": "noun/en_singular", "text": "Parliament", "is_base_form": true}]}]}
-{"guid": "N55_022", "forms": [{"grammatical_form": "noun/en_possessive_singular", "text": "empire's", "is_base_form": false}], "variants": [{"kind": "spelling", "key": "Empire", "forms": [{"grammatical_form": "noun/en_singular", "text": "Empire", "is_base_form": true}]}]}
-{"guid": "N55_024", "forms": [{"grammatical_form": "noun/en_possessive_singular", "text": "committee's", "is_base_form": false}], "variants": [{"kind": "spelling", "key": "Committee", "forms": [{"grammatical_form": "noun/en_singular", "text": "Committee", "is_base_form": true}]}]}
-{"guid": "N55_025", "forms": [{"grammatical_form": "noun/en_possessive_singular", "text": "nation's", "is_base_form": false}]}
+{"guid": "N55_022", "variants": [{"kind": "spelling", "key": "Empire", "forms": [{"grammatical_form": "noun/en_singular", "text": "Empire", "is_base_form": true}]}]}
+{"guid": "N55_024", "variants": [{"kind": "spelling", "key": "Committee", "forms": [{"grammatical_form": "noun/en_singular", "text": "Committee", "is_base_form": true}]}]}
 {"guid": "N55_027", "forms": [{"grammatical_form": "noun/en_singular", "text": "driving school", "is_base_form": true}]}
 {"guid": "N55_028", "forms": [{"grammatical_form": "noun/en_singular", "text": "health insurance", "is_base_form": true}]}
 {"guid": "N55_029", "forms": [{"grammatical_form": "noun/en_singular", "text": "economy", "is_base_form": true, "ipa": "/ɪˈkɑnəmi/", "phonetic": "ih-KON-uh-mee"}]}
@@ -29,12 +28,12 @@
 {"guid": "N55_037", "forms": [{"grammatical_form": "noun/en_singular", "text": "conference", "is_base_form": true, "ipa": "/ˈkɑːn.fɚ.əns/", "phonetic": "KON-fer-ens"}]}
 {"guid": "N55_038", "forms": [{"grammatical_form": "noun/en_singular", "text": "session", "is_base_form": true, "ipa": "/ˈsɛʃən/", "phonetic": "SESH-un"}]}
 {"guid": "N55_039", "forms": [{"grammatical_form": "noun/en_singular", "text": "protocol", "is_base_form": true, "ipa": "/ˈproʊtəˌkɔl/", "phonetic": "PROH-tuh-kol"}]}
-{"guid": "N55_040", "forms": [{"grammatical_form": "noun/en_singular", "text": "code", "is_base_form": true, "ipa": "/koʊd/", "phonetic": "KOHD"}, {"grammatical_form": "noun/en_possessive_singular", "text": "code's", "is_base_form": false}]}
+{"guid": "N55_040", "forms": [{"grammatical_form": "noun/en_singular", "text": "code", "is_base_form": true, "ipa": "/koʊd/", "phonetic": "KOHD"}]}
 {"guid": "N55_041", "forms": [{"grammatical_form": "noun/en_singular", "text": "league", "is_base_form": true, "ipa": "/liːɡ/", "phonetic": "LEEG"}]}
-{"guid": "N55_042", "forms": [{"grammatical_form": "noun/en_singular", "text": "university", "is_base_form": true, "ipa": "/ˌjuːnəˈvɝːsəti/", "phonetic": "yoo-nuh-VUR-suh-tee"}, {"grammatical_form": "noun/en_possessive_singular", "text": "university's", "is_base_form": false}], "variants": [{"kind": "spelling", "key": "University", "forms": [{"grammatical_form": "noun/en_singular", "text": "University", "is_base_form": true}]}]}
+{"guid": "N55_042", "forms": [{"grammatical_form": "noun/en_singular", "text": "university", "is_base_form": true, "ipa": "/ˌjuːnəˈvɝːsəti/", "phonetic": "yoo-nuh-VUR-suh-tee"}], "variants": [{"kind": "spelling", "key": "University", "forms": [{"grammatical_form": "noun/en_singular", "text": "University", "is_base_form": true}]}]}
 {"guid": "N55_043", "forms": [{"grammatical_form": "noun/en_singular", "text": "tradition", "is_base_form": true, "ipa": "/trəˈdɪʃən/", "phonetic": "truh-DISH-un"}]}
 {"guid": "N55_044", "forms": [{"grammatical_form": "noun/en_singular", "text": "bullying", "is_base_form": true, "ipa": "/ˈbʊliɪŋ/", "phonetic": "BOOL-ee-ing"}]}
-{"guid": "N55_045", "forms": [{"grammatical_form": "noun/en_singular", "text": "policy", "is_base_form": true, "ipa": "/ˈpɑːləsi/", "phonetic": "POL-uh-see"}, {"grammatical_form": "noun/en_possessive_singular", "text": "policy's", "is_base_form": false}]}
+{"guid": "N55_045", "forms": [{"grammatical_form": "noun/en_singular", "text": "policy", "is_base_form": true, "ipa": "/ˈpɑːləsi/", "phonetic": "POL-uh-see"}]}
 {"guid": "N55_046", "forms": [{"grammatical_form": "noun/en_singular", "text": "terrorism", "is_base_form": true, "ipa": "/ˈtɛrəˌrɪzəm/", "phonetic": "TAIR-uh-riz-um"}]}
 {"guid": "N55_047", "forms": [{"grammatical_form": "noun/en_singular", "text": "status", "is_base_form": true, "ipa": "/ˈsteɪtəs/", "phonetic": "STAY-tus"}]}
 {"guid": "N55_048", "forms": [{"grammatical_form": "noun/en_singular", "text": "privilege", "is_base_form": true, "ipa": "/ˈprɪvəlɪdʒ/", "phonetic": "PRIV-uh-lij"}]}
@@ -81,7 +80,6 @@
 {"guid": "N55_090", "forms": [{"grammatical_form": "noun/en_singular", "text": "law enforcement", "is_base_form": true}]}
 {"guid": "N55_091", "forms": [{"grammatical_form": "noun/en_singular", "text": "national defense", "is_base_form": true}], "variants": [{"kind": "equivalent", "key": "defense", "forms": [{"grammatical_form": "noun/en_singular", "text": "defense", "is_base_form": true}]}]}
 {"guid": "N55_092", "forms": [{"grammatical_form": "noun/en_singular", "text": "institutionalized segregation", "is_base_form": true}]}
-{"guid": "N55_093", "forms": [{"grammatical_form": "noun/en_possessive_singular", "text": "section's", "is_base_form": false}]}
 {"guid": "N55_094", "forms": [{"grammatical_form": "noun/en_singular", "text": "non-profit organization", "is_base_form": true}], "variants": [{"kind": "equivalent", "key": "non-profit", "forms": [{"grammatical_form": "noun/en_singular", "text": "non-profit", "is_base_form": true}]}]}
 {"guid": "N55_095", "forms": [{"grammatical_form": "noun/en_singular", "text": "city-state system", "is_base_form": true}]}
 {"guid": "N55_096", "forms": [{"grammatical_form": "noun/en_singular", "text": "spin-off", "is_base_form": true}]}
@@ -91,3 +89,7 @@
 {"guid": "N55_103", "forms": [{"grammatical_form": "noun/en_singular", "text": "minor political party", "is_base_form": true}]}
 {"guid": "N55_104", "forms": [{"grammatical_form": "noun/en_singular", "text": "racial discrimination", "is_base_form": true}], "variants": [{"kind": "equivalent", "key": "racism", "forms": [{"grammatical_form": "noun/en_singular", "text": "racism", "is_base_form": true}]}]}
 {"guid": "N55_106", "variants": [{"kind": "equivalent", "key": "college", "forms": [{"grammatical_form": "noun/en_singular", "text": "college", "is_base_form": true}]}]}
+{"guid": "N55_108", "forms": [{"grammatical_form": "noun/en_singular", "text": "union", "is_base_form": true, "ipa": "/ˈjuːnjən/", "phonetic": "YOON-yun"}]}
+{"guid": "N55_109", "forms": [{"grammatical_form": "noun/en_singular", "text": "union", "is_base_form": true, "ipa": "/ˈjuːnjən/", "phonetic": "YOON-yun"}]}
+{"guid": "N55_110", "forms": [{"grammatical_form": "noun/en_singular", "text": "union", "is_base_form": true, "ipa": "/ˈjuːnjən/", "phonetic": "YOON-yun"}]}
+{"guid": "N55_111", "forms": [{"grammatical_form": "noun/en_singular", "text": "non-governmental organization", "is_base_form": true}], "variants": [{"kind": "abbreviation", "key": "NGO", "forms": [{"grammatical_form": "noun/en_singular", "text": "NGO", "is_base_form": true}, {"grammatical_form": "noun/en_plural", "text": "NGOs", "is_base_form": false}]}]}

@@ -61,7 +61,7 @@
 {"guid": "N60_061", "forms": [{"grammatical_form": "noun/en_singular", "text": "fault", "is_base_form": true, "ipa": "/fɔlt/", "phonetic": "FAWLT"}]}
 {"guid": "N60_062", "forms": [{"grammatical_form": "noun/en_singular", "text": "double fault", "is_base_form": true, "ipa": "/ˌdʌbəl ˈfɔlt/", "phonetic": "DUH-bul FAWLT"}]}
 {"guid": "N60_063", "forms": [{"grammatical_form": "noun/en_singular", "text": "foot fault", "is_base_form": true, "ipa": "/ˈfʊt ˌfɔlt/", "phonetic": "FOOT-fawlt"}]}
-{"guid": "N60_064", "forms": [{"grammatical_form": "noun/en_singular", "text": "let", "is_base_form": true, "ipa": "/lɛt/", "phonetic": "LET"}, {"grammatical_form": "noun/en_possessive_singular", "text": "let's", "is_base_form": false}]}
+{"guid": "N60_064", "forms": [{"grammatical_form": "noun/en_singular", "text": "let", "is_base_form": true, "ipa": "/lɛt/", "phonetic": "LET"}]}
 {"guid": "N60_065", "forms": [{"grammatical_form": "noun/en_singular", "text": "break point", "is_base_form": true, "ipa": "/ˈbreɪk ˌpɔɪnt/", "phonetic": "BRAYK-point"}]}
 {"guid": "N60_066", "forms": [{"grammatical_form": "noun/en_singular", "text": "unforced error", "is_base_form": true, "ipa": "/ˌʌnˈfɔrst ˈɛrər/", "phonetic": "un-FORST AIR-er"}]}
 {"guid": "N60_067", "forms": [{"grammatical_form": "noun/en_singular", "text": "inning", "is_base_form": true, "ipa": "/ˈɪnɪŋ/", "phonetic": "IN-ing"}]}
@@ -158,7 +158,7 @@
 {"guid": "N60_158", "forms": [{"grammatical_form": "noun/en_singular", "text": "knockout", "is_base_form": true, "ipa": "/ˈnɑkˌaʊt/", "phonetic": "NOK-out"}]}
 {"guid": "N60_159", "forms": [{"grammatical_form": "noun/en_singular", "text": "technical knockout", "is_base_form": true, "ipa": "/ˈtɛknɪkəl ˈnɑːkaʊt/", "phonetic": "TEK-ni-kuhl KNOCK-out"}], "variants": [{"kind": "abbreviation", "key": "TKO", "forms": [{"grammatical_form": "noun/en_singular", "text": "TKO", "is_base_form": true}]}]}
 {"guid": "N60_160", "forms": [{"grammatical_form": "noun/en_singular", "text": "knockdown", "is_base_form": true, "ipa": "/ˈnɑkˌdaʊn/", "phonetic": "NAHK-down"}]}
-{"guid": "N60_161", "forms": [{"grammatical_form": "noun/en_singular", "text": "count", "is_base_form": true, "ipa": "/kaʊnt/", "phonetic": "KOWNT"}, {"grammatical_form": "noun/en_possessive_singular", "text": "count's", "is_base_form": false}]}
+{"guid": "N60_161", "forms": [{"grammatical_form": "noun/en_singular", "text": "count", "is_base_form": true, "ipa": "/kaʊnt/", "phonetic": "KOWNT"}]}
 {"guid": "N60_162", "forms": [{"grammatical_form": "noun/en_singular", "text": "split decision", "is_base_form": true, "ipa": "/ˌsplɪt dɪˈsɪʒən/", "phonetic": "SPLIT dih-SIZH-uhn"}]}
 {"guid": "N60_163", "forms": [{"grammatical_form": "noun/en_singular", "text": "weigh-in", "is_base_form": true, "ipa": "/ˈweɪˌɪn/", "phonetic": "WAY-in"}]}
 {"guid": "N60_164", "forms": [{"grammatical_form": "noun/en_singular", "text": "trick", "is_base_form": true, "ipa": "/trɪk/", "phonetic": "TRIK"}]}

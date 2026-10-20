@@ -1,0 +1,11 @@
+{"guid": "N35_031", "grammar_facts": [{"fact_type": "number_type", "fact_value": "regular"}, {"fact_type": "plural", "fact_value": "families"}, {"fact_type": "plural_status", "fact_value": "override"}]}
+{"guid": "N35_032", "grammar_facts": [{"fact_type": "number_type", "fact_value": "regular"}, {"fact_type": "plural", "fact_value": "moeders"}, {"fact_type": "plural_status", "fact_value": "override"}]}
+{"guid": "N35_033", "grammar_facts": [{"fact_type": "number_type", "fact_value": "regular"}, {"fact_type": "plural", "fact_value": "vaders"}, {"fact_type": "plural_status", "fact_value": "override"}]}
+{"guid": "N35_034", "grammar_facts": [{"fact_type": "number_type", "fact_value": "regular"}, {"fact_type": "plural", "fact_value": "broers"}, {"fact_type": "plural_status", "fact_value": "override"}]}
+{"guid": "N35_035", "grammar_facts": [{"fact_type": "number_type", "fact_value": "regular"}, {"fact_type": "plural", "fact_value": "zussen"}, {"fact_type": "plural_status", "fact_value": "override"}]}
+{"guid": "N35_036", "grammar_facts": [{"fact_type": "number_type", "fact_value": "regular"}, {"fact_type": "plural", "fact_value": "zonen"}, {"fact_type": "plural_status", "fact_value": "override"}]}
+{"guid": "N35_037", "grammar_facts": [{"fact_type": "number_type", "fact_value": "regular"}, {"fact_type": "plural", "fact_value": "dochters"}, {"fact_type": "plural_status", "fact_value": "override"}]}
+{"guid": "N35_071", "grammar_facts": [{"fact_type": "number_type", "fact_value": "regular"}, {"fact_type": "plural", "fact_value": "vrouwen"}, {"fact_type": "plural_status", "fact_value": "override"}]}
+{"guid": "N35_075", "grammar_facts": [{"fact_type": "number_type", "fact_value": "regular"}, {"fact_type": "plural", "fact_value": "echtgenoten"}, {"fact_type": "plural_status", "fact_value": "override"}]}
+{"guid": "N35_099", "grammar_facts": [{"fact_type": "number_type", "fact_value": "regular"}, {"fact_type": "plural", "fact_value": "ouders"}, {"fact_type": "plural_status", "fact_value": "override"}]}
+{"guid": "N35_100", "grammar_facts": [{"fact_type": "number_type", "fact_value": "regular"}, {"fact_type": "plural", "fact_value": "kinderen"}, {"fact_type": "plural_status", "fact_value": "override"}]}

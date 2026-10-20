@@ -10,7 +10,7 @@
 {"guid": "R99_018", "forms": [{"grammatical_form": "preposition/base", "text": "above", "is_base_form": true, "ipa": "əˈbʌv", "phonetic": "uh-BUV"}]}
 {"guid": "R99_019", "forms": [{"grammatical_form": "preposition/base", "text": "below", "is_base_form": true, "ipa": "/bɪˈloʊ/", "phonetic": "bi-LOH"}]}
 {"guid": "R99_020", "forms": [{"grammatical_form": "preposition/base", "text": "among", "is_base_form": true, "ipa": "/əˈmɒŋ/", "phonetic": "uh-MONG"}]}
-{"guid": "R99_021", "forms": [{"grammatical_form": "preposition/base", "text": "toward", "is_base_form": true, "ipa": "/tʊə(r)d/", "phonetic": "TOO-erd"}]}
+{"guid": "R99_021", "forms": [{"grammatical_form": "preposition/base", "text": "toward", "is_base_form": true, "ipa": "/tʊə(r)d/", "phonetic": "TOO-erd"}], "variants": [{"kind": "spelling", "key": "towards", "forms": [{"grammatical_form": "preposition/base", "text": "towards", "is_base_form": true}]}]}
 {"guid": "R99_025", "forms": [{"grammatical_form": "preposition/base", "text": "beside", "is_base_form": true, "ipa": "/bɪˈsaɪd/", "phonetic": "BY-side"}]}
 {"guid": "R99_026", "forms": [{"grammatical_form": "preposition/base", "text": "near", "is_base_form": true, "ipa": "/nɪər/", "phonetic": "NIGH-er"}]}
 {"guid": "R99_027", "forms": [{"grammatical_form": "preposition/base", "text": "behind", "is_base_form": true}]}
@@ -30,3 +30,10 @@
 {"guid": "R99_041", "forms": [{"grammatical_form": "preposition/base", "text": "throughout", "is_base_form": true, "ipa": "/θruˈaʊt/", "phonetic": "throo-OUT"}]}
 {"guid": "R99_042", "forms": [{"grammatical_form": "preposition/base", "text": "half-past", "is_base_form": true, "ipa": "/ˌhæf ˈpæst/", "phonetic": "HAF-past"}]}
 {"guid": "R99_043", "forms": [{"grammatical_form": "preposition/base", "text": "on", "is_base_form": true}]}
+{"guid": "R99_044", "forms": [{"grammatical_form": "preposition/base", "text": "despite", "is_base_form": true, "ipa": "/dɪˈspaɪt/", "phonetic": "dih-SPITE"}]}
+{"guid": "R99_045", "forms": [{"grammatical_form": "preposition/base", "text": "unlike", "is_base_form": true, "ipa": "/ʌnˈlaɪk/", "phonetic": "un-LIKE"}]}
+{"guid": "R99_046", "forms": [{"grammatical_form": "preposition/base", "text": "in", "is_base_form": true, "ipa": "/ɪn/", "phonetic": "IN"}]}
+{"guid": "R99_047", "forms": [{"grammatical_form": "preposition/base", "text": "at", "is_base_form": true, "ipa": "/æt/", "phonetic": "AT"}]}
+{"guid": "R99_048", "forms": [{"grammatical_form": "preposition/base", "text": "since", "is_base_form": true, "ipa": "/sɪns/", "phonetic": "SINS"}]}
+{"guid": "R99_049", "forms": [{"grammatical_form": "preposition/base", "text": "until", "is_base_form": true, "ipa": "/ənˈtɪl/", "phonetic": "un-TIL"}]}
+{"guid": "R99_050", "forms": [{"grammatical_form": "preposition/base", "text": "like", "is_base_form": true, "ipa": "/laɪk/", "phonetic": "LYKE"}]}

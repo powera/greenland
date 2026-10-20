@@ -1,2 +1,4 @@
 {"guid": "A28_006", "forms": [{"grammatical_form": "adjective/en_positive", "text": "first-person", "is_base_form": true}]}
 {"guid": "A28_007", "forms": [{"grammatical_form": "adjective/en_positive", "text": "third-person", "is_base_form": true}]}
+{"guid": "A28_020", "forms": [{"grammatical_form": "adjective/en_positive", "text": "foreign", "is_base_form": true, "ipa": "/ˈfɔrən/", "phonetic": "FOR-in"}]}
+{"guid": "A28_021", "forms": [{"grammatical_form": "adjective/en_positive", "text": "active", "is_base_form": true, "ipa": "/ˈæk.tɪv/", "phonetic": "AK-tiv"}]}

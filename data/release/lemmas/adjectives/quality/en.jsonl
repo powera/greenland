@@ -22,7 +22,7 @@
 {"guid": "A05_052", "forms": [{"grammatical_form": "adjective/en_positive", "text": "true", "is_base_form": true, "ipa": "/truː/", "phonetic": "TRUE-"}]}
 {"guid": "A05_054", "forms": [{"grammatical_form": "adjective/en_positive", "text": "able", "is_base_form": true, "ipa": "/ˈeɪ.bəl/", "phonetic": "EY-buh-l"}]}
 {"guid": "A05_055", "forms": [{"grammatical_form": "adjective/en_positive", "text": "ready", "is_base_form": true, "ipa": "ˈrɛd.i", "phonetic": "RED-ee"}]}
-{"guid": "A05_056", "forms": [{"grammatical_form": "adjective/en_positive", "text": "afraid", "is_base_form": true, "ipa": "/əˈfrɑɪd/", "phonetic": "uh-FRYD"}, {"grammatical_form": "adjective/en_comparative", "text": "more afraid", "is_base_form": false}, {"grammatical_form": "adjective/en_superlative", "text": "most afraid", "is_base_form": false}]}
+{"guid": "A05_056", "forms": [{"grammatical_form": "adjective/en_positive", "text": "afraid", "is_base_form": true, "ipa": "/əˈfrɑɪd/", "phonetic": "uh-FRYD"}], "grammar_facts": [{"fact_type": "gradability", "fact_value": "periphrastic"}, {"fact_type": "comparative_status", "fact_value": "regular"}, {"fact_type": "superlative_status", "fact_value": "regular"}]}
 {"guid": "A05_057", "forms": [{"grammatical_form": "adjective/en_positive", "text": "evil", "is_base_form": true, "ipa": "Iːvəl", "phonetic": "EE-VAL"}]}
 {"guid": "A05_059", "forms": [{"grammatical_form": "adjective/en_positive", "text": "fair", "is_base_form": true, "ipa": "/fɛər/", "phonetic": "FAY-er"}]}
 {"guid": "A05_060", "forms": [{"grammatical_form": "adjective/en_positive", "text": "certain", "is_base_form": true}, {"grammatical_form": "adjective/en_comparative", "text": "more certain", "is_base_form": false}, {"grammatical_form": "adjective/en_superlative", "text": "most certain", "is_base_form": false}]}
@@ -208,3 +208,14 @@
 {"guid": "A05_344", "forms": [{"grammatical_form": "adjective/en_positive", "text": "vulnerable", "is_base_form": true, "ipa": "/ˈvʌlnɚəbəl/", "phonetic": "VUL-ner-uh-bul"}]}
 {"guid": "A05_346", "forms": [{"grammatical_form": "adjective/en_positive", "text": "bona fide", "is_base_form": true}]}
 {"guid": "A05_351", "forms": [{"grammatical_form": "adjective/en_positive", "text": "all-encompassing", "is_base_form": true}]}
+{"guid": "A05_352", "forms": [{"grammatical_form": "adjective/en_positive", "text": "central", "is_base_form": true, "ipa": "/ˈsɛntrəl/", "phonetic": "SEN-truhl"}]}
+{"guid": "A05_353", "forms": [{"grammatical_form": "adjective/en_positive", "text": "active", "is_base_form": true, "ipa": "/ˈæk.tɪv/", "phonetic": "AK-tiv"}]}
+{"guid": "A05_354", "forms": [{"grammatical_form": "adjective/en_positive", "text": "potential", "is_base_form": true, "ipa": "/pəˈtɛnʃəl/", "phonetic": "puh-TEN-shul"}]}
+{"guid": "A05_355", "forms": [{"grammatical_form": "adjective/en_positive", "text": "basic", "is_base_form": true, "ipa": "/ˈbeɪsɪk/", "phonetic": "BAY-sik"}]}
+{"guid": "A05_356", "forms": [{"grammatical_form": "adjective/en_positive", "text": "basic", "is_base_form": true, "ipa": "/ˈbeɪsɪk/", "phonetic": "BAY-sik"}]}
+{"guid": "A05_357", "forms": [{"grammatical_form": "adjective/en_positive", "text": "actual", "is_base_form": true, "ipa": "/ˈæk.tʃu.əl/", "phonetic": "AK-choo-uhl"}]}
+{"guid": "A05_358", "forms": [{"grammatical_form": "adjective/en_positive", "text": "actual", "is_base_form": true, "ipa": "/ˈæk.tʃu.əl/", "phonetic": "AK-choo-uhl"}]}
+{"guid": "A05_359", "forms": [{"grammatical_form": "adjective/en_positive", "text": "essential", "is_base_form": true, "ipa": "/ɪˈsɛnʃəl/", "phonetic": "ih-SEN-shuhl"}]}
+{"guid": "A05_360", "forms": [{"grammatical_form": "adjective/en_positive", "text": "self-evident", "is_base_form": true}]}
+{"guid": "A05_361", "forms": [{"grammatical_form": "adjective/en_positive", "text": "wonderful", "is_base_form": true, "ipa": "/ˈwʌndɚfəl/", "phonetic": "WUN-der-ful"}]}
+{"guid": "A05_362", "forms": [{"grammatical_form": "adjective/en_positive", "text": "wonderful", "is_base_form": true, "ipa": "/ˈwʌndɚfəl/", "phonetic": "WUN-der-ful"}]}

@@ -26,6 +26,239 @@
 {"guid": "A08_026", "forms": [{"grammatical_form": "adjective/en_positive", "text": "vernacular", "is_base_form": true, "ipa": "/vəˈnækjələr/", "phonetic": "vuh-NAK-yuh-ler"}]}
 {"guid": "A08_027", "forms": [{"grammatical_form": "adjective/en_positive", "text": "English", "is_base_form": true, "ipa": "/ˈɪŋɡlɪʃ/", "phonetic": "ING-glish"}]}
 {"guid": "A08_028", "variants": [{"kind": "spelling", "key": "multi-national", "forms": [{"grammatical_form": "adjective/en_positive", "text": "multi-national", "is_base_form": true}]}]}
+{"guid": "A08_029", "forms": [{"grammatical_form": "adjective/en_positive", "text": "Lithuanian", "is_base_form": true}]}
+{"guid": "A08_030", "forms": [{"grammatical_form": "adjective/en_positive", "text": "Latvian", "is_base_form": true}]}
+{"guid": "A08_031", "forms": [{"grammatical_form": "adjective/en_positive", "text": "Estonian", "is_base_form": true}]}
+{"guid": "A08_032", "forms": [{"grammatical_form": "adjective/en_positive", "text": "Polish", "is_base_form": true}]}
+{"guid": "A08_033", "forms": [{"grammatical_form": "adjective/en_positive", "text": "German", "is_base_form": true}]}
+{"guid": "A08_034", "forms": [{"grammatical_form": "adjective/en_positive", "text": "French", "is_base_form": true}]}
+{"guid": "A08_035", "forms": [{"grammatical_form": "adjective/en_positive", "text": "Spanish", "is_base_form": true}]}
+{"guid": "A08_036", "forms": [{"grammatical_form": "adjective/en_positive", "text": "Italian", "is_base_form": true}]}
+{"guid": "A08_037", "forms": [{"grammatical_form": "adjective/en_positive", "text": "Russian", "is_base_form": true}]}
+{"guid": "A08_038", "forms": [{"grammatical_form": "adjective/en_positive", "text": "British", "is_base_form": true}]}
+{"guid": "A08_039", "forms": [{"grammatical_form": "adjective/en_positive", "text": "American", "is_base_form": true}]}
+{"guid": "A08_040", "forms": [{"grammatical_form": "adjective/en_positive", "text": "Canadian", "is_base_form": true}]}
+{"guid": "A08_041", "forms": [{"grammatical_form": "adjective/en_positive", "text": "Portuguese", "is_base_form": true}]}
+{"guid": "A08_042", "forms": [{"grammatical_form": "adjective/en_positive", "text": "Brazilian", "is_base_form": true}]}
+{"guid": "A08_043", "forms": [{"grammatical_form": "adjective/en_positive", "text": "Dutch", "is_base_form": true}]}
+{"guid": "A08_044", "forms": [{"grammatical_form": "adjective/en_positive", "text": "Swedish", "is_base_form": true}]}
+{"guid": "A08_045", "forms": [{"grammatical_form": "adjective/en_positive", "text": "Norwegian", "is_base_form": true}]}
+{"guid": "A08_046", "forms": [{"grammatical_form": "adjective/en_positive", "text": "Finnish", "is_base_form": true}]}
+{"guid": "A08_047", "forms": [{"grammatical_form": "adjective/en_positive", "text": "Chinese", "is_base_form": true}]}
+{"guid": "A08_048", "forms": [{"grammatical_form": "adjective/en_positive", "text": "Taiwanese", "is_base_form": true}]}
+{"guid": "A08_049", "forms": [{"grammatical_form": "adjective/en_positive", "text": "Japanese", "is_base_form": true}]}
+{"guid": "A08_050", "forms": [{"grammatical_form": "adjective/en_positive", "text": "South Korean", "is_base_form": true}]}
+{"guid": "A08_051", "forms": [{"grammatical_form": "adjective/en_positive", "text": "Vietnamese", "is_base_form": true}]}
+{"guid": "A08_052", "forms": [{"grammatical_form": "adjective/en_positive", "text": "Tanzanian", "is_base_form": true}]}
+{"guid": "A08_053", "forms": [{"grammatical_form": "adjective/en_positive", "text": "Kenyan", "is_base_form": true}]}
+{"guid": "A08_054", "forms": [{"grammatical_form": "adjective/en_positive", "text": "Nigerian", "is_base_form": true}]}
+{"guid": "A08_055", "forms": [{"grammatical_form": "adjective/en_positive", "text": "Indian", "is_base_form": true}]}
+{"guid": "A08_056", "forms": [{"grammatical_form": "adjective/en_positive", "text": "Egyptian", "is_base_form": true}]}
+{"guid": "A08_057", "forms": [{"grammatical_form": "adjective/en_positive", "text": "Saudi Arabian", "is_base_form": true}]}
+{"guid": "A08_058", "forms": [{"grammatical_form": "adjective/en_positive", "text": "Mongolian", "is_base_form": true}]}
+{"guid": "A08_059", "forms": [{"grammatical_form": "adjective/en_positive", "text": "Igbo", "is_base_form": true}]}
+{"guid": "A08_060", "forms": [{"grammatical_form": "adjective/en_positive", "text": "Assamese", "is_base_form": true}]}
 {"guid": "A08_061", "forms": [{"grammatical_form": "adjective/en_positive", "text": "middle-class", "is_base_form": true}]}
 {"guid": "A08_062", "forms": [{"grammatical_form": "adjective/en_positive", "text": "working-class", "is_base_form": true}]}
 {"guid": "A08_063", "forms": [{"grammatical_form": "adjective/en_positive", "text": "upper-class", "is_base_form": true}]}
+{"guid": "A08_064", "forms": [{"grammatical_form": "adjective/en_positive", "text": "foreign", "is_base_form": true, "ipa": "/ˈfɔrən/", "phonetic": "FOR-in"}]}
+{"guid": "A08_065", "forms": [{"grammatical_form": "adjective/en_positive", "text": "international", "is_base_form": true, "ipa": "/ˌɪntərˈnæʃənəl/", "phonetic": "in-ter-NASH-uh-nul"}]}
+{"guid": "A08_066", "variants": [{"kind": "spelling", "key": "trans-atlantic", "forms": [{"grammatical_form": "adjective/en_positive", "text": "trans-atlantic", "is_base_form": true}]}]}
+{"guid": "A08_067", "forms": [{"grammatical_form": "adjective/en_positive", "text": "Greek", "is_base_form": true, "ipa": "/ɡriːk/", "phonetic": "GREEK"}]}
+{"guid": "A08_068", "forms": [{"grammatical_form": "adjective/en_positive", "text": "Thai", "is_base_form": true, "ipa": "/taɪ/", "phonetic": "TIE"}]}
+{"guid": "A08_069", "forms": [{"grammatical_form": "adjective/en_positive", "text": "Georgian", "is_base_form": true, "ipa": "/ˈdʒɔrdʒən/", "phonetic": "JOR-juhn"}]}
+{"guid": "A08_070", "forms": [{"grammatical_form": "adjective/en_positive", "text": "Kurdish", "is_base_form": true, "ipa": "/ˈkɝːdɪʃ/", "phonetic": "KUR-dish"}]}
+{"guid": "A08_071", "forms": [{"grammatical_form": "adjective/en_positive", "text": "Scottish", "is_base_form": true, "ipa": "/ˈskɑtɪʃ/", "phonetic": "SKOT-ish"}]}
+{"guid": "A08_072", "forms": [{"grammatical_form": "adjective/en_positive", "text": "Welsh", "is_base_form": true, "ipa": "/wɛlʃ/", "phonetic": "WELSH"}]}
+{"guid": "A08_073", "forms": [{"grammatical_form": "adjective/en_positive", "text": "Irish", "is_base_form": true, "ipa": "/ˈaɪrɪʃ/", "phonetic": "EYE-rish"}]}
+{"guid": "A08_074", "forms": [{"grammatical_form": "adjective/en_positive", "text": "Mexican", "is_base_form": true, "ipa": "/ˈmɛksɪkən/", "phonetic": "MEK-si-kuhn"}]}
+{"guid": "A08_075", "forms": [{"grammatical_form": "adjective/en_positive", "text": "Cuban", "is_base_form": true, "ipa": "/ˈkjuːbən/", "phonetic": "KYOO-buhn"}]}
+{"guid": "A08_076", "forms": [{"grammatical_form": "adjective/en_positive", "text": "Argentine", "is_base_form": true, "ipa": "/ˈɑːrdʒənˌtiːn/", "phonetic": "AR-juhn-teen"}]}
+{"guid": "A08_077", "forms": [{"grammatical_form": "adjective/en_positive", "text": "Chilean", "is_base_form": true, "ipa": "/ˈtʃɪliən/", "phonetic": "CHIL-ee-uhn"}]}
+{"guid": "A08_078", "forms": [{"grammatical_form": "adjective/en_positive", "text": "Peruvian", "is_base_form": true, "ipa": "/pəˈruːviən/", "phonetic": "puh-ROO-vee-uhn"}]}
+{"guid": "A08_079", "forms": [{"grammatical_form": "adjective/en_positive", "text": "Belgian", "is_base_form": true, "ipa": "/ˈbɛldʒən/", "phonetic": "bel-JIN"}]}
+{"guid": "A08_080", "forms": [{"grammatical_form": "adjective/en_positive", "text": "Swiss", "is_base_form": true, "ipa": "/swɪts/", "phonetic": "SWITS"}]}
+{"guid": "A08_081", "forms": [{"grammatical_form": "adjective/en_positive", "text": "Austrian", "is_base_form": true, "ipa": "/ˈɔːstriən/", "phonetic": "AW-stree-uhn"}]}
+{"guid": "A08_082", "forms": [{"grammatical_form": "adjective/en_positive", "text": "Danish", "is_base_form": true, "ipa": "/ˈdeɪnɪʃ/", "phonetic": "DAY-nish"}]}
+{"guid": "A08_083", "forms": [{"grammatical_form": "adjective/en_positive", "text": "Hungarian", "is_base_form": true, "ipa": "/hʌŋˈɡɛriən/", "phonetic": "hung-GAIR-ee-un"}]}
+{"guid": "A08_084", "forms": [{"grammatical_form": "adjective/en_positive", "text": "Ukrainian", "is_base_form": true, "ipa": "/juˈkreɪniən/", "phonetic": "yoo-KRAY-nee-un"}]}
+{"guid": "A08_085", "forms": [{"grammatical_form": "adjective/en_positive", "text": "Turkish", "is_base_form": true, "ipa": "/ˈtɝːkɪʃ/", "phonetic": "TUR-kish"}]}
+{"guid": "A08_086", "forms": [{"grammatical_form": "adjective/en_positive", "text": "Israeli", "is_base_form": true, "ipa": "/ɪzˈreɪli/", "phonetic": "iz-RAIL-ee"}]}
+{"guid": "A08_087", "forms": [{"grammatical_form": "adjective/en_positive", "text": "Iranian", "is_base_form": true, "ipa": "/ɪˈreɪniən/", "phonetic": "ih-RAY-nee-uhn"}]}
+{"guid": "A08_088", "forms": [{"grammatical_form": "adjective/en_positive", "text": "Iraqi", "is_base_form": true, "ipa": "/ɪˈrɑːki/", "phonetic": "ih-RAH-kee"}]}
+{"guid": "A08_089", "forms": [{"grammatical_form": "adjective/en_positive", "text": "Moroccan", "is_base_form": true, "ipa": "/məˈrɑkən/", "phonetic": "muh-ROK-un"}]}
+{"guid": "A08_090", "forms": [{"grammatical_form": "adjective/en_positive", "text": "Ethiopian", "is_base_form": true, "ipa": "/ˌiːθiˈoʊpiən/", "phonetic": "ee-thee-OH-pee-un"}]}
+{"guid": "A08_091", "forms": [{"grammatical_form": "adjective/en_positive", "text": "South African", "is_base_form": true, "ipa": "/ˌsaʊθ ˈæfrɪkən/", "phonetic": "SOUTH AF-ri-kuhn"}]}
+{"guid": "A08_092", "forms": [{"grammatical_form": "adjective/en_positive", "text": "Indonesian", "is_base_form": true, "ipa": "/ˌɪndəˈniːʒən/", "phonetic": "in-duh-NEE-zhuhn"}]}
+{"guid": "A08_093", "forms": [{"grammatical_form": "adjective/en_positive", "text": "Filipino", "is_base_form": true, "ipa": "/ˌfɪlɪˈpiːnoʊ/", "phonetic": "fil-uh-PEE-noh"}]}
+{"guid": "A08_094", "forms": [{"grammatical_form": "adjective/en_positive", "text": "Australian", "is_base_form": true, "ipa": "/ɔˈstreɪliən/", "phonetic": "aw-STRAYL-yuhn"}]}
+{"guid": "A08_095", "forms": [{"grammatical_form": "adjective/en_positive", "text": "Albanian", "is_base_form": true, "ipa": "/ælˈbeɪniən/", "phonetic": "al-BAY-nee-uhn"}]}
+{"guid": "A08_096", "forms": [{"grammatical_form": "adjective/en_positive", "text": "Andorran", "is_base_form": true, "ipa": "/ˌændəˈrɑːn/", "phonetic": "an-uh-RAHN"}]}
+{"guid": "A08_097", "forms": [{"grammatical_form": "adjective/en_positive", "text": "Belarusian", "is_base_form": true, "ipa": "/ˌbɛləˈruːsiən/", "phonetic": "bel-uh-ROO-see-uhn"}]}
+{"guid": "A08_098", "forms": [{"grammatical_form": "adjective/en_positive", "text": "Bosnian", "is_base_form": true, "ipa": "/ˈbɑːzniən/", "phonetic": "boz-NEE-uhn"}]}
+{"guid": "A08_099", "forms": [{"grammatical_form": "adjective/en_positive", "text": "Bulgarian", "is_base_form": true, "ipa": "/bʌlˈɡɛriən/", "phonetic": "buhl-GAIR-ee-uhn"}]}
+{"guid": "A08_100", "forms": [{"grammatical_form": "adjective/en_positive", "text": "Croatian", "is_base_form": true, "ipa": "/kroʊˈeɪʃən/", "phonetic": "kroh-AY-shun"}]}
+{"guid": "A08_101", "forms": [{"grammatical_form": "adjective/en_positive", "text": "Cypriot", "is_base_form": true, "ipa": "/ˈsɪpriət/", "phonetic": "SIP-ree-uht"}]}
+{"guid": "A08_102", "forms": [{"grammatical_form": "adjective/en_positive", "text": "Czech", "is_base_form": true, "ipa": "/tʃɛk/", "phonetic": "CHEK"}]}
+{"guid": "A08_103", "forms": [{"grammatical_form": "adjective/en_positive", "text": "Icelandic", "is_base_form": true, "ipa": "/aɪˈslændɪk/", "phonetic": "eye-s LAN-dik"}]}
+{"guid": "A08_104", "forms": [{"grammatical_form": "adjective/en_positive", "text": "Kosovar", "is_base_form": true, "ipa": "/ˈkoʊsəvɑr/", "phonetic": "KOH-suh-var"}]}
+{"guid": "A08_105", "forms": [{"grammatical_form": "adjective/en_positive", "text": "Luxembourgish", "is_base_form": true, "ipa": "/ˈlʌksəmbɜːrɡɪʃ/", "phonetic": "LUK-suhm-bur-gish"}]}
+{"guid": "A08_106", "forms": [{"grammatical_form": "adjective/en_positive", "text": "Maltese", "is_base_form": true, "ipa": "/mɔlˈtiːz/", "phonetic": "MOL-teez"}]}
+{"guid": "A08_107", "forms": [{"grammatical_form": "adjective/en_positive", "text": "Moldovan", "is_base_form": true, "ipa": "/mɑlˈdoʊvən/", "phonetic": "mol-DOH-vuhn"}]}
+{"guid": "A08_108", "forms": [{"grammatical_form": "adjective/en_positive", "text": "Monegasque", "is_base_form": true, "ipa": "/ˌmɑnəˈɡæsk/", "phonetic": "MON-uh-GASK"}]}
+{"guid": "A08_109", "forms": [{"grammatical_form": "adjective/en_positive", "text": "Montenegrin", "is_base_form": true, "ipa": "/ˌmɑntəˈniɡrɪn/", "phonetic": "mon-tuh-NEE-grin"}]}
+{"guid": "A08_110", "forms": [{"grammatical_form": "adjective/en_positive", "text": "Macedonian", "is_base_form": true, "ipa": "/ˌmæsəˈdoʊniən/", "phonetic": "MASS-uh-DOH-nee-uhn"}]}
+{"guid": "A08_111", "forms": [{"grammatical_form": "adjective/en_positive", "text": "Romanian", "is_base_form": true, "ipa": "/roʊˈmeɪniən/", "phonetic": "roh-MAY-nee-uhn"}]}
+{"guid": "A08_112", "forms": [{"grammatical_form": "adjective/en_positive", "text": "Sammarinese", "is_base_form": true, "ipa": "/ˌsæm.ə.rəˈniːz/", "phonetic": "sam-uh-ruh-NEEZ"}]}
+{"guid": "A08_113", "forms": [{"grammatical_form": "adjective/en_positive", "text": "Serbian", "is_base_form": true, "ipa": "/ˈsɝː.bi.ən/", "phonetic": "ser-BEE-uhn"}]}
+{"guid": "A08_114", "forms": [{"grammatical_form": "adjective/en_positive", "text": "Slovak", "is_base_form": true, "ipa": "/ˈsloʊvɑːk/", "phonetic": "SLOH-vak"}]}
+{"guid": "A08_115", "forms": [{"grammatical_form": "adjective/en_positive", "text": "Slovenian", "is_base_form": true, "ipa": "/sloʊˈviːniən/", "phonetic": "sloh-VEE-nee-un"}]}
+{"guid": "A08_116", "forms": [{"grammatical_form": "adjective/en_positive", "text": "Armenian", "is_base_form": true, "ipa": "/ɑrˈmiːniən/", "phonetic": "ar-MEE-nee-uhn"}]}
+{"guid": "A08_117", "forms": [{"grammatical_form": "adjective/en_positive", "text": "Azerbaijani", "is_base_form": true, "ipa": "/ˌæzərbaɪˈdʒɑːni/", "phonetic": "az-er-bye-JAH-nee"}]}
+{"guid": "A08_118", "forms": [{"grammatical_form": "adjective/en_positive", "text": "Kazakh", "is_base_form": true, "ipa": "/kəˈzɑːk/", "phonetic": "kuh-ZAK"}]}
+{"guid": "A08_119", "forms": [{"grammatical_form": "adjective/en_positive", "text": "Kyrgyz", "is_base_form": true, "ipa": "/ˈkɪrɡɪz/", "phonetic": "kur-GIZ"}]}
+{"guid": "A08_120", "forms": [{"grammatical_form": "adjective/en_positive", "text": "Tajik", "is_base_form": true, "ipa": "/təˈdʒiːk/", "phonetic": "tuh-JEEK"}]}
+{"guid": "A08_121", "forms": [{"grammatical_form": "adjective/en_positive", "text": "Turkmen", "is_base_form": true, "ipa": "/tɝkˈmɛn/", "phonetic": "turk-MEN"}]}
+{"guid": "A08_122", "forms": [{"grammatical_form": "adjective/en_positive", "text": "Uzbek", "is_base_form": true, "ipa": "/ˈʊzˌbɛk/", "phonetic": "OOZ-bek"}]}
+{"guid": "A08_123", "forms": [{"grammatical_form": "adjective/en_positive", "text": "Bahraini", "is_base_form": true, "ipa": "/bɑːˈreɪni/", "phonetic": "bah-RAY-nee"}]}
+{"guid": "A08_124", "forms": [{"grammatical_form": "adjective/en_positive", "text": "Jordanian", "is_base_form": true, "ipa": "/dʒɔrˈdeɪniən/", "phonetic": "jor-DAY-nee-uhn"}]}
+{"guid": "A08_125", "forms": [{"grammatical_form": "adjective/en_positive", "text": "Kuwaiti", "is_base_form": true, "ipa": "/kuːˈweɪti/", "phonetic": "koo-WAY-tee"}]}
+{"guid": "A08_126", "forms": [{"grammatical_form": "adjective/en_positive", "text": "Lebanese", "is_base_form": true, "ipa": "/ˌlɛbəˈniːz/", "phonetic": "LEB-uh-neez"}]}
+{"guid": "A08_127", "forms": [{"grammatical_form": "adjective/en_positive", "text": "Omani", "is_base_form": true, "ipa": "/oʊˈmɑːni/", "phonetic": "oh-MAH-nee"}]}
+{"guid": "A08_128", "forms": [{"grammatical_form": "adjective/en_positive", "text": "Palestinian", "is_base_form": true, "ipa": "/ˌpæləˈstɪniən/", "phonetic": "pal-uh-STIN-ee-un"}]}
+{"guid": "A08_129", "forms": [{"grammatical_form": "adjective/en_positive", "text": "Qatari", "is_base_form": true, "ipa": "/kəˈtɑri/", "phonetic": "kuh-TAH-ree"}]}
+{"guid": "A08_130", "forms": [{"grammatical_form": "adjective/en_positive", "text": "Syrian", "is_base_form": true, "ipa": "/ˈsɪriən/", "phonetic": "SEER-ee-uhn"}]}
+{"guid": "A08_131", "forms": [{"grammatical_form": "adjective/en_positive", "text": "Emirati", "is_base_form": true, "ipa": "/ɪˈmɑːrəti/", "phonetic": "eh-muh-RAH-tee"}]}
+{"guid": "A08_132", "forms": [{"grammatical_form": "adjective/en_positive", "text": "Yemeni", "is_base_form": true, "ipa": "/ˈjɛməni/", "phonetic": "yuh-MEN-ee"}]}
+{"guid": "A08_133", "forms": [{"grammatical_form": "adjective/en_positive", "text": "Afghan", "is_base_form": true, "ipa": "/ˈæfɡæn/", "phonetic": "AF-gan"}]}
+{"guid": "A08_134", "forms": [{"grammatical_form": "adjective/en_positive", "text": "Bangladeshi", "is_base_form": true, "ipa": "/ˌbæŋɡləˈdɛʃi/", "phonetic": "BANG-gluh-DESH-ee"}]}
+{"guid": "A08_135", "forms": [{"grammatical_form": "adjective/en_positive", "text": "Bhutanese", "is_base_form": true, "ipa": "/ˌbuːtəˈniːz/", "phonetic": "boo-tuh-NEEZ"}]}
+{"guid": "A08_136", "forms": [{"grammatical_form": "adjective/en_positive", "text": "Maldivian", "is_base_form": true, "ipa": "/ˌmɔːldɪˈviːən/", "phonetic": "mal-duh-VEE-uhn"}]}
+{"guid": "A08_137", "forms": [{"grammatical_form": "adjective/en_positive", "text": "Nepali", "is_base_form": true, "ipa": "/nəˈpɔːli/", "phonetic": "nuh-PAW-lee"}]}
+{"guid": "A08_138", "forms": [{"grammatical_form": "adjective/en_positive", "text": "Pakistani", "is_base_form": true, "ipa": "/ˌpækɪˈstæni/", "phonetic": "pak-ih-STAN-ee"}]}
+{"guid": "A08_139", "forms": [{"grammatical_form": "adjective/en_positive", "text": "Sri Lankan", "is_base_form": true, "ipa": "/ˌsriː ˈlʌŋkən/", "phonetic": "sree LUN-kuhn"}]}
+{"guid": "A08_140", "forms": [{"grammatical_form": "adjective/en_positive", "text": "North Korean", "is_base_form": true, "ipa": "/ˌnɔrθ kəˈriən/", "phonetic": "north kuh-REE-un"}]}
+{"guid": "A08_141", "forms": [{"grammatical_form": "adjective/en_positive", "text": "Bruneian", "is_base_form": true, "ipa": "/bruːˈneɪən/", "phonetic": "broo-NAY-uhn"}]}
+{"guid": "A08_142", "forms": [{"grammatical_form": "adjective/en_positive", "text": "Cambodian", "is_base_form": true, "ipa": "/kæmˈboʊdiən/", "phonetic": "kam-BOH-dee-un"}]}
+{"guid": "A08_143", "forms": [{"grammatical_form": "adjective/en_positive", "text": "Timorese", "is_base_form": true, "ipa": "/ˌtɪməˈriz/", "phonetic": "tim-uh-REEZ"}]}
+{"guid": "A08_144", "forms": [{"grammatical_form": "adjective/en_positive", "text": "Laotian", "is_base_form": true, "ipa": "/leɪˈoʊʃən/", "phonetic": "lay-OH-shun"}]}
+{"guid": "A08_145", "forms": [{"grammatical_form": "adjective/en_positive", "text": "Malaysian", "is_base_form": true, "ipa": "/məˈleɪʒən/", "phonetic": "muh-LAY-zhee-uhn"}]}
+{"guid": "A08_146", "forms": [{"grammatical_form": "adjective/en_positive", "text": "Burmese", "is_base_form": true, "ipa": "/bɜrˈmiːz/", "phonetic": "bur-MEEZ"}]}
+{"guid": "A08_147", "forms": [{"grammatical_form": "adjective/en_positive", "text": "Singaporean", "is_base_form": true, "ipa": "/ˌsɪŋəˈpɔriən/", "phonetic": "sing-uh-PORE-ee-uhn"}]}
+{"guid": "A08_148", "forms": [{"grammatical_form": "adjective/en_positive", "text": "Algerian", "is_base_form": true, "ipa": "/ælˈdʒɪriən/", "phonetic": "al-JEER-ee-un"}]}
+{"guid": "A08_149", "forms": [{"grammatical_form": "adjective/en_positive", "text": "Libyan", "is_base_form": true, "ipa": "/ˈlɪbiən/", "phonetic": "LIB-ee-uhn"}]}
+{"guid": "A08_150", "forms": [{"grammatical_form": "adjective/en_positive", "text": "Sudanese", "is_base_form": true, "ipa": "/suːdəˈniːz/", "phonetic": "soo-duh-NEEZ"}]}
+{"guid": "A08_151", "forms": [{"grammatical_form": "adjective/en_positive", "text": "Tunisian", "is_base_form": true, "ipa": "/tuˈnɪʒən/", "phonetic": "too-NEE-zhuhn"}]}
+{"guid": "A08_152", "forms": [{"grammatical_form": "adjective/en_positive", "text": "Beninese", "is_base_form": true, "ipa": "/ˌbɛnɪˈniːz/", "phonetic": "ben-uh-NEEZ"}]}
+{"guid": "A08_153", "forms": [{"grammatical_form": "adjective/en_positive", "text": "Burkinabe", "is_base_form": true, "ipa": "/ˌbɜːr.kɪˈnɑː.beɪ/", "phonetic": "bur-KIN-uh-bay"}]}
+{"guid": "A08_154", "forms": [{"grammatical_form": "adjective/en_positive", "text": "Cape Verdean", "is_base_form": true, "ipa": "/ˌkeɪp vərˈdiːən/", "phonetic": "KAYP ver-DEE-un"}]}
+{"guid": "A08_155", "forms": [{"grammatical_form": "adjective/en_positive", "text": "Gambian", "is_base_form": true, "ipa": "/ˈɡæm.bi.ən/", "phonetic": "gam-BEE-uhn"}]}
+{"guid": "A08_156", "forms": [{"grammatical_form": "adjective/en_positive", "text": "Ghanaian", "is_base_form": true, "ipa": "/ɡəˈneɪən/", "phonetic": "guh-NAY-uhn"}]}
+{"guid": "A08_157", "forms": [{"grammatical_form": "adjective/en_positive", "text": "Guinean", "is_base_form": true, "ipa": "/ˈɡɪniən/", "phonetic": "GIH-nee-uhn"}]}
+{"guid": "A08_158", "forms": [{"grammatical_form": "adjective/en_positive", "text": "Bissau-Guinean", "is_base_form": true, "ipa": "/ˌbɪsaʊˈɡɪniən/", "phonetic": "BIS-sow-GIN-ee-un"}]}
+{"guid": "A08_159", "forms": [{"grammatical_form": "adjective/en_positive", "text": "Ivorian", "is_base_form": true, "ipa": "/aɪˈvɔriən/", "phonetic": "eye-VOR-ee-uhn"}]}
+{"guid": "A08_160", "forms": [{"grammatical_form": "adjective/en_positive", "text": "Liberian", "is_base_form": true, "ipa": "/laɪˈbɪriən/", "phonetic": "ly-BEER-ee-uhn"}]}
+{"guid": "A08_161", "forms": [{"grammatical_form": "adjective/en_positive", "text": "Malian", "is_base_form": true, "ipa": "/ˈmɑːliən/", "phonetic": "MAL-ee-uhn"}]}
+{"guid": "A08_162", "forms": [{"grammatical_form": "adjective/en_positive", "text": "Mauritanian", "is_base_form": true, "ipa": "/ˌmɔːrəˈteɪniən/", "phonetic": "mawr-uh-TAY-nee-uhn"}]}
+{"guid": "A08_163", "forms": [{"grammatical_form": "adjective/en_positive", "text": "Nigerien", "is_base_form": true, "ipa": "/naɪˈdʒɪriən/", "phonetic": "ny-JEER-ee-uhn"}]}
+{"guid": "A08_164", "forms": [{"grammatical_form": "adjective/en_positive", "text": "Senegalese", "is_base_form": true, "ipa": "/ˌsɛnəɡəˈliz/", "phonetic": "sen-uh-guh-LEEZ"}]}
+{"guid": "A08_165", "forms": [{"grammatical_form": "adjective/en_positive", "text": "Sierra Leonean", "is_base_form": true, "ipa": "/ˌsɪr.ə liˈoʊ.ni.ən/", "phonetic": "see-ER-uh lee-OH-nee-un"}]}
+{"guid": "A08_166", "forms": [{"grammatical_form": "adjective/en_positive", "text": "Togolese", "is_base_form": true, "ipa": "/ˌtoʊɡəˈliːz/", "phonetic": "TOH-guh-leez"}]}
+{"guid": "A08_167", "forms": [{"grammatical_form": "adjective/en_positive", "text": "Cameroonian", "is_base_form": true, "ipa": "/ˌkæməˈruːniən/", "phonetic": "kam-uh-ROO-nee-uhn"}]}
+{"guid": "A08_168", "forms": [{"grammatical_form": "adjective/en_positive", "text": "Central African", "is_base_form": true, "ipa": "/ˈsɛntrəl ˈæfrɪkən/", "phonetic": "SEN-truhl AF-ri-kuhn"}]}
+{"guid": "A08_169", "forms": [{"grammatical_form": "adjective/en_positive", "text": "Chadian", "is_base_form": true, "ipa": "/ˈtʃædiən/", "phonetic": "CHAD-ee-uhn"}]}
+{"guid": "A08_170", "forms": [{"grammatical_form": "adjective/en_positive", "text": "Congolese", "is_base_form": true, "ipa": "/ˌkɑŋɡəˈliz/", "phonetic": "kon-guh-LEEZ"}]}
+{"guid": "A08_171", "forms": [{"grammatical_form": "adjective/en_positive", "text": "Equatorial Guinean", "is_base_form": true, "ipa": "/ˌɛkwəˈtɔriəl ˈɡɪniən/", "phonetic": "ee-kwuh-TOR-ee-uhl GIN-ee-uhn"}]}
+{"guid": "A08_172", "forms": [{"grammatical_form": "adjective/en_positive", "text": "Gabonese", "is_base_form": true, "ipa": "/ˌɡæbəˈniːz/", "phonetic": "gab-uh-NEEZ"}]}
+{"guid": "A08_173", "forms": [{"grammatical_form": "adjective/en_positive", "text": "Burundian", "is_base_form": true, "ipa": "/bʊˈrʌndiən/", "phonetic": "buh-RUN-dee-uhn"}]}
+{"guid": "A08_174", "forms": [{"grammatical_form": "adjective/en_positive", "text": "Comorian", "is_base_form": true, "ipa": "/kəˈmɔriən/", "phonetic": "kuh-MOR-ee-uhn"}]}
+{"guid": "A08_175", "forms": [{"grammatical_form": "adjective/en_positive", "text": "Djiboutian", "is_base_form": true, "ipa": "/dʒɪˈbuːtiən/", "phonetic": "ji-BOO-tee-uhn"}]}
+{"guid": "A08_176", "forms": [{"grammatical_form": "adjective/en_positive", "text": "Eritrean", "is_base_form": true, "ipa": "/ˌɛrɪˈtriːən/", "phonetic": "eh-rih-TREE-uhn"}]}
+{"guid": "A08_177", "forms": [{"grammatical_form": "adjective/en_positive", "text": "Malagasy", "is_base_form": true, "ipa": "/ˌmæləˈɡæsi/", "phonetic": "mal-uh-GAS-ee"}]}
+{"guid": "A08_178", "forms": [{"grammatical_form": "adjective/en_positive", "text": "Mauritian", "is_base_form": true, "ipa": "/məˈrɪʃən/", "phonetic": "muh-RISH-un"}]}
+{"guid": "A08_179", "forms": [{"grammatical_form": "adjective/en_positive", "text": "Rwandan", "is_base_form": true, "ipa": "/ruˈɑndən/", "phonetic": "roo-AHN-duhn"}]}
+{"guid": "A08_180", "forms": [{"grammatical_form": "adjective/en_positive", "text": "Seychellois", "is_base_form": true, "ipa": "/seɪˈʃɛlwɑː/", "phonetic": "say-SHEL-wah"}]}
+{"guid": "A08_181", "forms": [{"grammatical_form": "adjective/en_positive", "text": "Somali", "is_base_form": true, "ipa": "/səˈmɑːli/", "phonetic": "suh-MAH-lee"}]}
+{"guid": "A08_182", "forms": [{"grammatical_form": "adjective/en_positive", "text": "South Sudanese", "is_base_form": true, "ipa": "/ˌsaʊθ suːdəˈniːz/", "phonetic": "south soo-duh-NEEZ"}]}
+{"guid": "A08_183", "forms": [{"grammatical_form": "adjective/en_positive", "text": "Ugandan", "is_base_form": true, "ipa": "/juˈɡændən/", "phonetic": "yoo-GAN-dun"}]}
+{"guid": "A08_184", "forms": [{"grammatical_form": "adjective/en_positive", "text": "Angolan", "is_base_form": true, "ipa": "/æŋˈɡoʊlən/", "phonetic": "ang-GOH-lun"}]}
+{"guid": "A08_185", "forms": [{"grammatical_form": "adjective/en_positive", "text": "Botswanan", "is_base_form": true, "ipa": "/bɒtsˈwɑːnən/", "phonetic": "bots-WAH-nuhn"}]}
+{"guid": "A08_186", "forms": [{"grammatical_form": "adjective/en_positive", "text": "Swazi", "is_base_form": true, "ipa": "/ˈswɑːzi/", "phonetic": "SWAH-zee"}]}
+{"guid": "A08_187", "forms": [{"grammatical_form": "adjective/en_positive", "text": "Malawian", "is_base_form": true, "ipa": "/məˈlɔːiən/", "phonetic": "muh-LAW-ee-uhn"}]}
+{"guid": "A08_188", "forms": [{"grammatical_form": "adjective/en_positive", "text": "Mozambican", "is_base_form": true, "ipa": "/ˌmoʊzæmˈbiːkən/", "phonetic": "moh-zam-BEE-kuhn"}]}
+{"guid": "A08_189", "forms": [{"grammatical_form": "adjective/en_positive", "text": "Namibian", "is_base_form": true, "ipa": "/nəˈmɪbiən/", "phonetic": "nuh-MIB-ee-uhn"}]}
+{"guid": "A08_190", "forms": [{"grammatical_form": "adjective/en_positive", "text": "Zambian", "is_base_form": true, "ipa": "/zæmˈbiːən/", "phonetic": "zam-BEE-uhn"}]}
+{"guid": "A08_191", "forms": [{"grammatical_form": "adjective/en_positive", "text": "Zimbabwean", "is_base_form": true, "ipa": "/zɪmˈbɑːbwiən/", "phonetic": "zim-BAB-wee-uhn"}]}
+{"guid": "A08_192", "forms": [{"grammatical_form": "adjective/en_positive", "text": "Antiguan", "is_base_form": true, "ipa": "/ænˈtiːɡwən/", "phonetic": "an-tee-GWUN"}]}
+{"guid": "A08_193", "forms": [{"grammatical_form": "adjective/en_positive", "text": "Bahamian", "is_base_form": true, "ipa": "/bəˈheɪmiən/", "phonetic": "buh-HAY-mee-uhn"}]}
+{"guid": "A08_194", "forms": [{"grammatical_form": "adjective/en_positive", "text": "Barbadian", "is_base_form": true, "ipa": "/bɑːrˈbeɪdiən/", "phonetic": "bar-BAY-dee-uhn"}]}
+{"guid": "A08_195", "forms": [{"grammatical_form": "adjective/en_positive", "text": "Belizean", "is_base_form": true, "ipa": "/bəˈliːziən/", "phonetic": "buh-LEE-zee-uhn"}]}
+{"guid": "A08_196", "forms": [{"grammatical_form": "adjective/en_positive", "text": "Costa Rican", "is_base_form": true, "ipa": "/ˌkɑːstə ˈriːkən/", "phonetic": "KOS-tuh REE-kuhn"}]}
+{"guid": "A08_197", "forms": [{"grammatical_form": "adjective/en_positive", "text": "Dominican", "is_base_form": true, "ipa": "/dəˈmɪnɪkən/", "phonetic": "duh-MIN-ih-kuhn"}]}
+{"guid": "A08_198", "forms": [{"grammatical_form": "adjective/en_positive", "text": "Salvadoran", "is_base_form": true, "ipa": "/ˌsælvəˈdɔrən/", "phonetic": "sal-vuh-DOR-un"}]}
+{"guid": "A08_199", "forms": [{"grammatical_form": "adjective/en_positive", "text": "Grenadian", "is_base_form": true, "ipa": "/ɡrəˈneɪdiən/", "phonetic": "gruh-NAY-dee-uhn"}]}
+{"guid": "A08_200", "forms": [{"grammatical_form": "adjective/en_positive", "text": "Guatemalan", "is_base_form": true, "ipa": "/ˌɡwɑːtəˈmɑːlən/", "phonetic": "gwa-tuh-MAH-luhn"}]}
+{"guid": "A08_201", "forms": [{"grammatical_form": "adjective/en_positive", "text": "Haitian", "is_base_form": true, "ipa": "/ˈheɪʃən/", "phonetic": "HAY-shun"}]}
+{"guid": "A08_202", "forms": [{"grammatical_form": "adjective/en_positive", "text": "Honduran", "is_base_form": true, "ipa": "/hɑnˈdʊrən/", "phonetic": "hon-DUR-uhn"}]}
+{"guid": "A08_203", "forms": [{"grammatical_form": "adjective/en_positive", "text": "Jamaican", "is_base_form": true, "ipa": "/dʒəˈmeɪkən/", "phonetic": "juh-MAY-kuhn"}]}
+{"guid": "A08_204", "forms": [{"grammatical_form": "adjective/en_positive", "text": "Nicaraguan", "is_base_form": true, "ipa": "/ˌnɪkəˈrɑːɡwən/", "phonetic": "nik-uh-RAH-gwuhn"}]}
+{"guid": "A08_205", "forms": [{"grammatical_form": "adjective/en_positive", "text": "Panamanian", "is_base_form": true, "ipa": "/ˌpænəˈmeɪniən/", "phonetic": "pan-uh-MAY-nee-un"}]}
+{"guid": "A08_206", "forms": [{"grammatical_form": "adjective/en_positive", "text": "Saint Lucian", "is_base_form": true, "ipa": "/seɪnt ˈluːʃən/", "phonetic": "saynt LOO-shun"}]}
+{"guid": "A08_207", "forms": [{"grammatical_form": "adjective/en_positive", "text": "Vincentian", "is_base_form": true, "ipa": "/vɪnˈsɛnʃən/", "phonetic": "vin-SEN-shun"}]}
+{"guid": "A08_208", "forms": [{"grammatical_form": "adjective/en_positive", "text": "Trinidadian", "is_base_form": true, "ipa": "/ˌtrɪnɪˈdædiən/", "phonetic": "trin-ih-DAD-ee-uhn"}]}
+{"guid": "A08_209", "forms": [{"grammatical_form": "adjective/en_positive", "text": "Bolivian", "is_base_form": true, "ipa": "/bəˈlɪviən/", "phonetic": "buh-LIV-ee-un"}]}
+{"guid": "A08_210", "forms": [{"grammatical_form": "adjective/en_positive", "text": "Colombian", "is_base_form": true, "ipa": "/kəˈlʌmbiən/", "phonetic": "kuh-LUHM-bee-uhn"}]}
+{"guid": "A08_211", "forms": [{"grammatical_form": "adjective/en_positive", "text": "Ecuadorian", "is_base_form": true, "ipa": "/ˌɛkwəˈdɔriən/", "phonetic": "ek-wuh-DOR-ee-uhn"}]}
+{"guid": "A08_212", "forms": [{"grammatical_form": "adjective/en_positive", "text": "Guyanese", "is_base_form": true, "ipa": "/ˌɡaɪəˈniːz/", "phonetic": "guy-uh-NEEZ"}]}
+{"guid": "A08_213", "forms": [{"grammatical_form": "adjective/en_positive", "text": "Paraguayan", "is_base_form": true, "ipa": "/ˌpærəˈɡwaɪən/", "phonetic": "PAIR-uh-GWAY-uhn"}]}
+{"guid": "A08_214", "forms": [{"grammatical_form": "adjective/en_positive", "text": "Surinamese", "is_base_form": true, "ipa": "/ˌsʊrɪnəˈmiz/", "phonetic": "soo-rih-nuh-MEEZ"}]}
+{"guid": "A08_215", "forms": [{"grammatical_form": "adjective/en_positive", "text": "Uruguayan", "is_base_form": true, "ipa": "/ˌjʊrəˈɡweɪən/", "phonetic": "yoo-roo-GWAY-uhn"}]}
+{"guid": "A08_216", "forms": [{"grammatical_form": "adjective/en_positive", "text": "Venezuelan", "is_base_form": true, "ipa": "/ˌvɛnəˈzweɪlən/", "phonetic": "ven-uh-ZWAY-luhn"}]}
+{"guid": "A08_217", "forms": [{"grammatical_form": "adjective/en_positive", "text": "Fijian", "is_base_form": true, "ipa": "/fɪˈdʒiːən/", "phonetic": "fee-JEE-uhn"}]}
+{"guid": "A08_218", "forms": [{"grammatical_form": "adjective/en_positive", "text": "Marshallese", "is_base_form": true, "ipa": "/ˌmɑrʃəˈliz/", "phonetic": "mar-shuh-LEEZ"}]}
+{"guid": "A08_219", "forms": [{"grammatical_form": "adjective/en_positive", "text": "Micronesian", "is_base_form": true, "ipa": "/ˌmaɪkroʊˈniːʒən/", "phonetic": "MY-kroh-NEE-zhuhn"}]}
+{"guid": "A08_220", "forms": [{"grammatical_form": "adjective/en_positive", "text": "Nauruan", "is_base_form": true, "ipa": "/nɑːˈruːən/", "phonetic": "now-ROO-uhn"}]}
+{"guid": "A08_221", "forms": [{"grammatical_form": "adjective/en_positive", "text": "Palauan", "is_base_form": true, "ipa": "/pəˈlaʊən/", "phonetic": "puh-LAU-uhn"}]}
+{"guid": "A08_222", "forms": [{"grammatical_form": "adjective/en_positive", "text": "Papua New Guinean", "is_base_form": true, "ipa": "/ˌpæpjuə nuː ˈɡɪniən/", "phonetic": "PAP-yoo-uh noo GIN-ee-uhn"}]}
+{"guid": "A08_223", "forms": [{"grammatical_form": "adjective/en_positive", "text": "Samoan", "is_base_form": true, "ipa": "/səˈmoʊən/", "phonetic": "suh-MOH-uhn"}]}
+{"guid": "A08_224", "forms": [{"grammatical_form": "adjective/en_positive", "text": "Tongan", "is_base_form": true, "ipa": "/ˈtɑːŋən/", "phonetic": "tahn-GUHN"}]}
+{"guid": "A08_225", "forms": [{"grammatical_form": "adjective/en_positive", "text": "Tuvaluan", "is_base_form": true, "ipa": "/ˌtuːvəˈluːən/", "phonetic": "too-vuh-LOO-uhn"}]}
+{"guid": "A08_226", "forms": [{"grammatical_form": "adjective/en_positive", "text": "Ni-Vanuatu", "is_base_form": true, "ipa": "/ˌniːˌvɑːnuˈɑːtuː/", "phonetic": "nee-vah-noo-AH-too"}]}
+{"guid": "A08_227", "forms": [{"grammatical_form": "adjective/en_positive", "text": "Puerto Rican", "is_base_form": true, "ipa": "/ˌpwɛrtoʊ ˈriːkən/", "phonetic": "PWER-toh REE-kuhn"}]}
+{"guid": "A08_228", "forms": [{"grammatical_form": "adjective/en_positive", "text": "Greenlandic", "is_base_form": true, "ipa": "/ˌɡriːnˈlændɪk/", "phonetic": "gree-nuh-LAN-dik"}]}
+{"guid": "A08_229", "forms": [{"grammatical_form": "adjective/en_positive", "text": "Northern Irish", "is_base_form": true, "ipa": "/ˌnɔrðərn ˈaɪrɪʃ/", "phonetic": "NOR-thern EYE-rish"}]}
+{"guid": "A08_230", "forms": [{"grammatical_form": "adjective/en_positive", "text": "Arab", "is_base_form": true, "ipa": "/ˈærəb/", "phonetic": "AIR-uhb"}]}
+{"guid": "A08_231", "forms": [{"grammatical_form": "adjective/en_positive", "text": "Persian", "is_base_form": true, "ipa": "/ˈpɝːʒən/", "phonetic": "PUR-zhuhn"}]}
+{"guid": "A08_232", "forms": [{"grammatical_form": "adjective/en_positive", "text": "Pashtun", "is_base_form": true, "ipa": "/pəʃˈtun/", "phonetic": "puhsh-TOON"}]}
+{"guid": "A08_233", "forms": [{"grammatical_form": "adjective/en_positive", "text": "Basque", "is_base_form": true, "ipa": "/bæsk/", "phonetic": "BASK"}]}
+{"guid": "A08_234", "forms": [{"grammatical_form": "adjective/en_positive", "text": "Catalan", "is_base_form": true, "ipa": "/ˈkætəlæn/", "phonetic": "KAT-uh-lan"}]}
+{"guid": "A08_235", "forms": [{"grammatical_form": "adjective/en_positive", "text": "Flemish", "is_base_form": true, "ipa": "/ˈflɛmɪʃ/", "phonetic": "FLEM-ish"}]}
+{"guid": "A08_236", "forms": [{"grammatical_form": "adjective/en_positive", "text": "Sami", "is_base_form": true, "ipa": "/ˈsɑːmi/", "phonetic": "SAH-mee"}]}
+{"guid": "A08_237", "forms": [{"grammatical_form": "adjective/en_positive", "text": "Romani", "is_base_form": true, "ipa": "/ˈrɑːməni/", "phonetic": "ROM-uh-nee"}]}
+{"guid": "A08_238", "forms": [{"grammatical_form": "adjective/en_positive", "text": "Tatar", "is_base_form": true, "ipa": "/ˈtɑːtər/", "phonetic": "tuh-TAR"}]}
+{"guid": "A08_239", "forms": [{"grammatical_form": "adjective/en_positive", "text": "Tamil", "is_base_form": true, "ipa": "/ˈtæmɪl/", "phonetic": "TAM-il"}]}
+{"guid": "A08_240", "forms": [{"grammatical_form": "adjective/en_positive", "text": "Punjabi", "is_base_form": true, "ipa": "/pʌnˈdʒɑbi/", "phonetic": "pun-JAH-bee"}]}
+{"guid": "A08_241", "forms": [{"grammatical_form": "adjective/en_positive", "text": "Bengali", "is_base_form": true, "ipa": "/bɛnˈɡɔli/", "phonetic": "ben-GAW-lee"}]}
+{"guid": "A08_242", "forms": [{"grammatical_form": "adjective/en_positive", "text": "Tibetan", "is_base_form": true, "ipa": "/tɪˈbɛtən/", "phonetic": "tih-BET-un"}]}
+{"guid": "A08_243", "forms": [{"grammatical_form": "adjective/en_positive", "text": "Uyghur", "is_base_form": true, "ipa": "/ˈwiːɡər/", "phonetic": "WEE-gur"}]}
+{"guid": "A08_244", "forms": [{"grammatical_form": "adjective/en_positive", "text": "Hmong", "is_base_form": true, "ipa": "/mɔŋ/", "phonetic": "MONG"}]}
+{"guid": "A08_245", "forms": [{"grammatical_form": "adjective/en_positive", "text": "Malay", "is_base_form": true, "ipa": "/məˈleɪ/", "phonetic": "muh-LAY"}]}
+{"guid": "A08_246", "forms": [{"grammatical_form": "adjective/en_positive", "text": "Rohingya", "is_base_form": true, "ipa": "/roʊˈhɪŋɡjə/", "phonetic": "roh-HING-yuh"}]}
+{"guid": "A08_247", "forms": [{"grammatical_form": "adjective/en_positive", "text": "Berber", "is_base_form": true, "ipa": "/ˈbɝːbɚ/", "phonetic": "BER-ber"}]}
+{"guid": "A08_248", "forms": [{"grammatical_form": "adjective/en_positive", "text": "Yoruba", "is_base_form": true, "ipa": "/ˈjɔːrəbə/", "phonetic": "Yuh-ROO-buh"}]}
+{"guid": "A08_249", "forms": [{"grammatical_form": "adjective/en_positive", "text": "Hausa", "is_base_form": true, "ipa": "/ˈhaʊsə/", "phonetic": "HOW-suh"}]}
+{"guid": "A08_250", "forms": [{"grammatical_form": "adjective/en_positive", "text": "Fulani", "is_base_form": true, "ipa": "/ˈfuːlɑːni/", "phonetic": "foo-LAH-nee"}]}
+{"guid": "A08_251", "forms": [{"grammatical_form": "adjective/en_positive", "text": "Oromo", "is_base_form": true, "ipa": "/əˈroʊmoʊ/", "phonetic": "uh-ROH-moh"}]}
+{"guid": "A08_252", "forms": [{"grammatical_form": "adjective/en_positive", "text": "Zulu", "is_base_form": true, "ipa": "/ˈzuːluː/", "phonetic": "ZOO-loo"}]}
+{"guid": "A08_253", "forms": [{"grammatical_form": "adjective/en_positive", "text": "Xhosa", "is_base_form": true, "ipa": "/ˈkoʊsə/", "phonetic": "KOH-suh"}]}
+{"guid": "A08_254", "forms": [{"grammatical_form": "adjective/en_positive", "text": "Afrikaner", "is_base_form": true, "ipa": "/ˌæfrɪˈkɑːnər/", "phonetic": "af-ri-KAH-ner"}]}
+{"guid": "A08_255", "forms": [{"grammatical_form": "adjective/en_positive", "text": "Hispanic", "is_base_form": true, "ipa": "/hɪˈspænɪk/", "phonetic": "hi-SPAN-ik"}]}
+{"guid": "A08_256", "forms": [{"grammatical_form": "adjective/en_positive", "text": "Latino", "is_base_form": true, "ipa": "/ləˈtiːnoʊ/", "phonetic": "luh-TEE-noh"}]}
+{"guid": "A08_257", "forms": [{"grammatical_form": "adjective/en_positive", "text": "Native American", "is_base_form": true, "ipa": "/ˌneɪtɪv əˈmɛrɪkən/", "phonetic": "NAY-tiv uh-MAIR-ih-kuhn"}]}
+{"guid": "A08_258", "forms": [{"grammatical_form": "adjective/en_positive", "text": "Navajo", "is_base_form": true, "ipa": "/ˈnævəhoʊ/", "phonetic": "NA-vuh-hoh"}]}
+{"guid": "A08_259", "forms": [{"grammatical_form": "adjective/en_positive", "text": "Cherokee", "is_base_form": true, "ipa": "/ˈtʃɛrəki/", "phonetic": "CHAIR-uh-kee"}]}
+{"guid": "A08_260", "forms": [{"grammatical_form": "adjective/en_positive", "text": "Inuit", "is_base_form": true, "ipa": "/ˈɪnjuɪt/", "phonetic": "IN-yoo-it"}]}
+{"guid": "A08_261", "forms": [{"grammatical_form": "adjective/en_positive", "text": "Maori", "is_base_form": true, "ipa": "/ˈmaʊri/", "phonetic": "MOW-ree"}]}
+{"guid": "A08_262", "forms": [{"grammatical_form": "adjective/en_positive", "text": "European", "is_base_form": true, "ipa": "/ˌjʊrəˈpiːən/", "phonetic": "yur-uh-PEE-uhn"}]}
+{"guid": "A08_263", "forms": [{"grammatical_form": "adjective/en_positive", "text": "Asian", "is_base_form": true, "ipa": "/ˈeɪʒən/", "phonetic": "AY-zhuhn"}]}
+{"guid": "A08_264", "forms": [{"grammatical_form": "adjective/en_positive", "text": "African", "is_base_form": true, "ipa": "/ˈæfrɪkən/", "phonetic": "af-ri-kuhn"}]}

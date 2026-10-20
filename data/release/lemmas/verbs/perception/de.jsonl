@@ -1,0 +1,3 @@
+{"guid": "V10_001", "grammar_facts": [{"fact_type": "verb_reflexivity", "fact_value": "non_reflexive"}, {"fact_type": "auxiliary_verb", "fact_value": "haben"}, {"fact_type": "past_participle", "fact_value": "gesehen"}]}
+{"guid": "V10_002", "grammar_facts": [{"fact_type": "verb_reflexivity", "fact_value": "non_reflexive"}, {"fact_type": "auxiliary_verb", "fact_value": "haben"}, {"fact_type": "past_participle", "fact_value": "gehört"}]}
+{"guid": "V10_006", "grammar_facts": [{"fact_type": "verb_reflexivity", "fact_value": "non_reflexive"}, {"fact_type": "auxiliary_verb", "fact_value": "haben"}, {"fact_type": "past_participle", "fact_value": "geschaut"}]}

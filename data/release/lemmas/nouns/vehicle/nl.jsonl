@@ -1,0 +1,8 @@
+{"guid": "N40_003", "grammar_facts": [{"fact_type": "number_type", "fact_value": "regular"}, {"fact_type": "plural", "fact_value": "treinen"}, {"fact_type": "plural_status", "fact_value": "override"}]}
+{"guid": "N40_006", "grammar_facts": [{"fact_type": "number_type", "fact_value": "regular"}, {"fact_type": "plural", "fact_value": "vliegtuigen"}, {"fact_type": "plural_status", "fact_value": "override"}]}
+{"guid": "N40_007", "grammar_facts": [{"fact_type": "number_type", "fact_value": "regular"}, {"fact_type": "plural", "fact_value": "fietsen"}, {"fact_type": "plural_status", "fact_value": "override"}]}
+{"guid": "N40_008", "grammar_facts": [{"fact_type": "number_type", "fact_value": "regular"}, {"fact_type": "plural", "fact_value": "boten"}, {"fact_type": "plural_status", "fact_value": "override"}]}
+{"guid": "N40_009", "grammar_facts": [{"fact_type": "number_type", "fact_value": "regular"}, {"fact_type": "plural", "fact_value": "schepen"}, {"fact_type": "plural_status", "fact_value": "override"}]}
+{"guid": "N40_010", "grammar_facts": [{"fact_type": "number_type", "fact_value": "regular"}, {"fact_type": "plural", "fact_value": "taxi's"}, {"fact_type": "plural_status", "fact_value": "override"}]}
+{"guid": "N40_011", "grammar_facts": [{"fact_type": "number_type", "fact_value": "regular"}, {"fact_type": "plural", "fact_value": "vrachtwagens"}, {"fact_type": "plural_status", "fact_value": "override"}]}
+{"guid": "N40_012", "grammar_facts": [{"fact_type": "number_type", "fact_value": "regular"}, {"fact_type": "plural", "fact_value": "motorfietsen"}, {"fact_type": "plural_status", "fact_value": "override"}]}

@@ -29,3 +29,6 @@
 {"guid": "N66_036", "forms": [{"grammatical_form": "noun/en_singular", "text": "atomic orbital", "is_base_form": true}], "variants": [{"kind": "equivalent", "key": "orbital", "forms": [{"grammatical_form": "noun/en_singular", "text": "orbital", "is_base_form": true}]}]}
 {"guid": "N66_038", "forms": [{"grammatical_form": "noun/en_singular", "text": "coefficient alpha", "is_base_form": true}], "variants": [{"kind": "equivalent", "key": "alpha", "forms": [{"grammatical_form": "noun/en_singular", "text": "alpha", "is_base_form": true}]}]}
 {"guid": "N66_039", "forms": [{"grammatical_form": "noun/en_singular", "text": "cohomology groups", "is_base_form": true}]}
+{"guid": "N66_041", "forms": [{"grammatical_form": "noun/en_singular", "text": "factor", "is_base_form": true, "ipa": "/ˈfæktɚ/", "phonetic": "FAK-ter"}]}
+{"guid": "N66_042", "forms": [{"grammatical_form": "noun/en_singular", "text": "negative", "is_base_form": true, "ipa": "/ˈnɛɡətɪv/", "phonetic": "NEG-uh-tiv"}]}
+{"guid": "N66_043", "forms": [{"grammatical_form": "noun/en_singular", "text": "multiple", "is_base_form": true, "ipa": "/ˈmʌltəpəl/", "phonetic": "MUL-tuh-puhl"}]}

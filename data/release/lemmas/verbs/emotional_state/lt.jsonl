@@ -1,8 +1,8 @@
-{"guid": "V05_001", "grammar_facts": [{"fact_type": "infinitive", "fact_value": "patikti"}, {"fact_type": "3s_present", "fact_value": "patinka"}, {"fact_type": "3s_past", "fact_value": "patiko"}]}
+{"guid": "V05_001", "grammar_facts": [{"fact_type": "infinitive", "fact_value": "patikti"}, {"fact_type": "3s_present", "fact_value": "patinka"}, {"fact_type": "3s_past", "fact_value": "patiko"}, {"fact_type": "verb_reflexivity", "fact_value": "non_reflexive"}]}
 {"guid": "V05_002", "grammar_facts": [{"fact_type": "infinitive", "fact_value": "mylėti"}, {"fact_type": "3s_present", "fact_value": "myli"}, {"fact_type": "3s_past", "fact_value": "mylėjo"}]}
-{"guid": "V05_003", "grammar_facts": [{"fact_type": "infinitive", "fact_value": "nekęsti"}, {"fact_type": "3s_present", "fact_value": "nekenčia"}, {"fact_type": "3s_past", "fact_value": "nekentė"}]}
-{"guid": "V05_004", "grammar_facts": [{"fact_type": "infinitive", "fact_value": "norėti"}, {"fact_type": "3s_present", "fact_value": "nori"}, {"fact_type": "3s_past", "fact_value": "norėjo"}]}
-{"guid": "V05_005", "grammar_facts": [{"fact_type": "infinitive", "fact_value": "jausti"}, {"fact_type": "3s_present", "fact_value": "jaučia"}, {"fact_type": "3s_past", "fact_value": "jautė"}]}
+{"guid": "V05_003", "grammar_facts": [{"fact_type": "infinitive", "fact_value": "nekęsti"}, {"fact_type": "3s_present", "fact_value": "nekenčia"}, {"fact_type": "3s_past", "fact_value": "nekentė"}, {"fact_type": "verb_reflexivity", "fact_value": "non_reflexive"}]}
+{"guid": "V05_004", "grammar_facts": [{"fact_type": "infinitive", "fact_value": "norėti"}, {"fact_type": "3s_present", "fact_value": "nori"}, {"fact_type": "3s_past", "fact_value": "norėjo"}, {"fact_type": "verb_reflexivity", "fact_value": "non_reflexive"}]}
+{"guid": "V05_005", "grammar_facts": [{"fact_type": "infinitive", "fact_value": "jausti"}, {"fact_type": "3s_present", "fact_value": "jaučia"}, {"fact_type": "3s_past", "fact_value": "jautė"}, {"fact_type": "verb_reflexivity", "fact_value": "non_reflexive"}]}
 {"guid": "V05_006", "grammar_facts": [{"fact_type": "infinitive", "fact_value": "verkti"}, {"fact_type": "3s_present", "fact_value": "verkia"}, {"fact_type": "3s_past", "fact_value": "verkė"}]}
 {"guid": "V05_007", "grammar_facts": [{"fact_type": "infinitive", "fact_value": "šypsotis"}, {"fact_type": "3s_present", "fact_value": "šypsosi"}, {"fact_type": "3s_past", "fact_value": "šypsojosi"}]}
 {"guid": "V05_008", "grammar_facts": [{"fact_type": "infinitive", "fact_value": "ilgėtis"}, {"fact_type": "3s_present", "fact_value": "ilgisi"}, {"fact_type": "3s_past", "fact_value": "ilgėjosi"}]}
@@ -16,7 +16,7 @@
 {"guid": "V05_016", "grammar_facts": [{"fact_type": "infinitive", "fact_value": "pasitikėti"}, {"fact_type": "3s_present", "fact_value": "pasitiki"}, {"fact_type": "3s_past", "fact_value": "pasitikėjo"}]}
 {"guid": "V05_017", "grammar_facts": [{"fact_type": "infinitive", "fact_value": "teikti pirmenybę"}, {"fact_type": "3s_present", "fact_value": "teika"}, {"fact_type": "3s_past", "fact_value": "teiko"}]}
 {"guid": "V05_018", "grammar_facts": [{"fact_type": "infinitive", "fact_value": "gailėtis"}, {"fact_type": "3s_present", "fact_value": "gailisi"}, {"fact_type": "3s_past", "fact_value": "gailėjosi"}]}
-{"guid": "V05_019", "grammar_facts": [{"fact_type": "infinitive", "fact_value": "rūpintis"}, {"fact_type": "3s_present", "fact_value": "rūpinasi"}, {"fact_type": "3s_past", "fact_value": "rūpinosi"}]}
+{"guid": "V05_019", "grammar_facts": [{"fact_type": "infinitive", "fact_value": "rūpintis"}, {"fact_type": "3s_present", "fact_value": "rūpinasi"}, {"fact_type": "3s_past", "fact_value": "rūpinosi"}, {"fact_type": "verb_reflexivity", "fact_value": "inherently_reflexive"}]}
 {"guid": "V05_020", "grammar_facts": [{"fact_type": "infinitive", "fact_value": "atleisti"}, {"fact_type": "3s_present", "fact_value": "atleidžia"}, {"fact_type": "3s_past", "fact_value": "atleido"}]}
 {"guid": "V05_021", "grammar_facts": [{"fact_type": "infinitive", "fact_value": "žavėtis"}, {"fact_type": "3s_present", "fact_value": "žavisi"}, {"fact_type": "3s_past", "fact_value": "žavėjosi"}]}
 {"guid": "V05_022", "grammar_facts": [{"fact_type": "infinitive", "fact_value": "pavydėti"}, {"fact_type": "3s_present", "fact_value": "pavydi"}, {"fact_type": "3s_past", "fact_value": "pavydėjo"}]}

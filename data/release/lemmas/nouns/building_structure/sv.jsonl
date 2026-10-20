@@ -1,0 +1,10 @@
+{"guid": "N07_001", "grammar_facts": [{"fact_type": "number_type", "fact_value": "regular"}, {"fact_type": "plural", "fact_value": "hus"}, {"fact_type": "plural_status", "fact_value": "override"}]}
+{"guid": "N07_002", "grammar_facts": [{"fact_type": "number_type", "fact_value": "regular"}, {"fact_type": "plural", "fact_value": "skolor"}, {"fact_type": "plural_status", "fact_value": "override"}]}
+{"guid": "N07_003", "grammar_facts": [{"fact_type": "number_type", "fact_value": "regular"}, {"fact_type": "plural", "fact_value": "sjukhus"}, {"fact_type": "plural_status", "fact_value": "override"}]}
+{"guid": "N07_005", "grammar_facts": [{"fact_type": "number_type", "fact_value": "regular"}, {"fact_type": "plural", "fact_value": "butiker"}, {"fact_type": "plural_status", "fact_value": "override"}]}
+{"guid": "N07_006", "grammar_facts": [{"fact_type": "number_type", "fact_value": "regular"}, {"fact_type": "plural", "fact_value": "restauranger"}, {"fact_type": "plural_status", "fact_value": "override"}]}
+{"guid": "N07_007", "grammar_facts": [{"fact_type": "number_type", "fact_value": "regular"}, {"fact_type": "plural", "fact_value": "hotell"}, {"fact_type": "plural_status", "fact_value": "override"}]}
+{"guid": "N07_008", "grammar_facts": [{"fact_type": "number_type", "fact_value": "regular"}, {"fact_type": "plural", "fact_value": "banker"}, {"fact_type": "plural_status", "fact_value": "override"}]}
+{"guid": "N07_009", "grammar_facts": [{"fact_type": "number_type", "fact_value": "regular"}, {"fact_type": "plural", "fact_value": "bibliotek"}, {"fact_type": "plural_status", "fact_value": "override"}]}
+{"guid": "N07_010", "grammar_facts": [{"fact_type": "number_type", "fact_value": "regular"}, {"fact_type": "plural", "fact_value": "museer"}, {"fact_type": "plural_status", "fact_value": "override"}]}
+{"guid": "N07_011", "grammar_facts": [{"fact_type": "number_type", "fact_value": "regular"}, {"fact_type": "plural", "fact_value": "brandstationer"}, {"fact_type": "plural_status", "fact_value": "override"}]}

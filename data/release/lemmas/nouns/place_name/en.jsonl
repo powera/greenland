@@ -1,7 +1,7 @@
 {"guid": "N30_043", "forms": [{"grammatical_form": "noun/en_singular", "text": "land", "is_base_form": true, "ipa": "/lænd/", "phonetic": "LAND"}]}
 {"guid": "N30_058", "forms": [{"grammatical_form": "noun/en_singular", "text": "bench", "is_base_form": true, "ipa": "/bɛntʃ/", "phonetic": "BENCH"}]}
 {"guid": "N30_059", "forms": [{"grammatical_form": "noun/en_singular", "text": "pitch", "is_base_form": true, "ipa": "/pɪtʃ/", "phonetic": "PITCH"}]}
-{"guid": "N30_060", "forms": [{"grammatical_form": "noun/en_singular", "text": "court", "is_base_form": true, "ipa": "/kɔrt/", "phonetic": "KORT"}, {"grammatical_form": "noun/en_possessive_singular", "text": "court's", "is_base_form": false}]}
+{"guid": "N30_060", "forms": [{"grammatical_form": "noun/en_singular", "text": "court", "is_base_form": true, "ipa": "/kɔrt/", "phonetic": "KORT"}]}
 {"guid": "N30_061", "forms": [{"grammatical_form": "noun/en_singular", "text": "rink", "is_base_form": true, "ipa": "/rɪŋk/", "phonetic": "RINK"}]}
 {"guid": "N30_062", "forms": [{"grammatical_form": "noun/en_singular", "text": "lane", "is_base_form": true, "ipa": "/leɪn/", "phonetic": "LAYN"}]}
 {"guid": "N30_063", "forms": [{"grammatical_form": "noun/en_singular", "text": "square", "is_base_form": true, "ipa": "/skwɛr/", "phonetic": "SKWAIR"}]}
@@ -33,3 +33,17 @@
 {"guid": "N30_095", "forms": [{"grammatical_form": "noun/en_singular", "text": "parking lot", "is_base_form": true}]}
 {"guid": "N30_096", "forms": [{"grammatical_form": "noun/en_singular", "text": "town square", "is_base_form": true}]}
 {"guid": "N30_098", "forms": [{"grammatical_form": "noun/en_singular", "text": "funfair", "is_base_form": true, "ipa": "/ˈfʌnˌfɛr/", "phonetic": "FUN-fair"}]}
+{"guid": "N30_100", "forms": [{"grammatical_form": "noun/en_singular", "text": "pasture", "is_base_form": true, "ipa": "/ˈpæstʃɚ/", "phonetic": "PAS-cher"}]}
+{"guid": "N30_101", "forms": [{"grammatical_form": "noun/en_singular", "text": "meadow", "is_base_form": true, "ipa": "/ˈmɛdoʊ/", "phonetic": "MED-oh"}]}
+{"guid": "N30_102", "forms": [{"grammatical_form": "noun/en_singular", "text": "orchard", "is_base_form": true, "ipa": "/ˈɔrtʃərd/", "phonetic": "OR-cherd"}]}
+{"guid": "N30_103", "forms": [{"grammatical_form": "noun/en_singular", "text": "paddock", "is_base_form": true, "ipa": "/ˈpædək/", "phonetic": "PAD-uk"}]}
+{"guid": "N30_104", "forms": [{"grammatical_form": "noun/en_singular", "text": "farmland", "is_base_form": true, "ipa": "/ˈfɑrmˌlænd/", "phonetic": "FARM-land"}]}
+{"guid": "N30_105", "forms": [{"grammatical_form": "noun/en_singular", "text": "grassland", "is_base_form": true, "ipa": "/ˈɡræsˌlænd/", "phonetic": "GRASS-land"}]}
+{"guid": "N30_106", "forms": [{"grammatical_form": "noun/en_singular", "text": "homestead", "is_base_form": true, "ipa": "/ˈhoʊmˌstɛd/", "phonetic": "HOHM-sted"}]}
+{"guid": "N30_107", "forms": [{"grammatical_form": "noun/en_singular", "text": "smallholding", "is_base_form": true, "ipa": "/ˈsmɔlˌhoʊldɪŋ/", "phonetic": "SMAWL-hohl-ding"}]}
+{"guid": "N30_108", "forms": [{"grammatical_form": "noun/en_singular", "text": "plantation", "is_base_form": true, "ipa": "/plænˈteɪʃən/", "phonetic": "plan-TAY-shun"}]}
+{"guid": "N30_109", "forms": [{"grammatical_form": "noun/en_singular", "text": "vineyard", "is_base_form": true, "ipa": "/ˈvɪn.jɚd/", "phonetic": "VIN-yerd"}]}
+{"guid": "N30_110", "forms": [{"grammatical_form": "noun/en_singular", "text": "feedlot", "is_base_form": true, "ipa": "/ˈfiːdˌlɑːt/", "phonetic": "FEED-lot"}]}
+{"guid": "N30_111", "forms": [{"grammatical_form": "noun/en_singular", "text": "corral", "is_base_form": true, "ipa": "/kəˈræl/", "phonetic": "kuh-RAL"}]}
+{"guid": "N30_112", "forms": [{"grammatical_form": "noun/en_singular", "text": "stockyard", "is_base_form": true, "ipa": "/ˈstɑkˌjɑrd/", "phonetic": "STOK-yard"}]}
+{"guid": "N30_113", "forms": [{"grammatical_form": "noun/en_singular", "text": "ranch", "is_base_form": true, "ipa": "/ræntʃ/", "phonetic": "RANCH"}]}

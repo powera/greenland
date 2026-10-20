@@ -8,13 +8,17 @@
 {"guid": "D04_012", "forms": [{"grammatical_form": "adverb/en_positive", "text": "seldom", "is_base_form": true, "ipa": "/ˈsɛldəm/", "phonetic": "SEL-dəm"}]}
 {"guid": "D04_014", "forms": [{"grammatical_form": "adverb/en_positive", "text": "sooner", "is_base_form": true, "ipa": "/ˈsuːnər/", "phonetic": "SOO-nur"}]}
 {"guid": "D04_015", "forms": [{"grammatical_form": "adverb/en_positive", "text": "next", "is_base_form": true, "ipa": "/nɛkst/", "phonetic": "NEH-ksht"}]}
-{"guid": "D04_016", "forms": [{"grammatical_form": "adverb/en_comparative", "text": "earlier", "is_base_form": false}, {"grammatical_form": "adverb/en_superlative", "text": "earliest", "is_base_form": false}]}
-{"guid": "D04_017", "forms": [{"grammatical_form": "adverb/en_positive", "text": "late", "is_base_form": true}, {"grammatical_form": "adverb/en_comparative", "text": "later", "is_base_form": false}, {"grammatical_form": "adverb/en_superlative", "text": "latest", "is_base_form": false}]}
+{"guid": "D04_016", "grammar_facts": [{"fact_type": "gradability", "fact_value": "synthetic"}, {"fact_type": "comparative_status", "fact_value": "regular"}, {"fact_type": "superlative_status", "fact_value": "regular"}]}
+{"guid": "D04_017", "grammar_facts": [{"fact_type": "gradability", "fact_value": "synthetic"}, {"fact_type": "comparative_status", "fact_value": "regular"}, {"fact_type": "superlative_status", "fact_value": "regular"}]}
 {"guid": "D04_018", "forms": [{"grammatical_form": "adverb/en_positive", "text": "meanwhile", "is_base_form": true}]}
 {"guid": "D04_019", "forms": [{"grammatical_form": "adverb/en_positive", "text": "afterward", "is_base_form": true}]}
 {"guid": "D04_020", "forms": [{"grammatical_form": "adverb/en_positive", "text": "beforehand", "is_base_form": true}]}
-{"guid": "D04_021", "forms": [{"grammatical_form": "adverb/en_positive", "text": "after", "is_base_form": true, "ipa": "/ˈæftɚ/", "phonetic": "AF-ter"}]}
+{"guid": "D04_021", "forms": [{"grammatical_form": "adverb/en_positive", "text": "after", "is_base_form": true, "ipa": "/ˈæftɚ/", "phonetic": "AF-ter"}], "grammar_facts": [{"fact_type": "gradability", "fact_value": "non_gradable"}, {"fact_type": "comparative_status", "fact_value": "not_applicable"}, {"fact_type": "superlative_status", "fact_value": "not_applicable"}]}
 {"guid": "D04_022", "forms": [{"grammatical_form": "adverb/en_positive", "text": "eventually", "is_base_form": true, "ipa": "/ɪˈvɛntʃuəli/", "phonetic": "ih-VEN-choo-uh-lee"}]}
 {"guid": "D04_023", "forms": [{"grammatical_form": "adverb/en_positive", "text": "further", "is_base_form": true, "ipa": "/ˈfɝːðɚ/", "phonetic": "FUR-ther"}]}
 {"guid": "D04_024", "forms": [{"grammatical_form": "adverb/en_positive", "text": "then", "is_base_form": true}]}
 {"guid": "D04_025", "forms": [{"grammatical_form": "adverb/en_positive", "text": "anew", "is_base_form": true}]}
+{"guid": "D04_026", "forms": [{"grammatical_form": "adverb/en_positive", "text": "originally", "is_base_form": true, "ipa": "/əˈrɪdʒənəli/", "phonetic": "uh-RIJ-uh-nuh-lee"}]}
+{"guid": "D04_027", "forms": [{"grammatical_form": "adverb/en_positive", "text": "previously", "is_base_form": true, "ipa": "/ˈpriːviəsli/", "phonetic": "PREE-vee-us-lee"}]}
+{"guid": "D04_028", "forms": [{"grammatical_form": "adverb/en_positive", "text": "hence", "is_base_form": true, "ipa": "/hɛns/", "phonetic": "HENS"}]}
+{"guid": "D04_029", "forms": [{"grammatical_form": "adverb/en_positive", "text": "yet", "is_base_form": true, "ipa": "/jɛt/", "phonetic": "YET"}]}

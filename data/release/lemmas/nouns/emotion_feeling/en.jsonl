@@ -39,3 +39,4 @@
 {"guid": "N23_046", "variants": [{"kind": "equivalent", "key": "equilibrium", "forms": [{"grammatical_form": "noun/en_singular", "text": "equilibrium", "is_base_form": true}]}]}
 {"guid": "N23_049", "forms": [{"grammatical_form": "noun/en_singular", "text": "self-consciousness", "is_base_form": true}]}
 {"guid": "N23_050", "variants": [{"kind": "equivalent", "key": "security", "forms": [{"grammatical_form": "noun/en_singular", "text": "security", "is_base_form": true}]}]}
+{"guid": "N23_055", "forms": [{"grammatical_form": "noun/en_singular", "text": "response", "is_base_form": true, "ipa": "/rɪˈspɑns/", "phonetic": "ri-SPONS"}]}

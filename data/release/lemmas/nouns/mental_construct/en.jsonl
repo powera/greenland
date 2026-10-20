@@ -17,13 +17,12 @@
 {"guid": "N20_017", "forms": [{"grammatical_form": "noun/en_singular", "text": "decision", "is_base_form": true, "ipa": "/dɪˈsɪʒən/", "phonetic": "DIH-shun"}]}
 {"guid": "N20_018", "forms": [{"grammatical_form": "noun/en_singular", "text": "vision", "is_base_form": true, "ipa": "/ˈvɪʒ.ən/", "phonetic": "VIZH-uhn"}]}
 {"guid": "N20_020", "forms": [{"grammatical_form": "noun/en_singular", "text": "belief", "is_base_form": true}, {"grammatical_form": "noun/en_plural", "text": "beliefs", "is_base_form": false}]}
-{"guid": "N20_022", "forms": [{"grammatical_form": "noun/en_possessive_singular", "text": "opinion's", "is_base_form": false}]}
 {"guid": "N20_024", "forms": [{"grammatical_form": "noun/en_singular", "text": "point of view", "is_base_form": true}]}
 {"guid": "N20_025", "forms": [{"grammatical_form": "noun/en_singular", "text": "common sense", "is_base_form": true}]}
 {"guid": "N20_026", "forms": [{"grammatical_form": "noun/en_singular", "text": "personality", "is_base_form": true, "ipa": "/ˌpɝːsəˈnæləti/", "phonetic": "pur-suh-NAL-uh-tee"}]}
 {"guid": "N20_027", "forms": [{"grammatical_form": "noun/en_singular", "text": "mythology", "is_base_form": true, "ipa": "/mɪˈθɑːlədʒi/", "phonetic": "mih-THOL-uh-jee"}]}
 {"guid": "N20_028", "forms": [{"grammatical_form": "noun/en_singular", "text": "judgment", "is_base_form": true, "ipa": "/ˈdʒʌdʒmənt/", "phonetic": "JUHJ-munt"}]}
-{"guid": "N20_029", "forms": [{"grammatical_form": "noun/en_singular", "text": "agency", "is_base_form": true, "ipa": "/ˈeɪdʒənsi/", "phonetic": "AY-juhn-see"}, {"grammatical_form": "noun/en_possessive_singular", "text": "agency's", "is_base_form": false}]}
+{"guid": "N20_029", "forms": [{"grammatical_form": "noun/en_singular", "text": "agency", "is_base_form": true, "ipa": "/ˈeɪdʒənsi/", "phonetic": "AY-juhn-see"}]}
 {"guid": "N20_030", "forms": [{"grammatical_form": "noun/en_singular", "text": "reasoning", "is_base_form": true, "ipa": "/ˈriːzənɪŋ/", "phonetic": "REE-zuh-ning"}]}
 {"guid": "N20_031", "forms": [{"grammatical_form": "noun/en_singular", "text": "self-determination", "is_base_form": true, "ipa": "/ˌsɛlf dɪˌtɝməˈneɪʃən/", "phonetic": "self-di-ter-muh-NAY-shun"}]}
 {"guid": "N20_032", "forms": [{"grammatical_form": "noun/en_singular", "text": "cognition", "is_base_form": true, "ipa": "/kɑːɡˈnɪʃən/", "phonetic": "kog-NISH-un"}]}

@@ -1,0 +1,6 @@
+{"guid": "V12_001", "grammar_facts": [{"fact_type": "verb_reflexivity", "fact_value": "non_reflexive"}, {"fact_type": "auxiliary_verb", "fact_value": "sein"}, {"fact_type": "past_participle", "fact_value": "gegangen"}]}
+{"guid": "V12_002", "grammar_facts": [{"fact_type": "verb_reflexivity", "fact_value": "non_reflexive"}, {"fact_type": "auxiliary_verb", "fact_value": "sein"}, {"fact_type": "past_participle", "fact_value": "gefahren"}]}
+{"guid": "V12_003", "grammar_facts": [{"fact_type": "verb_reflexivity", "fact_value": "non_reflexive"}, {"fact_type": "auxiliary_verb", "fact_value": "sein"}, {"fact_type": "past_participle", "fact_value": "gelaufen"}]}
+{"guid": "V12_004", "grammar_facts": [{"fact_type": "verb_reflexivity", "fact_value": "non_reflexive"}, {"fact_type": "auxiliary_verb", "fact_value": "sein"}, {"fact_type": "past_participle", "fact_value": "gegangen"}]}
+{"guid": "V12_005", "grammar_facts": [{"fact_type": "verb_reflexivity", "fact_value": "non_reflexive"}, {"fact_type": "auxiliary_verb", "fact_value": "sein"}, {"fact_type": "past_participle", "fact_value": "gekommen"}]}
+{"guid": "V12_030", "grammar_facts": [{"fact_type": "verb_reflexivity", "fact_value": "non_reflexive"}, {"fact_type": "auxiliary_verb", "fact_value": "haben"}, {"fact_type": "past_participle", "fact_value": "besucht"}]}

@@ -1,13 +1,13 @@
-{"guid": "N02_001", "forms": [{"grammatical_form": "noun/en_singular", "text": "dog", "is_base_form": true, "ipa": "/dɒɡ/", "phonetic": "DOG"}, {"grammatical_form": "noun/en_possessive_singular", "text": "dog's", "is_base_form": false}]}
-{"guid": "N02_002", "forms": [{"grammatical_form": "noun/en_singular", "text": "cat", "is_base_form": true, "ipa": "/kæt/", "phonetic": "CAT"}]}
-{"guid": "N02_003", "forms": [{"grammatical_form": "noun/en_singular", "text": "bird", "is_base_form": true, "ipa": "/bɜːrd/", "phonetic": "BIRD"}, {"grammatical_form": "noun/en_possessive_singular", "text": "bird's", "is_base_form": false}]}
-{"guid": "N02_004", "forms": [{"grammatical_form": "noun/en_singular", "text": "horse", "is_base_form": true, "ipa": "/hɔːrs/", "phonetic": "HAWR-s"}, {"grammatical_form": "noun/en_possessive_singular", "text": "horse's", "is_base_form": false}]}
-{"guid": "N02_005", "forms": [{"grammatical_form": "noun/en_singular", "text": "cow", "is_base_form": true, "ipa": "/kaʊ/", "phonetic": "KAW"}, {"grammatical_form": "noun/en_possessive_singular", "text": "cow's", "is_base_form": false}]}
-{"guid": "N02_006", "forms": [{"grammatical_form": "noun/en_singular", "text": "pig", "is_base_form": true, "ipa": "/pɪɡ/", "phonetic": "PIG"}]}
-{"guid": "N02_007", "forms": [{"grammatical_form": "noun/en_singular", "text": "chicken", "is_base_form": true, "ipa": "/ˈtʃɪk.ɪn/", "phonetic": "CHIK-uhn"}]}
-{"guid": "N02_008", "forms": [{"grammatical_form": "noun/en_singular", "text": "mouse", "is_base_form": true, "ipa": "/maʊs/", "phonetic": "MAWs"}, {"grammatical_form": "noun/en_plural", "text": "mice", "is_base_form": false}]}
-{"guid": "N02_009", "forms": [{"grammatical_form": "noun/en_singular", "text": "bear", "is_base_form": true, "ipa": "/bɛr/", "phonetic": "BER"}]}
-{"guid": "N02_010", "forms": [{"grammatical_form": "noun/en_singular", "text": "wolf", "is_base_form": true, "ipa": "/wʊlf/", "phonetic": "WUHF"}, {"grammatical_form": "noun/en_plural", "text": "wolves", "is_base_form": false}]}
+{"guid": "N02_001", "forms": [{"grammatical_form": "noun/en_singular", "text": "dog", "is_base_form": true, "ipa": "/dɒɡ/", "phonetic": "DOG"}], "grammar_facts": [{"fact_type": "countability", "fact_value": "countable"}, {"fact_type": "number_type", "fact_value": "regular"}, {"fact_type": "animacy", "fact_value": "animate"}, {"fact_type": "plural_status", "fact_value": "regular"}]}
+{"guid": "N02_002", "forms": [{"grammatical_form": "noun/en_singular", "text": "cat", "is_base_form": true, "ipa": "/kæt/", "phonetic": "CAT"}], "grammar_facts": [{"fact_type": "countability", "fact_value": "countable"}, {"fact_type": "number_type", "fact_value": "regular"}, {"fact_type": "animacy", "fact_value": "animate"}, {"fact_type": "plural_status", "fact_value": "regular"}]}
+{"guid": "N02_003", "forms": [{"grammatical_form": "noun/en_singular", "text": "bird", "is_base_form": true, "ipa": "/bɜːrd/", "phonetic": "BIRD"}], "grammar_facts": [{"fact_type": "countability", "fact_value": "countable"}, {"fact_type": "number_type", "fact_value": "regular"}, {"fact_type": "animacy", "fact_value": "animate"}, {"fact_type": "plural_status", "fact_value": "regular"}]}
+{"guid": "N02_004", "forms": [{"grammatical_form": "noun/en_singular", "text": "horse", "is_base_form": true, "ipa": "/hɔːrs/", "phonetic": "HAWR-s"}], "grammar_facts": [{"fact_type": "countability", "fact_value": "countable"}, {"fact_type": "number_type", "fact_value": "regular"}, {"fact_type": "animacy", "fact_value": "animate"}, {"fact_type": "plural_status", "fact_value": "regular"}]}
+{"guid": "N02_005", "forms": [{"grammatical_form": "noun/en_singular", "text": "cow", "is_base_form": true, "ipa": "/kaʊ/", "phonetic": "KAW"}], "grammar_facts": [{"fact_type": "countability", "fact_value": "countable"}, {"fact_type": "number_type", "fact_value": "regular"}, {"fact_type": "animacy", "fact_value": "animate"}, {"fact_type": "plural_status", "fact_value": "regular"}]}
+{"guid": "N02_006", "forms": [{"grammatical_form": "noun/en_singular", "text": "pig", "is_base_form": true, "ipa": "/pɪɡ/", "phonetic": "PIG"}], "grammar_facts": [{"fact_type": "countability", "fact_value": "countable"}, {"fact_type": "number_type", "fact_value": "regular"}, {"fact_type": "animacy", "fact_value": "animate"}, {"fact_type": "plural_status", "fact_value": "regular"}]}
+{"guid": "N02_007", "forms": [{"grammatical_form": "noun/en_singular", "text": "chicken", "is_base_form": true, "ipa": "/ˈtʃɪk.ɪn/", "phonetic": "CHIK-uhn"}], "grammar_facts": [{"fact_type": "countability", "fact_value": "both"}, {"fact_type": "number_type", "fact_value": "regular"}, {"fact_type": "animacy", "fact_value": "animate"}, {"fact_type": "plural_status", "fact_value": "regular"}]}
+{"guid": "N02_008", "forms": [{"grammatical_form": "noun/en_singular", "text": "mouse", "is_base_form": true, "ipa": "/maʊs/", "phonetic": "MAWs"}], "grammar_facts": [{"fact_type": "countability", "fact_value": "countable"}, {"fact_type": "number_type", "fact_value": "regular"}, {"fact_type": "animacy", "fact_value": "animate"}, {"fact_type": "plural", "fact_value": "mice"}, {"fact_type": "plural_status", "fact_value": "override"}]}
+{"guid": "N02_009", "forms": [{"grammatical_form": "noun/en_singular", "text": "bear", "is_base_form": true, "ipa": "/bɛr/", "phonetic": "BER"}], "grammar_facts": [{"fact_type": "countability", "fact_value": "countable"}, {"fact_type": "number_type", "fact_value": "regular"}, {"fact_type": "animacy", "fact_value": "animate"}, {"fact_type": "plural_status", "fact_value": "regular"}]}
+{"guid": "N02_010", "forms": [{"grammatical_form": "noun/en_singular", "text": "wolf", "is_base_form": true, "ipa": "/wʊlf/", "phonetic": "WUHF"}], "grammar_facts": [{"fact_type": "countability", "fact_value": "countable"}, {"fact_type": "number_type", "fact_value": "regular"}, {"fact_type": "animacy", "fact_value": "animate"}, {"fact_type": "plural", "fact_value": "wolves"}, {"fact_type": "plural_status", "fact_value": "override"}]}
 {"guid": "N02_011", "forms": [{"grammatical_form": "noun/en_singular", "text": "rabbit", "is_base_form": true, "ipa": "ˈræbɪt", "phonetic": "RAB-bit"}]}
 {"guid": "N02_012", "forms": [{"grammatical_form": "noun/en_singular", "text": "whale", "is_base_form": true, "ipa": "/weɪl/", "phonetic": "WEY-uhl"}]}
 {"guid": "N02_013", "forms": [{"grammatical_form": "noun/en_singular", "text": "tiger", "is_base_form": true, "ipa": "/ˈtaɪgər/", "phonetic": "TIGH-ger"}]}
@@ -25,10 +25,10 @@
 {"guid": "N02_026", "forms": [{"grammatical_form": "noun/en_singular", "text": "crow", "is_base_form": true, "ipa": "/kraʊ/", "phonetic": "KROH"}]}
 {"guid": "N02_027", "forms": [{"grammatical_form": "noun/en_singular", "text": "eagle", "is_base_form": true, "ipa": "/ˈiː.ɡəl/", "phonetic": "EE-geh-ul"}]}
 {"guid": "N02_028", "forms": [{"grammatical_form": "noun/en_singular", "text": "sheep", "is_base_form": true, "ipa": "ʃiːp", "phonetic": "SHEEP"}, {"grammatical_form": "noun/en_plural", "text": "sheep", "is_base_form": false}]}
-{"guid": "N02_030", "forms": [{"grammatical_form": "noun/en_singular", "text": "animal", "is_base_form": true, "ipa": "/ˈænɪml/", "phonetic": "AN-ih-muhl"}, {"grammatical_form": "noun/en_possessive_singular", "text": "animal's", "is_base_form": false}]}
+{"guid": "N02_030", "forms": [{"grammatical_form": "noun/en_singular", "text": "animal", "is_base_form": true, "ipa": "/ˈænɪml/", "phonetic": "AN-ih-muhl"}]}
 {"guid": "N02_031", "forms": [{"grammatical_form": "noun/en_singular", "text": "creature", "is_base_form": true, "ipa": "/ˈkriːtʃɚ/", "phonetic": "KREE-chuh"}]}
 {"guid": "N02_032", "forms": [{"grammatical_form": "noun/en_singular", "text": "beast", "is_base_form": true, "ipa": "/biːst/", "phonetic": "BEAST"}]}
-{"guid": "N02_034", "forms": [{"grammatical_form": "noun/en_plural", "text": "fish", "is_base_form": false}]}
+{"guid": "N02_034", "grammar_facts": [{"fact_type": "countability", "fact_value": "both"}, {"fact_type": "number_type", "fact_value": "regular"}, {"fact_type": "animacy", "fact_value": "animate"}, {"fact_type": "plural", "fact_value": "fish"}, {"fact_type": "plural_status", "fact_value": "override"}]}
 {"guid": "N02_037", "forms": [{"grammatical_form": "noun/en_plural", "text": "deer", "is_base_form": false}]}
 {"guid": "N02_053", "forms": [{"grammatical_form": "noun/en_singular", "text": "hippopotamus", "is_base_form": true}]}
 {"guid": "N02_054", "forms": [{"grammatical_form": "noun/en_singular", "text": "rhinoceros", "is_base_form": true}, {"grammatical_form": "noun/en_plural", "text": "rhinoceroses", "is_base_form": false}]}
@@ -78,8 +78,38 @@
 {"guid": "N02_112", "forms": [{"grammatical_form": "noun/en_singular", "text": "dinosaur", "is_base_form": true, "ipa": "/ˈdaɪnəˌsɔr/", "phonetic": "DIE-nuh-sor"}]}
 {"guid": "N02_113", "forms": [{"grammatical_form": "noun/en_singular", "text": "tortoise", "is_base_form": true, "ipa": "/ˈtɔr.təs/", "phonetic": "TOR-tus"}]}
 {"guid": "N02_116", "forms": [{"grammatical_form": "noun/en_singular", "text": "migrant animal", "is_base_form": true}]}
-{"guid": "N02_117", "forms": [{"grammatical_form": "noun/en_possessive_singular", "text": "carrier's", "is_base_form": false}]}
 {"guid": "N02_118", "forms": [{"grammatical_form": "noun/en_singular", "text": "broiler chicken", "is_base_form": true}], "variants": [{"kind": "equivalent", "key": "broiler", "forms": [{"grammatical_form": "noun/en_singular", "text": "broiler", "is_base_form": true}]}]}
 {"guid": "N02_119", "variants": [{"kind": "equivalent", "key": "larvae", "forms": [{"grammatical_form": "noun/en_singular", "text": "larvae", "is_base_form": true}]}]}
 {"guid": "N02_120", "variants": [{"kind": "equivalent", "key": "gulls", "forms": [{"grammatical_form": "noun/en_singular", "text": "gulls", "is_base_form": true}]}]}
 {"guid": "N02_122", "forms": [{"grammatical_form": "noun/en_singular", "text": "breeding partner", "is_base_form": true}]}
+{"guid": "N02_123", "forms": [{"grammatical_form": "noun/en_singular", "text": "bull", "is_base_form": true, "ipa": "/bʊl/", "phonetic": "BOOL"}]}
+{"guid": "N02_124", "forms": [{"grammatical_form": "noun/en_singular", "text": "ox", "is_base_form": true, "ipa": "/ɑks/", "phonetic": "OKS"}]}
+{"guid": "N02_125", "forms": [{"grammatical_form": "noun/en_singular", "text": "calf", "is_base_form": true, "ipa": "/kæf/", "phonetic": "KAF"}]}
+{"guid": "N02_126", "forms": [{"grammatical_form": "noun/en_singular", "text": "heifer", "is_base_form": true, "ipa": "/ˈhɛfər/", "phonetic": "HEF-er"}]}
+{"guid": "N02_127", "forms": [{"grammatical_form": "noun/en_singular", "text": "hen", "is_base_form": true, "ipa": "/hɛn/", "phonetic": "HEN"}]}
+{"guid": "N02_128", "forms": [{"grammatical_form": "noun/en_singular", "text": "lamb", "is_base_form": true, "ipa": "/læm/", "phonetic": "LAM"}]}
+{"guid": "N02_129", "forms": [{"grammatical_form": "noun/en_singular", "text": "ram", "is_base_form": true, "ipa": "/ræm/", "phonetic": "RAM"}]}
+{"guid": "N02_130", "forms": [{"grammatical_form": "noun/en_singular", "text": "ewe", "is_base_form": true, "ipa": "/juː/", "phonetic": "YOO"}]}
+{"guid": "N02_131", "forms": [{"grammatical_form": "noun/en_singular", "text": "piglet", "is_base_form": true, "ipa": "/ˈpɪɡlɪt/", "phonetic": "PIG-lit"}]}
+{"guid": "N02_132", "forms": [{"grammatical_form": "noun/en_singular", "text": "foal", "is_base_form": true, "ipa": "/foʊl/", "phonetic": "FOHL"}]}
+{"guid": "N02_133", "forms": [{"grammatical_form": "noun/en_singular", "text": "livestock", "is_base_form": true, "ipa": "/ˈlaɪvˌstɑk/", "phonetic": "LIVE-stok"}]}
+{"guid": "N02_134", "forms": [{"grammatical_form": "noun/en_singular", "text": "poultry", "is_base_form": true, "ipa": "/ˈpoʊltri/", "phonetic": "POHL-tree"}]}
+{"guid": "N02_135", "forms": [{"grammatical_form": "noun/en_singular", "text": "steer", "is_base_form": true, "ipa": "/stɪr/", "phonetic": "STEER"}]}
+{"guid": "N02_136", "forms": [{"grammatical_form": "noun/en_singular", "text": "bullock", "is_base_form": true, "ipa": "/ˈbʊlək/", "phonetic": "BUHL-uhk"}]}
+{"guid": "N02_137", "forms": [{"grammatical_form": "noun/en_singular", "text": "sow", "is_base_form": true, "ipa": "/saʊ/", "phonetic": "SOW"}]}
+{"guid": "N02_138", "forms": [{"grammatical_form": "noun/en_singular", "text": "boar", "is_base_form": true, "ipa": "/bɔr/", "phonetic": "BOR"}]}
+{"guid": "N02_139", "forms": [{"grammatical_form": "noun/en_singular", "text": "stallion", "is_base_form": true, "ipa": "/ˈstæljən/", "phonetic": "STAL-yun"}]}
+{"guid": "N02_140", "forms": [{"grammatical_form": "noun/en_singular", "text": "mare", "is_base_form": true, "ipa": "/mɛr/", "phonetic": "MAIR"}]}
+{"guid": "N02_141", "forms": [{"grammatical_form": "noun/en_singular", "text": "kid", "is_base_form": true, "ipa": "/kɪd/", "phonetic": "KID"}]}
+{"guid": "N02_142", "forms": [{"grammatical_form": "noun/en_singular", "text": "gelding", "is_base_form": true, "ipa": "/ˈɡɛldɪŋ/", "phonetic": "GEL-ding"}]}
+{"guid": "N02_143", "forms": [{"grammatical_form": "noun/en_singular", "text": "colt", "is_base_form": true, "ipa": "/koʊlt/", "phonetic": "KOHLT"}]}
+{"guid": "N02_144", "forms": [{"grammatical_form": "noun/en_singular", "text": "filly", "is_base_form": true, "ipa": "/ˈfɪli/", "phonetic": "FIL-ee"}]}
+{"guid": "N02_145", "forms": [{"grammatical_form": "noun/en_singular", "text": "gilt", "is_base_form": true, "ipa": "/ɡɪlt/", "phonetic": "GILT"}]}
+{"guid": "N02_146", "forms": [{"grammatical_form": "noun/en_singular", "text": "drake", "is_base_form": true, "ipa": "/dreɪk/", "phonetic": "DRAYK"}]}
+{"guid": "N02_147", "forms": [{"grammatical_form": "noun/en_singular", "text": "gander", "is_base_form": true, "ipa": "/ˈɡændər/", "phonetic": "GAN-der"}]}
+{"guid": "N02_148", "forms": [{"grammatical_form": "noun/en_singular", "text": "pullet", "is_base_form": true, "ipa": "/ˈpʊlɪt/", "phonetic": "PUL-it"}]}
+{"guid": "N02_149", "forms": [{"grammatical_form": "noun/en_singular", "text": "cockerel", "is_base_form": true, "ipa": "/ˈkɑkərəl/", "phonetic": "KOK-uh-rel"}]}
+{"guid": "N02_150", "forms": [{"grammatical_form": "noun/en_singular", "text": "sheepdog", "is_base_form": true, "ipa": "/ˈʃiːpˌdɔɡ/", "phonetic": "SHEEP-dawg"}]}
+{"guid": "N02_151", "forms": [{"grammatical_form": "noun/en_singular", "text": "fleece", "is_base_form": true, "ipa": "/fliːs/", "phonetic": "FLEES"}]}
+{"guid": "N02_152", "forms": [{"grammatical_form": "noun/en_singular", "text": "hutch", "is_base_form": true, "ipa": "/hʌtʃ/", "phonetic": "HUHCH"}]}
+{"guid": "N02_153", "forms": [{"grammatical_form": "noun/en_singular", "text": "horseshoe", "is_base_form": true, "ipa": "/ˈhɔrsˌʃu/", "phonetic": "HAWRSS-hoo"}]}

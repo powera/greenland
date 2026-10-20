@@ -1,0 +1,5 @@
+{"guid": "V05_001", "grammar_facts": [{"fact_type": "verb_reflexivity", "fact_value": "non_reflexive"}, {"fact_type": "auxiliary_verb", "fact_value": "haben"}, {"fact_type": "past_participle", "fact_value": "gemocht"}]}
+{"guid": "V05_003", "grammar_facts": [{"fact_type": "verb_reflexivity", "fact_value": "non_reflexive"}, {"fact_type": "auxiliary_verb", "fact_value": "haben"}, {"fact_type": "past_participle", "fact_value": "gehasst"}]}
+{"guid": "V05_004", "grammar_facts": [{"fact_type": "verb_reflexivity", "fact_value": "non_reflexive"}, {"fact_type": "auxiliary_verb", "fact_value": "haben"}, {"fact_type": "past_participle", "fact_value": "gewollt"}]}
+{"guid": "V05_005", "grammar_facts": [{"fact_type": "verb_reflexivity", "fact_value": "non_reflexive"}, {"fact_type": "auxiliary_verb", "fact_value": "haben"}, {"fact_type": "past_participle", "fact_value": "gefühlt"}]}
+{"guid": "V05_019", "grammar_facts": [{"fact_type": "verb_reflexivity", "fact_value": "inherently_reflexive"}, {"fact_type": "auxiliary_verb", "fact_value": "haben"}, {"fact_type": "past_participle", "fact_value": "sich gekümmert"}]}

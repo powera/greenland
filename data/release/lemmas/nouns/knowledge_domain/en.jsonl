@@ -100,3 +100,4 @@
 {"guid": "N21_137", "forms": [{"grammatical_form": "noun/en_singular", "text": "cultural anthropology", "is_base_form": true}]}
 {"guid": "N21_142", "forms": [{"grammatical_form": "noun/en_singular", "text": "domain ontology", "is_base_form": true}], "variants": [{"kind": "equivalent", "key": "ontology", "forms": [{"grammatical_form": "noun/en_singular", "text": "ontology", "is_base_form": true}]}]}
 {"guid": "N21_147", "forms": [{"grammatical_form": "noun/en_singular", "text": "philosophical skepticism", "is_base_form": true}], "variants": [{"kind": "equivalent", "key": "skepticism", "forms": [{"grammatical_form": "noun/en_singular", "text": "skepticism", "is_base_form": true}]}]}
+{"guid": "N21_148", "forms": [{"grammatical_form": "noun/en_singular", "text": "principle", "is_base_form": true, "ipa": "/ˈprɪnsəpəl/", "phonetic": "PRIN-suh-puhl"}]}

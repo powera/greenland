@@ -11,3 +11,6 @@
 {"guid": "A07_011", "forms": [{"grammatical_form": "adjective/en_positive", "text": "pre-eminent", "is_base_form": true, "ipa": "/ˌpriːˈɛmənənt/", "phonetic": "pree-EM-uh-nunt"}]}
 {"guid": "A07_012", "forms": [{"grammatical_form": "adjective/en_positive", "text": "world-famous", "is_base_form": true, "ipa": "/ˌwɝːld ˈfeɪməs/", "phonetic": "WORLD-FAY-muhs"}]}
 {"guid": "A07_013", "forms": [{"grammatical_form": "adjective/en_positive", "text": "world-renowned", "is_base_form": true, "ipa": "/ˌwɝːld rɪˈnaʊnd/", "phonetic": "WORLD-rih-NOWND"}]}
+{"guid": "A07_014", "forms": [{"grammatical_form": "adjective/en_positive", "text": "central", "is_base_form": true, "ipa": "/ˈsɛntrəl/", "phonetic": "SEN-truhl"}]}
+{"guid": "A07_015", "forms": [{"grammatical_form": "adjective/en_positive", "text": "historical", "is_base_form": true, "ipa": "/hɪˈstɔrɪkəl/", "phonetic": "hi-STAWR-ih-kuhl"}]}
+{"guid": "A07_016", "forms": [{"grammatical_form": "adjective/en_positive", "text": "essential", "is_base_form": true, "ipa": "/ɪˈsɛnʃəl/", "phonetic": "ih-SEN-shuhl"}]}

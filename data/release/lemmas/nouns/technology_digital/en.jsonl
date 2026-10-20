@@ -56,3 +56,4 @@
 {"guid": "N52_071", "variants": [{"kind": "equivalent", "key": "search", "forms": [{"grammatical_form": "noun/en_singular", "text": "search", "is_base_form": true}]}]}
 {"guid": "N52_072", "forms": [{"grammatical_form": "noun/en_singular", "text": "online platform", "is_base_form": true}], "variants": [{"kind": "equivalent", "key": "platform", "forms": [{"grammatical_form": "noun/en_singular", "text": "platform", "is_base_form": true}]}]}
 {"guid": "N52_074", "variants": [{"kind": "equivalent", "key": "link", "forms": [{"grammatical_form": "noun/en_singular", "text": "link", "is_base_form": true}]}]}
+{"guid": "N52_075", "forms": [{"grammatical_form": "noun/en_singular", "text": "feature", "is_base_form": true, "ipa": "/ˈfiːtʃər/", "phonetic": "FEE-cher"}]}

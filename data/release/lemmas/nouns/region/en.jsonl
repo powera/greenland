@@ -2,7 +2,7 @@
 {"guid": "N45_002", "forms": [{"grammatical_form": "noun/en_singular", "text": "Latvia", "is_base_form": true, "ipa": "/ˌlætˈviːə/", "phonetic": "LAT-vee-uh"}]}
 {"guid": "N45_003", "forms": [{"grammatical_form": "noun/en_singular", "text": "Estonia", "is_base_form": true, "ipa": "/ˌɛs.təˈni.i.ə/", "phonetic": "ehs-tə-NEE-ee-ə"}]}
 {"guid": "N45_004", "forms": [{"grammatical_form": "noun/en_singular", "text": "Poland", "is_base_form": true, "ipa": "/ˌpɒl.ənd/", "phonetic": "POL-ə-nd"}]}
-{"guid": "N45_005", "forms": [{"grammatical_form": "noun/en_singular", "text": "Germany", "is_base_form": true, "ipa": "/ˈdɔɪ.ʒə.mi/", "phonetic": "DOY-juh-mee"}, {"grammatical_form": "noun/en_possessive_singular", "text": "Germany's", "is_base_form": false}]}
+{"guid": "N45_005", "forms": [{"grammatical_form": "noun/en_singular", "text": "Germany", "is_base_form": true, "ipa": "/ˈdɔɪ.ʒə.mi/", "phonetic": "DOY-juh-mee"}]}
 {"guid": "N45_006", "forms": [{"grammatical_form": "noun/en_singular", "text": "France", "is_base_form": true, "ipa": "/frɑːns/", "phonetic": "FRANS"}]}
 {"guid": "N45_007", "forms": [{"grammatical_form": "noun/en_singular", "text": "Spain", "is_base_form": true, "ipa": "/ˈspeɪn/", "phonetic": "SPAY-n"}]}
 {"guid": "N45_008", "forms": [{"grammatical_form": "noun/en_singular", "text": "Italy", "is_base_form": true, "ipa": "/ɪˈtaɪli/", "phonetic": "IH-ty-luh"}]}
@@ -10,8 +10,8 @@
 {"guid": "N45_010", "forms": [{"grammatical_form": "noun/en_singular", "text": "England", "is_base_form": true, "ipa": "/ˈɛŋlənd/", "phonetic": "EN-glənd"}]}
 {"guid": "N45_011", "forms": [{"grammatical_form": "noun/en_singular", "text": "United States", "is_base_form": true, "ipa": "/ˌjuːnɪtɛd ˈsɛts/", "phonetic": "YOO-nit-id SET-s"}]}
 {"guid": "N45_012", "forms": [{"grammatical_form": "noun/en_singular", "text": "Canada", "is_base_form": true, "ipa": "/kəˈnædə/", "phonetic": "kuh-NAD-uh"}]}
-{"guid": "N45_013", "forms": [{"grammatical_form": "noun/en_singular", "text": "Japan", "is_base_form": true, "ipa": "dʒəˈpæn", "phonetic": "JAY-puhn"}, {"grammatical_form": "noun/en_possessive_singular", "text": "Japan's", "is_base_form": false}]}
-{"guid": "N45_014", "forms": [{"grammatical_form": "noun/en_singular", "text": "China", "is_base_form": true, "ipa": "/ˈtʃaɪnə/", "phonetic": "CHY-nuh"}, {"grammatical_form": "noun/en_possessive_singular", "text": "China's", "is_base_form": false}]}
+{"guid": "N45_013", "forms": [{"grammatical_form": "noun/en_singular", "text": "Japan", "is_base_form": true, "ipa": "dʒəˈpæn", "phonetic": "JAY-puhn"}]}
+{"guid": "N45_014", "forms": [{"grammatical_form": "noun/en_singular", "text": "China", "is_base_form": true, "ipa": "/ˈtʃaɪnə/", "phonetic": "CHY-nuh"}]}
 {"guid": "N45_015", "forms": [{"grammatical_form": "noun/en_singular", "text": "India", "is_base_form": true, "ipa": "/ˈɪndiə/", "phonetic": "IN-dee-uh"}]}
 {"guid": "N45_016", "forms": [{"grammatical_form": "noun/en_singular", "text": "Brazil", "is_base_form": true, "ipa": "ˌbræzɪl", "phonetic": "BRAH-zil"}]}
 {"guid": "N45_017", "forms": [{"grammatical_form": "noun/en_singular", "text": "Australia", "is_base_form": true, "ipa": "/ɔːˈstreɪliə/", "phonetic": "AW-streigh-lee-uh"}]}
@@ -27,11 +27,11 @@
 {"guid": "N45_027", "forms": [{"grammatical_form": "noun/en_singular", "text": "Alaska", "is_base_form": true}]}
 {"guid": "N45_028", "forms": [{"grammatical_form": "noun/en_singular", "text": "Arizona", "is_base_form": true}]}
 {"guid": "N45_029", "forms": [{"grammatical_form": "noun/en_singular", "text": "Arkansas", "is_base_form": true}]}
-{"guid": "N45_030", "forms": [{"grammatical_form": "noun/en_singular", "text": "California", "is_base_form": true}, {"grammatical_form": "noun/en_possessive_singular", "text": "California's", "is_base_form": false}]}
+{"guid": "N45_030", "forms": [{"grammatical_form": "noun/en_singular", "text": "California", "is_base_form": true}]}
 {"guid": "N45_031", "forms": [{"grammatical_form": "noun/en_singular", "text": "Colorado", "is_base_form": true}]}
 {"guid": "N45_032", "forms": [{"grammatical_form": "noun/en_singular", "text": "Connecticut", "is_base_form": true}]}
 {"guid": "N45_033", "forms": [{"grammatical_form": "noun/en_singular", "text": "Delaware", "is_base_form": true}]}
-{"guid": "N45_034", "forms": [{"grammatical_form": "noun/en_singular", "text": "Florida", "is_base_form": true}, {"grammatical_form": "noun/en_possessive_singular", "text": "Florida's", "is_base_form": false}]}
+{"guid": "N45_034", "forms": [{"grammatical_form": "noun/en_singular", "text": "Florida", "is_base_form": true}]}
 {"guid": "N45_035", "forms": [{"grammatical_form": "noun/en_singular", "text": "Georgia", "is_base_form": true}]}
 {"guid": "N45_036", "forms": [{"grammatical_form": "noun/en_singular", "text": "Hawaii", "is_base_form": true}]}
 {"guid": "N45_037", "forms": [{"grammatical_form": "noun/en_singular", "text": "Idaho", "is_base_form": true}]}
@@ -44,10 +44,10 @@
 {"guid": "N45_044", "forms": [{"grammatical_form": "noun/en_singular", "text": "Maine", "is_base_form": true}]}
 {"guid": "N45_045", "forms": [{"grammatical_form": "noun/en_singular", "text": "Maryland", "is_base_form": true}]}
 {"guid": "N45_046", "forms": [{"grammatical_form": "noun/en_singular", "text": "Massachusetts", "is_base_form": true}]}
-{"guid": "N45_047", "forms": [{"grammatical_form": "noun/en_singular", "text": "Michigan", "is_base_form": true}, {"grammatical_form": "noun/en_possessive_singular", "text": "Michigan's", "is_base_form": false}]}
+{"guid": "N45_047", "forms": [{"grammatical_form": "noun/en_singular", "text": "Michigan", "is_base_form": true}]}
 {"guid": "N45_048", "forms": [{"grammatical_form": "noun/en_singular", "text": "Minnesota", "is_base_form": true}]}
 {"guid": "N45_049", "forms": [{"grammatical_form": "noun/en_singular", "text": "Mississippi", "is_base_form": true}]}
-{"guid": "N45_050", "forms": [{"grammatical_form": "noun/en_singular", "text": "Missouri", "is_base_form": true}, {"grammatical_form": "noun/en_possessive_singular", "text": "Missouri's", "is_base_form": false}]}
+{"guid": "N45_050", "forms": [{"grammatical_form": "noun/en_singular", "text": "Missouri", "is_base_form": true}]}
 {"guid": "N45_051", "forms": [{"grammatical_form": "noun/en_singular", "text": "Montana", "is_base_form": true}]}
 {"guid": "N45_052", "forms": [{"grammatical_form": "noun/en_singular", "text": "Nebraska", "is_base_form": true}]}
 {"guid": "N45_053", "forms": [{"grammatical_form": "noun/en_singular", "text": "Nevada", "is_base_form": true}]}
@@ -56,10 +56,10 @@
 {"guid": "N45_056", "forms": [{"grammatical_form": "noun/en_singular", "text": "New Mexico", "is_base_form": true}]}
 {"guid": "N45_057", "forms": [{"grammatical_form": "noun/en_singular", "text": "North Carolina", "is_base_form": true}]}
 {"guid": "N45_058", "forms": [{"grammatical_form": "noun/en_singular", "text": "North Dakota", "is_base_form": true}]}
-{"guid": "N45_059", "forms": [{"grammatical_form": "noun/en_singular", "text": "Ohio", "is_base_form": true}, {"grammatical_form": "noun/en_possessive_singular", "text": "Ohio's", "is_base_form": false}]}
+{"guid": "N45_059", "forms": [{"grammatical_form": "noun/en_singular", "text": "Ohio", "is_base_form": true}]}
 {"guid": "N45_060", "forms": [{"grammatical_form": "noun/en_singular", "text": "Oklahoma", "is_base_form": true}]}
 {"guid": "N45_061", "forms": [{"grammatical_form": "noun/en_singular", "text": "Oregon", "is_base_form": true}]}
-{"guid": "N45_062", "forms": [{"grammatical_form": "noun/en_singular", "text": "Pennsylvania", "is_base_form": true}, {"grammatical_form": "noun/en_possessive_singular", "text": "Pennsylvania's", "is_base_form": false}]}
+{"guid": "N45_062", "forms": [{"grammatical_form": "noun/en_singular", "text": "Pennsylvania", "is_base_form": true}]}
 {"guid": "N45_063", "forms": [{"grammatical_form": "noun/en_singular", "text": "Rhode Island", "is_base_form": true}]}
 {"guid": "N45_064", "forms": [{"grammatical_form": "noun/en_singular", "text": "South Carolina", "is_base_form": true}]}
 {"guid": "N45_065", "forms": [{"grammatical_form": "noun/en_singular", "text": "South Dakota", "is_base_form": true}]}
@@ -67,8 +67,8 @@
 {"guid": "N45_067", "forms": [{"grammatical_form": "noun/en_singular", "text": "Texas", "is_base_form": true}]}
 {"guid": "N45_068", "forms": [{"grammatical_form": "noun/en_singular", "text": "Utah", "is_base_form": true}]}
 {"guid": "N45_069", "forms": [{"grammatical_form": "noun/en_singular", "text": "Vermont", "is_base_form": true}]}
-{"guid": "N45_070", "forms": [{"grammatical_form": "noun/en_singular", "text": "Virginia", "is_base_form": true}, {"grammatical_form": "noun/en_possessive_singular", "text": "Virginia's", "is_base_form": false}]}
-{"guid": "N45_071", "forms": [{"grammatical_form": "noun/en_singular", "text": "Washington", "is_base_form": true}, {"grammatical_form": "noun/en_possessive_singular", "text": "Washington's", "is_base_form": false}]}
+{"guid": "N45_070", "forms": [{"grammatical_form": "noun/en_singular", "text": "Virginia", "is_base_form": true}]}
+{"guid": "N45_071", "forms": [{"grammatical_form": "noun/en_singular", "text": "Washington", "is_base_form": true}]}
 {"guid": "N45_072", "forms": [{"grammatical_form": "noun/en_singular", "text": "West Virginia", "is_base_form": true}]}
 {"guid": "N45_073", "forms": [{"grammatical_form": "noun/en_singular", "text": "Wisconsin", "is_base_form": true}]}
 {"guid": "N45_074", "forms": [{"grammatical_form": "noun/en_singular", "text": "Wyoming", "is_base_form": true}]}
@@ -97,7 +97,7 @@
 {"guid": "N45_097", "forms": [{"grammatical_form": "noun/en_singular", "text": "Ethiopia", "is_base_form": true}]}
 {"guid": "N45_098", "forms": [{"grammatical_form": "noun/en_singular", "text": "Indonesia", "is_base_form": true}]}
 {"guid": "N45_099", "forms": [{"grammatical_form": "noun/en_singular", "text": "Philippines", "is_base_form": true}]}
-{"guid": "N45_100", "forms": [{"grammatical_form": "noun/en_singular", "text": "Europe", "is_base_form": true}, {"grammatical_form": "noun/en_possessive_singular", "text": "Europe's", "is_base_form": false}]}
+{"guid": "N45_100", "forms": [{"grammatical_form": "noun/en_singular", "text": "Europe", "is_base_form": true}]}
 {"guid": "N45_101", "forms": [{"grammatical_form": "noun/en_singular", "text": "Asia", "is_base_form": true}]}
 {"guid": "N45_102", "forms": [{"grammatical_form": "noun/en_singular", "text": "Africa", "is_base_form": true}]}
 {"guid": "N45_103", "forms": [{"grammatical_form": "noun/en_singular", "text": "North America", "is_base_form": true}]}
@@ -107,3 +107,157 @@
 {"guid": "N45_109", "forms": [{"grammatical_form": "noun/en_singular", "text": "protectorate", "is_base_form": true, "ipa": "/prəˈtɛktərət/", "phonetic": "pro-TEK-tuh-rut"}]}
 {"guid": "N45_111", "forms": [{"grammatical_form": "noun/en_singular", "text": "austria-hungary", "is_base_form": true, "ipa": "/ˌɔːstriə ˈhʌŋɡəri/", "phonetic": "AW-stree-uh HUNG-uh-ree"}]}
 {"guid": "N45_112", "forms": [{"grammatical_form": "noun/en_singular", "text": "New York", "is_base_form": true}]}
+{"guid": "N45_113", "forms": [{"grammatical_form": "noun/en_singular", "text": "United Kingdom", "is_base_form": true}]}
+{"guid": "N45_114", "forms": [{"grammatical_form": "noun/en_singular", "text": "Taiwan", "is_base_form": true}]}
+{"guid": "N45_115", "forms": [{"grammatical_form": "noun/en_singular", "text": "Tanzania", "is_base_form": true}]}
+{"guid": "N45_116", "forms": [{"grammatical_form": "noun/en_singular", "text": "Kenya", "is_base_form": true}]}
+{"guid": "N45_117", "forms": [{"grammatical_form": "noun/en_singular", "text": "Nigeria", "is_base_form": true}]}
+{"guid": "N45_118", "forms": [{"grammatical_form": "noun/en_singular", "text": "Saudi Arabia", "is_base_form": true}]}
+{"guid": "N45_119", "forms": [{"grammatical_form": "noun/en_singular", "text": "Mongolia", "is_base_form": true}]}
+{"guid": "N45_120", "forms": [{"grammatical_form": "noun/en_singular", "text": "sub-Saharan Africa", "is_base_form": true}]}
+{"guid": "N45_121", "forms": [{"grammatical_form": "noun/en_singular", "text": "Georgia", "is_base_form": true, "ipa": "/ˈdʒɔrdʒə/", "phonetic": "JOR-juh"}]}
+{"guid": "N45_122", "forms": [{"grammatical_form": "noun/en_singular", "text": "Albania", "is_base_form": true, "ipa": "/ælˈbeɪniə/", "phonetic": "al-BAY-nee-uh"}]}
+{"guid": "N45_123", "forms": [{"grammatical_form": "noun/en_singular", "text": "Andorra", "is_base_form": true, "ipa": "/ænˈdɔrə/", "phonetic": "an-DOR-uh"}]}
+{"guid": "N45_124", "forms": [{"grammatical_form": "noun/en_singular", "text": "Belarus", "is_base_form": true, "ipa": "/ˌbɛləˈruːs/", "phonetic": "bel-uh-ROOS"}]}
+{"guid": "N45_125", "forms": [{"grammatical_form": "noun/en_singular", "text": "Bosnia and Herzegovina", "is_base_form": true, "ipa": "/ˈbɑːzniə ænd ˌhɜːrtsəɡoʊˈviːnə/", "phonetic": "BOZ-nee-uh and HERT-suh-goh-vee-nuh"}]}
+{"guid": "N45_126", "forms": [{"grammatical_form": "noun/en_singular", "text": "Bulgaria", "is_base_form": true, "ipa": "/bʌlˈɡɛriə/", "phonetic": "bul-GAIR-ee-uh"}]}
+{"guid": "N45_127", "forms": [{"grammatical_form": "noun/en_singular", "text": "Croatia", "is_base_form": true, "ipa": "/kroʊˈeɪʃə/", "phonetic": "kroh-AY-shuh"}]}
+{"guid": "N45_128", "forms": [{"grammatical_form": "noun/en_singular", "text": "Cyprus", "is_base_form": true, "ipa": "/ˈsaɪprəs/", "phonetic": "SY-pruhs"}]}
+{"guid": "N45_129", "forms": [{"grammatical_form": "noun/en_singular", "text": "Czech Republic", "is_base_form": true, "ipa": "/ˌtʃɛk rɪˈpʌblɪk/", "phonetic": "CHEK ri-PUB-lik"}]}
+{"guid": "N45_130", "forms": [{"grammatical_form": "noun/en_singular", "text": "Iceland", "is_base_form": true, "ipa": "/ˈaɪs.lənd/", "phonetic": "ICE-land"}]}
+{"guid": "N45_131", "forms": [{"grammatical_form": "noun/en_singular", "text": "Kosovo", "is_base_form": true, "ipa": "/ˈkoʊsəvoʊ/", "phonetic": "KOH-suh-voh"}]}
+{"guid": "N45_132", "forms": [{"grammatical_form": "noun/en_singular", "text": "Liechtenstein", "is_base_form": true, "ipa": "/ˈlɪktənˌstaɪn/", "phonetic": "LIK-tuhn-styn"}]}
+{"guid": "N45_133", "forms": [{"grammatical_form": "noun/en_singular", "text": "Luxembourg", "is_base_form": true, "ipa": "/ˈlʌksəmˌbɝɡ/", "phonetic": "LUK-suhm-burg"}]}
+{"guid": "N45_134", "forms": [{"grammatical_form": "noun/en_singular", "text": "Malta", "is_base_form": true, "ipa": "/ˈmɔltə/", "phonetic": "MAWL-tuh"}]}
+{"guid": "N45_135", "forms": [{"grammatical_form": "noun/en_singular", "text": "Moldova", "is_base_form": true, "ipa": "/mɑlˈdoʊvə/", "phonetic": "mol-DOH-vuh"}]}
+{"guid": "N45_136", "forms": [{"grammatical_form": "noun/en_singular", "text": "Monaco", "is_base_form": true, "ipa": "/ˈmɑnəkoʊ/", "phonetic": "MON-uh-koh"}]}
+{"guid": "N45_137", "forms": [{"grammatical_form": "noun/en_singular", "text": "Montenegro", "is_base_form": true, "ipa": "/ˌmɑːntəˈniːɡroʊ/", "phonetic": "mon-tuh-NEE-groh"}]}
+{"guid": "N45_138", "forms": [{"grammatical_form": "noun/en_singular", "text": "North Macedonia", "is_base_form": true, "ipa": "/ˌnɔrθ ˌmæsɪˈdoʊniə/", "phonetic": "NORTH ma-suh-DOH-nee-uh"}]}
+{"guid": "N45_139", "forms": [{"grammatical_form": "noun/en_singular", "text": "Romania", "is_base_form": true, "ipa": "/roʊˈmeɪniə/", "phonetic": "roh-MAY-nee-uh"}]}
+{"guid": "N45_140", "forms": [{"grammatical_form": "noun/en_singular", "text": "San Marino", "is_base_form": true, "ipa": "/ˌsæn məˈriːnoʊ/", "phonetic": "san muh-REE-noh"}]}
+{"guid": "N45_141", "forms": [{"grammatical_form": "noun/en_singular", "text": "Serbia", "is_base_form": true, "ipa": "/ˈsɝːbiə/", "phonetic": "SUR-bee-uh"}]}
+{"guid": "N45_142", "forms": [{"grammatical_form": "noun/en_singular", "text": "Slovakia", "is_base_form": true, "ipa": "/sloʊˈvɑːkiə/", "phonetic": "sloh-VAH-kee-uh"}]}
+{"guid": "N45_143", "forms": [{"grammatical_form": "noun/en_singular", "text": "Slovenia", "is_base_form": true, "ipa": "/sloʊˈviːniə/", "phonetic": "sloh-VEE-nee-uh"}]}
+{"guid": "N45_144", "forms": [{"grammatical_form": "noun/en_singular", "text": "Vatican City", "is_base_form": true, "ipa": "/ˈvætɪkən ˈsɪti/", "phonetic": "VAT-ih-kuhn SIT-ee"}]}
+{"guid": "N45_145", "forms": [{"grammatical_form": "noun/en_singular", "text": "Armenia", "is_base_form": true, "ipa": "/ɑrˈmiːniə/", "phonetic": "ar-MEE-nee-uh"}]}
+{"guid": "N45_146", "forms": [{"grammatical_form": "noun/en_singular", "text": "Azerbaijan", "is_base_form": true, "ipa": "/ˌæzərbaɪˈdʒɑn/", "phonetic": "az-er-bye-JAHN"}]}
+{"guid": "N45_147", "forms": [{"grammatical_form": "noun/en_singular", "text": "Kazakhstan", "is_base_form": true, "ipa": "/ˌkɑːzəkˈstɑːn/", "phonetic": "KAZ-uhk-stan"}]}
+{"guid": "N45_148", "forms": [{"grammatical_form": "noun/en_singular", "text": "Kyrgyzstan", "is_base_form": true, "ipa": "/ˌkɪrɡɪˈstɑːn/", "phonetic": "keer-gih-STAN"}]}
+{"guid": "N45_149", "forms": [{"grammatical_form": "noun/en_singular", "text": "Tajikistan", "is_base_form": true, "ipa": "/təˈdʒiːkɪˌstæn/", "phonetic": "tah-JEE-ki-stan"}]}
+{"guid": "N45_150", "forms": [{"grammatical_form": "noun/en_singular", "text": "Turkmenistan", "is_base_form": true, "ipa": "/tɝːˌmɛnɪˈstɑːn/", "phonetic": "tur-MEN-uh-stan"}]}
+{"guid": "N45_151", "forms": [{"grammatical_form": "noun/en_singular", "text": "Uzbekistan", "is_base_form": true, "ipa": "/ʊzˈbɛkɪˌstæn/", "phonetic": "ooz-BEK-ih-stan"}]}
+{"guid": "N45_152", "forms": [{"grammatical_form": "noun/en_singular", "text": "Bahrain", "is_base_form": true, "ipa": "/bɑːˈreɪn/", "phonetic": "bah-RAYN"}]}
+{"guid": "N45_153", "forms": [{"grammatical_form": "noun/en_singular", "text": "Jordan", "is_base_form": true, "ipa": "/ˈdʒɔrdən/", "phonetic": "JOR-dun"}]}
+{"guid": "N45_154", "forms": [{"grammatical_form": "noun/en_singular", "text": "Kuwait", "is_base_form": true, "ipa": "/kuːˈweɪt/", "phonetic": "koo-WAYT"}]}
+{"guid": "N45_155", "forms": [{"grammatical_form": "noun/en_singular", "text": "Lebanon", "is_base_form": true, "ipa": "/ˈlɛbənɑːn/", "phonetic": "LEB-uh-non"}]}
+{"guid": "N45_156", "forms": [{"grammatical_form": "noun/en_singular", "text": "Oman", "is_base_form": true, "ipa": "/oʊˈmɑːn/", "phonetic": "oh-MAHN"}]}
+{"guid": "N45_157", "forms": [{"grammatical_form": "noun/en_singular", "text": "Palestine", "is_base_form": true, "ipa": "/ˈpæl.ə.staɪn/", "phonetic": "PAL-uh-stine"}]}
+{"guid": "N45_158", "forms": [{"grammatical_form": "noun/en_singular", "text": "Qatar", "is_base_form": true, "ipa": "/kəˈtɑr/", "phonetic": "kuh-TAR"}]}
+{"guid": "N45_159", "forms": [{"grammatical_form": "noun/en_singular", "text": "Syria", "is_base_form": true, "ipa": "/ˈsɪriə/", "phonetic": "SEER-ee-uh"}]}
+{"guid": "N45_160", "forms": [{"grammatical_form": "noun/en_singular", "text": "United Arab Emirates", "is_base_form": true, "ipa": "/juˈnaɪtɪd ˈærəb ˈɛmərɪts/", "phonetic": "yoo-NY-tid AIR-uhb EM-uh-rits"}]}
+{"guid": "N45_161", "forms": [{"grammatical_form": "noun/en_singular", "text": "Yemen", "is_base_form": true, "ipa": "/ˈjɛmən/", "phonetic": "YEM-en"}]}
+{"guid": "N45_162", "forms": [{"grammatical_form": "noun/en_singular", "text": "Afghanistan", "is_base_form": true, "ipa": "/æfˈɡænɪˌstæn/", "phonetic": "af-GAN-uh-stan"}]}
+{"guid": "N45_163", "forms": [{"grammatical_form": "noun/en_singular", "text": "Bangladesh", "is_base_form": true, "ipa": "/ˌbæŋɡləˈdɛʃ/", "phonetic": "BANG-luh-desh"}]}
+{"guid": "N45_164", "forms": [{"grammatical_form": "noun/en_singular", "text": "Bhutan", "is_base_form": true, "ipa": "/buːˈtɑːn/", "phonetic": "boo-TAHN"}]}
+{"guid": "N45_165", "forms": [{"grammatical_form": "noun/en_singular", "text": "Maldives", "is_base_form": true, "ipa": "/ˈmɔlˌdiːvz/", "phonetic": "MAWL-deevz"}]}
+{"guid": "N45_166", "forms": [{"grammatical_form": "noun/en_singular", "text": "Nepal", "is_base_form": true, "ipa": "/nəˈpɔl/", "phonetic": "nuh-PAWL"}]}
+{"guid": "N45_167", "forms": [{"grammatical_form": "noun/en_singular", "text": "Pakistan", "is_base_form": true, "ipa": "/ˈpækɪstæn/", "phonetic": "PAK-ih-stan"}]}
+{"guid": "N45_168", "forms": [{"grammatical_form": "noun/en_singular", "text": "Sri Lanka", "is_base_form": true, "ipa": "/ˌsriː ˈlɑŋkə/", "phonetic": "sree LAHN-kuh"}]}
+{"guid": "N45_169", "forms": [{"grammatical_form": "noun/en_singular", "text": "North Korea", "is_base_form": true, "ipa": "/ˌnɔrθ kəˈriə/", "phonetic": "NORTH kuh-REE-uh"}]}
+{"guid": "N45_170", "forms": [{"grammatical_form": "noun/en_singular", "text": "Brunei", "is_base_form": true, "ipa": "/bruːˈneɪ/", "phonetic": "broo-NAY"}]}
+{"guid": "N45_171", "forms": [{"grammatical_form": "noun/en_singular", "text": "Cambodia", "is_base_form": true, "ipa": "/kæmˈboʊdiə/", "phonetic": "kam-BOH-dee-uh"}]}
+{"guid": "N45_172", "forms": [{"grammatical_form": "noun/en_singular", "text": "East Timor", "is_base_form": true, "ipa": "/ˌiːst tiˈmɔr/", "phonetic": "EEST TEE-MOR"}]}
+{"guid": "N45_173", "forms": [{"grammatical_form": "noun/en_singular", "text": "Laos", "is_base_form": true, "ipa": "/ˈlɑːoʊs/", "phonetic": "LAH-ohs"}]}
+{"guid": "N45_174", "forms": [{"grammatical_form": "noun/en_singular", "text": "Malaysia", "is_base_form": true, "ipa": "/məˈleɪʒə/", "phonetic": "muh-LAY-zhuh"}]}
+{"guid": "N45_175", "forms": [{"grammatical_form": "noun/en_singular", "text": "Myanmar", "is_base_form": true, "ipa": "/ˈmjɑːnˌmɑːr/", "phonetic": "MYAN-mar"}]}
+{"guid": "N45_176", "forms": [{"grammatical_form": "noun/en_singular", "text": "Algeria", "is_base_form": true, "ipa": "/ælˈdʒɪriə/", "phonetic": "al-JEER-ee-uh"}]}
+{"guid": "N45_177", "forms": [{"grammatical_form": "noun/en_singular", "text": "Libya", "is_base_form": true, "ipa": "/ˈlɪbiə/", "phonetic": "LIB-ee-uh"}]}
+{"guid": "N45_178", "forms": [{"grammatical_form": "noun/en_singular", "text": "Sudan", "is_base_form": true, "ipa": "/suˈdæn/", "phonetic": "soo-DAN"}]}
+{"guid": "N45_179", "forms": [{"grammatical_form": "noun/en_singular", "text": "Tunisia", "is_base_form": true, "ipa": "/tuˈnɪʒə/", "phonetic": "too-NEE-zhuh"}]}
+{"guid": "N45_180", "forms": [{"grammatical_form": "noun/en_singular", "text": "Benin", "is_base_form": true, "ipa": "/bɪˈnɪn/", "phonetic": "buh-NEEN"}]}
+{"guid": "N45_181", "forms": [{"grammatical_form": "noun/en_singular", "text": "Burkina Faso", "is_base_form": true, "ipa": "/bɚˌkiːnə ˈfɑːsoʊ/", "phonetic": "bur-KEE-nuh FAH-soh"}]}
+{"guid": "N45_182", "forms": [{"grammatical_form": "noun/en_singular", "text": "Cape Verde", "is_base_form": true, "ipa": "/ˌkeɪp ˈvɜrd/", "phonetic": "KAYP VURD"}]}
+{"guid": "N45_183", "forms": [{"grammatical_form": "noun/en_singular", "text": "Gambia", "is_base_form": true, "ipa": "/ˈɡæmbiə/", "phonetic": "GAM-bee-uh"}]}
+{"guid": "N45_184", "forms": [{"grammatical_form": "noun/en_singular", "text": "Ghana", "is_base_form": true, "ipa": "/ˈɡɑːnə/", "phonetic": "guh-NAH"}]}
+{"guid": "N45_185", "forms": [{"grammatical_form": "noun/en_singular", "text": "Guinea", "is_base_form": true, "ipa": "/ˈɡɪni/", "phonetic": "GIH-nee"}]}
+{"guid": "N45_186", "forms": [{"grammatical_form": "noun/en_singular", "text": "Guinea-Bissau", "is_base_form": true, "ipa": "/ˌɡɪni bɪˈsaʊ/", "phonetic": "GIN-ee-bih-SOW"}]}
+{"guid": "N45_187", "forms": [{"grammatical_form": "noun/en_singular", "text": "Ivory Coast", "is_base_form": true, "ipa": "/ˈaɪvəri ˌkoʊst/", "phonetic": "EYE-vuh-ree KOHST"}]}
+{"guid": "N45_188", "forms": [{"grammatical_form": "noun/en_singular", "text": "Liberia", "is_base_form": true, "ipa": "/laɪˈbɪriə/", "phonetic": "lye-BEER-ee-uh"}]}
+{"guid": "N45_189", "forms": [{"grammatical_form": "noun/en_singular", "text": "Mali", "is_base_form": true, "ipa": "/ˈmɑːli/", "phonetic": "MAH-lee"}]}
+{"guid": "N45_190", "forms": [{"grammatical_form": "noun/en_singular", "text": "Mauritania", "is_base_form": true, "ipa": "/ˌmɔrɪˈteɪniə/", "phonetic": "mawr-ih-TAY-nee-uh"}]}
+{"guid": "N45_191", "forms": [{"grammatical_form": "noun/en_singular", "text": "Niger", "is_base_form": true, "ipa": "/ˈnaɪdʒər/", "phonetic": "NYE-jer"}]}
+{"guid": "N45_192", "forms": [{"grammatical_form": "noun/en_singular", "text": "Senegal", "is_base_form": true, "ipa": "/ˌsɛnɪˈɡɔl/", "phonetic": "SEN-uh-gawl"}]}
+{"guid": "N45_193", "forms": [{"grammatical_form": "noun/en_singular", "text": "Sierra Leone", "is_base_form": true, "ipa": "/siˌɛrə liˈoʊn/", "phonetic": "see-AIR-uh lee-OHN"}]}
+{"guid": "N45_194", "forms": [{"grammatical_form": "noun/en_singular", "text": "Togo", "is_base_form": true, "ipa": "/ˈtoʊɡoʊ/", "phonetic": "TOH-goh"}]}
+{"guid": "N45_195", "forms": [{"grammatical_form": "noun/en_singular", "text": "Cameroon", "is_base_form": true, "ipa": "/ˌkæməˈruːn/", "phonetic": "kam-uh-ROON"}]}
+{"guid": "N45_196", "forms": [{"grammatical_form": "noun/en_singular", "text": "Central African Republic", "is_base_form": true, "ipa": "/ˈsɛntrəl ˈæfrɪkən rɪˈpʌblɪk/", "phonetic": "SEN-truhl AF-ri-kuhn ri-PUB-lik"}]}
+{"guid": "N45_197", "forms": [{"grammatical_form": "noun/en_singular", "text": "Chad", "is_base_form": true, "ipa": "/tʃæd/", "phonetic": "CHAD"}]}
+{"guid": "N45_198", "forms": [{"grammatical_form": "noun/en_singular", "text": "Democratic Republic of the Congo", "is_base_form": true, "ipa": "/ˌdɛməˈkrætɪk rɪˈpʌblɪk əv ðə ˈkɑŋɡoʊ/", "phonetic": "dem-uh-KRAT-ik ri-PUB-lik uhv thuh KONG-oh"}]}
+{"guid": "N45_199", "forms": [{"grammatical_form": "noun/en_singular", "text": "Republic of the Congo", "is_base_form": true, "ipa": "/rɪˈpʌblɪk əv ðə ˈkɑŋɡoʊ/", "phonetic": "rih-PUB-lik uv thuh KONG-go"}]}
+{"guid": "N45_200", "forms": [{"grammatical_form": "noun/en_singular", "text": "Equatorial Guinea", "is_base_form": true, "ipa": "/ˌɛkwəˈtɔriəl ˈɡɪni/", "phonetic": "ee-kwuh-TOR-ee-uhl GIN-ee"}]}
+{"guid": "N45_201", "forms": [{"grammatical_form": "noun/en_singular", "text": "Gabon", "is_base_form": true, "ipa": "/ɡəˈbɑn/", "phonetic": "guh-BAHN"}]}
+{"guid": "N45_202", "forms": [{"grammatical_form": "noun/en_singular", "text": "São Tomé and Príncipe", "is_base_form": true, "ipa": "/ˌsaʊ təˈmeɪ ən ˈprɪnsəpeɪ/", "phonetic": "sow tuh-MAY and PRIN-suh-pay"}]}
+{"guid": "N45_203", "forms": [{"grammatical_form": "noun/en_singular", "text": "Burundi", "is_base_form": true, "ipa": "/bəˈrʊndi/", "phonetic": "buh-RUN-dee"}]}
+{"guid": "N45_204", "forms": [{"grammatical_form": "noun/en_singular", "text": "Comoros", "is_base_form": true, "ipa": "/ˈkɑməˌroʊz/", "phonetic": "KOM-uh-rohz"}]}
+{"guid": "N45_205", "forms": [{"grammatical_form": "noun/en_singular", "text": "Djibouti", "is_base_form": true, "ipa": "/dʒɪˈbuːti/", "phonetic": "ji-BOO-tee"}]}
+{"guid": "N45_206", "forms": [{"grammatical_form": "noun/en_singular", "text": "Eritrea", "is_base_form": true, "ipa": "/ˌɛrɪˈtriːə/", "phonetic": "er-ih-TREE-uh"}]}
+{"guid": "N45_207", "forms": [{"grammatical_form": "noun/en_singular", "text": "Madagascar", "is_base_form": true, "ipa": "/ˌmædəˈɡæskɑr/", "phonetic": "mad-uh-GAS-kar"}]}
+{"guid": "N45_208", "forms": [{"grammatical_form": "noun/en_singular", "text": "Mauritius", "is_base_form": true, "ipa": "/məˈrɪʃəs/", "phonetic": "muh-RISH-us"}]}
+{"guid": "N45_209", "forms": [{"grammatical_form": "noun/en_singular", "text": "Rwanda", "is_base_form": true, "ipa": "/ruˈɑndə/", "phonetic": "roo-AHN-duh"}]}
+{"guid": "N45_210", "forms": [{"grammatical_form": "noun/en_singular", "text": "Seychelles", "is_base_form": true, "ipa": "/seɪˈʃɛlz/", "phonetic": "say-SHELZ"}]}
+{"guid": "N45_211", "forms": [{"grammatical_form": "noun/en_singular", "text": "Somalia", "is_base_form": true, "ipa": "/səˈmɑːliə/", "phonetic": "suh-MAH-lee-uh"}]}
+{"guid": "N45_212", "forms": [{"grammatical_form": "noun/en_singular", "text": "South Sudan", "is_base_form": true, "ipa": "/ˌsaʊθ suˈdæn/", "phonetic": "sowth soo-DAN"}]}
+{"guid": "N45_213", "forms": [{"grammatical_form": "noun/en_singular", "text": "Uganda", "is_base_form": true, "ipa": "/juˈɡændə/", "phonetic": "yoo-GAN-duh"}]}
+{"guid": "N45_214", "forms": [{"grammatical_form": "noun/en_singular", "text": "Angola", "is_base_form": true, "ipa": "/æŋˈɡoʊlə/", "phonetic": "ang-GOH-luh"}]}
+{"guid": "N45_215", "forms": [{"grammatical_form": "noun/en_singular", "text": "Botswana", "is_base_form": true, "ipa": "/bɑtˈswɑnə/", "phonetic": "bot-SWAH-nuh"}]}
+{"guid": "N45_216", "forms": [{"grammatical_form": "noun/en_singular", "text": "Eswatini", "is_base_form": true, "ipa": "/ˌɛswɑˈtiːni/", "phonetic": "ess-wah-TEE-nee"}]}
+{"guid": "N45_217", "forms": [{"grammatical_form": "noun/en_singular", "text": "Lesotho", "is_base_form": true, "ipa": "/ləˈsuːtuː/", "phonetic": "luh-SOO-too"}]}
+{"guid": "N45_218", "forms": [{"grammatical_form": "noun/en_singular", "text": "Malawi", "is_base_form": true, "ipa": "/məˈlɑːwi/", "phonetic": "muh-LAH-wee"}]}
+{"guid": "N45_219", "forms": [{"grammatical_form": "noun/en_singular", "text": "Mozambique", "is_base_form": true, "ipa": "/ˌmoʊzæmˈbiːk/", "phonetic": "moh-zam-BEEK"}]}
+{"guid": "N45_220", "forms": [{"grammatical_form": "noun/en_singular", "text": "Namibia", "is_base_form": true, "ipa": "/nəˈmɪbiə/", "phonetic": "nuh-MIB-ee-uh"}]}
+{"guid": "N45_221", "forms": [{"grammatical_form": "noun/en_singular", "text": "Zambia", "is_base_form": true, "ipa": "/ˈzæm.bi.ə/", "phonetic": "zam-BEE-uh"}]}
+{"guid": "N45_222", "forms": [{"grammatical_form": "noun/en_singular", "text": "Zimbabwe", "is_base_form": true, "ipa": "/zɪmˈbɑːbweɪ/", "phonetic": "zim-BAH-bway"}]}
+{"guid": "N45_223", "forms": [{"grammatical_form": "noun/en_singular", "text": "Antigua and Barbuda", "is_base_form": true, "ipa": "/ænˈtiːɡə ænd bɑrˈbjuːdə/", "phonetic": "an-TEE-guh and bar-BYOO-duh"}]}
+{"guid": "N45_224", "forms": [{"grammatical_form": "noun/en_singular", "text": "Bahamas", "is_base_form": true, "ipa": "/bəˈhɑːməz/", "phonetic": "buh-HAH-muhz"}]}
+{"guid": "N45_225", "forms": [{"grammatical_form": "noun/en_singular", "text": "Barbados", "is_base_form": true, "ipa": "/bɑrˈbeɪdoʊs/", "phonetic": "bar-BAY-dohs"}]}
+{"guid": "N45_226", "forms": [{"grammatical_form": "noun/en_singular", "text": "Belize", "is_base_form": true, "ipa": "/bəˈliːz/", "phonetic": "buh-LEEZ"}]}
+{"guid": "N45_227", "forms": [{"grammatical_form": "noun/en_singular", "text": "Costa Rica", "is_base_form": true, "ipa": "/ˌkɔstə ˈriːkə/", "phonetic": "KOS-tuh REE-kuh"}]}
+{"guid": "N45_228", "forms": [{"grammatical_form": "noun/en_singular", "text": "Dominica", "is_base_form": true, "ipa": "/ˌdɑːmɪˈniːkə/", "phonetic": "dom-uh-NEE-kuh"}]}
+{"guid": "N45_229", "forms": [{"grammatical_form": "noun/en_singular", "text": "Dominican Republic", "is_base_form": true, "ipa": "/dəˈmɪnɪkən rɪˈpʌblɪk/", "phonetic": "duh-MIN-ih-kuhn ri-PUB-lik"}]}
+{"guid": "N45_230", "forms": [{"grammatical_form": "noun/en_singular", "text": "El Salvador", "is_base_form": true, "ipa": "/ɛl ˈsælvəˌdɔr/", "phonetic": "el SAL-vuh-dor"}]}
+{"guid": "N45_231", "forms": [{"grammatical_form": "noun/en_singular", "text": "Grenada", "is_base_form": true, "ipa": "/ɡrəˈneɪdə/", "phonetic": "gruh-NAY-duh"}]}
+{"guid": "N45_232", "forms": [{"grammatical_form": "noun/en_singular", "text": "Guatemala", "is_base_form": true, "ipa": "/ˌɡwɑtəˈmɑlə/", "phonetic": "gwah-tuh-MAH-luh"}]}
+{"guid": "N45_233", "forms": [{"grammatical_form": "noun/en_singular", "text": "Haiti", "is_base_form": true, "ipa": "/ˈheɪti/", "phonetic": "HAY-tee"}]}
+{"guid": "N45_234", "forms": [{"grammatical_form": "noun/en_singular", "text": "Honduras", "is_base_form": true, "ipa": "/hɑnˈdʊrəs/", "phonetic": "hon-DUR-us"}]}
+{"guid": "N45_235", "forms": [{"grammatical_form": "noun/en_singular", "text": "Jamaica", "is_base_form": true, "ipa": "/dʒəˈmeɪkə/", "phonetic": "juh-MAY-kuh"}]}
+{"guid": "N45_236", "forms": [{"grammatical_form": "noun/en_singular", "text": "Nicaragua", "is_base_form": true, "ipa": "/ˌnɪkəˈrɑɡwə/", "phonetic": "nik-uh-RAH-gwuh"}]}
+{"guid": "N45_237", "forms": [{"grammatical_form": "noun/en_singular", "text": "Panama", "is_base_form": true, "ipa": "/ˈpæn.ə.mɑː/", "phonetic": "PAN-uh-mah"}]}
+{"guid": "N45_238", "forms": [{"grammatical_form": "noun/en_singular", "text": "Saint Kitts and Nevis", "is_base_form": true, "ipa": "/seɪnt kɪts ænd ˈniːvɪs/", "phonetic": "SAYNT KITS and NEE-vis"}]}
+{"guid": "N45_239", "forms": [{"grammatical_form": "noun/en_singular", "text": "Saint Lucia", "is_base_form": true, "ipa": "/seɪnt ˈluːʃə/", "phonetic": "saynt LOO-shuh"}]}
+{"guid": "N45_240", "forms": [{"grammatical_form": "noun/en_singular", "text": "Saint Vincent and the Grenadines", "is_base_form": true, "ipa": "/seɪnt ˈvɪnsənt ænd ðə ˌɡrɛnəˈdiːnz/", "phonetic": "saynt VIN-sent and thuh greh-nuh-DEENZ"}]}
+{"guid": "N45_241", "forms": [{"grammatical_form": "noun/en_singular", "text": "Trinidad and Tobago", "is_base_form": true, "ipa": "/ˌtrɪnɪˈdæd ən təˈbeɪɡoʊ/", "phonetic": "TRIN-ih-dad and tuh-BAY-go"}]}
+{"guid": "N45_242", "forms": [{"grammatical_form": "noun/en_singular", "text": "Bolivia", "is_base_form": true, "ipa": "/bəˈlɪviə/", "phonetic": "buh-LIV-ee-uh"}]}
+{"guid": "N45_243", "forms": [{"grammatical_form": "noun/en_singular", "text": "Colombia", "is_base_form": true, "ipa": "/kəˈlʌmbiə/", "phonetic": "kuh-LUHM-bee-uh"}]}
+{"guid": "N45_244", "forms": [{"grammatical_form": "noun/en_singular", "text": "Ecuador", "is_base_form": true, "ipa": "/ˈɛkwəˌdɔr/", "phonetic": "EK-wuh-dor"}]}
+{"guid": "N45_245", "forms": [{"grammatical_form": "noun/en_singular", "text": "Guyana", "is_base_form": true, "ipa": "/ɡaɪˈænə/", "phonetic": "guy-A-nuh"}]}
+{"guid": "N45_246", "forms": [{"grammatical_form": "noun/en_singular", "text": "Paraguay", "is_base_form": true, "ipa": "/ˈpɛrəˌɡwaɪ/", "phonetic": "PAIR-uh-gway"}]}
+{"guid": "N45_247", "forms": [{"grammatical_form": "noun/en_singular", "text": "Suriname", "is_base_form": true, "ipa": "/ˌsʊrəˈnɑːm/", "phonetic": "SOOR-ih-nahm"}]}
+{"guid": "N45_248", "forms": [{"grammatical_form": "noun/en_singular", "text": "Uruguay", "is_base_form": true, "ipa": "/ˈjʊrəˌɡweɪ/", "phonetic": "YOOR-uh-gway"}]}
+{"guid": "N45_249", "forms": [{"grammatical_form": "noun/en_singular", "text": "Venezuela", "is_base_form": true, "ipa": "/ˌvɛnəˈzweɪlə/", "phonetic": "ven-uh-ZWAY-luh"}]}
+{"guid": "N45_250", "forms": [{"grammatical_form": "noun/en_singular", "text": "New Zealand", "is_base_form": true, "ipa": "/ˌnuː ˈziːlənd/", "phonetic": "nyoo ZEE-luhnd"}]}
+{"guid": "N45_251", "forms": [{"grammatical_form": "noun/en_singular", "text": "Fiji", "is_base_form": true, "ipa": "/ˈfiːdʒi/", "phonetic": "FEE-jee"}]}
+{"guid": "N45_252", "forms": [{"grammatical_form": "noun/en_singular", "text": "Kiribati", "is_base_form": true, "ipa": "/ˌkɪrɪˈbæs/", "phonetic": "KIH-rih-bahss"}]}
+{"guid": "N45_253", "forms": [{"grammatical_form": "noun/en_singular", "text": "Marshall Islands", "is_base_form": true, "ipa": "/ˈmɑrʃəl ˈaɪləndz/", "phonetic": "MAR-shuhl EYE-luhndz"}]}
+{"guid": "N45_254", "forms": [{"grammatical_form": "noun/en_singular", "text": "Micronesia", "is_base_form": true, "ipa": "/ˌmaɪkroʊˈniːʒə/", "phonetic": "my-kroh-NEE-zhuh"}]}
+{"guid": "N45_255", "forms": [{"grammatical_form": "noun/en_singular", "text": "Nauru", "is_base_form": true, "ipa": "/nɑːˈʊəruː/", "phonetic": "nah-OO-roo"}]}
+{"guid": "N45_256", "forms": [{"grammatical_form": "noun/en_singular", "text": "Palau", "is_base_form": true, "ipa": "/pəˈlaʊ/", "phonetic": "puh-LOW"}]}
+{"guid": "N45_257", "forms": [{"grammatical_form": "noun/en_singular", "text": "Papua New Guinea", "is_base_form": true, "ipa": "/ˌpæpjuə nu ˈɡɪni/", "phonetic": "PA-pyoo-uh noo GIN-ee"}]}
+{"guid": "N45_258", "forms": [{"grammatical_form": "noun/en_singular", "text": "Samoa", "is_base_form": true, "ipa": "/səˈmoʊə/", "phonetic": "suh-MOH-uh"}]}
+{"guid": "N45_259", "forms": [{"grammatical_form": "noun/en_singular", "text": "Solomon Islands", "is_base_form": true, "ipa": "/ˈsɑləmən ˈaɪləndz/", "phonetic": "SAH-luh-muhn EYE-luhndz"}]}
+{"guid": "N45_260", "forms": [{"grammatical_form": "noun/en_singular", "text": "Tonga", "is_base_form": true, "ipa": "/ˈtɑŋə/", "phonetic": "TON-guh"}]}
+{"guid": "N45_261", "forms": [{"grammatical_form": "noun/en_singular", "text": "Tuvalu", "is_base_form": true, "ipa": "/ˌtuːvəˈluː/", "phonetic": "too-vuh-LOO"}]}
+{"guid": "N45_262", "forms": [{"grammatical_form": "noun/en_singular", "text": "Vanuatu", "is_base_form": true, "ipa": "/ˌvɑːnuˈɑːtuː/", "phonetic": "vah-noo-AH-too"}]}
+{"guid": "N45_263", "forms": [{"grammatical_form": "noun/en_singular", "text": "Puerto Rico", "is_base_form": true, "ipa": "/ˌpwɛrtoʊ ˈriːkoʊ/", "phonetic": "PWER-tuh REE-koh"}]}
+{"guid": "N45_264", "forms": [{"grammatical_form": "noun/en_singular", "text": "Greenland", "is_base_form": true, "ipa": "/ˈɡriːnlənd/", "phonetic": "GREEN-lund"}]}
+{"guid": "N45_265", "forms": [{"grammatical_form": "noun/en_singular", "text": "Northern Ireland", "is_base_form": true, "ipa": "/ˌnɔrðərn ˈaɪərlənd/", "phonetic": "NOR-thurn EYE-er-lund"}]}
+{"guid": "N45_266", "forms": [{"grammatical_form": "noun/en_singular", "text": "Latin America", "is_base_form": true}]}
