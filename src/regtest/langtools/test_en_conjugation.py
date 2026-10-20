@@ -365,6 +365,28 @@ class TestCommonIrregularsAreTabulated(unittest.TestCase):
             result = expand_verb_forms({"infinitive": infinitive})
             self.assertEqual(result["1s_past"], past)
 
+    def test_lay_and_lie_are_not_confused(self) -> None:
+        """lay/laid/laid (put down), lie/lay/lain (recline): native speakers mix these up.
+
+        The regular -ay rule gives "layed", so lay and its compounds must be
+        tabulated like pay/paid.  "lie" (tell a falsehood) is regular and is a
+        separate lemma; this table can only carry the recline sense.
+        """
+        for infinitive, past, past_participle, present_participle in [
+            ("lay", "laid", "laid", "laying"),
+            ("mislay", "mislaid", "mislaid", "mislaying"),
+            ("waylay", "waylaid", "waylaid", "waylaying"),
+            ("inlay", "inlaid", "inlaid", "inlaying"),
+            ("lie", "lay", "lain", "lying"),
+        ]:
+            result = expand_verb_forms({"infinitive": infinitive})
+            self.assertEqual(result["3s_past"], past, infinitive)
+            self.assertEqual(result["past_participle"], past_participle, infinitive)
+            self.assertEqual(result["present_participle"], present_participle, infinitive)
+
+        self.assertEqual(expand_verb_forms({"infinitive": "lay"})["3s_present"], "lays")
+        self.assertEqual(expand_verb_forms({"infinitive": "lie"})["3s_present"], "lies")
+
 
 class TestExpandVerbFormsAlignment(unittest.TestCase):
     """Verify that expanded keys match VERB_FORM_MAPPING keys."""
