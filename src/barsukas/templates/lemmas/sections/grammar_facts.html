@@ -1,5 +1,6 @@
 <!-- Grammar Facts -->
 {% from 'elements/_language_text.html' import language_text %}
+{% from 'lemmas/_reflexivity.html' import reflexivity_label %}
 <div class="row mb-4">
     <div class="col">
         <div class="card">
@@ -40,7 +41,11 @@
                             <td><span class="badge bg-secondary">{{ fact.language_code }}</span></td>
                             <td>{{ fact.fact_type|replace('_', ' ')|title }}</td>
                             <td>
+                                {% if fact.fact_type == 'verb_reflexivity' %}
+                                {{ reflexivity_label(fact, show_non_reflexive=true) }}
+                                {% else %}
                                 <strong>{{ language_text(fact.fact_value, fact.language_code) }}</strong>
+                                {% endif %}
                             </td>
                             <td><small class="text-muted">{{ fact.notes or '-' }}</small></td>
                             <td>

@@ -1,0 +1,9 @@
+{% macro reflexivity_label(fact, show_non_reflexive=false) %}
+    {% if fact and fact.fact_value and (show_non_reflexive or fact.fact_value != 'non_reflexive') %}
+    <div class="small mb-1">
+        <span class="badge {{ 'bg-light text-dark' if fact.fact_value == 'non_reflexive' else 'bg-info text-dark' }}">
+            {{ fact.fact_value|replace('_', ' ')|capitalize }}
+        </span>
+    </div>
+    {% endif %}
+{% endmacro %}

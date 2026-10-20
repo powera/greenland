@@ -1,4 +1,5 @@
 <!-- Grammatical Forms and Pronunciations -->
+{% from 'lemmas/_reflexivity.html' import reflexivity_label %}
 <div class="row mb-4">
     <div class="col">
         <div class="card">
@@ -124,6 +125,7 @@
                             {{ forms | map(attribute='derivative_form_text') | map('lower') | unique | list | length }} word(s)
                         </span>
                     </h5>
+                    {{ reflexivity_label((reflexivity_by_language | default({})).get(lang_code)) }}
                     <div class="table-responsive">
                         <table class="table table-sm table-hover">
                             <thead>
