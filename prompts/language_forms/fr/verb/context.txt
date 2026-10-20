@@ -17,7 +17,7 @@ French verbs conjugate across 6 persons and 6 tenses:
 4. Passé composé - provide ONLY the past participle (2 forms: masculine and feminine)
 
 **Important notes:**
-- Do NOT include any pronouns with each form (e.g., "mange" not "je mange")
+- Omit subject pronouns ("mange", not "je mange"). For pronominal verbs retain reflexive clitics: se laver → me lave, te laves, se lave, nous lavons, vous lavez, se lavent. Apply elision (s'habiller → m'habille). Keep the reflexive infinitive and present participle (se laver, se lavant); past participle slots contain bare participles without clitics or auxiliaries.
 - For irregular verbs (être, avoir, aller, faire, etc.), provide the correct irregular forms
 - Regular -er, -ir, -re verbs follow standard patterns
 - For passé composé, provide ONLY the past participle in masculine and feminine forms

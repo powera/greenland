@@ -21,3 +21,4 @@ Lithuanian verbs conjugate across 3 tenses and 8 persons (with gender distinctio
 - Some verbs may be irregular or have special conjugation patterns
 - Lithuanian verbs do not inflect by gender - only provide one 3rd person form per tense
 - Use empty string ("") for any forms that are non-standard or don't exist for this verb
+- Preserve reflexive morphology in every form: mokytis → mokausi, mokaisi, mokosi, mokomės, mokotės; future mokysiuosi, mokysiesi, mokysis. Prefixed verbs retain internal -si- (pasimokyti → pasimokau). Never substitute non-reflexive forms.

@@ -23,6 +23,16 @@ BASE_FORM_KEYS: Dict[str, str] = {
 }
 
 
+def is_safe_translation(word: str, pos_type: str) -> bool:
+    """Allow a single word or a pronominal infinitive, without arbitrary phrases."""
+    text = word.strip().replace("’", "'")
+    if not text or text != text.lower() or "/" in text:
+        return False
+    if pos_type == "verb" and text.startswith("se "):
+        text = text[3:]
+    return bool(text) and not any(char.isspace() for char in text)
+
+
 def build_paradigm(
     session: Session, lemma: Any, pos_type: str, language_code: str, word: str
 ) -> Paradigm:

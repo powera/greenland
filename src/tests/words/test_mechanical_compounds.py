@@ -92,3 +92,41 @@ def test_unhandled_phrases_are_still_declined(
     session.flush()
     set_translation(session, lemma, language, text)
     assert generate_lemma_forms(session, lemma, language)["forms_added"] == 0
+
+
+@pytest.mark.parametrize(
+    "language,translation,expected",
+    [
+        ("fr", "se laver", "me lave"),
+        ("fr", "s’habiller", "m'habille"),
+        ("es", "lavarse", "me lavo"),
+        ("es-419", "lavarse", "me lavo"),
+        ("lt", "mokytis", "mokausi"),
+    ],
+)
+def test_reflexive_forms_are_persisted(
+    session: Session, language: str, translation: str, expected: str
+) -> None:
+    lemma = Lemma(lemma_text="test verb", pos_type="verb", definition_text="Reflexive sense")
+    session.add(lemma)
+    session.flush()
+    set_translation(session, lemma, language, translation)
+    if language == "lt":
+        for fact_type, fact_value in (("3s_present", "mokosi"), ("3s_past", "mokėsi")):
+            session.add(
+                GrammarFact(
+                    lemma_id=lemma.id,
+                    language_code="lt",
+                    fact_type=fact_type,
+                    fact_value=fact_value,
+                )
+            )
+        session.flush()
+    assert generate_lemma_forms(session, lemma, language)["forms_added"] > 0
+    stored_form = (
+        session.query(DerivativeForm)
+        .filter_by(lemma_id=lemma.id, grammatical_form=f"verb/{language}_1s_present")
+        .one()
+    )
+    assert stored_form.derivative_form_text == expected
+    assert generate_lemma_forms(session, lemma, language)["forms_added"] == 0

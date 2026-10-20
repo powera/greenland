@@ -250,6 +250,15 @@ def surface_matches_lemma(language_code: str, surface: str, lemma: str) -> bool:
         # Candidates may themselves be multi-word: French "lève" yields the
         # reflexive lemma "se lever" as one key.
         return " ".join(lemma_words) in lemma_lookup_keys(language_code, surface_words[0])
+    if (
+        get_base_language(language_code) == "fr"
+        and len(lemma_words) == 2
+        and lemma_words[0] == "se"
+        and len(surface_words) == 2
+        and surface_words[0] in ("me", "te", "se", "nous", "vous")
+    ):
+        # The reflexive clitic agrees with the person, not the citation's se.
+        return " ".join(lemma_words) in lemma_lookup_keys(language_code, surface_words[1])
     if len(lemma_words) == 1:
         # A one-word lemma inside a longer surface: "se quedó" -> "quedarse",
         # "in the evening" -> "evening".
