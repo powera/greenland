@@ -416,6 +416,11 @@ def _get_lemma_page_context(lemma_id: int) -> Optional[Dict[str, Any]]:
         "pronunciation_forms_by_language": pronunciation_forms_by_language,
         "lemma_pronunciation_rows": lemma_pronunciation_rows,
         "grammar_facts": data["grammar_facts"],
+        "reflexivity_by_language": {
+            fact.language_code: fact
+            for fact in data["grammar_facts"]
+            if fact.fact_type == "verb_reflexivity" and lemma.pos_type == "verb"
+        },
         "audio_files": data["audio_files"],
         "sentence_count": data["sentence_count"],
         "needs_disambiguation_check": data["needs_disambiguation_check"],
