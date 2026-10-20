@@ -195,4 +195,6 @@ def candidate_lemmas(token: str) -> List[str]:
             expanded.extend(_stem_vowel_variants(verb))
     candidates.extend(expanded)
     candidates.extend(_reflexive(verb) for verb in expanded)
+    # Without a lexicon, h can be mute (s'habiller) or aspirated (se hâter).
+    candidates.extend("se " + verb for verb in expanded if verb.startswith("h"))
     return candidates.as_list()

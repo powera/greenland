@@ -464,10 +464,11 @@ class TestConjugateVerb:
         assert forms["2p_imperative"] == "būkite"
         assert forms["habitual_past"] == "būdavo"
 
-    def test_reflexive_returns_none(self) -> None:
-        """Reflexive verbs are not supported yet."""
+    def test_reflexive_forms(self) -> None:
+        """Reflexive verbs retain their morphology."""
         forms = conjugate_verb("mokytis", "mokosi", "mokėsi")
-        assert forms is None
+        assert forms is not None
+        assert forms["1s_present"] == "mokausi"
 
     def test_returns_27_forms(self) -> None:
         """All results should have exactly 27 form keys."""

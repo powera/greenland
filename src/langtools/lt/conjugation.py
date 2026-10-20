@@ -288,6 +288,41 @@ def _conjugate_habitual_past(infinitive: str) -> Optional[Dict[str, str]]:
     }
 
 
+def _conjugate_reflexive(infinitive: str, present_3: str, past_3: str) -> Optional[Dict[str, str]]:
+    """Derive suffix reflexives from their own principal parts, not a lexical base."""
+    if not present_3.endswith("si") or not past_3.endswith("si"):
+        return None
+    plain_forms = conjugate(infinitive[:-1], present_3[:-2], past_3[:-2])
+    if plain_forms is None:
+        return None
+    forms: Dict[str, str] = {}
+    for form_key, plain_form in plain_forms.items():
+        if form_key == "2s_conditional":
+            reflexive_form = plain_form + "eisi"
+        elif form_key.startswith(("1p_", "2p_")):
+            reflexive_form = plain_form[:-1] + "ės"
+        elif (
+            form_key.startswith("1s_")
+            and plain_form.endswith("u")
+            and not plain_form.endswith("au")
+        ):
+            reflexive_form = plain_form + "osi"
+        elif (
+            form_key.startswith("2s_")
+            and plain_form.endswith("i")
+            and not plain_form.endswith(("ai", "ei"))
+        ):
+            reflexive_form = plain_form[:-1] + "iesi"
+        elif form_key == "2s_imperative":
+            reflexive_form = plain_form + "is"
+        elif form_key in ("3s_future", "3p_future"):
+            reflexive_form = plain_form + "is"
+        else:
+            reflexive_form = plain_form + "si"
+        forms[form_key] = reflexive_form
+    return forms
+
+
 def conjugate(infinitive: str, present_3: str, past_3: str) -> Optional[Dict[str, str]]:
     """Generate all Lithuanian verb forms from three principal parts.
 
@@ -314,13 +349,8 @@ def conjugate(infinitive: str, present_3: str, past_3: str) -> Optional[Dict[str
     if infinitive == "būti":
         return dict(_BUTI_FORMS)
 
-    # Reflexive verbs are not yet supported for mechanical conjugation.
-    # Their reflexive particle (-si/-s) moves position across forms.
     if infinitive.endswith("tis"):
-        logger.info(
-            f"Reflexive verb '{infinitive}' is not supported for " f"mechanical conjugation"
-        )
-        return None
+        return _conjugate_reflexive(infinitive, present_3, past_3)
 
     present_forms = _conjugate_present(present_3)
     if present_forms is None:

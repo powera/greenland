@@ -309,6 +309,11 @@ _IRREGULAR_DATA: _IrregDict = {
         "future_stem": "fer",
         "pp": ("fait", "faite"),
     },
+    "asseoir": {
+        "present": ["assieds", "assieds", "assied", "asseyons", "asseyez", "asseyent"],
+        "future_stem": "assiér",
+        "pp": ("assis", "assise"),
+    },
     # ── -oir verbs ───────────────────────────────────────────────
     "pouvoir": {
         "present": ["peux", "peux", "peut", "pouvons", "pouvez", "peuvent"],
@@ -374,6 +379,26 @@ _IRREGULAR_DATA: _IrregDict = {
         "pp": ("conduit", "conduite"),
     },
     # ── -re verbs (irregular) ────────────────────────────────────
+    "battre": {
+        "present": ["bats", "bats", "bat", "battons", "battez", "battent"],
+        "future_stem": "battr",
+        "pp": ("battu", "battue"),
+    },
+    "plaindre": {
+        "present": ["plains", "plains", "plaint", "plaignons", "plaignez", "plaignent"],
+        "future_stem": "plaindr",
+        "pp": ("plaint", "plainte"),
+    },
+    "produire": {
+        "present": ["produis", "produis", "produit", "produisons", "produisez", "produisent"],
+        "future_stem": "produir",
+        "pp": ("produit", "produite"),
+    },
+    "inscrire": {
+        "present": ["inscris", "inscris", "inscrit", "inscrivons", "inscrivez", "inscrivent"],
+        "future_stem": "inscrir",
+        "pp": ("inscrit", "inscrite"),
+    },
     "prendre": {
         "present": ["prends", "prends", "prend", "prenons", "prenez", "prennent"],
         "future_stem": "prendr",
@@ -497,7 +522,9 @@ _IRREGULAR_DATA: _IrregDict = {
 # ---------------------------------------------------------------------------
 
 _COMPOUND_VERBS: Dict[str, Tuple[str, str]] = {
+    "reproduire": ("re", "produire"),
     # venir family
+    "souvenir": ("sou", "venir"),
     "revenir": ("re", "venir"),
     "devenir": ("de", "venir"),
     "parvenir": ("par", "venir"),
@@ -671,6 +698,8 @@ def conjugate(infinitive: str) -> Optional[Dict[str, str]]:
     conjugation, success = conjugate_detailed(infinitive)
     if not success or not conjugation.forms:
         return None
+    if "infinitive" in conjugation.forms:
+        return dict(conjugation.forms)
     return _add_non_finite_forms(conjugation.word, conjugation.forms)
 
 
@@ -691,7 +720,50 @@ def conjugate_detailed(infinitive: str) -> Tuple[VerbConjugation, bool]:
     applied.  Third-group -ir verbs (e.g. *partir*) must be in the
     irregular table to be conjugated correctly.
     """
-    verb = infinitive.strip()
+    verb = infinitive.strip().replace("’", "'")
+    base_verb = verb[3:] if verb.startswith("se ") else verb[2:] if verb.startswith("s'") else None
+    if base_verb is not None:
+        # Defective: only third persons are used. Decline until partial
+        # mechanical paradigms are supported rather than inventing je/nous.
+        if base_verb == "ensuivre":
+            return VerbConjugation(word=verb), False
+        if not base_verb or any(char.isspace() for char in base_verb):
+            return VerbConjugation(word=verb), False
+        base_result, base_success = conjugate_detailed(base_verb)
+        if not base_success or not base_result.forms:
+            return VerbConjugation(word=verb), False
+        reflexive_forms = _add_non_finite_forms(base_verb, base_result.forms)
+        clitics = {"1s": "me", "2s": "te", "3s": "se", "1p": "nous", "2p": "vous", "3p": "se"}
+        for form_key, form_value in list(reflexive_forms.items()):
+            person = form_key.split("_", 1)[0]
+            clitic = clitics.get(person)
+            if form_key == "present_participle":
+                clitic = "se"
+            if clitic:
+                elide = clitic in ("me", "te", "se") and (
+                    form_value[0] in "aàâäeéèêëiîïoôöuùûüyœ"
+                    or (
+                        form_value.startswith("h")
+                        # The citation form records whether h permits elision:
+                        # s'habiller versus se hâter.
+                        and verb.startswith("s'")
+                    )
+                )
+                reflexive_forms[form_key] = (
+                    clitic[0] + "'" + form_value if elide else clitic + " " + form_value
+                )
+        reflexive_forms["infinitive"] = verb
+        return (
+            VerbConjugation(
+                word=verb,
+                forms=reflexive_forms,
+                confidence=base_result.confidence,
+                notes="reflexive",
+            ),
+            True,
+        )
+    if any(char.isspace() for char in verb):
+        return VerbConjugation(word=verb), False
     if not verb:
         return VerbConjugation(word=infinitive), False
 
