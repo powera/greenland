@@ -1,17 +1,18 @@
 {"guid": "N36_014", "grammar_facts": [{"fact_type": "grammatical_gender", "fact_value": "masculine"}]}
-{"guid": "N36_015", "grammar_facts": [{"fact_type": "grammatical_gender", "fact_value": "masculine"}]}
-{"guid": "N36_016", "grammar_facts": [{"fact_type": "grammatical_gender", "fact_value": "masculine"}]}
+{"guid": "N36_015", "grammar_facts": [{"fact_type": "grammatical_gender", "fact_value": "masculine"}, {"fact_type": "countability", "fact_value": "countable"}, {"fact_type": "number_type", "fact_value": "regular"}]}
+{"guid": "N36_016", "grammar_facts": [{"fact_type": "grammatical_gender", "fact_value": "masculine"}, {"fact_type": "countability", "fact_value": "countable"}, {"fact_type": "number_type", "fact_value": "regular"}]}
 {"guid": "N36_018", "grammar_facts": [{"fact_type": "grammatical_gender", "fact_value": "masculine"}]}
-{"guid": "N36_020", "grammar_facts": [{"fact_type": "grammatical_gender", "fact_value": "masculine"}]}
+{"guid": "N36_019", "forms": [{"grammatical_form": "noun/lt_nominative_singular", "text": "policijos pareigūnas", "is_base_form": true}, {"grammatical_form": "noun/lt_nominative_plural", "text": "policijos pareigūnai", "is_base_form": false}, {"grammatical_form": "noun/lt_genitive_singular", "text": "policijos pareigūno", "is_base_form": false}, {"grammatical_form": "noun/lt_genitive_plural", "text": "policijos pareigūnų", "is_base_form": false}, {"grammatical_form": "noun/lt_dative_singular", "text": "policijos pareigūnui", "is_base_form": false}, {"grammatical_form": "noun/lt_dative_plural", "text": "policijos pareigūnams", "is_base_form": false}, {"grammatical_form": "noun/lt_accusative_singular", "text": "policijos pareigūną", "is_base_form": false}, {"grammatical_form": "noun/lt_accusative_plural", "text": "policijos pareigūnus", "is_base_form": false}, {"grammatical_form": "noun/lt_instrumental_singular", "text": "policijos pareigūnu", "is_base_form": false}, {"grammatical_form": "noun/lt_instrumental_plural", "text": "policijos pareigūnais", "is_base_form": false}, {"grammatical_form": "noun/lt_locative_singular", "text": "policijos pareigūne", "is_base_form": false}, {"grammatical_form": "noun/lt_locative_plural", "text": "policijos pareigūnuose", "is_base_form": false}, {"grammatical_form": "noun/lt_vocative_singular", "text": "policijos pareigūne", "is_base_form": false}, {"grammatical_form": "noun/lt_vocative_plural", "text": "policijos pareigūnai", "is_base_form": false}], "grammar_facts": [{"fact_type": "grammatical_gender", "fact_value": "masculine"}, {"fact_type": "countability", "fact_value": "countable"}, {"fact_type": "number_type", "fact_value": "regular"}]}
+{"guid": "N36_020", "grammar_facts": [{"fact_type": "grammatical_gender", "fact_value": "masculine"}, {"fact_type": "countability", "fact_value": "countable"}, {"fact_type": "number_type", "fact_value": "regular"}]}
 {"guid": "N36_021", "synonyms": [{"grammatical_form": "synonym", "text": "šefas"}], "grammar_facts": [{"fact_type": "grammatical_gender", "fact_value": "masculine"}]}
-{"guid": "N36_022", "grammar_facts": [{"fact_type": "grammatical_gender", "fact_value": "masculine"}]}
+{"guid": "N36_022", "grammar_facts": [{"fact_type": "grammatical_gender", "fact_value": "masculine"}, {"fact_type": "countability", "fact_value": "countable"}, {"fact_type": "number_type", "fact_value": "regular"}]}
 {"guid": "N36_023", "grammar_facts": [{"fact_type": "grammatical_gender", "fact_value": "masculine"}]}
-{"guid": "N36_024", "grammar_facts": [{"fact_type": "grammatical_gender", "fact_value": "masculine"}]}
+{"guid": "N36_024", "grammar_facts": [{"fact_type": "grammatical_gender", "fact_value": "masculine"}, {"fact_type": "countability", "fact_value": "countable"}, {"fact_type": "number_type", "fact_value": "regular"}]}
 {"guid": "N36_025", "grammar_facts": [{"fact_type": "grammatical_gender", "fact_value": "masculine"}]}
 {"guid": "N36_026", "grammar_facts": [{"fact_type": "grammatical_gender", "fact_value": "masculine"}]}
 {"guid": "N36_027", "grammar_facts": [{"fact_type": "grammatical_gender", "fact_value": "masculine"}]}
-{"guid": "N36_030", "grammar_facts": [{"fact_type": "grammatical_gender", "fact_value": "masculine"}]}
-{"guid": "N36_031", "grammar_facts": [{"fact_type": "grammatical_gender", "fact_value": "masculine"}]}
+{"guid": "N36_030", "grammar_facts": [{"fact_type": "grammatical_gender", "fact_value": "masculine"}, {"fact_type": "countability", "fact_value": "countable"}, {"fact_type": "number_type", "fact_value": "regular"}]}
+{"guid": "N36_031", "grammar_facts": [{"fact_type": "grammatical_gender", "fact_value": "masculine"}, {"fact_type": "countability", "fact_value": "countable"}, {"fact_type": "number_type", "fact_value": "regular"}]}
 {"guid": "N36_032", "grammar_facts": [{"fact_type": "grammatical_gender", "fact_value": "masculine"}]}
 {"guid": "N36_033", "grammar_facts": [{"fact_type": "grammatical_gender", "fact_value": "masculine"}]}
 {"guid": "N36_034", "grammar_facts": [{"fact_type": "grammatical_gender", "fact_value": "masculine"}]}

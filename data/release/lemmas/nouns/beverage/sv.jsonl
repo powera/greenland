@@ -1,0 +1,6 @@
+{"guid": "N42_001", "grammar_facts": [{"fact_type": "number_type", "fact_value": "regular"}, {"fact_type": "plural", "fact_value": "vatten"}, {"fact_type": "plural_status", "fact_value": "override"}]}
+{"guid": "N42_002", "grammar_facts": [{"fact_type": "number_type", "fact_value": "regular"}, {"fact_type": "plural", "fact_value": "kaffen"}, {"fact_type": "plural_status", "fact_value": "override"}]}
+{"guid": "N42_003", "grammar_facts": [{"fact_type": "number_type", "fact_value": "regular"}, {"fact_type": "plural", "fact_value": "ter"}, {"fact_type": "plural_status", "fact_value": "override"}]}
+{"guid": "N42_006", "grammar_facts": [{"fact_type": "number_type", "fact_value": "regular"}, {"fact_type": "plural", "fact_value": "mjölkar"}, {"fact_type": "plural_status", "fact_value": "override"}]}
+{"guid": "N42_007", "grammar_facts": [{"fact_type": "number_type", "fact_value": "regular"}, {"fact_type": "plural", "fact_value": "läsk"}, {"fact_type": "plural_status", "fact_value": "override"}]}
+{"guid": "N42_009", "grammar_facts": [{"fact_type": "number_type", "fact_value": "regular"}, {"fact_type": "plural", "fact_value": "lemonader"}, {"fact_type": "plural_status", "fact_value": "override"}]}

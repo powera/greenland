@@ -1,0 +1,9 @@
+{"guid": "N01_055", "grammar_facts": [{"fact_type": "number_type", "fact_value": "regular"}, {"fact_type": "plural", "fact_value": "mannen"}, {"fact_type": "plural_status", "fact_value": "override"}]}
+{"guid": "N01_056", "grammar_facts": [{"fact_type": "number_type", "fact_value": "regular"}, {"fact_type": "plural", "fact_value": "vrouwen"}, {"fact_type": "plural_status", "fact_value": "override"}]}
+{"guid": "N01_057", "grammar_facts": [{"fact_type": "number_type", "fact_value": "regular"}, {"fact_type": "plural", "fact_value": "jongens"}, {"fact_type": "plural_status", "fact_value": "override"}]}
+{"guid": "N01_058", "grammar_facts": [{"fact_type": "number_type", "fact_value": "regular"}, {"fact_type": "plural", "fact_value": "meisjes"}, {"fact_type": "plural_status", "fact_value": "override"}]}
+{"guid": "N01_059", "grammar_facts": [{"fact_type": "number_type", "fact_value": "regular"}, {"fact_type": "plural", "fact_value": "vrienden"}, {"fact_type": "plural_status", "fact_value": "override"}]}
+{"guid": "N01_060", "grammar_facts": [{"fact_type": "number_type", "fact_value": "regular"}, {"fact_type": "plural", "fact_value": "personen"}, {"fact_type": "plural_status", "fact_value": "override"}]}
+{"guid": "N01_076", "grammar_facts": [{"fact_type": "number_type", "fact_value": "regular"}, {"fact_type": "plural", "fact_value": "baby's"}, {"fact_type": "plural_status", "fact_value": "override"}]}
+{"guid": "N01_080", "grammar_facts": [{"fact_type": "number_type", "fact_value": "regular"}, {"fact_type": "plural", "fact_value": "kinderen"}, {"fact_type": "plural_status", "fact_value": "override"}]}
+{"guid": "N01_081", "grammar_facts": [{"fact_type": "number_type", "fact_value": "regular"}, {"fact_type": "plural", "fact_value": "volwassenen"}, {"fact_type": "plural_status", "fact_value": "override"}]}

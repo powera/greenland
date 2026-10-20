@@ -1,9 +1,9 @@
-{"guid": "N64_001", "forms": [{"grammatical_form": "noun/en_singular", "text": "sun", "is_base_form": true, "ipa": "/sʌn/", "phonetic": "SOON"}, {"grammatical_form": "noun/en_possessive_singular", "text": "sun's", "is_base_form": false}]}
-{"guid": "N64_002", "forms": [{"grammatical_form": "noun/en_singular", "text": "moon", "is_base_form": true, "ipa": " /mʊn / ", "phonetic": " MOON "}, {"grammatical_form": "noun/en_possessive_singular", "text": "moon's", "is_base_form": false}]}
-{"guid": "N64_003", "forms": [{"grammatical_form": "noun/en_singular", "text": "planet", "is_base_form": true, "ipa": "/ˈplænɪt/", "phonetic": "PLAN-it"}, {"grammatical_form": "noun/en_possessive_singular", "text": "planet's", "is_base_form": false}]}
-{"guid": "N64_004", "forms": [{"grammatical_form": "noun/en_singular", "text": "star", "is_base_form": true, "ipa": "/stɑːr/", "phonetic": "STAA-er"}, {"grammatical_form": "noun/en_possessive_singular", "text": "star's", "is_base_form": false}]}
+{"guid": "N64_001", "forms": [{"grammatical_form": "noun/en_singular", "text": "sun", "is_base_form": true, "ipa": "/sʌn/", "phonetic": "SOON"}]}
+{"guid": "N64_002", "forms": [{"grammatical_form": "noun/en_singular", "text": "moon", "is_base_form": true, "ipa": " /mʊn / ", "phonetic": " MOON "}]}
+{"guid": "N64_003", "forms": [{"grammatical_form": "noun/en_singular", "text": "planet", "is_base_form": true, "ipa": "/ˈplænɪt/", "phonetic": "PLAN-it"}]}
+{"guid": "N64_004", "forms": [{"grammatical_form": "noun/en_singular", "text": "star", "is_base_form": true, "ipa": "/stɑːr/", "phonetic": "STAA-er"}]}
 {"guid": "N64_005", "forms": [{"grammatical_form": "noun/en_singular", "text": "galaxy", "is_base_form": true, "ipa": "/ˈɡæləksi/", "phonetic": "GAL-uk-see"}]}
-{"guid": "N64_006", "forms": [{"grammatical_form": "noun/en_singular", "text": "earth", "is_base_form": true, "ipa": "/ɜːrθ/", "phonetic": "ER-th"}, {"grammatical_form": "noun/en_possessive_singular", "text": "earth's", "is_base_form": false}], "variants": [{"kind": "spelling", "key": "Earth", "forms": [{"grammatical_form": "noun/en_singular", "text": "Earth", "is_base_form": true}]}]}
+{"guid": "N64_006", "forms": [{"grammatical_form": "noun/en_singular", "text": "earth", "is_base_form": true, "ipa": "/ɜːrθ/", "phonetic": "ER-th"}], "variants": [{"kind": "spelling", "key": "Earth", "forms": [{"grammatical_form": "noun/en_singular", "text": "Earth", "is_base_form": true}]}]}
 {"guid": "N64_007", "forms": [{"grammatical_form": "noun/en_singular", "text": "asteroid", "is_base_form": true, "ipa": "/ˈæs.tə.rɔɪd/", "phonetic": "AS-tuh-royd"}]}
 {"guid": "N64_008", "forms": [{"grammatical_form": "noun/en_singular", "text": "solar system", "is_base_form": true}]}
 {"guid": "N64_009", "forms": [{"grammatical_form": "noun/en_singular", "text": "supernova", "is_base_form": true, "ipa": "/ˌsuːpərˈnoʊvə/", "phonetic": "SOO-per-NOH-vuh"}]}

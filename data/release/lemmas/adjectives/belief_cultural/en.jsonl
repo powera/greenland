@@ -62,3 +62,8 @@
 {"guid": "A24_062", "forms": [{"grammatical_form": "adjective/en_positive", "text": "ecumenical", "is_base_form": true, "ipa": "/ˌɛkjəˈmɛnɪkəl/", "phonetic": "ek-yoo-MEN-ih-kul"}]}
 {"guid": "A24_064", "forms": [{"grammatical_form": "adjective/en_positive", "text": "kosher", "is_base_form": true}]}
 {"guid": "A24_067", "forms": [{"grammatical_form": "adjective/en_positive", "text": "furry", "is_base_form": true, "ipa": "/ˈfɝi/", "phonetic": "FUR-ee"}]}
+{"guid": "A24_070", "forms": [{"grammatical_form": "adjective/en_positive", "text": "religious", "is_base_form": true, "ipa": "/rɪˈlɪdʒəs/", "phonetic": "ri-LIJ-us"}]}
+{"guid": "A24_071", "forms": [{"grammatical_form": "adjective/en_positive", "text": "traditional", "is_base_form": true, "ipa": "/trəˈdɪʃənəl/", "phonetic": "truh-DISH-uh-nuhl"}]}
+{"guid": "A24_072", "forms": [{"grammatical_form": "adjective/en_positive", "text": "independent", "is_base_form": true, "ipa": "/ˌɪndɪˈpɛndənt/", "phonetic": "in-duh-PEN-dent"}]}
+{"guid": "A24_073", "forms": [{"grammatical_form": "adjective/en_positive", "text": "cultural", "is_base_form": true, "ipa": "/ˈkʌltʃərəl/", "phonetic": "KUL-chuh-rul"}]}
+{"guid": "A24_074", "forms": [{"grammatical_form": "adjective/en_positive", "text": "multi-party", "is_base_form": true}]}

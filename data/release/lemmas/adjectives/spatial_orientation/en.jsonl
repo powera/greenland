@@ -38,3 +38,5 @@
 {"guid": "A21_040", "forms": [{"grammatical_form": "adjective/en_positive", "text": "long-range", "is_base_form": true}]}
 {"guid": "A21_041", "forms": [{"grammatical_form": "adjective/en_positive", "text": "one-way", "is_base_form": true}]}
 {"guid": "A21_042", "forms": [{"grammatical_form": "adjective/en_positive", "text": "two-way", "is_base_form": true}]}
+{"guid": "A21_045", "forms": [{"grammatical_form": "adjective/en_positive", "text": "central", "is_base_form": true, "ipa": "/ˈsɛntrəl/", "phonetic": "SEN-truhl"}]}
+{"guid": "A21_046", "forms": [{"grammatical_form": "adjective/en_positive", "text": "internal", "is_base_form": true, "ipa": "/ɪnˈtɝːnəl/", "phonetic": "in-TER-nuhl"}]}

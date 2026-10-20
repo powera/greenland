@@ -1,0 +1,11 @@
+{"guid": "N02_001", "grammar_facts": [{"fact_type": "number_type", "fact_value": "regular"}, {"fact_type": "plural", "fact_value": "hundar"}, {"fact_type": "plural_status", "fact_value": "override"}]}
+{"guid": "N02_002", "grammar_facts": [{"fact_type": "number_type", "fact_value": "regular"}, {"fact_type": "plural", "fact_value": "katter"}, {"fact_type": "plural_status", "fact_value": "override"}]}
+{"guid": "N02_003", "grammar_facts": [{"fact_type": "number_type", "fact_value": "regular"}, {"fact_type": "plural", "fact_value": "fåglar"}, {"fact_type": "plural_status", "fact_value": "override"}]}
+{"guid": "N02_004", "grammar_facts": [{"fact_type": "number_type", "fact_value": "regular"}, {"fact_type": "plural", "fact_value": "hästar"}, {"fact_type": "plural_status", "fact_value": "override"}]}
+{"guid": "N02_005", "grammar_facts": [{"fact_type": "number_type", "fact_value": "regular"}, {"fact_type": "plural", "fact_value": "kor"}, {"fact_type": "plural_status", "fact_value": "override"}]}
+{"guid": "N02_006", "grammar_facts": [{"fact_type": "number_type", "fact_value": "regular"}, {"fact_type": "plural", "fact_value": "grisar"}, {"fact_type": "plural_status", "fact_value": "override"}]}
+{"guid": "N02_007", "grammar_facts": [{"fact_type": "number_type", "fact_value": "regular"}, {"fact_type": "plural", "fact_value": "kycklingar"}, {"fact_type": "plural_status", "fact_value": "override"}]}
+{"guid": "N02_008", "grammar_facts": [{"fact_type": "number_type", "fact_value": "regular"}, {"fact_type": "plural", "fact_value": "möss"}, {"fact_type": "plural_status", "fact_value": "override"}]}
+{"guid": "N02_009", "grammar_facts": [{"fact_type": "number_type", "fact_value": "regular"}, {"fact_type": "plural", "fact_value": "björnar"}, {"fact_type": "plural_status", "fact_value": "override"}]}
+{"guid": "N02_010", "grammar_facts": [{"fact_type": "number_type", "fact_value": "regular"}, {"fact_type": "plural", "fact_value": "vargar"}, {"fact_type": "plural_status", "fact_value": "override"}]}
+{"guid": "N02_034", "grammar_facts": [{"fact_type": "number_type", "fact_value": "regular"}, {"fact_type": "plural", "fact_value": "fiskar"}, {"fact_type": "plural_status", "fact_value": "override"}]}

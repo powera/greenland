@@ -1,1 +1,5 @@
+{"guid": "N25_001", "grammar_facts": [{"fact_type": "grammatical_gender", "fact_value": "feminine"}, {"fact_type": "number_type", "fact_value": "regular"}, {"fact_type": "plural", "fact_value": "vite"}, {"fact_type": "plural_status", "fact_value": "override"}]}
+{"guid": "N25_002", "grammar_facts": [{"fact_type": "grammatical_gender", "fact_value": "masculine"}, {"fact_type": "number_type", "fact_value": "regular"}, {"fact_type": "plural", "fact_value": "giorni"}, {"fact_type": "plural_status", "fact_value": "override"}]}
+{"guid": "N25_007", "grammar_facts": [{"fact_type": "grammatical_gender", "fact_value": "masculine"}, {"fact_type": "number_type", "fact_value": "regular"}, {"fact_type": "plural", "fact_value": "anni"}, {"fact_type": "plural_status", "fact_value": "override"}]}
 {"guid": "N25_029", "synonyms": [{"grammatical_form": "synonym", "text": "periodo"}]}
+{"guid": "N25_036", "grammar_facts": [{"fact_type": "grammatical_gender", "fact_value": "feminine"}, {"fact_type": "number_type", "fact_value": "regular"}, {"fact_type": "plural", "fact_value": "date"}, {"fact_type": "plural_status", "fact_value": "override"}]}

@@ -38,3 +38,5 @@
 {"guid": "N67_043", "forms": [{"grammatical_form": "noun/en_singular", "text": "inflectional paradigm", "is_base_form": true}], "variants": [{"kind": "equivalent", "key": "paradigm", "forms": [{"grammatical_form": "noun/en_singular", "text": "paradigm", "is_base_form": true}]}]}
 {"guid": "N67_046", "forms": [{"grammatical_form": "noun/en_singular", "text": "grammatical aspect", "is_base_form": true}], "variants": [{"kind": "equivalent", "key": "aspect", "forms": [{"grammatical_form": "noun/en_singular", "text": "aspect", "is_base_form": true}]}]}
 {"guid": "N67_052", "forms": [{"grammatical_form": "noun/en_singular", "text": "present tense", "is_base_form": true}], "variants": [{"kind": "equivalent", "key": "present", "forms": [{"grammatical_form": "noun/en_singular", "text": "present", "is_base_form": true}]}]}
+{"guid": "N67_055", "forms": [{"grammatical_form": "noun/en_singular", "text": "object", "is_base_form": true, "ipa": "/ˈɑbdʒɛkt/", "phonetic": "OB-jekt"}]}
+{"guid": "N67_056", "forms": [{"grammatical_form": "noun/en_singular", "text": "article", "is_base_form": true, "ipa": "/ˈɑrtɪkəl/", "phonetic": "AR-ti-kuhl"}]}

@@ -1,13 +1,13 @@
 {"guid": "V04_001", "grammar_facts": [{"fact_type": "infinitive", "fact_value": "mokytis"}, {"fact_type": "3s_present", "fact_value": "mokosi"}, {"fact_type": "3s_past", "fact_value": "mokėsi"}]}
 {"guid": "V04_002", "grammar_facts": [{"fact_type": "infinitive", "fact_value": "mokyti"}, {"fact_type": "3s_present", "fact_value": "moko"}, {"fact_type": "3s_past", "fact_value": "mokė"}]}
-{"guid": "V04_003", "grammar_facts": [{"fact_type": "infinitive", "fact_value": "skaityti"}, {"fact_type": "3s_present", "fact_value": "skaito"}, {"fact_type": "3s_past", "fact_value": "skaitė"}]}
+{"guid": "V04_003", "grammar_facts": [{"fact_type": "infinitive", "fact_value": "skaityti"}, {"fact_type": "3s_present", "fact_value": "skaito"}, {"fact_type": "3s_past", "fact_value": "skaitė"}, {"fact_type": "verb_reflexivity", "fact_value": "non_reflexive"}]}
 {"guid": "V04_004", "grammar_facts": [{"fact_type": "infinitive", "fact_value": "rašyti"}, {"fact_type": "3s_present", "fact_value": "rašo"}, {"fact_type": "3s_past", "fact_value": "rašė"}]}
 {"guid": "V04_005", "grammar_facts": [{"fact_type": "infinitive", "fact_value": "klausytis"}, {"fact_type": "3s_present", "fact_value": "klausosi"}, {"fact_type": "3s_past", "fact_value": "klausėsi"}]}
-{"guid": "V04_006", "grammar_facts": [{"fact_type": "infinitive", "fact_value": "žinoti"}, {"fact_type": "3s_present", "fact_value": "žino"}, {"fact_type": "3s_past", "fact_value": "žinojo"}]}
-{"guid": "V04_008", "grammar_facts": [{"fact_type": "infinitive", "fact_value": "galvoti"}, {"fact_type": "3s_present", "fact_value": "galvoja"}, {"fact_type": "3s_past", "fact_value": "galvojo"}]}
+{"guid": "V04_006", "grammar_facts": [{"fact_type": "infinitive", "fact_value": "žinoti"}, {"fact_type": "3s_present", "fact_value": "žino"}, {"fact_type": "3s_past", "fact_value": "žinojo"}, {"fact_type": "verb_reflexivity", "fact_value": "non_reflexive"}]}
+{"guid": "V04_008", "grammar_facts": [{"fact_type": "infinitive", "fact_value": "galvoti"}, {"fact_type": "3s_present", "fact_value": "galvoja"}, {"fact_type": "3s_past", "fact_value": "galvojo"}, {"fact_type": "verb_reflexivity", "fact_value": "non_reflexive"}]}
 {"guid": "V04_009", "grammar_facts": [{"fact_type": "infinitive", "fact_value": "leisti"}, {"fact_type": "3s_present", "fact_value": "leidžia"}, {"fact_type": "3s_past", "fact_value": "leido"}]}
 {"guid": "V04_010", "grammar_facts": [{"fact_type": "infinitive", "fact_value": "reikėti"}, {"fact_type": "3s_present", "fact_value": "reikia"}, {"fact_type": "3s_past", "fact_value": "reikėjo"}]}
-{"guid": "V04_011", "grammar_facts": [{"fact_type": "infinitive", "fact_value": "reikšti"}, {"fact_type": "3s_present", "fact_value": "reiškia"}, {"fact_type": "3s_past", "fact_value": "reiškė"}]}
+{"guid": "V04_011", "grammar_facts": [{"fact_type": "infinitive", "fact_value": "reikšti"}, {"fact_type": "3s_present", "fact_value": "reiškia"}, {"fact_type": "3s_past", "fact_value": "reiškė"}, {"fact_type": "verb_reflexivity", "fact_value": "non_reflexive"}]}
 {"guid": "V04_012", "grammar_facts": [{"fact_type": "infinitive", "fact_value": "prisiminti"}, {"fact_type": "3s_present", "fact_value": "prisimena"}, {"fact_type": "3s_past", "fact_value": "prisiminė"}]}
 {"guid": "V04_013", "grammar_facts": [{"fact_type": "infinitive", "fact_value": "suprasti"}, {"fact_type": "3s_present", "fact_value": "supranta"}, {"fact_type": "3s_past", "fact_value": "suprato"}]}
 {"guid": "V04_014", "grammar_facts": [{"fact_type": "infinitive", "fact_value": "norėti"}, {"fact_type": "3s_present", "fact_value": "nori"}, {"fact_type": "3s_past", "fact_value": "norėjo"}]}
@@ -26,7 +26,7 @@
 {"guid": "V04_029", "grammar_facts": [{"fact_type": "infinitive", "fact_value": "drįsti"}, {"fact_type": "3s_present", "fact_value": "drįsta"}, {"fact_type": "3s_past", "fact_value": "drįso"}]}
 {"guid": "V04_030", "grammar_facts": [{"fact_type": "infinitive", "fact_value": "suvokti"}, {"fact_type": "3s_present", "fact_value": "suvokia"}, {"fact_type": "3s_past", "fact_value": "suvokė"}]}
 {"guid": "V04_031", "grammar_facts": [{"fact_type": "infinitive", "fact_value": "apsvarstyti"}, {"fact_type": "3s_present", "fact_value": "apsvarsto"}, {"fact_type": "3s_past", "fact_value": "apsvarstė"}]}
-{"guid": "V04_032", "grammar_facts": [{"fact_type": "infinitive", "fact_value": "studijuoti"}, {"fact_type": "3s_present", "fact_value": "studijuoja"}, {"fact_type": "3s_past", "fact_value": "studijavo"}]}
+{"guid": "V04_032", "grammar_facts": [{"fact_type": "infinitive", "fact_value": "studijuoti"}, {"fact_type": "3s_present", "fact_value": "studijuoja"}, {"fact_type": "3s_past", "fact_value": "studijavo"}, {"fact_type": "verb_reflexivity", "fact_value": "non_reflexive"}]}
 {"guid": "V04_033", "grammar_facts": [{"fact_type": "infinitive", "fact_value": "nuspręsti"}, {"fact_type": "3s_present", "fact_value": "nusprendžia"}, {"fact_type": "3s_past", "fact_value": "nusprendė"}]}
 {"guid": "V04_034", "grammar_facts": [{"fact_type": "infinitive", "fact_value": "atpažinti"}, {"fact_type": "3s_present", "fact_value": "atpažįsta"}, {"fact_type": "3s_past", "fact_value": "atpažino"}]}
 {"guid": "V04_035", "grammar_facts": [{"fact_type": "infinitive", "fact_value": "sutikti"}, {"fact_type": "3s_present", "fact_value": "sutinka"}, {"fact_type": "3s_past", "fact_value": "sutiko"}]}
@@ -40,3 +40,4 @@
 {"guid": "V04_043", "grammar_facts": [{"fact_type": "infinitive", "fact_value": "tikrinti"}, {"fact_type": "3s_present", "fact_value": "tikrina"}, {"fact_type": "3s_past", "fact_value": "tikrino"}]}
 {"guid": "V04_044", "grammar_facts": [{"fact_type": "infinitive", "fact_value": "matuoti"}, {"fact_type": "3s_present", "fact_value": "matuoja"}, {"fact_type": "3s_past", "fact_value": "matavo"}]}
 {"guid": "V04_045", "grammar_facts": [{"fact_type": "infinitive", "fact_value": "ilsėtis"}, {"fact_type": "3s_present", "fact_value": "ilsisi"}, {"fact_type": "3s_past", "fact_value": "ilsėjosi"}]}
+{"guid": "V04_068", "grammar_facts": [{"fact_type": "verb_reflexivity", "fact_value": "non_reflexive"}, {"fact_type": "infinitive", "fact_value": "galėti"}, {"fact_type": "3s_present", "fact_value": "gali"}, {"fact_type": "3s_past", "fact_value": "galėjo"}]}

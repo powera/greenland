@@ -15,3 +15,5 @@
 {"guid": "T99_015", "forms": [{"grammatical_form": "determiner/base", "text": "neither", "is_base_form": true}]}
 {"guid": "T99_016", "forms": [{"grammatical_form": "determiner/base", "text": "either", "is_base_form": true, "ipa": "/ˈiːðər/", "phonetic": "EED-ther"}]}
 {"guid": "T99_017", "forms": [{"grammatical_form": "determiner/base", "text": "every", "is_base_form": true, "ipa": "/ˈɛvri/", "phonetic": "EV-ruh-ee"}]}
+{"guid": "T99_018", "forms": [{"grammatical_form": "determiner/base", "text": "all", "is_base_form": true, "ipa": "/ɔl/", "phonetic": "AWL"}]}
+{"guid": "T99_019", "forms": [{"grammatical_form": "determiner/base", "text": "no", "is_base_form": true, "ipa": "/noʊ/", "phonetic": "NOH"}]}

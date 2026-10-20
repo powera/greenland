@@ -1,16 +1,15 @@
-{"guid": "N25_001", "forms": [{"grammatical_form": "noun/en_singular", "text": "life", "is_base_form": true, "ipa": "/laɪf/", "phonetic": "LYF"}, {"grammatical_form": "noun/en_plural", "text": "lives", "is_base_form": false}, {"grammatical_form": "noun/en_possessive_singular", "text": "life's", "is_base_form": false}]}
-{"guid": "N25_002", "forms": [{"grammatical_form": "noun/en_singular", "text": "day", "is_base_form": true, "ipa": "/deɪ/", "phonetic": "DEE"}, {"grammatical_form": "noun/en_possessive_singular", "text": "day's", "is_base_form": false}]}
-{"guid": "N25_003", "forms": [{"grammatical_form": "noun/en_singular", "text": "night", "is_base_form": true, "ipa": "/naɪt/", "phonetic": "NYT"}, {"grammatical_form": "noun/en_possessive_singular", "text": "night's", "is_base_form": false}]}
-{"guid": "N25_004", "forms": [{"grammatical_form": "noun/en_singular", "text": "morning", "is_base_form": true, "ipa": "/ˈmɔːrnɪŋ/", "phonetic": "MOHR-nihng"}, {"grammatical_form": "noun/en_possessive_singular", "text": "morning's", "is_base_form": false}]}
+{"guid": "N25_001", "forms": [{"grammatical_form": "noun/en_singular", "text": "life", "is_base_form": true, "ipa": "/laɪf/", "phonetic": "LYF"}], "grammar_facts": [{"fact_type": "countability", "fact_value": "both"}, {"fact_type": "number_type", "fact_value": "regular"}, {"fact_type": "animacy", "fact_value": "animate"}, {"fact_type": "plural", "fact_value": "lives"}, {"fact_type": "plural_status", "fact_value": "override"}]}
+{"guid": "N25_002", "forms": [{"grammatical_form": "noun/en_singular", "text": "day", "is_base_form": true, "ipa": "/deɪ/", "phonetic": "DEE"}], "grammar_facts": [{"fact_type": "countability", "fact_value": "countable"}, {"fact_type": "number_type", "fact_value": "regular"}, {"fact_type": "animacy", "fact_value": "inanimate"}, {"fact_type": "plural_status", "fact_value": "regular"}]}
+{"guid": "N25_003", "forms": [{"grammatical_form": "noun/en_singular", "text": "night", "is_base_form": true, "ipa": "/naɪt/", "phonetic": "NYT"}]}
+{"guid": "N25_004", "forms": [{"grammatical_form": "noun/en_singular", "text": "morning", "is_base_form": true, "ipa": "/ˈmɔːrnɪŋ/", "phonetic": "MOHR-nihng"}]}
 {"guid": "N25_005", "forms": [{"grammatical_form": "noun/en_singular", "text": "evening", "is_base_form": true, "ipa": "/ˈiːvnɪŋ/", "phonetic": "EE-ving"}]}
 {"guid": "N25_006", "forms": [{"grammatical_form": "noun/en_singular", "text": "decade", "is_base_form": true, "ipa": "/ˈdek.əd/", "phonetic": "DEK-əd"}]}
-{"guid": "N25_007", "forms": [{"grammatical_form": "noun/en_singular", "text": "year", "is_base_form": true, "ipa": "/jɪr/", "phonetic": "YIR"}, {"grammatical_form": "noun/en_possessive_singular", "text": "year's", "is_base_form": false}]}
-{"guid": "N25_008", "forms": [{"grammatical_form": "noun/en_singular", "text": "month", "is_base_form": true, "ipa": "/mʌnθ/", "phonetic": "MONTH"}, {"grammatical_form": "noun/en_possessive_singular", "text": "month's", "is_base_form": false}]}
-{"guid": "N25_009", "forms": [{"grammatical_form": "noun/en_possessive_singular", "text": "week's", "is_base_form": false}]}
-{"guid": "N25_010", "forms": [{"grammatical_form": "noun/en_singular", "text": "hour", "is_base_form": true, "ipa": "/ˈaʊər/", "phonetic": "OW-er"}, {"grammatical_form": "noun/en_possessive_singular", "text": "hour's", "is_base_form": false}]}
+{"guid": "N25_007", "forms": [{"grammatical_form": "noun/en_singular", "text": "year", "is_base_form": true, "ipa": "/jɪr/", "phonetic": "YIR"}], "grammar_facts": [{"fact_type": "countability", "fact_value": "countable"}, {"fact_type": "number_type", "fact_value": "regular"}, {"fact_type": "animacy", "fact_value": "inanimate"}, {"fact_type": "plural_status", "fact_value": "regular"}]}
+{"guid": "N25_008", "forms": [{"grammatical_form": "noun/en_singular", "text": "month", "is_base_form": true, "ipa": "/mʌnθ/", "phonetic": "MONTH"}]}
+{"guid": "N25_010", "forms": [{"grammatical_form": "noun/en_singular", "text": "hour", "is_base_form": true, "ipa": "/ˈaʊər/", "phonetic": "OW-er"}]}
 {"guid": "N25_011", "forms": [{"grammatical_form": "noun/en_singular", "text": "minute", "is_base_form": true, "ipa": "/ˈmɪnɪt/", "phonetic": "MIN-it"}]}
-{"guid": "N25_012", "forms": [{"grammatical_form": "noun/en_singular", "text": "moment", "is_base_form": true, "ipa": "/ˈmoʊ.mənt/", "phonetic": "MOH-muhnt"}, {"grammatical_form": "noun/en_possessive_singular", "text": "moment's", "is_base_form": false}]}
-{"guid": "N25_013", "forms": [{"grammatical_form": "noun/en_singular", "text": "death", "is_base_form": true, "ipa": "/dɛθ/", "phonetic": "DEETH"}, {"grammatical_form": "noun/en_possessive_singular", "text": "death's", "is_base_form": false}]}
+{"guid": "N25_012", "forms": [{"grammatical_form": "noun/en_singular", "text": "moment", "is_base_form": true, "ipa": "/ˈmoʊ.mənt/", "phonetic": "MOH-muhnt"}]}
+{"guid": "N25_013", "forms": [{"grammatical_form": "noun/en_singular", "text": "death", "is_base_form": true, "ipa": "/dɛθ/", "phonetic": "DEETH"}]}
 {"guid": "N25_020", "forms": [{"grammatical_form": "noun/en_singular", "text": "past", "is_base_form": true, "ipa": "/pæst/", "phonetic": "PAST"}]}
 {"guid": "N25_021", "forms": [{"grammatical_form": "noun/en_singular", "text": "age", "is_base_form": true, "ipa": "/eɪdʒ/", "phonetic": "AYJ"}]}
 {"guid": "N25_022", "forms": [{"grammatical_form": "noun/en_singular", "text": "future", "is_base_form": true, "ipa": "ˈfjuːtʃər", "phonetic": "FYOOO-choo-uh"}]}
@@ -22,6 +21,7 @@
 {"guid": "N25_028", "forms": [{"grammatical_form": "noun/en_singular", "text": "century", "is_base_form": true, "ipa": "/ˈsɛn.tʃə.r̩/", "phonetic": "SEN-chuh-r"}]}
 {"guid": "N25_029", "forms": [{"grammatical_form": "noun/en_singular", "text": "period", "is_base_form": true, "ipa": "/ˈpɪəriːd/", "phonetic": "PEE-rih-d"}], "synonyms": [{"grammatical_form": "synonym", "text": "period"}]}
 {"guid": "N25_030", "forms": [{"grammatical_form": "noun/en_singular", "text": "second", "is_base_form": true, "ipa": "/ˈsɛkənd/", "phonetic": "SEK-und"}]}
+{"guid": "N25_036", "grammar_facts": [{"fact_type": "countability", "fact_value": "countable"}, {"fact_type": "number_type", "fact_value": "regular"}, {"fact_type": "animacy", "fact_value": "inanimate"}, {"fact_type": "plural_status", "fact_value": "regular"}]}
 {"guid": "N25_037", "forms": [{"grammatical_form": "noun/en_singular", "text": "school year", "is_base_form": true}]}
 {"guid": "N25_038", "forms": [{"grammatical_form": "noun/en_singular", "text": "office hours", "is_base_form": true}]}
 {"guid": "N25_039", "forms": [{"grammatical_form": "noun/en_singular", "text": "rush hour", "is_base_form": true}]}

@@ -1,0 +1,8 @@
+{"guid": "N40_003", "grammar_facts": [{"fact_type": "number_type", "fact_value": "regular"}, {"fact_type": "plural", "fact_value": "tåg"}, {"fact_type": "plural_status", "fact_value": "override"}]}
+{"guid": "N40_006", "grammar_facts": [{"fact_type": "number_type", "fact_value": "regular"}, {"fact_type": "plural", "fact_value": "flygplan"}, {"fact_type": "plural_status", "fact_value": "override"}]}
+{"guid": "N40_007", "grammar_facts": [{"fact_type": "number_type", "fact_value": "regular"}, {"fact_type": "plural", "fact_value": "cyklar"}, {"fact_type": "plural_status", "fact_value": "override"}]}
+{"guid": "N40_008", "grammar_facts": [{"fact_type": "number_type", "fact_value": "regular"}, {"fact_type": "plural", "fact_value": "båtar"}, {"fact_type": "plural_status", "fact_value": "override"}]}
+{"guid": "N40_009", "grammar_facts": [{"fact_type": "number_type", "fact_value": "regular"}, {"fact_type": "plural", "fact_value": "fartyg"}, {"fact_type": "plural_status", "fact_value": "override"}]}
+{"guid": "N40_010", "grammar_facts": [{"fact_type": "number_type", "fact_value": "regular"}, {"fact_type": "plural", "fact_value": "taxibilar"}, {"fact_type": "plural_status", "fact_value": "override"}]}
+{"guid": "N40_011", "grammar_facts": [{"fact_type": "number_type", "fact_value": "regular"}, {"fact_type": "plural", "fact_value": "lastbilar"}, {"fact_type": "plural_status", "fact_value": "override"}]}
+{"guid": "N40_012", "grammar_facts": [{"fact_type": "number_type", "fact_value": "regular"}, {"fact_type": "plural", "fact_value": "motorcyklar"}, {"fact_type": "plural_status", "fact_value": "override"}]}

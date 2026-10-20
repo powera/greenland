@@ -8,3 +8,7 @@
 {"guid": "D09_011", "forms": [{"grammatical_form": "adverb/en_positive", "text": "further", "is_base_form": true, "ipa": "/ˈfɝːðɚ/", "phonetic": "FUR-ther"}]}
 {"guid": "D09_012", "forms": [{"grammatical_form": "adverb/en_positive", "text": "particularly", "is_base_form": true, "ipa": "/pɚˈtɪkjələrli/", "phonetic": "puh-TIK-yuh-ler-lee"}]}
 {"guid": "D09_013", "forms": [{"grammatical_form": "adverb/en_positive", "text": "highly", "is_base_form": true, "ipa": "/ˈhaɪli/", "phonetic": "HY-lee"}]}
+{"guid": "D09_014", "forms": [{"grammatical_form": "adverb/en_positive", "text": "widely", "is_base_form": true, "ipa": "/ˈwaɪdli/", "phonetic": "WIDE-lee"}]}
+{"guid": "D09_015", "forms": [{"grammatical_form": "adverb/en_positive", "text": "mostly", "is_base_form": true, "ipa": "/ˈmoʊstli/", "phonetic": "MOHST-lee"}]}
+{"guid": "D09_016", "forms": [{"grammatical_form": "adverb/en_positive", "text": "largely", "is_base_form": true, "ipa": "/ˈlɑrdʒli/", "phonetic": "LARJ-lee"}]}
+{"guid": "D09_017", "forms": [{"grammatical_form": "adverb/en_positive", "text": "relatively", "is_base_form": true, "ipa": "/ˈrɛlətɪvli/", "phonetic": "REL-uh-tiv-lee"}]}

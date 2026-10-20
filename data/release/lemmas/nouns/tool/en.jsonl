@@ -54,7 +54,7 @@
 {"guid": "N12_132", "forms": [{"grammatical_form": "noun/en_singular", "text": "hockey stick", "is_base_form": true, "ipa": "/ˈhɑki stɪk/", "phonetic": "HAA-kee stik"}]}
 {"guid": "N12_133", "forms": [{"grammatical_form": "noun/en_singular", "text": "tee", "is_base_form": true, "ipa": "/ti/", "phonetic": "TEE"}]}
 {"guid": "N12_134", "forms": [{"grammatical_form": "noun/en_singular", "text": "club", "is_base_form": true, "ipa": "/klʌb/", "phonetic": "KLUHB"}]}
-{"guid": "N12_135", "forms": [{"grammatical_form": "noun/en_singular", "text": "driver", "is_base_form": true, "ipa": "/ˈdraɪvər/", "phonetic": "DRY-ver"}, {"grammatical_form": "noun/en_possessive_singular", "text": "driver's", "is_base_form": false}]}
+{"guid": "N12_135", "forms": [{"grammatical_form": "noun/en_singular", "text": "driver", "is_base_form": true, "ipa": "/ˈdraɪvər/", "phonetic": "DRY-ver"}]}
 {"guid": "N12_136", "forms": [{"grammatical_form": "noun/en_singular", "text": "iron", "is_base_form": true, "ipa": "/ˈaɪərn/", "phonetic": "EYE-ern"}]}
 {"guid": "N12_137", "forms": [{"grammatical_form": "noun/en_singular", "text": "wedge", "is_base_form": true, "ipa": "/wɛdʒ/", "phonetic": "WEJ"}]}
 {"guid": "N12_138", "forms": [{"grammatical_form": "noun/en_singular", "text": "putter", "is_base_form": true, "ipa": "/ˈpʌtər/", "phonetic": "PUT-er"}]}
@@ -72,3 +72,8 @@
 {"guid": "N12_150", "forms": [{"grammatical_form": "noun/en_singular", "text": "beam", "is_base_form": true, "ipa": "/biːm/", "phonetic": "BEEM"}]}
 {"guid": "N12_153", "forms": [{"grammatical_form": "noun/en_singular", "text": "mandoline slicer", "is_base_form": true}], "variants": [{"kind": "equivalent", "key": "mandolin", "forms": [{"grammatical_form": "noun/en_singular", "text": "mandolin", "is_base_form": true}]}]}
 {"guid": "N12_154", "forms": [{"grammatical_form": "noun/en_singular", "text": "shears", "is_base_form": true}]}
+{"guid": "N12_155", "forms": [{"grammatical_form": "noun/en_singular", "text": "hoe", "is_base_form": true, "ipa": "/hoʊ/", "phonetic": "HOH"}]}
+{"guid": "N12_156", "forms": [{"grammatical_form": "noun/en_singular", "text": "scythe", "is_base_form": true, "ipa": "/saɪð/", "phonetic": "SYTHE"}]}
+{"guid": "N12_157", "forms": [{"grammatical_form": "noun/en_singular", "text": "sickle", "is_base_form": true, "ipa": "/ˈsɪkəl/", "phonetic": "SIK-uhl"}]}
+{"guid": "N12_158", "forms": [{"grammatical_form": "noun/en_singular", "text": "pitchfork", "is_base_form": true, "ipa": "/ˈpɪtʃˌfɔrk/", "phonetic": "PITCH-fork"}]}
+{"guid": "N12_159", "forms": [{"grammatical_form": "noun/en_singular", "text": "harrow", "is_base_form": true, "ipa": "/ˈhæroʊ/", "phonetic": "HAIR-oh"}]}

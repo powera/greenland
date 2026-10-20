@@ -60,7 +60,7 @@
 {"guid": "N41_090", "forms": [{"grammatical_form": "noun/en_singular", "text": "ritual", "is_base_form": true, "ipa": "/ˈrɪtʃuəl/", "phonetic": "RICH-oo-uhl"}]}
 {"guid": "N41_091", "forms": [{"grammatical_form": "noun/en_singular", "text": "worship", "is_base_form": true, "ipa": "/ˈwɝːʃɪp/", "phonetic": "WUR-ship"}]}
 {"guid": "N41_092", "forms": [{"grammatical_form": "noun/en_singular", "text": "fasting", "is_base_form": true, "ipa": "/ˈfæstɪŋ/", "phonetic": "FAST-ing"}]}
-{"guid": "N41_093", "forms": [{"grammatical_form": "noun/en_singular", "text": "provision", "is_base_form": true, "ipa": "/prəˈvɪʒən/", "phonetic": "pruh-VIZH-un"}, {"grammatical_form": "noun/en_possessive_singular", "text": "provision's", "is_base_form": false}]}
+{"guid": "N41_093", "forms": [{"grammatical_form": "noun/en_singular", "text": "provision", "is_base_form": true, "ipa": "/prəˈvɪʒən/", "phonetic": "pruh-VIZH-un"}]}
 {"guid": "N41_094", "forms": [{"grammatical_form": "noun/en_singular", "text": "ballot", "is_base_form": true, "ipa": "/ˈbælət/", "phonetic": "BAL-uht"}]}
 {"guid": "N41_095", "forms": [{"grammatical_form": "noun/en_singular", "text": "commerce", "is_base_form": true, "ipa": "/ˈkɑːmɝːs/", "phonetic": "KAH-mers"}]}
 {"guid": "N41_096", "forms": [{"grammatical_form": "noun/en_singular", "text": "refusal", "is_base_form": true, "ipa": "/rɪˈfjuːzəl/", "phonetic": "rih-FYOO-zul"}]}
@@ -179,3 +179,10 @@
 {"guid": "N41_244", "forms": [{"grammatical_form": "noun/en_singular", "text": "indoor cycling", "is_base_form": true}], "variants": [{"kind": "equivalent", "key": "spinning", "forms": [{"grammatical_form": "noun/en_singular", "text": "spinning", "is_base_form": true}]}]}
 {"guid": "N41_247", "forms": [{"grammatical_form": "noun/en_singular", "text": "make-up", "is_base_form": true}]}
 {"guid": "N41_248", "forms": [{"grammatical_form": "noun/en_singular", "text": "run-up", "is_base_form": true}]}
+{"guid": "N41_249", "forms": [{"grammatical_form": "noun/en_singular", "text": "production", "is_base_form": true, "ipa": "/prəˈdʌkʃən/", "phonetic": "pruh-DUK-shun"}]}
+{"guid": "N41_250", "forms": [{"grammatical_form": "noun/en_singular", "text": "production", "is_base_form": true, "ipa": "/prəˈdʌkʃən/", "phonetic": "pruh-DUK-shun"}]}
+{"guid": "N41_251", "forms": [{"grammatical_form": "noun/en_singular", "text": "analysis", "is_base_form": true, "ipa": "/əˈnæləsɪs/", "phonetic": "uh-NAL-uh-sis"}]}
+{"guid": "N41_252", "forms": [{"grammatical_form": "noun/en_singular", "text": "protection", "is_base_form": true, "ipa": "/prəˈtɛkʃən/", "phonetic": "pruh-TEK-shun"}]}
+{"guid": "N41_253", "forms": [{"grammatical_form": "noun/en_singular", "text": "agriculture", "is_base_form": true, "ipa": "/ˈæɡrɪˌkʌltʃɚ/", "phonetic": "AG-ri-kul-chur"}]}
+{"guid": "N41_254", "forms": [{"grammatical_form": "noun/en_singular", "text": "irrigation", "is_base_form": true, "ipa": "/ˌɪrɪˈɡeɪʃən/", "phonetic": "ir-ri-GAY-shun"}]}
+{"guid": "N41_255", "forms": [{"grammatical_form": "noun/en_singular", "text": "husbandry", "is_base_form": true, "ipa": "/ˈhʌzbəndri/", "phonetic": "HUHZ-buhn-dree"}]}

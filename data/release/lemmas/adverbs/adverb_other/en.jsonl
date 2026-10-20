@@ -2,6 +2,6 @@
 {"guid": "D99_002", "forms": [{"grammatical_form": "adverb/en_positive", "text": "less", "is_base_form": true, "ipa": "/ləs/", "phonetic": "LEHS"}]}
 {"guid": "D99_003", "forms": [{"grammatical_form": "adverb/en_positive", "text": "twice", "is_base_form": true, "ipa": "/taɪs/", "phonetic": "TWAIS"}]}
 {"guid": "D99_004", "forms": [{"grammatical_form": "adverb/en_positive", "text": "once", "is_base_form": true}]}
-{"guid": "D99_005", "forms": [{"grammatical_form": "adverb/en_positive", "text": "again", "is_base_form": true}]}
+{"guid": "D99_005", "grammar_facts": [{"fact_type": "gradability", "fact_value": "non_gradable"}, {"fact_type": "comparative_status", "fact_value": "not_applicable"}, {"fact_type": "superlative_status", "fact_value": "not_applicable"}]}
 {"guid": "D99_006", "forms": [{"grammatical_form": "adverb/en_positive", "text": "likewise", "is_base_form": true}]}
 {"guid": "D99_007", "forms": [{"grammatical_form": "adverb/en_positive", "text": "inter alia", "is_base_form": true}]}

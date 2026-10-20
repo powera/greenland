@@ -1,8 +1,8 @@
-{"guid": "V12_001", "grammar_facts": [{"fact_type": "infinitive", "fact_value": "eiti"}, {"fact_type": "3s_present", "fact_value": "eina"}, {"fact_type": "3s_past", "fact_value": "ėjo"}]}
-{"guid": "V12_002", "grammar_facts": [{"fact_type": "infinitive", "fact_value": "važiuoti"}, {"fact_type": "3s_present", "fact_value": "važiuoja"}, {"fact_type": "3s_past", "fact_value": "važiavo"}]}
-{"guid": "V12_003", "grammar_facts": [{"fact_type": "infinitive", "fact_value": "bėgti"}, {"fact_type": "3s_present", "fact_value": "bėga"}, {"fact_type": "3s_past", "fact_value": "bėgo"}]}
-{"guid": "V12_004", "grammar_facts": [{"fact_type": "infinitive", "fact_value": "eiti"}, {"fact_type": "3s_present", "fact_value": "eina"}, {"fact_type": "3s_past", "fact_value": "ėjo"}]}
-{"guid": "V12_005", "grammar_facts": [{"fact_type": "infinitive", "fact_value": "ateiti"}, {"fact_type": "3s_present", "fact_value": "ateina"}, {"fact_type": "3s_past", "fact_value": "atėjo"}]}
+{"guid": "V12_001", "grammar_facts": [{"fact_type": "infinitive", "fact_value": "eiti"}, {"fact_type": "3s_present", "fact_value": "eina"}, {"fact_type": "3s_past", "fact_value": "ėjo"}, {"fact_type": "verb_reflexivity", "fact_value": "non_reflexive"}]}
+{"guid": "V12_002", "grammar_facts": [{"fact_type": "infinitive", "fact_value": "važiuoti"}, {"fact_type": "3s_present", "fact_value": "važiuoja"}, {"fact_type": "3s_past", "fact_value": "važiavo"}, {"fact_type": "verb_reflexivity", "fact_value": "non_reflexive"}]}
+{"guid": "V12_003", "grammar_facts": [{"fact_type": "infinitive", "fact_value": "bėgti"}, {"fact_type": "3s_present", "fact_value": "bėga"}, {"fact_type": "3s_past", "fact_value": "bėgo"}, {"fact_type": "verb_reflexivity", "fact_value": "non_reflexive"}]}
+{"guid": "V12_004", "grammar_facts": [{"fact_type": "infinitive", "fact_value": "eiti"}, {"fact_type": "3s_present", "fact_value": "eina"}, {"fact_type": "3s_past", "fact_value": "ėjo"}, {"fact_type": "verb_reflexivity", "fact_value": "non_reflexive"}]}
+{"guid": "V12_005", "grammar_facts": [{"fact_type": "infinitive", "fact_value": "ateiti"}, {"fact_type": "3s_present", "fact_value": "ateina"}, {"fact_type": "3s_past", "fact_value": "atėjo"}, {"fact_type": "verb_reflexivity", "fact_value": "non_reflexive"}]}
 {"guid": "V12_006", "grammar_facts": [{"fact_type": "infinitive", "fact_value": "grįžti"}, {"fact_type": "3s_present", "fact_value": "grįžta"}, {"fact_type": "3s_past", "fact_value": "grįžo"}]}
 {"guid": "V12_007", "grammar_facts": [{"fact_type": "infinitive", "fact_value": "išeiti"}, {"fact_type": "3s_present", "fact_value": "išeina"}, {"fact_type": "3s_past", "fact_value": "išėjo"}]}
 {"guid": "V12_008", "grammar_facts": [{"fact_type": "infinitive", "fact_value": "sukti"}, {"fact_type": "3s_present", "fact_value": "suka"}, {"fact_type": "3s_past", "fact_value": "suko"}]}
@@ -27,4 +27,4 @@
 {"guid": "V12_027", "grammar_facts": [{"fact_type": "infinitive", "fact_value": "šokti"}, {"fact_type": "3s_present", "fact_value": "šoka"}, {"fact_type": "3s_past", "fact_value": "šoko"}]}
 {"guid": "V12_028", "grammar_facts": [{"fact_type": "infinitive", "fact_value": "pabėgti"}, {"fact_type": "3s_present", "fact_value": "pabėga"}, {"fact_type": "3s_past", "fact_value": "pabėgo"}]}
 {"guid": "V12_029", "grammar_facts": [{"fact_type": "infinitive", "fact_value": "plaukti laivu"}, {"fact_type": "3s_present", "fact_value": "plaukia"}, {"fact_type": "3s_past", "fact_value": "plaukė"}]}
-{"guid": "V12_030", "grammar_facts": [{"fact_type": "infinitive", "fact_value": "lankyti"}, {"fact_type": "3s_present", "fact_value": "lanko"}, {"fact_type": "3s_past", "fact_value": "lankė"}]}
+{"guid": "V12_030", "grammar_facts": [{"fact_type": "infinitive", "fact_value": "lankyti"}, {"fact_type": "3s_present", "fact_value": "lanko"}, {"fact_type": "3s_past", "fact_value": "lankė"}, {"fact_type": "verb_reflexivity", "fact_value": "non_reflexive"}]}

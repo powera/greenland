@@ -1,1 +1,144 @@
+{"guid": "N73_001", "forms": [{"grammatical_form": "noun/en_singular", "text": "Arabic", "is_base_form": true}]}
+{"guid": "N73_002", "forms": [{"grammatical_form": "noun/en_singular", "text": "Assamese", "is_base_form": true}]}
+{"guid": "N73_003", "forms": [{"grammatical_form": "noun/en_singular", "text": "Chinese", "is_base_form": true}]}
+{"guid": "N73_004", "forms": [{"grammatical_form": "noun/en_singular", "text": "Dutch", "is_base_form": true}]}
 {"guid": "N73_005", "forms": [{"grammatical_form": "noun/en_singular", "text": "English", "is_base_form": true, "ipa": "/ˈɪŋɡlɪʃ/", "phonetic": "ING-glish"}]}
+{"guid": "N73_006", "forms": [{"grammatical_form": "noun/en_singular", "text": "Estonian", "is_base_form": true}]}
+{"guid": "N73_007", "forms": [{"grammatical_form": "noun/en_singular", "text": "Finnish", "is_base_form": true}]}
+{"guid": "N73_008", "forms": [{"grammatical_form": "noun/en_singular", "text": "French", "is_base_form": true}]}
+{"guid": "N73_009", "forms": [{"grammatical_form": "noun/en_singular", "text": "German", "is_base_form": true}]}
+{"guid": "N73_010", "forms": [{"grammatical_form": "noun/en_singular", "text": "Hindi", "is_base_form": true}]}
+{"guid": "N73_011", "forms": [{"grammatical_form": "noun/en_singular", "text": "Igbo", "is_base_form": true}]}
+{"guid": "N73_012", "forms": [{"grammatical_form": "noun/en_singular", "text": "Italian", "is_base_form": true}]}
+{"guid": "N73_013", "forms": [{"grammatical_form": "noun/en_singular", "text": "Japanese", "is_base_form": true}]}
+{"guid": "N73_014", "forms": [{"grammatical_form": "noun/en_singular", "text": "Korean", "is_base_form": true}]}
+{"guid": "N73_015", "forms": [{"grammatical_form": "noun/en_singular", "text": "Latvian", "is_base_form": true}]}
+{"guid": "N73_016", "forms": [{"grammatical_form": "noun/en_singular", "text": "Lithuanian", "is_base_form": true}]}
+{"guid": "N73_017", "forms": [{"grammatical_form": "noun/en_singular", "text": "Mongolian", "is_base_form": true}]}
+{"guid": "N73_018", "forms": [{"grammatical_form": "noun/en_singular", "text": "Norwegian", "is_base_form": true}]}
+{"guid": "N73_019", "forms": [{"grammatical_form": "noun/en_singular", "text": "Polish", "is_base_form": true}]}
+{"guid": "N73_020", "forms": [{"grammatical_form": "noun/en_singular", "text": "Portuguese", "is_base_form": true}]}
+{"guid": "N73_021", "forms": [{"grammatical_form": "noun/en_singular", "text": "Russian", "is_base_form": true}]}
+{"guid": "N73_022", "forms": [{"grammatical_form": "noun/en_singular", "text": "Spanish", "is_base_form": true}]}
+{"guid": "N73_023", "forms": [{"grammatical_form": "noun/en_singular", "text": "Swahili", "is_base_form": true}]}
+{"guid": "N73_024", "forms": [{"grammatical_form": "noun/en_singular", "text": "Swedish", "is_base_form": true}]}
+{"guid": "N73_025", "forms": [{"grammatical_form": "noun/en_singular", "text": "Vietnamese", "is_base_form": true}]}
+{"guid": "N73_026", "forms": [{"grammatical_form": "noun/en_singular", "text": "Greek", "is_base_form": true, "ipa": "/ɡriːk/", "phonetic": "GREEK"}]}
+{"guid": "N73_027", "forms": [{"grammatical_form": "noun/en_singular", "text": "Thai", "is_base_form": true, "ipa": "/taɪ/", "phonetic": "TIE"}]}
+{"guid": "N73_028", "forms": [{"grammatical_form": "noun/en_singular", "text": "Mandarin", "is_base_form": true, "ipa": "/ˈmændərɪn/", "phonetic": "MAN-duh-rin"}]}
+{"guid": "N73_029", "forms": [{"grammatical_form": "noun/en_singular", "text": "Georgian", "is_base_form": true, "ipa": "/ˈdʒɔrdʒən/", "phonetic": "JOR-juhn"}]}
+{"guid": "N73_030", "forms": [{"grammatical_form": "noun/en_singular", "text": "Kurdish", "is_base_form": true, "ipa": "/ˈkɝːdɪʃ/", "phonetic": "KUR-dish"}]}
+{"guid": "N73_031", "forms": [{"grammatical_form": "noun/en_singular", "text": "Danish", "is_base_form": true, "ipa": "/ˈdeɪnɪʃ/", "phonetic": "DAY-nish"}]}
+{"guid": "N73_032", "forms": [{"grammatical_form": "noun/en_singular", "text": "Hungarian", "is_base_form": true, "ipa": "/hʌŋˈɡɛriən/", "phonetic": "hung-GAIR-ee-un"}]}
+{"guid": "N73_033", "forms": [{"grammatical_form": "noun/en_singular", "text": "Ukrainian", "is_base_form": true, "ipa": "/juːˈkreɪniən/", "phonetic": "yoo-KRAY-nee-un"}]}
+{"guid": "N73_034", "forms": [{"grammatical_form": "noun/en_singular", "text": "Turkish", "is_base_form": true, "ipa": "/ˈtɝːkɪʃ/", "phonetic": "TUR-kish"}]}
+{"guid": "N73_035", "forms": [{"grammatical_form": "noun/en_singular", "text": "Hebrew", "is_base_form": true, "ipa": "/ˈhiːbruː/", "phonetic": "HEE-broo"}]}
+{"guid": "N73_036", "forms": [{"grammatical_form": "noun/en_singular", "text": "Persian", "is_base_form": true, "ipa": "/ˈpɝːʒən/", "phonetic": "PUR-zhuhn"}]}
+{"guid": "N73_037", "forms": [{"grammatical_form": "noun/en_singular", "text": "Amharic", "is_base_form": true, "ipa": "/æmˈhærɪk/", "phonetic": "am-HAIR-ik"}]}
+{"guid": "N73_038", "forms": [{"grammatical_form": "noun/en_singular", "text": "Indonesian", "is_base_form": true, "ipa": "/ˌɪndəˈniːʒən/", "phonetic": "in-duh-NEE-zhuhn"}]}
+{"guid": "N73_039", "forms": [{"grammatical_form": "noun/en_singular", "text": "Filipino", "is_base_form": true, "ipa": "/ˌfɪlɪˈpiːnoʊ/", "phonetic": "fil-uh-PEE-noh"}]}
+{"guid": "N73_040", "forms": [{"grammatical_form": "noun/en_singular", "text": "Irish", "is_base_form": true, "ipa": "/ˈaɪrɪʃ/", "phonetic": "EYE-rish"}]}
+{"guid": "N73_041", "forms": [{"grammatical_form": "noun/en_singular", "text": "Welsh", "is_base_form": true, "ipa": "/wɛlʃ/", "phonetic": "WELSH"}]}
+{"guid": "N73_042", "forms": [{"grammatical_form": "noun/en_singular", "text": "Cantonese", "is_base_form": true, "ipa": "/ˌkæntəˈniːz/", "phonetic": "kan-tuh-NEEZ"}]}
+{"guid": "N73_043", "forms": [{"grammatical_form": "noun/en_singular", "text": "Hokkien", "is_base_form": true, "ipa": "/ˈhɑːkiɛn/", "phonetic": "hoh-KEE-en"}]}
+{"guid": "N73_044", "forms": [{"grammatical_form": "noun/en_singular", "text": "Hakka", "is_base_form": true, "ipa": "/ˈhɑkə/", "phonetic": "HAH-kuh"}]}
+{"guid": "N73_045", "forms": [{"grammatical_form": "noun/en_singular", "text": "Wu Chinese", "is_base_form": true, "ipa": "/ˌwuː tʃaɪˈniːz/", "phonetic": "WOO CHY-NEEZ"}]}
+{"guid": "N73_046", "forms": [{"grammatical_form": "noun/en_singular", "text": "Egyptian Arabic", "is_base_form": true, "ipa": "/ɪˈdʒɪpʃən ˈærəbɪk/", "phonetic": "ih-JIP-shun uh-RA-bik"}]}
+{"guid": "N73_047", "forms": [{"grammatical_form": "noun/en_singular", "text": "Levantine Arabic", "is_base_form": true, "ipa": "/ləˈvænˌtin ˈærəbɪk/", "phonetic": "luh-VAN-teen AIR-uh-bik"}]}
+{"guid": "N73_048", "forms": [{"grammatical_form": "noun/en_singular", "text": "Gulf Arabic", "is_base_form": true, "ipa": "/ˌɡʌlf ˈærəbɪk/", "phonetic": "GULF uh-RA-bik"}]}
+{"guid": "N73_049", "forms": [{"grammatical_form": "noun/en_singular", "text": "Moroccan Arabic", "is_base_form": true, "ipa": "/məˈrɑkən ˈærəbɪk/", "phonetic": "muh-RAK-uhn uh-RA-bik"}]}
+{"guid": "N73_050", "forms": [{"grammatical_form": "noun/en_singular", "text": "Algerian Arabic", "is_base_form": true, "ipa": "/ælˈdʒɪriən ˈærəbɪk/", "phonetic": "al-JEER-ee-uhn AR-uh-bik"}]}
+{"guid": "N73_051", "forms": [{"grammatical_form": "noun/en_singular", "text": "Sudanese Arabic", "is_base_form": true, "ipa": "/ˌsuːdəˈniːz ˈærəbɪk/", "phonetic": "soo-duh-NEEZ uh-RA-bik"}]}
+{"guid": "N73_052", "forms": [{"grammatical_form": "noun/en_singular", "text": "Bengali", "is_base_form": true, "ipa": "/bɛŋˈɡɔli/", "phonetic": "ben-GAW-lee"}]}
+{"guid": "N73_053", "forms": [{"grammatical_form": "noun/en_singular", "text": "Urdu", "is_base_form": true, "ipa": "/ˈʊrduː/", "phonetic": "OOR-doo"}]}
+{"guid": "N73_054", "forms": [{"grammatical_form": "noun/en_singular", "text": "Punjabi", "is_base_form": true, "ipa": "/pʌnˈdʒɑbi/", "phonetic": "pun-JAH-bee"}]}
+{"guid": "N73_055", "forms": [{"grammatical_form": "noun/en_singular", "text": "Marathi", "is_base_form": true, "ipa": "/məˈrɑːθi/", "phonetic": "muh-RAH-thee"}]}
+{"guid": "N73_056", "forms": [{"grammatical_form": "noun/en_singular", "text": "Telugu", "is_base_form": true, "ipa": "/ˈtɛləˌɡuː/", "phonetic": "TEL-uh-goo"}]}
+{"guid": "N73_057", "forms": [{"grammatical_form": "noun/en_singular", "text": "Tamil", "is_base_form": true, "ipa": "/ˈtæmɪl/", "phonetic": "TAM-il"}]}
+{"guid": "N73_058", "forms": [{"grammatical_form": "noun/en_singular", "text": "Gujarati", "is_base_form": true, "ipa": "/ˌɡʊdʒəˈrɑti/", "phonetic": "goo-juh-RAH-tee"}]}
+{"guid": "N73_059", "forms": [{"grammatical_form": "noun/en_singular", "text": "Kannada", "is_base_form": true, "ipa": "/kəˈnɑːdə/", "phonetic": "kuh-NAH-duh"}]}
+{"guid": "N73_060", "forms": [{"grammatical_form": "noun/en_singular", "text": "Malayalam", "is_base_form": true, "ipa": "/ˌmɑːləˈjɑːləm/", "phonetic": "MAL-uh-YAH-lum"}]}
+{"guid": "N73_061", "forms": [{"grammatical_form": "noun/en_singular", "text": "Odia", "is_base_form": true, "ipa": "/ˈoʊdiə/", "phonetic": "oh-DEE-uh"}]}
+{"guid": "N73_062", "forms": [{"grammatical_form": "noun/en_singular", "text": "Bhojpuri", "is_base_form": true, "ipa": "/boʊdʒˈpʊri/", "phonetic": "bohj-POOR-ee"}]}
+{"guid": "N73_063", "forms": [{"grammatical_form": "noun/en_singular", "text": "Maithili", "is_base_form": true, "ipa": "/ˈmaɪθɪli/", "phonetic": "MY-thuh-lee"}]}
+{"guid": "N73_064", "forms": [{"grammatical_form": "noun/en_singular", "text": "Sindhi", "is_base_form": true, "ipa": "/ˈsɪndi/", "phonetic": "SIN-dee"}]}
+{"guid": "N73_065", "forms": [{"grammatical_form": "noun/en_singular", "text": "Saraiki", "is_base_form": true, "ipa": "/səˈraɪki/", "phonetic": "suh-RYE-kee"}]}
+{"guid": "N73_066", "forms": [{"grammatical_form": "noun/en_singular", "text": "Nepali", "is_base_form": true, "ipa": "/nəˈpɔːli/", "phonetic": "nuh-PAW-lee"}]}
+{"guid": "N73_067", "forms": [{"grammatical_form": "noun/en_singular", "text": "Sinhala", "is_base_form": true, "ipa": "/sɪnˈhɑːlə/", "phonetic": "sin-HAH-luh"}]}
+{"guid": "N73_068", "forms": [{"grammatical_form": "noun/en_singular", "text": "Pashto", "is_base_form": true, "ipa": "/ˈpʌʃtuː/", "phonetic": "PUSH-too"}]}
+{"guid": "N73_069", "forms": [{"grammatical_form": "noun/en_singular", "text": "Malay", "is_base_form": true, "ipa": "/məˈleɪ/", "phonetic": "muh-LAY"}]}
+{"guid": "N73_070", "forms": [{"grammatical_form": "noun/en_singular", "text": "Javanese", "is_base_form": true, "ipa": "/ˌdʒɑːvəˈniːz/", "phonetic": "JAH-vuh-NEEZ"}]}
+{"guid": "N73_071", "forms": [{"grammatical_form": "noun/en_singular", "text": "Sundanese", "is_base_form": true, "ipa": "/ˌsʌndəˈniːz/", "phonetic": "sun-duh-NEEZ"}]}
+{"guid": "N73_072", "forms": [{"grammatical_form": "noun/en_singular", "text": "Burmese", "is_base_form": true, "ipa": "/bɜrˈmiːz/", "phonetic": "bur-MEEZ"}]}
+{"guid": "N73_073", "forms": [{"grammatical_form": "noun/en_singular", "text": "Khmer", "is_base_form": true, "ipa": "/kəˈmɛr/", "phonetic": "kuh-MAIR"}]}
+{"guid": "N73_074", "forms": [{"grammatical_form": "noun/en_singular", "text": "Lao", "is_base_form": true, "ipa": "/laʊ/", "phonetic": "LOW"}]}
+{"guid": "N73_075", "forms": [{"grammatical_form": "noun/en_singular", "text": "Cebuano", "is_base_form": true, "ipa": "/sɛˈbwɑnoʊ/", "phonetic": "seh-BWAH-noh"}]}
+{"guid": "N73_076", "forms": [{"grammatical_form": "noun/en_singular", "text": "Ilocano", "is_base_form": true, "ipa": "/ˌiloʊˈkɑnoʊ/", "phonetic": "ee-loh-KAH-noh"}]}
+{"guid": "N73_077", "forms": [{"grammatical_form": "noun/en_singular", "text": "Hmong", "is_base_form": true, "ipa": "/mɔŋ/", "phonetic": "MONG"}]}
+{"guid": "N73_078", "forms": [{"grammatical_form": "noun/en_singular", "text": "Tibetan", "is_base_form": true, "ipa": "/tɪˈbɛtən/", "phonetic": "tih-BET-un"}]}
+{"guid": "N73_079", "forms": [{"grammatical_form": "noun/en_singular", "text": "Uyghur", "is_base_form": true, "ipa": "/ˈwiːɡər/", "phonetic": "WEE-gur"}]}
+{"guid": "N73_080", "forms": [{"grammatical_form": "noun/en_singular", "text": "Zhuang", "is_base_form": true, "ipa": "/ʒwɑŋ/", "phonetic": "ZHWONG"}]}
+{"guid": "N73_081", "forms": [{"grammatical_form": "noun/en_singular", "text": "Czech", "is_base_form": true, "ipa": "/tʃɛk/", "phonetic": "CHEK"}]}
+{"guid": "N73_082", "forms": [{"grammatical_form": "noun/en_singular", "text": "Slovak", "is_base_form": true, "ipa": "/ˈsloʊvɑːk/", "phonetic": "SLOH-vak"}]}
+{"guid": "N73_083", "forms": [{"grammatical_form": "noun/en_singular", "text": "Romanian", "is_base_form": true, "ipa": "/roʊˈmeɪniən/", "phonetic": "roh-MAY-nee-uhn"}]}
+{"guid": "N73_084", "forms": [{"grammatical_form": "noun/en_singular", "text": "Bulgarian", "is_base_form": true, "ipa": "/bʌlˈɡɛriən/", "phonetic": "bul-GAIR-ee-uhn"}]}
+{"guid": "N73_085", "forms": [{"grammatical_form": "noun/en_singular", "text": "Serbian", "is_base_form": true, "ipa": "/ˈsɝː.bi.ən/", "phonetic": "ser-BEE-uhn"}]}
+{"guid": "N73_086", "forms": [{"grammatical_form": "noun/en_singular", "text": "Croatian", "is_base_form": true, "ipa": "/kroʊˈeɪʃən/", "phonetic": "kroh-AY-shun"}]}
+{"guid": "N73_087", "forms": [{"grammatical_form": "noun/en_singular", "text": "Bosnian", "is_base_form": true, "ipa": "/ˈbɑːzniən/", "phonetic": "boz-NEE-uhn"}]}
+{"guid": "N73_088", "forms": [{"grammatical_form": "noun/en_singular", "text": "Slovenian", "is_base_form": true, "ipa": "/sloʊˈviːniən/", "phonetic": "sloh-VEE-nee-uhn"}]}
+{"guid": "N73_089", "forms": [{"grammatical_form": "noun/en_singular", "text": "Macedonian", "is_base_form": true, "ipa": "/ˌmæsəˈdoʊniən/", "phonetic": "MASS-uh-DOH-nee-uhn"}]}
+{"guid": "N73_090", "forms": [{"grammatical_form": "noun/en_singular", "text": "Albanian", "is_base_form": true, "ipa": "/ælˈbeɪniən/", "phonetic": "al-BAY-nee-uhn"}]}
+{"guid": "N73_091", "forms": [{"grammatical_form": "noun/en_singular", "text": "Belarusian", "is_base_form": true, "ipa": "/ˌbɛləˈruːʃən/", "phonetic": "bel-uh-ROO-shun"}]}
+{"guid": "N73_092", "forms": [{"grammatical_form": "noun/en_singular", "text": "Icelandic", "is_base_form": true, "ipa": "/aɪˈslændɪk/", "phonetic": "eye-s-LAN-dik"}]}
+{"guid": "N73_093", "forms": [{"grammatical_form": "noun/en_singular", "text": "Luxembourgish", "is_base_form": true, "ipa": "/ˈlʌksəmbɜːrɡɪʃ/", "phonetic": "LUK-suhm-bur-gish"}]}
+{"guid": "N73_094", "forms": [{"grammatical_form": "noun/en_singular", "text": "Maltese", "is_base_form": true, "ipa": "/mɔlˈtiːz/", "phonetic": "mal-TEEZ"}]}
+{"guid": "N73_095", "forms": [{"grammatical_form": "noun/en_singular", "text": "Catalan", "is_base_form": true, "ipa": "/ˈkætəlæn/", "phonetic": "KAT-uh-lan"}]}
+{"guid": "N73_096", "forms": [{"grammatical_form": "noun/en_singular", "text": "Basque", "is_base_form": true, "ipa": "/bæsk/", "phonetic": "BASK"}]}
+{"guid": "N73_097", "forms": [{"grammatical_form": "noun/en_singular", "text": "Galician", "is_base_form": true, "ipa": "/ɡəˈlɪʃən/", "phonetic": "guh-LISH-un"}]}
+{"guid": "N73_098", "forms": [{"grammatical_form": "noun/en_singular", "text": "Scottish Gaelic", "is_base_form": true, "ipa": "/ˈskɑtɪʃ ˈɡeɪlɪk/", "phonetic": "SKOT-ish GAY-lik"}]}
+{"guid": "N73_099", "forms": [{"grammatical_form": "noun/en_singular", "text": "Yiddish", "is_base_form": true, "ipa": "/ˈjɪdɪʃ/", "phonetic": "YID-ish"}]}
+{"guid": "N73_100", "forms": [{"grammatical_form": "noun/en_singular", "text": "Romani", "is_base_form": true, "ipa": "/ˈrɑːməni/", "phonetic": "ROM-uh-nee"}]}
+{"guid": "N73_101", "forms": [{"grammatical_form": "noun/en_singular", "text": "Sami", "is_base_form": true, "ipa": "/ˈsɑːmi/", "phonetic": "SAH-mee"}]}
+{"guid": "N73_102", "forms": [{"grammatical_form": "noun/en_singular", "text": "Latin", "is_base_form": true, "ipa": "/ˈlætɪn/", "phonetic": "LAT-in"}]}
+{"guid": "N73_103", "forms": [{"grammatical_form": "noun/en_singular", "text": "Armenian", "is_base_form": true, "ipa": "/ɑrˈmiːniən/", "phonetic": "ar-MEE-nee-uhn"}]}
+{"guid": "N73_104", "forms": [{"grammatical_form": "noun/en_singular", "text": "Azerbaijani", "is_base_form": true, "ipa": "/ˌæzərbaɪˈdʒɑːni/", "phonetic": "az-er-by-JAH-nee"}]}
+{"guid": "N73_105", "forms": [{"grammatical_form": "noun/en_singular", "text": "Kazakh", "is_base_form": true, "ipa": "/kəˈzɑk/", "phonetic": "kuh-ZAK"}]}
+{"guid": "N73_106", "forms": [{"grammatical_form": "noun/en_singular", "text": "Uzbek", "is_base_form": true, "ipa": "/ˈʊzˌbɛk/", "phonetic": "OOZ-bek"}]}
+{"guid": "N73_107", "forms": [{"grammatical_form": "noun/en_singular", "text": "Turkmen", "is_base_form": true, "ipa": "/tɝkˈmɛn/", "phonetic": "turk-MEN"}]}
+{"guid": "N73_108", "forms": [{"grammatical_form": "noun/en_singular", "text": "Kyrgyz", "is_base_form": true, "ipa": "/ˈkɪrɡɪz/", "phonetic": "kuhr-GIZ"}]}
+{"guid": "N73_109", "forms": [{"grammatical_form": "noun/en_singular", "text": "Tajik", "is_base_form": true, "ipa": "/təˈdʒiːk/", "phonetic": "tuh-JEEK"}]}
+{"guid": "N73_110", "forms": [{"grammatical_form": "noun/en_singular", "text": "Tatar", "is_base_form": true, "ipa": "/ˈtɑtɚ/", "phonetic": "tuh-TAR"}]}
+{"guid": "N73_111", "forms": [{"grammatical_form": "noun/en_singular", "text": "Hausa", "is_base_form": true, "ipa": "/ˈhaʊsə/", "phonetic": "HOW-suh"}]}
+{"guid": "N73_112", "forms": [{"grammatical_form": "noun/en_singular", "text": "Yoruba", "is_base_form": true, "ipa": "/ˈjɔːrʊbə/", "phonetic": "yuh-ROO-buh"}]}
+{"guid": "N73_113", "forms": [{"grammatical_form": "noun/en_singular", "text": "Fula", "is_base_form": true, "ipa": "/ˈfuːlə/", "phonetic": "FOO-luh"}]}
+{"guid": "N73_114", "forms": [{"grammatical_form": "noun/en_singular", "text": "Oromo", "is_base_form": true, "ipa": "/əˈroʊmoʊ/", "phonetic": "uh-ROH-moh"}]}
+{"guid": "N73_115", "forms": [{"grammatical_form": "noun/en_singular", "text": "Somali", "is_base_form": true, "ipa": "/soʊˈmɑːli/", "phonetic": "soh-MAH-lee"}]}
+{"guid": "N73_116", "forms": [{"grammatical_form": "noun/en_singular", "text": "Tigrinya", "is_base_form": true, "ipa": "/tɪɡrɪˈnjɑː/", "phonetic": "tig-rihn-YAH"}]}
+{"guid": "N73_117", "forms": [{"grammatical_form": "noun/en_singular", "text": "Berber", "is_base_form": true, "ipa": "/ˈbɝːbər/", "phonetic": "BER-ber"}]}
+{"guid": "N73_118", "forms": [{"grammatical_form": "noun/en_singular", "text": "Wolof", "is_base_form": true, "ipa": "/ˈwoʊlɑːf/", "phonetic": "WOH-lohf"}]}
+{"guid": "N73_119", "forms": [{"grammatical_form": "noun/en_singular", "text": "Akan", "is_base_form": true, "ipa": "/əˈkɑn/", "phonetic": "uh-KAHN"}]}
+{"guid": "N73_120", "forms": [{"grammatical_form": "noun/en_singular", "text": "Lingala", "is_base_form": true, "ipa": "/lɪŋˈɡɑːlə/", "phonetic": "lin-GAH-luh"}]}
+{"guid": "N73_121", "forms": [{"grammatical_form": "noun/en_singular", "text": "Kinyarwanda", "is_base_form": true, "ipa": "/ˌkɪnjəˈrwɑndə/", "phonetic": "kin-yuh-RWAHN-duh"}]}
+{"guid": "N73_122", "forms": [{"grammatical_form": "noun/en_singular", "text": "Kirundi", "is_base_form": true, "ipa": "/kəˈrʊndi/", "phonetic": "kuh-ROON-dee"}]}
+{"guid": "N73_123", "forms": [{"grammatical_form": "noun/en_singular", "text": "Luganda", "is_base_form": true, "ipa": "/luːˈɡændə/", "phonetic": "loo-GAN-duh"}]}
+{"guid": "N73_124", "forms": [{"grammatical_form": "noun/en_singular", "text": "Shona", "is_base_form": true, "ipa": "/ˈʃoʊnə/", "phonetic": "SHOH-nuh"}]}
+{"guid": "N73_125", "forms": [{"grammatical_form": "noun/en_singular", "text": "Chichewa", "is_base_form": true, "ipa": "/tʃɪˈtʃɛwə/", "phonetic": "chi-CHEH-wuh"}]}
+{"guid": "N73_126", "forms": [{"grammatical_form": "noun/en_singular", "text": "Zulu", "is_base_form": true, "ipa": "/ˈzuːluː/", "phonetic": "ZOO-loo"}]}
+{"guid": "N73_127", "forms": [{"grammatical_form": "noun/en_singular", "text": "Xhosa", "is_base_form": true, "ipa": "/ˈkoʊsə/", "phonetic": "KOH-suh"}]}
+{"guid": "N73_128", "forms": [{"grammatical_form": "noun/en_singular", "text": "Afrikaans", "is_base_form": true, "ipa": "/ˌæfrɪˈkɑːns/", "phonetic": "af-ri-KAHNS"}]}
+{"guid": "N73_129", "forms": [{"grammatical_form": "noun/en_singular", "text": "Sesotho", "is_base_form": true, "ipa": "/səˈsuːtuː/", "phonetic": "seh-SOO-too"}]}
+{"guid": "N73_130", "forms": [{"grammatical_form": "noun/en_singular", "text": "Setswana", "is_base_form": true, "ipa": "/sɛtˈswɑːnə/", "phonetic": "set-SWAH-nuh"}]}
+{"guid": "N73_131", "forms": [{"grammatical_form": "noun/en_singular", "text": "Malagasy", "is_base_form": true, "ipa": "/ˌmæləˈɡæsi/", "phonetic": "mal-uh-GAS-ee"}]}
+{"guid": "N73_132", "forms": [{"grammatical_form": "noun/en_singular", "text": "Quechua", "is_base_form": true, "ipa": "/ˈkɛtʃwə/", "phonetic": "KEHCH-wuh"}]}
+{"guid": "N73_133", "forms": [{"grammatical_form": "noun/en_singular", "text": "Guarani", "is_base_form": true, "ipa": "/ˌɡwɑːrəˈniː/", "phonetic": "gwah-RAH-nee"}]}
+{"guid": "N73_134", "forms": [{"grammatical_form": "noun/en_singular", "text": "Nahuatl", "is_base_form": true, "ipa": "/ˈnɑːwɑːtəl/", "phonetic": "NAH-wuhtl"}]}
+{"guid": "N73_135", "forms": [{"grammatical_form": "noun/en_singular", "text": "Haitian Creole", "is_base_form": true, "ipa": "/ˈheɪʃən ˈkriːoʊl/", "phonetic": "HAY-shun KREE-ohl"}]}
+{"guid": "N73_136", "forms": [{"grammatical_form": "noun/en_singular", "text": "Navajo", "is_base_form": true, "ipa": "/ˈnævəˌhoʊ/", "phonetic": "NA-vuh-hoh"}]}
+{"guid": "N73_137", "forms": [{"grammatical_form": "noun/en_singular", "text": "Cherokee", "is_base_form": true, "ipa": "/ˈtʃɛrəki/", "phonetic": "CHEH-ruh-kee"}]}
+{"guid": "N73_138", "forms": [{"grammatical_form": "noun/en_singular", "text": "Greenlandic", "is_base_form": true, "ipa": "/ˌɡriːnˈlændɪk/", "phonetic": "green-LAN-dik"}]}
+{"guid": "N73_139", "forms": [{"grammatical_form": "noun/en_singular", "text": "Hawaiian", "is_base_form": true, "ipa": "/həˈwaɪən/", "phonetic": "huh-WY-uhn"}]}
+{"guid": "N73_140", "forms": [{"grammatical_form": "noun/en_singular", "text": "Maori", "is_base_form": true, "ipa": "/ˈmaʊri/", "phonetic": "MOW-ree"}]}
+{"guid": "N73_141", "forms": [{"grammatical_form": "noun/en_singular", "text": "Samoan", "is_base_form": true, "ipa": "/səˈmoʊən/", "phonetic": "suh-MOH-uhn"}]}
+{"guid": "N73_142", "forms": [{"grammatical_form": "noun/en_singular", "text": "Tongan", "is_base_form": true, "ipa": "/ˈtɑŋən/", "phonetic": "tung-UHN"}]}
+{"guid": "N73_143", "forms": [{"grammatical_form": "noun/en_singular", "text": "Tok Pisin", "is_base_form": true, "ipa": "/ˌtɑk pɪˈsɪn/", "phonetic": "TOK PI-zin"}]}
+{"guid": "N73_144", "forms": [{"grammatical_form": "noun/en_singular", "text": "Sanskrit", "is_base_form": true, "ipa": "/ˈsænˌskrɪt/", "phonetic": "SAN-skrit"}]}

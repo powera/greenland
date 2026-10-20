@@ -1,7 +1,7 @@
 {"guid": "N70_003", "forms": [{"grammatical_form": "noun/en_singular", "text": "football", "is_base_form": true, "ipa": "/ˈfʊtˌbɔl/", "phonetic": "FOOT-bawl"}]}
 {"guid": "N70_004", "forms": [{"grammatical_form": "noun/en_singular", "text": "goalpost", "is_base_form": true, "ipa": "/ˈɡoʊlˌpoʊst/", "phonetic": "GOHL-post"}]}
 {"guid": "N70_005", "forms": [{"grammatical_form": "noun/en_singular", "text": "net", "is_base_form": true, "ipa": "/nɛt/", "phonetic": "NET"}]}
-{"guid": "N70_006", "forms": [{"grammatical_form": "noun/en_singular", "text": "board", "is_base_form": true, "ipa": "/bɔrd/", "phonetic": "BORD"}, {"grammatical_form": "noun/en_possessive_singular", "text": "board's", "is_base_form": false}]}
+{"guid": "N70_006", "forms": [{"grammatical_form": "noun/en_singular", "text": "board", "is_base_form": true, "ipa": "/bɔrd/", "phonetic": "BORD"}]}
 {"guid": "N70_007", "forms": [{"grammatical_form": "noun/en_singular", "text": "counter", "is_base_form": true, "ipa": "/ˈkaʊntər/", "phonetic": "KOWN-ter"}]}
 {"guid": "N70_008", "forms": [{"grammatical_form": "noun/en_singular", "text": "dice", "is_base_form": true, "ipa": "/daɪs/", "phonetic": "DICE"}]}
 {"guid": "N70_009", "forms": [{"grammatical_form": "noun/en_singular", "text": "die", "is_base_form": true, "ipa": "/daɪ/", "phonetic": "DYE"}]}
@@ -21,3 +21,6 @@
 {"guid": "N70_024", "forms": [{"grammatical_form": "noun/en_singular", "text": "ski", "is_base_form": true, "ipa": "/ski/", "phonetic": "SKEE"}]}
 {"guid": "N70_025", "forms": [{"grammatical_form": "noun/en_singular", "text": "tennis racket", "is_base_form": true, "ipa": "/ˈtɛnɪs ˈrækət/", "phonetic": "TEN-is RAK-it"}]}
 {"guid": "N70_026", "forms": [{"grammatical_form": "noun/en_singular", "text": "roller skate", "is_base_form": true}], "variants": [{"kind": "equivalent", "key": "roller skates", "forms": [{"grammatical_form": "noun/en_singular", "text": "roller skates", "is_base_form": true}]}]}
+{"guid": "N70_027", "forms": [{"grammatical_form": "noun/en_singular", "text": "saddle", "is_base_form": true, "ipa": "/ˈsædəl/", "phonetic": "SAD-uhl"}]}
+{"guid": "N70_028", "forms": [{"grammatical_form": "noun/en_singular", "text": "bridle", "is_base_form": true, "ipa": "/ˈbraɪdəl/", "phonetic": "BRY-dul"}]}
+{"guid": "N70_029", "forms": [{"grammatical_form": "noun/en_singular", "text": "stirrup", "is_base_form": true, "ipa": "/ˈstɪr.ʌp/", "phonetic": "STIR-up"}]}

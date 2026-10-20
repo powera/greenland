@@ -1,5 +1,5 @@
-{"guid": "N50_001", "forms": [{"grammatical_form": "noun/en_singular", "text": "word", "is_base_form": true, "ipa": "/wɝːd/", "phonetic": "WOR-d"}, {"grammatical_form": "noun/en_possessive_singular", "text": "word's", "is_base_form": false}]}
-{"guid": "N50_002", "forms": [{"grammatical_form": "noun/en_singular", "text": "language", "is_base_form": true, "ipa": "/ˈlæŋɡɪdʒ/", "phonetic": "LANG-uh-jeez"}, {"grammatical_form": "noun/en_possessive_singular", "text": "language's", "is_base_form": false}]}
+{"guid": "N50_001", "forms": [{"grammatical_form": "noun/en_singular", "text": "word", "is_base_form": true, "ipa": "/wɝːd/", "phonetic": "WOR-d"}]}
+{"guid": "N50_002", "forms": [{"grammatical_form": "noun/en_singular", "text": "language", "is_base_form": true, "ipa": "/ˈlæŋɡɪdʒ/", "phonetic": "LANG-uh-jeez"}]}
 {"guid": "N50_003", "forms": [{"grammatical_form": "noun/en_singular", "text": "voice", "is_base_form": true, "ipa": "/vɔɪs/", "phonetic": "VOY-s"}]}
 {"guid": "N50_004", "forms": [{"grammatical_form": "noun/en_singular", "text": "question", "is_base_form": true, "ipa": "kwestchən", "phonetic": "KWEH-schən"}]}
 {"guid": "N50_005", "forms": [{"grammatical_form": "noun/en_singular", "text": "answer", "is_base_form": true, "ipa": "/ˈɔːnswər/", "phonetic": "AWNS-wur"}]}
@@ -7,13 +7,13 @@
 {"guid": "N50_007", "forms": [{"grammatical_form": "noun/en_singular", "text": "example", "is_base_form": true, "ipa": "/ɪgˈzæmp(ə)l/", "phonetic": "ig-ZAMP-ul"}]}
 {"guid": "N50_008", "forms": [{"grammatical_form": "noun/en_singular", "text": "information", "is_base_form": true, "ipa": "/ɪnˌfɔːrˈmeɪ.ʃən/", "phonetic": "in-FOR-may-shun"}]}
 {"guid": "N50_009", "forms": [{"grammatical_form": "noun/en_singular", "text": "news", "is_base_form": true, "ipa": "/ˈnuːz/", "phonetic": "NOOZ"}]}
-{"guid": "N50_010", "forms": [{"grammatical_form": "noun/en_singular", "text": "name", "is_base_form": true, "ipa": "/neɪm/", "phonetic": "NEY-m"}, {"grammatical_form": "noun/en_possessive_singular", "text": "name's", "is_base_form": false}]}
+{"guid": "N50_010", "forms": [{"grammatical_form": "noun/en_singular", "text": "name", "is_base_form": true, "ipa": "/neɪm/", "phonetic": "NEY-m"}], "grammar_facts": [{"fact_type": "countability", "fact_value": "countable"}, {"fact_type": "number_type", "fact_value": "regular"}, {"fact_type": "animacy", "fact_value": "inanimate"}, {"fact_type": "plural_status", "fact_value": "regular"}]}
 {"guid": "N50_011", "forms": [{"grammatical_form": "noun/en_singular", "text": "chapter", "is_base_form": true, "ipa": "/ˈtʃæp.tər/", "phonetic": "CHAP-tər"}]}
 {"guid": "N50_012", "forms": [{"grammatical_form": "noun/en_singular", "text": "message", "is_base_form": true, "ipa": "/ˈmɛsɪdʒ/", "phonetic": "MESS-ij"}]}
 {"guid": "N50_013", "forms": [{"grammatical_form": "noun/en_singular", "text": "speech", "is_base_form": true, "ipa": "/spɪtʃ/", "phonetic": "SPI-chee"}]}
 {"guid": "N50_014", "forms": [{"grammatical_form": "noun/en_singular", "text": "note", "is_base_form": true, "ipa": "/noʊt/", "phonetic": "NOH-t"}]}
 {"guid": "N50_015", "forms": [{"grammatical_form": "noun/en_singular", "text": "song", "is_base_form": true, "ipa": "/sɒŋ/", "phonetic": "SOHN"}]}
-{"guid": "N50_016", "forms": [{"grammatical_form": "noun/en_singular", "text": "report", "is_base_form": true, "ipa": "/rɪˈpɔːrt/", "phonetic": "ri-PORT"}, {"grammatical_form": "noun/en_possessive_singular", "text": "report's", "is_base_form": false}]}
+{"guid": "N50_016", "forms": [{"grammatical_form": "noun/en_singular", "text": "report", "is_base_form": true, "ipa": "/rɪˈpɔːrt/", "phonetic": "ri-PORT"}]}
 {"guid": "N50_017", "forms": [{"grammatical_form": "noun/en_singular", "text": "tale", "is_base_form": true, "ipa": "/teɪl/", "phonetic": "TAY-l"}]}
 {"guid": "N50_018", "forms": [{"grammatical_form": "noun/en_singular", "text": "subject", "is_base_form": true, "ipa": "/ˈsʌbdʒɛkt/", "phonetic": "SUB-dzhikt"}]}
 {"guid": "N50_019", "forms": [{"grammatical_form": "noun/en_singular", "text": "warning", "is_base_form": true, "ipa": "/ˈwɔːr.nɪŋ/", "phonetic": "WAHR-ning"}]}
@@ -45,10 +45,10 @@
 {"guid": "N50_064", "forms": [{"grammatical_form": "noun/en_singular", "text": "manuscript", "is_base_form": true, "ipa": "/ˈmænjəˌskrɪpt/", "phonetic": "MAN-yuh-skript"}]}
 {"guid": "N50_065", "forms": [{"grammatical_form": "noun/en_singular", "text": "intonation", "is_base_form": true, "ipa": "/ˌɪntəˈneɪʃən/", "phonetic": "in-tuh-NAY-shun"}]}
 {"guid": "N50_066", "forms": [{"grammatical_form": "noun/en_singular", "text": "signal", "is_base_form": true, "ipa": "/ˈsɪɡnəl/", "phonetic": "SIG-nuhl"}]}
-{"guid": "N50_067", "forms": [{"grammatical_form": "noun/en_singular", "text": "code", "is_base_form": true, "ipa": "/koʊd/", "phonetic": "KOHD"}, {"grammatical_form": "noun/en_possessive_singular", "text": "code's", "is_base_form": false}]}
+{"guid": "N50_067", "forms": [{"grammatical_form": "noun/en_singular", "text": "code", "is_base_form": true, "ipa": "/koʊd/", "phonetic": "KOHD"}]}
 {"guid": "N50_068", "forms": [{"grammatical_form": "noun/en_singular", "text": "tradition", "is_base_form": true, "ipa": "/trəˈdɪʃən/", "phonetic": "truh-DISH-un"}]}
 {"guid": "N50_069", "forms": [{"grammatical_form": "noun/en_singular", "text": "slang", "is_base_form": true, "ipa": "/slæŋ/", "phonetic": "SLANG"}]}
-{"guid": "N50_070", "forms": [{"grammatical_form": "noun/en_singular", "text": "policy", "is_base_form": true, "ipa": "/ˈpɑːləsi/", "phonetic": "POL-uh-see"}, {"grammatical_form": "noun/en_possessive_singular", "text": "policy's", "is_base_form": false}]}
+{"guid": "N50_070", "forms": [{"grammatical_form": "noun/en_singular", "text": "policy", "is_base_form": true, "ipa": "/ˈpɑːləsi/", "phonetic": "POL-uh-see"}]}
 {"guid": "N50_071", "forms": [{"grammatical_form": "noun/en_singular", "text": "petition", "is_base_form": true, "ipa": "/pəˈtɪʃən/", "phonetic": "puh-TISH-un"}]}
 {"guid": "N50_072", "forms": [{"grammatical_form": "noun/en_singular", "text": "complaint", "is_base_form": true, "ipa": "/kəmˈpleɪnt/", "phonetic": "kuhm-PLAYNT"}]}
 {"guid": "N50_073", "forms": [{"grammatical_form": "noun/en_singular", "text": "plea", "is_base_form": true, "ipa": "/pliː/", "phonetic": "PLEE"}]}
@@ -166,3 +166,10 @@
 {"guid": "N50_260", "forms": [{"grammatical_form": "noun/en_singular", "text": "song lyric", "is_base_form": true}], "variants": [{"kind": "equivalent", "key": "lyric", "forms": [{"grammatical_form": "noun/en_singular", "text": "lyric", "is_base_form": true}]}]}
 {"guid": "N50_261", "variants": [{"kind": "equivalent", "key": "indictment", "forms": [{"grammatical_form": "noun/en_singular", "text": "indictment", "is_base_form": true}]}]}
 {"guid": "N50_262", "forms": [{"grammatical_form": "noun/en_singular", "text": "electronic mail", "is_base_form": true}], "variants": [{"kind": "equivalent", "key": "e-mail", "forms": [{"grammatical_form": "noun/en_singular", "text": "e-mail", "is_base_form": true}]}]}
+{"guid": "N50_265", "forms": [{"grammatical_form": "noun/en_singular", "text": "feature", "is_base_form": true, "ipa": "/ˈfiːtʃər/", "phonetic": "FEE-cher"}]}
+{"guid": "N50_266", "forms": [{"grammatical_form": "noun/en_singular", "text": "material", "is_base_form": true, "ipa": "/məˈtɪriəl/", "phonetic": "muh-TEER-ee-uhl"}]}
+{"guid": "N50_267", "forms": [{"grammatical_form": "noun/en_singular", "text": "response", "is_base_form": true, "ipa": "/rɪˈspɑns/", "phonetic": "ri-SPONS"}]}
+{"guid": "N50_268", "forms": [{"grammatical_form": "noun/en_singular", "text": "negative", "is_base_form": true, "ipa": "/ˈnɛɡətɪv/", "phonetic": "NEG-uh-tiv"}]}
+{"guid": "N50_269", "forms": [{"grammatical_form": "noun/en_singular", "text": "article", "is_base_form": true, "ipa": "/ˈɑrtɪkəl/", "phonetic": "AR-ti-kuhl"}]}
+{"guid": "N50_270", "forms": [{"grammatical_form": "noun/en_singular", "text": "invitation", "is_base_form": true, "ipa": "/ˌɪnvəˈteɪʃən/", "phonetic": "in-vuh-TAY-shun"}]}
+{"guid": "N50_271", "forms": [{"grammatical_form": "noun/en_singular", "text": "invitation", "is_base_form": true, "ipa": "/ˌɪnvəˈteɪʃən/", "phonetic": "in-vuh-TAY-shun"}]}

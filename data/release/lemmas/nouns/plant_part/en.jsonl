@@ -25,3 +25,7 @@
 {"guid": "N38_028", "forms": [{"grammatical_form": "noun/en_singular", "text": "divot", "is_base_form": true, "ipa": "/ˈdɪvət/", "phonetic": "DIV-uht"}]}
 {"guid": "N38_030", "forms": [{"grammatical_form": "noun/en_singular", "text": "hop flower", "is_base_form": true}], "variants": [{"kind": "equivalent", "key": "hop", "forms": [{"grammatical_form": "noun/en_singular", "text": "hop", "is_base_form": true}]}]}
 {"guid": "N38_031", "forms": [{"grammatical_form": "noun/en_singular", "text": "chive leaves", "is_base_form": true}]}
+{"guid": "N38_032", "forms": [{"grammatical_form": "noun/en_singular", "text": "straw", "is_base_form": true, "ipa": "/strɔ/", "phonetic": "STRAW"}]}
+{"guid": "N38_033", "forms": [{"grammatical_form": "noun/en_singular", "text": "stalk", "is_base_form": true, "ipa": "/stɔk/", "phonetic": "STAWK"}]}
+{"guid": "N38_034", "forms": [{"grammatical_form": "noun/en_singular", "text": "husk", "is_base_form": true, "ipa": "/hʌsk/", "phonetic": "HUSK"}]}
+{"guid": "N38_035", "forms": [{"grammatical_form": "noun/en_singular", "text": "chaff", "is_base_form": true, "ipa": "/tʃæf/", "phonetic": "CHAF"}]}

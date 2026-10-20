@@ -1,0 +1,5 @@
+{"guid": "V04_003", "grammar_facts": [{"fact_type": "verb_reflexivity", "fact_value": "non_reflexive"}, {"fact_type": "auxiliary_verb", "fact_value": "haben"}, {"fact_type": "past_participle", "fact_value": "gelesen"}]}
+{"guid": "V04_006", "grammar_facts": [{"fact_type": "verb_reflexivity", "fact_value": "non_reflexive"}, {"fact_type": "auxiliary_verb", "fact_value": "haben"}, {"fact_type": "past_participle", "fact_value": "gewusst"}]}
+{"guid": "V04_008", "grammar_facts": [{"fact_type": "verb_reflexivity", "fact_value": "non_reflexive"}, {"fact_type": "auxiliary_verb", "fact_value": "haben"}, {"fact_type": "past_participle", "fact_value": "gedacht"}]}
+{"guid": "V04_011", "grammar_facts": [{"fact_type": "verb_reflexivity", "fact_value": "non_reflexive"}, {"fact_type": "auxiliary_verb", "fact_value": "haben"}, {"fact_type": "past_participle", "fact_value": "bedeutet"}]}
+{"guid": "V04_032", "grammar_facts": [{"fact_type": "verb_reflexivity", "fact_value": "non_reflexive"}, {"fact_type": "auxiliary_verb", "fact_value": "haben"}, {"fact_type": "past_participle", "fact_value": "studiert"}]}

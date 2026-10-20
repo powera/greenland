@@ -1,1 +1,5 @@
+{"guid": "N25_001", "grammar_facts": [{"fact_type": "number_type", "fact_value": "regular"}, {"fact_type": "plural", "fact_value": "liv"}, {"fact_type": "plural_status", "fact_value": "override"}]}
+{"guid": "N25_002", "grammar_facts": [{"fact_type": "number_type", "fact_value": "regular"}, {"fact_type": "plural", "fact_value": "dagar"}, {"fact_type": "plural_status", "fact_value": "override"}]}
+{"guid": "N25_007", "grammar_facts": [{"fact_type": "number_type", "fact_value": "regular"}, {"fact_type": "plural", "fact_value": "år"}, {"fact_type": "plural_status", "fact_value": "override"}]}
 {"guid": "N25_029", "synonyms": [{"grammatical_form": "synonym", "text": "period"}]}
+{"guid": "N25_036", "grammar_facts": [{"fact_type": "number_type", "fact_value": "regular"}, {"fact_type": "plural", "fact_value": "datum"}, {"fact_type": "plural_status", "fact_value": "override"}]}

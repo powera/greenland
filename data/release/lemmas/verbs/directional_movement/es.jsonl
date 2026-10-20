@@ -1,0 +1,6 @@
+{"guid": "V12_001", "grammar_facts": [{"fact_type": "verb_reflexivity", "fact_value": "non_reflexive"}, {"fact_type": "past_participle", "fact_value": "caminado"}]}
+{"guid": "V12_002", "grammar_facts": [{"fact_type": "verb_reflexivity", "fact_value": "non_reflexive"}, {"fact_type": "past_participle", "fact_value": "conducido"}]}
+{"guid": "V12_003", "grammar_facts": [{"fact_type": "verb_reflexivity", "fact_value": "non_reflexive"}, {"fact_type": "past_participle", "fact_value": "corrido"}]}
+{"guid": "V12_004", "grammar_facts": [{"fact_type": "verb_reflexivity", "fact_value": "non_reflexive"}, {"fact_type": "past_participle", "fact_value": "ido"}]}
+{"guid": "V12_005", "grammar_facts": [{"fact_type": "verb_reflexivity", "fact_value": "non_reflexive"}, {"fact_type": "past_participle", "fact_value": "venido"}]}
+{"guid": "V12_030", "grammar_facts": [{"fact_type": "verb_reflexivity", "fact_value": "non_reflexive"}, {"fact_type": "past_participle", "fact_value": "visitado"}]}

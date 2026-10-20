@@ -1,0 +1,8 @@
+{"guid": "N36_015", "grammar_facts": [{"fact_type": "number_type", "fact_value": "regular"}, {"fact_type": "plural", "fact_value": "läkare"}, {"fact_type": "plural_status", "fact_value": "override"}]}
+{"guid": "N36_016", "grammar_facts": [{"fact_type": "number_type", "fact_value": "regular"}, {"fact_type": "plural", "fact_value": "sjuksköterskor"}, {"fact_type": "plural_status", "fact_value": "override"}]}
+{"guid": "N36_019", "grammar_facts": [{"fact_type": "number_type", "fact_value": "regular"}, {"fact_type": "plural", "fact_value": "poliser"}, {"fact_type": "plural_status", "fact_value": "override"}]}
+{"guid": "N36_020", "grammar_facts": [{"fact_type": "number_type", "fact_value": "regular"}, {"fact_type": "plural", "fact_value": "brandmän"}, {"fact_type": "plural_status", "fact_value": "override"}]}
+{"guid": "N36_022", "grammar_facts": [{"fact_type": "number_type", "fact_value": "regular"}, {"fact_type": "plural", "fact_value": "bönder"}, {"fact_type": "plural_status", "fact_value": "override"}]}
+{"guid": "N36_024", "grammar_facts": [{"fact_type": "number_type", "fact_value": "regular"}, {"fact_type": "plural", "fact_value": "förare"}, {"fact_type": "plural_status", "fact_value": "override"}]}
+{"guid": "N36_030", "grammar_facts": [{"fact_type": "number_type", "fact_value": "regular"}, {"fact_type": "plural", "fact_value": "musiker"}, {"fact_type": "plural_status", "fact_value": "override"}]}
+{"guid": "N36_031", "grammar_facts": [{"fact_type": "number_type", "fact_value": "regular"}, {"fact_type": "plural", "fact_value": "konstnärer"}, {"fact_type": "plural_status", "fact_value": "override"}]}

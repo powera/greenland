@@ -9,3 +9,6 @@
 {"guid": "A12_009", "forms": [{"grammatical_form": "adjective/en_positive", "text": "open-ended", "is_base_form": true, "ipa": "/ˌoʊpənˈɛndɪd/", "phonetic": "OH-pun-EN-did"}]}
 {"guid": "A12_010", "forms": [{"grammatical_form": "adjective/en_positive", "text": "high-income", "is_base_form": true, "ipa": "/ˌhaɪ ˈɪnkʌm/", "phonetic": "high-IN-kum"}]}
 {"guid": "A12_011", "forms": [{"grammatical_form": "adjective/en_positive", "text": "singular", "is_base_form": true, "ipa": "/ˈsɪŋɡjələr/", "phonetic": "SING-yuh-ler"}]}
+{"guid": "A12_012", "forms": [{"grammatical_form": "adjective/en_positive", "text": "basic", "is_base_form": true, "ipa": "/ˈbeɪsɪk/", "phonetic": "BAY-sik"}]}
+{"guid": "A12_013", "forms": [{"grammatical_form": "adjective/en_positive", "text": "multiple", "is_base_form": true, "ipa": "/ˈmʌltəpəl/", "phonetic": "MUL-tuh-puhl"}]}
+{"guid": "A12_014", "forms": [{"grammatical_form": "adjective/en_positive", "text": "rare", "is_base_form": true, "ipa": "/rɛr/", "phonetic": "RAIR"}]}

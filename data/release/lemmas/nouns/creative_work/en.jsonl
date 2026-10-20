@@ -6,7 +6,7 @@
 {"guid": "N69_006", "forms": [{"grammatical_form": "noun/en_singular", "text": "literature", "is_base_form": true, "ipa": "/ˈlɪtərətʃər/", "phonetic": "LIT-er-uh-cher"}]}
 {"guid": "N69_007", "forms": [{"grammatical_form": "noun/en_singular", "text": "melody", "is_base_form": true, "ipa": "/ˈmɛlədi/", "phonetic": "MEL-uh-dee"}], "variants": [{"kind": "equivalent", "key": "tune", "forms": [{"grammatical_form": "noun/en_singular", "text": "tune", "is_base_form": true}]}]}
 {"guid": "N69_008", "forms": [{"grammatical_form": "noun/en_singular", "text": "musical", "is_base_form": true, "ipa": "/ˈmjuzɪkəl/", "phonetic": "MYOO-zi-kuhl"}]}
-{"guid": "N69_009", "forms": [{"grammatical_form": "noun/en_singular", "text": "novel", "is_base_form": true, "ipa": "/ˈnɑvəl/", "phonetic": "NOV-ul"}, {"grammatical_form": "noun/en_possessive_singular", "text": "novel's", "is_base_form": false}]}
+{"guid": "N69_009", "forms": [{"grammatical_form": "noun/en_singular", "text": "novel", "is_base_form": true, "ipa": "/ˈnɑvəl/", "phonetic": "NOV-ul"}]}
 {"guid": "N69_010", "forms": [{"grammatical_form": "noun/en_singular", "text": "opera", "is_base_form": true, "ipa": "/ˈɑːpərə/", "phonetic": "OP-er-uh"}]}
 {"guid": "N69_011", "forms": [{"grammatical_form": "noun/en_singular", "text": "poem", "is_base_form": true, "ipa": "/ˈpoʊəm/", "phonetic": "POH-um"}]}
 {"guid": "N69_012", "forms": [{"grammatical_form": "noun/en_singular", "text": "short story", "is_base_form": true}]}
@@ -23,3 +23,4 @@
 {"guid": "N69_028", "forms": [{"grammatical_form": "noun/en_singular", "text": "hip-hop music", "is_base_form": true}], "variants": [{"kind": "equivalent", "key": "hip-hop", "forms": [{"grammatical_form": "noun/en_singular", "text": "hip-hop", "is_base_form": true}]}]}
 {"guid": "N69_030", "forms": [{"grammatical_form": "noun/en_singular", "text": "fantasy fiction", "is_base_form": true}], "variants": [{"kind": "equivalent", "key": "fantasy", "forms": [{"grammatical_form": "noun/en_singular", "text": "fantasy", "is_base_form": true}]}]}
 {"guid": "N69_031", "variants": [{"kind": "equivalent", "key": "memoirs", "forms": [{"grammatical_form": "noun/en_singular", "text": "memoirs", "is_base_form": true}]}]}
+{"guid": "N69_032", "forms": [{"grammatical_form": "noun/en_singular", "text": "production", "is_base_form": true, "ipa": "/prəˈdʌkʃən/", "phonetic": "pruh-DUK-shun"}]}
