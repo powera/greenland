@@ -34,6 +34,15 @@ _VERB_SLOTS: List[str] = expand_fields(VERB_CONFIG)
 # Registry slots the conjugator fills under the same name.
 _NON_FINITE_FORMS = ("infinitive", "gerund", "past_participle")
 
+
+def is_safe_translation(word: str, pos_type: str) -> bool:
+    """Let the noun builder check compounds; accept only known verb phrases."""
+    text = word.strip()
+    if not text or text != text.lower() or "/" in text:
+        return False
+    return " " not in text or pos_type == "noun" or (pos_type == "verb" and text == "estar de pie")
+
+
 # "past" is the preterite, which is how the existing sentence data uses
 # verb/es_*_past ("compró", "encontró", "vio"), and the simple past both
 # varieties use.
@@ -68,8 +77,13 @@ def build_paradigm(
         # Adjective agreement is the same in every Spanish variety.
         return build_adjective_forms(word), {}
     if pos_type == "verb":
-        conjugated = conjugate_for_dialect(word, language_code)
+        suffix = " de pie" if word == "estar de pie" else ""
+        infinitive = "estar" if suffix else word
+        conjugated = conjugate_for_dialect(infinitive, language_code)
         if not conjugated:
             return None, {}
-        return project_verb_forms(conjugated) or None, {}
+        projected = project_verb_forms(conjugated)
+        if suffix:
+            projected = {slot: text + suffix for slot, text in projected.items()}
+        return projected or None, {}
     return None, {}

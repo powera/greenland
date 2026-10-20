@@ -237,7 +237,10 @@ class FamilyRelationOverrideManager:
                             default_level=lemma.difficulty_level,
                             current_override=current_override_level,
                             proposed_level=promoted_level,
-                            reason=f"Term '{concept_label}' is taught early in {target_language}",
+                            reason=(
+                                f"Term '{concept_label}' is assigned to curriculum level "
+                                f"{promoted_level} in {target_language}"
+                            ),
                             sets_override=True,
                         )
                         changes.append(change)
@@ -444,12 +447,22 @@ class FamilyRelationOverrideManager:
                 lines.append("")
 
             if inclusions:
-                lines.append("Terms to INCLUDE (remove exclusion):")
+                lines.append("Terms to INCLUDE or MOVE:")
                 lines.append("-" * 40)
                 for change in inclusions:
+                    previous_level = (
+                        change.current_override
+                        if change.current_override is not None
+                        else change.default_level
+                    )
+                    destination = (
+                        str(change.proposed_level)
+                        if change.sets_override
+                        else f"{change.proposed_level} (default)"
+                    )
                     lines.append(
                         f"  {change.guid:<12} {change.concept_label:<25} "
-                        f"{change.current_override or 'N/A':>3} -> (default)"
+                        f"{previous_level or 'N/A':>3} -> {destination}"
                     )
         else:
             lines.append("No changes needed.")

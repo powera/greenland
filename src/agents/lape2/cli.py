@@ -7,7 +7,6 @@ import json
 import logging
 import math
 from collections import Counter
-from dataclasses import asdict
 from pathlib import Path
 from typing import Any
 
@@ -25,6 +24,7 @@ from agents.lape2.job import LAPE2_JOB
 from agents.lape2.planner import RequestPlan, plan_request
 from agents.lape2.query import build_query
 from clients.unified_client import UnifiedLLMClient
+from clients.lib import to_openai_schema
 from constants import DEFAULT_MODEL
 from storage.backend import create_session
 from storage.backend.config import BackendType
@@ -157,7 +157,7 @@ def main() -> None:
                                 "manifest": plan.to_dict(),
                                 "context": query.context,
                                 "prompt": query.prompt,
-                                "schema": asdict(query.schema),
+                                "schema": to_openai_schema(query.schema),
                             },
                             ensure_ascii=False,
                             indent=2,

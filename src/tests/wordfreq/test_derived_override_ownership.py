@@ -147,3 +147,32 @@ def test_family_promotion_is_applied_and_removed_when_unconfigured(session: Sess
     session.flush()
     manager.apply_overrides("ko")
     assert session.query(LemmaDifficultyOverride).filter_by(lemma_id=lemma.id).count() == 0
+
+
+@pytest.mark.parametrize("language", ["es", "es-419", "lt"])
+@pytest.mark.parametrize("term,base_level", [("parent", 5), ("grandparent", 18)])
+def test_awkward_family_singulars_use_specific_family_unit(
+    session: Session, language: str, term: str, base_level: int
+) -> None:
+    from wordfreq.data.family_relations_sections import FAMILY_TIER_LEVELS
+
+    lemma = Lemma(
+        guid=f"N_{term}",
+        lemma_text=term,
+        definition_text="A family relation of either gender",
+        pos_type="noun",
+        pos_subtype="family_relation",
+        difficulty_level=base_level,
+    )
+    session.add(lemma)
+    session.flush()
+    manager = FamilyRelationOverrideManager(session)
+    preview = manager.format_summary_report(manager.preview_changes(language))
+    assert "-> 1002" in preview
+    assert "(default)" not in preview
+    manager.apply_overrides(language)
+    deferred = session.query(LemmaDifficultyOverride).filter_by(lemma_id=lemma.id).one()
+    assert deferred.difficulty_level == FAMILY_TIER_LEVELS[5] == 1002
+    assert _is_family_override(deferred)
+    assert manager.preview_changes(language).changes == []
+    assert manager.preview_changes("fr").changes == []

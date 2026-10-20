@@ -23,6 +23,7 @@ from clients.types import LLMCall, Response
 from storage.config.grammar_fact_registry import is_release_grammar_fact_type
 from storage.crud.uncertain_llm_result import get_uncertain_llm_result
 from storage.models import Base, Lemma
+from storage.models.schema import DerivativeForm
 from storage.models.grammar_fact import GrammarFact
 from storage.models.lemma_fact import LemmaFact
 from storage.translation_helpers import set_translation
@@ -59,7 +60,7 @@ def lemma(session: Session, text: str = "cat", pos: str = "noun", **translations
 
 
 def answer(value: str, confidence: float = 0.95) -> dict[str, Any]:
-    return {"value": value, "confidence": confidence, "explanation": "For this sense"}
+    return {"value": value, "confidence": confidence}
 
 
 def save(session: Session, plan: RequestPlan, data: dict[str, Any]) -> Any:
@@ -93,13 +94,128 @@ def test_one_query_has_exact_missing_questions_across_languages(session: Session
     assert "this sense" in query.prompt and "猫" in query.prompt
     assert "fr__grammatical_gender" in query.prompt  # supplied as known context
     assert session.query(GrammarFact).count() == 1
-    countability_schema = query.schema.properties["en__countability"].object_schema
+    countability_schema = query.schema.properties["en__countability"].properties
     assert countability_schema is not None
-    countability_values = countability_schema.properties["value"].enum
-    assert countability_values is not None and "countable" in countability_values
+    assert countability_schema["value"].enum is None
     restored = RequestPlan.from_dict(json.loads(json.dumps(plan.to_dict())))
     assert restored == plan
     assert build_query(restored) == query
+
+
+def test_job_builds_declensions_after_accepting_gender_and_number(session: Session) -> None:
+    word = lemma(session, "castle", lt="pilis")
+    state: dict[str, Any] = {
+        "lemma_id": word.id,
+        "languages": ["lt"],
+        "facts": ["grammatical_gender", "number_type"],
+        "min_confidence": 0.7,
+    }
+    prepare(session, state, CTX)
+    result = apply(
+        session,
+        state,
+        {"lt__grammatical_gender": answer("feminine"), "lt__number_type": answer("regular")},
+        CTX,
+    )
+    assert result.status == "written"
+    assert state["report"]["forms_added"] == 14
+    genitive = (
+        session.query(DerivativeForm)
+        .filter_by(lemma_id=word.id, grammatical_form="noun/lt_genitive_singular")
+        .one()
+    )
+    assert genitive.derivative_form_text == "pilies"
+    apply(session, state, {}, CTX)
+    assert session.query(DerivativeForm).filter_by(lemma_id=word.id).count() == 14
+
+
+def test_job_does_not_infer_forms_after_uncertain_gender(session: Session) -> None:
+    word = lemma(session, lt="katė")
+    state: dict[str, Any] = {
+        "lemma_id": word.id,
+        "languages": ["lt"],
+        "facts": ["grammatical_gender", "number_type"],
+        "min_confidence": 0.7,
+    }
+    prepare(session, state, CTX)
+    apply(
+        session,
+        state,
+        {"lt__grammatical_gender": answer("feminine", 0.4), "lt__number_type": answer("regular")},
+        CTX,
+    )
+    assert state["report"]["forms_added"] == 0
+    assert session.query(DerivativeForm).filter_by(lemma_id=word.id).count() == 0
+    assert "lt__grammatical_gender" not in stored_values(session, word.id)
+
+
+def test_job_respects_previously_uncertain_questions(session: Session) -> None:
+    word = lemma(session, lt="katė")
+    gender_plan = plan_request(session, word, ["lt"], facts=["grammatical_gender"])
+    save(session, gender_plan, {"lt__grammatical_gender": answer("feminine", 0.4)})
+    state: dict[str, Any] = {
+        "lemma_id": word.id,
+        "languages": ["lt"],
+        "facts": ["grammatical_gender", "number_type"],
+        "min_confidence": 0.7,
+    }
+    prepare(session, state, CTX)
+    assert state["plan"]["uncertain"] == ("lt__grammatical_gender",)
+    apply(session, state, {"lt__number_type": answer("regular")}, CTX)
+    assert state["report"]["forms_added"] == 0
+    assert "lt__grammatical_gender" not in stored_values(session, word.id)
+
+
+def test_prompt_omits_missing_translation_metadata(session: Session) -> None:
+    word = lemma(session, fr="chat", lt="katė")
+    plan = plan_request(session, word, ["en", "fr", "lt"])
+    query = build_query(plan)
+    source_text = query.prompt.split("Sense and existing translations:\n", 1)[1].split(
+        "\nAlready stored facts", 1
+    )[0]
+    source = json.loads(source_text)
+    assert source["translation_definitions"] == {"en": word.definition_text}
+    assert source["translation_disambiguations"] == {}
+    assert source["translations"]["lt"] == "katė"
+    assert plan.source["translation_definitions"]["fr"] is None
+    assert build_query(RequestPlan.from_dict(plan.to_dict())) == query
+
+
+def test_shared_definitions_are_only_in_context(session: Session) -> None:
+    word = lemma(session, de="Katze", fr="chat", it="gatto")
+    plan = plan_request(session, word, ["en", "de", "fr", "it"])
+    query = build_query(plan)
+    assert query.context is not None
+    for question in plan.questions:
+        assert query.context.count(question.instruction) == 1
+        assert question.instruction not in query.prompt
+        answer_schema = query.schema.properties[question.key].properties
+        assert answer_schema is not None
+        assert set(answer_schema) == {"value", "confidence"}
+        assert answer_schema["value"].enum is None
+        assert answer_schema["confidence"].minimum is None
+        assert answer_schema["confidence"].maximum is None
+    definitions = json.loads(query.context[query.context.index("[\n  {") :])
+    gender = next(item for item in definitions if item["fact_type"] == "grammatical_gender")
+    for question in plan.questions:
+        if question.fact_type == "grammatical_gender":
+            assert any(
+                question.language_code in group["languages"]
+                and list(question.values) == group["values"]
+                for group in gender["allowed_values_by_language"]
+            )
+
+
+def test_previous_batch_answers_with_explanations_are_still_accepted(session: Session) -> None:
+    word = lemma(session)
+    plan = plan_request(session, word, ["en"], facts=["countability"])
+    report = save(
+        session,
+        plan,
+        {"en__countability": {**answer("countable"), "explanation": "For this sense"}},
+    )
+    assert report.written == 1
+    assert stored_values(session, word.id)["en__countability"] == "countable"
 
 
 def test_context_is_fixed_and_form_filters_add_prerequisites(session: Session) -> None:

@@ -123,6 +123,13 @@ from spending twice on the same word within Lape2.
 The validator checks enums, answer shape, finite confidence bounds, required
 text, applicable slots, and dependencies. Unexpected answers are ignored and
 reported; malformed or uncertain answers do not discard valid siblings.
+
+After accepting facts, the shared inline/batch job adds missing mechanical
+declensions and conjugations using `words.mechanical_forms.generate_lemma_forms`.
+It preserves existing forms and uses the newly stored facts in the same transaction.
+A language with rejected or uncertain answers is skipped, so generation cannot
+replace a rejected classification with an assumed default. Unsupported paradigms
+remain for the separate form-generation workflow; this step never calls an LLM.
 Low-confidence answers use the existing confidence gate and uncertainty table.
 They are skipped on later runs unless `--retry-uncertain` is supplied.
 
