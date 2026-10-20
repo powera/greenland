@@ -17,7 +17,7 @@ is needed. An empty form means that grammatical slot does not apply, never
 singular-only senses have no plural. A plural-only noun keeps its plural text.
 Use one canonical form, not slash-separated alternatives or explanatory prose.
 
-Each answer has its own confidence from 0 to 1 and brief explanation. When a
+Each answer contains a value and its own confidence from 0 to 1. When a
 translation is incompatible with the sense, a definition mixes senses, or a
-classification is ambiguous, lower confidence and explain; do not guess a default.
+classification is ambiguous, lower confidence; do not guess a default.
 Return only the structured response required by the supplied schema.

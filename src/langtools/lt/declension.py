@@ -22,6 +22,13 @@ _IRREGULAR_NOUNS: Set[str] = {
     "sesuo",
     "duktė",
     "moteris",
+    # The generic -is tables cannot recover these paradigms: dantis has
+    # genitive danties/dantų, ausis and žuvis have ausų/žuvų, and širdis
+    # alternates širdies/širdį with širdžiai/širdžių. Leave them to stored forms.
+    "dantis",
+    "ausis",
+    "žuvis",
+    "širdis",
     # Two genitive singulars: "petiẽs" (the more common, and the one the
     # sentence corpus uses) alongside the regular "pẽčio" this module's
     # masc_ys pattern would build.  A paradigm cannot carry both, and emitting

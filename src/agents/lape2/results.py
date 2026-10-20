@@ -33,9 +33,13 @@ class ApplyReport:
 
 
 def validate_answer(question: Question, raw: Any) -> Answer:
-    if not isinstance(raw, dict) or set(raw) != {"value", "confidence", "explanation"}:
-        raise ValueError("Answer must contain exactly value, confidence and explanation")
-    value, confidence, explanation = raw["value"], raw["confidence"], raw["explanation"]
+    # Accept explanations from already submitted batches using the old schema.
+    if not isinstance(raw, dict) or set(raw) not in (
+        {"value", "confidence"},
+        {"value", "confidence", "explanation"},
+    ):
+        raise ValueError("Answer must contain value and confidence, with an optional explanation")
+    value, confidence, explanation = raw["value"], raw["confidence"], raw.get("explanation", "")
     if not isinstance(value, str) or not isinstance(explanation, str):
         raise ValueError("Value and explanation must be strings")
     if (
@@ -218,7 +222,9 @@ def apply_answers(
                 if question.kind == "override" and answer.confidence < min_confidence
                 else _completion_value(question, answer, plan.source, current)
             )
-            notes = f"Lape2 ({model}; confidence={answer.confidence:.3f}): {answer.explanation}"
+            notes = f"Lape2 ({model}; confidence={answer.confidence:.3f})"
+            if answer.explanation:
+                notes += f": {answer.explanation}"
             if (
                 existing_completion
                 and answer.confidence >= min_confidence

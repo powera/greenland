@@ -15,6 +15,8 @@ Words can be:
 1. Included: The term maps naturally to the target language
 2. Excluded (null): The term doesn't exist or is awkward in the target language
    - These get difficulty_level=-1 override
+3. Deferred: An awkward generic translation is kept in its configured named
+   family unit, outside the core, for later review.
 """
 
 from typing import Dict, List, Optional, Set
@@ -30,6 +32,8 @@ from wordfreq.data.family_relations_sections import FAMILY_TIER_LEVELS
 # Nuclear family - immediate parents and children
 NUCLEAR_FAMILY = [
     "family",
+    "parent",
+    "child",
     "mother",
     "father",
     "brother",
@@ -48,6 +52,7 @@ AGE_DISTINGUISHED_SIBLINGS = [
 
 # Extended family - grandparents and grandchildren
 GRANDPARENTS_GENERAL = [
+    "grandparent",
     "grandfather",
     "grandmother",
 ]
@@ -61,6 +66,7 @@ GRANDPARENTS_DISTINGUISHED = [
 ]
 
 GRANDCHILDREN = [
+    "grandchild",
     "grandson",
     "granddaughter",
 ]
@@ -464,6 +470,15 @@ PROMOTED_TERMS: Dict[str, Dict[str, int]] = {
 }
 PROMOTED_TERMS["zh-tw"] = PROMOTED_TERMS["zh"]
 
+# Awkward generic singulars belong with Specific Family Relationships, not
+# in an unrelated named unit or the early mother/father curriculum. Keep the
+# translations available for later review instead of excluding them entirely.
+DEFERRED_TERMS: Dict[str, Dict[str, int]] = {
+    language: {term: FAMILY_TIER_LEVELS[5] for term in ("parent", "grandparent")}
+    for language in ("es", "lt")
+}
+DEFERRED_TERMS["es-419"] = DEFERRED_TERMS["es"]
+
 # Default exclusions for languages not explicitly configured
 DEFAULT_EXCLUDED_TERMS: Set[str] = {
     # By default, exclude specialized terms that require linguistic analysis
@@ -537,8 +552,11 @@ def get_promoted_level(concept_label: str, lang_code: str) -> Optional[int]:
         lang_code: Language code (e.g., "zh")
 
     Returns:
-        The promoted difficulty level, or None to keep the lemma's own level
+        The configured promotion or deferral level, or None to keep the base level
     """
+    deferred_level = DEFERRED_TERMS.get(lang_code, {}).get(concept_label)
+    if deferred_level is not None:
+        return deferred_level
     return PROMOTED_TERMS.get(lang_code, {}).get(concept_label)
 
 

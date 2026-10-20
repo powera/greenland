@@ -38,6 +38,16 @@ class TestLithuanianMechanicalDeclension(unittest.TestCase):
     def test_skips_irregular(self) -> None:
         self.assertIsNone(decline_noun("žmogus"))
 
+    def test_refuses_exceptional_is_paradigms(self) -> None:
+        for word, gender in (
+            ("dantis", "masculine"),
+            ("ausis", "feminine"),
+            ("žuvis", "feminine"),
+            ("širdis", "feminine"),
+        ):
+            with self.subTest(word=word):
+                self.assertIsNone(decline_noun(word, grammatical_gender=gender))
+
     def test_palatalizes_t_and_d_before_i_endings(self) -> None:
         # A t/d stem palatalizes before an -i- ending and not otherwise, so the
         # same word shows both stems: "pavyzdžio" but "pavyzdį".

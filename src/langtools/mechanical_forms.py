@@ -17,6 +17,9 @@ A language with rules has ``langtools/<lang>/mechanical.py`` exposing:
 
 and optionally:
 
+``is_safe_translation(word, pos_type)``
+    Overrides the default single-word guard when a language's builder can
+    validate compounds without dropping or incorrectly inflecting modifiers.
 ``USES_LEMMA_TEXT = True``
     The word is the lemma text (English) rather than its translation.
 ``FORM_KEYS``
@@ -113,7 +116,13 @@ def build_for_lemma_with_metadata(session: Session, lemma: Any, language_code: s
         word = lemma.lemma_text
     else:
         translation = get_translation(session, lemma, language_code)
-        if not translation or not is_mechanically_safe_translation(translation):
+        if not translation:
+            return None, {}
+        safe_translation = getattr(module, "is_safe_translation", None)
+        if safe_translation is not None:
+            if not safe_translation(translation, pos_type):
+                return None, {}
+        elif not is_mechanically_safe_translation(translation):
             return None, {}
         word = translation.strip()
 
