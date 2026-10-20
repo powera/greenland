@@ -16,7 +16,9 @@ from typing import Any, Dict, List, NamedTuple, Optional, Sequence, Tuple
 
 from sqlalchemy.orm import Session
 
+import constants
 from clients.types import LLMCall
+from storage.crud.difficulty_override import get_all_overrides_for_lemma
 from storage.models.schema import Lemma
 from storage.translation_helpers import (
     convert_llm_response_to_confidences,
@@ -37,20 +39,42 @@ def missing_translation_languages(
 ) -> List[str]:
     """The languages among *languages* the lemma has no (non-blank) translation for.
 
-    A language a model was uncertain of (see
-    words.lemma_creation.store_llm_translation) is left out unless
-    *retry_uncertain*: asked again without its context, a model fills the gap
-    with the term it doubted, or a worse one.
+    A language the lemma is excluded from (see
+    :func:`excluded_translation_languages`) is always left out.  A language a
+    model was uncertain of (see words.lemma_creation.store_llm_translation) is
+    left out unless *retry_uncertain*: asked again without its context, a model
+    fills the gap with the term it doubted, or a worse one.
     """
-    missing = [
+    blank = [
         language_code
         for language_code in languages
         if not (get_translation(session, lemma, language_code) or "").strip()
     ]
+    excluded = excluded_translation_languages(session, lemma, blank)
+    missing = [language_code for language_code in blank if language_code not in excluded]
     if retry_uncertain:
         return missing
     uncertain = uncertain_translation_languages(session, lemma, missing)
     return [language_code for language_code in missing if language_code not in uncertain]
+
+
+def excluded_translation_languages(
+    session: Session, lemma: Lemma, languages: Sequence[str]
+) -> List[str]:
+    """The languages among *languages* the lemma is excluded from by a -1 override.
+
+    A blank translation beside a -1 override is a deliberate gap, not a missing
+    one: "in" and "at" have no word of their own in Lithuanian, which uses case
+    endings instead, and the override's note says so.  Filling it would put back
+    the near-miss the gap was left to avoid, so no fill pass asks for it --
+    --retry-uncertain included.
+    """
+    excluded = {
+        override.language_code
+        for override in get_all_overrides_for_lemma(session, lemma.id)
+        if override.difficulty_level == constants.EXCLUDE_DIFFICULTY_LEVEL
+    }
+    return [language_code for language_code in languages if language_code in excluded]
 
 
 def uncertain_translation_languages(
