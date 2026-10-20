@@ -34,7 +34,12 @@ from storage.crud.guid_tombstone import create_tombstone, get_tombstone_by_guid
 from storage.models.guid_tombstone import TOMBSTONE_REASON_SYNONYM_MERGE
 from storage.crud.lemma import get_lemma_by_guid
 from storage.crud.lemma_tags import read_tags
-from storage.crud.operation_log import log_translation_change
+from storage.crud.operation_log import (
+    LEMMA_UPDATE,
+    FieldChange,
+    log_field_changes,
+    log_translation_change,
+)
 from storage.crud.sentence import add_sentence, find_sentence_by_text
 from storage.crud.sentence_translation import add_sentence_translation
 from storage.lexeme import get_lexeme
@@ -828,6 +833,14 @@ def update_lemma_info(guid: str) -> ResponseReturnValue:
 
     old_difficulty_level = lemma.difficulty_level
     lemma.difficulty_level = new_difficulty_level
+    log_field_changes(
+        g.db,
+        source=Config.OPERATION_LOG_SOURCE,
+        operation_type=LEMMA_UPDATE,
+        entity_guid=lemma.guid,
+        changes=[FieldChange("difficulty_level", old_difficulty_level, new_difficulty_level)],
+        lemma_id=lemma.id,
+    )
     g.db.commit()
 
     return _build_success_response(

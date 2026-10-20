@@ -83,6 +83,10 @@ IDIOM_EQUIVALENT_CREATE = "idiom_equivalent_create"
 IDIOM_EQUIVALENT_UPDATE = "idiom_equivalent_update"
 IDIOM_EQUIVALENT_DELETE = "idiom_equivalent_delete"
 
+# A scalar edit to a lemma row (definition, level, POS, ...), logged through
+# log_field_changes. Translation edits keep their own "translation" entries.
+LEMMA_UPDATE = "lemma_update"
+
 # Operation types for the variant and derivative-form families. Neither row
 # carries a GUID of its own, so both log against the owning *lemma's* GUID with
 # the form's identity in the fact -- the same shape phrase and name
