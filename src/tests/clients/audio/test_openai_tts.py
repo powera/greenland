@@ -271,10 +271,15 @@ class TestRealtimeTTS(unittest.TestCase):
             self.assertEqual(wav_file.getframerate(), 24000)
             self.assertEqual(wav_file.readframes(24), pcm)
         events = [json.loads(call.args[0]) for call in connection.send.call_args_list]
-        self.assertEqual(events[0]["session"]["audio"]["output"]["voice"], "ash")
-        self.assertIn("A calm speaker", events[1]["response"]["instructions"])
-        self.assertIn("labas", events[1]["response"]["instructions"])
-        self.assertEqual(events[1]["response"]["input"], [])
+        session = events[0]["session"]
+        self.assertEqual(session["audio"]["output"]["voice"], "ash")
+        self.assertIn("native Lithuanian speaker", session["instructions"])
+        self.assertIn("A calm speaker", session["instructions"])
+        self.assertNotIn("labas", session["instructions"])
+        self.assertNotIn("instructions", events[1]["response"])
+        (message,) = events[1]["response"]["input"]
+        self.assertEqual(message["role"], "user")
+        self.assertEqual(message["content"][0]["text"], "Next word: labas")
         self.assertIn(DEFAULT_MODEL, mock_connect.call_args.args[0])
         connection.close.assert_called_once()
 
@@ -321,4 +326,73 @@ class TestRealtimeTTS(unittest.TestCase):
         command = mock_run.call_args.args[0]
         self.assertIn("atempo=0.5,atempo=0.5", command)
         self.assertIn("libmp3lame", command)
+        self.assertEqual(command[command.index("-b:a") + 1], "128k")
         self.assertEqual(mock_run.call_args.kwargs["input"], b"\x00\x00")
+
+    @patch("clients.audio.openai_tts.clients.lib.assert_llm_calls_enabled")
+    @patch("websocket.create_connection")
+    def test_realtime_output_is_trimmed(
+        self, mock_connect: MagicMock, mock_guard: MagicMock
+    ) -> None:
+        import base64
+        import json
+
+        pcm = _pcm(_tone(300) + _quiet(2000))
+        mock_connect.return_value.recv.side_effect = [
+            json.dumps({"type": "session.updated"}),
+            json.dumps(
+                {"type": "response.output_audio.delta", "delta": base64.b64encode(pcm).decode()}
+            ),
+            json.dumps({"type": "response.done", "response": {"status": "completed"}}),
+        ]
+        result = OpenAITTSClient(api_key="fake").generate_audio(
+            "vanduo", voice=Voice.SHIMMER, audio_format=AudioFormat.PCM
+        )
+        self.assertTrue(result.success, result.error)
+        self.assertEqual(len(result.audio_data), len(_pcm(_tone(300) + _quiet(100))))
+
+
+def _ms(ms: int) -> int:
+    """Sample count for ms of 24 kHz audio."""
+    return 24000 * ms // 1000
+
+
+def _tone(ms: int) -> list[int]:
+    """A loud square wave, well above the silence threshold."""
+    return [8000 if i % 40 < 20 else -8000 for i in range(_ms(ms))]
+
+
+def _quiet(ms: int, level: int = 30) -> list[int]:
+    """Faint noise at about -61 dBFS, below the -50 dB threshold but not zero."""
+    return [level if i % 2 else -level for i in range(_ms(ms))]
+
+
+def _pcm(samples: list[int]) -> bytes:
+    import array
+
+    data = array.array("h", samples)
+    if sys.byteorder == "big":
+        data.byteswap()
+    return data.tobytes()
+
+
+class TestTrimPcmSilence(unittest.TestCase):
+    """Edge trimming keeps at most 100 ms of silence at each end."""
+
+    def test_long_edges_trimmed_to_limit(self) -> None:
+        from clients.audio.openai_tts import trim_pcm_silence
+
+        trimmed = trim_pcm_silence(_pcm(_quiet(500) + _tone(300) + _quiet(3300)))
+        self.assertEqual(trimmed, _pcm(_quiet(100) + _tone(300) + _quiet(100)))
+
+    def test_short_edges_kept_without_padding(self) -> None:
+        from clients.audio.openai_tts import trim_pcm_silence
+
+        pcm = _pcm(_quiet(40) + _tone(300) + _quiet(60))
+        self.assertEqual(trim_pcm_silence(pcm), pcm)
+
+    def test_all_quiet_returned_unchanged(self) -> None:
+        from clients.audio.openai_tts import trim_pcm_silence
+
+        pcm = _pcm(_quiet(1000))
+        self.assertEqual(trim_pcm_silence(pcm), pcm)

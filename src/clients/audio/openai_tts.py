@@ -1,11 +1,14 @@
 #!/usr/bin/python3
 """OpenAI TTS client for audio generation."""
 
+import array
 import base64
 import io
 import json
+import math
 import subprocess
 import shutil
+import sys
 import wave
 import logging
 import time
@@ -17,6 +20,7 @@ import requests
 import clients.lib
 from clients.keys import load_key
 from langtools.dialect_overrides import (
+    get_dialect_display_name,
     get_parent_language,
     get_translation_language,
     normalize_language_code,
@@ -37,6 +41,15 @@ REALTIME_VOICES = frozenset(
 )
 API_BASE = "https://api.openai.com/v1"
 DEFAULT_TIMEOUT = 60
+MP3_BITRATE = "128k"
+
+# Realtime output is 24 kHz mono signed 16-bit little-endian PCM.
+PCM_SAMPLE_RATE = 24000
+# Edge trimming: audio quieter than this (dBFS, per 10 ms frame) counts as silence,
+# and at most this much of it is kept before the first and after the last loud frame.
+# -50 dB catches the faint noise tails Realtime sometimes appends (seen at -50..-60 dB).
+SILENCE_THRESHOLD_DB = -50.0
+MAX_EDGE_SILENCE_MS = 100
 
 # Pricing estimates (as of Jan 2025)
 # gpt-4o-mini-tts: $0.60/1M input tokens, $12/1M output audio tokens
@@ -108,6 +121,78 @@ def get_instructions(language_code: str, is_sentence: bool = False) -> str:
     return _load_prompt(prompt_type, language_code)
 
 
+def get_realtime_session_instructions(
+    language_code: str, pronunciation_notes: str, is_sentence: bool = False
+) -> str:
+    """
+    Frame a language's pronunciation notes as a Realtime recording session.
+
+    Realtime is a conversational model, not a text reader: it pronounces words
+    more reliably when told it is recording flashcard audio and handed each
+    word as the next turn than when the word trails the instructions.
+
+    Args:
+        language_code: Language code (e.g., "lt", "es-mx")
+        pronunciation_notes: The language's word or sentence prompt, plus any
+            character description
+        is_sentence: If True, frame a sentence session; otherwise a word session
+
+    Returns:
+        Session instructions for the Realtime session.update event
+    """
+    prompt_type = "sentence" if is_sentence else "word"
+    template = (PROMPTS_DIR / "realtime" / f"{prompt_type}.txt").read_text().strip()
+    return template.format(
+        language=get_dialect_display_name(language_code),
+        pronunciation_notes=pronunciation_notes,
+    )
+
+
+def trim_pcm_silence(
+    data: bytes,
+    threshold_db: float = SILENCE_THRESHOLD_DB,
+    max_edge_ms: int = MAX_EDGE_SILENCE_MS,
+    frame_ms: int = 10,
+) -> bytes:
+    """
+    Trim leading and trailing silence from 24 kHz mono s16le PCM.
+
+    Keeps at most max_edge_ms of the original audio before the first and after
+    the last frame whose RMS reaches threshold_db (relative to full scale).
+    Nothing is padded: an edge already shorter than max_edge_ms is left as is.
+
+    Args:
+        data: Raw PCM bytes
+        threshold_db: Frames below this RMS level (dBFS) count as silence
+        max_edge_ms: Most silence to keep at each end, in milliseconds
+        frame_ms: Analysis frame length, in milliseconds
+
+    Returns:
+        The trimmed PCM bytes, or data unchanged if no frame is loud enough
+    """
+    samples = array.array("h")
+    samples.frombytes(data[: len(data) - len(data) % 2])
+    if sys.byteorder == "big":
+        samples.byteswap()
+    frame_len = PCM_SAMPLE_RATE * frame_ms // 1000
+    threshold = 32768.0 * 10 ** (threshold_db / 20)
+    loud_frames = [
+        start
+        for start in range(0, len(samples), frame_len)
+        if math.sqrt(
+            sum(s * s for s in samples[start : start + frame_len])
+            / len(samples[start : start + frame_len])
+        )
+        >= threshold
+    ]
+    if not loud_frames:
+        return data
+    edge = PCM_SAMPLE_RATE * max_edge_ms // 1000
+    first = max(0, loud_frames[0] - edge)
+    last = min(len(samples), loud_frames[-1] + frame_len + edge)
+    return data[first * 2 : last * 2]
+
+
 def _encode_pcm(data: bytes, audio_format: AudioFormat, speed: float, timeout: int) -> bytes:
     """Encode 24 kHz mono signed 16-bit PCM; preserve the public format/speed contract."""
     if speed == 1.0:
@@ -122,7 +207,8 @@ def _encode_pcm(data: bytes, audio_format: AudioFormat, speed: float, timeout: i
                 wav_file.writeframes(data)
             return buffer.getvalue()
     formats = {
-        AudioFormat.MP3: ["-c:a", "libmp3lame", "-f", "mp3"],
+        # Without -b:a, libmp3lame picks 32 kbps for 24 kHz mono, which sounds metallic.
+        AudioFormat.MP3: ["-c:a", "libmp3lame", "-b:a", MP3_BITRATE, "-f", "mp3"],
         AudioFormat.OPUS: ["-c:a", "libopus", "-f", "ogg"],
         AudioFormat.AAC: ["-c:a", "aac", "-f", "adts"],
         AudioFormat.FLAC: ["-f", "flac"],
@@ -202,8 +288,15 @@ class OpenAITTSClient:
         instructions: str,
         audio_format: AudioFormat,
         speed: float,
+        language_code: str,
+        is_sentence: bool,
     ) -> bytes:
-        """Collect GA Realtime PCM output and encode it for existing callers."""
+        """Collect GA Realtime PCM output and encode it for existing callers.
+
+        The session is framed as a recording session (see
+        get_realtime_session_instructions) and the text is sent as the next
+        user turn, "Next word: ...", rather than appended to the instructions.
+        """
         from websocket import create_connection
 
         if voice.value not in REALTIME_VOICES:
@@ -221,6 +314,7 @@ class OpenAITTSClient:
             header={"Authorization": f"Bearer {self.api_key}"},
             timeout=self.timeout,
         )
+        unit = "sentence" if is_sentence else "word"
         deadline = time.monotonic() + self.timeout
         chunks: list[bytes] = []
         try:
@@ -230,6 +324,9 @@ class OpenAITTSClient:
                         "type": "session.update",
                         "session": {
                             "type": "realtime",
+                            "instructions": get_realtime_session_instructions(
+                                language_code, instructions, is_sentence
+                            ),
                             "output_modalities": ["audio"],
                             "audio": {
                                 "output": {
@@ -261,11 +358,19 @@ class OpenAITTSClient:
                                 "type": "response.create",
                                 "response": {
                                     "conversation": "none",
-                                    "input": [],
+                                    "input": [
+                                        {
+                                            "type": "message",
+                                            "role": "user",
+                                            "content": [
+                                                {
+                                                    "type": "input_text",
+                                                    "text": f"Next {unit}: {text}",
+                                                }
+                                            ],
+                                        }
+                                    ],
                                     "output_modalities": ["audio"],
-                                    "instructions": instructions
-                                    + "\nRead exactly the following text aloud. "
-                                    "Do not translate, answer, explain, or add any words.\n" + text,
                                 },
                             }
                         )
@@ -285,7 +390,7 @@ class OpenAITTSClient:
         pcm_data = b"".join(chunks)
         if not pcm_data:
             raise ValueError("Realtime TTS returned no audio")
-        return _encode_pcm(pcm_data, audio_format, speed, self.timeout)
+        return _encode_pcm(trim_pcm_silence(pcm_data), audio_format, speed, self.timeout)
 
     def generate_audio(
         self,
@@ -352,7 +457,14 @@ class OpenAITTSClient:
         try:
             if model.startswith("gpt-realtime"):
                 audio_data = self._generate_realtime(
-                    text, voice, model, instructions, audio_format, speed
+                    text,
+                    voice,
+                    model,
+                    instructions,
+                    audio_format,
+                    speed,
+                    language_code,
+                    is_sentence,
                 )
                 return AudioGenerationResult(
                     audio_data=audio_data,
