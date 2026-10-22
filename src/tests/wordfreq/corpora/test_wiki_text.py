@@ -43,6 +43,50 @@ def test_prose_without_math_is_untouched() -> None:
     assert "No math here at all." in wikitext_to_plain_text("No math here at all.")
 
 
+def test_category_links_contribute_no_text() -> None:
+    """A category link is page metadata; its piped part is a sort key."""
+    cases = [
+        "Before after.\n[[Category:Cubism]]",
+        "Before after.\n[[Category:Art movements|Cubism]]",
+        "Before after.\n[[category: French art]]",
+        "Before after.\n[[ Category :Painters|*]]",
+    ]
+    for case in cases:
+        words = {word.strip(".,") for word in wikitext_to_plain_text(case).lower().split()}
+        assert words == {"before", "after"}, f"{case!r} produced {words}"
+
+
+def test_namespace_and_interwiki_links_contribute_no_text() -> None:
+    """Links out of the article's prose yield nothing, colon or not."""
+    cases = [
+        "Before [[:Category:Painters|painters list]] after.",
+        "Before [[wikt:run|run]] after.",
+        "Before [[:wiktionary:run]] after.",
+        "Before [[Wiktionary:run|run]] after.",
+        "Before [[doi:10.1000/182]] after.",
+        "Before [[:fr:Cubisme|Cubisme]] after.",
+        "Before [[zh-tw:Example]] after.",
+        "Before [[Help:Editing|editing help]] after.",
+        "Before [[User talk:Example|talk page]] after.",
+        "Before [[file:Example.jpg|thumb|caption]] after.",
+    ]
+    for case in cases:
+        words = {word.strip(".,") for word in wikitext_to_plain_text(case).lower().split()}
+        assert words == {"before", "after"}, f"{case!r} produced {words}"
+
+
+def test_article_titles_with_colons_are_ordinary_links() -> None:
+    text = wikitext_to_plain_text(
+        "Both [[Star Trek: Voyager]] and [[ISO 3166-2:GB|the GB codes]] count."
+    )
+    assert text == "Both Star Trek: Voyager and the GB codes count."
+
+
+def test_behavior_switches_contribute_no_text() -> None:
+    text = wikitext_to_plain_text("__NOTOC__\nBefore after.__INDEX__ Uses __FILE__ here.")
+    assert text == "Before after. Uses __FILE__ here."
+
+
 def test_prose_tags_are_dropped_but_their_text_kept() -> None:
     """A tag name is markup, not a word.
 
