@@ -18,6 +18,8 @@ from flask import Blueprint, abort, g, redirect, render_template, request, url_f
 from flask.typing import ResponseReturnValue
 from sqlalchemy import func
 
+from barsukas.helpers.lemma_urls import resolve_lemma_ref
+
 from storage.models.schema import (
     AudioQualityReview,
     DerivativeForm,
@@ -29,6 +31,7 @@ from storage.models.schema import (
 from storage.translation_helpers import get_supported_languages
 
 bp = Blueprint("trakaido", __name__, url_prefix="/trakaido")
+bp.before_request(resolve_lemma_ref)
 
 
 DEFAULT_INTERFACE_LANG = "en"
@@ -469,7 +472,7 @@ def lemma_search() -> ResponseReturnValue:
     )
 
 
-@bp.route("/lemma/<int:lemma_id>")
+@bp.route("/lemma/<lemma:lemma_id>")
 def lemma_view(lemma_id: int) -> ResponseReturnValue:
     """Trakaido lemma view: details + foreign forms + foreign audio."""
     interface_lang, foreign_lang = _parse_language_params()

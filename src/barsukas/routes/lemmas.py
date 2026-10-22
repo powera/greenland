@@ -18,6 +18,7 @@ from clients.audio.gemini_tts import GeminiTtsVoice
 from clients.audio.google_tts import GoogleTtsVoice
 from clients.audio.polly_tts import PollyVoice
 from barsukas.helpers.elements import group_language_values
+from barsukas.helpers.lemma_urls import resolve_lemma_ref
 from barsukas.helpers.lemma_display import (
     build_lemma_pronunciation_rows,
     get_pronunciation_languages,
@@ -64,6 +65,7 @@ from storage.translation_helpers import (
 )
 
 bp = Blueprint("lemmas", __name__, url_prefix="/lemmas")
+bp.before_request(resolve_lemma_ref)
 
 
 # Synthetic ranks each tier source contributes to the combined frequency rank,
@@ -437,7 +439,7 @@ def _get_lemma_page_context(lemma_id: int) -> Optional[Dict[str, Any]]:
     }
 
 
-@bp.route("/<int:lemma_id>")
+@bp.route("/<lemma:lemma_id>")
 def view_lemma(lemma_id: int) -> ResponseReturnValue:
     """Lemma overview: details, translations, and per-language coverage summary."""
     from barsukas.helpers.lemma_display import build_language_coverage_rows
@@ -475,7 +477,7 @@ def view_lemma(lemma_id: int) -> ResponseReturnValue:
     )
 
 
-@bp.route("/<int:lemma_id>/translations/edit")
+@bp.route("/<lemma:lemma_id>/translations/edit")
 def edit_lemma_translations(lemma_id: int) -> ResponseReturnValue:
     """Edit every translation for a lemma on one page.
 
@@ -496,7 +498,7 @@ def edit_lemma_translations(lemma_id: int) -> ResponseReturnValue:
     )
 
 
-@bp.route("/<int:lemma_id>/forms")
+@bp.route("/<lemma:lemma_id>/forms")
 def view_lemma_forms(lemma_id: int) -> ResponseReturnValue:
     """Grammatical forms, pronunciations, and grammar facts for a lemma."""
     from storage.config.grammar_fact_registry import get_generatable_fact_definitions
@@ -542,7 +544,7 @@ def view_lemma_forms(lemma_id: int) -> ResponseReturnValue:
     )
 
 
-@bp.route("/<int:lemma_id>/audio")
+@bp.route("/<lemma:lemma_id>/audio")
 def view_lemma_audio(lemma_id: int) -> ResponseReturnValue:
     """Audio files and audio generation for a lemma."""
     context = _get_lemma_page_context(lemma_id)
@@ -558,7 +560,7 @@ def view_lemma_audio(lemma_id: int) -> ResponseReturnValue:
     )
 
 
-@bp.route("/<int:lemma_id>/related")
+@bp.route("/<lemma:lemma_id>/related")
 def view_lemma_related(lemma_id: int) -> ResponseReturnValue:
     """Synonyms, alternative forms, related lemmas, and example sentences."""
     context = _get_lemma_page_context(lemma_id)
@@ -573,7 +575,7 @@ def view_lemma_related(lemma_id: int) -> ResponseReturnValue:
     )
 
 
-@bp.route("/<int:lemma_id>/levels")
+@bp.route("/<lemma:lemma_id>/levels")
 def view_lemma_levels(lemma_id: int) -> ResponseReturnValue:
     """Frequency/tier signals and per-language difficulty overrides for a lemma."""
     from storage.lexeme import get_lexeme
@@ -792,7 +794,7 @@ def _render_lemma_edit_form(lemma: Lemma) -> str:
     )
 
 
-@bp.route("/<int:lemma_id>/edit", methods=["GET", "POST"])
+@bp.route("/<lemma:lemma_id>/edit", methods=["GET", "POST"])
 def edit_lemma(lemma_id: int) -> ResponseReturnValue:
     """Edit a lemma."""
     from flask import current_app
@@ -1034,7 +1036,7 @@ def edit_lemma(lemma_id: int) -> ResponseReturnValue:
     return _render_lemma_edit_form(lemma)
 
 
-@bp.route("/<int:lemma_id>/delete-synonym/<int:form_id>", methods=["POST"])
+@bp.route("/<lemma:lemma_id>/delete-synonym/<int:form_id>", methods=["POST"])
 def delete_synonym(lemma_id: int, form_id: int) -> ResponseReturnValue:
     """Delete a single synonym or alternative form."""
     from flask import current_app
@@ -1090,7 +1092,7 @@ def delete_synonym(lemma_id: int, form_id: int) -> ResponseReturnValue:
     return redirect(url_for("lemmas.view_lemma_related", lemma_id=lemma_id))
 
 
-@bp.route("/<int:lemma_id>/delete-all-synonyms", methods=["POST"])
+@bp.route("/<lemma:lemma_id>/delete-all-synonyms", methods=["POST"])
 def delete_all_synonyms(lemma_id: int) -> ResponseReturnValue:
     """Delete all synonyms and/or alternative forms for a lemma."""
     from flask import current_app
@@ -1180,7 +1182,7 @@ def delete_all_synonyms(lemma_id: int) -> ResponseReturnValue:
     return redirect(url_for("lemmas.view_lemma_related", lemma_id=lemma_id))
 
 
-@bp.route("/<int:lemma_id>/add-variant", methods=["POST"])
+@bp.route("/<lemma:lemma_id>/add-variant", methods=["POST"])
 def add_variant(lemma_id: int) -> ResponseReturnValue:
     """Add a spelling variant, expanding it into a paradigm where possible."""
     from flask import current_app
@@ -1228,7 +1230,7 @@ def add_variant(lemma_id: int) -> ResponseReturnValue:
     return redirect(url_for("lemmas.view_lemma_related", lemma_id=lemma_id))
 
 
-@bp.route("/<int:lemma_id>/delete-variant-form/<int:form_id>", methods=["POST"])
+@bp.route("/<lemma:lemma_id>/delete-variant-form/<int:form_id>", methods=["POST"])
 def delete_variant_form(lemma_id: int, form_id: int) -> ResponseReturnValue:
     """Delete a single form of a variant paradigm."""
     from flask import current_app
@@ -1272,7 +1274,7 @@ def delete_variant_form(lemma_id: int, form_id: int) -> ResponseReturnValue:
     return redirect(url_for("lemmas.view_lemma_related", lemma_id=lemma_id))
 
 
-@bp.route("/<int:lemma_id>/delete-variant", methods=["POST"])
+@bp.route("/<lemma:lemma_id>/delete-variant", methods=["POST"])
 def delete_variant_paradigm(lemma_id: int) -> ResponseReturnValue:
     """Delete an entire variant paradigm (all forms of one spelling)."""
     from flask import current_app
