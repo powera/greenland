@@ -1,12 +1,4 @@
-"""Tests for the es-419 pass-through from the word-import path to LemmaTranslation.
-
-``DEFINITIONS_PROMPT_LANGUAGES`` has asked the LLM for Latin American Spanish
-alongside lt/es/fr/zh for a while, but the old ``word_processing.process_word`` built
-its ``TranslationSet`` from only four of the five and dropped the es-419 answer
-on the floor, so a word created through the pending-import approval path got no
-es-419 row. These tests cover the parameter on the two CRUD layers it crosses
-and the mapping to the right language code.
-"""
+"""Tests for es-419 storage and omission in storage.crud.lemma.add_lemma."""
 
 from __future__ import annotations
 
@@ -18,10 +10,8 @@ from sqlalchemy.orm import Session
 
 # Import the full model registry so every table the log touches is created.
 import storage.models  # noqa: F401
-from storage.crud.derivative_form import add_complete_word_entry
 from storage.crud.lemma import add_lemma
 from storage.models.schema import Base, LemmaTranslation
-from storage.models.translations import Translation, TranslationSet
 
 
 @pytest.fixture()
@@ -68,24 +58,3 @@ def test_add_lemma_omits_es419_when_not_given(session: Session) -> None:
     session.flush()
 
     assert "es-419" not in _translations(session, lemma.id)
-
-
-def test_add_complete_word_entry_carries_es419_from_translation_set(session: Session) -> None:
-    """The TranslationSet route must not drop es-419."""
-    form = add_complete_word_entry(
-        session=session,
-        token="computer",
-        lemma_text="computer",
-        definition_text="An electronic device for processing data.",
-        pos_type="noun",
-        grammatical_form="singular",
-        translations=TranslationSet(
-            spanish=Translation(text="ordenador"),
-            spanish_latam=Translation(text="computadora"),
-        ),
-    )
-    session.flush()
-
-    stored = _translations(session, form.lemma_id)
-    assert stored["es-419"] == "computadora"
-    assert stored["es"] == "ordenador"

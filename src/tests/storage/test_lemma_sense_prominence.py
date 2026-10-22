@@ -3,9 +3,9 @@
 ``Lemma.sense_prominence`` weights the split of a shared spelling's corpus
 frequency (see ``wordfreq.lexeme_frequency.get_token_share``). The LLM that
 discovers a word already rates it, but the CRUD layer used to have no way to
-accept that rating, so every lemma created through ``add_complete_word_entry``
-landed on the schema default. These tests cover the parameter, its validation,
-and the default when a caller has no opinion.
+accept that rating, so newly created lemmas landed on the schema default.
+These tests cover the parameter, its validation, and the default when a caller
+has no opinion.
 """
 
 from __future__ import annotations

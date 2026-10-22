@@ -1,7 +1,11 @@
 #!/usr/bin/env python3
 
 """
-Family Relations Generator
+Historical Family Relations Generator (originally added 2026-01-18)
+
+Retained as a historical record, not a current maintenance workflow.
+For current family difficulty overrides, use
+PYTHONPATH=src python src/scripts/apply_family_relation_overrides.py --help.
 
 This module manages family relation lemmas across different languages, handling
 the complexity that family terms vary significantly between languages:
@@ -17,9 +21,9 @@ This generator uses:
 4. Language groupings: reduce duplication for language families (Romance, Germanic, etc.)
 
 Usage:
-    PYTHONPATH=src python src/wordfreq/data/family_relations_generator.py --help
-    PYTHONPATH=src python src/wordfreq/data/family_relations_generator.py --dry-run
-    PYTHONPATH=src python src/wordfreq/data/family_relations_generator.py --apply
+    PYTHONPATH=src python scripts/20260118_family_relations_generator.py --help
+    PYTHONPATH=src python scripts/20260118_family_relations_generator.py --dry-run
+    PYTHONPATH=src python scripts/20260118_family_relations_generator.py --apply
 """
 
 import argparse
@@ -29,8 +33,8 @@ from pathlib import Path
 from typing import Any, Dict, List, Set
 
 # Add parent directory to path for imports
-if str(Path(__file__).parent.parent.parent) not in sys.path:
-    sys.path.insert(0, str(Path(__file__).parent.parent.parent))
+if str(Path(__file__).resolve().parent.parent / "src") not in sys.path:
+    sys.path.insert(0, str(Path(__file__).resolve().parent.parent / "src"))
 
 from wordfreq.data.family_relations_sections import (
     ALL_SECTIONS,
@@ -475,22 +479,22 @@ def main() -> int:
         epilog="""
 Examples:
   # Show what would be created (dry run)
-  PYTHONPATH=src python src/wordfreq/data/family_relations_generator.py --dry-run
+  PYTHONPATH=src python scripts/20260118_family_relations_generator.py --dry-run
 
   # Show detailed output with dry run
-  PYTHONPATH=src python src/wordfreq/data/family_relations_generator.py --dry-run --verbose
+  PYTHONPATH=src python scripts/20260118_family_relations_generator.py --dry-run --verbose
 
   # Show language configuration report
-  PYTHONPATH=src python src/wordfreq/data/family_relations_generator.py --report
+  PYTHONPATH=src python scripts/20260118_family_relations_generator.py --report
 
   # Actually create/update the lemmas
-  PYTHONPATH=src python src/wordfreq/data/family_relations_generator.py --apply
+  PYTHONPATH=src python scripts/20260118_family_relations_generator.py --apply
 
   # Apply with verbose output
-  PYTHONPATH=src python src/wordfreq/data/family_relations_generator.py --apply --verbose
+  PYTHONPATH=src python scripts/20260118_family_relations_generator.py --apply --verbose
 
   # Use custom database path
-  PYTHONPATH=src python src/wordfreq/data/family_relations_generator.py --apply --db-path /path/to/db.sqlite
+  PYTHONPATH=src python scripts/20260118_family_relations_generator.py --apply --db-path /path/to/db.sqlite
         """,
     )
 
