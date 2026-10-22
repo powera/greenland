@@ -22,6 +22,12 @@ What each construct contributes to the text:
   "Picasso", and a bare ``[[Cubism]]`` yields "Cubism".  ``[[File:...]]`` and
   ``[[Image:...]]`` yield nothing -- a caption is written in a different
   register from body prose and is full of photographer credits.
+  Nor do ``[[Category:...]]`` (page metadata, whose piped part is a sort key),
+  links into Wikipedia's own namespaces (``[[Help:...]]``, ``[[WP:...]]``), or
+  interwiki and interlanguage links (``[[wikt:...]]``, ``[[doi:...]]``,
+  ``[[fr:...]]``) -- with or without a leading colon.
+* **Behavior switches** such as ``__NOTOC__`` yield nothing.  ``__INDEX__``
+  would otherwise be counted as "index".
 * **Templates** yield nothing, except the few in :data:`RAW_TEMPLATES` that
   wrap running prose rather than generating apparatus.  An infobox is a data
   table, and counting it would put "caption", "align" and "px" into an English
@@ -60,8 +66,55 @@ from typing import Dict, List, Optional, Sequence, Set, Union
 # mid-sentence and reading around them would leave a hole in the sentence.
 RAW_TEMPLATES = frozenset(["as of", "circa", "lang", "nihongo", "sc"])
 
-# Link namespaces that are media rather than prose.
-_MEDIA_PREFIXES = ("File:", "Image:", "Media:")
+# Link prefixes whose links are not prose, compared lowercased.  Three kinds:
+# media ("File:"), Wikipedia's own namespaces ("Category:", "Help:", "WP:"),
+# and the capitalized spellings of interwiki prefixes ("Wiktionary:").  A
+# "<namespace> talk:" prefix is matched separately.  Article titles can contain
+# a colon too ("Star Trek: Voyager", "ISO 3166-2:GB"), which is why this is a
+# list rather than "anything before a colon".
+_NON_PROSE_PREFIXES = frozenset(
+    [
+        # Media.
+        "file",
+        "image",
+        "media",
+        # Wikipedia namespaces and their shortcuts.
+        "category",
+        "draft",
+        "help",
+        "mediawiki",
+        "module",
+        "mos",
+        "portal",
+        "project",
+        "special",
+        "talk",
+        "template",
+        "timedtext",
+        "user",
+        "wikipedia",
+        "wp",
+        # Interwiki prefixes as they are written capitalized.  Lowercase ones
+        # are caught by _LOWERCASE_PREFIX_RE.
+        "commons",
+        "meta",
+        "species",
+        "wikibooks",
+        "wikidata",
+        "wikinews",
+        "wikiquote",
+        "wikisource",
+        "wikispecies",
+        "wikiversity",
+        "wikivoyage",
+        "wikt",
+        "wiktionary",
+    ]
+)
+
+# An all-lowercase prefix is an interwiki or interlanguage link ("wikt:",
+# "doi:", "fr:", "zh-tw:"): article titles are capitalized.
+_LOWERCASE_PREFIX_RE = re.compile(r"^[a-z][a-z-]*$")
 
 # URL schemes that make a single "[" an external link rather than punctuation,
 # and that mark a bare run of text in prose as a URL.  Wikitext also permits
@@ -328,6 +381,29 @@ class HeadingBlock(ParseBlock):
         return "\n"
 
 
+def _is_non_prose_target(target: str) -> bool:
+    """Whether a ``[[link]]`` with this target contributes no text.
+
+    True for media, for links into Wikipedia's own namespaces, and for
+    interwiki and interlanguage links, with or without the leading colon that
+    makes a link visible.  ``[[Category:Cubism]]`` renders nothing and its
+    piped part is a sort key; read as an ordinary link it put "Category" into
+    every wiki corpus (rank 227 in wiki_math) and counted the sort key's words
+    a second time.  ``[[wikt:run|run]]`` and ``[[doi:10.1000/1]]`` do render,
+    but as pointers out of the article rather than its prose.
+    """
+    stripped = target.strip().lstrip(":").lstrip()
+    if ":" not in stripped:
+        return False
+    prefix = " ".join(stripped.split(":", 1)[0].split())
+    if _LOWERCASE_PREFIX_RE.match(prefix):
+        return True
+    lowered = prefix.lower()
+    if lowered.endswith(" talk"):
+        return True
+    return lowered in _NON_PROSE_PREFIXES
+
+
 class LinkBlock(ParseBlock):
     """A ``[[wikilink]]``, contributing its display text."""
 
@@ -355,8 +431,12 @@ class LinkBlock(ParseBlock):
     def to_text(self) -> str:
         if not self.sub_blocks:
             return ""
-        head = _node_str(self.sub_blocks[0])
-        if head.startswith(_MEDIA_PREFIXES):
+        first_pipe = next(
+            (index for index, child in enumerate(self.sub_blocks) if child == "|"),
+            len(self.sub_blocks),
+        )
+        target = "".join(_node_str(child) for child in self.sub_blocks[:first_pipe])
+        if _is_non_prose_target(target):
             return ""
         # "[[target|display text]]" shows the text after the last pipe;
         # "[[target]]" shows the target itself.
@@ -788,6 +868,16 @@ def _strip_bare_urls(text: str) -> str:
     return _BARE_URL_RE.sub(" ", text)
 
 
+# MediaWiki behavior switches.  An exact list rather than any "__WORD__",
+# because code samples in prose use "__FILE__" and "__LINE__" as text.
+_BEHAVIOR_SWITCH_RE = re.compile(
+    r"__(?:ARCHIVEDTALK|DISAMBIG|EXPECTUNUSEDCATEGORY|EXPECTUNUSEDTEMPLATE|FORCETOC"
+    r"|HIDDENCAT|INDEX|NEWSECTIONLINK|NOCC|NOCONTENTCONVERT|NOEDITSECTION|NOGALLERY"
+    r"|NOGLOBAL|NOINDEX|NONEWSECTIONLINK|NOTALK|NOTC|NOTITLECONVERT|NOTOC"
+    r"|STATICREDIRECT|TOC)__"
+)
+
+
 def _collapse_whitespace(text: str) -> str:
     """Normalize the whitespace left behind by removed constructs."""
     lines = [line.strip() for line in text.splitlines()]
@@ -820,4 +910,5 @@ def wikitext_to_plain_text(wikitext: str, page_name: str = "") -> str:
     """
     if is_redirect(wikitext):
         return ""
+    wikitext = _BEHAVIOR_SWITCH_RE.sub("", wikitext)
     return _collapse_whitespace(_strip_bare_urls(parse(wikitext, page_name).to_text()))
