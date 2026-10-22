@@ -1082,6 +1082,7 @@ def delete_synonym(lemma_id: int, form_id: int) -> ResponseReturnValue:
             old_value=form_text,
             new_value=None,
         )
+        g.db.commit()
         flash(f'Deleted {form_type}: "{form_text}"', "success")
     else:
         flash(f'Failed to delete {form_type}: "{form_text}"', "error")
@@ -1162,6 +1163,7 @@ def delete_all_synonyms(lemma_id: int) -> ResponseReturnValue:
             language_code=language,
             deleted_form_type=None,  # Recalculate all types since bulk delete may affect multiple
         )
+    g.db.commit()
 
     # Create success message
     if deleted_count > 0:

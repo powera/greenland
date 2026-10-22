@@ -909,6 +909,7 @@ def main() -> int:
         failed = 0
         if not dry_run:
             written, failed = apply_inserts(session, outcomes)
+            session.commit()
 
         report(outcomes, dry_run)
 

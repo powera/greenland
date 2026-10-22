@@ -55,6 +55,10 @@ def add_lemma(
 
     A new lemma with a ``pos_subtype`` takes a GUID, so the call must run
     inside ``storage.utils.guid.run_lemma_write``.
+
+    A new lemma gets a ``lemma_create`` operation-log entry (``source``, or
+    "lemma-crud/add") and its English forms: the base form plus whatever the
+    mechanical rules can build.  An existing lemma is returned untouched.
     """
     # Check if lemma already exists with same text, definition, and POS
     existing = (
@@ -107,6 +111,30 @@ def add_lemma(
     session.add(lemma)
     session.flush()
     ensure_english_translation(session, lemma)
+
+    log_source = source or "lemma-crud/add"
+    # The same entry add_word and add_term write, so every new lemma has one.
+    log_translation_change(
+        session=session,
+        source=log_source,
+        operation_type="lemma_create",
+        lemma_id=lemma.id,
+        language_code="en",
+        old_translation=None,
+        new_translation=lemma_text,
+        entity_guid=guid,
+        guid=guid,
+        pos_type=pos_type,
+        pos_subtype=pos_subtype,
+        definition=definition_text,
+        sense_prominence=lemma.sense_prominence,
+    )
+    # Without a DerivativeForm the lemma is invisible to token frequency and
+    # to the word-import duplicate guard.  Imported here: words sits above
+    # storage, and words.lemma_creation imports wordfreq.translation.
+    from words.lemma_creation import attach_english_forms
+
+    attach_english_forms(session, lemma, source=log_source)
 
     # Translations go to the LemmaTranslation table via set_translation. The
     # legacy Lemma.<language>_translation columns are gone -- that table is the

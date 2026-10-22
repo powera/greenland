@@ -42,8 +42,8 @@ logger = logging.getLogger(__name__)
 # here rather than in the service because the service imports this module; both
 # it and TrakaidoExporter.LANGUAGE_CONFIG below read this one list, so the CLI
 # cannot offer a language the exporter then rejects.
-WIREWORD_EXPORT_LANGUAGES = (
-    TIER_1_LANGUAGES + TIER_2_LANGUAGES + ["ja"] + get_translation_target_dialects()
+WIREWORD_EXPORT_LANGUAGES = list(
+    dict.fromkeys(TIER_1_LANGUAGES + TIER_2_LANGUAGES + ["ja"] + get_translation_target_dialects())
 )
 
 
