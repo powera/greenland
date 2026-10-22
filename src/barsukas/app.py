@@ -21,6 +21,7 @@ from typing import Any, Callable, Dict, Optional, cast
 from barsukas.config import Config
 from barsukas.golden_wordfreq_status import is_loading as is_golden_wordfreq_loading
 from barsukas.personas import PersonaConfig
+from barsukas.helpers.lemma_urls import register_lemma_url_converter
 from barsukas.helpers.strings import (
     SUPPORTED_UI_LANGS,
     create_cstr_accessor,
@@ -364,7 +365,9 @@ def create_app(
         if "probe_session" in locals():
             probe_session.close()
 
-    # Register blueprints
+    # Register blueprints.  The <lemma:...> converter must exist before any
+    # blueprint that uses it adds its rules.
+    register_lemma_url_converter(app)
     app.register_blueprint(lemmas.bp)
     app.register_blueprint(sentences.bp)
     app.register_blueprint(sentence_rapid_review.bp)
