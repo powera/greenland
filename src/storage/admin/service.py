@@ -27,8 +27,6 @@ from storage.models.schema import (  # Ensure Corpus model is imported
     WordToken,
 )
 from storage.token_forms import TOKEN_FORM_SOURCES
-from storage.translation_helpers import has_translation_clause
-import storage.admin.legacy_json_import as legacy_json_import
 
 # Configure logging
 logging.basicConfig(
@@ -600,117 +598,6 @@ class DatabaseAdminService:
                 result = {"dry_run": False, "success": False, "error": str(e)}
             finally:
                 session.close()
-
-        return result
-
-    def bootstrap_from_json(
-        self, json_path: str, update_difficulty: bool = True, dry_run: bool = False
-    ) -> Dict[str, Any]:
-        """
-        Bootstrap the database with trakaido data from JSON export.
-
-        This operation is intended for initial database setup only. If words with Lithuanian
-        translations already exist in the database, the operation will be aborted to prevent
-        accidental modifications to existing data.
-
-        Args:
-            json_path: Path to JSON file containing trakaido data
-            update_difficulty: Whether to update difficulty level on existing lemmas (default: True)
-            dry_run: If True, report what would be done without making changes
-
-        Returns:
-            Dictionary with bootstrap results
-        """
-        logger.info(f"Bootstrap from JSON (dry_run={dry_run})...")
-        start_time = datetime.now()
-
-        # Step 1: Check if database already has Lithuanian translations
-        session = self.get_session()
-        try:
-            from storage.models.schema import Lemma
-
-            # Count lemmas with Lithuanian translations
-            existing_lithuanian_count = (
-                session.query(Lemma).filter(has_translation_clause("lt")).count()
-            )
-
-            if existing_lithuanian_count > 0:
-                logger.warning(
-                    f"Database already contains {existing_lithuanian_count} lemmas with Lithuanian translations"
-                )
-                logger.warning(
-                    "Bootstrap operation aborted to prevent accidental data modification"
-                )
-                return {
-                    "success": False,
-                    "aborted": True,
-                    "reason": "database_already_populated",
-                    "existing_lithuanian_count": existing_lithuanian_count,
-                    "message": f"Database already contains {existing_lithuanian_count} lemmas with Lithuanian translations. Bootstrap is only for initial setup.",
-                }
-
-            logger.info("No existing Lithuanian translations found - proceeding with bootstrap")
-
-        finally:
-            session.close()
-
-        # Step 2: Load and validate JSON data
-        try:
-            logger.info(f"Loading trakaido data from: {json_path}")
-            trakaido_data = legacy_json_import.load_trakaido_json(json_path)
-
-            result = {
-                "dry_run": dry_run,
-                "json_path": json_path,
-                "json_entries_loaded": len(trakaido_data),
-                "timestamp": start_time.isoformat(),
-            }
-        except Exception as e:
-            logger.error(f"Failed to load JSON data: {e}")
-            return {
-                "success": False,
-                "error": str(e),
-                "message": f"Failed to load JSON data from {json_path}",
-            }
-
-        if dry_run:
-            # For dry run, just report what would happen
-            result["would_migrate"] = len(trakaido_data)
-            result["update_difficulty"] = update_difficulty
-            result["message"] = f"Would migrate {len(trakaido_data)} entries from JSON"
-        else:
-            # Actually perform the migration
-            session = self.get_session()
-            try:
-                logger.info(f"Migrating {len(trakaido_data)} entries to database...")
-                successful, total = legacy_json_import.migrate_json_data(
-                    session=session,
-                    trakaido_data=trakaido_data,
-                    update_difficulty=update_difficulty,
-                    verbose=False,  # Use logging instead of print statements
-                )
-
-                # Commit the changes
-                session.commit()
-
-                result["successful_migrations"] = successful
-                result["total_entries"] = total
-                result["failed_migrations"] = total - successful
-                result["success"] = successful > 0
-
-                logger.info(f"Bootstrap complete: {successful}/{total} entries migrated")
-
-            except Exception as e:
-                logger.error(f"Bootstrap failed: {e}")
-                session.rollback()
-                result["success"] = False
-                result["error"] = str(e)
-            finally:
-                session.close()
-
-        end_time = datetime.now()
-        duration = (end_time - start_time).total_seconds()
-        result["duration_seconds"] = duration
 
         return result
 

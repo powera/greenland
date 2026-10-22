@@ -22,3 +22,7 @@ helpers. (Database maintenance scripts live in `src/scripts/` instead.)
 - `check_langtools_required_functions.py` — pre-commit check that required
   langtools functions exist per language
 - `migrate_synonym_uniqueness.py` — report cross-lemma synonym duplicates
+
+- `20260118_family_relations_generator.py` — historical family-lemma seed and
+  exclusion generator, dated by its original introduction. Retained for reference;
+  current family difficulty overrides use `src/scripts/apply_family_relation_overrides.py`.

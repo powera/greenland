@@ -45,7 +45,6 @@ logger = logging.getLogger(__name__)
 
 from storage.crud.derivative_form import (
     add_alternative_form,
-    add_complete_word_entry,
     add_derivative_form,
     add_noun_derivative_form,
     delete_derivative_form,
@@ -270,7 +269,6 @@ __all__ = [
     "get_grammatical_forms_for_token",
     "add_alternative_form",
     "get_alternative_forms_for_lemma",
-    "add_complete_word_entry",
     # Variant form CRUD (alternate spellings)
     "add_variant_form",
     "delete_variant",
