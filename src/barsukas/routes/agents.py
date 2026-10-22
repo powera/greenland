@@ -762,6 +762,7 @@ def add_grammar_fact_manual(lemma_id: int) -> ResponseReturnValue:
             verified=False,
         )
         if result:
+            g.db.commit()
             flash(f"Added grammar fact {language_code}:{fact_type}", "success")
         else:
             flash("Could not add grammar fact", "error")

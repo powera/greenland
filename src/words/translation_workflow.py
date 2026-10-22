@@ -41,17 +41,21 @@ from words.translation_populate import (
     uncertain_translation_languages,
 )
 from storage.translation_helpers import (
+    ANCIENT_LANGUAGE_GROUP,
     LANG_CODE_TO_LLM_FIELD,
     LANGUAGE_FIELDS,
     convert_llm_response_to_lang_codes,
     convert_llm_response_to_confidences,
     convert_llm_response_to_translation_metadata,
     get_language_name,
-    get_default_generation_languages,
     get_reference_translation,
     normalize_llm_language_codes,
     split_llm_language_batches,
+    TIER_1_LANGUAGES,
+    TIER_2_LANGUAGES,
+    TIER_3_LANGUAGES,
 )
+from wordfreq.translation.constants import AVAILABLE_TRANSLATION_LANGUAGES_BY_CODE
 from storage.translation_helpers import get_translation
 from storage.translation_helpers import get_translation as get_translation_helper
 from storage.translation_helpers import set_translation as set_translation_helper
@@ -108,19 +112,53 @@ def count_curated_lemmas(session: Any, limit: Optional[int] = None) -> int:
     return cast(int, query.count())
 
 
+# What a Voras run translates into when --languages is not given.
+DEFAULT_POPULATE_LANGUAGES: List[str] = TIER_1_LANGUAGES + TIER_2_LANGUAGES
+
+# Group names --languages accepts besides "all", each expanding to its members.
+# Tier 4 is meant to gain regional groups (european, asian, indian, african,
+# native-american) in time; until then its other languages are named singly.
+POPULATE_LANGUAGE_GROUPS: Dict[str, List[str]] = {
+    "ancient": list(ANCIENT_LANGUAGE_GROUP),
+}
+
+
+def all_populate_languages() -> List[str]:
+    """What ``--languages all`` means: every tier 1-3 language.
+
+    Tier 4 is left out; it is asked for by group ("ancient") or by code.  The
+    default set comes first, so an "all" run fills the served languages
+    before the experimental ones.
+    """
+    return list(
+        dict.fromkeys(
+            code
+            for code in DEFAULT_POPULATE_LANGUAGES + TIER_3_LANGUAGES
+            if code in AVAILABLE_TRANSLATION_LANGUAGES_BY_CODE
+        )
+    )
+
+
 def resolve_generation_languages(languages: Optional[Sequence[str]]) -> List[str]:
-    """Normalize requested language codes, expanding "all" and empty input.
+    """Normalize requested language codes, expanding "all", groups and empty input.
+
+    No request means :data:`DEFAULT_POPULATE_LANGUAGES` (tiers 1 and 2); "all"
+    means :func:`all_populate_languages` (tiers 1-3); a name in
+    :data:`POPULATE_LANGUAGE_GROUPS` ("ancient") means that group's members.
+    A run over the long tail should say so rather than happen by default.
 
     Uncapped: generation splits the selection into per-request batches with
     ``split_llm_language_batches``, so the whole requested set must survive
     here.  Capping at one request's worth would silently drop the tail of the
     default set (the dialects and the experimental languages sit at its end).
     """
-    default_languages = get_default_generation_languages()
+    requested: List[str] = []
+    for code in languages or DEFAULT_POPULATE_LANGUAGES:
+        requested.extend(POPULATE_LANGUAGE_GROUPS.get(code.lower(), [code]))
     return normalize_llm_language_codes(
-        list(languages) if languages else default_languages,
+        requested,
         operation_name="Voras translation generation",
-        all_expansion=default_languages,
+        all_expansion=all_populate_languages(),
         max_languages=None,
     )
 
@@ -361,20 +399,30 @@ class TranslationWorkflow:
                 else ("en", lemma.lemma_text)
             )
 
-            llm_response, success = client.query_translations(
-                english_word=lemma.lemma_text,
-                reference_translation=reference,
-                definition=lemma.definition_text,
-                pos_type=lemma.pos_type,
-                pos_subtype=lemma.pos_subtype,
-                languages=list(missing_languages),
-            )
+            # One request per batch: the prompt builder truncates anything past
+            # one request's worth, and ancient languages must go on their own.
+            llm_response: Dict[str, Any] = {}
+            for language_batch in split_llm_language_batches(list(missing_languages)):
+                batch_response, success = client.query_translations(
+                    english_word=lemma.lemma_text,
+                    reference_translation=reference,
+                    definition=lemma.definition_text,
+                    pos_type=lemma.pos_type,
+                    pos_subtype=lemma.pos_subtype,
+                    languages=language_batch,
+                )
+                if success and batch_response:
+                    llm_response.update(batch_response)
+                else:
+                    logger.error(
+                        "Translation batch %s failed for '%s'", language_batch, lemma.lemma_text
+                    )
         except Exception as e:
             session.rollback()
             logger.error("Error generating translations for '%s': %s", lemma.lemma_text, e)
             return LemmaTranslations(error=f"Error generating translations: {e}")
 
-        if not success or not llm_response:
+        if not llm_response:
             return LemmaTranslations(error="Failed to generate translations")
 
         return LemmaTranslations(
@@ -870,7 +918,8 @@ class TranslationWorkflow:
 
         Args:
             language_code: Specific language(s) to fix. Can be a single code (str),
-                          a list of codes, or None (all languages)
+                          a list of codes ("all" for every generation language),
+                          or None (DEFAULT_POPULATE_LANGUAGES)
             limit: Maximum number of words to process
             dry_run: If True, only report what would be fixed without making changes
             lemmas: Optional pre-filtered list of lemmas to process (if None, queries all curated)
@@ -885,19 +934,10 @@ class TranslationWorkflow:
         session = self.get_session()
         client = self.get_linguistic_client()
 
-        # Handle language_code as string, list, or None
-        if language_code is None:
-            languages_to_fix = get_default_generation_languages()
-        elif isinstance(language_code, str):
-            languages_to_fix = [language_code]
-        else:
-            languages_to_fix = language_code
-
-        languages_to_fix = normalize_llm_language_codes(
-            languages_to_fix,
-            operation_name="Voras translation generation",
-            all_expansion=get_default_generation_languages(),
-            max_languages=None,  # batched below by split_llm_language_batches
+        # Handle language_code as string, list, or None; batched below by
+        # split_llm_language_batches.
+        languages_to_fix = resolve_generation_languages(
+            [language_code] if isinstance(language_code, str) else language_code
         )
 
         # Initialize results structure

@@ -58,7 +58,7 @@ from storage.backend.config import BackendType, DataSourceConfig
 from storage.crud.grammar_fact import add_grammar_fact, get_grammar_fact_value
 from storage.crud.operation_log import log_operation
 from storage.crud.word_token import add_word_token
-from storage.models.schema import DerivativeForm, Lemma
+from storage.models.schema import DerivativeForm, Lemma, WordToken
 from storage.models.variant_form import VariantForm
 
 __all__ = [
@@ -286,6 +286,25 @@ def generate(
         session.close()
 
 
+def _get_or_add_word_token(session: Session, token: str, language_code: str) -> WordToken:
+    """Find or create a word token without committing.
+
+    storage.crud.word_token.add_word_token commits, which generate_lemma_forms
+    must not do inside a caller's transaction.
+    """
+    existing = (
+        session.query(WordToken)
+        .filter(WordToken.token == token, WordToken.language_code == language_code)
+        .first()
+    )
+    if existing is not None:
+        return existing
+    word_token = WordToken(token=token, language_code=language_code)
+    session.add(word_token)
+    session.flush()
+    return word_token
+
+
 def generate_lemma_forms(
     session: Session, lemma: Lemma, language_code: str = "en", dry_run: bool = False
 ) -> Dict[str, int]:
@@ -349,7 +368,7 @@ def generate_lemma_forms(
             continue
 
         if not dry_run:
-            token = add_word_token(session, form_text, language_code)
+            token = _get_or_add_word_token(session, form_text, language_code)
             session.add(
                 DerivativeForm(
                     lemma_id=lemma.id,

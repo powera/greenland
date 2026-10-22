@@ -3,7 +3,6 @@
 import logging
 from typing import Dict, List, Optional
 
-from sqlalchemy.exc import IntegrityError
 from sqlalchemy.orm import Session
 
 from storage.config.grammar_fact_registry import VERB_FORM_OVERRIDE_PREFIX
@@ -47,9 +46,14 @@ def add_grammar_fact(
             storage.crud.uncertain_llm_result.confidence_gated.  An answer
             below min_confidence is recorded as uncertain, not added.
 
+    Flushes but does not commit: the caller owns the transaction.  A fact
+    already present for (lemma, language, fact_type) is left as it is and None
+    returned, without touching the caller's other pending writes -- this used
+    to commit, and to roll the whole session back on a duplicate.
+
     Returns:
-        The created GrammarFact, or None if creation failed or the answer
-        was not confident enough
+        The created GrammarFact, or None if the fact already exists or the
+        answer was not confident enough
 
     Examples:
         # Mark "scissors" as plurale tantum in English
@@ -64,29 +68,38 @@ def add_grammar_fact(
         add_grammar_fact(session, lemma_id=789, language_code="lt",
                         fact_type="declension_class", fact_value="1")
     """
-    try:
-        grammar_fact = GrammarFact(
-            lemma_id=lemma_id,
-            language_code=language_code,
-            fact_type=fact_type,
-            fact_value=fact_value,
-            notes=notes,
-            verified=verified,
+    # Checked up front rather than by catching IntegrityError: recovering from
+    # that needs a rollback, which would discard the caller's pending writes
+    # (SAVEPOINTs are unreliable under pysqlite).
+    existing = (
+        session.query(GrammarFact.id)
+        .filter(
+            GrammarFact.lemma_id == lemma_id,
+            GrammarFact.language_code == language_code,
+            GrammarFact.fact_type == fact_type,
         )
-        session.add(grammar_fact)
-        session.commit()
-        logger.info(
-            f"Added grammar fact: lemma_id={lemma_id}, {fact_type}={fact_value} ({language_code})"
+        .first()
+    )
+    if existing is not None:
+        logger.debug(
+            f"Grammar fact already exists: lemma_id={lemma_id}, {fact_type} ({language_code})"
         )
-        return grammar_fact
-    except IntegrityError as e:
-        session.rollback()
-        logger.warning(f"Grammar fact already exists or constraint violated: {e}")
         return None
-    except Exception as e:
-        session.rollback()
-        logger.error(f"Error adding grammar fact: {e}")
-        return None
+
+    grammar_fact = GrammarFact(
+        lemma_id=lemma_id,
+        language_code=language_code,
+        fact_type=fact_type,
+        fact_value=fact_value,
+        notes=notes,
+        verified=verified,
+    )
+    session.add(grammar_fact)
+    session.flush()
+    logger.info(
+        f"Added grammar fact: lemma_id={lemma_id}, {fact_type}={fact_value} ({language_code})"
+    )
+    return grammar_fact
 
 
 def get_grammar_facts(
@@ -201,6 +214,8 @@ def delete_grammar_fact(
         language_code: Language code
         fact_type: Type of fact to delete
 
+    Flushes but does not commit: the caller owns the transaction.
+
     Returns:
         True if a fact was deleted, False if not found
     """
@@ -216,7 +231,7 @@ def delete_grammar_fact(
 
     if fact:
         session.delete(fact)
-        session.commit()
+        session.flush()
         logger.info(f"Deleted grammar fact: lemma_id={lemma_id}, {fact_type} ({language_code})")
         return True
 

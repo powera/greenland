@@ -10,6 +10,8 @@ from sqlalchemy.orm import Session
 from storage.models.schema import BarsukasTask, Base, Lemma
 from storage.translation_helpers import MAX_LLM_LANGUAGES_PER_OPERATION
 from words.translation_workflow import (
+    DEFAULT_POPULATE_LANGUAGES,
+    all_populate_languages,
     count_curated_lemmas,
     enqueue_translation_population,
     enqueue_translation_regeneration,
@@ -123,32 +125,52 @@ def test_dry_run_queues_nothing(session: Session) -> None:
     assert session.query(BarsukasTask).count() == 0
 
 
-def test_empty_language_request_falls_back_to_the_generation_defaults() -> None:
-    from storage.translation_helpers import get_default_generation_languages
+def test_empty_language_request_falls_back_to_tiers_one_and_two() -> None:
+    from storage.translation_helpers import TIER_1_LANGUAGES, TIER_2_LANGUAGES
 
-    defaults = resolve_generation_languages(get_default_generation_languages())
+    defaults = TIER_1_LANGUAGES + TIER_2_LANGUAGES
 
+    assert "es-419" in defaults
+    assert len(defaults) == 10
     assert resolve_generation_languages(None) == defaults
     assert resolve_generation_languages([]) == defaults
-    assert resolve_generation_languages(["all"]) == defaults
     assert resolve_generation_languages(["fr"]) == ["fr"]
 
 
-def test_the_whole_default_set_survives_resolution() -> None:
+def test_all_expands_to_tiers_one_to_three() -> None:
     """Generation batches its own requests, so nothing may be dropped here.
 
-    The per-call LLM limit used to truncate the default set, silently dropping
-    everything past the tenth entry -- which is exactly where the dialects and
-    the experimental languages sit.
+    The per-call LLM limit used to truncate the requested set, silently
+    dropping everything past the tenth entry -- which is exactly where the
+    dialects and the experimental languages sit.
     """
-    from storage.translation_helpers import get_default_generation_languages
+    from storage.translation_helpers import (
+        TIER_1_LANGUAGES,
+        TIER_2_LANGUAGES,
+        TIER_3_LANGUAGES,
+        TIER_4_LANGUAGES,
+    )
 
-    defaults = get_default_generation_languages()
+    expanded = resolve_generation_languages(["all"])
 
-    assert len(defaults) > MAX_LLM_LANGUAGES_PER_OPERATION
-    assert resolve_generation_languages(None) == defaults
-    for language_code in ("zh-tw", "es-419", "pt-br"):
-        assert language_code in resolve_generation_languages(None)
+    assert expanded == all_populate_languages()
+    assert expanded == TIER_1_LANGUAGES + TIER_2_LANGUAGES + TIER_3_LANGUAGES
+    assert len(expanded) > MAX_LLM_LANGUAGES_PER_OPERATION
+    for code in ("zh-tw", "es-419", "pt-br", "vi"):
+        assert code in expanded
+    assert not set(expanded) & set(TIER_4_LANGUAGES)
+    # The served default languages are asked for first.
+    assert expanded[:10] == DEFAULT_POPULATE_LANGUAGES
+
+
+def test_ancient_expands_to_the_five_ancient_languages() -> None:
+    from storage.translation_helpers import ANCIENT_LANGUAGE_GROUP
+
+    assert resolve_generation_languages(["ancient"]) == ANCIENT_LANGUAGE_GROUP
+    assert resolve_generation_languages(["fr", "ancient"]) == ["fr"] + ANCIENT_LANGUAGE_GROUP
+    assert resolve_generation_languages(["all", "ancient"]) == (
+        all_populate_languages() + ANCIENT_LANGUAGE_GROUP
+    )
 
 
 def test_dialect_codes_are_accepted_however_they_are_spelled() -> None:

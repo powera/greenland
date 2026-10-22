@@ -126,6 +126,7 @@ def _handle_single_lemma_populate(
         True if successful, False otherwise
     """
     from agents.voras import cli_display
+    from words.translation_workflow import resolve_generation_languages
     from words.translation_populate import (
         excluded_translation_languages,
         uncertain_translation_languages,
@@ -134,6 +135,10 @@ def _handle_single_lemma_populate(
     translations = agent.collect_translations(session, lemma)
     cli_display.display_lemma_translations(lemma, translations)
     missing_langs = [lang_code for lang_code, value in translations.items() if not value]
+    # Same selection as --level runs: --languages, else tiers 1 and 2 plus
+    # es-419 ("all" for every tier 1-4 language and the storage dialects).
+    requested = set(resolve_generation_languages(args.languages))
+    missing_langs = [code for code in missing_langs if code in requested]
     excluded = excluded_translation_languages(session, lemma, missing_langs)
     if excluded:
         print(f"\nSkipping {', '.join(excluded)}: excluded for this lemma (a -1 level override)")
