@@ -60,7 +60,9 @@ def add_lemma_fact(
     fact.fact_value = fact_value
     fact.notes = notes
     fact.verified = verified
-    session.commit()
+    # Flushed, not committed: the caller owns the transaction, as with
+    # add_grammar_fact and the confidence_gated record.
+    session.flush()
     return fact
 
 
@@ -99,7 +101,7 @@ def delete_lemma_fact(session: Session, lemma_id: int, fact_type: str) -> bool:
     if fact is None:
         return False
     session.delete(fact)
-    session.commit()
+    session.flush()
     return True
 
 

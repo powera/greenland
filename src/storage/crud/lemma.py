@@ -190,7 +190,7 @@ def update_lemma(
     notes: Optional[str] = None,
     source: Optional[str] = None,
 ) -> bool:
-    """Update lemma information.
+    """Update lemma information.  Flushes but does not commit; the caller does.
 
     Args:
         session: Database session
@@ -283,7 +283,7 @@ def update_lemma(
         lemma_id=lemma.id,
     )
 
-    session.commit()
+    session.flush()
     return True
 
 

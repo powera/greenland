@@ -795,6 +795,7 @@ def add_lemma_fact_manual(lemma_id: int) -> ResponseReturnValue:
 
     result = add_lemma_fact(g.db, lemma_id, fact_type, fact_value, notes=notes, verified=True)
     if result:
+        g.db.commit()
         flash(f"Saved lemma fact {fact_type}={fact_value}", "success")
     else:
         flash(f"Invalid value for {fact_type}: {fact_value!r}", "error")
@@ -808,6 +809,7 @@ def delete_lemma_fact_manual(lemma_id: int) -> ResponseReturnValue:
 
     fact_type = (request.form.get("fact_type") or "").strip()
     if delete_lemma_fact(g.db, lemma_id, fact_type):
+        g.db.commit()
         flash(f"Removed lemma fact {fact_type}", "success")
     else:
         flash(f"No lemma fact {fact_type!r} to remove", "warning")

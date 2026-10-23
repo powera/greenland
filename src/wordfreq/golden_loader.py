@@ -86,11 +86,11 @@ def _generate_mechanical_forms(storage: "JSONLStorage") -> dict[str, Any]:
     for ``link_forms_to_word_tokens`` to attach tokens to -- the same order
     ``storage.admin.bootstrap`` uses after a release import.
 
-    ``expire_on_commit=False`` is what makes this bearable here.
-    ``add_word_token`` commits once per new token, and a committing session
-    expires every object it holds; against an in-memory database whose
-    identity map is the whole dictionary that is quadratic, and the pass takes
-    minutes instead of the tens of seconds it takes with expiry off.
+    ``expire_on_commit=False`` keeps the identity map warm across the pass's
+    commit.  It once mattered far more: ``add_word_token`` used to commit once
+    per new token, and a committing session expires every object it holds,
+    which against an in-memory database whose identity map is the whole
+    dictionary made the pass quadratic.
     """
     session = _make_session_for_storage(storage, expire_on_commit=False)
     try:
