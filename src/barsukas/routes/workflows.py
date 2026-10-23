@@ -35,6 +35,7 @@ from flask import (
     request,
     url_for,
 )
+from barsukas.helpers.lemma_urls import resolve_lemma_ref
 from flask.typing import ResponseReturnValue
 from sqlalchemy import func
 
@@ -47,6 +48,7 @@ from sentences.import_workflow import (
     last_import_task,
     next_incomplete_stage,
 )
+from storage.crud.lemma import get_lemma_by_guid
 from storage.models.grammar_fact import GrammarFact
 from storage.translation_helpers import get_language_name
 from storage.models.schema import (
@@ -66,6 +68,7 @@ from words.pending_imports.sentence_links import (
 from workqueue.task_queue import TaskType, enqueue_task
 
 bp = Blueprint("workflows", __name__, url_prefix="/workflows")
+bp.before_request(resolve_lemma_ref)
 logger = logging.getLogger(__name__)
 
 # Languages a lemma is expected to reach before it counts as translated. Kept
@@ -266,9 +269,21 @@ def _lemma_steps(session: Any, lemma: Lemma) -> List[WorkflowStep]:
 
 
 @bp.route("/lemma")
-def lemma_workflow() -> ResponseReturnValue:
+@bp.route("/lemma/<lemma:lemma_id>")
+def lemma_workflow(lemma_id: Optional[int] = None) -> ResponseReturnValue:
     """Per-lemma workflow. Shows one lemma's stages, or a search prompt."""
-    lemma_id = request.args.get("lemma_id", type=int)
+    legacy_ref = request.args.get("lemma_id")
+    if lemma_id is None and legacy_ref:
+        legacy_lemma = (
+            g.db.get(Lemma, int(legacy_ref))
+            if legacy_ref.isdigit()
+            else get_lemma_by_guid(g.db, legacy_ref)
+        )
+        if legacy_lemma is not None:
+            url_values: Dict[str, Any] = request.args.to_dict()
+            url_values["lemma_id"] = legacy_lemma.id
+            return redirect(url_for("workflows.lemma_workflow", **url_values))
+        flash(f"Lemma {legacy_ref} not found", "error")
     query_text = (request.args.get("q") or "").strip()
 
     lemma: Optional[Lemma] = None
@@ -302,7 +317,7 @@ def lemma_workflow() -> ResponseReturnValue:
     )
 
 
-@bp.route("/lemma/<int:lemma_id>/run/<task_type>", methods=["POST"])
+@bp.route("/lemma/<lemma:lemma_id>/run/<task_type>", methods=["POST"])
 def run_lemma_task(lemma_id: int, task_type: str) -> ResponseReturnValue:
     """Queue one pipeline task for one lemma."""
     if current_app.config.get("READONLY", False):

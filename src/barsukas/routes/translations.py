@@ -5,6 +5,7 @@
 from typing import Union
 
 from barsukas.config import Config
+from barsukas.helpers.lemma_urls import resolve_lemma_ref
 from flask import Blueprint, flash, g, jsonify, redirect, request, url_for
 from werkzeug.wrappers import Response
 
@@ -18,9 +19,10 @@ from storage.translation_helpers import (
 )
 
 bp = Blueprint("translations", __name__, url_prefix="/translations")
+bp.before_request(resolve_lemma_ref)
 
 
-@bp.route("/<int:lemma_id>/<lang_code>", methods=["POST"])
+@bp.route("/<lemma:lemma_id>/<lang_code>", methods=["POST"])
 def update_translation(lemma_id: int, lang_code: str) -> Response:
     """Update a translation for a lemma."""
     from flask import current_app
@@ -100,7 +102,7 @@ def update_translation(lemma_id: int, lang_code: str) -> Response:
         return redirect(url_for("lemmas.view_lemma", lemma_id=lemma_id))
 
 
-@bp.route("/<int:lemma_id>/<lang_code>/check", methods=["GET"])
+@bp.route("/<lemma:lemma_id>/<lang_code>/check", methods=["GET"])
 def check_translation(lemma_id: int, lang_code: str) -> Response:
     """Check if a translation has a slash (for AJAX validation)."""
     translation = request.args.get("translation", "")

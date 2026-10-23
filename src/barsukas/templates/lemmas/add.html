@@ -210,14 +210,14 @@ function checkWordExists() {
                     <div class="alert alert-warning py-2">
                         <i class="bi bi-exclamation-triangle"></i>
                         <strong>Exact match found:</strong>
-                        <a href="{{ url_for('lemmas.view_lemma', lemma_id=0) }}".replace('0', data.exact_match.id) target="_blank">
+                        <a href="${data.exact_match.url}" target="_blank">
                             ${data.exact_match.lemma_text} (${data.exact_match.pos_type})
                         </a>
                     </div>
                 `;
             } else if (data.similar_matches && data.similar_matches.length > 0) {
                 const matches = data.similar_matches.slice(0, 3).map(m =>
-                    `<a href="{{ url_for('lemmas.view_lemma', lemma_id=0) }}".replace('0', m.id) target="_blank">${m.lemma_text} (${m.pos_type})</a>`
+                    `<a href="${m.url}" target="_blank">${m.lemma_text} (${m.pos_type})</a>`
                 ).join(', ');
                 resultDiv.innerHTML = `
                     <div class="alert alert-info py-2">
