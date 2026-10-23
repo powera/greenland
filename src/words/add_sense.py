@@ -76,7 +76,7 @@ from words.add_word import (
 )
 from words.lemma_creation import (
     TRANSLATION_LANGUAGES,
-    attach_english_base_form,
+    attach_english_forms,
     store_sense_examples,
     store_sense_translations,
 )
@@ -621,7 +621,7 @@ def add_sense(
                 min_confidence=TRANSLATION_CONFIDENCE_FLOOR,
             )
             store_sense_examples(session, new_lemma, sense, source=source)
-            attach_english_base_form(session, new_lemma, sense, source=source)
+            attach_english_forms(session, new_lemma, source=source, sense=sense)
             _add_abbreviation(session, new_lemma, abbreviation, source=source)
             if requested_tags:
                 add_tags(session, new_lemma, requested_tags, source=source)

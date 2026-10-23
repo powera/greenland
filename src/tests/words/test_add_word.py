@@ -636,11 +636,14 @@ def test_add_word_creates_lemma(
         "fr": "chien",
         "zh": "狗",
     }
-    assert len(lemma.derivative_forms) == 1
-    assert lemma.derivative_forms[0].derivative_form_text == "dog"
-    assert lemma.derivative_forms[0].grammatical_form == "noun/en_singular"
-    assert lemma.derivative_forms[0].is_base_form is True
-    assert lemma.derivative_forms[0].word_token_id is not None
+    # The base form plus the rule-derived forms, as add_term attaches.
+    base_forms = [form for form in lemma.derivative_forms if form.is_base_form]
+    assert len(base_forms) == 1
+    assert base_forms[0].derivative_form_text == "dog"
+    assert base_forms[0].grammatical_form == "noun/en_singular"
+    assert base_forms[0].word_token_id is not None
+    assert "dogs" in {form.derivative_form_text for form in lemma.derivative_forms}
+    assert all(form.word_token_id is not None for form in lemma.derivative_forms)
 
 
 def test_add_word_skips_existing_lemma(

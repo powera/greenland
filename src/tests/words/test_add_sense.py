@@ -282,14 +282,18 @@ class TestCreation:
         assert rated.type == "object"
         assert set(rated.properties or {}) == {"translation", "confidence"}
 
-    def test_base_form_is_attached(self, session: Session, config: DataSourceConfig) -> None:
+    def test_mechanical_forms_are_attached(
+        self, session: Session, config: DataSourceConfig
+    ) -> None:
+        """The base form and the rule-derived forms, as add_term attaches."""
         result = _add(session, config, _FakeClient(_chess_check()))
 
         lemma = session.query(Lemma).filter(Lemma.guid == result.guid).one()
         forms = session.query(DerivativeForm).filter(DerivativeForm.lemma_id == lemma.id).all()
-        assert [(form.derivative_form_text, form.is_base_form) for form in forms] == [
-            ("check", True)
-        ]
+        by_text = {form.derivative_form_text: form.is_base_form for form in forms}
+        assert by_text["check"] is True
+        assert by_text["checks"] is False
+        assert [text for text, is_base in by_text.items() if is_base] == ["check"]
 
     def test_prompt_carries_domain_hint_and_existing_senses(
         self, session: Session, config: DataSourceConfig

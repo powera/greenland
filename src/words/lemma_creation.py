@@ -344,7 +344,10 @@ def create_sense_lemma(
     # sense; keep them rather than paying for them and dropping them.
     store_sense_examples(session, lemma, sense, source=source)
 
-    attach_english_base_form(session, lemma, sense, source=source)
+    # The full mechanical forms, as add_term and the manual adds attach, so a
+    # lemma from add_word or a pending-import approval does not wait for the
+    # next forms pass.
+    attach_english_forms(session, lemma, source=source, sense=sense)
 
     # Record the corpus rank on the lemma itself, not only in the operation
     # log. This runs after the derivative form is attached because the rank
