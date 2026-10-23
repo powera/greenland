@@ -71,6 +71,7 @@ def test_a_failed_batch_keeps_the_others(monkeypatch: pytest.MonkeyPatch) -> Non
 
     assert sorted(result.translations) == ["ja", "vi"]
     assert result.error is None
+    assert result.failed_languages == ["la"]
 
 
 def test_every_batch_failing_is_an_error(monkeypatch: pytest.MonkeyPatch) -> None:
@@ -80,3 +81,48 @@ def test_every_batch_failing_is_an_error(monkeypatch: pytest.MonkeyPatch) -> Non
 
     assert result.translations == {}
     assert result.error == "Failed to generate translations"
+
+
+class _AncientStatusClient(_FakeClient):
+    """Answers Latin in the object shape the ancient-group schema asks for."""
+
+    def query_translations(self, **kwargs: Any) -> Tuple[Dict[str, Any], bool]:
+        self.calls.append(kwargs["languages"])
+        return {
+            LANG_CODE_TO_LLM_FIELD["la"]: {
+                "translation": "aeroplanum",
+                "confidence": 0.95,
+                "translation_status": "late_construction",
+                "translation_status_note": "Neo-Latin coinage",
+            }
+        }, True
+
+
+def test_ancient_status_is_saved(monkeypatch: pytest.MonkeyPatch) -> None:
+    """--guid runs store translation_status the way --level runs do."""
+    workflow = _workflow(monkeypatch, _AncientStatusClient())
+    generated = workflow.generate_translations_for_lemma(None, LEMMA, ["la"])
+
+    expected = {
+        "la": {
+            "translation_status": "late_construction",
+            "translation_status_note": "Neo-Latin coinage",
+        }
+    }
+    assert generated.metadata == expected
+
+    stored_metadata: List[Dict[str, Any]] = []
+
+    def _capture_store(
+        session: Any, lemma: Lemma, texts: Any, metadata: Any, *args: Any, **kwargs: Any
+    ) -> None:
+        stored_metadata.append(metadata)
+
+    class _Session:
+        def commit(self) -> None:
+            pass
+
+    monkeypatch.setattr("words.translation_workflow.store_translations_by_language", _capture_store)
+    workflow.save_lemma_translations(_Session(), LEMMA, generated, ["la"])
+
+    assert stored_metadata == [expected]

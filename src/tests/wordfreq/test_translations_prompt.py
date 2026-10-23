@@ -12,7 +12,8 @@ from typing import Any, Dict, List, Optional, Tuple
 import pytest
 
 from clients.types import Schema
-from wordfreq.translation.translations import query_translations
+from storage.translation_helpers import MAX_LLM_LANGUAGES_PER_OPERATION
+from wordfreq.translation.translations import build_translation_prompt, query_translations
 
 
 class _CapturingClient:
@@ -55,7 +56,9 @@ def _run(
 
 def _language_properties(client: _CapturingClient, field: str) -> Dict[str, Any]:
     assert client.schema is not None
-    return client.schema.properties[field].properties
+    properties = client.schema.properties[field].properties
+    assert properties is not None
+    return properties
 
 
 # --- The context never hardcodes a reference language ----------------------
@@ -171,3 +174,18 @@ def test_mixed_batch_gives_every_language_the_status_fields(
     client = _run(monkeypatch, ["es", "la"])
     assert "translation_status" in _language_properties(client, "spanish_translation")
     assert "translation_status" in _language_properties(client, "latin_translation")
+
+
+def test_more_languages_than_one_request_raises() -> None:
+    """An unbatched caller fails instead of silently losing the tail languages."""
+    languages = ["fr", "es", "de", "pt", "it", "nl", "sv", "pl", "ro", "el", "tr"]
+    assert len(languages) > MAX_LLM_LANGUAGES_PER_OPERATION
+
+    with pytest.raises(ValueError, match="split_llm_language_batches"):
+        build_translation_prompt(
+            "dog",
+            ("lt", "šuo"),
+            "a domesticated carnivorous mammal",
+            "noun",
+            languages=languages,
+        )

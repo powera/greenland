@@ -85,11 +85,14 @@ def build_translation_prompt(
         pos_type: Part of speech (noun, verb, etc.)
         pos_subtype: Optional part of speech subtype
         languages: ISO language codes to translate to. If None, uses
-            ['zh', 'ko', 'fr', 'es', 'de', 'pt', 'sw', 'vi']. Capped at
+            ['zh', 'ko', 'fr', 'es', 'de', 'pt', 'sw', 'vi']. At most
             MAX_LLM_LANGUAGES_PER_OPERATION.
 
     Returns:
         The prompt, or None when the inputs are unusable (logged).
+
+    Raises:
+        ValueError: More than MAX_LLM_LANGUAGES_PER_OPERATION languages.
     """
     if not english_word or not reference_translation or len(reference_translation) != 2:
         logger.error("English word and reference translation (lang_code, translation) are required")
@@ -104,13 +107,15 @@ def build_translation_prompt(
     if languages is None:
         languages = ["zh", "ko", "fr", "es", "de", "pt", "sw", "vi"]
 
+    # Callers split with storage.translation_helpers.split_llm_language_batches
+    # first.  Truncating here instead would drop the tail languages with only a
+    # log line to show for it, so an unbatched caller fails loudly.
     if len(languages) > MAX_LLM_LANGUAGES_PER_OPERATION:
-        logger.warning(
-            "Translation generation requested %s languages; limiting to first %s",
-            len(languages),
-            MAX_LLM_LANGUAGES_PER_OPERATION,
+        raise ValueError(
+            f"Translation prompt requested {len(languages)} languages; at most "
+            f"{MAX_LLM_LANGUAGES_PER_OPERATION} fit one request.  Split them with "
+            "split_llm_language_batches first."
         )
-        languages = languages[:MAX_LLM_LANGUAGES_PER_OPERATION]
 
     # Build schema properties dynamically based on requested languages
     schema_properties = {}
