@@ -292,6 +292,49 @@ def _encode_pcm(data: bytes, audio_format: AudioFormat, speed: float, timeout: i
     return result.stdout
 
 
+def _log_realtime_usage(
+    response: dict[str, Any],
+    pcm_bytes: int,
+    text: str,
+    voice: Voice,
+    language_code: str,
+    model: str,
+) -> None:
+    """Log reported usage verbatim, including any optional reasoning breakdown.
+
+    Audio duration is the received PCM before trimming or speed adjustment, not
+    request latency. Missing usage fields stay unknown rather than becoming zero.
+    """
+    if not logger.isEnabledFor(logging.DEBUG):
+        return
+    generated_seconds = pcm_bytes / (PCM_SAMPLE_RATE * 2)
+    usage = response.get("usage")
+    output_details = (usage.get("output_token_details") or {}) if isinstance(usage, dict) else {}
+    audio_tokens = output_details.get("audio_tokens")
+    tokens_per_second = (
+        audio_tokens / generated_seconds
+        if isinstance(audio_tokens, (int, float)) and generated_seconds > 0
+        else None
+    )
+    logger.debug(
+        "Realtime TTS usage: %s",
+        json.dumps(
+            {
+                "response_id": response.get("id"),
+                "status": response.get("status"),
+                "model": model,
+                "language": language_code,
+                "voice": voice.value,
+                "text": text,
+                "generated_audio_seconds": generated_seconds,
+                "output_audio_tokens_per_generated_second": tokens_per_second,
+                "usage": usage,
+            },
+            ensure_ascii=False,
+        ),
+    )
+
+
 class OpenAITTSClient:
     """Client for generating audio using OpenAI TTS API."""
 
@@ -392,6 +435,10 @@ class OpenAITTSClient:
                 if event_type == "error":
                     raise ValueError(f"Realtime TTS error: {event.get('error')}")
                 if event_type == "session.updated" and not requested:
+                    logger.debug(
+                        "Realtime TTS session reasoning: %s",
+                        json.dumps(event.get("session", {}).get("reasoning")),
+                    )
                     connection.send(
                         json.dumps(
                             {
@@ -418,8 +465,20 @@ class OpenAITTSClient:
                     requested = True
                 elif event_type == "response.output_audio.delta":
                     chunks.append(base64.b64decode(event["delta"], validate=True))
+                elif event_type == "response.output_audio_transcript.done":
+                    logger.debug("Realtime TTS output transcript: %r", event.get("transcript"))
+                elif event_type == "response.output_text.done":
+                    logger.debug("Realtime TTS output text: %r", event.get("text"))
                 elif event_type == "response.done":
                     response_data = event.get("response", {})
+                    _log_realtime_usage(
+                        response_data,
+                        sum(len(chunk) for chunk in chunks),
+                        text,
+                        voice,
+                        language_code,
+                        model,
+                    )
                     if response_data.get("status") != "completed":
                         raise ValueError(
                             f"Realtime TTS did not complete: {response_data.get('status_details')}"

@@ -25,7 +25,7 @@ except ImportError:
     ClientError = Exception
 
 import constants
-from clients.keys import assert_credential_reads_enabled
+from clients.keys import assert_credential_reads_enabled, test_mode_enabled
 
 # Configure logging
 logging.basicConfig(
@@ -116,7 +116,7 @@ class S3AudioUploader:
         access_key: Optional[str] = None,
         secret_key: Optional[str] = None,
         bucket_name: Optional[str] = None,
-    ):
+    ) -> None:
         """
         Initialize S3 uploader.
 
@@ -276,6 +276,8 @@ class S3AudioUploader:
         Returns:
             Tuple of (success: bool, audio_url: str, manifest_url: str, md5_hash: str)
         """
+        if test_mode_enabled():
+            raise RuntimeError("GREENLAND_TEST_MODE blocks S3 staging uploads")
         if not audio_path.exists():
             logger.error(f"Audio file not found: {audio_path}")
             return False, "", "", ""

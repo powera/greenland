@@ -244,6 +244,73 @@ class TestRealtimeTTS(unittest.TestCase):
 
     @patch("clients.audio.openai_tts.clients.lib.assert_llm_calls_enabled")
     @patch("websocket.create_connection")
+    def test_debug_usage_preserves_breakdowns_and_uses_untrimmed_duration(
+        self, mock_connect: MagicMock, mock_guard: MagicMock
+    ) -> None:
+        import base64
+        import json
+
+        usage = {
+            "input_tokens": 400,
+            "output_tokens": 80,
+            "input_token_details": {"text_tokens": 400, "cached_tokens": 0},
+            "output_token_details": {
+                "audio_tokens": 20,
+                "text_tokens": 60,
+                "reasoning_tokens": 50,
+                "reasoning_audio_tokens": 0,
+            },
+        }
+        mock_connect.return_value.recv.side_effect = [
+            json.dumps({"type": "session.updated", "session": {"reasoning": {"effort": "low"}}}),
+            json.dumps(
+                {
+                    "type": "response.output_audio.delta",
+                    "delta": base64.b64encode(_pcm(_tone(200) + _quiet(800))).decode(),
+                }
+            ),
+            json.dumps({"type": "response.output_audio_transcript.done", "transcript": "pan"}),
+            json.dumps(
+                {
+                    "type": "response.done",
+                    "response": {"id": "resp-test", "status": "completed", "usage": usage},
+                }
+            ),
+        ]
+        with self.assertLogs("clients.audio.openai_tts", level="DEBUG") as logs:
+            result = OpenAITTSClient(api_key="fake").generate_audio(
+                "pan", language_code="es-419", audio_format=AudioFormat.PCM
+            )
+        self.assertTrue(result.success, result.error)
+        self.assertEqual(len(result.audio_data), _ms(300) * 2)
+        usage_record = next(record for record in logs.records if "usage:" in record.getMessage())
+        self.assertEqual(usage_record.levelname, "DEBUG")
+        payload = json.loads(usage_record.getMessage().split("usage: ", 1)[1])
+        self.assertEqual(payload["usage"], usage)
+        self.assertEqual(payload["generated_audio_seconds"], 1.0)
+        self.assertEqual(payload["output_audio_tokens_per_generated_second"], 20.0)
+        self.assertEqual(payload["response_id"], "resp-test")
+        self.assertTrue(any("output transcript: 'pan'" in line for line in logs.output))
+        self.assertTrue(any('"effort": "low"' in line for line in logs.output))
+
+    def test_debug_usage_handles_missing_usage_and_zero_audio(self) -> None:
+        import json
+        from clients.audio.openai_tts import _log_realtime_usage
+
+        responses: list[dict[str, Any]] = [
+            {"status": "failed"},
+            {"status": "completed", "usage": {"output_token_details": {"audio_tokens": 20}}},
+        ]
+        for response in responses:
+            with self.subTest(response=response):
+                with self.assertLogs("clients.audio.openai_tts", level="DEBUG") as logs:
+                    _log_realtime_usage(response, 0, "pan", Voice.CORAL, "es-419", DEFAULT_MODEL)
+                payload = json.loads(logs.records[0].getMessage().split("usage: ", 1)[1])
+                self.assertIsNone(payload["output_audio_tokens_per_generated_second"])
+                self.assertEqual(payload["usage"], response.get("usage"))
+
+    @patch("clients.audio.openai_tts.clients.lib.assert_llm_calls_enabled")
+    @patch("websocket.create_connection")
     def test_stream_and_wav(self, mock_connect: MagicMock, mock_guard: MagicMock) -> None:
         import base64
         import io

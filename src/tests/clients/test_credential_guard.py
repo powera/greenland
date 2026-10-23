@@ -292,3 +292,18 @@ def test_load_key_from_path_missing_file(monkeypatch: pytest.MonkeyPatch, tmp_pa
     assert load_key_from_path(missing) is None
     with pytest.raises(RuntimeError):
         load_key_from_path(missing, required=True)
+
+
+def test_staging_upload_blocked_even_with_existing_client(
+    monkeypatch: pytest.MonkeyPatch, tmp_path: Path
+) -> None:
+    from unittest.mock import Mock
+    from clients.audio.s3_uploader import S3AudioUploader
+
+    uploader = object.__new__(S3AudioUploader)
+    remote_client = Mock()
+    uploader.s3 = remote_client
+    monkeypatch.setenv("GREENLAND_TEST_MODE", "1")
+    with pytest.raises(RuntimeError, match="GREENLAND_TEST_MODE blocks S3 staging"):
+        uploader.upload_to_staging(tmp_path / "test.mp3", {}, "es-419", "maria")
+    assert not remote_client.mock_calls
