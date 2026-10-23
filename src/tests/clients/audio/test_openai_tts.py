@@ -250,7 +250,7 @@ class TestRealtimeTTS(unittest.TestCase):
         import json
         import wave
 
-        pcm = b"\x01\x00" * 24
+        pcm = _pcm(_tone(50))
         connection = mock_connect.return_value
         connection.recv.side_effect = [
             json.dumps({"type": "session.created"}),
@@ -269,7 +269,7 @@ class TestRealtimeTTS(unittest.TestCase):
         self.assertTrue(result.success, result.error)
         with wave.open(io.BytesIO(result.audio_data), "rb") as wav_file:
             self.assertEqual(wav_file.getframerate(), 24000)
-            self.assertEqual(wav_file.readframes(24), pcm)
+            self.assertEqual(wav_file.readframes(_ms(50)), pcm)
         events = [json.loads(call.args[0]) for call in connection.send.call_args_list]
         session = events[0]["session"]
         self.assertEqual(session["audio"]["output"]["voice"], "ash")
@@ -351,6 +351,30 @@ class TestRealtimeTTS(unittest.TestCase):
         self.assertTrue(result.success, result.error)
         self.assertEqual(len(result.audio_data), len(_pcm(_tone(300) + _quiet(100))))
 
+    @patch("clients.audio.openai_tts.clients.lib.assert_llm_calls_enabled")
+    @patch("websocket.create_connection")
+    def test_completed_but_silent_response_rejected(
+        self, mock_connect: MagicMock, mock_guard: MagicMock
+    ) -> None:
+        import base64
+        import json
+
+        mock_connect.return_value.recv.side_effect = [
+            json.dumps({"type": "session.updated"}),
+            json.dumps(
+                {
+                    "type": "response.output_audio.delta",
+                    "delta": base64.b64encode(_pcm(_quiet(4100))).decode(),
+                }
+            ),
+            json.dumps({"type": "response.done", "response": {"status": "completed"}}),
+        ]
+        result = OpenAITTSClient(api_key="fake").generate_audio("pan")
+        self.assertFalse(result.success)
+        self.assertEqual(result.audio_data, b"")
+        self.assertIn("insufficient audible audio", result.error or "")
+        mock_connect.return_value.close.assert_called_once()
+
 
 def _ms(ms: int) -> int:
     """Sample count for ms of 24 kHz audio."""
@@ -374,6 +398,24 @@ def _pcm(samples: list[int]) -> bytes:
     if sys.byteorder == "big":
         data.byteswap()
     return data.tobytes()
+
+
+class TestAudibleAudio(unittest.TestCase):
+    def test_duration_excludes_quiet_gaps_and_counts_partial_frame(self) -> None:
+        from clients.audio.openai_tts import audible_pcm_duration_ms
+
+        self.assertEqual(audible_pcm_duration_ms(_pcm(_tone(20) + _quiet(100) + _tone(25))), 45)
+
+    def test_minimum_boundaries(self) -> None:
+        from clients.audio.openai_tts import validate_pcm_audio
+
+        for text, minimum_ms in [("bread", 50), ("I", 30), ("pan", 30), ("a b", 50)]:
+            with self.subTest(text=text):
+                validate_pcm_audio(_pcm(_tone(minimum_ms)), text)
+                with self.assertRaisesRegex(ValueError, "insufficient audible audio"):
+                    validate_pcm_audio(_pcm(_tone(minimum_ms - 10)), text)
+                with self.assertRaises(ValueError):
+                    validate_pcm_audio(_pcm(_quiet(4100)), text)
 
 
 class TestTrimPcmSilence(unittest.TestCase):
