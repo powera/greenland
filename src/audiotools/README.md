@@ -108,6 +108,26 @@ emits a manifest the review tools consume.
 
 ## OpenAI TTS migration (October 2026)
 
+With Vieversys `--debug`, the Realtime client logs each response's complete
+reported `usage` object (including any cached or reasoning-token fields), its
+response ID/status, output transcript, and reported session reasoning settings.
+It also logs raw generated PCM seconds and output audio tokens per generated
+second, before silence trimming or speed adjustment. Missing fields are logged
+as unknown, not zero; no hidden reasoning breakdown is inferred from text tokens.
+These diagnostics are DEBUG logs only and are not saved to database or manifests.
+OpenAI's documented baseline is about 20 assistant audio tokens per second
+(one per 50 ms); compare that with the measured ratio rather than MP3 size or
+wall-clock request latency. See
+https://developers.openai.com/api/docs/guides/voice-latency-cost.
+
+Vieversys uploads generated audio and manifests to DigitalOcean Spaces staging
+by default and saves the staging URLs in its pending-review database records.
+Use `--no-upload-s3` for an explicitly local-only run. Dry runs do not initialize
+the uploader; `GREENLAND_TEST_MODE=1` disables agent uploads and blocks direct
+staging uploads even with an already initialized client. Uploader setup errors
+stop the run, and a failed staging upload is reported as a generation failure
+while preserving the local recording for recovery.
+
 The default is `gpt-realtime-2.1-mini`, using the GA Realtime WebSocket API.
 Install `websocket-client` (included in project dependencies) and `ffmpeg` for
 MP3/Opus/AAC/FLAC output and speed adjustment. WAV and PCM at normal speed need

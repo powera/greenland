@@ -6,9 +6,8 @@ This agent generates audio files for lemmas using cloud TTS APIs.
 Supported engines: OpenAI TTS, Amazon Polly, Azure Cognitive TTS,
 and Google Cloud Text-to-Speech.
 
-Files are generated to a temporary directory, stored with metadata in the
-AudioQualityReview table with 'pending_review' status, and can later be
-uploaded to S3 after review.
+Files are generated locally and uploaded to S3 staging by default, with metadata
+stored in AudioQualityReview with 'pending_review' status.
 
 "Vieversys" means "lark" in Lithuanian - a bird known for its beautiful song.
 """
@@ -31,6 +30,7 @@ if GREENLAND_SRC_PATH not in sys.path:
     sys.path.insert(0, GREENLAND_SRC_PATH)
 
 import constants
+from clients.keys import test_mode_enabled
 from agents.common.common_args import (
     add_backend_args,
     add_common_args,
@@ -108,7 +108,7 @@ class VieversysAgent:
         self,
         config: DataSourceConfig,
         output_dir: Optional[str] = None,
-        upload_s3: bool = False,
+        upload_s3: bool = True,
         auto_approve: bool = False,
         skip_existing: bool = False,
         tts_engine: str = "openai",
@@ -119,14 +119,14 @@ class VieversysAgent:
         Args:
             config: DataSourceConfig with model, debug, and backend settings (required)
             output_dir: Output directory for generated audio (uses temp dir if None)
-            upload_s3: Whether to upload generated audio to S3 staging
+            upload_s3: Upload to S3 staging by default; disabled in test mode
             auto_approve: Whether to automatically approve audio (requires upload_s3)
             skip_existing: Whether to skip lemma/voice combinations that already have audio
             tts_engine: TTS engine to use ('openai', 'polly', 'azure', 'google')
         """
         self.config = config
         self.debug = config.debug
-        self.upload_s3 = upload_s3
+        self.upload_s3 = upload_s3 and not test_mode_enabled()
         self.auto_approve = auto_approve
         self.skip_existing = skip_existing
         self.tts_engine = tts_engine
@@ -140,17 +140,13 @@ class VieversysAgent:
 
         if self.debug:
             logger.setLevel(logging.DEBUG)
+            logging.getLogger("clients.audio.openai_tts").setLevel(logging.DEBUG)
 
         # Initialize S3 uploader if needed
         self.s3_uploader = None
         if self.upload_s3:
-            try:
-                self.s3_uploader = S3AudioUploader()
-                logger.info("S3 uploader initialized")
-            except Exception as e:
-                logger.error(f"Failed to initialize S3 uploader: {e}")
-                logger.warning("S3 upload will be disabled")
-                self.upload_s3 = False
+            self.s3_uploader = S3AudioUploader()
+            logger.info("S3 uploader initialized")
 
         # Ensure output directory exists
         self.output_dir.mkdir(parents=True, exist_ok=True)
@@ -417,7 +413,12 @@ class VieversysAgent:
             voices_list.append(
                 {
                     "voice": voice_path_name,
-                    "success": True,
+                    "success": not self.upload_s3 or bool(s3_staging_url),
+                    "error": (
+                        "S3 staging upload failed"
+                        if self.upload_s3 and not s3_staging_url
+                        else None
+                    ),
                     "filename": filename,
                     "file_path": str(file_path),
                     "md5": md5_hash,
@@ -651,7 +652,12 @@ class VieversysAgent:
             sent_voices_list.append(
                 {
                     "voice": voice_path_name,
-                    "success": True,
+                    "success": not self.upload_s3 or bool(s3_staging_url),
+                    "error": (
+                        "S3 staging upload failed"
+                        if self.upload_s3 and not s3_staging_url
+                        else None
+                    ),
                     "filename": filename,
                     "file_path": str(file_path),
                     "md5": md5_hash,
@@ -867,7 +873,12 @@ class VieversysAgent:
             results["voices"].append(
                 {
                     "voice": voice_name,
-                    "success": True,
+                    "success": not self.upload_s3 or bool(s3_staging_url),
+                    "error": (
+                        "S3 staging upload failed"
+                        if self.upload_s3 and not s3_staging_url
+                        else None
+                    ),
                     "filename": filename,
                     "file_path": str(file_path),
                     "md5": md5_hash,
@@ -1275,8 +1286,9 @@ def get_argument_parser() -> argparse.ArgumentParser:
     )
     parser.add_argument(
         "--upload-s3",
-        action="store_true",
-        help="Upload generated audio and manifests to S3 staging bucket",
+        action=argparse.BooleanOptionalAction,
+        default=True,
+        help="Upload audio and manifests to S3 staging (default); --no-upload-s3 for local only",
     )
     parser.add_argument(
         "--generate-sentences",
@@ -1363,7 +1375,9 @@ def main() -> int:
     agent = VieversysAgent(
         config=config,
         output_dir=args.output_dir,
-        upload_s3=args.upload_s3,
+        upload_s3=(
+            args.upload_s3 and not args.dry_run and args.mode in {"populate-only", "regenerate"}
+        ),
         auto_approve=args.auto_approve,
         skip_existing=(args.mode == "populate-only"),
         tts_engine=tts_engine,
