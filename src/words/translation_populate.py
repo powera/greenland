@@ -166,12 +166,16 @@ def store_translations_by_language(
     source: str,
     confidences: Optional[Dict[str, Optional[float]]] = None,
     model: Optional[str] = None,
+    replace_existing: bool = False,
 ) -> PopulateOutcome:
     """Write language-code-keyed translations for *languages*; the caller commits.
 
     The one writer for filled-in translations, live or batched.  A language
     that has gained a translation since it was found missing (added by hand
-    while a batch ran, say) is left alone.
+    while a batch ran, say) is left alone, unless ``replace_existing`` --
+    regeneration, which overwrites in place.  Either way an answer below the
+    confidence floor writes nothing, so a regenerated language keeps its old
+    text rather than ending up empty.
 
     A language in *confidences* is gated on its confidence (a missing or
     non-numeric one counts as 0.0) through
@@ -186,7 +190,7 @@ def store_translations_by_language(
         if not text:
             outcome.blank.append(language_code)
             continue
-        if (get_translation(session, lemma, language_code) or "").strip():
+        if not replace_existing and (get_translation(session, lemma, language_code) or "").strip():
             continue
         language_metadata = metadata.get(language_code, {})
         confidence: Optional[float] = None

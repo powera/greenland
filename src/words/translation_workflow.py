@@ -42,7 +42,6 @@ from words.translation_populate import (
 )
 from storage.translation_helpers import (
     ANCIENT_LANGUAGE_GROUP,
-    LANG_CODE_TO_LLM_FIELD,
     LANGUAGE_FIELDS,
     convert_llm_response_to_lang_codes,
     convert_llm_response_to_confidences,
@@ -214,13 +213,15 @@ def enqueue_translation_regeneration(
     session: Any,
     lemmas: Sequence[Lemma],
     *,
+    languages: Optional[Sequence[str]] = None,
     dry_run: bool = False,
 ) -> "EnqueueSummary":
-    """Queue "delete and regenerate the translations" work for each lemma.
+    """Queue "regenerate these languages' translations in place" work per lemma.
 
     Args:
         session: Database session.
         lemmas: Lemmas to queue work for.
+        languages: Language codes to regenerate, resolved as for populate.
         dry_run: If True, count what would be queued and write nothing.
 
     Returns:
@@ -228,6 +229,7 @@ def enqueue_translation_regeneration(
     """
     from workqueue.task_queue import TaskRequest, TaskType, enqueue_tasks
 
+    resolved_languages = resolve_generation_languages(languages)
     requests = [
         TaskRequest(
             task_type=TaskType.WORDS_TRANSLATIONS_REGENERATE,
@@ -236,6 +238,7 @@ def enqueue_translation_regeneration(
             payload={
                 "schema_version": 1,
                 "lemma_id": lemma.id,
+                "languages": resolved_languages,
                 "source_component": QUEUE_SOURCE_COMPONENT,
             },
             dedup_key=f"{TaskType.WORDS_TRANSLATIONS_REGENERATE}:{lemma.id}",
@@ -394,10 +397,22 @@ class TranslationWorkflow:
                 error="Cache-only mode: cannot generate translations (not in cache)"
             )
 
+        return self.query_llm_translations(session, lemma, missing_languages)
+
+    def query_llm_translations(
+        self, session: Any, lemma: Lemma, languages: Sequence[str]
+    ) -> LemmaTranslations:
+        """Ask the model for ``languages``, one request per language batch.
+
+        The reference is an existing translation outside ``languages`` (or the
+        English lemma), so a language being regenerated never anchors its own
+        replacement.  A failed batch leaves its languages in
+        ``failed_languages``; the others are kept.
+        """
         client = self.get_linguistic_client()
         try:
             existing_lang_code, existing_translation = get_reference_translation(
-                session, lemma, exclude_languages=list(missing_languages)
+                session, lemma, exclude_languages=list(languages)
             )
             # With nothing else on file, the English lemma is the reference.
             reference: Tuple[str, str] = (
@@ -410,7 +425,7 @@ class TranslationWorkflow:
             # one request's worth, and ancient languages must go on their own.
             llm_response: Dict[str, Any] = {}
             failed_languages: List[str] = []
-            for language_batch in split_llm_language_batches(list(missing_languages)):
+            for language_batch in split_llm_language_batches(list(languages)):
                 batch_response, success = client.query_translations(
                     english_word=lemma.lemma_text,
                     reference_translation=reference,
@@ -469,6 +484,34 @@ class TranslationWorkflow:
         )
         session.commit()
         return outcome
+
+    def regenerate_lemma_translations(
+        self, session: Any, lemma: Lemma, languages: Sequence[str]
+    ) -> Tuple[LemmaTranslations, PopulateOutcome]:
+        """Ask again for ``languages`` and overwrite them in place; commits.
+
+        Nothing is cleared first.  A language is replaced only when the new
+        answer is non-empty and clears the confidence floor, so a failed batch,
+        a blank answer or an uncertain one leaves the existing translation as
+        it was, and languages outside ``languages`` are never touched.  The
+        Barsukas cache is skipped: it would hand back the current translations.
+        """
+        generated = self.query_llm_translations(session, lemma, languages)
+        outcome = PopulateOutcome([], [], [])
+        if generated.translations:
+            outcome = store_translations_by_language(
+                session,
+                lemma,
+                generated.translations,
+                generated.metadata,
+                [code for code in languages if code not in generated.failed_languages],
+                source=generated.source or f"voras-agent/{self.config.model}",
+                confidences=generated.confidences,
+                model=self.config.model,
+                replace_existing=True,
+            )
+            session.commit()
+        return generated, outcome
 
     def validate_translations(
         self,
@@ -771,41 +814,39 @@ class TranslationWorkflow:
         limit: Optional[int] = None,
         dry_run: bool = False,
         lemmas: Optional[List[Lemma]] = None,
+        languages: Optional[Sequence[str]] = None,
     ) -> Dict[str, Any]:
-        """
-        Delete all non-Lithuanian translations and regenerate them fresh.
+        """Ask again for ``languages`` on each lemma and overwrite them in place.
 
-        There is deliberately no batch mode: deleting first and regenerating
-        hours later leaves every word untranslated in between.  To fill gaps
-        through the Batch API, use populate (``words.translation_batch``).
+        Only the selected languages are touched, and only where the new answer
+        is usable (see :meth:`regenerate_lemma_translations`); nothing is
+        cleared ahead of the call, so a failure leaves the old translation.
 
         Args:
             limit: Maximum number of words to process
             dry_run: If True, only report what would be done without making changes
             lemmas: Optional pre-filtered list of lemmas to process (if None, queries all curated)
+            languages: Language codes to regenerate, resolved as for populate
+                (tiers 1 and 2 when None).
 
         Returns:
             Dictionary with regeneration results
         """
-        logger.info("Starting translation regeneration (delete + regenerate all non-LT)...")
+        languages_to_regenerate = resolve_generation_languages(languages)
+        logger.info("Regenerating translations for: %s", ", ".join(languages_to_regenerate))
 
         session = self.get_session()
-        client = self.get_linguistic_client()
 
-        # All languages except Lithuanian
-        languages_to_regenerate = [lc for lc in LANGUAGE_FIELDS.keys() if lc != "lt"]
-
-        # Initialize results structure
         results: Dict[str, Any] = {
             "total_words_processed": 0,
-            "total_translations_added": 0,
+            "total_translations_replaced": 0,
+            "total_uncertain": 0,
             "total_failed": 0,
-            "llm_cost_usd": 0.0,
             "by_language": {
                 lang_code: {
                     "language_name": get_language_name(lang_code),
-                    "deleted": 0,
-                    "added": 0,
+                    "replaced": 0,
+                    "uncertain": 0,
                     "failed": 0,
                 }
                 for lang_code in languages_to_regenerate
@@ -821,95 +862,46 @@ class TranslationWorkflow:
                 query = LemmaQueryBuilder(session).curated_only().order_by_id().build()
                 words_to_process = apply_limit_and_sample_rate(query, limit, sample_rate=1.0)
             total_words = len(words_to_process)
-
             logger.info(f"Found {total_words} curated words to process")
 
-            # First pass: delete existing non-Lithuanian translations
-            logger.info("Deleting existing non-Lithuanian translations...")
-            for lemma in words_to_process:
-                for lang_code in languages_to_regenerate:
-                    field_name, _ = LANGUAGE_FIELDS[lang_code]
-                    existing = getattr(lemma, field_name)
-                    if existing and existing.strip():
-                        if not dry_run:
-                            setattr(lemma, field_name, None)
-                        results["by_language"][lang_code]["deleted"] += 1
-
-            if not dry_run:
-                session.commit()
-                logger.info("Deleted all non-Lithuanian translations")
-            else:
-                logger.info("[DRY RUN] Would delete all non-Lithuanian translations")
-
-            # Second pass: regenerate all translations
-            logger.info("Regenerating translations...")
             for i, lemma in enumerate(words_to_process, 1):
                 if i % 10 == 0:
                     logger.info(f"Progress: {i}/{total_words} words processed")
-
                 results["total_words_processed"] += 1
 
+                if dry_run:
+                    logger.info(f"[DRY RUN] Would regenerate translations for '{lemma.lemma_text}'")
+                    continue
+
                 try:
-                    if dry_run:
-                        for lang_code in languages_to_regenerate:
-                            results["by_language"][lang_code]["added"] += 1
-                            results["total_translations_added"] += 1
-                        logger.info(
-                            f"[DRY RUN] Would generate all translations for '{lemma.lemma_text}'"
-                        )
-                        continue
-
-                    # Use Lithuanian as reference translation - ONE CALL
-                    translations, success = client.query_translations(
-                        english_word=lemma.lemma_text,
-                        reference_translation=(
-                            "lt",
-                            get_translation(session, lemma, "lt") or "",
-                        ),
-                        definition=lemma.definition_text,
-                        pos_type=lemma.pos_type,
-                        pos_subtype=lemma.pos_subtype,
+                    generated, outcome = self.regenerate_lemma_translations(
+                        session, lemma, languages_to_regenerate
                     )
-
-                    if not success or not translations:
-                        logger.warning(f"Failed to get translations for '{lemma.lemma_text}'")
-                        for lang_code in languages_to_regenerate:
-                            results["by_language"][lang_code]["failed"] += 1
-                        results["total_failed"] += 1
-                        continue
-
-                    # Add all non-Lithuanian translations
-                    added_this_word = 0
-                    for lang_code in languages_to_regenerate:
-                        field_name, language_name = LANGUAGE_FIELDS[lang_code]
-                        llm_field = LANG_CODE_TO_LLM_FIELD.get(lang_code, "")
-                        translation = translations.get(llm_field, "").strip()
-
-                        if translation:
-                            setattr(lemma, field_name, translation)
-                            logger.debug(f"  Added {language_name}: '{translation}'")
-                            results["by_language"][lang_code]["added"] += 1
-                            results["total_translations_added"] += 1
-                            added_this_word += 1
-                        else:
-                            logger.warning(
-                                f"  LLM returned empty {language_name} translation for '{lemma.lemma_text}'"
-                            )
-                            results["by_language"][lang_code]["failed"] += 1
-                            results["total_failed"] += 1
-
-                    # Commit all updates for this word at once
-                    session.commit()
-                    logger.info(
-                        f"Added {added_this_word}/{len(languages_to_regenerate)} translations for '{lemma.lemma_text}' (GUID: {lemma.guid})"
-                    )
-
                 except Exception as e:
                     logger.error(f"Error processing '{lemma.lemma_text}': {e}")
                     session.rollback()
                     for lang_code in languages_to_regenerate:
                         results["by_language"][lang_code]["failed"] += 1
-                    results["total_failed"] += 1
+                    results["total_failed"] += len(languages_to_regenerate)
+                    continue
+
+                for lang_code in languages_to_regenerate:
+                    if lang_code in outcome.written:
+                        results["by_language"][lang_code]["replaced"] += 1
+                        results["total_translations_replaced"] += 1
+                    elif lang_code in outcome.uncertain:
+                        results["by_language"][lang_code]["uncertain"] += 1
+                        results["total_uncertain"] += 1
+                    else:
+                        # The batch failed or the answer was blank; the old
+                        # translation, if any, is still there.
+                        results["by_language"][lang_code]["failed"] += 1
+                        results["total_failed"] += 1
+                logger.info(
+                    f"Replaced {len(outcome.written)}/{len(languages_to_regenerate)} translations "
+                    f"for '{lemma.lemma_text}' (GUID: {lemma.guid})"
+                    + (f"; {generated.error}" if generated.error else "")
+                )
 
         finally:
             session.close()
