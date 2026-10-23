@@ -96,24 +96,28 @@ SPECS: tuple[FactSpec, ...] = (
         "Comparison strategy in this sense: synthetic (-er/-est, including irregular synthetic forms), periphrastic (more/most), or non_gradable.",
         ("synthetic", "periphrastic", "non_gradable"),
     ),
-    FactSpec("past", "principal_part", "Canonical English simple past, even when regular."),
+    FactSpec("past", "principal_part", "Canonical simple past, even when regular."),
     FactSpec(
         "past_participle",
         "principal_part",
         "Canonical past participle (perfect-form principal part), even when regular; preserve the language's required spelling.",
     ),
-    FactSpec("infinitive", "principal_part", "Canonical Lithuanian infinitive principal part."),
+    FactSpec("infinitive", "principal_part", "Canonical infinitive principal part."),
     FactSpec(
-        "3s_present", "principal_part", "Lithuanian third-person singular present principal part."
+        "3s_present", "principal_part", "Canonical third-person singular present principal part."
     ),
-    FactSpec("3s_past", "principal_part", "Lithuanian third-person singular past principal part."),
+    FactSpec("3s_past", "principal_part", "Canonical third-person singular past principal part."),
     FactSpec(
-        "1s_present", "principal_part", "Italian first-person singular present principal part."
+        "1s_present", "principal_part", "Canonical first-person singular present principal part."
     ),
     FactSpec(
-        "1s_past", "principal_part", "Italian first-person singular passato remoto principal part."
+        "1s_past",
+        "principal_part",
+        "Canonical first-person singular past principal part (Italian: passato remoto).",
     ),
-    FactSpec("1s_future", "principal_part", "Italian first-person singular future principal part."),
+    FactSpec(
+        "1s_future", "principal_part", "Canonical first-person singular future principal part."
+    ),
     FactSpec(
         "plural",
         "override",

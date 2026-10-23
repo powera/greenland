@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import json
+from dataclasses import replace
 from pathlib import Path
 from typing import Any, Iterator
 from unittest.mock import Mock
@@ -16,7 +17,7 @@ from agents.lape2.catalog import CATALOG
 from agents.lape2.cli import get_argument_parser, main, select_plans
 from agents.lape2.job import LAPE2_JOB, apply, prepare
 from agents.lape2.planner import RequestPlan, plan_request, stored_values
-from agents.lape2.query import build_query
+from agents.lape2.query import build_context, build_query
 from agents.lape2.results import apply_answers, validate_answer
 from clients.lib import LLMCallsDisabledError
 from clients.types import LLMCall, Response
@@ -195,14 +196,12 @@ def test_shared_definitions_are_only_in_context(session: Session) -> None:
         assert answer_schema["value"].enum is None
         assert answer_schema["confidence"].minimum is None
         assert answer_schema["confidence"].maximum is None
-    definitions = json.loads(query.context[query.context.index("[\n  {") :])
-    gender = next(item for item in definitions if item["fact_type"] == "grammatical_gender")
     for question in plan.questions:
         if question.fact_type == "grammatical_gender":
-            assert any(
-                question.language_code in group["languages"]
-                and list(question.values) == group["values"]
-                for group in gender["allowed_values_by_language"]
+            assert question.language_code is not None
+            assert (
+                f"Allowed values ({question.language_code}): {' | '.join(question.values)}."
+                in query.context
             )
 
 
@@ -228,7 +227,7 @@ def test_context_is_fixed_and_form_filters_add_prerequisites(session: Session) -
         "en__comparative",
         "en__gradability",
     }
-    assert build_query(plural_plan).context == build_query(comparison_plan).context
+    assert build_query(plural_plan).context != build_query(comparison_plan).context
 
 
 def test_explicit_regular_paradigm_and_plural_completion_are_durable(session: Session) -> None:
@@ -757,3 +756,47 @@ def test_plural_status_and_concept_facts_survive_release_export_and_reload(
         ).questions
     finally:
         reloaded.close()
+
+
+def test_context_tracks_pos_and_language_set_only(session: Session) -> None:
+    word = lemma(session, "eat", "verb", lt="valgyti", it="mangiare")
+    plan = plan_request(session, word, ["en", "lt"], facts=["past"])
+    full_plan = plan_request(session, word, ["lt", "en", "lt"])
+    context = build_query(plan).context
+    assert context == build_query(full_plan).context
+    assert context is not None
+    assert "3s_present [lt]" in context and "3s_past [lt]" in context
+    assert "1s_future" not in context and "countability" not in context
+    assert context != build_context("verb", ["en", "lt", "it"])
+    assert "passato remoto" in build_context("verb", ["it"])
+    save(session, plan, {"en__past": answer("ate")})
+    remaining = plan_request(session, word, ["en", "lt"])
+    assert build_query(remaining).context == context
+    other = lemma(session, "sleep", "verb")
+    missing_translation = plan_request(session, other, ["en", "lt"])
+    assert build_query(missing_translation).context == context
+    adjective_context = build_context("adjective", ["en", "fr"])
+    assert "feminine_form [fr]" in adjective_context
+    assert "verb_transitivity" not in adjective_context
+    assert "number_type" not in adjective_context
+    assert "countability" not in adjective_context
+
+
+def test_prompt_is_canonical_without_mutating_manifest(session: Session) -> None:
+    word = lemma(session, fr="chat", lt="katė")
+    plan = plan_request(session, word, ["en", "lt", "fr"])
+    known = {"lt__grammatical_gender": "feminine", "fr__grammatical_gender": "masculine"}
+    original = replace(plan, known=known)
+    reordered_source = dict(reversed(list(plan.source.items())))
+    reordered_source["translations"] = dict(reversed(list(plan.source["translations"].items())))
+    reordered = replace(
+        plan,
+        source=reordered_source,
+        known=dict(reversed(list(known.items()))),
+        questions=tuple(reversed(plan.questions)),
+    )
+    query = build_query(original)
+    assert query == build_query(reordered)
+    assert all(not line.startswith(" ") for line in query.prompt.splitlines())
+    assert '"guid"' not in query.prompt
+    assert original.source["guid"] == word.guid
