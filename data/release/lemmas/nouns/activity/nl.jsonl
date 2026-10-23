@@ -1,0 +1,13 @@
+{"guid": "N41_001", "grammar_facts": [{"fact_type": "number_type", "fact_value": "regular"}, {"fact_type": "plural", "fact_value": "lezingen"}, {"fact_type": "plural_status", "fact_value": "override"}]}
+{"guid": "N41_010", "grammar_facts": [{"fact_type": "number_type", "fact_value": "regular"}, {"fact_type": "plural", "fact_value": "vissingen"}, {"fact_type": "plural_status", "fact_value": "override"}]}
+{"guid": "N41_016", "grammar_facts": [{"fact_type": "number_type", "fact_value": "singulare_tantum"}]}
+{"guid": "N41_017", "grammar_facts": [{"fact_type": "number_type", "fact_value": "regular"}, {"fact_type": "plural", "fact_value": "films"}, {"fact_type": "plural_status", "fact_value": "override"}]}
+{"guid": "N41_018", "grammar_facts": [{"fact_type": "number_type", "fact_value": "regular"}, {"fact_type": "plural", "fact_value": "spellen"}, {"fact_type": "plural_status", "fact_value": "override"}]}
+{"guid": "N41_020", "grammar_facts": [{"fact_type": "number_type", "fact_value": "singulare_tantum"}, {"fact_type": "plural_status", "fact_value": "not_applicable"}]}
+{"guid": "N41_021", "grammar_facts": [{"fact_type": "number_type", "fact_value": "regular"}, {"fact_type": "plural", "fact_value": "oefeningen"}, {"fact_type": "plural_status", "fact_value": "override"}]}
+{"guid": "N41_022", "grammar_facts": [{"fact_type": "number_type", "fact_value": "regular"}, {"fact_type": "plural", "fact_value": "concerten"}, {"fact_type": "plural_status", "fact_value": "override"}]}
+{"guid": "N41_024", "grammar_facts": [{"fact_type": "number_type", "fact_value": "regular"}, {"fact_type": "plural", "fact_value": "tennissen"}, {"fact_type": "plural_status", "fact_value": "override"}]}
+{"guid": "N41_025", "grammar_facts": [{"fact_type": "number_type", "fact_value": "regular"}, {"fact_type": "plural", "fact_value": "voetballen"}, {"fact_type": "plural_status", "fact_value": "override"}]}
+{"guid": "N41_027", "grammar_facts": [{"fact_type": "number_type", "fact_value": "regular"}, {"fact_type": "plural", "fact_value": "basketballen"}, {"fact_type": "plural_status", "fact_value": "override"}]}
+{"guid": "N41_028", "grammar_facts": [{"fact_type": "number_type", "fact_value": "regular"}, {"fact_type": "plural", "fact_value": "honkballen"}, {"fact_type": "plural_status", "fact_value": "override"}]}
+{"guid": "N41_048", "grammar_facts": [{"fact_type": "number_type", "fact_value": "regular"}, {"fact_type": "plural", "fact_value": "kussen"}, {"fact_type": "plural_status", "fact_value": "override"}]}

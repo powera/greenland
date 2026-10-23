@@ -1,3 +1,4 @@
+{"guid": "N70_001", "grammar_facts": [{"fact_type": "countability", "fact_value": "countable"}, {"fact_type": "number_type", "fact_value": "regular"}, {"fact_type": "animacy", "fact_value": "inanimate"}, {"fact_type": "plural_status", "fact_value": "regular"}]}
 {"guid": "N70_003", "forms": [{"grammatical_form": "noun/en_singular", "text": "football", "is_base_form": true, "ipa": "/ˈfʊtˌbɔl/", "phonetic": "FOOT-bawl"}]}
 {"guid": "N70_004", "forms": [{"grammatical_form": "noun/en_singular", "text": "goalpost", "is_base_form": true, "ipa": "/ˈɡoʊlˌpoʊst/", "phonetic": "GOHL-post"}]}
 {"guid": "N70_005", "forms": [{"grammatical_form": "noun/en_singular", "text": "net", "is_base_form": true, "ipa": "/nɛt/", "phonetic": "NET"}]}

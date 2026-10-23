@@ -1,0 +1,11 @@
+{"guid": "N23_001", "grammar_facts": [{"fact_type": "number_type", "fact_value": "regular"}]}
+{"guid": "N23_002", "grammar_facts": [{"fact_type": "number_type", "fact_value": "regular"}, {"fact_type": "plural", "fact_value": "sorger"}, {"fact_type": "plural_status", "fact_value": "override"}]}
+{"guid": "N23_003", "grammar_facts": [{"fact_type": "number_type", "fact_value": "regular"}, {"fact_type": "plural", "fact_value": "ilskor"}, {"fact_type": "plural_status", "fact_value": "override"}]}
+{"guid": "N23_006", "grammar_facts": [{"fact_type": "number_type", "fact_value": "regular"}, {"fact_type": "plural", "fact_value": "rädslor"}, {"fact_type": "plural_status", "fact_value": "override"}]}
+{"guid": "N23_007", "grammar_facts": [{"fact_type": "number_type", "fact_value": "regular"}, {"fact_type": "plural", "fact_value": "förvåningar"}, {"fact_type": "plural_status", "fact_value": "override"}]}
+{"guid": "N23_008", "grammar_facts": [{"fact_type": "number_type", "fact_value": "regular"}, {"fact_type": "plural", "fact_value": "oror"}, {"fact_type": "plural_status", "fact_value": "override"}]}
+{"guid": "N23_018", "grammar_facts": [{"fact_type": "number_type", "fact_value": "regular"}, {"fact_type": "plural", "fact_value": "hopp"}, {"fact_type": "plural_status", "fact_value": "override"}]}
+{"guid": "N23_025", "grammar_facts": [{"fact_type": "number_type", "fact_value": "regular"}, {"fact_type": "plural", "fact_value": "glädjer"}, {"fact_type": "plural_status", "fact_value": "override"}]}
+{"guid": "N23_026", "grammar_facts": [{"fact_type": "number_type", "fact_value": "regular"}, {"fact_type": "plural", "fact_value": "smärtor"}, {"fact_type": "plural_status", "fact_value": "override"}]}
+{"guid": "N23_028", "grammar_facts": [{"fact_type": "number_type", "fact_value": "regular"}, {"fact_type": "plural", "fact_value": "begär"}, {"fact_type": "plural_status", "fact_value": "override"}]}
+{"guid": "N23_031", "grammar_facts": [{"fact_type": "number_type", "fact_value": "regular"}, {"fact_type": "plural", "fact_value": "kärlekar"}, {"fact_type": "plural_status", "fact_value": "override"}]}

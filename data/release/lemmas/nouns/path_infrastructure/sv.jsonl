@@ -1,0 +1,7 @@
+{"guid": "N13_001", "grammar_facts": [{"fact_type": "number_type", "fact_value": "regular"}, {"fact_type": "plural", "fact_value": "vägar"}, {"fact_type": "plural_status", "fact_value": "override"}]}
+{"guid": "N13_002", "grammar_facts": [{"fact_type": "number_type", "fact_value": "regular"}, {"fact_type": "plural", "fact_value": "broar"}, {"fact_type": "plural_status", "fact_value": "override"}]}
+{"guid": "N13_004", "grammar_facts": [{"fact_type": "number_type", "fact_value": "regular"}, {"fact_type": "plural", "fact_value": "gator"}, {"fact_type": "plural_status", "fact_value": "override"}]}
+{"guid": "N13_005", "grammar_facts": [{"fact_type": "number_type", "fact_value": "regular"}, {"fact_type": "plural", "fact_value": "motorvägar"}, {"fact_type": "plural_status", "fact_value": "override"}]}
+{"guid": "N13_011", "grammar_facts": [{"fact_type": "number_type", "fact_value": "regular"}, {"fact_type": "plural", "fact_value": "scener"}, {"fact_type": "plural_status", "fact_value": "override"}]}
+{"guid": "N13_032", "grammar_facts": [{"fact_type": "number_type", "fact_value": "regular"}, {"fact_type": "plural", "fact_value": "tunnelbanor"}, {"fact_type": "plural_status", "fact_value": "override"}]}
+{"guid": "N13_033", "grammar_facts": [{"fact_type": "number_type", "fact_value": "regular"}, {"fact_type": "plural", "fact_value": "staket"}, {"fact_type": "plural_status", "fact_value": "override"}]}

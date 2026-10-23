@@ -1,0 +1,5 @@
+{"guid": "N05_001", "grammar_facts": [{"fact_type": "number_type", "fact_value": "regular"}, {"fact_type": "plural", "fact_value": "bomen"}, {"fact_type": "plural_status", "fact_value": "override"}]}
+{"guid": "N05_002", "grammar_facts": [{"fact_type": "number_type", "fact_value": "regular"}, {"fact_type": "plural", "fact_value": "bloemen"}, {"fact_type": "plural_status", "fact_value": "override"}]}
+{"guid": "N05_003", "grammar_facts": [{"fact_type": "number_type", "fact_value": "regular"}, {"fact_type": "plural", "fact_value": "grassen"}, {"fact_type": "plural_status", "fact_value": "override"}]}
+{"guid": "N05_005", "grammar_facts": [{"fact_type": "number_type", "fact_value": "regular"}, {"fact_type": "plural", "fact_value": "rozen"}, {"fact_type": "plural_status", "fact_value": "override"}]}
+{"guid": "N05_014", "grammar_facts": [{"fact_type": "number_type", "fact_value": "regular"}, {"fact_type": "plural", "fact_value": "planten"}, {"fact_type": "plural_status", "fact_value": "override"}]}

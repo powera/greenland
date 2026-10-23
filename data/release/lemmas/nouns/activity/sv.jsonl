@@ -1,0 +1,14 @@
+{"guid": "N41_001", "grammar_facts": [{"fact_type": "number_type", "fact_value": "regular"}, {"fact_type": "plural", "fact_value": "läsningar"}, {"fact_type": "plural_status", "fact_value": "override"}]}
+{"guid": "N41_004", "grammar_facts": [{"fact_type": "number_type", "fact_value": "regular"}, {"fact_type": "plural", "fact_value": "målningar"}, {"fact_type": "plural_status", "fact_value": "override"}]}
+{"guid": "N41_010", "grammar_facts": [{"fact_type": "number_type", "fact_value": "regular"}, {"fact_type": "plural", "fact_value": "fisken"}, {"fact_type": "plural_status", "fact_value": "override"}]}
+{"guid": "N41_016", "grammar_facts": [{"fact_type": "number_type", "fact_value": "regular"}, {"fact_type": "plural", "fact_value": "musiker"}, {"fact_type": "plural_status", "fact_value": "override"}]}
+{"guid": "N41_017", "grammar_facts": [{"fact_type": "number_type", "fact_value": "regular"}, {"fact_type": "plural", "fact_value": "filmer"}, {"fact_type": "plural_status", "fact_value": "override"}]}
+{"guid": "N41_018", "grammar_facts": [{"fact_type": "number_type", "fact_value": "regular"}, {"fact_type": "plural", "fact_value": "spel"}, {"fact_type": "plural_status", "fact_value": "override"}]}
+{"guid": "N41_020", "grammar_facts": [{"fact_type": "number_type", "fact_value": "singulare_tantum"}, {"fact_type": "plural_status", "fact_value": "not_applicable"}]}
+{"guid": "N41_021", "grammar_facts": [{"fact_type": "number_type", "fact_value": "regular"}, {"fact_type": "plural", "fact_value": "motioner"}, {"fact_type": "plural_status", "fact_value": "override"}]}
+{"guid": "N41_022", "grammar_facts": [{"fact_type": "number_type", "fact_value": "regular"}, {"fact_type": "plural", "fact_value": "konserter"}, {"fact_type": "plural_status", "fact_value": "override"}]}
+{"guid": "N41_024", "grammar_facts": [{"fact_type": "number_type", "fact_value": "regular"}, {"fact_type": "plural", "fact_value": "tennis"}, {"fact_type": "plural_status", "fact_value": "override"}]}
+{"guid": "N41_025", "grammar_facts": [{"fact_type": "number_type", "fact_value": "regular"}, {"fact_type": "plural", "fact_value": "fotbollar"}, {"fact_type": "plural_status", "fact_value": "override"}]}
+{"guid": "N41_027", "grammar_facts": [{"fact_type": "number_type", "fact_value": "regular"}, {"fact_type": "plural", "fact_value": "basket"}, {"fact_type": "plural_status", "fact_value": "override"}]}
+{"guid": "N41_028", "grammar_facts": [{"fact_type": "number_type", "fact_value": "regular"}, {"fact_type": "plural", "fact_value": "basebollar"}, {"fact_type": "plural_status", "fact_value": "override"}]}
+{"guid": "N41_048", "grammar_facts": [{"fact_type": "number_type", "fact_value": "regular"}, {"fact_type": "plural", "fact_value": "kyssar"}, {"fact_type": "plural_status", "fact_value": "override"}]}

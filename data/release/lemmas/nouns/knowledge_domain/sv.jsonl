@@ -1,0 +1,4 @@
+{"guid": "N21_001", "grammar_facts": [{"fact_type": "number_type", "fact_value": "regular"}, {"fact_type": "plural", "fact_value": "vetenskaper"}, {"fact_type": "plural_status", "fact_value": "override"}]}
+{"guid": "N21_002", "grammar_facts": [{"fact_type": "number_type", "fact_value": "regular"}, {"fact_type": "plural", "fact_value": "historior"}, {"fact_type": "plural_status", "fact_value": "override"}]}
+{"guid": "N21_005", "grammar_facts": [{"fact_type": "number_type", "fact_value": "regular"}, {"fact_type": "plural", "fact_value": "geografier"}, {"fact_type": "plural_status", "fact_value": "override"}]}
+{"guid": "N21_009", "grammar_facts": [{"fact_type": "number_type", "fact_value": "regular"}, {"fact_type": "plural", "fact_value": "matter"}, {"fact_type": "plural_status", "fact_value": "override"}]}

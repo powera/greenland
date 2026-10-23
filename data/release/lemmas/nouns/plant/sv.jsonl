@@ -1,0 +1,5 @@
+{"guid": "N05_001", "grammar_facts": [{"fact_type": "number_type", "fact_value": "regular"}, {"fact_type": "plural", "fact_value": "träd"}, {"fact_type": "plural_status", "fact_value": "override"}]}
+{"guid": "N05_002", "grammar_facts": [{"fact_type": "number_type", "fact_value": "regular"}, {"fact_type": "plural", "fact_value": "blommor"}, {"fact_type": "plural_status", "fact_value": "override"}]}
+{"guid": "N05_003", "grammar_facts": [{"fact_type": "number_type", "fact_value": "regular"}, {"fact_type": "plural", "fact_value": "gräs"}, {"fact_type": "plural_status", "fact_value": "override"}]}
+{"guid": "N05_005", "grammar_facts": [{"fact_type": "number_type", "fact_value": "regular"}, {"fact_type": "plural", "fact_value": "rosor"}, {"fact_type": "plural_status", "fact_value": "override"}]}
+{"guid": "N05_014", "grammar_facts": [{"fact_type": "number_type", "fact_value": "regular"}, {"fact_type": "plural", "fact_value": "växter"}, {"fact_type": "plural_status", "fact_value": "override"}]}

@@ -1,7 +1,27 @@
 {"guid": "N09_001", "grammar_facts": [{"fact_type": "number_type", "fact_value": "regular"}, {"fact_type": "plural", "fact_value": "overhemden"}, {"fact_type": "plural_status", "fact_value": "override"}]}
+{"guid": "N09_002", "grammar_facts": [{"fact_type": "number_type", "fact_value": "regular"}, {"fact_type": "plural", "fact_value": "broeken"}, {"fact_type": "plural_status", "fact_value": "override"}]}
 {"guid": "N09_003", "grammar_facts": [{"fact_type": "number_type", "fact_value": "regular"}, {"fact_type": "plural", "fact_value": "jurken"}, {"fact_type": "plural_status", "fact_value": "override"}]}
+{"guid": "N09_004", "grammar_facts": [{"fact_type": "number_type", "fact_value": "regular"}, {"fact_type": "plural", "fact_value": "jassen"}, {"fact_type": "plural_status", "fact_value": "override"}]}
 {"guid": "N09_005", "grammar_facts": [{"fact_type": "number_type", "fact_value": "regular"}, {"fact_type": "plural", "fact_value": "jacks"}, {"fact_type": "plural_status", "fact_value": "override"}]}
+{"guid": "N09_006", "grammar_facts": [{"fact_type": "number_type", "fact_value": "regular"}, {"fact_type": "plural", "fact_value": "schoenen"}, {"fact_type": "plural_status", "fact_value": "override"}]}
+{"guid": "N09_007", "grammar_facts": [{"fact_type": "number_type", "fact_value": "regular"}, {"fact_type": "plural", "fact_value": "sokken"}, {"fact_type": "plural_status", "fact_value": "override"}]}
 {"guid": "N09_008", "grammar_facts": [{"fact_type": "number_type", "fact_value": "regular"}, {"fact_type": "plural", "fact_value": "hoeden"}, {"fact_type": "plural_status", "fact_value": "override"}]}
 {"guid": "N09_009", "grammar_facts": [{"fact_type": "number_type", "fact_value": "regular"}, {"fact_type": "plural", "fact_value": "handschoenen"}, {"fact_type": "plural_status", "fact_value": "override"}]}
+{"guid": "N09_010", "grammar_facts": [{"fact_type": "number_type", "fact_value": "regular"}, {"fact_type": "plural", "fact_value": "stropdassen"}, {"fact_type": "plural_status", "fact_value": "override"}]}
 {"guid": "N09_011", "grammar_facts": [{"fact_type": "number_type", "fact_value": "regular"}, {"fact_type": "plural", "fact_value": "truien"}, {"fact_type": "plural_status", "fact_value": "override"}]}
 {"guid": "N09_012", "grammar_facts": [{"fact_type": "number_type", "fact_value": "singulare_tantum"}, {"fact_type": "plural_status", "fact_value": "not_applicable"}]}
+{"guid": "N09_013", "grammar_facts": [{"fact_type": "number_type", "fact_value": "regular"}, {"fact_type": "plural", "fact_value": "rokken"}, {"fact_type": "plural_status", "fact_value": "override"}]}
+{"guid": "N09_014", "grammar_facts": [{"fact_type": "number_type", "fact_value": "regular"}, {"fact_type": "plural", "fact_value": "bh's"}, {"fact_type": "plural_status", "fact_value": "override"}]}
+{"guid": "N09_015", "grammar_facts": [{"fact_type": "number_type", "fact_value": "regular"}, {"fact_type": "plural", "fact_value": "riemen"}, {"fact_type": "plural_status", "fact_value": "override"}]}
+{"guid": "N09_016", "grammar_facts": [{"fact_type": "number_type", "fact_value": "regular"}, {"fact_type": "plural", "fact_value": "oorbellen"}, {"fact_type": "plural_status", "fact_value": "override"}]}
+{"guid": "N09_017", "grammar_facts": [{"fact_type": "number_type", "fact_value": "regular"}, {"fact_type": "plural", "fact_value": "ringen"}, {"fact_type": "plural_status", "fact_value": "override"}]}
+{"guid": "N09_018", "grammar_facts": [{"fact_type": "number_type", "fact_value": "regular"}, {"fact_type": "plural", "fact_value": "sjaals"}, {"fact_type": "plural_status", "fact_value": "override"}]}
+{"guid": "N09_021", "grammar_facts": [{"fact_type": "number_type", "fact_value": "regular"}, {"fact_type": "plural", "fact_value": "spijkerbroeken"}, {"fact_type": "plural_status", "fact_value": "override"}]}
+{"guid": "N09_022", "grammar_facts": [{"fact_type": "number_type", "fact_value": "regular"}, {"fact_type": "plural", "fact_value": "schorten"}, {"fact_type": "plural_status", "fact_value": "override"}]}
+{"guid": "N09_023", "grammar_facts": [{"fact_type": "number_type", "fact_value": "regular"}, {"fact_type": "plural", "fact_value": "regenjassen"}, {"fact_type": "plural_status", "fact_value": "override"}]}
+{"guid": "N09_025", "grammar_facts": [{"fact_type": "number_type", "fact_value": "regular"}, {"fact_type": "plural", "fact_value": "korte broeken"}, {"fact_type": "plural_status", "fact_value": "override"}]}
+{"guid": "N09_026", "grammar_facts": [{"fact_type": "number_type", "fact_value": "regular"}, {"fact_type": "plural", "fact_value": "pakken"}, {"fact_type": "plural_status", "fact_value": "override"}]}
+{"guid": "N09_028", "grammar_facts": [{"fact_type": "number_type", "fact_value": "regular"}, {"fact_type": "plural", "fact_value": "zakken"}, {"fact_type": "plural_status", "fact_value": "override"}]}
+{"guid": "N09_032", "grammar_facts": [{"fact_type": "number_type", "fact_value": "regular"}, {"fact_type": "plural", "fact_value": "T-shirts"}, {"fact_type": "plural_status", "fact_value": "override"}]}
+{"guid": "N09_034", "grammar_facts": [{"fact_type": "number_type", "fact_value": "plurale_tantum"}, {"fact_type": "plural", "fact_value": "sieraden"}, {"fact_type": "plural_status", "fact_value": "override"}]}
+{"guid": "N09_037", "grammar_facts": [{"fact_type": "number_type", "fact_value": "regular"}, {"fact_type": "plural", "fact_value": "tops"}, {"fact_type": "plural_status", "fact_value": "override"}]}

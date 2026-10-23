@@ -1,5 +1,26 @@
 {"guid": "N25_001", "grammar_facts": [{"fact_type": "number_type", "fact_value": "regular"}, {"fact_type": "plural", "fact_value": "liv"}, {"fact_type": "plural_status", "fact_value": "override"}]}
 {"guid": "N25_002", "grammar_facts": [{"fact_type": "number_type", "fact_value": "regular"}, {"fact_type": "plural", "fact_value": "dagar"}, {"fact_type": "plural_status", "fact_value": "override"}]}
+{"guid": "N25_003", "grammar_facts": [{"fact_type": "number_type", "fact_value": "regular"}, {"fact_type": "plural", "fact_value": "nätter"}, {"fact_type": "plural_status", "fact_value": "override"}]}
+{"guid": "N25_004", "grammar_facts": [{"fact_type": "number_type", "fact_value": "regular"}, {"fact_type": "plural", "fact_value": "morgnar"}, {"fact_type": "plural_status", "fact_value": "override"}]}
+{"guid": "N25_005", "grammar_facts": [{"fact_type": "number_type", "fact_value": "regular"}, {"fact_type": "plural", "fact_value": "kvällar"}, {"fact_type": "plural_status", "fact_value": "override"}]}
 {"guid": "N25_007", "grammar_facts": [{"fact_type": "number_type", "fact_value": "regular"}, {"fact_type": "plural", "fact_value": "år"}, {"fact_type": "plural_status", "fact_value": "override"}]}
-{"guid": "N25_029", "synonyms": [{"grammatical_form": "synonym", "text": "period"}]}
+{"guid": "N25_008", "grammar_facts": [{"fact_type": "number_type", "fact_value": "regular"}, {"fact_type": "plural", "fact_value": "månader"}, {"fact_type": "plural_status", "fact_value": "override"}]}
+{"guid": "N25_009", "grammar_facts": [{"fact_type": "number_type", "fact_value": "regular"}, {"fact_type": "plural", "fact_value": "veckor"}, {"fact_type": "plural_status", "fact_value": "override"}]}
+{"guid": "N25_010", "grammar_facts": [{"fact_type": "number_type", "fact_value": "regular"}, {"fact_type": "plural", "fact_value": "timmar"}, {"fact_type": "plural_status", "fact_value": "override"}]}
+{"guid": "N25_011", "grammar_facts": [{"fact_type": "number_type", "fact_value": "regular"}, {"fact_type": "plural", "fact_value": "minuter"}, {"fact_type": "plural_status", "fact_value": "override"}]}
+{"guid": "N25_012", "grammar_facts": [{"fact_type": "number_type", "fact_value": "regular"}, {"fact_type": "plural", "fact_value": "ögonblick"}, {"fact_type": "plural_status", "fact_value": "override"}]}
+{"guid": "N25_013", "grammar_facts": [{"fact_type": "number_type", "fact_value": "regular"}, {"fact_type": "plural", "fact_value": "dödar"}, {"fact_type": "plural_status", "fact_value": "override"}]}
+{"guid": "N25_020", "grammar_facts": [{"fact_type": "number_type", "fact_value": "regular"}, {"fact_type": "plural", "fact_value": "förflutna"}, {"fact_type": "plural_status", "fact_value": "override"}]}
+{"guid": "N25_021", "grammar_facts": [{"fact_type": "number_type", "fact_value": "regular"}, {"fact_type": "plural", "fact_value": "åldrar"}, {"fact_type": "plural_status", "fact_value": "override"}]}
+{"guid": "N25_022", "grammar_facts": [{"fact_type": "number_type", "fact_value": "regular"}, {"fact_type": "plural", "fact_value": "framtider"}, {"fact_type": "plural_status", "fact_value": "override"}]}
+{"guid": "N25_023", "grammar_facts": [{"fact_type": "number_type", "fact_value": "regular"}, {"fact_type": "plural", "fact_value": "vintrar"}, {"fact_type": "plural_status", "fact_value": "override"}]}
+{"guid": "N25_024", "grammar_facts": [{"fact_type": "number_type", "fact_value": "regular"}, {"fact_type": "plural", "fact_value": "somrar"}, {"fact_type": "plural_status", "fact_value": "override"}]}
+{"guid": "N25_025", "grammar_facts": [{"fact_type": "number_type", "fact_value": "regular"}, {"fact_type": "plural", "fact_value": "vårar"}, {"fact_type": "plural_status", "fact_value": "override"}]}
+{"guid": "N25_026", "grammar_facts": [{"fact_type": "number_type", "fact_value": "regular"}, {"fact_type": "plural", "fact_value": "höstar"}, {"fact_type": "plural_status", "fact_value": "override"}]}
+{"guid": "N25_028", "grammar_facts": [{"fact_type": "number_type", "fact_value": "regular"}, {"fact_type": "plural", "fact_value": "århundraden"}, {"fact_type": "plural_status", "fact_value": "override"}]}
+{"guid": "N25_029", "synonyms": [{"grammatical_form": "synonym", "text": "period"}], "grammar_facts": [{"fact_type": "number_type", "fact_value": "regular"}, {"fact_type": "plural", "fact_value": "perioder"}, {"fact_type": "plural_status", "fact_value": "override"}]}
+{"guid": "N25_030", "grammar_facts": [{"fact_type": "number_type", "fact_value": "regular"}, {"fact_type": "plural", "fact_value": "sekunder"}, {"fact_type": "plural_status", "fact_value": "override"}]}
+{"guid": "N25_031", "grammar_facts": [{"fact_type": "number_type", "fact_value": "regular"}, {"fact_type": "plural", "fact_value": "eftermiddagar"}, {"fact_type": "plural_status", "fact_value": "override"}]}
+{"guid": "N25_032", "grammar_facts": [{"fact_type": "number_type", "fact_value": "regular"}, {"fact_type": "plural", "fact_value": "helger"}, {"fact_type": "plural_status", "fact_value": "override"}]}
+{"guid": "N25_033", "grammar_facts": [{"fact_type": "number_type", "fact_value": "regular"}, {"fact_type": "plural", "fact_value": "midnätter"}, {"fact_type": "plural_status", "fact_value": "override"}]}
 {"guid": "N25_036", "grammar_facts": [{"fact_type": "number_type", "fact_value": "regular"}, {"fact_type": "plural", "fact_value": "datum"}, {"fact_type": "plural_status", "fact_value": "override"}]}

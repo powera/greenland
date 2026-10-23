@@ -1,0 +1,4 @@
+{"guid": "N75_001", "grammar_facts": [{"fact_type": "number_type", "fact_value": "plurale_tantum"}, {"fact_type": "plural", "fact_value": "kontanter"}, {"fact_type": "plural_status", "fact_value": "override"}]}
+{"guid": "N75_002", "grammar_facts": [{"fact_type": "number_type", "fact_value": "plurale_tantum"}, {"fact_type": "plural", "fact_value": "pengar"}, {"fact_type": "plural_status", "fact_value": "override"}]}
+{"guid": "N75_004", "grammar_facts": [{"fact_type": "number_type", "fact_value": "regular"}, {"fact_type": "plural", "fact_value": "växlar"}, {"fact_type": "plural_status", "fact_value": "override"}]}
+{"guid": "N75_005", "grammar_facts": [{"fact_type": "number_type", "fact_value": "regular"}, {"fact_type": "plural", "fact_value": "mynt"}, {"fact_type": "plural_status", "fact_value": "override"}]}

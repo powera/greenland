@@ -1,2 +1,2 @@
-{"guid": "N14_093", "grammar_facts": [{"fact_type": "grammatical_gender", "fact_value": "masculine"}]}
+{"guid": "N14_093", "grammar_facts": [{"fact_type": "grammatical_gender", "fact_value": "masculine"}, {"fact_type": "countability", "fact_value": "both"}, {"fact_type": "number_type", "fact_value": "regular"}, {"fact_type": "plural_status", "fact_value": "regular"}]}
 {"guid": "N14_096", "grammar_facts": [{"fact_type": "grammatical_gender", "fact_value": "masculine"}]}

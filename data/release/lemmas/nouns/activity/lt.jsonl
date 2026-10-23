@@ -1,25 +1,26 @@
-{"guid": "N41_001", "grammar_facts": [{"fact_type": "grammatical_gender", "fact_value": "masculine"}]}
+{"guid": "N41_001", "grammar_facts": [{"fact_type": "grammatical_gender", "fact_value": "masculine"}, {"fact_type": "countability", "fact_value": "both"}, {"fact_type": "number_type", "fact_value": "regular"}]}
 {"guid": "N41_002", "grammar_facts": [{"fact_type": "grammatical_gender", "fact_value": "masculine"}]}
 {"guid": "N41_003", "grammar_facts": [{"fact_type": "grammatical_gender", "fact_value": "masculine"}]}
-{"guid": "N41_004", "grammar_facts": [{"fact_type": "grammatical_gender", "fact_value": "feminine"}]}
+{"guid": "N41_004", "forms": [{"grammatical_form": "noun/lt_nominative_singular", "text": "tapyba", "is_base_form": true}, {"grammatical_form": "noun/lt_nominative_plural", "text": "tapybos", "is_base_form": false}, {"grammatical_form": "noun/lt_genitive_singular", "text": "tapybos", "is_base_form": false}, {"grammatical_form": "noun/lt_genitive_plural", "text": "tapybų", "is_base_form": false}, {"grammatical_form": "noun/lt_dative_singular", "text": "tapybai", "is_base_form": false}, {"grammatical_form": "noun/lt_dative_plural", "text": "tapyboms", "is_base_form": false}, {"grammatical_form": "noun/lt_accusative_singular", "text": "tapybą", "is_base_form": false}, {"grammatical_form": "noun/lt_accusative_plural", "text": "tapybas", "is_base_form": false}, {"grammatical_form": "noun/lt_instrumental_singular", "text": "tapyba", "is_base_form": false}, {"grammatical_form": "noun/lt_instrumental_plural", "text": "tapybomis", "is_base_form": false}, {"grammatical_form": "noun/lt_locative_singular", "text": "tapyboje", "is_base_form": false}, {"grammatical_form": "noun/lt_locative_plural", "text": "tapybose", "is_base_form": false}, {"grammatical_form": "noun/lt_vocative_singular", "text": "tapyba", "is_base_form": false}, {"grammatical_form": "noun/lt_vocative_plural", "text": "tapybos", "is_base_form": false}], "grammar_facts": [{"fact_type": "grammatical_gender", "fact_value": "feminine"}, {"fact_type": "countability", "fact_value": "uncountable"}, {"fact_type": "number_type", "fact_value": "singulare_tantum"}]}
 {"guid": "N41_005", "grammar_facts": [{"fact_type": "grammatical_gender", "fact_value": "masculine"}]}
 {"guid": "N41_008", "grammar_facts": [{"fact_type": "grammatical_gender", "fact_value": "masculine"}]}
 {"guid": "N41_009", "grammar_facts": [{"fact_type": "grammatical_gender", "fact_value": "feminine"}]}
-{"guid": "N41_010", "grammar_facts": [{"fact_type": "grammatical_gender", "fact_value": "feminine"}]}
+{"guid": "N41_010", "grammar_facts": [{"fact_type": "grammatical_gender", "fact_value": "feminine"}, {"fact_type": "countability", "fact_value": "uncountable"}, {"fact_type": "number_type", "fact_value": "regular"}]}
 {"guid": "N41_012", "grammar_facts": [{"fact_type": "grammatical_gender", "fact_value": "masculine"}]}
 {"guid": "N41_014", "grammar_facts": [{"fact_type": "grammatical_gender", "fact_value": "feminine"}]}
 {"guid": "N41_015", "grammar_facts": [{"fact_type": "grammatical_gender", "fact_value": "masculine"}]}
-{"guid": "N41_016", "grammar_facts": [{"fact_type": "grammatical_gender", "fact_value": "feminine"}]}
-{"guid": "N41_017", "grammar_facts": [{"fact_type": "grammatical_gender", "fact_value": "masculine"}]}
-{"guid": "N41_018", "grammar_facts": [{"fact_type": "grammatical_gender", "fact_value": "masculine"}]}
+{"guid": "N41_016", "grammar_facts": [{"fact_type": "grammatical_gender", "fact_value": "feminine"}, {"fact_type": "countability", "fact_value": "uncountable"}, {"fact_type": "number_type", "fact_value": "regular"}]}
+{"guid": "N41_017", "grammar_facts": [{"fact_type": "grammatical_gender", "fact_value": "masculine"}, {"fact_type": "countability", "fact_value": "countable"}, {"fact_type": "number_type", "fact_value": "regular"}]}
+{"guid": "N41_018", "grammar_facts": [{"fact_type": "grammatical_gender", "fact_value": "masculine"}, {"fact_type": "countability", "fact_value": "countable"}, {"fact_type": "number_type", "fact_value": "regular"}]}
 {"guid": "N41_019", "grammar_facts": [{"fact_type": "grammatical_gender", "fact_value": "masculine"}]}
-{"guid": "N41_020", "grammar_facts": [{"fact_type": "grammatical_gender", "fact_value": "masculine"}]}
-{"guid": "N41_021", "grammar_facts": [{"fact_type": "grammatical_gender", "fact_value": "feminine"}]}
-{"guid": "N41_022", "grammar_facts": [{"fact_type": "grammatical_gender", "fact_value": "masculine"}]}
+{"guid": "N41_020", "grammar_facts": [{"fact_type": "grammatical_gender", "fact_value": "masculine"}, {"fact_type": "countability", "fact_value": "countable"}, {"fact_type": "number_type", "fact_value": "regular"}]}
+{"guid": "N41_021", "forms": [{"grammatical_form": "noun/lt_nominative_singular", "text": "mankšta", "is_base_form": true}, {"grammatical_form": "noun/lt_nominative_plural", "text": "mankštos", "is_base_form": false}, {"grammatical_form": "noun/lt_genitive_singular", "text": "mankštos", "is_base_form": false}, {"grammatical_form": "noun/lt_genitive_plural", "text": "mankštų", "is_base_form": false}, {"grammatical_form": "noun/lt_dative_singular", "text": "mankštai", "is_base_form": false}, {"grammatical_form": "noun/lt_dative_plural", "text": "mankštoms", "is_base_form": false}, {"grammatical_form": "noun/lt_accusative_singular", "text": "mankštą", "is_base_form": false}, {"grammatical_form": "noun/lt_accusative_plural", "text": "mankštas", "is_base_form": false}, {"grammatical_form": "noun/lt_instrumental_singular", "text": "mankšta", "is_base_form": false}, {"grammatical_form": "noun/lt_instrumental_plural", "text": "mankštomis", "is_base_form": false}, {"grammatical_form": "noun/lt_locative_singular", "text": "mankštoje", "is_base_form": false}, {"grammatical_form": "noun/lt_locative_plural", "text": "mankštose", "is_base_form": false}, {"grammatical_form": "noun/lt_vocative_singular", "text": "mankšta", "is_base_form": false}, {"grammatical_form": "noun/lt_vocative_plural", "text": "mankštos", "is_base_form": false}], "grammar_facts": [{"fact_type": "grammatical_gender", "fact_value": "feminine"}, {"fact_type": "countability", "fact_value": "uncountable"}, {"fact_type": "number_type", "fact_value": "singulare_tantum"}]}
+{"guid": "N41_022", "grammar_facts": [{"fact_type": "grammatical_gender", "fact_value": "masculine"}, {"fact_type": "countability", "fact_value": "countable"}, {"fact_type": "number_type", "fact_value": "regular"}]}
 {"guid": "N41_023", "grammar_facts": [{"fact_type": "grammatical_gender", "fact_value": "masculine"}]}
-{"guid": "N41_024", "grammar_facts": [{"fact_type": "grammatical_gender", "fact_value": "masculine"}]}
-{"guid": "N41_025", "grammar_facts": [{"fact_type": "grammatical_gender", "fact_value": "masculine"}]}
-{"guid": "N41_028", "grammar_facts": [{"fact_type": "grammatical_gender", "fact_value": "masculine"}]}
+{"guid": "N41_024", "grammar_facts": [{"fact_type": "grammatical_gender", "fact_value": "masculine"}, {"fact_type": "countability", "fact_value": "both"}, {"fact_type": "number_type", "fact_value": "regular"}]}
+{"guid": "N41_025", "grammar_facts": [{"fact_type": "grammatical_gender", "fact_value": "masculine"}, {"fact_type": "countability", "fact_value": "both"}, {"fact_type": "number_type", "fact_value": "regular"}]}
+{"guid": "N41_027", "grammar_facts": [{"fact_type": "grammatical_gender", "fact_value": "masculine"}, {"fact_type": "countability", "fact_value": "both"}, {"fact_type": "number_type", "fact_value": "regular"}]}
+{"guid": "N41_028", "grammar_facts": [{"fact_type": "grammatical_gender", "fact_value": "masculine"}, {"fact_type": "countability", "fact_value": "uncountable"}, {"fact_type": "number_type", "fact_value": "regular"}]}
 {"guid": "N41_030", "grammar_facts": [{"fact_type": "grammatical_gender", "fact_value": "masculine"}]}
 {"guid": "N41_031", "grammar_facts": [{"fact_type": "grammatical_gender", "fact_value": "masculine"}]}
 {"guid": "N41_033", "grammar_facts": [{"fact_type": "grammatical_gender", "fact_value": "masculine"}]}
@@ -29,7 +30,7 @@
 {"guid": "N41_044", "grammar_facts": [{"fact_type": "grammatical_gender", "fact_value": "feminine"}]}
 {"guid": "N41_046", "grammar_facts": [{"fact_type": "grammatical_gender", "fact_value": "masculine"}]}
 {"guid": "N41_047", "grammar_facts": [{"fact_type": "grammatical_gender", "fact_value": "feminine"}]}
-{"guid": "N41_048", "grammar_facts": [{"fact_type": "grammatical_gender", "fact_value": "masculine"}]}
+{"guid": "N41_048", "grammar_facts": [{"fact_type": "grammatical_gender", "fact_value": "masculine"}, {"fact_type": "countability", "fact_value": "countable"}, {"fact_type": "number_type", "fact_value": "regular"}]}
 {"guid": "N41_049", "grammar_facts": [{"fact_type": "grammatical_gender", "fact_value": "masculine"}]}
 {"guid": "N41_050", "grammar_facts": [{"fact_type": "grammatical_gender", "fact_value": "masculine"}]}
 {"guid": "N41_051", "grammar_facts": [{"fact_type": "grammatical_gender", "fact_value": "masculine"}]}
@@ -51,7 +52,7 @@
 {"guid": "N41_077", "grammar_facts": [{"fact_type": "grammatical_gender", "fact_value": "feminine"}]}
 {"guid": "N41_078", "grammar_facts": [{"fact_type": "grammatical_gender", "fact_value": "feminine"}]}
 {"guid": "N41_079", "grammar_facts": [{"fact_type": "grammatical_gender", "fact_value": "masculine"}]}
-{"guid": "N41_080", "grammar_facts": [{"fact_type": "grammatical_gender", "fact_value": "masculine"}]}
+{"guid": "N41_080", "grammar_facts": [{"fact_type": "grammatical_gender", "fact_value": "masculine"}, {"fact_type": "countability", "fact_value": "countable"}, {"fact_type": "number_type", "fact_value": "regular"}]}
 {"guid": "N41_081", "grammar_facts": [{"fact_type": "grammatical_gender", "fact_value": "masculine"}]}
 {"guid": "N41_082", "grammar_facts": [{"fact_type": "grammatical_gender", "fact_value": "masculine"}]}
 {"guid": "N41_083", "grammar_facts": [{"fact_type": "grammatical_gender", "fact_value": "feminine"}]}

@@ -1,5 +1,15 @@
+{"guid": "V04_001", "grammar_facts": [{"fact_type": "past_participle", "fact_value": "aprendido"}]}
+{"guid": "V04_002", "grammar_facts": [{"fact_type": "past_participle", "fact_value": "ensinado"}]}
 {"guid": "V04_003", "grammar_facts": [{"fact_type": "past_participle", "fact_value": "lido"}]}
+{"guid": "V04_004", "grammar_facts": [{"fact_type": "past_participle", "fact_value": "escrito"}]}
 {"guid": "V04_006", "grammar_facts": [{"fact_type": "past_participle", "fact_value": "sabido"}]}
 {"guid": "V04_008", "grammar_facts": [{"fact_type": "past_participle", "fact_value": "pensado"}]}
+{"guid": "V04_010", "grammar_facts": [{"fact_type": "past_participle", "fact_value": "precisado"}]}
 {"guid": "V04_011", "grammar_facts": [{"fact_type": "past_participle", "fact_value": "significado"}]}
+{"guid": "V04_012", "grammar_facts": [{"fact_type": "past_participle", "fact_value": "lembrado"}]}
+{"guid": "V04_013", "grammar_facts": [{"fact_type": "past_participle", "fact_value": "entendido"}]}
+{"guid": "V04_021", "grammar_facts": [{"fact_type": "past_participle", "fact_value": "esquecido"}]}
+{"guid": "V04_024", "grammar_facts": [{"fact_type": "past_participle", "fact_value": "contado"}]}
+{"guid": "V04_027", "grammar_facts": [{"fact_type": "past_participle", "fact_value": "escolhido"}]}
 {"guid": "V04_032", "grammar_facts": [{"fact_type": "past_participle", "fact_value": "estudado"}]}
+{"guid": "V04_068", "forms": [{"grammatical_form": "verb/pt_1s_present", "text": "posso", "is_base_form": true}, {"grammatical_form": "verb/pt_2s_present", "text": "podes", "is_base_form": false}, {"grammatical_form": "verb/pt_3s_present", "text": "pode", "is_base_form": false}, {"grammatical_form": "verb/pt_1p_present", "text": "podemos", "is_base_form": false}, {"grammatical_form": "verb/pt_2p_present", "text": "podeis", "is_base_form": false}, {"grammatical_form": "verb/pt_3p_present", "text": "podem", "is_base_form": false}, {"grammatical_form": "verb/pt_1s_past", "text": "pude", "is_base_form": false}, {"grammatical_form": "verb/pt_2s_past", "text": "pudeste", "is_base_form": false}, {"grammatical_form": "verb/pt_3s_past", "text": "pôde", "is_base_form": false}, {"grammatical_form": "verb/pt_1p_past", "text": "pudemos", "is_base_form": false}, {"grammatical_form": "verb/pt_2p_past", "text": "pudestes", "is_base_form": false}, {"grammatical_form": "verb/pt_3p_past", "text": "puderam", "is_base_form": false}, {"grammatical_form": "verb/pt_1s_future", "text": "poderei", "is_base_form": false}, {"grammatical_form": "verb/pt_2s_future", "text": "poderás", "is_base_form": false}, {"grammatical_form": "verb/pt_3s_future", "text": "poderá", "is_base_form": false}, {"grammatical_form": "verb/pt_1p_future", "text": "poderemos", "is_base_form": false}, {"grammatical_form": "verb/pt_2p_future", "text": "podereis", "is_base_form": false}, {"grammatical_form": "verb/pt_3p_future", "text": "poderão", "is_base_form": false}], "grammar_facts": [{"fact_type": "past_participle", "fact_value": "podido"}]}

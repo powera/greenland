@@ -7,6 +7,7 @@
 {"guid": "N76_007", "forms": [{"grammatical_form": "noun/en_singular", "text": "parking ticket", "is_base_form": true}]}
 {"guid": "N76_010", "forms": [{"grammatical_form": "noun/en_singular", "text": "fee", "is_base_form": true, "ipa": "/fi/", "phonetic": "FEE"}]}
 {"guid": "N76_013", "forms": [{"grammatical_form": "noun/en_singular", "text": "pay", "is_base_form": true, "ipa": "/peɪ/", "phonetic": "PEY"}]}
+{"guid": "N76_014", "grammar_facts": [{"fact_type": "countability", "fact_value": "countable"}, {"fact_type": "number_type", "fact_value": "regular"}, {"fact_type": "animacy", "fact_value": "inanimate"}, {"fact_type": "plural_status", "fact_value": "regular"}]}
 {"guid": "N76_018", "forms": [{"grammatical_form": "noun/en_singular", "text": "cost", "is_base_form": true, "ipa": "/kɔst/", "phonetic": "KAWST"}]}
 {"guid": "N76_019", "forms": [{"grammatical_form": "noun/en_singular", "text": "minimum wage", "is_base_form": true}]}
 {"guid": "N76_023", "forms": [{"grammatical_form": "noun/en_singular", "text": "shipping cost", "is_base_form": true}]}
