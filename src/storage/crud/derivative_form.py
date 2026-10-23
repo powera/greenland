@@ -168,7 +168,7 @@ def update_derivative_form(
     notes: Optional[str] = None,
     source: Optional[str] = None,
 ) -> bool:
-    """Update derivative form information.
+    """Update derivative form information.  Flushes; the caller commits.
 
     ``source`` names who is making the edit, for the operation log; None skips
     logging, as does an update where no field actually changes.
@@ -223,7 +223,7 @@ def update_derivative_form(
         extra={"language_code": language_code},
         lemma_id=lemma_id,
     )
-    session.commit()
+    session.flush()
     return True
 
 
@@ -231,7 +231,10 @@ def delete_derivative_form(
     session: Session, derivative_form_id: int, source: Optional[str] = None
 ) -> bool:
     """
-    Delete a specific derivative form.
+    Delete a specific derivative form.  Flushes; the caller commits.
+
+    A database error propagates rather than being rolled back here: a rollback
+    would discard the caller's other pending work too.
 
     Args:
         session: Database session
@@ -240,68 +243,55 @@ def delete_derivative_form(
             logging.
 
     Returns:
-        Success flag
+        True if the form existed and was deleted, False if there was none.
     """
-    try:
-        derivative_form = (
-            session.query(DerivativeForm).filter(DerivativeForm.id == derivative_form_id).first()
+    derivative_form = (
+        session.query(DerivativeForm).filter(DerivativeForm.id == derivative_form_id).first()
+    )
+    if not derivative_form:
+        return False
+    # Logged before the delete, while the row is still there to describe.
+    # The entry outlives it, which is the point.
+    if source is not None:
+        log_entity_operation(
+            session,
+            source=source,
+            operation_type=DERIVATIVE_FORM_DELETE,
+            entity_guid=(derivative_form.lemma.guid if derivative_form.lemma else None),
+            fact={
+                "language_code": derivative_form.language_code,
+                "grammatical_form": derivative_form.grammatical_form,
+                "text": derivative_form.derivative_form_text,
+            },
+            lemma_id=derivative_form.lemma_id,
         )
-        if derivative_form:
-            # Logged before the delete, while the row is still there to
-            # describe. The entry outlives it, which is the point.
-            if source is not None:
-                log_entity_operation(
-                    session,
-                    source=source,
-                    operation_type=DERIVATIVE_FORM_DELETE,
-                    entity_guid=(derivative_form.lemma.guid if derivative_form.lemma else None),
-                    fact={
-                        "language_code": derivative_form.language_code,
-                        "grammatical_form": derivative_form.grammatical_form,
-                        "text": derivative_form.derivative_form_text,
-                    },
-                    lemma_id=derivative_form.lemma_id,
-                )
-            session.delete(derivative_form)
-            session.commit()
-            return True
-        return False
-    except Exception as e:
-        session.rollback()
-        logger.error(f"Error deleting derivative form ID {derivative_form_id}: {e}")
-        return False
+    session.delete(derivative_form)
+    session.flush()
+    return True
 
 
 def delete_derivative_forms_for_token(session: Session, word_token_id: int) -> bool:
     """
-    Delete all derivative forms for a word token.
+    Delete all derivative forms for a word token.  Flushes; the caller commits.
 
     Args:
         session: Database session
         word_token_id: ID of the word token to delete derivative forms for
 
     Returns:
-        Success flag
+        True.  A database error propagates instead of rolling back the
+        caller's transaction.
     """
-    try:
-        # Query all derivative forms for the word token
-        derivative_forms = (
-            session.query(DerivativeForm)
-            .filter(DerivativeForm.word_token_id == word_token_id)
-            .all()
-        )
+    derivative_forms = (
+        session.query(DerivativeForm).filter(DerivativeForm.word_token_id == word_token_id).all()
+    )
 
-        # Delete each derivative form (cascade will handle example sentences)
-        for derivative_form in derivative_forms:
-            session.delete(derivative_form)
+    # Delete each derivative form (cascade will handle example sentences)
+    for derivative_form in derivative_forms:
+        session.delete(derivative_form)
 
-        # Commit the transaction
-        session.commit()
-        return True
-    except Exception as e:
-        session.rollback()
-        logger.error(f"Error deleting derivative forms for word token ID {word_token_id}: {e}")
-        return False
+    session.flush()
+    return True
 
 
 def get_all_derivative_forms_for_token(
@@ -403,53 +393,49 @@ def add_noun_derivative_form(
         notes: Optional notes
 
     Returns:
-        DerivativeForm object or None if creation failed
+        The new DerivativeForm, or the existing one if the form is already
+        recorded.  Flushes but does not commit; a database error propagates
+        instead of rolling back the caller's transaction.
     """
-    try:
-        # Get or create word token
-        word_token = add_word_token(session, form_text, language_code)
+    # Get or create word token
+    word_token = add_word_token(session, form_text, language_code)
 
-        # Check if this derivative form already exists
-        existing_form = (
-            session.query(DerivativeForm)
-            .filter(
-                DerivativeForm.lemma_id == lemma.id,
-                DerivativeForm.derivative_form_text == form_text,
-                DerivativeForm.language_code == language_code,
-                DerivativeForm.grammatical_form == grammatical_form,
-            )
-            .first()
+    # Check if this derivative form already exists
+    existing_form = (
+        session.query(DerivativeForm)
+        .filter(
+            DerivativeForm.lemma_id == lemma.id,
+            DerivativeForm.derivative_form_text == form_text,
+            DerivativeForm.language_code == language_code,
+            DerivativeForm.grammatical_form == grammatical_form,
         )
+        .first()
+    )
 
-        if existing_form:
-            logger.debug(f"Derivative form already exists: {form_text} ({grammatical_form})")
-            result: DerivativeForm = existing_form
-            return result
+    if existing_form:
+        logger.debug(f"Derivative form already exists: {form_text} ({grammatical_form})")
+        result: DerivativeForm = existing_form
+        return result
 
-        # Create new derivative form
-        derivative_form = DerivativeForm(
-            lemma_id=lemma.id,
-            derivative_form_text=form_text,
-            word_token_id=word_token.id,
-            language_code=language_code,
-            grammatical_form=grammatical_form,
-            is_base_form=is_base_form,
-            verified=verified,
-            notes=notes,
-        )
+    # Create new derivative form
+    derivative_form = DerivativeForm(
+        lemma_id=lemma.id,
+        derivative_form_text=form_text,
+        word_token_id=word_token.id,
+        language_code=language_code,
+        grammatical_form=grammatical_form,
+        is_base_form=is_base_form,
+        verified=verified,
+        notes=notes,
+    )
 
-        session.add(derivative_form)
-        session.commit()
+    session.add(derivative_form)
+    session.flush()
 
-        logger.info(
-            f"Added noun derivative form: {form_text} ({grammatical_form}) for lemma {lemma.lemma_text}"
-        )
-        return derivative_form
-
-    except Exception as e:
-        session.rollback()
-        logger.error(f"Failed to add noun derivative form {form_text}: {e}")
-        return None
+    logger.info(
+        f"Added noun derivative form: {form_text} ({grammatical_form}) for lemma {lemma.lemma_text}"
+    )
+    return derivative_form
 
 
 def get_noun_derivative_forms(session: Session, lemma_id: int) -> List[DerivativeForm]:

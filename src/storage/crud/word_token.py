@@ -8,7 +8,10 @@ from storage.models.schema import DerivativeForm, WordToken
 
 
 def add_word_token(session: Session, token: str, language_code: str) -> WordToken:
-    """Add a word token to the database if it doesn't exist, or return existing one."""
+    """Add a word token if it doesn't exist, or return the existing one.
+
+    Flushes for the id but does not commit: the caller owns the transaction.
+    """
     existing: Optional[WordToken] = (
         session.query(WordToken)
         .filter(WordToken.token == token, WordToken.language_code == language_code)
@@ -19,7 +22,7 @@ def add_word_token(session: Session, token: str, language_code: str) -> WordToke
 
     new_token = WordToken(token=token, language_code=language_code)
     session.add(new_token)
-    session.commit()
+    session.flush()
     return new_token
 
 

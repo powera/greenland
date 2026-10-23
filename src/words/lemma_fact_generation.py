@@ -139,4 +139,6 @@ def generate_lemma_fact_for_lemma(
             "model": config.model,
         },
     )
+    # add_lemma_fact leaves the transaction to its caller.
+    session.commit()
     return {**base, "success": True, "fact_value": value, "notes": notes, "confidence": confidence}
