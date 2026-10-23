@@ -126,3 +126,64 @@ def test_ancient_status_is_saved(monkeypatch: pytest.MonkeyPatch) -> None:
     workflow.save_lemma_translations(_Session(), LEMMA, generated, ["la"])
 
     assert stored_metadata == [expected]
+
+
+class _RatedClient(_FakeClient):
+    """Answers each language with ``new-<code>`` at the confidence in ``ratings``."""
+
+    def __init__(self, ratings: Dict[str, float], fail: Optional[List[str]] = None) -> None:
+        super().__init__(fail=fail)
+        self.ratings = ratings
+
+    def query_translations(self, **kwargs: Any) -> Tuple[Dict[str, Any], bool]:
+        languages: List[str] = kwargs["languages"]
+        self.calls.append(languages)
+        if set(languages) & set(self.fail):
+            return {}, False
+        return {
+            LANG_CODE_TO_LLM_FIELD[code]: {
+                "translation": f"new-{code}",
+                "confidence": self.ratings.get(code, 0.95),
+            }
+            for code in languages
+        }, True
+
+
+def test_regenerate_overwrites_only_usable_answers_for_the_chosen_languages(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    """Nothing is cleared up front: a failed or uncertain language keeps its text."""
+    from sqlalchemy import create_engine
+    from sqlalchemy.orm import Session
+
+    from storage.crud.lemma import add_lemma
+    from storage.models.schema import Base
+    from storage.translation_helpers import get_translation, set_translation
+
+    engine = create_engine("sqlite:///:memory:")
+    Base.metadata.create_all(engine)
+    with Session(engine) as session:
+        lemma = add_lemma(
+            session,
+            lemma_text="dog",
+            definition_text="a domesticated carnivore",
+            pos_type="noun",
+            auto_generate_guid=False,
+        )
+        for code in ["fr", "de", "it", "la"]:
+            set_translation(session, lemma, code, f"old-{code}")
+        session.commit()
+
+        client = _RatedClient({"de": 0.2}, fail=["la"])
+        workflow = _workflow(monkeypatch, client)
+        generated, outcome = workflow.regenerate_lemma_translations(
+            session, lemma, ["fr", "de", "la"]
+        )
+
+        assert generated.failed_languages == ["la"]
+        assert outcome.written == ["fr"]
+        assert outcome.uncertain == ["de"]
+        assert get_translation(session, lemma, "fr") == "new-fr"
+        assert get_translation(session, lemma, "de") == "old-de"  # below the floor
+        assert get_translation(session, lemma, "la") == "old-la"  # batch failed
+        assert get_translation(session, lemma, "it") == "old-it"  # not requested

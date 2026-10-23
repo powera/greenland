@@ -67,13 +67,14 @@ def display_batch_summary(results: Dict[str, Any], batch_mode: bool = False) -> 
         print("REGENERATION COMPLETE")
         print("=" * 80)
         print(f"Words processed: {results['total_words_processed']}")
-        print(f"Total translations added: {results['total_translations_added']}")
-        print(f"Total failed: {results['total_failed']}")
+        print(f"Total translations replaced: {results['total_translations_replaced']}")
+        print(f"Total uncertain (old kept): {results['total_uncertain']}")
+        print(f"Total failed (old kept): {results['total_failed']}")
         print()
         for lang_code, lang_results in results["by_language"].items():
             print(f"{lang_results['language_name']}:")
-            print(f"  Deleted: {lang_results['deleted']}")
-            print(f"  Added: {lang_results['added']}")
+            print(f"  Replaced: {lang_results['replaced']}")
+            print(f"  Uncertain: {lang_results['uncertain']}")
             print(f"  Failed: {lang_results['failed']}")
     print("=" * 80)
 

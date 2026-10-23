@@ -72,7 +72,8 @@ def get_argument_parser() -> argparse.ArgumentParser:
     mode_group.add_argument(
         "--regenerate",
         action="store_true",
-        help="Delete and regenerate all non-Lithuanian translations (destructive)",
+        help="Ask again for the --languages translations (tiers 1-2 by default) and overwrite "
+        "them where the new answer is confident; other languages are untouched",
     )
 
     add_language_args(parser)
@@ -215,7 +216,8 @@ def _print_enqueue_results(session: Any, results: Any, dry_run: bool) -> None:
 
 def _confirm_regeneration(agent: Any, args: argparse.Namespace) -> bool:
     """Show what regeneration would do and ask whether to proceed."""
-    from words.translation_workflow import count_curated_lemmas
+    from storage.translation_helpers import split_llm_language_batches
+    from words.translation_workflow import count_curated_lemmas, resolve_generation_languages
 
     session = agent.get_session()
     try:
@@ -223,13 +225,16 @@ def _confirm_regeneration(agent: Any, args: argparse.Namespace) -> bool:
     finally:
         session.close()
 
+    languages = resolve_generation_languages(args.languages)
+    calls = word_count * len(split_llm_language_batches(languages))
     print(f"\nREGENERATION MODE")
-    print(f"This will:")
-    print(f"  1. Delete all non-Lithuanian translations")
+    print(f"Languages ({len(languages)}): {', '.join(languages)}")
+    print("Each is asked again and overwritten where the new answer is confident;")
+    print("a failed or uncertain answer keeps the old translation.")
     if args.use_workqueue:
-        print(f"  2. Enqueue {word_count} regeneration tasks for barsukas worker")
+        print(f"This will enqueue {word_count} regeneration tasks for the barsukas worker.")
     else:
-        print(f"  2. Regenerate them fresh using {word_count} LLM API calls (1 per word)")
+        print(f"This will make ~{calls} LLM call(s).")
     print(f"\nModel: {args.model}")
     print(f"Words to process: {word_count}")
 
@@ -265,6 +270,7 @@ def _run_regenerate(agent: Any, args: argparse.Namespace) -> int:
             enqueue_results = enqueue_translation_regeneration(
                 session,
                 select_curated_lemmas(session, args.limit),
+                languages=args.languages,
                 dry_run=args.dry_run,
             )
             _print_enqueue_results(session, enqueue_results, args.dry_run)
@@ -275,7 +281,9 @@ def _run_regenerate(agent: Any, args: argparse.Namespace) -> int:
             session.close()
         return 0
 
-    results = agent.regenerate_all_translations(limit=args.limit, dry_run=args.dry_run, lemmas=None)
+    results = agent.regenerate_all_translations(
+        limit=args.limit, dry_run=args.dry_run, lemmas=None, languages=args.languages
+    )
     cli_display.display_batch_summary(results)
     return 1 if results["total_failed"] else 0
 
