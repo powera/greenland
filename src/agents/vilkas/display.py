@@ -47,6 +47,8 @@ def print_fix_results(results: dict[str, Any], dry_run: bool = False) -> None:
             print(f"  Processed: {results['processed']}")
             print(f"  Successful: {results['successful']}")
             print(f"  Failed: {results['failed']}")
+            if results.get("uncertain"):
+                print(f"  Uncertain (recorded, not stored): {results['uncertain']}")
             if results.get("uncertain_skipped"):
                 print(
                     f"  Skipped as uncertain: {results['uncertain_skipped']} "

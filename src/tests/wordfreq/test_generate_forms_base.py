@@ -13,6 +13,7 @@ from storage.models.uncertain_llm_result import TOPIC_FORMS
 from storage.translation_helpers import set_translation
 from wordfreq.translation.generate_forms_base import (
     FormGenerationConfig,
+    FormsOutcome,
     extract_gender_from_forms,
     process_lemma_forms,
 )
@@ -70,11 +71,25 @@ def test_live_low_confidence_forms_are_recorded_and_skipped(tmp_path: Path) -> N
     with patch(
         "wordfreq.translation.generate_forms_base.generate_forms", return_value=answer
     ) as generate:
-        assert not process_lemma_forms(client, lemma_id, config, task_config)
-        assert not process_lemma_forms(client, lemma_id, config, task_config)
+        # Falsy like a failure, but distinguishable from one.
+        first = process_lemma_forms(client, lemma_id, config, task_config)
+        assert not first
+        assert first is FormsOutcome.UNCERTAIN
+        assert (
+            process_lemma_forms(client, lemma_id, config, task_config)
+            is FormsOutcome.SKIPPED_UNCERTAIN
+        )
         assert generate.call_count == 1
         process_lemma_forms(client, lemma_id, config, task_config, retry_uncertain=True)
         assert generate.call_count == 2
+
+    with patch(
+        "wordfreq.translation.generate_forms_base.generate_forms",
+        return_value=FormsAnswer({}, False, None, None),
+    ):
+        failed = process_lemma_forms(client, lemma_id, config, task_config, retry_uncertain=True)
+        assert failed is FormsOutcome.FAILED
+        assert not failed.is_uncertain
 
     with Session(create_engine(f"sqlite:///{db_path}")) as check:
         assert check.query(DerivativeForm).filter_by(lemma_id=lemma_id).count() == 0

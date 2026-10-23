@@ -107,11 +107,13 @@ def generate_forms_for_lemma(
     # Generate forms using the task system.  Asked for one lemma by hand, so a
     # model's earlier uncertainty does not stop it asking again; a new
     # uncertain answer is still recorded rather than stored.
-    success = process_lemma_for_task(task_key, lemma.id, config, client, retry_uncertain=True)
+    outcome = process_lemma_for_task(task_key, lemma.id, config, client, retry_uncertain=True)
 
-    if success:
+    if outcome:
         return True, None
-    return False, (
-        f"Could not generate {lang_code} {pos_type} forms "
-        "(or the model was below confidence; see uncertain_llm_results)"
-    )
+    if outcome.is_uncertain:
+        return False, (
+            f"The model was below confidence on the {lang_code} {pos_type} forms; "
+            "recorded in uncertain_llm_results"
+        )
+    return False, f"Could not generate {lang_code} {pos_type} forms"

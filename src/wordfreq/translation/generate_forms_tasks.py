@@ -18,6 +18,7 @@ from storage.backend.config import DataSourceConfig
 from wordfreq.translation.client import LinguisticClient
 from wordfreq.translation.generate_forms_base import (
     FormGenerationConfig,
+    FormsOutcome,
     get_lemmas_needing_forms,
     get_lemmas_with_translation,
     process_lemma_forms,
@@ -119,11 +120,11 @@ def process_lemma_for_task(
     data_config: DataSourceConfig,
     client: Optional[LinguisticClient] = None,
     retry_uncertain: bool = False,
-) -> bool:
+) -> FormsOutcome:
     """Process a single lemma for a registered task.
 
-    A lemma whose forms a model was uncertain of is skipped (False) unless
-    ``retry_uncertain``.
+    A lemma whose forms a model was uncertain of is skipped
+    (FormsOutcome.SKIPPED_UNCERTAIN, falsy) unless ``retry_uncertain``.
     """
 
     if task_key not in FORM_GENERATION_TASKS:
