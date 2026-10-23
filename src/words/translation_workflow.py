@@ -90,6 +90,13 @@ class LemmaTranslations:
     # The model's confidence per language; None for cached translations,
     # which are stored as they are.
     confidences: Optional[Dict[str, Optional[float]]] = None
+    # translation_status/translation_status_note per language, as
+    # convert_llm_response_to_translation_metadata returns them; only the
+    # ancient group carries any.
+    metadata: Dict[str, Dict[str, Optional[str]]] = field(default_factory=dict)
+    # Languages whose request failed while others succeeded.  ``error`` stays
+    # None, since there is something to save, but the run did not finish.
+    failed_languages: List[str] = field(default_factory=list)
 
 
 def select_curated_lemmas(session: Any, limit: Optional[int] = None) -> List[Lemma]:
@@ -399,9 +406,10 @@ class TranslationWorkflow:
                 else ("en", lemma.lemma_text)
             )
 
-            # One request per batch: the prompt builder truncates anything past
+            # One request per batch: the prompt builder refuses anything past
             # one request's worth, and ancient languages must go on their own.
             llm_response: Dict[str, Any] = {}
+            failed_languages: List[str] = []
             for language_batch in split_llm_language_batches(list(missing_languages)):
                 batch_response, success = client.query_translations(
                     english_word=lemma.lemma_text,
@@ -414,6 +422,7 @@ class TranslationWorkflow:
                 if success and batch_response:
                     llm_response.update(batch_response)
                 else:
+                    failed_languages.extend(language_batch)
                     logger.error(
                         "Translation batch %s failed for '%s'", language_batch, lemma.lemma_text
                     )
@@ -429,6 +438,8 @@ class TranslationWorkflow:
             translations=convert_llm_response_to_lang_codes(llm_response),
             source=f"voras-agent/{self.config.model}",
             confidences=convert_llm_response_to_confidences(llm_response),
+            metadata=convert_llm_response_to_translation_metadata(llm_response),
+            failed_languages=failed_languages,
         )
 
     def save_lemma_translations(
@@ -450,7 +461,7 @@ class TranslationWorkflow:
             session,
             lemma,
             generated.translations,
-            {},
+            generated.metadata,
             languages,
             source=generated.source or f"voras-agent/{self.config.model}",
             confidences=generated.confidences,
