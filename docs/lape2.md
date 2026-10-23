@@ -57,10 +57,15 @@ creates only applicable missing questions. A plural check includes a missing
 number classification, and English comparison checks include a missing
 gradability classification, in the same request.
 
-`prompts/grammar/lape2/context.txt` is fixed across words and language subsets.
-The prompt lists the sense, supplied translations, known facts, and missing
+The shared rules in `prompts/grammar/lape2/context.txt` are followed by a readable
+fact reference selected by part of speech and the requested language set. Context
+includes all applicable facts, independently of missing translations, stored facts,
+uncertainty, and `--facts` filters. Language ordering does not affect it.
+
+The prompt uses deterministically ordered JSON with line breaks and no indentation,
+omits the internal GUID (retained in the saved manifest), and lists the sense, supplied translations, known facts, and missing
 questions. The schema requires exactly those questions; each answer contains
-`value`, `confidence`, and `explanation`. One question's confidence never gates
+`value` and `confidence`. One question's confidence never gates
 an unrelated answer. Output allowance scales with the number of questions.
 Question instructions appear only in the prompt, not repeated as schema
 descriptions. Lape2 explicitly allows up to 3,072 input-schema tokens; other
