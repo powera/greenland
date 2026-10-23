@@ -23,7 +23,7 @@ Supported languages and forms:
 import logging
 import time
 from datetime import datetime
-from typing import Any, Dict, List, Optional, cast
+from typing import Any, Dict, List, Optional
 
 import constants
 from words.lemma_selection import find_lemma_by_guid
@@ -273,9 +273,8 @@ class InflectionService:
                 return False
 
             client = client or LinguisticClient(config=self.config)
-            return cast(
-                bool,
-                process_lemma_for_task(task_key, lemma.id, self.config, client, retry_uncertain),
+            return bool(
+                process_lemma_for_task(task_key, lemma.id, self.config, client, retry_uncertain)
             )
         finally:
             session.close()
@@ -673,6 +672,9 @@ class InflectionService:
         # Process each item
         successful = 0
         failed = 0
+        # Answered below the confidence floor (recorded as uncertain), or
+        # skipped as uncertain before: an outcome, not a failure.
+        uncertain = 0
 
         session = self.get_session()
         try:
@@ -701,14 +703,20 @@ class InflectionService:
                     success = process_lemma_forms_wiktionary(
                         found_lemma.id, self.config, task_config
                     )
+                    is_uncertain = False
                 else:
-                    success = process_lemma_for_task(
+                    outcome = process_lemma_for_task(
                         task_key, found_lemma.id, self.config, client, retry_uncertain
                     )
+                    success = bool(outcome)
+                    is_uncertain = outcome.is_uncertain
 
                 if success:
                     successful += 1
                     logger.info(f"Successfully generated forms for '{item_info['english']}'")
+                elif is_uncertain:
+                    uncertain += 1
+                    logger.warning(f"Uncertain forms for '{item_info['english']}', not stored")
                 else:
                     failed += 1
                     logger.error(f"Failed to generate forms for '{item_info['english']}'")
@@ -729,6 +737,7 @@ class InflectionService:
         logger.info(f"  Processed: {len(items_to_process)}")
         logger.info(f"  Successful: {successful}")
         logger.info(f"  Failed: {failed}")
+        logger.info(f"  Uncertain: {uncertain}")
         if uncertain_skipped:
             logger.info(f"  Skipped as uncertain: {uncertain_skipped}")
         logger.info(f"{'='*60}")
@@ -738,6 +747,7 @@ class InflectionService:
             "processed": len(items_to_process),
             "successful": successful,
             "failed": failed,
+            "uncertain": uncertain,
             "uncertain_skipped": uncertain_skipped,
             "dry_run": dry_run,
             "source": "wiktionary" if use_wiktionary else "llm",

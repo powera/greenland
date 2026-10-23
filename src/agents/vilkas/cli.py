@@ -452,8 +452,7 @@ def main() -> int:
                 print("Aborted.")
                 return 0
 
-        # process_lemma_forms reports an uncertain answer as a failure too, so
-        # an uncertain run exits 1 as well; better than a failed run exiting 0.
+        # An uncertain answer is counted apart from "failed", so it exits 0.
         exit_status = 0
 
         # For "all" task, we need to process each supported combination

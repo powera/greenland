@@ -12,6 +12,7 @@ import contextlib
 import logging
 import time
 from dataclasses import dataclass
+from enum import Enum
 from typing import Any, Callable, Dict, List, Optional, Set, Tuple
 
 from sqlalchemy.exc import OperationalError
@@ -40,6 +41,30 @@ logging.basicConfig(
     level=logging.INFO, format="%(asctime)s - %(filename)s:%(lineno)d - %(levelname)s - %(message)s"
 )
 logger = logging.getLogger(__name__)
+
+
+class FormsOutcome(Enum):
+    """What :func:`process_lemma_forms` did with one lemma.
+
+    Truthy exactly when the old boolean return was True (the forms are now on
+    file), so callers that only test success are unchanged; a caller that
+    needs to tell an uncertain answer from a failed call compares members.
+    """
+
+    WRITTEN = "written"
+    ALREADY_COMPLETE = "already_complete"
+    #: Answered below the confidence floor; recorded as uncertain.
+    UNCERTAIN = "uncertain"
+    #: A model was uncertain before and retry_uncertain was off.
+    SKIPPED_UNCERTAIN = "skipped_uncertain"
+    FAILED = "failed"
+
+    def __bool__(self) -> bool:
+        return self in (FormsOutcome.WRITTEN, FormsOutcome.ALREADY_COMPLETE)
+
+    @property
+    def is_uncertain(self) -> bool:
+        return self in (FormsOutcome.UNCERTAIN, FormsOutcome.SKIPPED_UNCERTAIN)
 
 
 @dataclass
@@ -648,7 +673,7 @@ def process_lemma_forms(
     data_config: DataSourceConfig,
     form_config: FormGenerationConfig,
     retry_uncertain: bool = False,
-) -> bool:
+) -> FormsOutcome:
     """
     Process and store forms for a single lemma.
 
@@ -661,8 +686,9 @@ def process_lemma_forms(
             forms before; by default the lemma is skipped
 
     Returns:
-        True if successful, False otherwise (including an uncertain answer,
-        or a lemma skipped as uncertain)
+        A :class:`FormsOutcome`, truthy when the forms are on file.  An
+        uncertain answer and a skipped-as-uncertain lemma are falsy but are
+        not FAILED.
     """
     session = create_session(data_config)
 
@@ -673,20 +699,20 @@ def process_lemma_forms(
 
         if not lemma:
             logger.error(f"Lemma ID {lemma_id} not found")
-            return False
+            return FormsOutcome.FAILED
 
         if forms_already_complete(session, lemma_id, form_config):
             logger.info(
                 f"Lemma ID {lemma_id} already has {form_config.language_name} forms, skipping"
             )
-            return True
+            return FormsOutcome.ALREADY_COMPLETE
 
         if not retry_uncertain and forms_uncertain(session, lemma_id, form_config):
             logger.info(
                 f"Lemma ID {lemma_id}: a model was uncertain of its "
                 f"{form_config.language_name} forms, skipping (--retry-uncertain to ask again)"
             )
-            return False
+            return FormsOutcome.SKIPPED_UNCERTAIN
 
         generated = generate_forms(
             form_config.language_code,
@@ -699,7 +725,7 @@ def process_lemma_forms(
 
         if not success or not forms_dict:
             logger.error(f"Failed to get forms for lemma ID {lemma_id}")
-            return False
+            return FormsOutcome.FAILED
 
         result = store_generated_forms(
             session,
@@ -718,18 +744,18 @@ def process_lemma_forms(
                 f"Lemma ID {lemma_id}: forms below confidence "
                 f"({forms_answer_confidence(generated) or 0.0:.2f}), recorded as uncertain"
             )
-            return False
+            return FormsOutcome.UNCERTAIN
         logger.info(f"Added {result[0]} forms for lemma ID {lemma_id}")
-        return True
+        return FormsOutcome.WRITTEN
 
     except OperationalError as oe:
         session.rollback()
         logger.error(f"Database error processing lemma ID {lemma_id}: {oe}")
-        return False
+        return FormsOutcome.FAILED
     except Exception as e:
         session.rollback()
         logger.error(f"Error processing lemma ID {lemma_id}: {e}", exc_info=True)
-        return False
+        return FormsOutcome.FAILED
     finally:
         session.close()
 
