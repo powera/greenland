@@ -420,12 +420,10 @@ AVAILABLE_TRANSLATION_LANGUAGES = {
         "description": "Finnish translation in lemma form",
         "instructions": "- Finnish: Provide standard written Finnish (kirjakieli) in base form (first infinitive for verbs, e.g. lukea; singular nominative for nouns)\n  - Use standard forms, not spoken puhekieli (minä not mä)",
     },
-    "hungarian": {
-        "field": "hungarian_translation",
-        "code": "hu",
-        "description": "Hungarian translation in lemma form",
-        "instructions": "- Hungarian: Provide standard Hungarian in base form (the -ni infinitive for verbs, e.g. olvasni, not the third-person dictionary form olvas; singular nominative for nouns)\n  - Do not add a verbal prefix (meg-, el-, ki-) unless the English sense needs it",
-    },
+    # Hungarian (hu) is deferred until a Hungarian speaker weighs in on the
+    # verb citation form: learners know verbs by the -ni infinitive (olvasni),
+    # dictionaries by the 3sg present (olvas).  If the infinitive is stored,
+    # the 3sg form likely belongs in a grammar fact.
     "latvian": {
         "field": "latvian_translation",
         "code": "lv",
