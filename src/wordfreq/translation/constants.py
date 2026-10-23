@@ -396,6 +396,66 @@ AVAILABLE_TRANSLATION_LANGUAGES = {
         "description": "Albanian translation in lemma form",
         "instructions": "- Albanian: Provide standard Albanian (Tosk-based standard) in base form (lemma for verbs, singular indefinite for nouns)",
     },
+    "czech": {
+        "field": "czech_translation",
+        "code": "cs",
+        "description": "Czech translation in lemma form",
+        "instructions": "- Czech: Provide standard written Czech (spisovná čeština) in base form (infinitive for verbs, singular nominative for nouns)\n  - Use literary forms, not colloquial obecná čeština (mléko not mlíko, malý not malej)\n  - For verbs, give the aspect that matches the English sense; for a general activity, the imperfective",
+    },
+    "slovak": {
+        "field": "slovak_translation",
+        "code": "sk",
+        "description": "Slovak translation in lemma form",
+        "instructions": "- Slovak: Provide standard Slovak (spisovná slovenčina) in base form (infinitive for verbs, singular nominative for nouns)\n  - Give the Slovak word, not the Czech one where the two differ (ďakovať not děkovat)\n  - For verbs, give the aspect that matches the English sense; for a general activity, the imperfective",
+    },
+    "estonian": {
+        "field": "estonian_translation",
+        "code": "et",
+        "description": "Estonian translation in lemma form",
+        "instructions": "- Estonian: Provide standard Estonian in base form (the -ma infinitive for verbs, as dictionaries cite them: lugema, not lugeda; singular nominative for nouns)",
+    },
+    "finnish": {
+        "field": "finnish_translation",
+        "code": "fi",
+        "description": "Finnish translation in lemma form",
+        "instructions": "- Finnish: Provide standard written Finnish (kirjakieli) in base form (first infinitive for verbs, e.g. lukea; singular nominative for nouns)\n  - Use standard forms, not spoken puhekieli (minä not mä)",
+    },
+    "hungarian": {
+        "field": "hungarian_translation",
+        "code": "hu",
+        "description": "Hungarian translation in lemma form",
+        "instructions": "- Hungarian: Provide standard Hungarian in base form (the -ni infinitive for verbs, e.g. olvasni, not the third-person dictionary form olvas; singular nominative for nouns)\n  - Do not add a verbal prefix (meg-, el-, ki-) unless the English sense needs it",
+    },
+    "latvian": {
+        "field": "latvian_translation",
+        "code": "lv",
+        "description": "Latvian translation in lemma form",
+        "instructions": "- Latvian: Provide standard Latvian in base form (infinitive for verbs, singular nominative for nouns)\n  - Use the full diacritics (ā, č, ē, ģ, ī, ķ, ļ, ņ, š, ū, ž); do not drop them\n  - Use standard Latvian, not Latgalian",
+    },
+    "irish": {
+        "field": "irish_translation",
+        "code": "ga",
+        "description": "Irish translation in lemma form",
+        "instructions": "- Irish: Provide standard Irish (An Caighdeán Oifigiúil) in base form\n  - Irish has no infinitive: give verbs in their dictionary form, the second-person singular imperative (ól, ceannaigh), not the verbal noun\n  - Give nouns in the singular nominative, without the article and without initial mutation\n  - Mark long vowels with the síneadh fada (á, é, í, ó, ú)",
+    },
+    "maltese": {
+        "field": "maltese_translation",
+        "code": "mt",
+        "description": "Maltese translation in lemma form",
+        "instructions": "- Maltese: Provide standard Maltese in base form\n  - Maltese has no infinitive: give verbs in their dictionary form, the third-person masculine singular perfect (kiteb, not tikteb)\n  - Give nouns in the singular, without the article\n  - Use the Maltese letters (ċ, ġ, ħ, ż, għ, ie), never their plain substitutes\n  - Give the word Maltese speakers use, including established Italian- or English-derived words; do not invent a Semitic-root form",
+    },
+    "macedonian": {
+        "field": "macedonian_translation",
+        "code": "mk",
+        "description": "Macedonian translation in lemma form (Cyrillic script)",
+        "instructions": "- Macedonian: Provide standard Macedonian in Cyrillic script in base form\n  - Macedonian has no infinitive: give verbs in their dictionary form, the third-person singular present (чита)\n  - Give nouns in the singular indefinite, without the suffixed article\n  - Give the Macedonian word, not the Bulgarian or Serbian one, using the Macedonian letters (ѓ, ќ, ѕ, ј, љ, њ, џ)\n  - Do not include transliteration, just the Cyrillic characters",
+    },
+    "montenegrin": {
+        "field": "montenegrin_translation",
+        "code": "me",
+        "description": "Montenegrin translation in lemma form (Latin script)",
+        "instructions": "- Montenegrin: Provide standard Montenegrin in Latin script in base form (infinitive for verbs, singular nominative for nouns)\n  - Use ijekavian forms (mlijeko, dijete), as the standard does\n  - Where the Montenegrin word is the same as the Serbian or Bosnian one, give that word; do not invent a difference",
+    },
 }
 
 # Index by language code for fast lookup. Built from AVAILABLE_TRANSLATION_LANGUAGES.
