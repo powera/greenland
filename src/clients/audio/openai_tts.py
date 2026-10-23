@@ -50,6 +50,8 @@ PCM_SAMPLE_RATE = 24000
 # -50 dB catches the faint noise tails Realtime sometimes appends (seen at -50..-60 dB).
 SILENCE_THRESHOLD_DB = -50.0
 MAX_EDGE_SILENCE_MS = 100
+MIN_AUDIBLE_MS = 50
+MIN_SHORT_WORD_AUDIBLE_MS = 30
 
 # Pricing estimates (as of Jan 2025)
 # gpt-4o-mini-tts: $0.60/1M input tokens, $12/1M output audio tokens
@@ -146,6 +148,44 @@ def get_realtime_session_instructions(
         language=get_dialect_display_name(language_code),
         pronunciation_notes=pronunciation_notes,
     )
+
+
+def audible_pcm_duration_ms(data: bytes, threshold_db: float = SILENCE_THRESHOLD_DB) -> float:
+    """Count audible samples in 10 ms RMS frames of 24 kHz mono s16le PCM.
+
+    Quiet gaps do not count toward the total. A final partial frame contributes
+    only its actual duration.
+    """
+    samples = array.array("h")
+    samples.frombytes(data[: len(data) - len(data) % 2])
+    if sys.byteorder == "big":
+        samples.byteswap()
+    frame_len = PCM_SAMPLE_RATE // 100
+    threshold = 32768.0 * 10 ** (threshold_db / 20)
+    audible_samples = 0
+    for start in range(0, len(samples), frame_len):
+        frame = samples[start : start + frame_len]
+        if math.sqrt(sum(sample * sample for sample in frame) / len(frame)) >= threshold:
+            audible_samples += len(frame)
+    return audible_samples * 1000 / PCM_SAMPLE_RATE
+
+
+def validate_pcm_audio(data: bytes, text: str) -> None:
+    """Reject silent/glitched output, allowing 30 ms for single 1–3 letter words."""
+    stripped_text = text.strip()
+    minimum_ms = (
+        MIN_SHORT_WORD_AUDIBLE_MS
+        if 1 <= sum(character.isalpha() for character in stripped_text) <= 3
+        and len(stripped_text.split()) == 1
+        else MIN_AUDIBLE_MS
+    )
+    audible_ms = audible_pcm_duration_ms(data)
+    if audible_ms < minimum_ms:
+        raise ValueError(
+            f"Realtime TTS returned insufficient audible audio for {text!r}: "
+            f"{audible_ms:.1f} ms above {SILENCE_THRESHOLD_DB:g} dBFS; "
+            f"minimum {minimum_ms} ms"
+        )
 
 
 def trim_pcm_silence(
@@ -390,6 +430,7 @@ class OpenAITTSClient:
         pcm_data = b"".join(chunks)
         if not pcm_data:
             raise ValueError("Realtime TTS returned no audio")
+        validate_pcm_audio(pcm_data, text)
         return _encode_pcm(trim_pcm_silence(pcm_data), audio_format, speed, self.timeout)
 
     def generate_audio(
