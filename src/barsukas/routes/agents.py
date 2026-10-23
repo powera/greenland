@@ -8,6 +8,7 @@ from typing import Optional
 
 from barsukas.config import Config
 from flask import Blueprint, flash, g, jsonify, redirect, render_template, request, url_for
+from barsukas.helpers.lemma_urls import resolve_lemma_ref
 from flask.typing import ResponseReturnValue
 
 import constants
@@ -20,10 +21,11 @@ from words.translation_workflow import TranslationWorkflow
 from words.validation import LemmaValidationService
 
 bp = Blueprint("agents", __name__, url_prefix="/agents")
+bp.before_request(resolve_lemma_ref)
 logger = logging.getLogger(__name__)
 
 
-@bp.route("/check-translations/<int:lemma_id>", methods=["POST"])
+@bp.route("/check-translations/<lemma:lemma_id>", methods=["POST"])
 def check_translations(lemma_id: int) -> ResponseReturnValue:
     """Check translations for a lemma using the voras agent."""
     lemma = g.db.query(Lemma).get(lemma_id)
@@ -103,7 +105,7 @@ def check_translations(lemma_id: int) -> ResponseReturnValue:
     return redirect(url_for("lemmas.view_lemma", lemma_id=lemma_id))
 
 
-@bp.route("/add-missing-translations/<int:lemma_id>", methods=["POST"])
+@bp.route("/add-missing-translations/<lemma:lemma_id>", methods=["POST"])
 def add_missing_translations(lemma_id: int) -> ResponseReturnValue:
     """Add missing translations for a lemma using the voras agent."""
     lemma = g.db.query(Lemma).get(lemma_id)
@@ -137,7 +139,7 @@ def add_missing_translations(lemma_id: int) -> ResponseReturnValue:
     return redirect(url_for("lemmas.view_lemma", lemma_id=lemma_id))
 
 
-@bp.route("/check-pronunciations/<int:lemma_id>", methods=["POST"])
+@bp.route("/check-pronunciations/<lemma:lemma_id>", methods=["POST"])
 def check_pronunciations(lemma_id: int) -> ResponseReturnValue:
     """Check pronunciations for a lemma's derivative forms using the PAPUGA agent."""
     lemma = g.db.query(Lemma).get(lemma_id)
@@ -221,7 +223,7 @@ def check_pronunciations(lemma_id: int) -> ResponseReturnValue:
     return redirect(url_for("lemmas.view_lemma", lemma_id=lemma_id))
 
 
-@bp.route("/generate-pronunciations/<int:lemma_id>", methods=["POST"])
+@bp.route("/generate-pronunciations/<lemma:lemma_id>", methods=["POST"])
 def generate_pronunciations(lemma_id: int) -> ResponseReturnValue:
     """Generate missing pronunciations for a lemma's derivative forms using the PAPUGA agent."""
     lemma = g.db.query(Lemma).get(lemma_id)
@@ -261,7 +263,7 @@ def generate_pronunciations(lemma_id: int) -> ResponseReturnValue:
     return redirect(url_for("lemmas.view_lemma", lemma_id=lemma_id))
 
 
-@bp.route("/generate-forms/<int:lemma_id>", methods=["POST"])
+@bp.route("/generate-forms/<lemma:lemma_id>", methods=["POST"])
 def generate_forms(lemma_id: int) -> ResponseReturnValue:
     """Generate missing grammatical forms for a lemma using the VILKAS agent."""
     lemma = g.db.query(Lemma).get(lemma_id)
@@ -304,7 +306,7 @@ def generate_forms(lemma_id: int) -> ResponseReturnValue:
     return redirect(url_for("lemmas.view_lemma", lemma_id=lemma_id))
 
 
-@bp.route("/generate-synonyms/<int:lemma_id>", methods=["POST"])
+@bp.route("/generate-synonyms/<lemma:lemma_id>", methods=["POST"])
 def generate_synonyms(lemma_id: int) -> ResponseReturnValue:
     """Generate synonyms and alternative forms for a lemma using the ŠERNAS agent."""
     lemma = g.db.query(Lemma).get(lemma_id)
@@ -342,7 +344,7 @@ def generate_synonyms(lemma_id: int) -> ResponseReturnValue:
     return redirect(url_for("lemmas.view_lemma", lemma_id=lemma_id))
 
 
-@bp.route("/check-definition/<int:lemma_id>", methods=["POST"])
+@bp.route("/check-definition/<lemma:lemma_id>", methods=["POST"])
 def check_definition(lemma_id: int) -> ResponseReturnValue:
     """Check/improve the definition of a lemma using the LOKYS agent."""
     lemma = g.db.query(Lemma).get(lemma_id)
@@ -377,7 +379,7 @@ def check_definition(lemma_id: int) -> ResponseReturnValue:
     return redirect(url_for("lemmas.view_lemma", lemma_id=lemma_id))
 
 
-@bp.route("/apply-definition/<int:lemma_id>", methods=["POST"])
+@bp.route("/apply-definition/<lemma:lemma_id>", methods=["POST"])
 def apply_definition(lemma_id: int) -> ResponseReturnValue:
     """Apply a suggested definition improvement."""
     lemma = g.db.query(Lemma).get(lemma_id)
@@ -419,7 +421,7 @@ def apply_definition(lemma_id: int) -> ResponseReturnValue:
     return redirect(url_for("lemmas.view_lemma", lemma_id=lemma_id))
 
 
-@bp.route("/check-disambiguation/<int:lemma_id>", methods=["POST"])
+@bp.route("/check-disambiguation/<lemma:lemma_id>", methods=["POST"])
 def check_disambiguation(lemma_id: int) -> ResponseReturnValue:
     """Check if a lemma needs disambiguation (parentheticals) using the LOKYS agent."""
     lemma = g.db.query(Lemma).get(lemma_id)
@@ -501,7 +503,7 @@ def check_disambiguation(lemma_id: int) -> ResponseReturnValue:
     return redirect(url_for("lemmas.view_lemma", lemma_id=lemma_id))
 
 
-@bp.route("/apply-disambiguation/<int:lemma_id>", methods=["POST"])
+@bp.route("/apply-disambiguation/<lemma:lemma_id>", methods=["POST"])
 def apply_disambiguation(lemma_id: int) -> ResponseReturnValue:
     """Apply an AI-suggested disambiguation to a lemma."""
     lemma = g.db.query(Lemma).get(lemma_id)
@@ -549,7 +551,7 @@ def apply_disambiguation(lemma_id: int) -> ResponseReturnValue:
     return redirect(url_for("lemmas.view_lemma", lemma_id=lemma_id))
 
 
-@bp.route("/generate-sentences/<int:lemma_id>", methods=["POST"])
+@bp.route("/generate-sentences/<lemma:lemma_id>", methods=["POST"])
 def generate_sentences(lemma_id: int) -> ResponseReturnValue:
     """Generate example sentences for a lemma using the Buivolas agent."""
     lemma = g.db.query(Lemma).get(lemma_id)
@@ -645,7 +647,7 @@ def generate_sentences(lemma_id: int) -> ResponseReturnValue:
     return redirect(url_for("lemmas.view_lemma", lemma_id=lemma_id))
 
 
-@bp.route("/generate-grammar-fact/<int:lemma_id>", methods=["POST"])
+@bp.route("/generate-grammar-fact/<lemma:lemma_id>", methods=["POST"])
 def generate_grammar_fact(lemma_id: int) -> ResponseReturnValue:
     """Generate a grammar fact for a lemma using the LAPE agent (queued via task worker)."""
     from words.grammar_fact_generation import SUPPORTED_FACT_TYPES, validate_grammar_fact_request
@@ -712,7 +714,7 @@ def generate_grammar_fact(lemma_id: int) -> ResponseReturnValue:
     return redirect(url_for("lemmas.view_lemma", lemma_id=lemma_id))
 
 
-@bp.route("/add-grammar-fact/<int:lemma_id>", methods=["POST"])
+@bp.route("/add-grammar-fact/<lemma:lemma_id>", methods=["POST"])
 def add_grammar_fact_manual(lemma_id: int) -> ResponseReturnValue:
     """Add or update a grammar fact manually from the lemma page."""
     from storage.config.grammar_fact_registry import is_release_grammar_fact_type
@@ -773,7 +775,7 @@ def add_grammar_fact_manual(lemma_id: int) -> ResponseReturnValue:
     return redirect(url_for("lemmas.view_lemma", lemma_id=lemma_id))
 
 
-@bp.route("/add-lemma-fact/<int:lemma_id>", methods=["POST"])
+@bp.route("/add-lemma-fact/<lemma:lemma_id>", methods=["POST"])
 def add_lemma_fact_manual(lemma_id: int) -> ResponseReturnValue:
     """Add or update a language-independent lemma fact from the lemma page."""
     from storage.config.lemma_fact_registry import get_lemma_fact_definition
@@ -802,7 +804,7 @@ def add_lemma_fact_manual(lemma_id: int) -> ResponseReturnValue:
     return redirect(url_for("lemmas.view_lemma_forms", lemma_id=lemma_id))
 
 
-@bp.route("/delete-lemma-fact/<int:lemma_id>", methods=["POST"])
+@bp.route("/delete-lemma-fact/<lemma:lemma_id>", methods=["POST"])
 def delete_lemma_fact_manual(lemma_id: int) -> ResponseReturnValue:
     """Remove a lemma fact from the lemma page."""
     from storage.crud.lemma_fact import delete_lemma_fact
@@ -816,7 +818,7 @@ def delete_lemma_fact_manual(lemma_id: int) -> ResponseReturnValue:
     return redirect(url_for("lemmas.view_lemma_forms", lemma_id=lemma_id))
 
 
-@bp.route("/view-sentences/<int:lemma_id>")
+@bp.route("/view-sentences/<lemma:lemma_id>")
 def view_sentences(lemma_id: int) -> ResponseReturnValue:
     """View all sentences that use a specific lemma."""
     lemma = g.db.query(Lemma).get(lemma_id)
@@ -862,7 +864,7 @@ def view_sentences(lemma_id: int) -> ResponseReturnValue:
         return redirect(url_for("lemmas.view_lemma", lemma_id=lemma_id))
 
 
-@bp.route("/check-translation-disambiguation/<int:lemma_id>/<lang_code>", methods=["POST"])
+@bp.route("/check-translation-disambiguation/<lemma:lemma_id>/<lang_code>", methods=["POST"])
 def check_translation_disambiguation(lemma_id: int, lang_code: str) -> ResponseReturnValue:
     """Find lemmas sharing the same translation in lang_code and suggest disambiguations."""
     from storage.models.schema import LemmaTranslation
@@ -978,7 +980,7 @@ def check_translation_disambiguation(lemma_id: int, lang_code: str) -> ResponseR
 
 
 @bp.route(
-    "/apply-translation-disambiguation/<int:lemma_id>/<lang_code>",
+    "/apply-translation-disambiguation/<lemma:lemma_id>/<lang_code>",
     methods=["POST"],
 )
 def apply_translation_disambiguation(lemma_id: int, lang_code: str) -> ResponseReturnValue:

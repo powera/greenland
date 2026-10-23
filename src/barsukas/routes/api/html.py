@@ -20,7 +20,7 @@ from clients.audio.azure_tts import AzureVoice
 from clients.audio.google_tts import GoogleTtsVoice
 from clients.audio.gpt_voices import GptVoice
 from clients.audio.polly_tts import PollyVoice
-from flask import Response, current_app, g, jsonify, request
+from flask import Response, current_app, g, jsonify, request, url_for
 from flask.typing import ResponseReturnValue
 from sqlalchemy import and_, case, func, or_
 from audioshoe.coqui.types import CoquiVoice
@@ -88,6 +88,7 @@ def check_lemma_exists() -> ResponseReturnValue:
             "exact_match": (
                 {
                     "id": exact_match.id,
+                    "url": url_for("lemmas.view_lemma", lemma_id=exact_match.id),
                     "lemma_text": exact_match.lemma_text,
                     "pos_type": exact_match.pos_type,
                     "definition_text": exact_match.definition_text,
@@ -98,6 +99,7 @@ def check_lemma_exists() -> ResponseReturnValue:
             "similar_matches": [
                 {
                     "id": lemma.id,
+                    "url": url_for("lemmas.view_lemma", lemma_id=lemma.id),
                     "lemma_text": lemma.lemma_text,
                     "pos_type": lemma.pos_type,
                     "definition_text": lemma.definition_text,

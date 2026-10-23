@@ -5,6 +5,7 @@
 from typing import Union
 
 from barsukas.config import Config
+from barsukas.helpers.lemma_urls import resolve_lemma_ref
 from flask import Blueprint, flash, g, redirect, request, url_for
 from werkzeug.wrappers import Response
 
@@ -19,9 +20,10 @@ from storage.models.schema import Lemma
 from storage.translation_helpers import get_supported_languages
 
 bp = Blueprint("overrides", __name__, url_prefix="/overrides")
+bp.before_request(resolve_lemma_ref)
 
 
-@bp.route("/<int:lemma_id>/add", methods=["POST"])
+@bp.route("/<lemma:lemma_id>/add", methods=["POST"])
 def add_override(lemma_id: int) -> Response:
     """Add or update a difficulty override."""
     from flask import current_app
@@ -95,7 +97,7 @@ def add_override(lemma_id: int) -> Response:
     return redirect(url_for("lemmas.view_lemma_levels", lemma_id=lemma_id))
 
 
-@bp.route("/<int:lemma_id>/<lang_code>/delete", methods=["POST"])
+@bp.route("/<lemma:lemma_id>/<lang_code>/delete", methods=["POST"])
 def delete_override(lemma_id: int, lang_code: str) -> Response:
     """Delete a difficulty override."""
     from flask import current_app
