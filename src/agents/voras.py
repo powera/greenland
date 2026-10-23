@@ -18,4 +18,4 @@ if GREENLAND_SRC_PATH not in sys.path:
 from agents.voras.cli import main
 
 if __name__ == "__main__":
-    main()
+    sys.exit(main())

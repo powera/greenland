@@ -316,6 +316,9 @@ class GrammarFactService:
             skipped_count = 0
             success_count = 0
             failed_count = 0
+            # An answer below min_confidence, recorded as uncertain: an outcome,
+            # not a failure, so the CLI's exit status does not count it.
+            uncertain_count = 0
             results = []
 
             for lemma in lemmas:
@@ -385,15 +388,18 @@ class GrammarFactService:
                         }
                     )
                     logger.info(f"  ✓ Generated: {fact_value} (confidence: {confidence:.2f})")
+                elif fact_value:
+                    uncertain_count += 1
+                    logger.warning(
+                        f"  ? Low confidence: {fact_value} (confidence: {confidence:.2f})"
+                    )
                 else:
                     failed_count += 1
-                    logger.warning(
-                        f"  ✗ Failed or low confidence: {fact_value} (confidence: {confidence:.2f})"
-                    )
+                    logger.warning(f"  ✗ Failed: no value (confidence: {confidence:.2f})")
 
             logger.info(
                 f"Complete! Processed: {processed_count}, Success: {success_count}, "
-                f"Failed: {failed_count}, Skipped: {skipped_count}"
+                f"Failed: {failed_count}, Uncertain: {uncertain_count}, Skipped: {skipped_count}"
             )
 
             return {
@@ -402,6 +408,7 @@ class GrammarFactService:
                 "processed": processed_count,
                 "success": success_count,
                 "failed": failed_count,
+                "uncertain": uncertain_count,
                 "skipped": skipped_count,
                 "results": results,
                 "dry_run": dry_run,

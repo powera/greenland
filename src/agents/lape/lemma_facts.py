@@ -82,7 +82,8 @@ def get_argument_parser() -> argparse.ArgumentParser:
     return parser
 
 
-def main() -> None:
+def main() -> int:
+    """Run lemma-fact coverage or population; returns the process exit status."""
     parser = get_argument_parser()
     args = parser.parse_args()
 
@@ -117,17 +118,17 @@ def main() -> None:
         )
         print(f"{args.fact_type}: {len(missing)}/{len(lemmas)} missing ({uncertain} uncertain)")
         if not args.populate:
-            return
+            return 0
 
         targets = lemmas if not args.skip_existing else missing
         if args.limit:
             targets = targets[: args.limit]
         if args.dry_run:
             print(f"DRY RUN - would process {len(targets)} lemmas")
-            return
+            return 0
 
         client = service.get_llm_client()
-        counts = {"success": 0, "failed": 0, "skipped": 0}
+        counts = {"success": 0, "failed": 0, "uncertain": 0, "skipped": 0}
         for lemma in targets:
             result = generate_lemma_fact_for_lemma(
                 session,
@@ -144,15 +145,20 @@ def main() -> None:
                 print(f"{lemma.lemma_text}: {result['fact_value']} ({result['confidence']:.2f})")
             elif result.get("skipped"):
                 counts["skipped"] += 1
+            elif result.get("uncertain"):
+                counts["uncertain"] += 1
+                print(f"{lemma.lemma_text}: UNCERTAIN {result.get('error')}")
             else:
                 counts["failed"] += 1
                 print(f"{lemma.lemma_text}: FAILED {result.get('error')}")
         print(
-            f"Success: {counts['success']}  Failed: {counts['failed']}  Skipped: {counts['skipped']}"
+            f"Success: {counts['success']}  Failed: {counts['failed']}  "
+            f"Uncertain: {counts['uncertain']}  Skipped: {counts['skipped']}"
         )
+        return 1 if counts["failed"] else 0
     finally:
         session.close()
 
 
 if __name__ == "__main__":
-    main()
+    sys.exit(main())

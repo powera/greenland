@@ -416,7 +416,7 @@ def main() -> int:
                     logger.info("Sentences failed: %s", total_failed)
                 logger.info("%s", "=" * 60)
 
-    return 0
+    return 1 if total_failed else 0
 
 
 if __name__ == "__main__":

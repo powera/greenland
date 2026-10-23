@@ -6,6 +6,7 @@ import argparse
 import json
 import logging
 import math
+import sys
 from collections import Counter
 from pathlib import Path
 from typing import Any
@@ -118,7 +119,8 @@ def select_plans(session: Session, args: argparse.Namespace) -> list[RequestPlan
     return plans
 
 
-def main() -> None:
+def main() -> int:
+    """Run Lape2; returns the process exit status (1 if any inline item failed)."""
     parser = get_argument_parser()
     args = parser.parse_args()
     if args.limit is not None and args.limit < 1:
@@ -163,9 +165,9 @@ def main() -> None:
                             indent=2,
                         )
                     )
-            return
+            return 0
         if args.command == "coverage" or args.dry_run or not counts:
-            return
+            return 0
         session.close()
         session = create_session(config)
         states: list[dict[str, Any]] = [
@@ -179,6 +181,7 @@ def main() -> None:
             for plan in plans
             if plan.questions
         ]
+        failed = 0
         if args.batch:
             run_batch_populate(LAPE2_JOB, states, args, session, "LAPE2 — BUNDLED GRAMMAR")
         else:
@@ -186,9 +189,12 @@ def main() -> None:
             for state in states:
                 outcome = run_inline(session, LAPE2_JOB, [state], client, args.model)[0]
                 print(f"{state['lemma_id']}: {outcome.status}: {outcome.detail}")
+                if outcome.status == "failed":
+                    failed += 1
+        return 1 if failed else 0
     finally:
         session.close()
 
 
 if __name__ == "__main__":
-    main()
+    sys.exit(main())

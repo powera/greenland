@@ -176,6 +176,9 @@ def _handle_single_lemma_populate(
             f"{', '.join(outcome.uncertain)}"
         )
     print(f"\n✓ {len(outcome.written)} translation(s) saved")
+    if generated.failed_languages:
+        print(f"\n✗ Generation failed for: {', '.join(generated.failed_languages)}")
+        return False
     return True
 
 
@@ -234,8 +237,11 @@ def _confirm_regeneration(agent: Any, args: argparse.Namespace) -> bool:
     return response in ["y", "yes"]
 
 
-def _run_regenerate(agent: Any, args: argparse.Namespace) -> None:
-    """Regenerate every curated lemma's translations, or queue that work."""
+def _run_regenerate(agent: Any, args: argparse.Namespace) -> int:
+    """Regenerate every curated lemma's translations, or queue that work.
+
+    Returns the process exit status: 1 if any lemma failed.
+    """
     from agents.voras import cli_display
     from words.translation_workflow import (
         enqueue_translation_regeneration,
@@ -264,17 +270,21 @@ def _run_regenerate(agent: Any, args: argparse.Namespace) -> None:
             _print_enqueue_results(session, enqueue_results, args.dry_run)
         except Exception as e:
             print(f"Failed to enqueue work: {e}")
-            sys.exit(1)
+            return 1
         finally:
             session.close()
-        return
+        return 0
 
     results = agent.regenerate_all_translations(limit=args.limit, dry_run=args.dry_run, lemmas=None)
     cli_display.display_batch_summary(results)
+    return 1 if results["total_failed"] else 0
 
 
-def _run_populate(agent: Any, lemmas: List[Any], args: argparse.Namespace) -> None:
-    """Generate the missing translations for the selected lemmas."""
+def _run_populate(agent: Any, lemmas: List[Any], args: argparse.Namespace) -> int:
+    """Generate the missing translations for the selected lemmas.
+
+    Returns the process exit status: 1 if any translation failed.
+    """
     from agents.voras import cli_display
     from words.translation_workflow import (
         enqueue_translation_population,
@@ -300,10 +310,10 @@ def _run_populate(agent: Any, lemmas: List[Any], args: argparse.Namespace) -> No
             _print_enqueue_results(session, enqueue_results, args.dry_run)
         except Exception as e:
             print(f"Failed to enqueue work: {e}")
-            sys.exit(1)
+            return 1
         finally:
             session.close()
-        return
+        return 0
 
     # IMMEDIATE MODE: Process directly (default behavior)
     results = agent.fix_missing_translations(
@@ -314,6 +324,7 @@ def _run_populate(agent: Any, lemmas: List[Any], args: argparse.Namespace) -> No
         retry_uncertain=args.retry_uncertain,
     )
     cli_display.display_population_summary(results)
+    return 1 if results["total_failed"] else 0
 
 
 def _run_populate_batch(agent: Any, lemmas: List[Any], args: argparse.Namespace) -> None:
@@ -361,8 +372,11 @@ def _run_populate_batch(agent: Any, lemmas: List[Any], args: argparse.Namespace)
         session.close()
 
 
-def main() -> None:
-    """Main entry point for the voras agent."""
+def main() -> int:
+    """Main entry point for the voras agent; returns the process exit status.
+
+    A failed generation exits 1, so a script or scheduled run can tell.
+    """
     # Import here to avoid circular imports
     from words.translation_workflow import TranslationWorkflow
 
@@ -391,7 +405,7 @@ def main() -> None:
     # Handle batch submit first (no lemmas needed)
     if args.batch_submit:
         agent.submit_batch()
-        return
+        return 0
 
     # Handle coverage mode (no lemmas needed)
     if mode == "coverage":
@@ -402,12 +416,11 @@ def main() -> None:
             min_level=min_level,
             max_level=max_level,
         )
-        return
+        return 0
 
     # Handle regenerate mode (operates on all curated lemmas, not --guid)
     if mode == "regenerate":
-        _run_regenerate(agent, args)
-        return
+        return _run_regenerate(agent, args)
 
     # Get lemmas to process (either single lemma from --guid or batch)
     # This handles both modes uniformly - returns a list with one or more lemmas
@@ -419,21 +432,21 @@ def main() -> None:
 
     if len(lemmas) == 0:
         print(f"\nNo lemmas found to process")
-        sys.exit(1)
+        return 1
 
     if args.batch:
         _run_populate_batch(agent, lemmas, args)
-        return
+        return 0
 
     # Handle single lemma mode (from --guid) - provide detailed interactive experience
     if len(lemmas) == 1:
         lemma = lemmas[0]
         session = agent.get_session()
         try:
-            _handle_single_lemma_populate(agent, lemma, session, args)
+            succeeded = _handle_single_lemma_populate(agent, lemma, session, args)
         finally:
             session.close()
-        return
+        return 0 if succeeded else 1
 
     # Batch processing mode - get confirmation before running
     if not args.yes and not args.dry_run:
@@ -459,10 +472,10 @@ def main() -> None:
         response = input("Do you want to proceed? [y/N]: ").strip().lower()
         if response not in ["y", "yes"]:
             print("Aborted.")
-            sys.exit(0)
+            return 0
 
-    _run_populate(agent, lemmas, args)
+    return _run_populate(agent, lemmas, args)
 
 
 if __name__ == "__main__":
-    main()
+    sys.exit(main())

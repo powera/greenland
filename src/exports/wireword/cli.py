@@ -143,7 +143,7 @@ def _cdn_credentials_available() -> bool:
     return key_file.exists()
 
 
-def main() -> None:
+def main() -> int:
     """Run a WireWord export or enqueue directory exports."""
     parser = get_argument_parser()
     args = parser.parse_args()
@@ -218,7 +218,7 @@ def main() -> None:
                     queued_total += 1
             session.commit()
         logger.info("Queued %s source language export task(s)", queued_total)
-        return
+        return 0
 
     if args.source_language == "all" and args.mode != "directory":
         raise ValueError("--source-language all currently supports only --mode directory")
@@ -243,6 +243,7 @@ def main() -> None:
         )
 
     # Run export
+    exit_status = 0
     for selected_source_language in selected_source_languages:
         source_exporter = WirewordExportService(
             config=config,
@@ -250,7 +251,7 @@ def main() -> None:
             include_unreviewed_audio=args.include_unreviewed_audio,
             source_language=selected_source_language,
         )
-        source_exporter.run_export(
+        export_results = source_exporter.run_export(
             output_path=args.output,
             output_dir=args.output_dir,
             difficulty_level=args.level,
@@ -264,3 +265,14 @@ def main() -> None:
             skip_family_relation_overrides=args.skip_family_relation_overrides,
             cdn_upload=cdn_upload,
         )
+        failed_exports = [
+            name
+            for name, outcome in export_results.get("exports", {}).items()
+            if not outcome.get("success")
+        ]
+        if failed_exports:
+            logger.error(
+                "Export failed for %s (%s)", ", ".join(failed_exports), selected_source_language
+            )
+            exit_status = 1
+    return exit_status

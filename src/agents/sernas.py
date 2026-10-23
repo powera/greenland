@@ -32,6 +32,7 @@ __all__ = ["SernasAgent", "main"]
 if __name__ == "__main__":
     logger = get_logger(__name__)
     try:
-        main()
+        sys.exit(main())
     except Exception:
         logger.exception("Unhandled exception in sernas main")
+        sys.exit(1)

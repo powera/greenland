@@ -122,6 +122,9 @@ def generate_lemma_fact_for_lemma(
             "error": f"Could not generate {fact_type} with sufficient confidence "
             f"(got {confidence:.2f}, need >= {min_confidence})",
             "confidence": confidence,
+            # An answer below the floor is recorded, not lost; only a missing
+            # value is a failed call.
+            "uncertain": value is not None,
         }
     if stored is None:
         return {**base, "error": f"Rejected value {value!r} for {fact_type}"}
