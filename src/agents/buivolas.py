@@ -18,4 +18,4 @@ from agents.buivolas.cli import main
 __all__ = ["BuivolasAgent", "main"]
 
 if __name__ == "__main__":
-    main()
+    sys.exit(main())

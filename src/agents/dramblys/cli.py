@@ -9,7 +9,7 @@ import argparse
 import json
 import sys
 from pathlib import Path
-from typing import Optional
+from typing import Any, Dict, Optional
 
 # Add src directory to path
 GREENLAND_SRC_PATH = str(Path(__file__).parent.parent.parent.parent)
@@ -175,8 +175,15 @@ def get_argument_parser() -> argparse.ArgumentParser:
     return parser
 
 
-def main() -> None:
-    """Main entry point for the dramblys agent."""
+def _exit_status(results: Dict[str, Any]) -> int:
+    """1 when a mode's results report an error or any failed item, else 0."""
+    if "error" in results or results.get("success") is False or results.get("failed"):
+        return 1
+    return 0
+
+
+def main() -> int:
+    """Main entry point for the dramblys agent; returns the process exit status."""
     # Import here to avoid circular imports
     from agents.dramblys.agent import DramblysAgent
 
@@ -228,7 +235,7 @@ def main() -> None:
             with open(args.output, "w", encoding="utf-8") as f:
                 json.dump(results, f, indent=2, ensure_ascii=False)
             print(f"Full results written to: {args.output}")
-        return
+        return _exit_status(results)
 
     # Handle --list-pending mode
     if args.list_pending:
@@ -272,7 +279,7 @@ def main() -> None:
                 with open(args.output, "w", encoding="utf-8") as f:
                     json.dump(results, f, indent=2, ensure_ascii=False)
                 print(f"Full results written to: {args.output}")
-        return
+        return _exit_status(results)
 
     # Handle --approve mode
     if args.approve:
@@ -282,7 +289,7 @@ def main() -> None:
             print(f"\nSuccess: {results['message']}")
         else:
             print(f"\nError: {results.get('error', 'Unknown error')}")
-        return
+        return _exit_status(results)
 
     # Handle --reject mode
     if args.reject:
@@ -296,7 +303,7 @@ def main() -> None:
                 print(f"  Added '{results['word']}' to exclusions")
         else:
             print(f"\nError: {results.get('error', 'Unknown error')}")
-        return
+        return _exit_status(results)
 
     # Handle --stage-words mode (explicit word list rather than the frequency check)
     if args.stage_words:
@@ -304,10 +311,10 @@ def main() -> None:
             words = _resolve_word_arguments(args.stage_words)
         except OSError as exc:
             print(f"\nError reading word list: {exc}")
-            return
+            return 1
         if not words:
             print("\nNo words to stage.")
-            return
+            return 0
 
         if not confirm_operation(
             message=f"Model: {args.model}\nTarget language: {args.target_language}\n"
@@ -317,7 +324,7 @@ def main() -> None:
             dry_run=args.dry_run,
         ):
             print("Aborted.")
-            return
+            return 0
 
         results = agent.stage_explicit_words(
             words=words,
@@ -346,7 +353,7 @@ def main() -> None:
                 print(f"  Skipped (already pending): {results['skipped_already_pending']}")
                 print(f"  Failed: {results['failed']}")
                 print(f"\nUse --list-pending to review staged words")
-        return
+        return _exit_status(results)
 
     # Handle --stage mode
     if args.stage:
@@ -361,7 +368,7 @@ def main() -> None:
             dry_run=args.dry_run,
         ):
             print("Aborted.")
-            return
+            return 0
 
         results = agent.stage_missing_words_for_import(
             top_n=args.top_n,
@@ -387,13 +394,13 @@ def main() -> None:
                 print(f"  Skipped (already pending): {results['skipped_already_pending']}")
                 print(f"  Failed: {results['failed']}")
                 print(f"\nUse --list-pending to review staged words")
-        return
+        return _exit_status(results)
 
     # Handle --add-subtype mode
     if args.add_subtype:
         if not args.pos_type or not args.pos_subtype:
             print("Error: --add-subtype requires --pos-type and --pos-subtype")
-            return
+            return 1
 
         if args.find_only:
             # Just find and display
@@ -434,7 +441,7 @@ def main() -> None:
 
                 if "error" in preview:
                     print(f"\nError: {preview['error']}")
-                    return
+                    return 1
 
                 sample_words = "\n".join(
                     [
@@ -449,7 +456,7 @@ def main() -> None:
                     dry_run=args.dry_run,
                 ):
                     print("Aborted.")
-                    return
+                    return 0
 
             results = agent.add_words_for_subtype(
                 pos_type=args.pos_type,
@@ -480,7 +487,7 @@ def main() -> None:
                         print(f"  Successfully added: {results['successful']}")
                     print(f"  Failed: {results['failed']}")
                     print(f"  Skipped (already exist): {results['skipped']}")
-        return
+        return _exit_status(results)
 
     # Handle --fix mode
     if args.fix:
@@ -502,7 +509,7 @@ def main() -> None:
             dry_run=args.dry_run,
         ):
             print("Aborted.")
-            return
+            return 0
 
         results = agent.fix_missing_words(
             top_n=args.top_n,
@@ -525,7 +532,7 @@ def main() -> None:
                 print(f"  Processed: {results['processed']}")
                 print(f"  Successful: {results['successful']}")
                 print(f"  Failed: {results['failed']}")
-        return
+        return _exit_status(results)
 
     # Handle check mode (existing functionality)
     if args.check == "frequency":
@@ -561,7 +568,8 @@ def main() -> None:
             top_n_frequency=args.top_n,
             min_subtype_count=args.min_subtype_count,
         )
+    return 0
 
 
 if __name__ == "__main__":
-    main()
+    sys.exit(main())

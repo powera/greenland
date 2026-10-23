@@ -8,6 +8,7 @@ enqueueing, and rendering. The synonym work itself lives in
 """
 
 import argparse
+import sys
 from typing import Any, List, Optional, Sequence
 
 from agents.common.common_args import (
@@ -186,8 +187,8 @@ def _confirm_populate(
     return input("\nContinue? [y/N]: ").lower() in ["y", "yes"]
 
 
-def main() -> None:
-    """Main entry point for the šernas agent."""
+def main() -> int:
+    """Main entry point for the šernas agent; returns the process exit status."""
     from agents.common.cli_display import display_language_header
     from agents.sernas.cli_display import display_batch_results, display_enqueue_summary
     from storage.translation_helpers import (
@@ -236,7 +237,7 @@ def main() -> None:
 
     if mode == "coverage":
         _run_coverage(agent, lemmas, languages_to_process, form_type, requested_all_languages)
-        return
+        return 0
 
     # WORKQUEUE MODE: Enqueue work items for barsukas worker
     if args.use_workqueue:
@@ -257,7 +258,9 @@ def main() -> None:
         finally:
             session.close()
 
-        return
+        return 0
+
+    exit_status = 0
 
     # Populate and regenerate differ only in what they clear first: regenerate
     # forgets the previous scan so every lemma is generated again.
@@ -298,7 +301,10 @@ def main() -> None:
             dry_run=args.dry_run,
         )
         display_batch_results(results, language_code, dry_run=args.dry_run)
+        if results.error or results.failed:
+            exit_status = 1
+    return exit_status
 
 
 if __name__ == "__main__":
-    main()
+    sys.exit(main())

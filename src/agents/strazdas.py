@@ -588,7 +588,7 @@ def get_argument_parser() -> argparse.ArgumentParser:
     return parser
 
 
-def main() -> None:
+def main() -> int:
     """Main entry point for the strazdas agent."""
     parser = get_argument_parser()
     args = parser.parse_args()
@@ -734,7 +734,7 @@ def main() -> None:
                     print(f"  {voice_name}: {count} audio files")
         finally:
             session.close()
-        return
+        return 0
 
     elif args.mode == "check-existing":
         # List existing audio files
@@ -761,7 +761,7 @@ def main() -> None:
             print(f"\nTotal: {len(audio_files)} audio files")
         finally:
             session.close()
-        return
+        return 0
 
     elif args.mode in ["populate-only", "regenerate"]:
         # Validate language is required
@@ -804,7 +804,7 @@ def main() -> None:
                 backend_desc,
                 voices_str,
             )
-            return
+            return 0
 
         # Confirm before running (unless --yes was provided)
         if not args.yes:
@@ -840,7 +840,9 @@ def main() -> None:
         logger.info(f"Duration: {duration:.2f} seconds")
         logger.info(f"Output directory: {batch_results['output_dir']}")
         logger.info("=" * 80)
+        return 1 if batch_results["error_count"] else 0
+    return 0
 
 
 if __name__ == "__main__":
-    main()
+    sys.exit(main())

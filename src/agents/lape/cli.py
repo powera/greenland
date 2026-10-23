@@ -335,7 +335,7 @@ def get_lape_queue_stats(session: Session) -> Dict[str, int]:
     }
 
 
-def main() -> None:
+def main() -> int:
     """Command-line interface for the Lape agent."""
     parser = get_argument_parser()
     args = parser.parse_args()
@@ -484,12 +484,12 @@ def main() -> None:
         finally:
             session.close()
 
-        return
+        return 0
 
     # BATCH MODE: Send the requests as OpenAI batches
     if args.batch:
         _run_populate_batch(agent, lemmas, fact_types_by_language, args)
-        return
+        return 0
 
     # WORKQUEUE MODE: Enqueue work items for barsukas worker to process
     if args.use_workqueue and mode == "populate":
@@ -533,13 +533,14 @@ def main() -> None:
         finally:
             session.close()
 
-        return
+        return 0
 
     # IMMEDIATE MODE: Process directly (default behavior)
     logger.info("=" * 80)
     logger.info("LAPE AGENT - IMMEDIATE PROCESSING")
     logger.info("=" * 80)
 
+    exit_status = 0
     try:
         for language_code, applicable_fact_types in fact_types_by_language.items():
             for fact_type in applicable_fact_types:
@@ -563,7 +564,10 @@ def main() -> None:
                 print(f"Processed: {results['processed']}")
                 print(f"Success: {results['success']}")
                 print(f"Failed: {results['failed']}")
+                print(f"Uncertain: {results.get('uncertain', 0)}")
                 print(f"Skipped: {results['skipped']}")
+                if results["failed"]:
+                    exit_status = 1
                 if results["dry_run"]:
                     print("\n⚠️  DRY RUN - No changes saved to database")
                 print("=" * 60)
@@ -580,4 +584,5 @@ def main() -> None:
 
     except Exception as e:
         logger.error(f"Failed to generate grammar facts: {e}")
-        sys.exit(1)
+        return 1
+    return exit_status

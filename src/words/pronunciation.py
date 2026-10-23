@@ -531,6 +531,9 @@ class PronunciationService:
 
             populated_count = 0
             failed_count = 0
+            # Answered below the confidence floor and recorded as uncertain: an
+            # outcome, not a failure, so it is kept out of failed_count.
+            uncertain_count = 0
             total_forms = sum(len(forms_by_lemma_lang[key]) for key in lemma_lang_pairs)
             batch_count = 0
             single_count = 0
@@ -688,7 +691,7 @@ class PronunciationService:
                                     f"  Low confidence ({result['confidence']:.2f}), "
                                     "recorded as uncertain"
                                 )
-                                failed_count += 1
+                                uncertain_count += 1
 
                         except Exception as e:
                             logger.error(f"  Failed to generate pronunciation: {e}")
@@ -766,7 +769,7 @@ class PronunciationService:
                                         f"  Low confidence ({result['confidence']:.2f}) for "
                                         f"{grammatical_form}, recorded as uncertain"
                                     )
-                                    batch_failed += 1
+                                    uncertain_count += 1
 
                             # Commit all updates for this batch
                             session.commit()
@@ -799,6 +802,7 @@ class PronunciationService:
                 "total_processed": total_forms if not dry_run else 0,
                 "populated": populated_count,
                 "failed": failed_count,
+                "uncertain": uncertain_count,
                 "dry_run": dry_run,
                 "lemma_lang_pairs": len(lemma_lang_pairs),
                 "batch_calls": batch_count,

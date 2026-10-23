@@ -431,7 +431,7 @@ def get_conversation_queue_stats(session: Any) -> Dict[str, int]:
 get_sarka_queue_stats = get_conversation_queue_stats
 
 
-def main() -> None:
+def main() -> int:
     """Command-line interface for the Sarka agent."""
     parser = get_argument_parser()
     args = parser.parse_args()
@@ -472,7 +472,7 @@ def main() -> None:
                     print(f"     ({lang}) {text}")
 
         print("=" * 60)
-        return
+        return 0
 
     # STATS MODE: Show statistics
     if args.stats:
@@ -489,7 +489,7 @@ def main() -> None:
             print("=" * 60)
         finally:
             session.close()
-        return
+        return 0
 
     # SHOW-WORDS MODE: Display words at a level
     if args.show_words:
@@ -503,7 +503,7 @@ def main() -> None:
                 print()
         else:
             show_level_words(planner, args.level)
-        return
+        return 0
 
     # DEFINITIONS MODE: Generate word definition/comparison narratives
     if args.definitions:
@@ -560,7 +560,7 @@ def main() -> None:
                 sys.exit(1)
             finally:
                 session.close()
-            return
+            return 0
 
         # IMMEDIATE MODE: Generate directly
         all_results: List[Dict[str, Any]] = []
@@ -590,6 +590,7 @@ def main() -> None:
                 print(f"Error: {result['error']}")
                 if result.get("plan_stats"):
                     print(f"Stats: {result['plan_stats']}")
+                total_failed += 1
                 continue
 
             all_results.append(result)
@@ -637,7 +638,7 @@ def main() -> None:
         if args.dry_run:
             print("\n[DRY RUN] No definitions were actually saved")
         print("=" * 60)
-        return
+        return 1 if total_failed else 0
 
     # GENERATE MODE
     if args.generate:
@@ -700,7 +701,7 @@ def main() -> None:
                 sys.exit(1)
             finally:
                 session.close()
-            return
+            return 0
 
         # IMMEDIATE MODE: Generate directly
         logger.info("=" * 60)
@@ -778,6 +779,7 @@ def main() -> None:
             if args.dry_run:
                 print("\n[DRY RUN] No conversations were actually saved")
             print("=" * 60)
+            return 1 if result["failed"] else 0
 
         else:
             # Use original per-level generation
@@ -797,6 +799,7 @@ def main() -> None:
 
                 if result.get("error"):
                     print(f"Error: {result['error']}")
+                    total_failed += 1
                     continue
 
                 all_results.append(result)
@@ -836,7 +839,10 @@ def main() -> None:
             if args.dry_run:
                 print("\n[DRY RUN] No conversations were actually saved")
             print("=" * 60)
+            return 1 if total_failed else 0
+
+    return 0
 
 
 if __name__ == "__main__":
-    main()
+    sys.exit(main())

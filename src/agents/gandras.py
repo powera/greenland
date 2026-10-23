@@ -559,7 +559,7 @@ Examples:
     return parser
 
 
-def main() -> None:
+def main() -> int:
     """Main entry point for the gandras agent."""
     parser = get_argument_parser()
     args = parser.parse_args()
@@ -595,7 +595,7 @@ def main() -> None:
             print(f"  {manifest_key}")
 
         print(f"\nTotal: {len(manifests)} manifests")
-        return
+        return 0
 
     elif args.mode == "report":
         # Report on manifest matching without downloading
@@ -628,7 +628,7 @@ def main() -> None:
             if len(results["warnings"]) > 10:
                 print(f"  ... and {len(results['warnings']) - 10} more")
 
-        return
+        return 1 if results["errors"] else 0
 
     elif args.mode == "download":
         if args.fetch_audio:
@@ -687,7 +687,10 @@ def main() -> None:
                         print(f"    WARNING: {w}")
 
         print("=" * 80)
+        return 1 if results["errors"] else 0
+
+    return 0
 
 
 if __name__ == "__main__":
-    main()
+    sys.exit(main())

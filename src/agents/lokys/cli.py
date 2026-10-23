@@ -32,6 +32,7 @@ from agents.lokys.display import (
     display_single_lemma_header,
 )
 from words.llm_validators import validate_definition, validate_lemma_form
+from storage.models.schema import Lemma
 
 # Configure logging
 logger = logging.getLogger(__name__)
@@ -72,8 +73,13 @@ def get_argument_parser() -> argparse.ArgumentParser:
     return parser
 
 
-def main() -> None:
-    """Main entry point for the lokys agent."""
+def main() -> int:
+    """Main entry point for the lokys agent; returns the process exit status.
+
+    Single-lemma runs exit 1 when a validation call fails.  The batch report
+    does not yet count failed calls (llm_validators returns them as a None
+    verdict), so it exits 0 either way.
+    """
     parser = get_argument_parser()
     args = parser.parse_args()
 
@@ -94,17 +100,21 @@ def main() -> None:
     if len(lemmas) == 1:
         lemma = lemmas[0]
         display_single_lemma_header(lemma, lemma.guid or "")
+        # A failed validation call comes back as a None verdict, not an exception.
+        call_failed = False
 
         # Validate lemma form
         if args.check_type in ["lemma", "both"]:
             result = validate_lemma_form(lemma.lemma_text, lemma.pos_type, args.model)
             display_lemma_validation_result(result, lemma.lemma_text)
+            call_failed = call_failed or result.get("is_lemma") is None
 
         # Validate definition
         if args.check_type in ["definitions", "both"]:
             result = validate_definition(
                 lemma.lemma_text, lemma.definition_text, lemma.pos_type, args.model
             )
+            call_failed = call_failed or result.get("is_valid") is None
             should_apply_fix, new_definition = display_definition_validation_result(
                 result, lemma.lemma_text, lemma.definition_text, dry_run=args.dry_run
             )
@@ -113,8 +123,14 @@ def main() -> None:
             if should_apply_fix and new_definition:
                 session = agent.get_session()
                 try:
-                    old_definition = lemma.definition_text
-                    lemma.definition_text = new_definition
+                    # ``lemma`` came from the selection session, now closed;
+                    # writing to it would change nothing in this one.
+                    attached = session.get(Lemma, lemma.id)
+                    if attached is None:
+                        logger.error("Lemma %s disappeared before the fix was applied", lemma.id)
+                        return 1
+                    old_definition = attached.definition_text
+                    attached.definition_text = new_definition
                     session.commit()
                     display_fix_applied(old_definition, new_definition)
                 finally:
@@ -128,7 +144,7 @@ def main() -> None:
                 session.close()
             display_disambiguation_validation_result(result, lemma.lemma_text)
 
-        return
+        return 1 if call_failed else 0
     elif len(lemmas) == 0:
         logger.error("No lemmas found to process")
         sys.exit(1)
@@ -171,7 +187,8 @@ def main() -> None:
         check_type=args.check_type,
         lemmas=lemmas,
     )
+    return 0
 
 
 if __name__ == "__main__":
-    main()
+    sys.exit(main())

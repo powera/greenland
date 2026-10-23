@@ -270,7 +270,7 @@ def _run_populate_batch(
         session.close()
 
 
-def main() -> None:
+def main() -> int:
     """Main entry point for the papuga agent."""
     from words.pronunciation import PronunciationService
 
@@ -320,7 +320,7 @@ def main() -> None:
     # BATCH MODE: Send the requests as OpenAI batches
     if getattr(args, "batch", False):
         _run_populate_batch(config, lemmas, only_english, selected_languages, args)
-        return
+        return 0
 
     # WORKQUEUE MODE: Enqueue work items for barsukas worker
     if args.use_workqueue and mode == "populate":
@@ -348,7 +348,7 @@ def main() -> None:
         finally:
             session.close()
 
-        return
+        return 0
 
     # Confirm before running LLM queries (unless --yes or --dry-run was provided)
     if not args.yes and not args.dry_run and mode == "populate":
@@ -415,12 +415,19 @@ def main() -> None:
             lemmas=lemmas,
             retry_uncertain=args.retry_uncertain,
         )
+        if "error" in result:
+            logger.error(f"\nPopulation failed: {result['error']}")
+            return 1
         logger.info(
-            f"\nPopulation complete: {result['populated']} populated, {result['failed']} failed "
+            f"\nPopulation complete: {result['populated']} populated, {result['failed']} failed, "
+            f"{result.get('uncertain', 0)} uncertain "
             f"({result.get('lemma_lang_pairs', 0)} lemma/language pairs: "
             f"{result.get('batch_calls', 0)} batch, {result.get('single_calls', 0)} single)"
         )
+        if result["failed"]:
+            return 1
+    return 0
 
 
 if __name__ == "__main__":
-    main()
+    sys.exit(main())

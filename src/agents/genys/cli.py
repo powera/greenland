@@ -76,8 +76,8 @@ def get_argument_parser() -> argparse.ArgumentParser:
     return parser
 
 
-def main() -> None:
-    """Run the genys agent from command line."""
+def main() -> int:
+    """Run the genys agent; returns the process exit status (1 on decomposition errors)."""
     from agents.genys.agent import GenysAgent
 
     parser = get_argument_parser()
@@ -114,7 +114,7 @@ def main() -> None:
         skip_confirmation=args.yes,
         dry_run=args.dry_run,
     ):
-        return
+        return 0
 
     # None lets the agent use DEFAULT_SOURCE_LANGUAGES; an empty list disables pivots.
     pivot_languages: Optional[List[str]] = (
@@ -144,7 +144,9 @@ def main() -> None:
     print(f"  - Staged for review: {results['staged_for_review']}")
     if results["errors"]:
         print(f"  - Decomposition errors: {results['errors']}")
+        return 1
+    return 0
 
 
 if __name__ == "__main__":
-    main()
+    sys.exit(main())

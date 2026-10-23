@@ -20,4 +20,4 @@ from agents.dramblys.cli import main
 __all__ = ["DramblysAgent", "main"]
 
 if __name__ == "__main__":
-    main()
+    sys.exit(main())

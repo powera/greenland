@@ -307,7 +307,7 @@ def _run_populate_batch(
         session.close()
 
 
-def main() -> None:
+def main() -> int:
     """Main entry point for the vilkas agent."""
     # Import here to avoid circular imports
     from agents.common.cli_display import display_language_header
@@ -402,7 +402,7 @@ def main() -> None:
         # BATCH MODE: Send the requests as OpenAI batches
         if getattr(args, "batch", False):
             _run_populate_batch(agent, lemmas, args.task, selected_languages, args)
-            return
+            return 0
 
         # WORKQUEUE MODE: Enqueue work items for barsukas worker
         if args.use_workqueue:
@@ -427,7 +427,7 @@ def main() -> None:
             finally:
                 session.close()
 
-            return
+            return 0
 
         # Confirmation prompt (unless --yes or --dry-run)
         if not args.yes and not args.dry_run:
@@ -450,7 +450,11 @@ def main() -> None:
 
             if not display.print_fix_confirmation(lang_name, form_type_label, needs_fix, args):
                 print("Aborted.")
-                return
+                return 0
+
+        # process_lemma_forms reports an uncertain answer as a failure too, so
+        # an uncertain run exits 1 as well; better than a failed run exiting 0.
+        exit_status = 0
 
         # For "all" task, we need to process each supported combination
         if args.task == "all":
@@ -495,6 +499,8 @@ def main() -> None:
 
                 results = agent.fix_missing_forms(**kwargs)
                 display.print_fix_results(results, args.dry_run)
+                if "error" in results or results.get("failed"):
+                    exit_status = 1
                 task_num += 1
 
             print("\n=== All forms processed ===")
@@ -513,8 +519,10 @@ def main() -> None:
                 retry_uncertain=args.retry_uncertain,
             )
             display.print_fix_results(results, args.dry_run)
+            if "error" in results or results.get("failed"):
+                exit_status = 1
 
-        return
+        return exit_status
 
     # Coverage mode - report what needs work
     if mode == "coverage":
@@ -559,8 +567,8 @@ def main() -> None:
                 use_wiktionary=args.use_wiktionary,
             )
             display.print_fix_results(coverage_results, dry_run=True)
-        return
+    return 0
 
 
 if __name__ == "__main__":
-    main()
+    sys.exit(main())
