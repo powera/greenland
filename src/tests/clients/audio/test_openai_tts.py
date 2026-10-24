@@ -242,6 +242,68 @@ if __name__ == "__main__":
 class TestRealtimeTTS(unittest.TestCase):
     """Exercise streamed GA events without credentials or outbound calls."""
 
+    def test_transcript_comparison_logs_unexpected_speech_at_warning(self) -> None:
+        from clients.audio.openai_tts import _log_realtime_transcript
+
+        for transcript in ("hacer hacer hacer", "denter, no, wait, sorry, dentista", "hácér"):
+            with self.subTest(transcript=transcript):
+                with self.assertLogs("clients.audio.openai_tts", level="WARNING") as logs:
+                    _log_realtime_transcript("hacer", transcript, "es-419", Voice.ASH)
+                self.assertIn("expected='hacer'", logs.output[0])
+                self.assertIn(f"actual={transcript!r}", logs.output[0])
+                self.assertIn("language=es-419 voice=ash", logs.output[0])
+
+    def test_transcript_comparison_ignores_formatting_at_debug(self) -> None:
+        from clients.audio.openai_tts import _log_realtime_transcript
+
+        for expected, transcript in (
+            ("hola", "¡Hola!"),
+            ("padre o madre", "Padre  o\nmadre."),
+            ("café", "Cafe\u0301."),
+        ):
+            with self.subTest(transcript=transcript):
+                with self.assertLogs("clients.audio.openai_tts", level="DEBUG") as logs:
+                    _log_realtime_transcript(expected, transcript, "es-419", Voice.CORAL)
+                self.assertEqual([record.levelname for record in logs.records], ["DEBUG"])
+
+    def test_missing_or_empty_transcript_warns(self) -> None:
+        from clients.audio.openai_tts import _log_realtime_transcript
+
+        for transcript in (None, "", "  ", 123):
+            with self.subTest(transcript=transcript):
+                with self.assertLogs("clients.audio.openai_tts", level="WARNING") as logs:
+                    _log_realtime_transcript("pan", transcript, "es-419", Voice.ASH)
+                self.assertIn("missing output transcript", logs.output[0])
+
+    @patch("clients.audio.openai_tts.clients.lib.assert_llm_calls_enabled")
+    @patch("websocket.create_connection")
+    def test_streamed_transcript_mismatch_warns_without_discarding_audio(
+        self, mock_connect: MagicMock, mock_guard: MagicMock
+    ) -> None:
+        import base64
+        import json
+
+        mock_connect.return_value.recv.side_effect = [
+            json.dumps({"type": "session.updated"}),
+            json.dumps(
+                {
+                    "type": "response.output_audio.delta",
+                    "delta": base64.b64encode(_pcm(_tone(200))).decode(),
+                }
+            ),
+            json.dumps(
+                {"type": "response.output_audio_transcript.done", "transcript": "hacer hacer hacer"}
+            ),
+            json.dumps({"type": "response.done", "response": {"status": "completed"}}),
+        ]
+        with self.assertLogs("clients.audio.openai_tts", level="WARNING") as logs:
+            result = OpenAITTSClient(api_key="fake").generate_audio(
+                "hacer", language_code="es", audio_format=AudioFormat.PCM
+            )
+        self.assertTrue(result.success, result.error)
+        self.assertIn("transcript mismatch", logs.output[0])
+        self.assertIn("actual='hacer hacer hacer'", logs.output[0])
+
     @patch("clients.audio.openai_tts.clients.lib.assert_llm_calls_enabled")
     @patch("websocket.create_connection")
     def test_debug_usage_preserves_breakdowns_and_uses_untrimmed_duration(
