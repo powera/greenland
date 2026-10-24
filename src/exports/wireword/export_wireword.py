@@ -23,7 +23,7 @@ import constants
 from storage.backend.config import BackendType, DataSourceConfig
 from storage.backend.factory import create_session
 from storage.crud.difficulty_override import bulk_get_effective_difficulty_levels
-from storage.models.grammar_fact import GrammarFact
+from storage.crud.grammar_fact import bulk_get_effective_grammar_facts
 from storage.models.lemma_fact import LemmaFact
 from storage.models.variant_form import ACCEPTED_ANSWER_VARIANT_KINDS, VariantForm
 from storage.models.schema import (
@@ -584,21 +584,9 @@ class WirewordExporter:
                     audio_by_guid_form[key][audio.voice_name] = audio.manifest_md5
             logger.info(f"Bulk fetched {len(all_audio_records)} audio records")
 
-            # Bulk fetch all grammar facts for all lemmas
-            all_grammar_facts = (
-                session.query(GrammarFact)
-                .filter(
-                    GrammarFact.lemma_id.in_(lemma_ids),
-                    GrammarFact.language_code == self.language,
-                )
-                .all()
+            grammar_facts_by_lemma = bulk_get_effective_grammar_facts(
+                session, lemma_ids, self.language
             )
-            grammar_facts_by_lemma: Dict[int, List[GrammarFact]] = {}
-            for fact in all_grammar_facts:
-                if fact.lemma_id not in grammar_facts_by_lemma:
-                    grammar_facts_by_lemma[fact.lemma_id] = []
-                grammar_facts_by_lemma[fact.lemma_id].append(fact)
-            logger.info(f"Bulk fetched {len(all_grammar_facts)} grammar facts")
 
             # Shared concept dimensions are identical in every language export.
             concept_facts_by_lemma: Dict[int, Dict[str, str]] = {}
@@ -890,14 +878,10 @@ class WirewordExporter:
                     wireword["grammatical_forms"] = grammatical_forms
 
                 # Add grammar facts (gender, declension, etc.) as metadata (from pre-fetched data)
-                grammar_facts = grammar_facts_by_lemma.get(lemma_id, [])
+                grammar_facts = grammar_facts_by_lemma.get(lemma_id, {})
 
                 if grammar_facts:
-                    grammar_metadata = {}
-                    for fact in grammar_facts:
-                        # Store grammar facts as key-value pairs
-                        grammar_metadata[fact.fact_type] = fact.fact_value
-                    wireword["grammar_metadata"] = grammar_metadata
+                    wireword["grammar_metadata"] = grammar_facts
 
                 if lemma.pos_type == "noun":
                     wireword.update(concept_facts_by_lemma.get(lemma_id, {}))
