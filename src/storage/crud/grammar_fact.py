@@ -3,7 +3,10 @@
 import logging
 from typing import Dict, List, Optional
 
+from sqlalchemy import and_, or_
 from sqlalchemy.orm import Session
+
+from langtools.dialect_overrides import get_parent_language
 
 from storage.config.grammar_fact_registry import VERB_FORM_OVERRIDE_PREFIX
 from storage.crud.uncertain_llm_result import LLMQuestion, confidence_gated
@@ -179,7 +182,59 @@ def get_grammar_fact_value(
         .first()
     )
 
+    if fact and fact.fact_value:
+        return fact.fact_value
+    source_language = _inherited_fact_language(language_code, fact_type)
+    if source_language:
+        return get_grammar_fact_value(session, lemma_id, source_language, fact_type)
     return fact.fact_value if fact else None
+
+
+def _inherited_fact_language(language_code: str, fact_type: str) -> Optional[str]:
+    """Share Spanish number paradigms across regional vocabulary choices.
+
+    This is deliberately limited to number_type; translations and other facts
+    still belong to each storage dialect. Explicit regional values win.
+    """
+    if language_code == "es-419" and fact_type == "number_type":
+        return get_parent_language(language_code)
+    return None
+
+
+def bulk_get_effective_grammar_facts(
+    session: Session, lemma_ids: List[int], language_code: str
+) -> Dict[int, Dict[str, Optional[str]]]:
+    """Read export metadata with the same number inheritance as scalar reads.
+
+    Inherited values are resolved in memory, without creating dialect rows or
+    changing the independent data/release records.
+    """
+    language_filter = GrammarFact.language_code == language_code
+    source_language = _inherited_fact_language(language_code, "number_type")
+    if source_language:
+        language_filter = or_(
+            language_filter,
+            and_(
+                GrammarFact.language_code == source_language,
+                GrammarFact.fact_type == "number_type",
+            ),
+        )
+    rows = (
+        session.query(GrammarFact)
+        .filter(GrammarFact.lemma_id.in_(lemma_ids), language_filter)
+        .all()
+    )
+    result: Dict[int, Dict[str, Optional[str]]] = {}
+    # Apply inherited defaults first, regardless of database row order.
+    for row in rows:
+        if row.language_code != language_code and row.fact_value:
+            result.setdefault(row.lemma_id, {})[row.fact_type] = row.fact_value
+    for row in rows:
+        if row.language_code == language_code:
+            metadata = result.setdefault(row.lemma_id, {})
+            if row.fact_value or row.fact_type not in metadata:
+                metadata[row.fact_type] = row.fact_value
+    return result
 
 
 def is_plurale_tantum(session: Session, lemma_id: int, language_code: str) -> bool:
