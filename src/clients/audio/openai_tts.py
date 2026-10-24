@@ -12,6 +12,7 @@ import sys
 import wave
 import logging
 import time
+import unicodedata
 from pathlib import Path
 from typing import Any, Optional
 
@@ -66,6 +67,40 @@ PROMPTS_DIR = Path(__file__).parent.parent.parent.parent / "prompts" / "audio"
 
 # Cache for loaded prompts
 _prompt_cache: dict[tuple[str, str], str] = {}
+
+
+def _normalize_transcript(text: str) -> str:
+    """Ignore capitalization, punctuation, and spacing while retaining word boundaries."""
+    normalized = unicodedata.normalize("NFC", text).casefold()
+    return " ".join(
+        "".join(
+            " " if unicodedata.category(character).startswith("P") else character
+            for character in normalized
+        ).split()
+    )
+
+
+def _log_realtime_transcript(
+    expected: str, transcript: object, language_code: str, voice: Voice
+) -> None:
+    """Keep matching transcripts at DEBUG and surface unexpected speech at WARNING."""
+    if not isinstance(transcript, str) or not transcript.strip():
+        logger.warning(
+            "Realtime TTS missing output transcript: expected=%r language=%s voice=%s",
+            expected,
+            language_code,
+            voice.value,
+        )
+    elif _normalize_transcript(transcript) != _normalize_transcript(expected):
+        logger.warning(
+            "Realtime TTS transcript mismatch: expected=%r actual=%r language=%s voice=%s",
+            expected,
+            transcript,
+            language_code,
+            voice.value,
+        )
+    else:
+        logger.debug("Realtime TTS output transcript: %r", transcript)
 
 
 def _load_prompt(prompt_type: str, language_code: str) -> str:
@@ -400,6 +435,7 @@ class OpenAITTSClient:
         unit = "sentence" if is_sentence else "word"
         deadline = time.monotonic() + self.timeout
         chunks: list[bytes] = []
+        transcript_received = False
         try:
             connection.send(
                 json.dumps(
@@ -466,7 +502,8 @@ class OpenAITTSClient:
                 elif event_type == "response.output_audio.delta":
                     chunks.append(base64.b64decode(event["delta"], validate=True))
                 elif event_type == "response.output_audio_transcript.done":
-                    logger.debug("Realtime TTS output transcript: %r", event.get("transcript"))
+                    transcript_received = True
+                    _log_realtime_transcript(text, event.get("transcript"), language_code, voice)
                 elif event_type == "response.output_text.done":
                     logger.debug("Realtime TTS output text: %r", event.get("text"))
                 elif event_type == "response.done":
@@ -483,6 +520,8 @@ class OpenAITTSClient:
                         raise ValueError(
                             f"Realtime TTS did not complete: {response_data.get('status_details')}"
                         )
+                    if not transcript_received:
+                        _log_realtime_transcript(text, None, language_code, voice)
                     break
         finally:
             connection.close()
