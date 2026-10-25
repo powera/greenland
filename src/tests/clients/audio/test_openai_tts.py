@@ -408,7 +408,7 @@ class TestRealtimeTTS(unittest.TestCase):
         self.assertNotIn("instructions", events[1]["response"])
         (message,) = events[1]["response"]["input"]
         self.assertEqual(message["role"], "user")
-        self.assertEqual(message["content"][0]["text"], "Next word: labas")
+        self.assertEqual(message["content"][0]["text"], "Kitas žodis lietuviškai: labas")
         self.assertIn(DEFAULT_MODEL, mock_connect.call_args.args[0])
         connection.close.assert_called_once()
 
@@ -527,6 +527,55 @@ def _pcm(samples: list[int]) -> bytes:
     if sys.byteorder == "big":
         data.byteswap()
     return data.tobytes()
+
+
+class TestRealtimeTurnText(unittest.TestCase):
+    """The Realtime user turn is labelled in the target language."""
+
+    def test_labels_resolve_through_dialects(self) -> None:
+        from clients.audio.openai_tts import get_realtime_turn_text
+
+        cases = {
+            ("rectangular", "es", False): "Siguiente palabra en español: rectangular",
+            ("rectangular", "es-419", False): "Siguiente palabra en español: rectangular",
+            ("rectangular", "es-mx", False): "Siguiente palabra en español: rectangular",
+            ("你好", "zh-tw", False): "下一個中文詞語： 你好",
+            ("Bonjour.", "fr-ca", True): "Phrase suivante en français : Bonjour.",
+        }
+        for (text, code, is_sentence), expected in cases.items():
+            with self.subTest(code=code):
+                self.assertEqual(get_realtime_turn_text(text, code, is_sentence), expected)
+
+    def test_unlabelled_language_falls_back_to_english(self) -> None:
+        from clients.audio.openai_tts import get_realtime_turn_text
+
+        self.assertEqual(get_realtime_turn_text("merhaba", "tr"), "Next Turkish word: merhaba")
+
+    def test_every_audio_prompt_language_has_a_label(self) -> None:
+        import json
+
+        from clients.audio.openai_tts import (
+            PROMPTS_DIR,
+            get_parent_language,
+            get_translation_language,
+        )
+
+        labels = json.loads((PROMPTS_DIR / "realtime" / "turn_labels.json").read_text())
+        for prompt_type in ("word", "sentence"):
+            for prompt_file in (PROMPTS_DIR / prompt_type).glob("*.txt"):
+                code = prompt_file.stem
+                with self.subTest(prompt_type=prompt_type, code=code):
+                    resolved = [
+                        candidate
+                        for candidate in (
+                            code,
+                            get_translation_language(code),
+                            get_parent_language(code),
+                        )
+                        if candidate in labels
+                    ]
+                    self.assertTrue(resolved, f"no turn label for {code}")
+                    self.assertTrue(labels[resolved[0]][prompt_type].strip())
 
 
 class TestAudibleAudio(unittest.TestCase):

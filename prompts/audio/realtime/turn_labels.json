@@ -1,0 +1,16 @@
+{
+  "de": {"word": "Nächstes deutsches Wort:", "sentence": "Nächster deutscher Satz:"},
+  "es": {"word": "Siguiente palabra en español:", "sentence": "Siguiente frase en español:"},
+  "fr": {"word": "Mot suivant en français :", "sentence": "Phrase suivante en français :"},
+  "it": {"word": "Prossima parola in italiano:", "sentence": "Prossima frase in italiano:"},
+  "ja": {"word": "次の日本語の単語：", "sentence": "次の日本語の文："},
+  "ko": {"word": "다음 한국어 단어:", "sentence": "다음 한국어 문장:"},
+  "lt": {"word": "Kitas žodis lietuviškai:", "sentence": "Kitas sakinys lietuviškai:"},
+  "nl": {"word": "Volgend Nederlands woord:", "sentence": "Volgende Nederlandse zin:"},
+  "pt": {"word": "Próxima palavra em português:", "sentence": "Próxima frase em português:"},
+  "sv": {"word": "Nästa svenska ord:", "sentence": "Nästa svenska mening:"},
+  "sw": {"word": "Neno linalofuata kwa Kiswahili:", "sentence": "Sentensi inayofuata kwa Kiswahili:"},
+  "vi": {"word": "Từ tiếp theo bằng tiếng Việt:", "sentence": "Câu tiếp theo bằng tiếng Việt:"},
+  "zh": {"word": "下一个中文词语：", "sentence": "下一个中文句子："},
+  "zh-tw": {"word": "下一個中文詞語：", "sentence": "下一個中文句子："}
+}
