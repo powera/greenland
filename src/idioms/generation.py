@@ -191,7 +191,7 @@ def _resolve_client(
         config = build_default_config()
 
     # Lazy-imported to avoid a circular import via wordfreq -> langtools.
-    from wordfreq.translation.client import LinguisticClient
+    from words.linguistic_client import LinguisticClient
 
     linguistic_client = LinguisticClient(config=config)
     return linguistic_client.client, linguistic_client.model

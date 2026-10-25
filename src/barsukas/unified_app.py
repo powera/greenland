@@ -56,7 +56,7 @@ def _load_wordfreq_in_background(jsonl_data_dir: str) -> None:
         from storage.backend import create_session as _create_session
         from storage.backend.config import BackendType, DataSourceConfig
         from storage.backend.factory import _jsonl_storage_cache
-        from wordfreq.golden_loader import load_wordfreq_into_storage
+        from storage.backend.jsonl.frequency_loader import load_wordfreq_into_storage
 
         # Trigger storage cache population if it hasn't happened yet so we can
         # find the JSONLStorage instance to pass to the loader.

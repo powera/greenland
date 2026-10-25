@@ -33,8 +33,8 @@ from storage.models.imports import TARGET_KIND_LEMMA, PendingImport
 from storage.translation_helpers import LANG_CODE_TO_LLM_FIELD
 from util.logging_config import get_logger
 from words.pending_imports.classification import suggest_target_kind
-from wordfreq.translation.client import LinguisticClient
-from wordfreq.translation.definitions import select_senses_to_add
+from words.linguistic_client import LinguisticClient
+from words.definitions import select_senses_to_add
 
 logger = get_logger(__name__)
 

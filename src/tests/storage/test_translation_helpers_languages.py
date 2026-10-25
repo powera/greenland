@@ -21,7 +21,7 @@ from storage.translation_helpers import (
     get_language_name,
     has_sort_key,
 )
-from wordfreq.translation.constants import AVAILABLE_TRANSLATION_LANGUAGES_BY_CODE
+from words.linguistic_constants import AVAILABLE_TRANSLATION_LANGUAGES_BY_CODE
 
 
 def test_ancient_languages_are_tier4_languages() -> None:

@@ -81,7 +81,7 @@ def run(args: argparse.Namespace) -> int:
             return 0
 
         # Imported here so --list needs no LLM client at all.
-        from wordfreq.translation.client import LinguisticClient
+        from words.linguistic_client import LinguisticClient
 
         client = LinguisticClient(config=config.with_model(args.model, debug=args.debug))
 

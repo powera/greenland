@@ -29,7 +29,7 @@ from storage.crud.grammar_fact import add_grammar_fact
 from storage.lexeme import get_lexeme
 from storage.models.schema import Base, DerivativeForm, Lemma
 from storage.release.mechanical_filter import clear_cache, without_derivable
-from wordfreq import golden_loader
+from storage.backend.jsonl import frequency_loader
 from words.mechanical_forms import generate_for_session
 
 
@@ -212,21 +212,21 @@ class GoldenLoaderOrderTest(unittest.TestCase):
             return _recorded
 
         with (
-            mock.patch.object(golden_loader, "generate_for_session", record("generate", {})),
-            mock.patch.object(golden_loader.corpus, "load_all_corpora", record("corpora", {})),
+            mock.patch.object(frequency_loader, "generate_for_session", record("generate", {})),
+            mock.patch.object(frequency_loader.corpus, "load_all_corpora", record("corpora", {})),
             mock.patch.object(
-                golden_loader,
+                frequency_loader,
                 "link_forms_to_word_tokens",
                 record("link", {"derivative_forms": 0, "variant_forms": 0}),
             ),
-            mock.patch.object(golden_loader, "run_tier_import", record("tiers", mock.Mock())),
+            mock.patch.object(frequency_loader, "run_tier_import", record("tiers", mock.Mock())),
             mock.patch.object(
-                golden_loader.combined_rank,
+                frequency_loader.combined_rank,
                 "calculate_lemma_combined_ranks",
                 record("ranks", {}),
             ),
         ):
-            golden_loader.load_wordfreq_into_storage(self.storage)
+            frequency_loader.load_wordfreq_into_storage(self.storage)
 
         self.assertEqual(calls[:3], ["generate", "corpora", "link"])
 
@@ -237,8 +237,8 @@ class GoldenLoaderOrderTest(unittest.TestCase):
         expires every object it holds.  Against the in-memory database, whose
         identity map is the whole dictionary, that is quadratic.
         """
-        with mock.patch.object(golden_loader, "generate_for_session") as generate:
-            golden_loader._generate_mechanical_forms(self.storage)
+        with mock.patch.object(frequency_loader, "generate_for_session") as generate:
+            frequency_loader._generate_mechanical_forms(self.storage)
 
         session = generate.call_args.args[0]
         self.assertFalse(session.expire_on_commit)

@@ -214,7 +214,7 @@ def query_synonyms_from_llm(
     ``explanation``. On failure, returns ``{"success": False, "error": ...}``.
     """
     # Lazy-imported to avoid a circular import via wordfreq -> langtools -> words.
-    from wordfreq.translation.client import LinguisticClient
+    from words.linguistic_client import LinguisticClient
 
     client = LinguisticClient(config=config)
     result = query_synonyms(

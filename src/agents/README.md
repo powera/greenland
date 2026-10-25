@@ -246,7 +246,6 @@ Portuguese (pt), English (en).  `--task` names are `<lang>-<pos>-<forms>`
 vilkas.py --task all --coverage
 vilkas.py --task lt-noun-declensions --populate --use-workqueue
 vilkas.py --task fr-verb-conjugations --populate --guid V03_007
-vilkas.py --task en-noun-forms --populate --use-wiktionary
 vilkas.py --task fr-verb-conjugations --populate --batch     # OpenAI batches
 ```
 

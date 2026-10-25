@@ -45,13 +45,8 @@ from words.translation import build_term_translation_prompt
 
 logger = logging.getLogger(__name__)
 
-# Same target set the definitions call covers (DEFINITIONS_PROMPT_LANGUAGES), so
-# a term added this way and a word added through add_word end up with the same
-# languages populated. Spelled out rather than imported from
-# wordfreq.translation.definitions: this module is re-exported from
-# words/__init__, and importing the wordfreq.translation package from here runs
-# its __init__, which imports the client, which imports back into words --
-# a cycle. A test below asserts the two stay equal.
+# Keep the initial translation targets aligned with DEFINITIONS_PROMPT_LANGUAGES
+# in words.definitions; a test asserts that the two stay equal.
 TRANSLATION_LANGUAGES: Tuple[str, ...] = ("lt", "es", "es-419", "fr", "zh")
 
 # Matches add_word: a term with no caller-supplied level is created unset
@@ -148,7 +143,7 @@ def add_term(
 
     # Imported here rather than at module scope so that importing this module
     # does not construct a client; add_word does the same.
-    from wordfreq.translation.client import LinguisticClient
+    from words.linguistic_client import LinguisticClient
 
     translation_client = client
     if translation_client is None:
@@ -213,8 +208,7 @@ def add_term(
         session.add(new_lemma)
         session.flush()
         ensure_english_translation(session, new_lemma)
-        # Imported here: words.lemma_creation imports wordfreq.translation,
-        # the cycle described at TRANSLATION_LANGUAGES.
+        # Import the creation workflow only when attaching the forms.
         from words.lemma_creation import attach_english_forms
 
         attach_english_forms(session, new_lemma, source=source)

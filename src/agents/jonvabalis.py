@@ -173,7 +173,7 @@ from storage.models.schema import Lemma
 from langtools.en.conjugation import expand_verb_forms
 from storage.models.variant_form import VARIANT_KIND_EQUIVALENT, VARIANT_KIND_SPELLING
 from storage.translation_helpers import LANG_CODE_TO_LLM_FIELD, convert_llm_response_to_lang_codes
-from wordfreq.translation.constants import MAJOR_POS_TYPES
+from words.linguistic_constants import MAJOR_POS_TYPES
 from words.lemma_creation import TRANSLATION_LANGUAGES
 from quality.level_placement import LevelPlacer, PlacementSuggestion, load_profiles
 from words.pending_imports.approval import approve_pending_import, reject_pending_import

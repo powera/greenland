@@ -6,8 +6,6 @@ import constants
 
 # Common model information
 DEFAULT_MODEL = constants.DEFAULT_MODEL
-RETRY_COUNT = 3
-RETRY_DELAY = 2  # seconds
 
 # Valid parts of speech
 VALID_POS_TYPES = {

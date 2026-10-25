@@ -18,7 +18,7 @@ from storage.models.schema import (
 )
 from storage.models.guid_prefixes import render_subtype_list
 from storage.utils.enums import get_subtype_values_for_pos
-from wordfreq.translation.constants import MAJOR_POS_TYPES, VALID_POS_TYPES
+from words.linguistic_constants import MAJOR_POS_TYPES, VALID_POS_TYPES
 
 logger = logging.getLogger(__name__)
 

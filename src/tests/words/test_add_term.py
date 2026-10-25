@@ -94,13 +94,8 @@ def _add(session: Session, config: DataSourceConfig, client: _FakeClient, **kwar
 
 
 def test_target_languages_match_the_definitions_prompt() -> None:
-    """add_term's language tuple is a copy; it must not drift from the original.
-
-    It is spelled out in add_term rather than imported because importing the
-    wordfreq.translation package from a module that words/__init__ re-exports
-    closes an import cycle. This test is what keeps the copy honest.
-    """
-    from wordfreq.translation.definitions import DEFINITIONS_PROMPT_LANGUAGES
+    """The initial translation targets must agree across term and word creation."""
+    from words.definitions import DEFINITIONS_PROMPT_LANGUAGES
 
     assert TRANSLATION_LANGUAGES == DEFINITIONS_PROMPT_LANGUAGES
 

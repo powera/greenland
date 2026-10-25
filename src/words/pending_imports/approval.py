@@ -62,7 +62,7 @@ from words.pending_imports.sentence_links import (
     resolve_sentence_links,
 )
 from words.pending_imports.synonym_screening import has_active_strong_synonym_candidate
-from wordfreq.translation.client import LinguisticClient
+from words.linguistic_client import LinguisticClient
 
 logger = get_logger(__name__)
 

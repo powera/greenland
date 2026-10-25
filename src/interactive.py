@@ -3,9 +3,9 @@
 # MODEL = "gpt-4o-mini"
 MODEL = "gpt-4.1-nano"
 
-import wordfreq.translation.client
+import words.linguistic_client
 
-cl = wordfreq.translation.client.LinguisticClient(model=MODEL)
+cl = words.linguistic_client.LinguisticClient(model=MODEL)
 get_session = cl.get_session
 session = get_session()
 

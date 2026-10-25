@@ -34,7 +34,7 @@ from storage.translation_helpers import (
     set_translation,
 )
 from storage.utils.guid import generate_guid
-from wordfreq.translation.definitions import DEFINITIONS_PROMPT_LANGUAGES
+from words.definitions import DEFINITIONS_PROMPT_LANGUAGES
 
 # Level for a lemma whose difficulty nobody has decided yet. Exports skip it,
 # so an unassessed sense does not ship at a made-up level.

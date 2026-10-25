@@ -174,13 +174,6 @@ def get_argument_parser() -> argparse.ArgumentParser:
         help="Enqueue work items for background processing by barsukas worker",
     )
 
-    # Form source arguments
-    parser.add_argument(
-        "--use-wiktionary",
-        action="store_true",
-        default=False,
-        help="Use Wiktionary instead of LLM for form generation (no API cost, supports en/es/fr/lt)",
-    )
     parser.add_argument(
         "--retry-uncertain",
         action="store_true",
@@ -318,8 +311,6 @@ def main() -> int:
     parser = get_argument_parser()
     args = parser.parse_args()
     check_batch_args(parser, args)
-    if getattr(args, "batch", False) and args.use_wiktionary:
-        parser.error("--batch and --use-wiktionary cannot be used together")
 
     selected_languages = list(SUPPORTED_TASKS.keys())
     if args.languages:
@@ -492,7 +483,6 @@ def main() -> int:
                     "model": args.model,
                     "throttle": args.throttle,
                     "dry_run": args.dry_run,
-                    "use_wiktionary": args.use_wiktionary,
                     "retry_uncertain": args.retry_uncertain,
                 }
 
@@ -514,7 +504,6 @@ def main() -> int:
                 model=args.model,
                 throttle=args.throttle,
                 dry_run=args.dry_run,
-                use_wiktionary=args.use_wiktionary,
                 retry_uncertain=args.retry_uncertain,
             )
             display.print_fix_results(results, args.dry_run)
@@ -550,7 +539,6 @@ def main() -> int:
                     model=args.model,
                     throttle=args.throttle,
                     dry_run=True,
-                    use_wiktionary=args.use_wiktionary,
                 )
                 display.print_fix_results(coverage_results, dry_run=True)
         else:
@@ -563,7 +551,6 @@ def main() -> int:
                 model=args.model,
                 throttle=args.throttle,
                 dry_run=True,
-                use_wiktionary=args.use_wiktionary,
             )
             display.print_fix_results(coverage_results, dry_run=True)
     return 0

@@ -28,7 +28,7 @@ from storage.translation_helpers import (
     get_translation,
     split_llm_language_batches,
 )
-from wordfreq.translation.translations import build_translation_prompt
+from words.translation_queries import build_translation_prompt
 from words.lemma_creation import store_llm_translation
 
 logger = logging.getLogger(__name__)

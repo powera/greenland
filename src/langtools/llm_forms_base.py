@@ -53,7 +53,7 @@ class FormsAnswer(Tuple[Dict[str, str], bool]):
     Unpacks like the plain pair every generator returns, so generators that
     pass :func:`query_forms`'s result through need no change, while the
     writer can read ``confidence`` for its gate (see
-    wordfreq.translation.generate_forms_base.store_generated_forms).  A
+    words.forms.generation.store_generated_forms).  A
     mechanical paradigm returns a plain tuple: no confidence, no gate.
     """
 

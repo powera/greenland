@@ -73,7 +73,7 @@ source of truth for what a dialect code means.  There are two kinds:
   column, and audio.  Adding one means four matching registrations: the
   registry entry with translation_target=True, LANGUAGE_FIELDS +
   LLM_FIELD_TO_LANG_CODE + LANGUAGE_HIERARCHY in translation_helpers.py, an
-  AVAILABLE_TRANSLATION_LANGUAGES entry in wordfreq/translation/constants.py,
+  AVAILABLE_TRANSLATION_LANGUAGES entry in words/linguistic_constants.py,
   and prompts/audio/{word,sentence}/<code>.txt.  A test in
   src/tests/storage/test_translation_helpers_languages.py enforces the set.
   There is no "fallback" from a storage dialect to the main version.

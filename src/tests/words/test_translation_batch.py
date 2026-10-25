@@ -32,7 +32,7 @@ from words.translation_batch import (
     apply_populate_results,
     find_in_flight_lemma_ids,
 )
-from wordfreq.translation.translations import build_translation_prompt
+from words.translation_queries import build_translation_prompt
 from workqueue.handlers.words.translations import TRANSLATIONS_JOB, translation_populate_states
 from workqueue.llm_batch import complete_rows, start_batch_run
 from workqueue.registry import get_llm_job
