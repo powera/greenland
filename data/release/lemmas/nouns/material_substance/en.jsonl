@@ -56,7 +56,7 @@
 {"guid": "N14_090", "forms": [{"grammatical_form": "noun/en_singular", "text": "mush", "is_base_form": true, "ipa": "/mʌʃ/", "phonetic": "MUSH"}]}
 {"guid": "N14_091", "forms": [{"grammatical_form": "noun/en_singular", "text": "scum", "is_base_form": true, "ipa": "/skʌm/", "phonetic": "SKUM"}]}
 {"guid": "N14_092", "forms": [{"grammatical_form": "noun/en_singular", "text": "zinc", "is_base_form": true, "ipa": "/zɪŋk/", "phonetic": "ZINGK"}]}
-{"guid": "N14_093", "forms": [{"grammatical_form": "noun/en_singular", "text": "glue", "is_base_form": true, "ipa": "/ɡluː/", "phonetic": "GLOO"}]}
+{"guid": "N14_093", "forms": [{"grammatical_form": "noun/en_singular", "text": "glue", "is_base_form": true, "ipa": "/ɡluː/", "phonetic": "GLOO"}], "grammar_facts": [{"fact_type": "countability", "fact_value": "both"}, {"fact_type": "number_type", "fact_value": "regular"}, {"fact_type": "animacy", "fact_value": "inanimate"}, {"fact_type": "plural_status", "fact_value": "regular"}]}
 {"guid": "N14_094", "forms": [{"grammatical_form": "noun/en_singular", "text": "newspaper", "is_base_form": true, "ipa": "/ˈnuːzˌpeɪpər/", "phonetic": "NOOZ-pay-per"}]}
 {"guid": "N14_095", "forms": [{"grammatical_form": "noun/en_singular", "text": "venom", "is_base_form": true, "ipa": "/ˈvɛnəm/", "phonetic": "VEN-um"}]}
 {"guid": "N14_096", "forms": [{"grammatical_form": "noun/en_singular", "text": "ice", "is_base_form": true, "ipa": "/aɪs/", "phonetic": "AY-s"}]}

@@ -1,0 +1,7 @@
+{"guid": "N13_001", "grammar_facts": [{"fact_type": "number_type", "fact_value": "regular"}, {"fact_type": "plural", "fact_value": "wegen"}, {"fact_type": "plural_status", "fact_value": "override"}]}
+{"guid": "N13_002", "grammar_facts": [{"fact_type": "number_type", "fact_value": "regular"}, {"fact_type": "plural", "fact_value": "bruggen"}, {"fact_type": "plural_status", "fact_value": "override"}]}
+{"guid": "N13_004", "grammar_facts": [{"fact_type": "number_type", "fact_value": "regular"}, {"fact_type": "plural", "fact_value": "straten"}, {"fact_type": "plural_status", "fact_value": "override"}]}
+{"guid": "N13_005", "grammar_facts": [{"fact_type": "number_type", "fact_value": "regular"}, {"fact_type": "plural", "fact_value": "snelwegen"}, {"fact_type": "plural_status", "fact_value": "override"}]}
+{"guid": "N13_011", "grammar_facts": [{"fact_type": "number_type", "fact_value": "regular"}, {"fact_type": "plural", "fact_value": "podia"}, {"fact_type": "plural_status", "fact_value": "override"}]}
+{"guid": "N13_032", "grammar_facts": [{"fact_type": "number_type", "fact_value": "regular"}, {"fact_type": "plural", "fact_value": "metro's"}, {"fact_type": "plural_status", "fact_value": "override"}]}
+{"guid": "N13_033", "grammar_facts": [{"fact_type": "number_type", "fact_value": "regular"}, {"fact_type": "plural", "fact_value": "hekken"}, {"fact_type": "plural_status", "fact_value": "override"}]}

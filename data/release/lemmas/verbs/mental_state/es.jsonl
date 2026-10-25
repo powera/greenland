@@ -1,5 +1,15 @@
+{"guid": "V04_001", "grammar_facts": [{"fact_type": "verb_reflexivity", "fact_value": "non_reflexive"}, {"fact_type": "past_participle", "fact_value": "aprendido"}]}
+{"guid": "V04_002", "grammar_facts": [{"fact_type": "verb_reflexivity", "fact_value": "non_reflexive"}, {"fact_type": "past_participle", "fact_value": "enseñado"}]}
 {"guid": "V04_003", "grammar_facts": [{"fact_type": "verb_reflexivity", "fact_value": "non_reflexive"}, {"fact_type": "past_participle", "fact_value": "leído"}]}
+{"guid": "V04_004", "grammar_facts": [{"fact_type": "verb_reflexivity", "fact_value": "non_reflexive"}, {"fact_type": "past_participle", "fact_value": "escrito"}]}
 {"guid": "V04_006", "grammar_facts": [{"fact_type": "verb_reflexivity", "fact_value": "non_reflexive"}, {"fact_type": "past_participle", "fact_value": "sabido"}]}
 {"guid": "V04_008", "grammar_facts": [{"fact_type": "verb_reflexivity", "fact_value": "non_reflexive"}, {"fact_type": "past_participle", "fact_value": "pensado"}]}
+{"guid": "V04_010", "grammar_facts": [{"fact_type": "verb_reflexivity", "fact_value": "non_reflexive"}, {"fact_type": "past_participle", "fact_value": "necesitado"}]}
 {"guid": "V04_011", "grammar_facts": [{"fact_type": "verb_reflexivity", "fact_value": "non_reflexive"}, {"fact_type": "past_participle", "fact_value": "significado"}]}
+{"guid": "V04_012", "grammar_facts": [{"fact_type": "verb_reflexivity", "fact_value": "non_reflexive"}, {"fact_type": "past_participle", "fact_value": "recordado"}]}
+{"guid": "V04_013", "grammar_facts": [{"fact_type": "verb_reflexivity", "fact_value": "non_reflexive"}, {"fact_type": "past_participle", "fact_value": "entendido"}]}
+{"guid": "V04_021", "grammar_facts": [{"fact_type": "verb_reflexivity", "fact_value": "non_reflexive"}, {"fact_type": "past_participle", "fact_value": "olvidado"}]}
+{"guid": "V04_024", "grammar_facts": [{"fact_type": "verb_reflexivity", "fact_value": "non_reflexive"}, {"fact_type": "past_participle", "fact_value": "contado"}]}
+{"guid": "V04_027", "grammar_facts": [{"fact_type": "verb_reflexivity", "fact_value": "non_reflexive"}, {"fact_type": "past_participle", "fact_value": "elegido"}]}
 {"guid": "V04_032", "grammar_facts": [{"fact_type": "verb_reflexivity", "fact_value": "non_reflexive"}, {"fact_type": "past_participle", "fact_value": "estudiado"}]}
+{"guid": "V04_068", "grammar_facts": [{"fact_type": "verb_reflexivity", "fact_value": "non_reflexive"}, {"fact_type": "past_participle", "fact_value": "podido"}]}

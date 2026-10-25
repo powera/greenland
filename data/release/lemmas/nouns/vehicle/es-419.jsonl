@@ -1,5 +1,5 @@
-{"guid": "N40_001", "grammar_facts": [{"fact_type": "grammatical_gender", "fact_value": "masculine"}]}
-{"guid": "N40_002", "grammar_facts": [{"fact_type": "grammatical_gender", "fact_value": "masculine"}]}
+{"guid": "N40_001", "grammar_facts": [{"fact_type": "grammatical_gender", "fact_value": "masculine"}, {"fact_type": "countability", "fact_value": "countable"}]}
+{"guid": "N40_002", "grammar_facts": [{"fact_type": "grammatical_gender", "fact_value": "masculine"}, {"fact_type": "countability", "fact_value": "countable"}]}
 {"guid": "N40_003", "grammar_facts": [{"fact_type": "grammatical_gender", "fact_value": "masculine"}, {"fact_type": "countability", "fact_value": "countable"}]}
 {"guid": "N40_006", "grammar_facts": [{"fact_type": "grammatical_gender", "fact_value": "masculine"}, {"fact_type": "countability", "fact_value": "countable"}]}
 {"guid": "N40_007", "grammar_facts": [{"fact_type": "grammatical_gender", "fact_value": "feminine"}, {"fact_type": "countability", "fact_value": "countable"}]}
@@ -8,4 +8,4 @@
 {"guid": "N40_010", "grammar_facts": [{"fact_type": "grammatical_gender", "fact_value": "masculine"}, {"fact_type": "countability", "fact_value": "countable"}]}
 {"guid": "N40_011", "grammar_facts": [{"fact_type": "grammatical_gender", "fact_value": "masculine"}, {"fact_type": "countability", "fact_value": "countable"}]}
 {"guid": "N40_012", "grammar_facts": [{"fact_type": "grammatical_gender", "fact_value": "feminine"}, {"fact_type": "countability", "fact_value": "countable"}]}
-{"guid": "N40_016", "grammar_facts": [{"fact_type": "grammatical_gender", "fact_value": "masculine"}]}
+{"guid": "N40_016", "grammar_facts": [{"fact_type": "grammatical_gender", "fact_value": "masculine"}, {"fact_type": "countability", "fact_value": "countable"}]}

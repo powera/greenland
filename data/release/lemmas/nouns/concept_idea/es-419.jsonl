@@ -1,4 +1,4 @@
-{"guid": "N17_188", "grammar_facts": [{"fact_type": "grammatical_gender", "fact_value": "masculine"}]}
-{"guid": "N17_217", "grammar_facts": [{"fact_type": "grammatical_gender", "fact_value": "feminine"}]}
-{"guid": "N17_225", "grammar_facts": [{"fact_type": "grammatical_gender", "fact_value": "masculine"}]}
-{"guid": "N17_240", "grammar_facts": [{"fact_type": "grammatical_gender", "fact_value": "masculine"}]}
+{"guid": "N17_188", "grammar_facts": [{"fact_type": "grammatical_gender", "fact_value": "masculine"}, {"fact_type": "countability", "fact_value": "both"}]}
+{"guid": "N17_217", "grammar_facts": [{"fact_type": "grammatical_gender", "fact_value": "feminine"}, {"fact_type": "countability", "fact_value": "countable"}]}
+{"guid": "N17_225", "grammar_facts": [{"fact_type": "grammatical_gender", "fact_value": "masculine"}, {"fact_type": "countability", "fact_value": "both"}]}
+{"guid": "N17_240", "grammar_facts": [{"fact_type": "grammatical_gender", "fact_value": "masculine"}, {"fact_type": "countability", "fact_value": "countable"}]}

@@ -1,8 +1,9 @@
+{"guid": "N50_001", "grammar_facts": [{"fact_type": "grammatical_gender", "fact_value": "masculine"}, {"fact_type": "countability", "fact_value": "countable"}, {"fact_type": "number_type", "fact_value": "regular"}]}
 {"guid": "N50_002", "grammar_facts": [{"fact_type": "grammatical_gender", "fact_value": "feminine"}]}
 {"guid": "N50_003", "grammar_facts": [{"fact_type": "grammatical_gender", "fact_value": "masculine"}]}
-{"guid": "N50_004", "grammar_facts": [{"fact_type": "grammatical_gender", "fact_value": "masculine"}]}
-{"guid": "N50_005", "grammar_facts": [{"fact_type": "grammatical_gender", "fact_value": "masculine"}]}
-{"guid": "N50_006", "grammar_facts": [{"fact_type": "grammatical_gender", "fact_value": "feminine"}]}
+{"guid": "N50_004", "grammar_facts": [{"fact_type": "grammatical_gender", "fact_value": "masculine"}, {"fact_type": "countability", "fact_value": "countable"}, {"fact_type": "number_type", "fact_value": "regular"}]}
+{"guid": "N50_005", "grammar_facts": [{"fact_type": "grammatical_gender", "fact_value": "masculine"}, {"fact_type": "countability", "fact_value": "countable"}, {"fact_type": "number_type", "fact_value": "regular"}]}
+{"guid": "N50_006", "grammar_facts": [{"fact_type": "grammatical_gender", "fact_value": "feminine"}, {"fact_type": "countability", "fact_value": "countable"}, {"fact_type": "number_type", "fact_value": "regular"}]}
 {"guid": "N50_007", "grammar_facts": [{"fact_type": "grammatical_gender", "fact_value": "masculine"}]}
 {"guid": "N50_008", "grammar_facts": [{"fact_type": "grammatical_gender", "fact_value": "feminine"}]}
 {"guid": "N50_010", "grammar_facts": [{"fact_type": "grammatical_gender", "fact_value": "masculine"}, {"fact_type": "countability", "fact_value": "countable"}, {"fact_type": "number_type", "fact_value": "regular"}]}
@@ -17,9 +18,11 @@
 {"guid": "N50_021", "grammar_facts": [{"fact_type": "grammatical_gender", "fact_value": "masculine"}]}
 {"guid": "N50_022", "grammar_facts": [{"fact_type": "grammatical_gender", "fact_value": "masculine"}]}
 {"guid": "N50_024", "grammar_facts": [{"fact_type": "grammatical_gender", "fact_value": "masculine"}]}
+{"guid": "N50_025", "grammar_facts": [{"fact_type": "grammatical_gender", "fact_value": "masculine"}, {"fact_type": "countability", "fact_value": "countable"}, {"fact_type": "number_type", "fact_value": "regular"}]}
 {"guid": "N50_026", "grammar_facts": [{"fact_type": "grammatical_gender", "fact_value": "masculine"}]}
 {"guid": "N50_027", "grammar_facts": [{"fact_type": "grammatical_gender", "fact_value": "feminine"}]}
 {"guid": "N50_028", "grammar_facts": [{"fact_type": "grammatical_gender", "fact_value": "masculine"}]}
+{"guid": "N50_029", "grammar_facts": [{"fact_type": "grammatical_gender", "fact_value": "masculine"}, {"fact_type": "countability", "fact_value": "countable"}, {"fact_type": "number_type", "fact_value": "regular"}]}
 {"guid": "N50_030", "grammar_facts": [{"fact_type": "grammatical_gender", "fact_value": "masculine"}]}
 {"guid": "N50_031", "grammar_facts": [{"fact_type": "grammatical_gender", "fact_value": "feminine"}]}
 {"guid": "N50_032", "grammar_facts": [{"fact_type": "grammatical_gender", "fact_value": "masculine"}]}

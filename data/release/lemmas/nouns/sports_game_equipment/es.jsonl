@@ -1,4 +1,4 @@
-{"guid": "N70_001", "grammar_facts": [{"fact_type": "grammatical_gender", "fact_value": "feminine"}]}
+{"guid": "N70_001", "grammar_facts": [{"fact_type": "grammatical_gender", "fact_value": "feminine"}, {"fact_type": "countability", "fact_value": "countable"}, {"fact_type": "number_type", "fact_value": "regular"}, {"fact_type": "plural_status", "fact_value": "regular"}]}
 {"guid": "N70_014", "grammar_facts": [{"fact_type": "grammatical_gender", "fact_value": "masculine"}]}
 {"guid": "N70_015", "grammar_facts": [{"fact_type": "grammatical_gender", "fact_value": "masculine"}]}
 {"guid": "N70_016", "grammar_facts": [{"fact_type": "grammatical_gender", "fact_value": "masculine"}]}

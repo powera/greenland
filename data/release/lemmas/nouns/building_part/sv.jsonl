@@ -1,0 +1,16 @@
+{"guid": "N47_001", "grammar_facts": [{"fact_type": "number_type", "fact_value": "regular"}, {"fact_type": "plural", "fact_value": "dörrar"}, {"fact_type": "plural_status", "fact_value": "override"}]}
+{"guid": "N47_002", "grammar_facts": [{"fact_type": "number_type", "fact_value": "regular"}, {"fact_type": "plural", "fact_value": "fönster"}, {"fact_type": "plural_status", "fact_value": "override"}]}
+{"guid": "N47_003", "grammar_facts": [{"fact_type": "number_type", "fact_value": "regular"}, {"fact_type": "plural", "fact_value": "väggar"}, {"fact_type": "plural_status", "fact_value": "override"}]}
+{"guid": "N47_004", "grammar_facts": [{"fact_type": "number_type", "fact_value": "regular"}, {"fact_type": "plural", "fact_value": "golv"}, {"fact_type": "plural_status", "fact_value": "override"}]}
+{"guid": "N47_006", "grammar_facts": [{"fact_type": "number_type", "fact_value": "regular"}, {"fact_type": "plural", "fact_value": "tak"}, {"fact_type": "plural_status", "fact_value": "override"}]}
+{"guid": "N47_008", "grammar_facts": [{"fact_type": "number_type", "fact_value": "regular"}, {"fact_type": "plural", "fact_value": "grindar"}, {"fact_type": "plural_status", "fact_value": "override"}]}
+{"guid": "N47_014", "grammar_facts": [{"fact_type": "number_type", "fact_value": "regular"}, {"fact_type": "plural", "fact_value": "balkonger"}, {"fact_type": "plural_status", "fact_value": "override"}]}
+{"guid": "N47_017", "grammar_facts": [{"fact_type": "number_type", "fact_value": "regular"}, {"fact_type": "plural", "fact_value": "steg"}, {"fact_type": "plural_status", "fact_value": "override"}]}
+{"guid": "N47_021", "grammar_facts": [{"fact_type": "number_type", "fact_value": "regular"}, {"fact_type": "plural", "fact_value": "hörn"}, {"fact_type": "plural_status", "fact_value": "override"}]}
+{"guid": "N47_023", "grammar_facts": [{"fact_type": "number_type", "fact_value": "regular"}, {"fact_type": "plural", "fact_value": "avlopp"}, {"fact_type": "plural_status", "fact_value": "override"}]}
+{"guid": "N47_046", "grammar_facts": [{"fact_type": "number_type", "fact_value": "regular"}, {"fact_type": "plural", "fact_value": "rum"}, {"fact_type": "plural_status", "fact_value": "override"}]}
+{"guid": "N47_047", "grammar_facts": [{"fact_type": "number_type", "fact_value": "regular"}, {"fact_type": "plural", "fact_value": "badrum"}, {"fact_type": "plural_status", "fact_value": "override"}]}
+{"guid": "N47_048", "grammar_facts": [{"fact_type": "number_type", "fact_value": "regular"}, {"fact_type": "plural", "fact_value": "sovrum"}, {"fact_type": "plural_status", "fact_value": "override"}]}
+{"guid": "N47_049", "grammar_facts": [{"fact_type": "number_type", "fact_value": "regular"}, {"fact_type": "plural", "fact_value": "matsalar"}, {"fact_type": "plural_status", "fact_value": "override"}]}
+{"guid": "N47_050", "grammar_facts": [{"fact_type": "number_type", "fact_value": "regular"}, {"fact_type": "plural", "fact_value": "kök"}, {"fact_type": "plural_status", "fact_value": "override"}]}
+{"guid": "N47_051", "grammar_facts": [{"fact_type": "number_type", "fact_value": "regular"}, {"fact_type": "plural", "fact_value": "vardagsrum"}, {"fact_type": "plural_status", "fact_value": "override"}]}

@@ -1,2 +1,2 @@
-{"guid": "D10_001", "forms": [{"grammatical_form": "adverb/en_positive", "text": "enough", "is_base_form": true, "ipa": "/ɪˈnʌf/", "phonetic": "IH-NUFF"}]}
-{"guid": "D10_002", "forms": [{"grammatical_form": "adverb/en_positive", "text": "all", "is_base_form": true, "ipa": "/ɔːl/", "phonetic": "AOH-l"}]}
+{"guid": "D10_001", "forms": [{"grammatical_form": "adverb/en_positive", "text": "enough", "is_base_form": true, "ipa": "/ɪˈnʌf/", "phonetic": "IH-NUFF"}], "grammar_facts": [{"fact_type": "gradability", "fact_value": "non_gradable"}]}
+{"guid": "D10_002", "forms": [{"grammatical_form": "adverb/en_positive", "text": "all", "is_base_form": true, "ipa": "/ɔːl/", "phonetic": "AOH-l"}], "grammar_facts": [{"fact_type": "gradability", "fact_value": "non_gradable"}, {"fact_type": "comparative_status", "fact_value": "not_applicable"}, {"fact_type": "superlative_status", "fact_value": "not_applicable"}]}

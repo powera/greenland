@@ -5,6 +5,8 @@
 {"guid": "N37_005", "grammar_facts": [{"fact_type": "number_type", "fact_value": "regular"}, {"fact_type": "plural", "fact_value": "ovaler"}, {"fact_type": "plural_status", "fact_value": "override"}]}
 {"guid": "N37_006", "grammar_facts": [{"fact_type": "number_type", "fact_value": "regular"}, {"fact_type": "plural", "fact_value": "kuber"}, {"fact_type": "plural_status", "fact_value": "override"}]}
 {"guid": "N37_007", "grammar_facts": [{"fact_type": "number_type", "fact_value": "regular"}, {"fact_type": "plural", "fact_value": "sfärer"}, {"fact_type": "plural_status", "fact_value": "override"}]}
+{"guid": "N37_008", "grammar_facts": [{"fact_type": "number_type", "fact_value": "regular"}, {"fact_type": "plural", "fact_value": "cylindrar"}, {"fact_type": "plural_status", "fact_value": "override"}]}
+{"guid": "N37_009", "grammar_facts": [{"fact_type": "number_type", "fact_value": "regular"}, {"fact_type": "plural", "fact_value": "koner"}, {"fact_type": "plural_status", "fact_value": "override"}]}
 {"guid": "N37_010", "grammar_facts": [{"fact_type": "number_type", "fact_value": "regular"}, {"fact_type": "plural", "fact_value": "pyramider"}, {"fact_type": "plural_status", "fact_value": "override"}]}
 {"guid": "N37_011", "grammar_facts": [{"fact_type": "number_type", "fact_value": "regular"}, {"fact_type": "plural", "fact_value": "hexagon"}, {"fact_type": "plural_status", "fact_value": "override"}]}
 {"guid": "N37_012", "grammar_facts": [{"fact_type": "number_type", "fact_value": "regular"}, {"fact_type": "plural", "fact_value": "femhörningar"}, {"fact_type": "plural_status", "fact_value": "override"}]}

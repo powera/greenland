@@ -1,7 +1,10 @@
-{"guid": "A15_011", "forms": [{"grammatical_form": "adjective/en_positive", "text": "last", "is_base_form": true, "ipa": "/læst/", "phonetic": "LAST"}]}
-{"guid": "A15_012", "forms": [{"grammatical_form": "adjective/en_positive", "text": "final", "is_base_form": true, "ipa": "/faɪnəl/", "phonetic": "FY-nəl"}]}
-{"guid": "A15_017", "forms": [{"grammatical_form": "adjective/en_positive", "text": "middle", "is_base_form": true}]}
-{"guid": "A15_019", "forms": [{"grammatical_form": "adjective/en_positive", "text": "latter", "is_base_form": true, "ipa": "/ˈlætər/", "phonetic": "LAT-er"}]}
+{"guid": "A15_011", "forms": [{"grammatical_form": "adjective/en_positive", "text": "last", "is_base_form": true, "ipa": "/læst/", "phonetic": "LAST"}], "grammar_facts": [{"fact_type": "gradability", "fact_value": "non_gradable"}, {"fact_type": "comparative_status", "fact_value": "not_applicable"}, {"fact_type": "superlative_status", "fact_value": "not_applicable"}]}
+{"guid": "A15_012", "forms": [{"grammatical_form": "adjective/en_positive", "text": "final", "is_base_form": true, "ipa": "/faɪnəl/", "phonetic": "FY-nəl"}], "grammar_facts": [{"fact_type": "gradability", "fact_value": "non_gradable"}, {"fact_type": "comparative_status", "fact_value": "not_applicable"}, {"fact_type": "superlative_status", "fact_value": "not_applicable"}]}
+{"guid": "A15_013", "grammar_facts": [{"fact_type": "gradability", "fact_value": "non_gradable"}, {"fact_type": "comparative_status", "fact_value": "not_applicable"}, {"fact_type": "superlative_status", "fact_value": "not_applicable"}]}
+{"guid": "A15_015", "grammar_facts": [{"fact_type": "gradability", "fact_value": "non_gradable"}]}
+{"guid": "A15_017", "grammar_facts": [{"fact_type": "gradability", "fact_value": "non_gradable"}]}
+{"guid": "A15_018", "grammar_facts": [{"fact_type": "gradability", "fact_value": "non_gradable"}]}
+{"guid": "A15_019", "forms": [{"grammatical_form": "adjective/en_positive", "text": "latter", "is_base_form": true, "ipa": "/ˈlætər/", "phonetic": "LAT-er"}], "grammar_facts": [{"fact_type": "gradability", "fact_value": "non_gradable"}, {"fact_type": "comparative_status", "fact_value": "not_applicable"}, {"fact_type": "superlative_status", "fact_value": "not_applicable"}]}
 {"guid": "A15_020", "forms": [{"grammatical_form": "adjective/en_positive", "text": "third-largest", "is_base_form": true, "ipa": "/ˌθɝd ˈlɑrdʒəst/", "phonetic": "THURD-LAR-jist"}]}
 {"guid": "A15_021", "forms": [{"grammatical_form": "adjective/en_positive", "text": "second-highest", "is_base_form": true, "ipa": "/ˌsɛkənd ˈhaɪəst/", "phonetic": "SEK-und-HIGH-ist"}]}
 {"guid": "A15_022", "forms": [{"grammatical_form": "adjective/en_positive", "text": "second-most", "is_base_form": true, "ipa": "/ˌsɛkənd ˈmoʊst/", "phonetic": "SEK-und-most"}]}

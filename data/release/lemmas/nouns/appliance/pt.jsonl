@@ -1,0 +1,6 @@
+{"guid": "N43_002", "grammar_facts": [{"fact_type": "grammatical_gender", "fact_value": "masculine"}, {"fact_type": "number_type", "fact_value": "regular"}, {"fact_type": "plural_status", "fact_value": "regular"}]}
+{"guid": "N43_003", "grammar_facts": [{"fact_type": "grammatical_gender", "fact_value": "masculine"}, {"fact_type": "number_type", "fact_value": "regular"}, {"fact_type": "plural_status", "fact_value": "regular"}]}
+{"guid": "N43_005", "grammar_facts": [{"fact_type": "grammatical_gender", "fact_value": "feminine"}, {"fact_type": "number_type", "fact_value": "regular"}, {"fact_type": "plural", "fact_value": "máquinas de lavar roupa"}, {"fact_type": "plural_status", "fact_value": "override"}]}
+{"guid": "N43_012", "grammar_facts": [{"fact_type": "grammatical_gender", "fact_value": "masculine"}, {"fact_type": "number_type", "fact_value": "regular"}, {"fact_type": "plural_status", "fact_value": "regular"}]}
+{"guid": "N43_018", "grammar_facts": [{"fact_type": "grammatical_gender", "fact_value": "masculine"}, {"fact_type": "number_type", "fact_value": "regular"}, {"fact_type": "plural_status", "fact_value": "regular"}]}
+{"guid": "N43_030", "grammar_facts": [{"fact_type": "grammatical_gender", "fact_value": "masculine"}, {"fact_type": "number_type", "fact_value": "regular"}, {"fact_type": "plural_status", "fact_value": "regular"}]}

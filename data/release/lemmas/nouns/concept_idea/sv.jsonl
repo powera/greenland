@@ -1,0 +1,4 @@
+{"guid": "N17_188", "grammar_facts": [{"fact_type": "number_type", "fact_value": "regular"}, {"fact_type": "plural", "fact_value": "färger"}, {"fact_type": "plural_status", "fact_value": "override"}]}
+{"guid": "N17_217", "grammar_facts": [{"fact_type": "number_type", "fact_value": "regular"}, {"fact_type": "plural", "fact_value": "läxor"}, {"fact_type": "plural_status", "fact_value": "override"}]}
+{"guid": "N17_225", "grammar_facts": [{"fact_type": "number_type", "fact_value": "regular"}, {"fact_type": "plural", "fact_value": "konster"}, {"fact_type": "plural_status", "fact_value": "override"}]}
+{"guid": "N17_240", "grammar_facts": [{"fact_type": "number_type", "fact_value": "regular"}, {"fact_type": "plural", "fact_value": "städer"}, {"fact_type": "plural_status", "fact_value": "override"}]}

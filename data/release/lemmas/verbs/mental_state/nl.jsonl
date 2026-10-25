@@ -1,5 +1,15 @@
+{"guid": "V04_001", "grammar_facts": [{"fact_type": "auxiliary_verb", "fact_value": "hebben"}, {"fact_type": "past_participle", "fact_value": "geleerd"}]}
+{"guid": "V04_002", "grammar_facts": [{"fact_type": "auxiliary_verb", "fact_value": "hebben"}, {"fact_type": "past_participle", "fact_value": "onderwezen"}]}
 {"guid": "V04_003", "grammar_facts": [{"fact_type": "auxiliary_verb", "fact_value": "hebben"}, {"fact_type": "past_participle", "fact_value": "gelezen"}]}
+{"guid": "V04_004", "grammar_facts": [{"fact_type": "auxiliary_verb", "fact_value": "hebben"}, {"fact_type": "past_participle", "fact_value": "geschreven"}]}
 {"guid": "V04_006", "grammar_facts": [{"fact_type": "auxiliary_verb", "fact_value": "hebben"}, {"fact_type": "past_participle", "fact_value": "geweten"}]}
 {"guid": "V04_008", "grammar_facts": [{"fact_type": "auxiliary_verb", "fact_value": "hebben"}, {"fact_type": "past_participle", "fact_value": "gedacht"}]}
+{"guid": "V04_010", "grammar_facts": [{"fact_type": "auxiliary_verb", "fact_value": "hebben"}, {"fact_type": "past_participle", "fact_value": "nodig gehad"}]}
 {"guid": "V04_011", "grammar_facts": [{"fact_type": "auxiliary_verb", "fact_value": "hebben"}, {"fact_type": "past_participle", "fact_value": "betekend"}]}
+{"guid": "V04_012", "grammar_facts": [{"fact_type": "auxiliary_verb", "fact_value": "hebben"}, {"fact_type": "past_participle", "fact_value": "herinnerd"}]}
+{"guid": "V04_013", "grammar_facts": [{"fact_type": "auxiliary_verb", "fact_value": "hebben"}, {"fact_type": "past_participle", "fact_value": "begrepen"}]}
+{"guid": "V04_021", "grammar_facts": [{"fact_type": "auxiliary_verb", "fact_value": "zijn"}, {"fact_type": "past_participle", "fact_value": "vergeten"}]}
+{"guid": "V04_024", "grammar_facts": [{"fact_type": "auxiliary_verb", "fact_value": "hebben"}, {"fact_type": "past_participle", "fact_value": "geteld"}]}
+{"guid": "V04_027", "grammar_facts": [{"fact_type": "auxiliary_verb", "fact_value": "hebben"}, {"fact_type": "past_participle", "fact_value": "gekozen"}]}
 {"guid": "V04_032", "grammar_facts": [{"fact_type": "auxiliary_verb", "fact_value": "hebben"}, {"fact_type": "past_participle", "fact_value": "gestudeerd"}]}
+{"guid": "V04_068", "grammar_facts": [{"fact_type": "auxiliary_verb", "fact_value": "hebben"}, {"fact_type": "past_participle", "fact_value": "gekund"}]}

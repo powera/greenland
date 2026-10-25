@@ -7,7 +7,7 @@
 {"guid": "N24_008", "forms": [{"grammatical_form": "noun/en_singular", "text": "attack", "is_base_form": true, "ipa": "/əˈtæk/", "phonetic": "uh-TACK"}]}
 {"guid": "N24_009", "forms": [{"grammatical_form": "noun/en_singular", "text": "party", "is_base_form": true, "ipa": "/ˈpɑːr.ti/", "phonetic": "PAR-ti"}]}
 {"guid": "N24_010", "forms": [{"grammatical_form": "noun/en_singular", "text": "race", "is_base_form": true, "ipa": "/res/", "phonetic": "REH-se"}]}
-{"guid": "N24_011", "forms": [{"grammatical_form": "noun/en_singular", "text": "test", "is_base_form": true, "ipa": "/tɛst/", "phonetic": "TEST"}]}
+{"guid": "N24_011", "forms": [{"grammatical_form": "noun/en_singular", "text": "test", "is_base_form": true, "ipa": "/tɛst/", "phonetic": "TEST"}], "grammar_facts": [{"fact_type": "countability", "fact_value": "countable"}, {"fact_type": "number_type", "fact_value": "regular"}, {"fact_type": "animacy", "fact_value": "inanimate"}, {"fact_type": "plural_status", "fact_value": "regular"}]}
 {"guid": "N24_012", "forms": [{"grammatical_form": "noun/en_singular", "text": "action", "is_base_form": true, "ipa": "/ˈæk.ʃən/", "phonetic": "AK-shən"}]}
 {"guid": "N24_015", "forms": [{"grammatical_form": "noun/en_singular", "text": "training", "is_base_form": true, "ipa": "/ˈtreɪnɪŋ/", "phonetic": "TRAY-nin"}]}
 {"guid": "N24_016", "forms": [{"grammatical_form": "noun/en_singular", "text": "movement", "is_base_form": true, "ipa": "/ˈmuːvmənt/", "phonetic": "MOO-vmənt"}]}
@@ -19,6 +19,8 @@
 {"guid": "N24_023", "forms": [{"grammatical_form": "noun/en_singular", "text": "escape", "is_base_form": true, "ipa": "/ɪsˈkeɪp/", "phonetic": "IH-skayp"}]}
 {"guid": "N24_024", "forms": [{"grammatical_form": "noun/en_singular", "text": "meeting", "is_base_form": true, "ipa": "/ˈmiːtɪŋ/", "phonetic": "MEE-ting"}]}
 {"guid": "N24_026", "forms": [{"grammatical_form": "noun/en_singular", "text": "beginning", "is_base_form": true, "ipa": "/bɪˈɡɪn.ɪŋ/", "phonetic": "bi-GIN-ing"}]}
+{"guid": "N24_034", "grammar_facts": [{"fact_type": "countability", "fact_value": "countable"}, {"fact_type": "number_type", "fact_value": "regular"}, {"fact_type": "animacy", "fact_value": "inanimate"}, {"fact_type": "plural_status", "fact_value": "regular"}]}
+{"guid": "N24_063", "grammar_facts": [{"fact_type": "countability", "fact_value": "countable"}, {"fact_type": "number_type", "fact_value": "regular"}, {"fact_type": "animacy", "fact_value": "inanimate"}, {"fact_type": "plural_status", "fact_value": "regular"}]}
 {"guid": "N24_072", "forms": [{"grammatical_form": "noun/en_singular", "text": "final exam", "is_base_form": true}]}
 {"guid": "N24_073", "forms": [{"grammatical_form": "noun/en_singular", "text": "traffic jam", "is_base_form": true}]}
 {"guid": "N24_074", "forms": [{"grammatical_form": "noun/en_singular", "text": "family reunion", "is_base_form": true}]}

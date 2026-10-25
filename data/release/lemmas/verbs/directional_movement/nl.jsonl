@@ -3,4 +3,12 @@
 {"guid": "V12_003", "grammar_facts": [{"fact_type": "auxiliary_verb", "fact_value": "hebben"}, {"fact_type": "past_participle", "fact_value": "gerend"}]}
 {"guid": "V12_004", "grammar_facts": [{"fact_type": "auxiliary_verb", "fact_value": "zijn"}, {"fact_type": "past_participle", "fact_value": "gegaan"}]}
 {"guid": "V12_005", "grammar_facts": [{"fact_type": "auxiliary_verb", "fact_value": "zijn"}, {"fact_type": "past_participle", "fact_value": "gekomen"}]}
+{"guid": "V12_006", "grammar_facts": [{"fact_type": "auxiliary_verb", "fact_value": "zijn"}, {"fact_type": "past_participle", "fact_value": "teruggekeerd"}]}
+{"guid": "V12_007", "grammar_facts": [{"fact_type": "auxiliary_verb", "fact_value": "zijn"}, {"fact_type": "past_participle", "fact_value": "vertrokken"}]}
+{"guid": "V12_016", "grammar_facts": [{"fact_type": "auxiliary_verb", "fact_value": "hebben"}, {"fact_type": "past_participle", "fact_value": "gereden"}]}
+{"guid": "V12_018", "grammar_facts": [{"fact_type": "auxiliary_verb", "fact_value": "hebben"}, {"fact_type": "past_participle", "fact_value": "gevlogen"}]}
+{"guid": "V12_019", "grammar_facts": [{"fact_type": "auxiliary_verb", "fact_value": "zijn"}, {"fact_type": "past_participle", "fact_value": "overgestoken"}]}
+{"guid": "V12_021", "grammar_facts": [{"fact_type": "auxiliary_verb", "fact_value": "zijn"}, {"fact_type": "past_participle", "fact_value": "binnengegaan"}]}
+{"guid": "V12_022", "grammar_facts": [{"fact_type": "auxiliary_verb", "fact_value": "hebben"}, {"fact_type": "past_participle", "fact_value": "gereisd"}]}
+{"guid": "V12_026", "grammar_facts": [{"fact_type": "auxiliary_verb", "fact_value": "hebben"}, {"fact_type": "past_participle", "fact_value": "gezwommen"}]}
 {"guid": "V12_030", "grammar_facts": [{"fact_type": "auxiliary_verb", "fact_value": "hebben"}, {"fact_type": "past_participle", "fact_value": "bezocht"}]}

@@ -1,9 +1,9 @@
 {"guid": "V09_001", "grammar_facts": [{"fact_type": "infinitive", "fact_value": "kalbėti"}, {"fact_type": "3s_present", "fact_value": "kalba"}, {"fact_type": "3s_past", "fact_value": "kalbėjo"}]}
-{"guid": "V09_002", "grammar_facts": [{"fact_type": "infinitive", "fact_value": "kalbėti"}, {"fact_type": "3s_present", "fact_value": "kalba"}, {"fact_type": "3s_past", "fact_value": "kalbėjo"}]}
+{"guid": "V09_002", "grammar_facts": [{"fact_type": "infinitive", "fact_value": "kalbėti"}, {"fact_type": "3s_present", "fact_value": "kalba"}, {"fact_type": "3s_past", "fact_value": "kalbėjo"}, {"fact_type": "verb_reflexivity", "fact_value": "non_reflexive"}]}
 {"guid": "V09_003", "grammar_facts": [{"fact_type": "infinitive", "fact_value": "pasakyti"}, {"fact_type": "3s_present", "fact_value": "pasako"}, {"fact_type": "3s_past", "fact_value": "pasakė"}]}
-{"guid": "V09_004", "grammar_facts": [{"fact_type": "infinitive", "fact_value": "klausti"}, {"fact_type": "3s_present", "fact_value": "klausia"}, {"fact_type": "3s_past", "fact_value": "klausė"}]}
+{"guid": "V09_004", "grammar_facts": [{"fact_type": "infinitive", "fact_value": "klausti"}, {"fact_type": "3s_present", "fact_value": "klausia"}, {"fact_type": "3s_past", "fact_value": "klausė"}, {"fact_type": "verb_reflexivity", "fact_value": "non_reflexive"}]}
 {"guid": "V09_005", "grammar_facts": [{"fact_type": "infinitive", "fact_value": "atsakyti"}, {"fact_type": "3s_present", "fact_value": "atsako"}, {"fact_type": "3s_past", "fact_value": "atsakė"}]}
-{"guid": "V09_006", "grammar_facts": [{"fact_type": "infinitive", "fact_value": "sakyti"}, {"fact_type": "3s_present", "fact_value": "sako"}, {"fact_type": "3s_past", "fact_value": "sakė"}]}
+{"guid": "V09_006", "grammar_facts": [{"fact_type": "infinitive", "fact_value": "sakyti"}, {"fact_type": "3s_present", "fact_value": "sako"}, {"fact_type": "3s_past", "fact_value": "sakė"}, {"fact_type": "verb_reflexivity", "fact_value": "non_reflexive"}]}
 {"guid": "V09_007", "grammar_facts": [{"fact_type": "infinitive", "fact_value": "šaukti"}, {"fact_type": "3s_present", "fact_value": "šaukia"}, {"fact_type": "3s_past", "fact_value": "šaukė"}]}
 {"guid": "V09_008", "grammar_facts": [{"fact_type": "infinitive", "fact_value": "šaukti"}, {"fact_type": "3s_present", "fact_value": "šaukia"}, {"fact_type": "3s_past", "fact_value": "šaukė"}]}
 {"guid": "V09_009", "grammar_facts": [{"fact_type": "infinitive", "fact_value": "šnibždėti"}, {"fact_type": "3s_present", "fact_value": "šnibžda"}, {"fact_type": "3s_past", "fact_value": "šnibždėjo"}]}
@@ -19,7 +19,7 @@
 {"guid": "V09_019", "grammar_facts": [{"fact_type": "infinitive", "fact_value": "skųstis"}, {"fact_type": "3s_present", "fact_value": "skundžiasi"}, {"fact_type": "3s_past", "fact_value": "skundėsi"}]}
 {"guid": "V09_020", "grammar_facts": [{"fact_type": "infinitive", "fact_value": "dėkoti"}, {"fact_type": "3s_present", "fact_value": "dėkoja"}, {"fact_type": "3s_past", "fact_value": "dėkojo"}]}
 {"guid": "V09_021", "grammar_facts": [{"fact_type": "infinitive", "fact_value": "versti"}, {"fact_type": "3s_present", "fact_value": "verčia"}, {"fact_type": "3s_past", "fact_value": "vertė"}]}
-{"guid": "V09_022", "grammar_facts": [{"fact_type": "infinitive", "fact_value": "dainuoti"}, {"fact_type": "3s_present", "fact_value": "dainuoja"}, {"fact_type": "3s_past", "fact_value": "dainavo"}]}
+{"guid": "V09_022", "grammar_facts": [{"fact_type": "infinitive", "fact_value": "dainuoti"}, {"fact_type": "3s_present", "fact_value": "dainuoja"}, {"fact_type": "3s_past", "fact_value": "dainavo"}, {"fact_type": "verb_reflexivity", "fact_value": "non_reflexive"}]}
 {"guid": "V09_023", "grammar_facts": [{"fact_type": "infinitive", "fact_value": "prašyti"}, {"fact_type": "3s_present", "fact_value": "prašo"}, {"fact_type": "3s_past", "fact_value": "prašė"}]}
 {"guid": "V09_024", "grammar_facts": [{"fact_type": "infinitive", "fact_value": "neigti"}, {"fact_type": "3s_present", "fact_value": "neigia"}, {"fact_type": "3s_past", "fact_value": "neigė"}]}
 {"guid": "V09_025", "grammar_facts": [{"fact_type": "infinitive", "fact_value": "urzgti"}, {"fact_type": "3s_present", "fact_value": "urzga"}, {"fact_type": "3s_past", "fact_value": "urzgo"}]}

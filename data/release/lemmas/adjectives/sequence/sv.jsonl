@@ -1,0 +1,6 @@
+{"guid": "A15_011", "grammar_facts": [{"fact_type": "comparative_status", "fact_value": "not_applicable"}, {"fact_type": "superlative_status", "fact_value": "not_applicable"}]}
+{"guid": "A15_012", "grammar_facts": [{"fact_type": "comparative_status", "fact_value": "not_applicable"}, {"fact_type": "superlative_status", "fact_value": "not_applicable"}]}
+{"guid": "A15_013", "grammar_facts": [{"fact_type": "comparative", "fact_value": "nästa"}, {"fact_type": "comparative_status", "fact_value": "override"}, {"fact_type": "superlative", "fact_value": "nästa"}, {"fact_type": "superlative_status", "fact_value": "override"}]}
+{"guid": "A15_015", "grammar_facts": [{"fact_type": "comparative", "fact_value": "mer följande"}, {"fact_type": "comparative_status", "fact_value": "override"}, {"fact_type": "superlative", "fact_value": "mest följande"}, {"fact_type": "superlative_status", "fact_value": "override"}]}
+{"guid": "A15_017", "grammar_facts": [{"fact_type": "comparative", "fact_value": "mer mellersta"}, {"fact_type": "comparative_status", "fact_value": "override"}, {"fact_type": "superlative", "fact_value": "mest mellersta"}, {"fact_type": "superlative_status", "fact_value": "override"}]}
+{"guid": "A15_018", "grammar_facts": [{"fact_type": "superlative", "fact_value": "främst"}, {"fact_type": "superlative_status", "fact_value": "override"}]}

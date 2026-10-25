@@ -3,6 +3,24 @@
 {"guid": "N08_007", "grammar_facts": [{"fact_type": "number_type", "fact_value": "regular"}, {"fact_type": "plural", "fact_value": "mobiele telefoons"}, {"fact_type": "plural_status", "fact_value": "override"}]}
 {"guid": "N08_009", "grammar_facts": [{"fact_type": "number_type", "fact_value": "regular"}, {"fact_type": "plural", "fact_value": "tassen"}, {"fact_type": "plural_status", "fact_value": "override"}]}
 {"guid": "N08_010", "grammar_facts": [{"fact_type": "number_type", "fact_value": "regular"}, {"fact_type": "plural", "fact_value": "portemonnees"}, {"fact_type": "plural_status", "fact_value": "override"}]}
+{"guid": "N08_011", "grammar_facts": [{"fact_type": "number_type", "fact_value": "regular"}, {"fact_type": "plural", "fact_value": "brillen"}, {"fact_type": "plural_status", "fact_value": "override"}]}
 {"guid": "N08_012", "grammar_facts": [{"fact_type": "number_type", "fact_value": "regular"}, {"fact_type": "plural", "fact_value": "flessen"}, {"fact_type": "plural_status", "fact_value": "override"}]}
+{"guid": "N08_013", "grammar_facts": [{"fact_type": "number_type", "fact_value": "regular"}, {"fact_type": "plural", "fact_value": "dozen"}, {"fact_type": "plural_status", "fact_value": "override"}]}
+{"guid": "N08_014", "grammar_facts": [{"fact_type": "number_type", "fact_value": "regular"}, {"fact_type": "plural", "fact_value": "papieren"}, {"fact_type": "plural_status", "fact_value": "override"}]}
 {"guid": "N08_016", "grammar_facts": [{"fact_type": "number_type", "fact_value": "regular"}, {"fact_type": "plural", "fact_value": "spiegels"}, {"fact_type": "plural_status", "fact_value": "override"}]}
 {"guid": "N08_017", "grammar_facts": [{"fact_type": "number_type", "fact_value": "regular"}, {"fact_type": "plural", "fact_value": "handdoeken"}, {"fact_type": "plural_status", "fact_value": "override"}]}
+{"guid": "N08_019", "grammar_facts": [{"fact_type": "number_type", "fact_value": "regular"}, {"fact_type": "plural", "fact_value": "pennen"}, {"fact_type": "plural_status", "fact_value": "override"}]}
+{"guid": "N08_020", "grammar_facts": [{"fact_type": "number_type", "fact_value": "regular"}, {"fact_type": "plural", "fact_value": "potloden"}, {"fact_type": "plural_status", "fact_value": "override"}]}
+{"guid": "N08_021", "grammar_facts": [{"fact_type": "number_type", "fact_value": "regular"}, {"fact_type": "plural", "fact_value": "messen"}, {"fact_type": "plural_status", "fact_value": "override"}]}
+{"guid": "N08_027", "grammar_facts": [{"fact_type": "number_type", "fact_value": "regular"}, {"fact_type": "plural", "fact_value": "paraplu's"}, {"fact_type": "plural_status", "fact_value": "override"}]}
+{"guid": "N08_030", "grammar_facts": [{"fact_type": "number_type", "fact_value": "regular"}, {"fact_type": "plural", "fact_value": "dekens"}, {"fact_type": "plural_status", "fact_value": "override"}]}
+{"guid": "N08_035", "grammar_facts": [{"fact_type": "number_type", "fact_value": "regular"}, {"fact_type": "plural", "fact_value": "poppen"}, {"fact_type": "plural_status", "fact_value": "override"}]}
+{"guid": "N08_036", "grammar_facts": [{"fact_type": "number_type", "fact_value": "singulare_tantum"}, {"fact_type": "plural_status", "fact_value": "not_applicable"}]}
+{"guid": "N08_052", "grammar_facts": [{"fact_type": "number_type", "fact_value": "regular"}, {"fact_type": "plural", "fact_value": "manden"}, {"fact_type": "plural_status", "fact_value": "override"}]}
+{"guid": "N08_067", "grammar_facts": [{"fact_type": "number_type", "fact_value": "regular"}, {"fact_type": "plural", "fact_value": "gummen"}, {"fact_type": "plural_status", "fact_value": "override"}]}
+{"guid": "N08_077", "grammar_facts": [{"fact_type": "number_type", "fact_value": "regular"}, {"fact_type": "plural", "fact_value": "bellen"}, {"fact_type": "plural_status", "fact_value": "override"}]}
+{"guid": "N08_081", "grammar_facts": [{"fact_type": "number_type", "fact_value": "regular"}, {"fact_type": "plural", "fact_value": "geschenken"}, {"fact_type": "plural_status", "fact_value": "override"}]}
+{"guid": "N08_088", "grammar_facts": [{"fact_type": "number_type", "fact_value": "regular"}, {"fact_type": "plural", "fact_value": "camera's"}, {"fact_type": "plural_status", "fact_value": "override"}]}
+{"guid": "N08_090", "grammar_facts": [{"fact_type": "number_type", "fact_value": "regular"}, {"fact_type": "plural", "fact_value": "kaarten"}, {"fact_type": "plural_status", "fact_value": "override"}]}
+{"guid": "N08_095", "grammar_facts": [{"fact_type": "number_type", "fact_value": "regular"}, {"fact_type": "plural", "fact_value": "vlaggen"}, {"fact_type": "plural_status", "fact_value": "override"}]}
+{"guid": "N08_230", "grammar_facts": [{"fact_type": "number_type", "fact_value": "regular"}, {"fact_type": "plural", "fact_value": "klokken"}, {"fact_type": "plural_status", "fact_value": "override"}]}

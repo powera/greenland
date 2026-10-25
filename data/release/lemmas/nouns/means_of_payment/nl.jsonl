@@ -1,0 +1,4 @@
+{"guid": "N75_001", "grammar_facts": [{"fact_type": "number_type", "fact_value": "regular"}, {"fact_type": "plural", "fact_value": "contante gelden"}, {"fact_type": "plural_status", "fact_value": "override"}]}
+{"guid": "N75_002", "grammar_facts": [{"fact_type": "number_type", "fact_value": "regular"}, {"fact_type": "plural", "fact_value": "gelden"}, {"fact_type": "plural_status", "fact_value": "override"}]}
+{"guid": "N75_004", "grammar_facts": [{"fact_type": "number_type", "fact_value": "regular"}, {"fact_type": "plural", "fact_value": "wisselgelden"}, {"fact_type": "plural_status", "fact_value": "override"}]}
+{"guid": "N75_005", "grammar_facts": [{"fact_type": "number_type", "fact_value": "regular"}, {"fact_type": "plural", "fact_value": "munten"}, {"fact_type": "plural_status", "fact_value": "override"}]}

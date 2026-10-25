@@ -1,4 +1,4 @@
-{"guid": "V07_001", "grammar_facts": [{"fact_type": "infinitive", "fact_value": "treniruoti"}, {"fact_type": "3s_present", "fact_value": "treniruoja"}, {"fact_type": "3s_past", "fact_value": "treniravo"}]}
+{"guid": "V07_001", "grammar_facts": [{"fact_type": "infinitive", "fact_value": "treniruoti"}, {"fact_type": "3s_present", "fact_value": "treniruoja"}, {"fact_type": "3s_past", "fact_value": "treniravo"}, {"fact_type": "verb_reflexivity", "fact_value": "non_reflexive"}]}
 {"guid": "V07_002", "grammar_facts": [{"fact_type": "infinitive", "fact_value": "vystyti"}, {"fact_type": "3s_present", "fact_value": "vysto"}, {"fact_type": "3s_past", "fact_value": "vystė"}]}
 {"guid": "V07_003", "grammar_facts": [{"fact_type": "infinitive", "fact_value": "tobulinti"}, {"fact_type": "3s_present", "fact_value": "tobulina"}, {"fact_type": "3s_past", "fact_value": "tobulino"}]}
 {"guid": "V07_004", "grammar_facts": [{"fact_type": "infinitive", "fact_value": "praktikuoti"}, {"fact_type": "3s_present", "fact_value": "praktikuoja"}, {"fact_type": "3s_past", "fact_value": "praktikavo"}]}

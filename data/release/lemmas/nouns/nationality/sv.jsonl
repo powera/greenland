@@ -1,0 +1,17 @@
+{"guid": "N33_001", "grammar_facts": [{"fact_type": "number_type", "fact_value": "regular"}, {"fact_type": "plural", "fact_value": "litauer"}, {"fact_type": "plural_status", "fact_value": "override"}]}
+{"guid": "N33_002", "grammar_facts": [{"fact_type": "number_type", "fact_value": "regular"}, {"fact_type": "plural", "fact_value": "letter"}, {"fact_type": "plural_status", "fact_value": "override"}]}
+{"guid": "N33_003", "grammar_facts": [{"fact_type": "number_type", "fact_value": "regular"}, {"fact_type": "plural", "fact_value": "ester"}, {"fact_type": "plural_status", "fact_value": "override"}]}
+{"guid": "N33_004", "grammar_facts": [{"fact_type": "number_type", "fact_value": "regular"}, {"fact_type": "plural", "fact_value": "polacker"}, {"fact_type": "plural_status", "fact_value": "override"}]}
+{"guid": "N33_005", "grammar_facts": [{"fact_type": "number_type", "fact_value": "regular"}, {"fact_type": "plural", "fact_value": "tyskar"}, {"fact_type": "plural_status", "fact_value": "override"}]}
+{"guid": "N33_006", "grammar_facts": [{"fact_type": "number_type", "fact_value": "regular"}, {"fact_type": "plural", "fact_value": "fransmän"}, {"fact_type": "plural_status", "fact_value": "override"}]}
+{"guid": "N33_007", "grammar_facts": [{"fact_type": "number_type", "fact_value": "regular"}, {"fact_type": "plural", "fact_value": "spanjorer"}, {"fact_type": "plural_status", "fact_value": "override"}]}
+{"guid": "N33_008", "grammar_facts": [{"fact_type": "number_type", "fact_value": "regular"}, {"fact_type": "plural", "fact_value": "italienare"}, {"fact_type": "plural_status", "fact_value": "override"}]}
+{"guid": "N33_009", "grammar_facts": [{"fact_type": "number_type", "fact_value": "regular"}, {"fact_type": "plural", "fact_value": "ryssar"}, {"fact_type": "plural_status", "fact_value": "override"}]}
+{"guid": "N33_010", "grammar_facts": [{"fact_type": "number_type", "fact_value": "regular"}, {"fact_type": "plural", "fact_value": "engelsmän"}, {"fact_type": "plural_status", "fact_value": "override"}]}
+{"guid": "N33_011", "grammar_facts": [{"fact_type": "number_type", "fact_value": "regular"}, {"fact_type": "plural", "fact_value": "amerikaner"}, {"fact_type": "plural_status", "fact_value": "override"}]}
+{"guid": "N33_012", "grammar_facts": [{"fact_type": "number_type", "fact_value": "regular"}, {"fact_type": "plural", "fact_value": "kanadensare"}, {"fact_type": "plural_status", "fact_value": "override"}]}
+{"guid": "N33_013", "grammar_facts": [{"fact_type": "number_type", "fact_value": "regular"}, {"fact_type": "plural", "fact_value": "japaner"}, {"fact_type": "plural_status", "fact_value": "override"}]}
+{"guid": "N33_014", "grammar_facts": [{"fact_type": "number_type", "fact_value": "regular"}, {"fact_type": "plural", "fact_value": "kineser"}, {"fact_type": "plural_status", "fact_value": "override"}]}
+{"guid": "N33_015", "grammar_facts": [{"fact_type": "number_type", "fact_value": "regular"}, {"fact_type": "plural", "fact_value": "svenskar"}, {"fact_type": "plural_status", "fact_value": "override"}]}
+{"guid": "N33_016", "grammar_facts": [{"fact_type": "number_type", "fact_value": "regular"}, {"fact_type": "plural", "fact_value": "norrmän"}, {"fact_type": "plural_status", "fact_value": "override"}]}
+{"guid": "N33_017", "grammar_facts": [{"fact_type": "number_type", "fact_value": "regular"}, {"fact_type": "plural", "fact_value": "finländare"}, {"fact_type": "plural_status", "fact_value": "override"}]}
