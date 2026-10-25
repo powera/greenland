@@ -10,7 +10,7 @@
 {"guid": "N47_010", "forms": [{"grammatical_form": "noun/en_singular", "text": "corridor", "is_base_form": true, "ipa": "/kəˈrɪdəʊɹ/", "phonetic": "kə-RID-ə-r"}]}
 {"guid": "N47_011", "forms": [{"grammatical_form": "noun/en_singular", "text": "arch", "is_base_form": true, "ipa": "ˈɑːrtʃ", "phonetic": "AART-ch"}]}
 {"guid": "N47_012", "forms": [{"grammatical_form": "noun/en_singular", "text": "landing", "is_base_form": true, "ipa": "ˌlændɪŋ", "phonetic": "LAND-ing"}]}
-{"guid": "N47_013", "forms": [{"grammatical_form": "noun/en_singular", "text": "chimney", "is_base_form": true, "ipa": "/tʃɪˈmiː/", "phonetic": "CHIM-nee"}, {"grammatical_form": "noun/en_plural", "text": "ies<l:archaic>", "is_base_form": false}]}
+{"guid": "N47_013", "forms": [{"grammatical_form": "noun/en_singular", "text": "chimney", "is_base_form": true, "ipa": "/tʃɪˈmiː/", "phonetic": "CHIM-nee"}]}
 {"guid": "N47_014", "forms": [{"grammatical_form": "noun/en_singular", "text": "balcony", "is_base_form": true, "ipa": "/ˈbæl.kə.ʃni/", "phonetic": "BAL-kuh-shee"}], "grammar_facts": [{"fact_type": "countability", "fact_value": "countable"}, {"fact_type": "number_type", "fact_value": "regular"}, {"fact_type": "animacy", "fact_value": "inanimate"}, {"fact_type": "plural_status", "fact_value": "regular"}]}
 {"guid": "N47_015", "forms": [{"grammatical_form": "noun/en_singular", "text": "pillar", "is_base_form": true, "ipa": "/ˈpɪlər/", "phonetic": "PIL-lər"}]}
 {"guid": "N47_017", "grammar_facts": [{"fact_type": "countability", "fact_value": "countable"}, {"fact_type": "number_type", "fact_value": "regular"}, {"fact_type": "animacy", "fact_value": "inanimate"}, {"fact_type": "plural_status", "fact_value": "regular"}]}
