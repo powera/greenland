@@ -15,7 +15,7 @@ GUID Allocation (10 slots per section):
   N35_051-060: Grandchild
   N35_061-070: Aunt/Uncle
   N35_071-080: Niece/Nephew
-  N35_081-090: Cousin
+  Cousin: existing N35_076; gender counterparts are not separate GUIDs
   N35_091-100: Spouse
   N35_101-110: In-law
   N35_111-120: Step-parent
@@ -399,31 +399,15 @@ NIECE_NEPHEW_SECTION = FamilyRelationSection(
 
 COUSIN_SECTION = FamilyRelationSection(
     section_name="Cousin",
-    description="Cousin terms including gender-neutral and gendered variants",
+    description="One cousin concept with language-specific gender variants",
     variants=[
         FamilyRelationVariant(
-            guid="N35_081",
+            guid="N35_076",
             lemma_text="cousin",
             definition="A child of one's aunt or uncle",
             tier=2,
             tags=["extended_family", "gender_neutral"],
-            notes="Gender-neutral in some languages; gendered in others",
-        ),
-        FamilyRelationVariant(
-            guid="N35_082",
-            lemma_text="male cousin",
-            definition="A male child of one's aunt or uncle",
-            tier=5,
-            tags=["extended_family", "male", "gendered"],
-            notes="Used in Romance languages",
-        ),
-        FamilyRelationVariant(
-            guid="N35_083",
-            lemma_text="female cousin",
-            definition="A female child of one's aunt or uncle",
-            tier=5,
-            tags=["extended_family", "female", "gendered"],
-            notes="Used in Romance languages",
+            notes="Unspecified default; male/female words are gender variants of this lemma",
         ),
     ],
 )

@@ -1,6 +1,6 @@
 """CRUD operations for VariantForm model.
 
-Variant forms are alternate spellings of the same lexeme ("grey" for "gray").
+Variants carry their own paradigms, including spelling and gender counterparts.
 See storage.models.variant_form for why these live outside derivative_forms.
 """
 
@@ -21,7 +21,12 @@ from storage.crud.operation_log import (
 )
 from storage.crud.word_token import add_word_token
 from storage.models.schema import Lemma, WordToken
-from storage.models.variant_form import VARIANT_KIND_SPELLING, VariantForm
+from storage.models.variant_form import (
+    GENDER_VARIANT_KEYS,
+    VARIANT_KIND_GENDER,
+    VARIANT_KIND_SPELLING,
+    VariantForm,
+)
 
 logger = logging.getLogger(__name__)
 
@@ -63,6 +68,7 @@ def add_variant_form(
     verified: bool = False,
     notes: Optional[str] = None,
     source: Optional[str] = None,
+    grammatical_gender: Optional[str] = None,
 ) -> VariantForm:
     """Add (or update) one grammatical form of a variant paradigm.
 
@@ -79,6 +85,9 @@ def add_variant_form(
             variant's own base form (e.g. "grey")
         grammatical_form: Grammatical slot (e.g. "adjective/en_comparative")
         variant_kind: Kind of variant; defaults to "spelling"
+        grammatical_gender: The variant word's grammatical gender, independent
+            of a gender variant's male/female referent key. None leaves an
+            existing classification unchanged.
         is_base_form: True for the variant's own base form
         word_token: Optional pre-resolved WordToken for frequency data
         link_word_token: When True and no word_token is given, look up or
@@ -94,6 +103,10 @@ def add_variant_form(
     Returns:
         VariantForm: The created or updated row
     """
+    if variant_kind == VARIANT_KIND_GENDER:
+        if lemma.pos_type != "noun" or variant_key not in GENDER_VARIANT_KEYS:
+            raise ValueError("Gender variants require a noun and a male/female key")
+
     existing = (
         session.query(VariantForm)
         .filter(
@@ -134,6 +147,10 @@ def add_variant_form(
             )
         if notes is not None:
             changes.append(FieldChange("notes", existing.notes, notes))
+        if grammatical_gender is not None:
+            changes.append(
+                FieldChange("grammatical_gender", existing.grammatical_gender, grammatical_gender)
+            )
 
         existing.variant_form_text = variant_form_text
         existing.is_base_form = is_base_form
@@ -146,6 +163,8 @@ def add_variant_form(
         if notes is not None:
             existing.notes = notes
         existing.verified = verified
+        if grammatical_gender is not None:
+            existing.grammatical_gender = grammatical_gender
         session.flush()
 
         log_field_changes(
@@ -172,6 +191,7 @@ def add_variant_form(
         phonetic_pronunciation=phonetic_pronunciation,
         verified=verified,
         notes=notes,
+        grammatical_gender=grammatical_gender,
     )
     session.add(variant_form)
     session.flush()
@@ -186,6 +206,7 @@ def add_variant_form(
                 **_variant_identity(language_code, variant_kind, variant_key, grammatical_form),
                 "text": variant_form_text,
                 "is_base_form": is_base_form,
+                "grammatical_gender": grammatical_gender,
             },
             lemma_id=lemma.id,
         )

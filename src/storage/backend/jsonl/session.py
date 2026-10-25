@@ -385,6 +385,7 @@ class JSONLSession(BaseSession):
                                 "variant_key": variant_key,
                                 "grammatical_form": variant_gform,
                                 "variant_form_text": variant_text,
+                                "grammatical_gender": variant.get("grammatical_gender"),
                                 "is_base_form": bool(variant_form_entry.get("is_base_form", False)),
                                 "ipa_pronunciation": variant_form_entry.get("ipa"),
                                 "phonetic_pronunciation": variant_form_entry.get("phonetic"),

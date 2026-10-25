@@ -47,6 +47,9 @@ TOMBSTONE_REASON_MANUAL_CORRECTION: str = "manual_correction"
 #: Unlike a synonym merge, nothing of it is kept on the surviving lemma.
 TOMBSTONE_REASON_DUPLICATE_SENSE: str = "duplicate_sense"
 
+# A person-gender counterpart is retained as a variant under one concept.
+TOMBSTONE_REASON_GENDER_VARIANT_MERGE: str = "gender_variant_merge"
+
 TOMBSTONE_REASONS: frozenset[str] = frozenset(
     {
         TOMBSTONE_REASON_TYPE_CHANGE,
@@ -59,6 +62,7 @@ TOMBSTONE_REASONS: frozenset[str] = frozenset(
         TOMBSTONE_REASON_RELEASE_REMOVAL,
         TOMBSTONE_REASON_MANUAL_CORRECTION,
         TOMBSTONE_REASON_DUPLICATE_SENSE,
+        TOMBSTONE_REASON_GENDER_VARIANT_MERGE,
     }
 )
 

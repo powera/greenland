@@ -41,6 +41,7 @@ from storage.translation_helpers import (
 )
 from langtools.dialect_overrides import get_base_language
 from exports.wireword.data_models import ExportStats, create_export_stats
+from exports.wireword.gendered_forms import bulk_gender_variants, build_gendered_forms
 from exports.wireword.readings import (
     build_target_reading_fields,
     build_target_reading_list_fields,
@@ -559,6 +560,9 @@ class WirewordExporter:
             # to read them separately or they reach no consumer at all -- see
             # storage.models.variant_form for why they are a table of their own.
             variant_base_forms_by_lemma = self._bulk_fetch_variant_base_forms(session, lemma_ids)
+            gender_variants_by_lemma = bulk_gender_variants(
+                session, lemma_ids, [self.language, self.source_language]
+            )
 
             # Bulk fetch all audio records for all GUIDs (base forms only)
             all_audio_records = (
@@ -908,6 +912,16 @@ class WirewordExporter:
                 if lemma.verified:
                     tags.append("verified")
                 wireword["tags"] = tags
+
+                gendered_forms = build_gendered_forms(
+                    wireword,
+                    gender_variants_by_lemma.get(lemma_id, {}),
+                    self.language,
+                    self.source_language,
+                    audio_by_guid_form,
+                )
+                if gendered_forms:
+                    wireword["gendered_forms"] = gendered_forms
 
                 wireword_data.append(wireword)
 

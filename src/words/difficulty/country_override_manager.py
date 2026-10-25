@@ -126,7 +126,6 @@ class CountryOverrideManager:
     COUNTRY_SUBTYPES = {
         "region",
         "nationality",
-        "origin",
         "language_name",
         "group_people",
     }
@@ -156,7 +155,10 @@ class CountryOverrideManager:
         return results
 
     def get_all_country_related_words(self) -> List[Lemma]:
-        """Countries, demonyms, origin adjectives, languages and ethnic groups."""
+        """Countries, person nouns, languages and ethnic groups.
+
+        Origin adjectives stay at their catalog level without country overrides.
+        """
         return [lemma for lemma, _, _, _ in self._geography_words()]
 
     def preview_changes(

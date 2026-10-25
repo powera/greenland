@@ -132,6 +132,8 @@ def _form_diffs(
                 "db_phonetic": "",
                 "release_is_base": release_form.get("is_base_form", False),
                 "db_is_base": False,
+                "release_grammatical_gender": release_form.get("grammatical_gender"),
+                "db_grammatical_gender": None,
             }
         )
 
@@ -150,6 +152,8 @@ def _form_diffs(
                 "db_phonetic": row.phonetic_pronunciation or "",
                 "release_is_base": False,
                 "db_is_base": row.is_base_form,
+                "release_grammatical_gender": None,
+                "db_grammatical_gender": row.grammatical_gender,
             }
         )
 
@@ -159,6 +163,7 @@ def _form_diffs(
         release_ipa = str(release_form.get("ipa") or "")
         release_phonetic = str(release_form.get("phonetic") or "")
         release_base = bool(release_form.get("is_base_form", False))
+        release_gender = release_form.get("grammatical_gender")
         db_ipa = row.ipa_pronunciation or ""
         db_phonetic = row.phonetic_pronunciation or ""
 
@@ -167,6 +172,7 @@ def _form_diffs(
             and release_ipa == db_ipa
             and release_phonetic == db_phonetic
             and release_base == row.is_base_form
+            and release_gender == row.grammatical_gender
         ):
             continue
 
@@ -183,6 +189,8 @@ def _form_diffs(
                 "db_phonetic": db_phonetic,
                 "release_is_base": release_base,
                 "db_is_base": row.is_base_form,
+                "release_grammatical_gender": release_gender,
+                "db_grammatical_gender": row.grammatical_gender,
             }
         )
     return diffs
@@ -204,6 +212,7 @@ def _new_db_row(
         ipa_pronunciation=data.get("ipa") or None,
         phonetic_pronunciation=data.get("phonetic") or None,
         verified=False,
+        grammatical_gender=data.get("grammatical_gender"),
     )
 
 

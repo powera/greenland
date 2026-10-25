@@ -21,6 +21,14 @@ and "TV" needs "TVs".  Each variant is identified by a (``variant_kind``,
     kind="spelling",     key="donut"       -> donut / donuts
     kind="abbreviation", key="TV"          -> TV / TVs
     kind="expanded",     key="television"  -> television / televisions
+    kind="gender",       key="female"      -> actress / actresses
+
+Gender variants are explicitly curated counterparts of one concept (cousin,
+actor, German person), not arbitrary pairs such as aunt/uncle or boy/girl.
+The lemma's translation and derivative_forms remain the unspecified default;
+gender variants use stable keys "male" and "female", even if their text repeats
+the default. Their grammatical_gender is recorded independently. They are
+exported as gendered_forms, never unconditional accepted-answer alternatives.
 
 ``variant_kind`` is deliberately free-form, and the kinds named in this module
 are what the table holds *today* rather than a closed definition.  The set of
@@ -57,7 +65,7 @@ lemma (``lemma_translations``, mirroring how zh-tw works today).  Both
 statements are true and neither is derivable from the other: "donut" has no
 dialect, and Taiwanese vocabulary like 軟體 is not a variant of anything.
 
-**Only en-US variants are written today.**  A row saying "grey" is an accepted
+**The existing English spelling variants describe en-US.** A row saying "grey" is an accepted
 way to write "gray" carries no claim that it is *the British* form; that
 regional axis is not stored yet.  When en-GB is taken up properly it becomes
 either a region tag on these rows or a storage dialect of its own -- that
@@ -116,10 +124,14 @@ VARIANT_KIND_EQUIVALENT: str = "equivalent"
 # stays the noun rather than a form of "be".
 VARIANT_KIND_ARCHAIC: str = "archaic"
 
-# The kinds a learner may type and be right.  Every kind above is currently in
-# this set -- each one is a way of writing the lemma itself -- but naming the
-# set keeps that judgement in one place, so a future kind that is *not* an
-# acceptable answer does not silently become one in the export.
+# Explicit person-gender counterparts of one concept, not arbitrary kinship
+# pairs. The lemma's ordinary translation is the unspecified default. Keys
+# identify referents rather than spellings, so male may repeat the default.
+VARIANT_KIND_GENDER: str = "gender"
+GENDER_VARIANT_KEYS: frozenset[str] = frozenset({"male", "female"})
+
+# The kinds a learner may type as unconditional alternatives. Gender
+# counterparts depend on the prompt's referent and are deliberately excluded.
 ACCEPTED_ANSWER_VARIANT_KINDS: frozenset[str] = frozenset(
     {
         VARIANT_KIND_SPELLING,
@@ -171,6 +183,11 @@ class VariantForm(Base):
 
     # The actual text of this form of the variant, e.g. "greyer".
     variant_form_text: Mapped[str] = mapped_column(String, nullable=False, index=True)
+
+    # The word's grammatical gender, independently of the variant's referent.
+    # Repeated on its form rows; NULL for languages without grammatical gender
+    # or an unclassified form. Never infer it from variant_key.
+    grammatical_gender: Mapped[Optional[str]] = mapped_column(String, nullable=True)
 
     # Optional link to WordToken for frequency data (single-word forms only),
     # mirroring DerivativeForm.
