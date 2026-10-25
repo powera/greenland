@@ -254,6 +254,7 @@ def generate_variant_forms(
                         # everything generated here is an inflection of it.
                         is_base_form=False,
                         verified=False,
+                        grammatical_gender=base_form.grammatical_gender,
                     )
                 )
             counts["forms_added"] += 1

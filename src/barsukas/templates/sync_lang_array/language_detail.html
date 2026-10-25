@@ -235,6 +235,7 @@
                                         {% if fd.db_ipa %}<br><small class="text-muted">IPA: {{ fd.db_ipa }}</small>{% endif %}
                                         {% if fd.db_phonetic %}<br><small class="text-muted">{{ fd.db_phonetic }}</small>{% endif %}
                                         {% if spec.has_base_form and fd.db_is_base %}<br><span class="badge bg-info text-dark">base</span>{% endif %}
+                                        {% if fd.db_grammatical_gender %}<br><small>Gender: {{ fd.db_grammatical_gender }}</small>{% endif %}
                                         {% else %}
                                         <span class="text-muted fst-italic">-</span>
                                         {% endif %}
@@ -245,6 +246,7 @@
                                         {% if fd.release_ipa %}<br><small class="text-muted">IPA: {{ fd.release_ipa }}</small>{% endif %}
                                         {% if fd.release_phonetic %}<br><small class="text-muted">{{ fd.release_phonetic }}</small>{% endif %}
                                         {% if spec.has_base_form and fd.release_is_base %}<br><span class="badge bg-info text-dark">base</span>{% endif %}
+                                        {% if fd.release_grammatical_gender %}<br><small>Gender: {{ fd.release_grammatical_gender }}</small>{% endif %}
                                         {% else %}
                                         <span class="text-muted fst-italic">-</span>
                                         {% endif %}

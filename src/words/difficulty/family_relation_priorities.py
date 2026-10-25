@@ -512,7 +512,9 @@ def get_excluded_terms_for_language(lang_code: str) -> Set[str]:
     Returns:
         Set of concept_labels that should be excluded (set to -1 difficulty)
     """
-    return EXCLUDED_TERMS.get(lang_code, DEFAULT_EXCLUDED_TERMS)
+    # Cousin is now one concept with male/female variant paradigms. Its
+    # default remains teachable even where the counterpart words differ.
+    return EXCLUDED_TERMS.get(lang_code, DEFAULT_EXCLUDED_TERMS) - {"cousin"}
 
 
 def get_included_terms_for_language(lang_code: str) -> Set[str]:

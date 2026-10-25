@@ -65,7 +65,7 @@ ROMANCE_BASE_CONFIG: Dict[str, List[str]] = {
     "Grandchild": ["N35_051", "N35_052", "N35_053"],
     "Aunt/Uncle": ["N35_061", "N35_062"],
     "Niece/Nephew": ["N35_071", "N35_072"],
-    "Cousin": ["N35_082", "N35_083"],  # Gendered cousins (primo/prima)
+    "Cousin": ["N35_076"],  # One cousin concept; gender counterparts are variants
     "Spouse": ["N35_091", "N35_092", "N35_093", "N35_094"],
     "In-law": ["N35_101", "N35_102", "N35_103", "N35_104", "N35_105", "N35_106", "N35_107"],
     "Step-parent": ["N35_111", "N35_112"],
@@ -83,7 +83,7 @@ GERMANIC_BASE_CONFIG: Dict[str, List[str]] = {
     "Grandchild": ["N35_051", "N35_052", "N35_053"],
     "Aunt/Uncle": ["N35_061", "N35_062"],
     "Niece/Nephew": ["N35_071", "N35_072"],
-    "Cousin": ["N35_082", "N35_083"],  # Gendered cousins
+    "Cousin": ["N35_076"],  # One cousin concept; gender counterparts are variants
     "Spouse": ["N35_091", "N35_092", "N35_093", "N35_094"],
     "In-law": ["N35_101", "N35_102", "N35_103", "N35_104", "N35_105", "N35_106", "N35_107"],
     "Step-parent": ["N35_111", "N35_112"],
@@ -126,7 +126,7 @@ LANGUAGE_CONFIGS: Dict[str, Dict[str, List[str]]] = {
             "N35_066",
         ],  # all variants
         "Niece/Nephew": ["N35_071", "N35_072"],
-        "Cousin": ["N35_081"],  # gender-neutral only
+        "Cousin": ["N35_076"],  # gender-neutral only
         "Spouse": ["N35_091", "N35_092", "N35_093", "N35_094"],
         "In-law": ["N35_101", "N35_102", "N35_103", "N35_104", "N35_105", "N35_106", "N35_107"],
         "Step-parent": ["N35_111", "N35_112"],
@@ -153,7 +153,7 @@ LANGUAGE_CONFIGS: Dict[str, Dict[str, List[str]]] = {
         "Grandchild": ["N35_052", "N35_053"],  # grandson, granddaughter (no "grandchild")
         "Aunt/Uncle": ["N35_063", "N35_064", "N35_065", "N35_066"],  # maternal/paternal only
         "Niece/Nephew": ["N35_071", "N35_072"],
-        "Cousin": ["N35_081"],  # gender-neutral
+        "Cousin": ["N35_076"],  # gender-neutral
         "Spouse": ["N35_092", "N35_093"],  # husband, wife (no "spouse" or "partner")
         "In-law": [
             "N35_102",
@@ -182,7 +182,7 @@ LANGUAGE_CONFIGS: Dict[str, Dict[str, List[str]]] = {
         "Grandchild": ["N35_051", "N35_052", "N35_053"],
         "Aunt/Uncle": ["N35_061", "N35_062"],
         "Niece/Nephew": ["N35_071", "N35_072"],
-        "Cousin": ["N35_081"],
+        "Cousin": ["N35_076"],
         "Spouse": ["N35_091", "N35_092", "N35_093", "N35_094"],
         "In-law": ["N35_101", "N35_102", "N35_103", "N35_104", "N35_105", "N35_106", "N35_107"],
         "Step-parent": ["N35_111", "N35_112"],
@@ -204,7 +204,7 @@ LANGUAGE_CONFIGS: Dict[str, Dict[str, List[str]]] = {
         "Grandchild": ["N35_051", "N35_052", "N35_053"],
         "Aunt/Uncle": ["N35_061", "N35_062"],
         "Niece/Nephew": ["N35_071", "N35_072"],
-        "Cousin": ["N35_081"],
+        "Cousin": ["N35_076"],
         "Spouse": ["N35_091", "N35_092", "N35_093", "N35_094"],
         "In-law": ["N35_101", "N35_102", "N35_103", "N35_104", "N35_105", "N35_106", "N35_107"],
         "Step-parent": ["N35_111", "N35_112"],
@@ -233,7 +233,7 @@ DEFAULT_LANGUAGE_CONFIG = {
     "Grandchild": ["N35_051", "N35_052", "N35_053"],
     "Aunt/Uncle": ["N35_061", "N35_062"],
     "Niece/Nephew": ["N35_071", "N35_072"],
-    "Cousin": ["N35_081"],
+    "Cousin": ["N35_076"],
     "Spouse": ["N35_091", "N35_092", "N35_093", "N35_094"],
     "In-law": ["N35_101", "N35_102", "N35_103", "N35_104", "N35_105", "N35_106", "N35_107"],
     "Step-parent": ["N35_111", "N35_112"],

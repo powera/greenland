@@ -3,7 +3,7 @@
     <div class="col">
         <div class="card">
             <div class="card-header d-flex justify-content-between align-items-center">
-                <span><i class="bi bi-pencil-square"></i> Spelling Variants</span>
+                <span><i class="bi bi-pencil-square"></i> Variants</span>
                 <button type="button" class="btn btn-sm btn-success"
                         data-bs-toggle="modal" data-bs-target="#addVariantModal">
                     <i class="bi bi-plus-circle"></i> Add Variant
@@ -11,13 +11,13 @@
             </div>
             <div class="card-body">
                 <div class="alert alert-info mb-3">
-                    <strong><i class="bi bi-info-circle"></i> What is a spelling variant?</strong>
+                    <strong><i class="bi bi-info-circle"></i> Variants and their forms</strong>
                     <p class="mb-0 mt-2 small">
-                        The <em>same word</em> written differently &mdash; "gray" &harr; "grey",
-                        "doughnut" &harr; "donut". Each variant carries its own full set of forms
-                        ("grey" &rarr; "greyer", "greyest"), which is why it is listed separately
-                        from both synonyms (different words) and inflections (different forms of
-                        this spelling).
+                        Each variant carries its own full set of forms, such as
+                        "grey", "greyer", and "greyest" for a spelling variant.
+                        Selected person words can also have male and female variants,
+                        such as "actor" and "actress". The ordinary translation
+                        remains the default when the person's gender is unspecified.
                     </p>
                 </div>
 
@@ -31,6 +31,7 @@
                                         <div>
                                             <strong>{{ variant.base_text }}</strong>
                                             <span class="badge bg-secondary ms-1">{{ variant.kind }}</span>
+                                            {% if variant.kind == 'gender' %}<span class="badge bg-info text-dark">{{ variant.key }}</span>{% endif %}
                                             <span class="text-muted small ms-1">
                                                 {{ variant.forms | length }} form{{ '' if variant.forms | length == 1 else 's' }}
                                             </span>
@@ -61,7 +62,7 @@
                                             {% for form in variant.forms %}
                                                 <tr>
                                                     <td><code>{{ form.grammatical_form }}</code></td>
-                                                    <td>{{ form.variant_form_text }}</td>
+                                                    <td>{{ form.variant_form_text }}{% if form.grammatical_gender %}<br><small class="text-muted">{{ form.grammatical_gender }}</small>{% endif %}</td>
                                                     <td>
                                                         {% if form.is_base_form %}
                                                             <i class="bi bi-check-circle-fill text-success"

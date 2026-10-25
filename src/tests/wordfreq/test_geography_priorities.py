@@ -57,18 +57,20 @@ def test_country_promotion_differs_between_lithuanian_and_chinese() -> None:
     assert validate_configuration() == []
 
 
-def test_person_adjective_and_language_senses_follow_country(session: Session) -> None:
+def test_person_and_language_follow_country_but_origin_does_not(session: Session) -> None:
     person = _add(session, "Lithuanian", "nationality")
     adjective = _add(session, "Lithuanian", "origin", "adjective")
     language = _add(session, "Lithuanian", "language_name")
     generic_origin = _add(session, "national", "origin", "adjective")
-    for lemma in [person, adjective, language]:
+    for lemma in [person, language]:
         assert lemma.guid is not None
         assert _levels(session, "lt")[lemma.guid] == 15
         assert _levels(session, "zh")[lemma.guid] == (
             233 if lemma.pos_subtype == "language_name" else 232
         )
     assert generic_origin.guid not in _levels(session, "lt")
+    assert adjective.guid not in _levels(session, "lt")
+    assert adjective.guid not in _levels(session, "zh")
 
 
 def test_existing_demonym_headwords_are_recognized(session: Session) -> None:
@@ -106,7 +108,7 @@ def test_new_main_country_senses_follow_promotion(session: Session) -> None:
     assert greek_person.guid and greek_language.guid and mexican.guid
     assert _levels(session, "lt")[greek_person.guid] == 232
     assert _levels(session, "lt")[greek_language.guid] == 233
-    assert _levels(session, "es-419")[mexican.guid] == 15
+    assert mexican.guid not in _levels(session, "es-419")
 
 
 def test_country_sense_requires_its_disambiguation(session: Session) -> None:

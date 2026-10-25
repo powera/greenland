@@ -1,7 +1,8 @@
 """Build and read the per-language ``variants`` array in ``{lang}.jsonl``.
 
-A variant is the *same lexeme* spelled differently -- "grey" for "gray" -- and
-carries a full paradigm of its own, which is why it is neither a ``synonym``
+A variant carries a full paradigm of its own, including spelling variants
+("grey" for "gray") and curated gender counterparts ("actress" for "actor").
+This is why it is neither a ``synonym``
 (a different lexeme) nor one of the lemma's own ``forms`` (a different
 grammatical slot).  See ``storage/models/variant_form.py``.
 
@@ -29,7 +30,12 @@ from __future__ import annotations
 from collections import defaultdict
 from typing import Any, Dict, Iterable, List, Tuple
 
-from storage.models.variant_form import VARIANT_KIND_SPELLING, VariantForm
+from storage.models.variant_form import (
+    GENDER_VARIANT_KEYS,
+    VARIANT_KIND_GENDER,
+    VARIANT_KIND_SPELLING,
+    VariantForm,
+)
 from storage.release.derivative_form import in_paradigm_order
 
 #: Identifies one variant paradigm within a lemma and language.
@@ -51,6 +57,8 @@ def form_to_record(variant_form: VariantForm) -> Dict[str, Any]:
         record["ipa"] = variant_form.ipa_pronunciation
     if variant_form.phonetic_pronunciation:
         record["phonetic"] = variant_form.phonetic_pronunciation
+    if variant_form.grammatical_gender is not None:
+        record["grammatical_gender"] = variant_form.grammatical_gender
     return record
 
 
@@ -69,10 +77,25 @@ def paradigms_to_records(
     paradigms: Dict[VariantIdentity, List[Dict[str, Any]]],
 ) -> List[Dict[str, Any]]:
     """Turn ``{(kind, key): [form, ...]}`` into the release ``variants`` array."""
-    return [
-        {"kind": kind, "key": key, "forms": _sorted_forms(forms)}
-        for (kind, key), forms in sorted(paradigms.items())
-    ]
+    records: List[Dict[str, Any]] = []
+    for (kind, key), forms in sorted(paradigms.items()):
+        genders = {form["grammatical_gender"] for form in forms if form.get("grammatical_gender")}
+        if len(genders) > 1:
+            raise ValueError(f"Conflicting grammatical genders for variant {kind}/{key}")
+        record: Dict[str, Any] = {
+            "kind": kind,
+            "key": key,
+            "forms": _sorted_forms(
+                [
+                    {name: value for name, value in form.items() if name != "grammatical_gender"}
+                    for form in forms
+                ]
+            ),
+        }
+        if genders:
+            record["grammatical_gender"] = next(iter(genders))
+        records.append(record)
+    return records
 
 
 def variants_by_language(
@@ -169,6 +192,8 @@ def records_to_paradigms(entries: Any) -> Dict[VariantIdentity, List[Dict[str, A
         if not key:
             continue
         kind = entry.get("kind") or VARIANT_KIND_SPELLING
+        if kind == VARIANT_KIND_GENDER and key not in GENDER_VARIANT_KEYS:
+            raise ValueError(f"Invalid gender variant key: {key!r}")
 
         forms: List[Dict[str, Any]] = []
         for form_entry in entry.get("forms") or []:
@@ -187,6 +212,8 @@ def records_to_paradigms(entries: Any) -> Dict[VariantIdentity, List[Dict[str, A
                 record["ipa"] = form_entry["ipa"]
             if form_entry.get("phonetic"):
                 record["phonetic"] = form_entry["phonetic"]
+            if entry.get("grammatical_gender") is not None:
+                record["grammatical_gender"] = entry["grammatical_gender"]
             forms.append(record)
 
         if forms:
