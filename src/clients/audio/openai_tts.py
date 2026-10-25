@@ -158,6 +158,28 @@ def get_instructions(language_code: str, is_sentence: bool = False) -> str:
     return _load_prompt(prompt_type, language_code)
 
 
+def get_realtime_turn_text(text: str, language_code: str, is_sentence: bool = False) -> str:
+    """
+    Build the Realtime user turn that hands over the next word or sentence.
+
+    The turn is labelled in the target language ("Siguiente palabra en
+    español: rectangular"): with only the session naming the language, a
+    spelling shared with English was read as English.  Labels live in
+    prompts/audio/realtime/turn_labels.json and resolve like the prompt files
+    (own code, then the variety it reads, then the parent language); a
+    language with no label falls back to an English one that names it.
+    """
+    unit = "sentence" if is_sentence else "word"
+    labels: dict[str, dict[str, str]] = json.loads(
+        (PROMPTS_DIR / "realtime" / "turn_labels.json").read_text()
+    )
+    code = normalize_language_code(language_code)
+    for candidate in (code, get_translation_language(code), get_parent_language(code)):
+        if candidate in labels:
+            return f"{labels[candidate][unit]} {text}"
+    return f"Next {get_dialect_display_name(code)} {unit}: {text}"
+
+
 def get_realtime_session_instructions(
     language_code: str, pronunciation_notes: str, is_sentence: bool = False
 ) -> str:
@@ -413,7 +435,8 @@ class OpenAITTSClient:
 
         The session is framed as a recording session (see
         get_realtime_session_instructions) and the text is sent as the next
-        user turn, "Next word: ...", rather than appended to the instructions.
+        user turn, labelled in the target language (get_realtime_turn_text),
+        rather than appended to the instructions.
         """
         from websocket import create_connection
 
@@ -432,7 +455,6 @@ class OpenAITTSClient:
             header={"Authorization": f"Bearer {self.api_key}"},
             timeout=self.timeout,
         )
-        unit = "sentence" if is_sentence else "word"
         deadline = time.monotonic() + self.timeout
         chunks: list[bytes] = []
         transcript_received = False
@@ -488,7 +510,9 @@ class OpenAITTSClient:
                                             "content": [
                                                 {
                                                     "type": "input_text",
-                                                    "text": f"Next {unit}: {text}",
+                                                    "text": get_realtime_turn_text(
+                                                        text, language_code, is_sentence
+                                                    ),
                                                 }
                                             ],
                                         }
