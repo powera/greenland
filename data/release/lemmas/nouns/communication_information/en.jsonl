@@ -1,9 +1,9 @@
-{"guid": "N50_001", "forms": [{"grammatical_form": "noun/en_singular", "text": "word", "is_base_form": true, "ipa": "/wɝːd/", "phonetic": "WOR-d"}]}
+{"guid": "N50_001", "forms": [{"grammatical_form": "noun/en_singular", "text": "word", "is_base_form": true, "ipa": "/wɝːd/", "phonetic": "WOR-d"}], "grammar_facts": [{"fact_type": "countability", "fact_value": "countable"}, {"fact_type": "number_type", "fact_value": "regular"}, {"fact_type": "animacy", "fact_value": "inanimate"}, {"fact_type": "plural_status", "fact_value": "regular"}]}
 {"guid": "N50_002", "forms": [{"grammatical_form": "noun/en_singular", "text": "language", "is_base_form": true, "ipa": "/ˈlæŋɡɪdʒ/", "phonetic": "LANG-uh-jeez"}]}
 {"guid": "N50_003", "forms": [{"grammatical_form": "noun/en_singular", "text": "voice", "is_base_form": true, "ipa": "/vɔɪs/", "phonetic": "VOY-s"}]}
-{"guid": "N50_004", "forms": [{"grammatical_form": "noun/en_singular", "text": "question", "is_base_form": true, "ipa": "kwestchən", "phonetic": "KWEH-schən"}]}
-{"guid": "N50_005", "forms": [{"grammatical_form": "noun/en_singular", "text": "answer", "is_base_form": true, "ipa": "/ˈɔːnswər/", "phonetic": "AWNS-wur"}]}
-{"guid": "N50_006", "forms": [{"grammatical_form": "noun/en_singular", "text": "story", "is_base_form": true, "ipa": "/ˈstɔːri/", "phonetic": "STAW-ree"}]}
+{"guid": "N50_004", "forms": [{"grammatical_form": "noun/en_singular", "text": "question", "is_base_form": true, "ipa": "kwestchən", "phonetic": "KWEH-schən"}], "grammar_facts": [{"fact_type": "countability", "fact_value": "countable"}, {"fact_type": "number_type", "fact_value": "regular"}, {"fact_type": "animacy", "fact_value": "inanimate"}, {"fact_type": "plural_status", "fact_value": "regular"}]}
+{"guid": "N50_005", "forms": [{"grammatical_form": "noun/en_singular", "text": "answer", "is_base_form": true, "ipa": "/ˈɔːnswər/", "phonetic": "AWNS-wur"}], "grammar_facts": [{"fact_type": "countability", "fact_value": "countable"}, {"fact_type": "number_type", "fact_value": "regular"}, {"fact_type": "animacy", "fact_value": "inanimate"}, {"fact_type": "plural_status", "fact_value": "regular"}]}
+{"guid": "N50_006", "forms": [{"grammatical_form": "noun/en_singular", "text": "story", "is_base_form": true, "ipa": "/ˈstɔːri/", "phonetic": "STAW-ree"}], "grammar_facts": [{"fact_type": "countability", "fact_value": "countable"}, {"fact_type": "number_type", "fact_value": "regular"}, {"fact_type": "animacy", "fact_value": "inanimate"}, {"fact_type": "plural_status", "fact_value": "regular"}]}
 {"guid": "N50_007", "forms": [{"grammatical_form": "noun/en_singular", "text": "example", "is_base_form": true, "ipa": "/ɪgˈzæmp(ə)l/", "phonetic": "ig-ZAMP-ul"}]}
 {"guid": "N50_008", "forms": [{"grammatical_form": "noun/en_singular", "text": "information", "is_base_form": true, "ipa": "/ɪnˌfɔːrˈmeɪ.ʃən/", "phonetic": "in-FOR-may-shun"}]}
 {"guid": "N50_009", "forms": [{"grammatical_form": "noun/en_singular", "text": "news", "is_base_form": true, "ipa": "/ˈnuːz/", "phonetic": "NOOZ"}]}
@@ -19,7 +19,9 @@
 {"guid": "N50_019", "forms": [{"grammatical_form": "noun/en_singular", "text": "warning", "is_base_form": true, "ipa": "/ˈwɔːr.nɪŋ/", "phonetic": "WAHR-ning"}]}
 {"guid": "N50_020", "forms": [{"grammatical_form": "noun/en_singular", "text": "secret", "is_base_form": true, "ipa": "/ˈsɛkrɪt/", "phonetic": "SEH-krit"}]}
 {"guid": "N50_021", "forms": [{"grammatical_form": "noun/en_singular", "text": "sign", "is_base_form": true, "ipa": "/saɪn/", "phonetic": "SIGHN"}]}
+{"guid": "N50_025", "grammar_facts": [{"fact_type": "countability", "fact_value": "countable"}, {"fact_type": "number_type", "fact_value": "regular"}, {"fact_type": "animacy", "fact_value": "inanimate"}, {"fact_type": "plural_status", "fact_value": "regular"}]}
 {"guid": "N50_027", "forms": [{"grammatical_form": "noun/en_singular", "text": "photo", "is_base_form": true}, {"grammatical_form": "noun/en_plural", "text": "photos", "is_base_form": false}]}
+{"guid": "N50_029", "grammar_facts": [{"fact_type": "countability", "fact_value": "countable"}, {"fact_type": "number_type", "fact_value": "regular"}, {"fact_type": "animacy", "fact_value": "inanimate"}, {"fact_type": "plural_status", "fact_value": "regular"}]}
 {"guid": "N50_039", "forms": [{"grammatical_form": "noun/en_singular", "text": "shopping list", "is_base_form": true}]}
 {"guid": "N50_040", "forms": [{"grammatical_form": "noun/en_singular", "text": "report card", "is_base_form": true}]}
 {"guid": "N50_042", "forms": [{"grammatical_form": "noun/en_singular", "text": "driver's license", "is_base_form": true}]}

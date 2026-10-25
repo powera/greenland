@@ -1,0 +1,25 @@
+{"guid": "N45_001", "grammar_facts": [{"fact_type": "number_type", "fact_value": "regular"}, {"fact_type": "plural", "fact_value": "Litauen"}, {"fact_type": "plural_status", "fact_value": "override"}]}
+{"guid": "N45_002", "grammar_facts": [{"fact_type": "number_type", "fact_value": "regular"}, {"fact_type": "plural", "fact_value": "Lettland"}, {"fact_type": "plural_status", "fact_value": "override"}]}
+{"guid": "N45_003", "grammar_facts": [{"fact_type": "number_type", "fact_value": "regular"}, {"fact_type": "plural", "fact_value": "Estland"}, {"fact_type": "plural_status", "fact_value": "override"}]}
+{"guid": "N45_004", "grammar_facts": [{"fact_type": "number_type", "fact_value": "regular"}, {"fact_type": "plural", "fact_value": "Polen"}, {"fact_type": "plural_status", "fact_value": "override"}]}
+{"guid": "N45_005", "grammar_facts": [{"fact_type": "number_type", "fact_value": "singulare_tantum"}, {"fact_type": "plural_status", "fact_value": "not_applicable"}]}
+{"guid": "N45_006", "grammar_facts": [{"fact_type": "number_type", "fact_value": "regular"}, {"fact_type": "plural", "fact_value": "Frankriken"}, {"fact_type": "plural_status", "fact_value": "override"}]}
+{"guid": "N45_007", "grammar_facts": [{"fact_type": "number_type", "fact_value": "regular"}, {"fact_type": "plural", "fact_value": "Spanien"}, {"fact_type": "plural_status", "fact_value": "override"}]}
+{"guid": "N45_008", "grammar_facts": [{"fact_type": "number_type", "fact_value": "regular"}, {"fact_type": "plural", "fact_value": "Italien"}, {"fact_type": "plural_status", "fact_value": "override"}]}
+{"guid": "N45_009", "grammar_facts": [{"fact_type": "number_type", "fact_value": "regular"}, {"fact_type": "plural", "fact_value": "Ryssland"}, {"fact_type": "plural_status", "fact_value": "override"}]}
+{"guid": "N45_010", "grammar_facts": [{"fact_type": "number_type", "fact_value": "singulare_tantum"}, {"fact_type": "plural_status", "fact_value": "not_applicable"}]}
+{"guid": "N45_011", "grammar_facts": [{"fact_type": "number_type", "fact_value": "plurale_tantum"}, {"fact_type": "plural", "fact_value": "Förenta staterna"}, {"fact_type": "plural_status", "fact_value": "override"}]}
+{"guid": "N45_012", "grammar_facts": [{"fact_type": "number_type", "fact_value": "regular"}, {"fact_type": "plural", "fact_value": "Kanador"}, {"fact_type": "plural_status", "fact_value": "override"}]}
+{"guid": "N45_013", "grammar_facts": [{"fact_type": "number_type", "fact_value": "regular"}, {"fact_type": "plural", "fact_value": "Japaner"}, {"fact_type": "plural_status", "fact_value": "override"}]}
+{"guid": "N45_014", "grammar_facts": [{"fact_type": "number_type", "fact_value": "regular"}, {"fact_type": "plural", "fact_value": "Kinor"}, {"fact_type": "plural_status", "fact_value": "override"}]}
+{"guid": "N45_015", "grammar_facts": [{"fact_type": "number_type", "fact_value": "singulare_tantum"}, {"fact_type": "plural_status", "fact_value": "not_applicable"}]}
+{"guid": "N45_016", "grammar_facts": [{"fact_type": "number_type", "fact_value": "regular"}, {"fact_type": "plural", "fact_value": "Brasilien"}, {"fact_type": "plural_status", "fact_value": "override"}]}
+{"guid": "N45_017", "grammar_facts": [{"fact_type": "number_type", "fact_value": "regular"}, {"fact_type": "plural", "fact_value": "Australien"}, {"fact_type": "plural_status", "fact_value": "override"}]}
+{"guid": "N45_018", "grammar_facts": [{"fact_type": "number_type", "fact_value": "singulare_tantum"}, {"fact_type": "plural_status", "fact_value": "not_applicable"}]}
+{"guid": "N45_019", "grammar_facts": [{"fact_type": "number_type", "fact_value": "regular"}, {"fact_type": "plural", "fact_value": "Norge"}, {"fact_type": "plural_status", "fact_value": "override"}]}
+{"guid": "N45_020", "grammar_facts": [{"fact_type": "number_type", "fact_value": "regular"}, {"fact_type": "plural", "fact_value": "Finland"}, {"fact_type": "plural_status", "fact_value": "override"}]}
+{"guid": "N45_021", "grammar_facts": [{"fact_type": "number_type", "fact_value": "regular"}, {"fact_type": "plural", "fact_value": "Sydkoreor"}, {"fact_type": "plural_status", "fact_value": "override"}]}
+{"guid": "N45_022", "grammar_facts": [{"fact_type": "number_type", "fact_value": "regular"}, {"fact_type": "plural", "fact_value": "Thailand"}, {"fact_type": "plural_status", "fact_value": "override"}]}
+{"guid": "N45_023", "grammar_facts": [{"fact_type": "number_type", "fact_value": "regular"}, {"fact_type": "plural", "fact_value": "Vietnam"}, {"fact_type": "plural_status", "fact_value": "override"}]}
+{"guid": "N45_024", "grammar_facts": [{"fact_type": "number_type", "fact_value": "regular"}, {"fact_type": "plural", "fact_value": "Sydafrikor"}, {"fact_type": "plural_status", "fact_value": "override"}]}
+{"guid": "N45_025", "grammar_facts": [{"fact_type": "number_type", "fact_value": "singulare_tantum"}, {"fact_type": "plural_status", "fact_value": "not_applicable"}]}

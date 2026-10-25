@@ -80,7 +80,7 @@
 {"guid": "N01_163", "forms": [{"grammatical_form": "noun/en_singular", "text": "classmate", "is_base_form": true, "ipa": "/ˈklæsˌmeɪt/", "phonetic": "KLASS-mayt"}]}
 {"guid": "N01_164", "forms": [{"grammatical_form": "noun/en_singular", "text": "pirate", "is_base_form": true, "ipa": "/ˈpaɪrət/", "phonetic": "PIE-rut"}]}
 {"guid": "N01_165", "forms": [{"grammatical_form": "noun/en_singular", "text": "furry", "is_base_form": true, "ipa": "/ˈfɝi/", "phonetic": "FUR-ee"}]}
-{"guid": "N01_166", "forms": [{"grammatical_form": "noun/en_singular", "text": "student", "is_base_form": true, "ipa": "/ˈstuːdənt/", "phonetic": "STOO-dent"}]}
+{"guid": "N01_166", "forms": [{"grammatical_form": "noun/en_singular", "text": "student", "is_base_form": true, "ipa": "/ˈstuːdənt/", "phonetic": "STOO-dent"}], "grammar_facts": [{"fact_type": "countability", "fact_value": "countable"}, {"fact_type": "number_type", "fact_value": "regular"}, {"fact_type": "animacy", "fact_value": "animate"}, {"fact_type": "plural_status", "fact_value": "regular"}]}
 {"guid": "N01_167", "forms": [{"grammatical_form": "noun/en_singular", "text": "winner", "is_base_form": true, "ipa": "/ˈwɪnɚ/", "phonetic": "WIN-er"}]}
 {"guid": "N01_168", "forms": [{"grammatical_form": "noun/en_singular", "text": "passenger", "is_base_form": true, "ipa": "/ˈpæsəndʒɚ/", "phonetic": "PASS-en-jer"}]}
 {"guid": "N01_169", "forms": [{"grammatical_form": "noun/en_singular", "text": "passenger", "is_base_form": true, "ipa": "/ˈpæsəndʒɚ/", "phonetic": "PASS-en-jer"}]}

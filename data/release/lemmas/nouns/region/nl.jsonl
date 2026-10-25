@@ -1,0 +1,25 @@
+{"guid": "N45_001", "grammar_facts": [{"fact_type": "number_type", "fact_value": "regular"}, {"fact_type": "plural", "fact_value": "Litouwens"}, {"fact_type": "plural_status", "fact_value": "override"}]}
+{"guid": "N45_002", "grammar_facts": [{"fact_type": "number_type", "fact_value": "regular"}, {"fact_type": "plural", "fact_value": "Letlanden"}, {"fact_type": "plural_status", "fact_value": "override"}]}
+{"guid": "N45_003", "grammar_facts": [{"fact_type": "number_type", "fact_value": "regular"}, {"fact_type": "plural", "fact_value": "Estlands"}, {"fact_type": "plural_status", "fact_value": "override"}]}
+{"guid": "N45_004", "grammar_facts": [{"fact_type": "number_type", "fact_value": "regular"}, {"fact_type": "plural", "fact_value": "Polens"}, {"fact_type": "plural_status", "fact_value": "override"}]}
+{"guid": "N45_005", "grammar_facts": [{"fact_type": "number_type", "fact_value": "singulare_tantum"}, {"fact_type": "plural_status", "fact_value": "not_applicable"}]}
+{"guid": "N45_006", "grammar_facts": [{"fact_type": "number_type", "fact_value": "regular"}, {"fact_type": "plural", "fact_value": "Frankrijken"}, {"fact_type": "plural_status", "fact_value": "override"}]}
+{"guid": "N45_007", "grammar_facts": [{"fact_type": "number_type", "fact_value": "regular"}, {"fact_type": "plural", "fact_value": "Spanje"}, {"fact_type": "plural_status", "fact_value": "override"}]}
+{"guid": "N45_008", "grammar_facts": [{"fact_type": "number_type", "fact_value": "regular"}, {"fact_type": "plural", "fact_value": "Italiës"}, {"fact_type": "plural_status", "fact_value": "override"}]}
+{"guid": "N45_009", "grammar_facts": [{"fact_type": "number_type", "fact_value": "regular"}, {"fact_type": "plural", "fact_value": "Ruslanden"}, {"fact_type": "plural_status", "fact_value": "override"}]}
+{"guid": "N45_010", "grammar_facts": [{"fact_type": "number_type", "fact_value": "singulare_tantum"}, {"fact_type": "plural_status", "fact_value": "not_applicable"}]}
+{"guid": "N45_011", "grammar_facts": [{"fact_type": "number_type", "fact_value": "plurale_tantum"}, {"fact_type": "plural", "fact_value": "Verenigde Staten"}, {"fact_type": "plural_status", "fact_value": "override"}]}
+{"guid": "N45_012", "grammar_facts": [{"fact_type": "number_type", "fact_value": "regular"}, {"fact_type": "plural", "fact_value": "Canada's"}, {"fact_type": "plural_status", "fact_value": "override"}]}
+{"guid": "N45_013", "grammar_facts": [{"fact_type": "number_type", "fact_value": "regular"}, {"fact_type": "plural", "fact_value": "Japans"}, {"fact_type": "plural_status", "fact_value": "override"}]}
+{"guid": "N45_014", "grammar_facts": [{"fact_type": "number_type", "fact_value": "regular"}, {"fact_type": "plural", "fact_value": "China's"}, {"fact_type": "plural_status", "fact_value": "override"}]}
+{"guid": "N45_015", "grammar_facts": [{"fact_type": "number_type", "fact_value": "singulare_tantum"}, {"fact_type": "plural_status", "fact_value": "not_applicable"}]}
+{"guid": "N45_016", "grammar_facts": [{"fact_type": "number_type", "fact_value": "regular"}, {"fact_type": "plural", "fact_value": "Braziliës"}, {"fact_type": "plural_status", "fact_value": "override"}]}
+{"guid": "N45_017", "grammar_facts": [{"fact_type": "number_type", "fact_value": "regular"}, {"fact_type": "plural", "fact_value": "Australiës"}, {"fact_type": "plural_status", "fact_value": "override"}]}
+{"guid": "N45_018", "grammar_facts": [{"fact_type": "number_type", "fact_value": "singulare_tantum"}, {"fact_type": "plural_status", "fact_value": "not_applicable"}]}
+{"guid": "N45_019", "grammar_facts": [{"fact_type": "number_type", "fact_value": "regular"}, {"fact_type": "plural", "fact_value": "Noorwegen"}, {"fact_type": "plural_status", "fact_value": "override"}]}
+{"guid": "N45_020", "grammar_facts": [{"fact_type": "number_type", "fact_value": "regular"}, {"fact_type": "plural", "fact_value": "Finlands"}, {"fact_type": "plural_status", "fact_value": "override"}]}
+{"guid": "N45_021", "grammar_facts": [{"fact_type": "number_type", "fact_value": "regular"}, {"fact_type": "plural", "fact_value": "Zuid-Korea's"}, {"fact_type": "plural_status", "fact_value": "override"}]}
+{"guid": "N45_022", "grammar_facts": [{"fact_type": "number_type", "fact_value": "regular"}]}
+{"guid": "N45_023", "grammar_facts": [{"fact_type": "number_type", "fact_value": "regular"}, {"fact_type": "plural", "fact_value": "Vietnams"}, {"fact_type": "plural_status", "fact_value": "override"}]}
+{"guid": "N45_024", "grammar_facts": [{"fact_type": "number_type", "fact_value": "regular"}, {"fact_type": "plural", "fact_value": "Zuid-Afrika's"}, {"fact_type": "plural_status", "fact_value": "override"}]}
+{"guid": "N45_025", "grammar_facts": [{"fact_type": "number_type", "fact_value": "singulare_tantum"}, {"fact_type": "plural_status", "fact_value": "not_applicable"}]}

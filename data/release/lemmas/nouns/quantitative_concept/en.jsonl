@@ -10,7 +10,7 @@
 {"guid": "N22_012", "forms": [{"grammatical_form": "noun/en_singular", "text": "level", "is_base_form": true, "ipa": "/ˈlɛvəl/", "phonetic": "LEV-əl"}]}
 {"guid": "N22_013", "forms": [{"grammatical_form": "noun/en_singular", "text": "group", "is_base_form": true, "ipa": "/ɡruːp/", "phonetic": "GROO-p"}]}
 {"guid": "N22_014", "forms": [{"grammatical_form": "noun/en_singular", "text": "length", "is_base_form": true, "ipa": "/lɛŋθ/", "phonetic": "LENG-th"}]}
-{"guid": "N22_015", "forms": [{"grammatical_form": "noun/en_singular", "text": "size", "is_base_form": true, "ipa": "/saɪz/", "phonetic": "SIZ"}]}
+{"guid": "N22_015", "forms": [{"grammatical_form": "noun/en_singular", "text": "size", "is_base_form": true, "ipa": "/saɪz/", "phonetic": "SIZ"}], "grammar_facts": [{"fact_type": "countability", "fact_value": "both"}, {"fact_type": "number_type", "fact_value": "regular"}, {"fact_type": "animacy", "fact_value": "inanimate"}, {"fact_type": "plural_status", "fact_value": "regular"}]}
 {"guid": "N22_016", "forms": [{"grammatical_form": "noun/en_singular", "text": "piece", "is_base_form": true, "ipa": "/piːs/", "phonetic": "PEE-s"}]}
 {"guid": "N22_017", "forms": [{"grammatical_form": "noun/en_singular", "text": "weight", "is_base_form": true, "ipa": "/weɪt/", "phonetic": "WAYT"}]}
 {"guid": "N22_020", "forms": [{"grammatical_form": "noun/en_singular", "text": "couple", "is_base_form": true, "ipa": "/ˈkʌpəl/", "phonetic": "COO-puh-l"}]}
@@ -97,4 +97,4 @@
 {"guid": "N22_132", "forms": [{"grammatical_form": "noun/en_singular", "text": "high-end", "is_base_form": true}]}
 {"guid": "N22_136", "forms": [{"grammatical_form": "noun/en_singular", "text": "camera exposure", "is_base_form": true}], "variants": [{"kind": "equivalent", "key": "exposure", "forms": [{"grammatical_form": "noun/en_singular", "text": "exposure", "is_base_form": true}]}]}
 {"guid": "N22_137", "forms": [{"grammatical_form": "noun/en_singular", "text": "production", "is_base_form": true, "ipa": "/prəˈdʌkʃən/", "phonetic": "pruh-DUK-shun"}]}
-{"guid": "N22_138", "forms": [{"grammatical_form": "noun/en_singular", "text": "neighborhood", "is_base_form": true, "ipa": "/ˈneɪbɚˌhʊd/", "phonetic": "NAY-ber-hood"}]}
+{"guid": "N22_138", "forms": [{"grammatical_form": "noun/en_singular", "text": "neighborhood", "is_base_form": true, "ipa": "/ˈneɪbɚˌhʊd/", "phonetic": "NAY-ber-hood"}], "grammar_facts": [{"fact_type": "number_type", "fact_value": "regular"}, {"fact_type": "animacy", "fact_value": "inanimate"}, {"fact_type": "plural_status", "fact_value": "regular"}]}

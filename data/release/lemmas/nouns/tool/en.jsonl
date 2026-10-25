@@ -6,7 +6,7 @@
 {"guid": "N12_049", "forms": [{"grammatical_form": "noun/en_singular", "text": "drill", "is_base_form": true, "ipa": "/drɪl/", "phonetic": "DRILL"}]}
 {"guid": "N12_050", "forms": [{"grammatical_form": "noun/en_singular", "text": "wrench", "is_base_form": true, "ipa": "/rɛntʃ/", "phonetic": "RENTCH"}]}
 {"guid": "N12_051", "forms": [{"grammatical_form": "noun/en_singular", "text": "ladder", "is_base_form": true, "ipa": "/ˈlædər/", "phonetic": "LAH-dər"}]}
-{"guid": "N12_054", "forms": [{"grammatical_form": "noun/en_singular", "text": "scissors", "is_base_form": true, "ipa": "/ˈsɪzərz/", "phonetic": "SIZ-ərz"}, {"grammatical_form": "noun/en_plural", "text": "scissors", "is_base_form": false}]}
+{"guid": "N12_054", "forms": [{"grammatical_form": "noun/en_singular", "text": "scissors", "is_base_form": true, "ipa": "/ˈsɪzərz/", "phonetic": "SIZ-ərz"}], "grammar_facts": [{"fact_type": "number_type", "fact_value": "plurale_tantum"}, {"fact_type": "animacy", "fact_value": "inanimate"}, {"fact_type": "plural_status", "fact_value": "regular"}]}
 {"guid": "N12_059", "forms": [{"grammatical_form": "noun/en_singular", "text": "pliers", "is_base_form": true}, {"grammatical_form": "noun/en_plural", "text": "pliers", "is_base_form": false}]}
 {"guid": "N12_067", "forms": [{"grammatical_form": "noun/en_singular", "text": "apparatus", "is_base_form": true}, {"grammatical_form": "noun/en_plural", "text": "apparatuses", "is_base_form": false}]}
 {"guid": "N12_078", "forms": [{"grammatical_form": "noun/en_singular", "text": "extension cord", "is_base_form": true}]}
@@ -16,7 +16,7 @@
 {"guid": "N12_088", "forms": [{"grammatical_form": "noun/en_singular", "text": "mechanism", "is_base_form": true, "ipa": "/ˈmɛkəˌnɪzəm/", "phonetic": "MEK-uh-niz-um"}]}
 {"guid": "N12_089", "forms": [{"grammatical_form": "noun/en_singular", "text": "trumpet", "is_base_form": true, "ipa": "/ˈtrʌmpɪt/", "phonetic": "TRUM-pit"}]}
 {"guid": "N12_090", "forms": [{"grammatical_form": "noun/en_singular", "text": "violin", "is_base_form": true, "ipa": "/ˌvaɪəˈlɪn/", "phonetic": "vy-uh-LIN"}]}
-{"guid": "N12_092", "forms": [{"grammatical_form": "noun/en_singular", "text": "ruler", "is_base_form": true, "ipa": "/ˈruːlər/", "phonetic": "ROO-ler"}]}
+{"guid": "N12_092", "forms": [{"grammatical_form": "noun/en_singular", "text": "ruler", "is_base_form": true, "ipa": "/ˈruːlər/", "phonetic": "ROO-ler"}], "grammar_facts": [{"fact_type": "countability", "fact_value": "countable"}, {"fact_type": "number_type", "fact_value": "regular"}, {"fact_type": "animacy", "fact_value": "inanimate"}, {"fact_type": "plural_status", "fact_value": "regular"}]}
 {"guid": "N12_093", "forms": [{"grammatical_form": "noun/en_singular", "text": "file", "is_base_form": true, "ipa": "/faɪl/", "phonetic": "FILE"}]}
 {"guid": "N12_094", "forms": [{"grammatical_form": "noun/en_singular", "text": "cable", "is_base_form": true, "ipa": "/ˈkeɪbəl/", "phonetic": "KAY-bul"}]}
 {"guid": "N12_095", "forms": [{"grammatical_form": "noun/en_singular", "text": "shaft", "is_base_form": true, "ipa": "/ʃæft/", "phonetic": "SHAFT"}]}

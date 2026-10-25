@@ -1,0 +1,8 @@
+{"guid": "N30_078", "grammar_facts": [{"fact_type": "number_type", "fact_value": "regular"}, {"fact_type": "plural", "fact_value": "flygplatser"}, {"fact_type": "plural_status", "fact_value": "override"}]}
+{"guid": "N30_080", "grammar_facts": [{"fact_type": "number_type", "fact_value": "regular"}, {"fact_type": "plural", "fact_value": "läger"}, {"fact_type": "plural_status", "fact_value": "override"}]}
+{"guid": "N30_082", "grammar_facts": [{"fact_type": "number_type", "fact_value": "regular"}, {"fact_type": "plural", "fact_value": "gårdar"}, {"fact_type": "plural_status", "fact_value": "override"}]}
+{"guid": "N30_083", "grammar_facts": [{"fact_type": "number_type", "fact_value": "regular"}, {"fact_type": "plural", "fact_value": "plan"}, {"fact_type": "plural_status", "fact_value": "override"}]}
+{"guid": "N30_084", "grammar_facts": [{"fact_type": "number_type", "fact_value": "regular"}, {"fact_type": "plural", "fact_value": "trädgårdar"}, {"fact_type": "plural_status", "fact_value": "override"}]}
+{"guid": "N30_085", "grammar_facts": [{"fact_type": "number_type", "fact_value": "regular"}, {"fact_type": "plural", "fact_value": "parker"}, {"fact_type": "plural_status", "fact_value": "override"}]}
+{"guid": "N30_089", "grammar_facts": [{"fact_type": "number_type", "fact_value": "regular"}, {"fact_type": "plural", "fact_value": "gårdar"}, {"fact_type": "plural_status", "fact_value": "override"}]}
+{"guid": "N30_090", "grammar_facts": [{"fact_type": "number_type", "fact_value": "regular"}, {"fact_type": "plural", "fact_value": "zoon"}, {"fact_type": "plural_status", "fact_value": "override"}]}

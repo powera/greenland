@@ -1,1 +1,7 @@
+{"guid": "N50_001", "grammar_facts": [{"fact_type": "number_type", "fact_value": "regular"}, {"fact_type": "plural", "fact_value": "woorden"}, {"fact_type": "plural_status", "fact_value": "override"}]}
+{"guid": "N50_004", "grammar_facts": [{"fact_type": "number_type", "fact_value": "regular"}, {"fact_type": "plural", "fact_value": "vragen"}, {"fact_type": "plural_status", "fact_value": "override"}]}
+{"guid": "N50_005", "grammar_facts": [{"fact_type": "number_type", "fact_value": "regular"}, {"fact_type": "plural", "fact_value": "antwoorden"}, {"fact_type": "plural_status", "fact_value": "override"}]}
+{"guid": "N50_006", "grammar_facts": [{"fact_type": "number_type", "fact_value": "regular"}, {"fact_type": "plural", "fact_value": "verhalen"}, {"fact_type": "plural_status", "fact_value": "override"}]}
 {"guid": "N50_010", "grammar_facts": [{"fact_type": "number_type", "fact_value": "regular"}, {"fact_type": "plural", "fact_value": "namen"}, {"fact_type": "plural_status", "fact_value": "override"}]}
+{"guid": "N50_025", "grammar_facts": [{"fact_type": "number_type", "fact_value": "regular"}, {"fact_type": "plural", "fact_value": "pagina's"}, {"fact_type": "plural_status", "fact_value": "override"}]}
+{"guid": "N50_029", "grammar_facts": [{"fact_type": "number_type", "fact_value": "regular"}, {"fact_type": "plural", "fact_value": "kaarten"}, {"fact_type": "plural_status", "fact_value": "override"}]}

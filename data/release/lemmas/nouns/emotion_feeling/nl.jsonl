@@ -1,0 +1,11 @@
+{"guid": "N23_001", "grammar_facts": [{"fact_type": "number_type", "fact_value": "regular"}]}
+{"guid": "N23_002", "grammar_facts": [{"fact_type": "number_type", "fact_value": "regular"}, {"fact_type": "plural", "fact_value": "verdrieten"}, {"fact_type": "plural_status", "fact_value": "override"}]}
+{"guid": "N23_003", "grammar_facts": [{"fact_type": "number_type", "fact_value": "regular"}, {"fact_type": "plural", "fact_value": "woedes"}, {"fact_type": "plural_status", "fact_value": "override"}]}
+{"guid": "N23_006", "grammar_facts": [{"fact_type": "number_type", "fact_value": "regular"}, {"fact_type": "plural", "fact_value": "angsten"}, {"fact_type": "plural_status", "fact_value": "override"}]}
+{"guid": "N23_007", "grammar_facts": [{"fact_type": "number_type", "fact_value": "regular"}, {"fact_type": "plural", "fact_value": "verrassingen"}, {"fact_type": "plural_status", "fact_value": "override"}]}
+{"guid": "N23_008", "grammar_facts": [{"fact_type": "number_type", "fact_value": "regular"}, {"fact_type": "plural", "fact_value": "bezorgdheden"}, {"fact_type": "plural_status", "fact_value": "override"}]}
+{"guid": "N23_018", "grammar_facts": [{"fact_type": "number_type", "fact_value": "regular"}, {"fact_type": "plural", "fact_value": "hopen"}, {"fact_type": "plural_status", "fact_value": "override"}]}
+{"guid": "N23_025", "grammar_facts": [{"fact_type": "number_type", "fact_value": "regular"}, {"fact_type": "plural", "fact_value": "vreugden"}, {"fact_type": "plural_status", "fact_value": "override"}]}
+{"guid": "N23_026", "grammar_facts": [{"fact_type": "number_type", "fact_value": "regular"}, {"fact_type": "plural", "fact_value": "pijnen"}, {"fact_type": "plural_status", "fact_value": "override"}]}
+{"guid": "N23_028", "grammar_facts": [{"fact_type": "number_type", "fact_value": "regular"}, {"fact_type": "plural", "fact_value": "verlangens"}, {"fact_type": "plural_status", "fact_value": "override"}]}
+{"guid": "N23_031", "grammar_facts": [{"fact_type": "number_type", "fact_value": "regular"}, {"fact_type": "plural", "fact_value": "liefdes"}, {"fact_type": "plural_status", "fact_value": "override"}]}

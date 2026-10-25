@@ -1,8 +1,8 @@
-{"guid": "N05_001", "forms": [{"grammatical_form": "noun/en_singular", "text": "tree", "is_base_form": true, "ipa": "/>truː/", "phonetic": "TROO"}]}
-{"guid": "N05_002", "forms": [{"grammatical_form": "noun/en_singular", "text": "flower", "is_base_form": true, "ipa": "/ˈflaʊ.ɚ/", "phonetic": "FLAW-ər"}]}
-{"guid": "N05_003", "forms": [{"grammatical_form": "noun/en_singular", "text": "grass", "is_base_form": true, "ipa": "/ɡræs/", "phonetic": "GRASS"}]}
+{"guid": "N05_001", "forms": [{"grammatical_form": "noun/en_singular", "text": "tree", "is_base_form": true, "ipa": "/>truː/", "phonetic": "TROO"}], "grammar_facts": [{"fact_type": "countability", "fact_value": "countable"}, {"fact_type": "number_type", "fact_value": "regular"}, {"fact_type": "animacy", "fact_value": "inanimate"}, {"fact_type": "plural_status", "fact_value": "regular"}]}
+{"guid": "N05_002", "forms": [{"grammatical_form": "noun/en_singular", "text": "flower", "is_base_form": true, "ipa": "/ˈflaʊ.ɚ/", "phonetic": "FLAW-ər"}], "grammar_facts": [{"fact_type": "countability", "fact_value": "countable"}, {"fact_type": "number_type", "fact_value": "regular"}, {"fact_type": "animacy", "fact_value": "inanimate"}, {"fact_type": "plural_status", "fact_value": "regular"}]}
+{"guid": "N05_003", "forms": [{"grammatical_form": "noun/en_singular", "text": "grass", "is_base_form": true, "ipa": "/ɡræs/", "phonetic": "GRASS"}], "grammar_facts": [{"fact_type": "countability", "fact_value": "both"}, {"fact_type": "number_type", "fact_value": "regular"}, {"fact_type": "animacy", "fact_value": "inanimate"}, {"fact_type": "plural_status", "fact_value": "regular"}]}
 {"guid": "N05_004", "forms": [{"grammatical_form": "noun/en_singular", "text": "oak", "is_base_form": true, "ipa": "/oʊk/", "phonetic": "OWK"}]}
-{"guid": "N05_005", "forms": [{"grammatical_form": "noun/en_singular", "text": "rose", "is_base_form": true, "ipa": "/roʊz/", "phonetic": "ROH-z"}]}
+{"guid": "N05_005", "forms": [{"grammatical_form": "noun/en_singular", "text": "rose", "is_base_form": true, "ipa": "/roʊz/", "phonetic": "ROH-z"}], "grammar_facts": [{"fact_type": "countability", "fact_value": "countable"}, {"fact_type": "number_type", "fact_value": "regular"}, {"fact_type": "animacy", "fact_value": "inanimate"}, {"fact_type": "plural_status", "fact_value": "regular"}]}
 {"guid": "N05_007", "forms": [{"grammatical_form": "noun/en_singular", "text": "weed", "is_base_form": true, "ipa": "/wiːd/", "phonetic": "WEED"}]}
 {"guid": "N05_008", "forms": [{"grammatical_form": "noun/en_singular", "text": "bush", "is_base_form": true, "ipa": "/bʊʃ/", "phonetic": "BOO-sh"}]}
 {"guid": "N05_009", "forms": [{"grammatical_form": "noun/en_singular", "text": "vine", "is_base_form": true, "ipa": "/vaɪn/", "phonetic": "VY-neh"}]}
@@ -10,6 +10,7 @@
 {"guid": "N05_011", "forms": [{"grammatical_form": "noun/en_singular", "text": "fern", "is_base_form": true, "ipa": "/fɝn/", "phonetic": "FURN"}]}
 {"guid": "N05_012", "forms": [{"grammatical_form": "noun/en_singular", "text": "pine", "is_base_form": true, "ipa": "/paɪn/", "phonetic": "PYNE"}]}
 {"guid": "N05_013", "forms": [{"grammatical_form": "noun/en_singular", "text": "palm", "is_base_form": true, "ipa": "/pɑːlm/", "phonetic": "PALM"}]}
+{"guid": "N05_014", "grammar_facts": [{"fact_type": "countability", "fact_value": "countable"}, {"fact_type": "number_type", "fact_value": "regular"}, {"fact_type": "animacy", "fact_value": "inanimate"}, {"fact_type": "plural_status", "fact_value": "regular"}]}
 {"guid": "N05_018", "forms": [{"grammatical_form": "noun/en_singular", "text": "reed", "is_base_form": true, "ipa": "/riːd/", "phonetic": "REED"}]}
 {"guid": "N05_019", "forms": [{"grammatical_form": "noun/en_singular", "text": "birch", "is_base_form": true, "ipa": "/bɝtʃ/", "phonetic": "BURCH"}]}
 {"guid": "N05_020", "forms": [{"grammatical_form": "noun/en_singular", "text": "crop", "is_base_form": true, "ipa": "/krɑp/", "phonetic": "KROP"}]}
@@ -38,4 +39,4 @@
 {"guid": "N05_048", "forms": [{"grammatical_form": "noun/en_singular", "text": "oats", "is_base_form": true, "ipa": "/oʊts/", "phonetic": "OHTS"}]}
 {"guid": "N05_049", "forms": [{"grammatical_form": "noun/en_singular", "text": "rye", "is_base_form": true, "ipa": "/raɪ/", "phonetic": "RYE"}]}
 {"guid": "N05_050", "forms": [{"grammatical_form": "noun/en_singular", "text": "hedgerow", "is_base_form": true, "ipa": "/ˈhɛdʒˌroʊ/", "phonetic": "HEJ-roh"}]}
-{"guid": "N05_051", "forms": [{"grammatical_form": "noun/en_singular", "text": "wheat", "is_base_form": true, "ipa": "/wit/", "phonetic": "WEET"}]}
+{"guid": "N05_051", "forms": [{"grammatical_form": "noun/en_singular", "text": "wheat", "is_base_form": true, "ipa": "/wit/", "phonetic": "WEET"}], "grammar_facts": [{"fact_type": "countability", "fact_value": "both"}, {"fact_type": "number_type", "fact_value": "regular"}, {"fact_type": "animacy", "fact_value": "inanimate"}, {"fact_type": "plural_status", "fact_value": "regular"}]}

@@ -1,0 +1,3 @@
+{"guid": "N24_011", "grammar_facts": [{"fact_type": "number_type", "fact_value": "regular"}, {"fact_type": "plural", "fact_value": "test"}, {"fact_type": "plural_status", "fact_value": "override"}]}
+{"guid": "N24_034", "grammar_facts": [{"fact_type": "number_type", "fact_value": "regular"}, {"fact_type": "plural", "fact_value": "lektioner"}, {"fact_type": "plural_status", "fact_value": "override"}]}
+{"guid": "N24_063", "grammar_facts": [{"fact_type": "number_type", "fact_value": "regular"}, {"fact_type": "plural", "fact_value": "kvitton"}, {"fact_type": "plural_status", "fact_value": "override"}]}
