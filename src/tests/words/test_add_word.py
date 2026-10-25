@@ -47,7 +47,7 @@ from words.add_word import (
     _sense_bounds,
     add_word,
 )
-from wordfreq.translation.definitions import select_senses_to_add
+from words.definitions import select_senses_to_add
 
 pytestmark = pytest.mark.usefixtures("require_lemma_write_scope")
 

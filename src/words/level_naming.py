@@ -90,7 +90,7 @@ def level_word_counts(session: Session) -> Dict[int, int]:
         .group_by(Lemma.difficulty_level)
         .all()
     )
-    return {int(level): int(count) for level, count in rows}
+    return {int(level): int(count) for level, count in rows if level is not None}
 
 
 def level_words(session: Session, level: int, limit: Optional[int] = None) -> List[Lemma]:
@@ -155,7 +155,7 @@ def _resolve_client(config: Optional[DataSourceConfig]) -> Tuple[UnifiedLLMClien
 
         config = build_default_config()
     # Lazy-imported to avoid a circular import via wordfreq -> langtools.
-    from wordfreq.translation.client import LinguisticClient
+    from words.linguistic_client import LinguisticClient
 
     linguistic_client = LinguisticClient(config=config)
     return linguistic_client.client, linguistic_client.model

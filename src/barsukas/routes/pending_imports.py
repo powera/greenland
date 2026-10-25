@@ -506,7 +506,7 @@ def stage(pending_import_id: int) -> ResponseReturnValue:
     data_source_config = base_config.with_model(model_name, debug=debug)
 
     try:
-        from wordfreq.translation.client import LinguisticClient
+        from words.linguistic_client import LinguisticClient
 
         # Accept an updated example sentence from the request and save it
         # before querying. It goes to the front of the staged list, which is

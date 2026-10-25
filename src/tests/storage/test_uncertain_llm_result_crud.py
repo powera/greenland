@@ -257,7 +257,8 @@ _LLM_ANSWER_MODULES = (
     "src/words/pronunciation.py",
     "src/words/pronunciation_generation.py",
     "src/workqueue/handlers/words/pronunciations.py",
-    "src/wordfreq/translation/generate_forms_base.py",
+    "src/words/forms/generation.py",
+    "src/words/forms/persistence.py",
     "src/workqueue/handlers/words/forms.py",
     "src/words/translation_populate.py",
     "src/sentences/translation.py",
@@ -272,7 +273,7 @@ def test_llm_code_passes_a_confidence_to_gated_writers(path: str) -> None:
     import words.grammar_fact_tasks.english_principal_parts  # noqa: F401
     import words.lemma_creation  # noqa: F401
     import words.pronunciation_generation  # noqa: F401
-    import wordfreq.translation.generate_forms_base  # noqa: F401
+    import words.forms.generation  # noqa: F401
 
     tree = ast.parse((_REPO_ROOT / path).read_text())
     unchecked = [

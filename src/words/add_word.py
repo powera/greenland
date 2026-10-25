@@ -62,9 +62,9 @@ from storage.queries.lemma import get_english_senses, word_exists_in_english
 from words.pending_imports.staging import create_pending_import, find_pending_import
 from storage.translation_helpers import convert_llm_response_to_lang_codes
 from storage.utils.guid import run_lemma_write
-from wordfreq.translation.client import LinguisticClient
-from wordfreq.translation.constants import MAJOR_POS_TYPES
-from wordfreq.translation.definitions import (
+from words.linguistic_client import LinguisticClient
+from words.linguistic_constants import MAJOR_POS_TYPES
+from words.definitions import (
     SENSE_PROMINENCE_ORDER,
     SUBTYPED_POS_TYPES,
     select_senses_to_add,

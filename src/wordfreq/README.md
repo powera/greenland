@@ -1,7 +1,7 @@
 # WordFreq
 
-Core linguistic database system: word frequency tracking, difficulty tiers,
-and LLM-based translation and analysis for the Greenland project.
+Corpus generation, word-token frequency analysis, and external difficulty tiers
+for the Greenland project.
 
 Related code that used to live here has moved: database models are in
 `src/storage/`, agents in `src/agents/`, and prompt templates in the
@@ -26,26 +26,24 @@ Difficulty tier annotations from external sources (CEFR, Cambridge YLE,
 Basic English). Each source supplies a `TierImporter`; imports run via
 `runner.run_import`.
 
-### `translation/`
-LLM-based linguistic analysis: word translation, definitions, pronunciation,
-POS subtype classification, and form generation (`client.py`,
-`processor.py`, `generate_forms_*.py`, `wiktionary_forms.py`).
+### Word-level linguistic workflows
 
-Related workflow helpers now live with their owners: sentence linking and
-vocabulary budgets in `src/sentences/`; LLM validation, text helpers and
-mechanical-form persistence in `src/words/`; language-specific difficulty
-rules and override managers in `src/words/difficulty/`. Maintenance CLIs
-live in `src/scripts/`.
+Definition and translation queries, the linguistic client, and word-form
+workflows live in `src/words/` (form generation and storage in `words/forms/`).
+Sentence linking and vocabulary budgets live in `src/sentences/`;
+language-specific difficulty rules and override managers in
+`src/words/difficulty/`. Maintenance CLIs live in `src/scripts/`.
 
 ### `data/`
-Python data modules and corpus comparison helpers (`compare.py`,
-family-relations generators).
+Curriculum themes, fixed cohorts, and family-relation section definitions.
 
 ### Top-level modules
-- `golden_loader.py` — load frequency and tier data into the JSONL backend's
-  in-memory database
 - `lexeme_frequency.py` — lexeme-level frequency rollups over external
   lexeme annotations
+
+Hosted JSONL startup enrichment lives in
+`src/storage/backend/jsonl/frequency_loader.py`; it uses these corpus loaders
+and rank calculations to populate the backend's in-memory database.
 
 ## Key Concepts
 

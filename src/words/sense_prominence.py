@@ -13,7 +13,7 @@ question is comparative -- "top" the highest point beats "top" the spinning toy
 see that. The prompt still allows repeated labels: two senses of "bank" can
 both be very_common, which leaves them splitting the frequency evenly.
 
-Compare ``wordfreq.translation.definitions``, which rates a sense
+Compare ``words.definitions``, which rates a sense
 independently while discovering a word. That is the right question there (it
 gates whether a sense is worth creating at all) and the wrong one here.
 """
@@ -30,7 +30,7 @@ from sqlalchemy.orm import Session
 
 from clients.types import Schema, SchemaProperty
 from storage.models.schema import SENSE_PROMINENCE_VALUES, Lemma
-from wordfreq.translation.definitions import SENSE_PROMINENCE_ORDER
+from words.definitions import SENSE_PROMINENCE_ORDER
 
 logger = logging.getLogger(__name__)
 

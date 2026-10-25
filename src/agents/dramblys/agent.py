@@ -43,7 +43,7 @@ from storage.models.imports import PendingImport
 from storage.models.schema import DerivativeForm, Lemma, WordToken
 from storage.queries.lemma import filter_existing_english_words
 from storage.translation_helpers import convert_llm_response_to_lang_codes
-from wordfreq.translation.client import LinguisticClient
+from words.linguistic_client import LinguisticClient
 from words.add_word import add_word
 
 # Configure logging

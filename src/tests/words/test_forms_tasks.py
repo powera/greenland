@@ -1,6 +1,6 @@
 import unittest
 
-from wordfreq.translation.generate_forms_tasks import FORM_GENERATION_TASKS, get_task_key
+from words.forms.tasks import FORM_GENERATION_TASKS, get_task_key
 
 
 class TestGenerateFormsTasks(unittest.TestCase):

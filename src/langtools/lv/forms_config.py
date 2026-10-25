@@ -61,8 +61,8 @@ ADVERB_CONFIG: Dict[str, Any] = {
 
 # Form-generation settings per part of speech; see langtools.form_tasks.
 FORM_TASK_SETTINGS: Dict[str, Dict[str, Any]] = {
-    "noun": {"fetcher": "translation", "threshold": 3},
-    "verb": {"fetcher": "translation", "threshold": 6},
-    "adjective": {"fetcher": "translation", "threshold": 4},
+    "noun": {"threshold": 3},
+    "verb": {"threshold": 6},
+    "adjective": {"threshold": 4},
     "adverb": {"fetcher": "translation"},
 }

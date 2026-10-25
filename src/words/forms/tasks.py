@@ -6,7 +6,7 @@ scripts.
 """
 
 from dataclasses import dataclass
-from typing import Any, Callable, Dict, List, Optional
+from typing import Dict, Optional
 
 from langtools.form_registry import FORM_SPECS, LANG_NAMES
 from langtools.form_tasks import (
@@ -15,14 +15,9 @@ from langtools.form_tasks import (
     get_task_settings,
 )
 from storage.backend.config import DataSourceConfig
-from wordfreq.translation.client import LinguisticClient
-from wordfreq.translation.generate_forms_base import (
-    FormGenerationConfig,
-    FormsOutcome,
-    get_lemmas_needing_forms,
-    get_lemmas_with_translation,
-    process_lemma_forms,
-)
+from words.linguistic_client import LinguisticClient
+from words.forms.config import FormGenerationConfig, FormsOutcome
+from words.forms.generation import process_lemma_forms
 
 
 @dataclass
@@ -30,25 +25,6 @@ class FormGenerationTask:
     """Describe a form generation workflow."""
 
     config: FormGenerationConfig
-    lemma_fetcher: Callable[[DataSourceConfig, Optional[int]], List[Dict[str, Any]]]
-
-
-def _translation_task(
-    config: FormGenerationConfig,
-) -> FormGenerationTask:
-    def fetcher(data_config: DataSourceConfig, limit: Optional[int] = None) -> List[Dict[str, Any]]:
-        return get_lemmas_with_translation(data_config, config, limit)
-
-    return FormGenerationTask(config=config, lemma_fetcher=fetcher)
-
-
-def _needs_forms_task(
-    config: FormGenerationConfig,
-) -> FormGenerationTask:
-    def fetcher(data_config: DataSourceConfig, limit: Optional[int] = None) -> List[Dict[str, Any]]:
-        return get_lemmas_needing_forms(data_config, config, limit)
-
-    return FormGenerationTask(config=config, lemma_fetcher=fetcher)
 
 
 def _compute_threshold(num_fields: int) -> int:
@@ -78,7 +54,6 @@ def _build_all_tasks() -> Dict[str, FormGenerationTask]:
         base_form = settings.get("base_form", compute_default_base_form(spec.form_fields))
         threshold = settings.get("threshold", _compute_threshold(len(spec.form_fields)))
         extract_gender = settings.get("extract_gender", False)
-        fetcher_type = settings.get("fetcher", "needs_forms")
 
         config = FormGenerationConfig(
             language_code=lang_code,
@@ -88,15 +63,10 @@ def _build_all_tasks() -> Dict[str, FormGenerationTask]:
             generator_name=get_generator_name(lang_code, pos_type),
             min_forms_threshold=threshold,
             base_form_identifier=base_form,
-            use_legacy_translation=False,
-            translation_field_name=None,
             extract_gender=extract_gender,
         )
 
-        if fetcher_type == "translation":
-            tasks[task_key] = _translation_task(config)
-        else:
-            tasks[task_key] = _needs_forms_task(config)
+        tasks[task_key] = FormGenerationTask(config=config)
 
     return tasks
 

@@ -3,9 +3,6 @@
 Each ``langtools/<lang>/forms_config.py`` may declare ``FORM_TASK_SETTINGS``, a
 dict keyed by part of speech.  Every key is optional:
 
-``fetcher``
-    ``"translation"`` to work through lemmas that have a translation in the
-    language, or ``"needs_forms"`` (the default) for lemmas missing forms.
 ``threshold``
     How many of the slots a lemma must already have to count as done.  The
     default scales with the number of slots.

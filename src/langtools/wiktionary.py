@@ -7,10 +7,6 @@ standard ``get_noun_declensions`` / ``get_verb_conjugations`` /
 ``get_adjective_declensions`` / ``get_adverb_forms`` methods, each returning a
 ``(result, success)`` tuple whose ``result.forms`` is a ``Dict[str, str]``.
 
-This replaces the per-language ``if/elif`` ladder that previously lived in
-``wordfreq.translation.wiktionary_forms``: callers now reach the parsers
-through this single dispatcher instead of a wordfreq-side wrapper.
-
 Parsing genuinely fetches Wiktionary, so - unlike the mechanical
 :mod:`langtools.inflection` / :mod:`langtools.conjugation` dispatchers - the
 forms here are not derived from lexical grammar facts and this dispatcher takes

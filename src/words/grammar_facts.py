@@ -37,7 +37,7 @@ from storage.config.grammar_fact_registry import legacy_supported_fact_types
 from storage.crud.grammar_fact import add_grammar_fact, get_grammar_fact_value
 from storage.models.schema import Lemma
 from storage.translation_helpers import get_translation
-from wordfreq.translation.client import LinguisticClient
+from words.linguistic_client import LinguisticClient
 from clients.unified_client import UnifiedLLMClient
 
 logger = logging.getLogger(__name__)

@@ -13,7 +13,7 @@ import pytest
 
 from clients.types import Schema
 from storage.translation_helpers import MAX_LLM_LANGUAGES_PER_OPERATION
-from wordfreq.translation.translations import build_translation_prompt, query_translations
+from words.translation_queries import build_translation_prompt, query_translations
 
 
 class _CapturingClient:
@@ -36,7 +36,7 @@ def _run(
 ) -> _CapturingClient:
     """Issue one query_translations call and return the capturing client."""
     monkeypatch.setattr(
-        "wordfreq.translation.translations.linguistic_db.log_query",
+        "words.translation_queries.linguistic_db.log_query",
         lambda *args, **kwargs: None,
     )
     client = _CapturingClient()
@@ -121,7 +121,7 @@ def test_modern_languages_omit_status(
     assert "{status_note_instruction}" not in client.context  # type: ignore[operator]
 
     for lang_code in languages:
-        from wordfreq.translation.constants import AVAILABLE_TRANSLATION_LANGUAGES_BY_CODE
+        from words.linguistic_constants import AVAILABLE_TRANSLATION_LANGUAGES_BY_CODE
 
         field = AVAILABLE_TRANSLATION_LANGUAGES_BY_CODE[lang_code]["field"]
         properties = _language_properties(client, field)
@@ -153,7 +153,7 @@ def test_ancient_languages_request_status(
     assert "7. For each translation" in client.context  # type: ignore[operator]
     assert "8. For the ancient/classical" in client.context  # type: ignore[operator]
 
-    from wordfreq.translation.constants import AVAILABLE_TRANSLATION_LANGUAGES_BY_CODE
+    from words.linguistic_constants import AVAILABLE_TRANSLATION_LANGUAGES_BY_CODE
 
     for lang_code in languages:
         field = AVAILABLE_TRANSLATION_LANGUAGES_BY_CODE[lang_code]["field"]

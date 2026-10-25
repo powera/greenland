@@ -66,9 +66,9 @@ from storage.translation_helpers import (
     ensure_english_translation,
 )
 from storage.utils.guid import generate_guid, run_lemma_write
-from wordfreq.translation.constants import VALID_POS_TYPES
-from wordfreq.translation.definitions import SUBTYPED_POS_TYPES, build_subtype_prompt
-from wordfreq.translation.word_processing import determine_default_grammatical_form
+from words.linguistic_constants import VALID_POS_TYPES
+from words.definitions import SUBTYPED_POS_TYPES, build_subtype_prompt
+from words.english_forms import determine_default_grammatical_form
 from words.add_word import (
     _needs_subtype_review,
     _normalize_subtype,
@@ -472,7 +472,7 @@ def add_sense(
 
     # Imported here rather than at module scope, as add_term does, so that
     # importing this module does not construct a client.
-    from wordfreq.translation.client import LinguisticClient
+    from words.linguistic_client import LinguisticClient
 
     llm_client = client
     if llm_client is None:

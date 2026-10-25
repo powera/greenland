@@ -131,7 +131,7 @@ def add_lemma(
     )
     # Without a DerivativeForm the lemma is invisible to token frequency and
     # to the word-import duplicate guard.  Imported here: words sits above
-    # storage, and words.lemma_creation imports wordfreq.translation.
+    # storage, and the creation workflow depends on this module.
     from words.lemma_creation import attach_english_forms
 
     attach_english_forms(session, lemma, source=log_source)

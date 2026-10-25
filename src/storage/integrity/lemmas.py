@@ -12,7 +12,7 @@ from sqlalchemy.orm import Session
 import constants
 from storage.models.schema import DerivativeForm, Lemma, WordToken
 from storage.translation_helpers import ensure_english_translation
-from wordfreq.translation.word_processing import determine_default_grammatical_form
+from words.english_forms import determine_default_grammatical_form
 
 logger = logging.getLogger(__name__)
 

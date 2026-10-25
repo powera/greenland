@@ -20,7 +20,6 @@ def test_coverage_mode_uses_task_language_instead_of_full_lithuanian_report() ->
         model = "gpt-5-mini"
         limit = 20
         throttle = 1.0
-        use_wiktionary = False
         use_workqueue = False
         yes = True
         guid = None
@@ -58,7 +57,6 @@ def test_coverage_mode_uses_task_language_instead_of_full_lithuanian_report() ->
         model="gpt-5-mini",
         throttle=1.0,
         dry_run=True,
-        use_wiktionary=False,
     )
     mock_agent.run_full_check.assert_not_called()
     mock_print_results.assert_called_once()

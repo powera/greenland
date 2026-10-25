@@ -125,7 +125,7 @@ def _ensure_corpus_rows(session: Session) -> None:
 
 
 def load_wordfreq_into_storage(storage: "JSONLStorage") -> dict[str, Any]:
-    """Load all seven wordfreq sources into the JSONL backend's in-memory DB.
+    """Load configured corpus and tier sources into the JSONL backend's in-memory DB.
 
     Steps, in order:
       1. Regenerate the mechanically-derivable forms the release withholds, so

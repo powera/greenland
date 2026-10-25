@@ -1,4 +1,4 @@
-"""Tests for sense selection in wordfreq.translation.definitions."""
+"""Tests for sense selection in words.definitions."""
 
 from typing import Any, Dict, List
 
@@ -8,7 +8,7 @@ from storage.models.schema import (
     SENSE_PROMINENCE_UNCOMMON,
     SENSE_PROMINENCE_VERY_COMMON,
 )
-from wordfreq.translation.definitions import SENSE_PROMINENCE_ORDER, select_senses_to_add
+from words.definitions import SENSE_PROMINENCE_ORDER, select_senses_to_add
 
 
 def _senses(*pairs: Any) -> List[Dict[str, Any]]:
