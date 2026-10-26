@@ -83,79 +83,82 @@ class JSONLSession(BaseSession):
         Returns:
             A SQLAlchemy engine connected to the cached in-memory SQLite database
         """
-        if self._storage._cached_sqlite_engine is not None:
-            return self._storage._cached_sqlite_engine
+        # The background loader and the first request can arrive together.
+        # Publish exactly one populated database so generated data stays visible.
+        with self._storage._sqlite_engine_lock:
+            if self._storage._cached_sqlite_engine is not None:
+                return self._storage._cached_sqlite_engine
 
-        import logging
+            import logging
 
-        from sqlalchemy import create_engine
-        from sqlalchemy.orm import sessionmaker
-        from sqlalchemy.pool import StaticPool
+            from sqlalchemy import create_engine
+            from sqlalchemy.orm import sessionmaker
+            from sqlalchemy.pool import StaticPool
 
-        import storage.models  # noqa: F401  # Ensure all model tables are registered.
-        from storage.models.schema import Base
+            import storage.models  # noqa: F401  # Ensure all model tables are registered.
+            from storage.models.schema import Base
 
-        logger = logging.getLogger(__name__)
-        logger.info("Creating cached in-memory SQLite database for JSONL backend queries")
+            logger = logging.getLogger(__name__)
+            logger.info("Creating cached in-memory SQLite database for JSONL backend queries")
 
-        # Use StaticPool so all sessions share the same in-memory database
-        engine = create_engine(
-            "sqlite:///:memory:",
-            echo=False,
-            connect_args={"check_same_thread": False},
-            poolclass=StaticPool,
-        )
-        Base.metadata.create_all(engine)
+            # Use StaticPool so all sessions share the same in-memory database
+            engine = create_engine(
+                "sqlite:///:memory:",
+                echo=False,
+                connect_args={"check_same_thread": False},
+                poolclass=StaticPool,
+            )
+            Base.metadata.create_all(engine)
 
-        # Populate the database using a temporary session
-        TempSessionFactory = sessionmaker(bind=engine)
-        temp_session = TempSessionFactory()
-        self._sqlite_session = temp_session
-        self._populate_sqlite()
+            # Populate the database using a temporary session
+            TempSessionFactory = sessionmaker(bind=engine)
+            temp_session = TempSessionFactory()
+            self._sqlite_session = temp_session
+            self._populate_sqlite()
 
-        # Log statistics about what was loaded
-        from storage.models.grammar_fact import GrammarFact as SQLGrammarFact
-        from storage.models.guid_tombstone import GuidTombstone as SQLGuidTombstone
-        from storage.models.lemma_relation import (
-            LemmaRelationGroup as SQLLemmaRelationGroup,
-        )
-        from storage.models.lemma_relation import (
-            LemmaRelationMember as SQLLemmaRelationMember,
-        )
-        from storage.models.schema import Lemma as SQLLemma
-        from storage.models.schema import LemmaTranslation
-        from storage.models.schema import Sentence as SQLSentence
-        from storage.models.schema import SentenceTranslation, SentenceWord, SentenceWordHint
+            # Log statistics about what was loaded
+            from storage.models.grammar_fact import GrammarFact as SQLGrammarFact
+            from storage.models.guid_tombstone import GuidTombstone as SQLGuidTombstone
+            from storage.models.lemma_relation import (
+                LemmaRelationGroup as SQLLemmaRelationGroup,
+            )
+            from storage.models.lemma_relation import (
+                LemmaRelationMember as SQLLemmaRelationMember,
+            )
+            from storage.models.schema import Lemma as SQLLemma
+            from storage.models.schema import LemmaTranslation
+            from storage.models.schema import Sentence as SQLSentence
+            from storage.models.schema import SentenceTranslation, SentenceWord, SentenceWordHint
 
-        assert temp_session is not None  # For type checking
-        lemma_count = temp_session.query(SQLLemma).count()
-        translation_count = temp_session.query(LemmaTranslation).count()
-        grammar_fact_count = temp_session.query(SQLGrammarFact).count()
-        relation_group_count = temp_session.query(SQLLemmaRelationGroup).count()
-        relation_member_count = temp_session.query(SQLLemmaRelationMember).count()
-        sentence_count = temp_session.query(SQLSentence).count()
-        sentence_translation_count = temp_session.query(SentenceTranslation).count()
-        sentence_word_count = temp_session.query(SentenceWord).count()
-        sentence_word_hint_count = temp_session.query(SentenceWordHint).count()
+            assert temp_session is not None  # For type checking
+            lemma_count = temp_session.query(SQLLemma).count()
+            translation_count = temp_session.query(LemmaTranslation).count()
+            grammar_fact_count = temp_session.query(SQLGrammarFact).count()
+            relation_group_count = temp_session.query(SQLLemmaRelationGroup).count()
+            relation_member_count = temp_session.query(SQLLemmaRelationMember).count()
+            sentence_count = temp_session.query(SQLSentence).count()
+            sentence_translation_count = temp_session.query(SentenceTranslation).count()
+            sentence_word_count = temp_session.query(SentenceWord).count()
+            sentence_word_hint_count = temp_session.query(SentenceWordHint).count()
 
-        logger.info(
-            f"Populated cached SQLite DB: "
-            f"{lemma_count} lemmas, "
-            f"{translation_count} translations, "
-            f"{grammar_fact_count} grammar_facts, "
-            f"{relation_group_count} relation_groups, "
-            f"{relation_member_count} relation_members, "
-            f"{sentence_count} sentences, "
-            f"{sentence_translation_count} sentence_translations, "
-            f"{sentence_word_count} sentence_words, "
-            f"{sentence_word_hint_count} sentence_word_hints"
-        )
+            logger.info(
+                f"Populated cached SQLite DB: "
+                f"{lemma_count} lemmas, "
+                f"{translation_count} translations, "
+                f"{grammar_fact_count} grammar_facts, "
+                f"{relation_group_count} relation_groups, "
+                f"{relation_member_count} relation_members, "
+                f"{sentence_count} sentences, "
+                f"{sentence_translation_count} sentence_translations, "
+                f"{sentence_word_count} sentence_words, "
+                f"{sentence_word_hint_count} sentence_word_hints"
+            )
 
-        # Cache the engine in storage for reuse by future sessions
-        self._storage._cached_sqlite_engine = engine
-        self._storage._sqlite_populated = True
+            # Cache the engine in storage for reuse by future sessions
+            self._storage._cached_sqlite_engine = engine
+            self._storage._sqlite_populated = True
 
-        return engine
+            return engine
 
     def _get_model_map(self) -> Dict[Type[Any], Type[Any]]:
         """Get mapping from JSONL model classes to SQLAlchemy model classes.

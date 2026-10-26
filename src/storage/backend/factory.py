@@ -27,6 +27,7 @@ _engine_lock = threading.Lock()
 # Cache JSONL storage instances to avoid re-loading data from disk on every request.
 # Since JSONL mode is read-only, the storage can be safely shared across sessions.
 _jsonl_storage_cache: dict[str, Any] = {}  # data_dir -> JSONLStorage
+_jsonl_storage_lock = threading.Lock()
 
 
 def _create_engine(db_path: str, readonly: bool = False) -> "Engine":
@@ -306,11 +307,12 @@ def create_session(config: Optional[DataSourceConfig] = None, readonly: bool = F
 
             assert config.jsonl_data_dir is not None, "jsonl_data_dir must be set for JSONL backend"
             data_dir = config.jsonl_data_dir
-            if data_dir not in _jsonl_storage_cache:
-                storage = JSONLStorage(data_dir)
-                storage.ensure_initialized()
-                _jsonl_storage_cache[data_dir] = storage
-            return _jsonl_storage_cache[data_dir].create_session()  # type: ignore[no-any-return]
+            with _jsonl_storage_lock:
+                if data_dir not in _jsonl_storage_cache:
+                    storage = JSONLStorage(data_dir)
+                    storage.ensure_initialized()
+                    _jsonl_storage_cache[data_dir] = storage
+                return _jsonl_storage_cache[data_dir].create_session()  # type: ignore[no-any-return]
         elif config.backend_type == BackendType.POSTGRES:
             assert config.postgres_url is not None, "postgres_url must be set for POSTGRES backend"
             db_path = config.postgres_url
