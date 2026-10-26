@@ -7,6 +7,7 @@ from sqlalchemy.orm import Session
 
 from sentences.guided_generation import GuidedSentenceGenerator
 from sentences.llm_generation import LlmSentenceGenerator
+from sentences.simple_generation import SimpleSentenceGenerator
 from storage.backend import create_session as create_backend_session
 from storage.backend.config import DataSourceConfig
 from storage.models.schema import Lemma
@@ -35,6 +36,8 @@ def generate_examples_for_lemma(
         raise ValueError(f"Lemma {lemma_id} has no GUID")
 
     service = SentenceGenerationService(config=config)
+    if mode == "simple":
+        return service.simple_generator.generate_and_store(session, lemma)
     if mode == "llm":
         generated = service.generate_llm_sentences_for_lemma(
             lemma=lemma,
@@ -65,7 +68,7 @@ def generate_examples_for_lemma(
 
 
 class SentenceGenerationService:
-    """Coordinate basic LLM and vocabulary-guided example generation."""
+    """Coordinate basic LLM, vocabulary-guided, and simple (A1) example generation."""
 
     def __init__(self, config: DataSourceConfig, dry_run: bool = False) -> None:
         self.config = config
@@ -77,6 +80,7 @@ class SentenceGenerationService:
 
         self.llm_generator = LlmSentenceGenerator(config=config, dry_run=dry_run)
         self.guided_generator = GuidedSentenceGenerator(config=config, dry_run=dry_run)
+        self.simple_generator = SimpleSentenceGenerator(config=config, dry_run=dry_run)
 
     def get_session(self) -> Any:
         return create_backend_session(self.config)

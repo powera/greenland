@@ -123,11 +123,17 @@ class GuidedSentenceGenerator:
         lemma: Lemma,
         num_sentences: int,
         vocabulary_section: str,
+        prompt_name: str = "guided",
+        previous_sentences: str = "",
     ) -> Optional[Dict[Any, Any]]:
-        """Call LLM to generate multiple sentences at once."""
+        """Call LLM to generate multiple sentences at once.
+
+        prompt_name selects the prompts/sentences/<name>/ pair; both pairs
+        share this response schema (en + words_used).
+        """
         # Load context and prompt template
-        context = util.prompt_loader.get_context("sentences", "guided")
-        prompt_template = util.prompt_loader.get_prompt("sentences", "guided")
+        context = util.prompt_loader.get_context("sentences", prompt_name)
+        prompt_template = util.prompt_loader.get_prompt("sentences", prompt_name)
 
         # Build extra context
         extra_parts = []
@@ -147,7 +153,7 @@ class GuidedSentenceGenerator:
             pos_type=lemma.pos_type,
             extra_context=extra_context,
             vocabulary_section=vocabulary_section,
-            previous_sentences="",
+            previous_sentences=previous_sentences,
             num_sentences=num_sentences,
         )
 

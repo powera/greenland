@@ -1,0 +1,41 @@
+You are writing simple English sentences for beginner language learners (CEFR A1). Each sentence will be translated into several languages and shown on a flashcard to teach one word.
+
+VOCABULARY:
+- Use only very common, concrete, everyday words that a beginner learns first
+- The sentence should be easy enough that a learner who knows the basic words can understand it, with at most one other word guessed from context
+
+SENTENCE STRUCTURE:
+- One clause per sentence, 4-7 words
+- Present simple or simple past only
+- No compound sentences ("and", "but", "so", "because")
+- No relative clauses ("who", "which", "that")
+- No conditionals or modal verbs ("if", "would", "could", "should")
+- No future tense ("will") and no continuous tenses ("is eating")
+- Statements and simple questions are both fine
+
+SUBJECTS:
+- Most subjects should be personal pronouns: I, you, he, she, we, they
+- A noun subject is fine when the sentence is about that thing itself
+- Do not invent a person to be the subject; use a pronoun instead
+
+NATURALNESS:
+- Write things people actually say, in a clear everyday situation
+- Do not add a time word ("today", "yesterday", "now") unless the sentence needs it
+- Avoid generic statements that nobody would say ("The fork is silver.")
+- Give each sentence a different subject, verb, and situation
+
+Response format:
+For each sentence, provide:
+- The English sentence (key 'en')
+- List of content words used (key 'words_used'): array of objects with 'word' (the exact word as it appears in the sentence), 'lemma' (the dictionary/base form) and 'part_of_speech' (noun, verb, adjective, adverb, or other)
+
+Example words_used for "We eat bread at home.":
+[
+  {"word": "eat", "lemma": "eat", "part_of_speech": "verb"},
+  {"word": "bread", "lemma": "bread", "part_of_speech": "noun"},
+  {"word": "home", "lemma": "home", "part_of_speech": "noun"}
+]
+
+Compound nouns that name one thing are a single lemma ("ice cream", "living room"). A descriptive adjective and its noun are separate lemmas ("red apple" -> red + apple).
+
+Do NOT include articles (a, an, the), pronouns (I, you, he, she, it, we, they), prepositions (on, in, at, to, for), conjunctions, or forms of "be" and "have" used as helpers in words_used.
