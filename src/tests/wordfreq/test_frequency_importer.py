@@ -36,7 +36,29 @@ def _ranks(session: Session, source: str) -> Dict[str, int]:
         .filter(ExternalLexemeAnnotation.source == source)
         .all()
     )
-    return {token: rank for token, rank in rows}
+    ranks: Dict[str, int] = {}
+    for token, rank in rows:
+        assert rank is not None
+        ranks[token] = rank
+    return ranks
+
+
+def test_reload_across_batches_keeps_earlier_batches_and_removes_stale_rows(tmp_path: Path) -> None:
+    session = _make_session()
+    # Alphabetic spellings: the importer deliberately excludes numerals.
+    words = ["word" + chr(97 + index // 26) + chr(97 + index % 26) for index in range(600)]
+    path = tmp_path / "batch.json"
+    assert import_frequency_as_annotations(
+        session, file_path=_write_ranked_list(path, words), corpus_name="batch_test"
+    ) == (600, 600)
+    reordered = list(reversed(words[25:]))
+    assert import_frequency_as_annotations(
+        session, file_path=_write_ranked_list(path, reordered), corpus_name="batch_test"
+    ) == (575, 575)
+    assert _ranks(session, "wordfreq_batch_test") == {
+        word: rank for rank, word in enumerate(reordered, 1)
+    }
+    session.close()
 
 
 def test_reload_deletes_words_the_new_file_dropped(tmp_path: Path) -> None:

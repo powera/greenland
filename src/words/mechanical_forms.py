@@ -189,7 +189,7 @@ def derivable_variant_slots(variant_form: VariantForm) -> frozenset[str]:
 
 
 def generate_variant_forms(
-    session: Session, language_code: str, dry_run: bool = False
+    session: Session, language_code: str, dry_run: bool = False, batch_size: Optional[int] = None
 ) -> Dict[str, int]:
     """Add the mechanically-derivable inflections of each variant paradigm.
 
@@ -211,6 +211,9 @@ def generate_variant_forms(
     )
 
     for base_form in base_forms:
+        if batch_size and counts["variants_seen"] and counts["variants_seen"] % batch_size == 0:
+            if not dry_run:
+                session.commit()
         counts["variants_seen"] += 1
         lemma = base_form.lemma
         if lemma is None:
@@ -389,6 +392,7 @@ def generate_for_session(
     dry_run: bool = False,
     languages: Optional[List[str]] = None,
     pos_types: Optional[List[str]] = None,
+    batch_size: Optional[int] = None,
 ) -> Dict[str, Dict[str, int]]:
     """Add missing mechanical forms to an already-open session.
 
@@ -399,9 +403,13 @@ def generate_for_session(
     the language supports).  Variant forms are skipped when it is given: they
     are rebuilt per language, not per part of speech.
 
+    When batch_size is provided, commit after that many lemmas/variants so
+    hosted startup does not hold one write transaction for the full dictionary.
     Existing forms and facts are never overwritten, so this is additive and
     safe to re-run against a database that has already been generated into.
     """
+    if batch_size is not None and batch_size < 1:
+        raise ValueError("batch_size must be positive")
     selected = languages or list(SUPPORTED)
     stats: Dict[str, Dict[str, int]] = {}
 
@@ -427,13 +435,15 @@ def generate_for_session(
             lemma_counts = generate_lemma_forms(session, lemma, language_code, dry_run=dry_run)
             for count_key, count_value in lemma_counts.items():
                 counts[count_key] += count_value
+            if batch_size and counts["lemmas_seen"] % batch_size == 0 and not dry_run:
+                session.commit()
 
         # A variant inflects by the same rules as the lemma it belongs to,
         # so its derivable slots are rebuilt here too -- otherwise the
         # release would ship "greyer" beside a "grayer" it withholds.
         if pos_types is None:
             counts["variant_forms_added"] = generate_variant_forms(
-                session, language_code, dry_run=dry_run
+                session, language_code, dry_run=dry_run, batch_size=batch_size
             )["forms_added"]
 
     if not dry_run:

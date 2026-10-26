@@ -1,10 +1,10 @@
-"""Load wordfreq frequency + tier data into the JSONL backend's in-memory DB.
+"""Load wordfreq frequency + tier data into the JSONL backend's temporary DB.
 
 Golden/hosted personas serve from JSONL files in ``data/release/`` via a cached
-in-memory SQLite database. That database normally only holds lemma/sentence
+temporary SQLite database. That database normally only holds lemma/sentence
 data because the wordfreq frequency signal is not (yet) checked into the
 release directory. This module loads the frequency sources directly
-from their on-disk files into the same in-memory SQLite so that
+from their on-disk files into the same temporary SQLite so that
 ``Lemma.frequency_rank``, ``ExternalLexemeAnnotation``, and ``LemmaTier``
 queries return real data in golden mode.
 
@@ -30,8 +30,9 @@ lexeme frequencies and tier signals so the dictionary/lemma views surface
 the combined rank without a separate sync step.
 
 Intended to be called from a background thread after Flask starts serving;
-the JSONL SQLite backend uses ``StaticPool`` + ``check_same_thread=False``
-so cross-thread writes are safe but will briefly contend with read queries.
+the JSONL SQLite backend uses a temporary disk-backed WAL database with
+independent pooled connections, so readers cannot roll back loader writes.
+Mechanical generation commits every 100 lemmas; corpus imports use 500-word batches.
 """
 
 from __future__ import annotations
@@ -59,7 +60,7 @@ logger = logging.getLogger(__name__)
 def _make_session_for_storage(storage: "JSONLStorage", expire_on_commit: bool = True) -> Session:
     """Open a raw SQLAlchemy session against the storage's cached SQLite engine.
 
-    Triggers cache population (loading JSONL lemmas into the in-memory DB) on
+    Triggers cache population (loading JSONL lemmas into the temporary DB) on
     first call by routing through a throwaway JSONLSession.
     """
     if storage._cached_sqlite_engine is None:
@@ -89,12 +90,12 @@ def _generate_mechanical_forms(storage: "JSONLStorage") -> dict[str, Any]:
     ``expire_on_commit=False`` keeps the identity map warm across the pass's
     commit.  It once mattered far more: ``add_word_token`` used to commit once
     per new token, and a committing session expires every object it holds,
-    which against an in-memory database whose identity map is the whole
+    which against an temporary database whose identity map is the whole
     dictionary made the pass quadratic.
     """
     session = _make_session_for_storage(storage, expire_on_commit=False)
     try:
-        return generate_for_session(session)
+        return generate_for_session(session, batch_size=100)
     finally:
         session.close()
 
@@ -125,7 +126,7 @@ def _ensure_corpus_rows(session: Session) -> None:
 
 
 def load_wordfreq_into_storage(storage: "JSONLStorage") -> dict[str, Any]:
-    """Load configured corpus and tier sources into the JSONL backend's in-memory DB.
+    """Load configured corpus and tier sources into the JSONL backend's temporary DB.
 
     Steps, in order:
       1. Regenerate the mechanically-derivable forms the release withholds, so

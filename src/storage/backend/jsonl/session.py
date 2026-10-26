@@ -1,6 +1,8 @@
 """JSONL session implementation."""
 
 import datetime
+import tempfile
+from pathlib import Path
 from typing import TYPE_CHECKING, Any, Dict, List, Optional, Type, TypeVar
 
 from sqlalchemy.orm import Query as SQLAlchemyQuery
@@ -61,7 +63,7 @@ class JSONLSession(BaseSession):
         database is populated once and reused across requests.
 
         Returns:
-            A SQLAlchemy session connected to the cached in-memory SQLite database
+            A SQLAlchemy session connected to the cached temporary SQLite database
         """
         if self._sqlite_session is None:
             engine = self._get_or_create_cached_engine()
@@ -81,7 +83,7 @@ class JSONLSession(BaseSession):
         SQLite DB on every request.
 
         Returns:
-            A SQLAlchemy engine connected to the cached in-memory SQLite database
+            A SQLAlchemy engine connected to the cached temporary SQLite database
         """
         # The background loader and the first request can arrive together.
         # Publish exactly one populated database so generated data stays visible.
@@ -93,21 +95,26 @@ class JSONLSession(BaseSession):
 
             from sqlalchemy import create_engine
             from sqlalchemy.orm import sessionmaker
-            from sqlalchemy.pool import StaticPool
+            from storage.backend.sqlite_pragmas import apply_sqlite_pragmas
 
             import storage.models  # noqa: F401  # Ensure all model tables are registered.
             from storage.models.schema import Base
 
             logger = logging.getLogger(__name__)
-            logger.info("Creating cached in-memory SQLite database for JSONL backend queries")
+            logger.info("Creating temporary WAL SQLite database for JSONL backend queries")
 
-            # Use StaticPool so all sessions share the same in-memory database
+            # One database, independent pooled connections and transactions.
+            # StaticPool shares a physical connection: closing a reader can
+            # roll back a background writer's transaction on that connection.
+            cache_dir = tempfile.TemporaryDirectory(prefix="greenland-jsonl-")
+            self._storage._sqlite_cache_dir = cache_dir
+            cache_path = Path(cache_dir.name) / "cache.sqlite"
             engine = create_engine(
-                "sqlite:///:memory:",
+                f"sqlite:///{cache_path}",
                 echo=False,
-                connect_args={"check_same_thread": False},
-                poolclass=StaticPool,
+                connect_args={"check_same_thread": False, "timeout": 30},
             )
+            apply_sqlite_pragmas(engine)
             Base.metadata.create_all(engine)
 
             # Populate the database using a temporary session
@@ -325,7 +332,7 @@ class JSONLSession(BaseSession):
 
             # Add derivative forms (per-language inflections / base forms).
             # The combined-rank pass uses these to identify English lemmas, so
-            # they must be present in the in-memory SQLite for golden mode.
+            # they must be present in the temporary SQLite for golden mode.
             langs_with_explicit_base: set[str] = set()
             for lang_code, lang_forms in jsonl_lemma.derivative_forms.items():
                 for form_name, form_data in lang_forms.items():
@@ -611,43 +618,47 @@ class JSONLSession(BaseSession):
                 }
             )
 
+        def insert_batches(model: Any, rows: list[Any]) -> None:
+            assert self._sqlite_session is not None
+            for start in range(0, len(rows), 1000):
+                self._sqlite_session.bulk_insert_mappings(model, rows[start : start + 1000])
+                self._sqlite_session.commit()
+
         # Bulk insert
         if lemmas:
-            self._sqlite_session.bulk_insert_mappings(SQLLemma, lemmas)
+            insert_batches(SQLLemma, lemmas)
         if translations:
-            self._sqlite_session.bulk_insert_mappings(LemmaTranslation, translations)
+            insert_batches(LemmaTranslation, translations)
         if difficulty_overrides:
-            self._sqlite_session.bulk_insert_mappings(
-                SQLLemmaDifficultyOverride, difficulty_overrides
-            )
+            insert_batches(SQLLemmaDifficultyOverride, difficulty_overrides)
         if concept_lemma_links:
-            self._sqlite_session.bulk_insert_mappings(SQLConceptLemmaLink, concept_lemma_links)
+            insert_batches(SQLConceptLemmaLink, concept_lemma_links)
         if derivative_forms:
-            self._sqlite_session.bulk_insert_mappings(SQLDerivativeForm, derivative_forms)
+            insert_batches(SQLDerivativeForm, derivative_forms)
         if variant_forms:
-            self._sqlite_session.bulk_insert_mappings(SQLVariantForm, variant_forms)
+            insert_batches(SQLVariantForm, variant_forms)
         if grammar_facts:
-            self._sqlite_session.bulk_insert_mappings(SQLGrammarFact, grammar_facts)
+            insert_batches(SQLGrammarFact, grammar_facts)
         if lemma_facts:
-            self._sqlite_session.bulk_insert_mappings(SQLLemmaFact, lemma_facts)
+            insert_batches(SQLLemmaFact, lemma_facts)
         if relation_groups:
-            self._sqlite_session.bulk_insert_mappings(SQLLemmaRelationGroup, relation_groups)
+            insert_batches(SQLLemmaRelationGroup, relation_groups)
         if relation_members:
-            self._sqlite_session.bulk_insert_mappings(SQLLemmaRelationMember, relation_members)
+            insert_batches(SQLLemmaRelationMember, relation_members)
         if sentences:
-            self._sqlite_session.bulk_insert_mappings(SQLSentence, sentences)
+            insert_batches(SQLSentence, sentences)
         if sentence_translations:
-            self._sqlite_session.bulk_insert_mappings(SentenceTranslation, sentence_translations)
+            insert_batches(SentenceTranslation, sentence_translations)
         if sentence_words:
-            self._sqlite_session.bulk_insert_mappings(SentenceWord, sentence_words)
+            insert_batches(SentenceWord, sentence_words)
         if sentence_word_hints:
-            self._sqlite_session.bulk_insert_mappings(SentenceWordHint, sentence_word_hints)
+            insert_batches(SentenceWordHint, sentence_word_hints)
         if phrases:
-            self._sqlite_session.bulk_insert_mappings(SQLPhrase, phrases)
+            insert_batches(SQLPhrase, phrases)
         if phrase_translations:
-            self._sqlite_session.bulk_insert_mappings(SQLPhraseTranslation, phrase_translations)
+            insert_batches(SQLPhraseTranslation, phrase_translations)
         if tombstones:
-            self._sqlite_session.bulk_insert_mappings(SQLGuidTombstone, tombstones)
+            insert_batches(SQLGuidTombstone, tombstones)
 
         self._sqlite_session.commit()
 
