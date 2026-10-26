@@ -41,13 +41,15 @@ from agents.common.common_args import (
     add_processing_args,
     confirm_operation,
     get_data_source_config,
+    parse_level_arg,
 )
 from words.lemma_selection import (
     LemmaQueryBuilder,
     apply_limit_and_sample_rate,
-    get_lemmas_for_agent,
+    find_lemma_by_guid,
 )
 from clients.audio import AudioFormat, AudioGenerationResult, Voice, generate_audio
+from clients.audio.openai_tts import DEFAULT_MODEL as DEFAULT_TTS_MODEL
 from clients.audio.azure_tts import AzureTTSClient, AzureVoice
 from clients.audio.gemini_tts import (
     DEFAULT_GEMINI_VOICES,
@@ -81,6 +83,7 @@ from storage.backend.config import BackendType, DataSourceConfig
 from storage.models.schema import (
     AudioQualityReview,
     Lemma,
+    LemmaDifficultyOverride,
     Sentence,
     SentenceTranslation,
     SentenceWord,
@@ -109,6 +112,32 @@ def _mark_failed_voices(results: Dict[str, Any], voice_results: List[Dict[str, A
         results["error"] = f"Audio generation failed for voice(s): {', '.join(failed_voices)}"
 
 
+def _get_lemmas_for_audio(
+    session: Session, args: argparse.Namespace, language_code: str
+) -> List[Lemma]:
+    """Select curated lemmas using the target language's effective levels."""
+    if args.guid:
+        selected_lemma = find_lemma_by_guid(session, args.guid)
+        return [selected_lemma] if selected_lemma is not None else []
+
+    query = LemmaQueryBuilder(session).curated_only().order_by_id().build()
+    min_level, max_level = parse_level_arg(args.level)
+    if min_level is not None or max_level is not None:
+        query = query.outerjoin(
+            LemmaDifficultyOverride,
+            (LemmaDifficultyOverride.lemma_id == Lemma.id)
+            & (LemmaDifficultyOverride.language_code == language_code),
+        )
+        effective_level = func.coalesce(
+            LemmaDifficultyOverride.difficulty_level, Lemma.difficulty_level
+        )
+        if min_level is not None:
+            query = query.filter(effective_level >= min_level)
+        if max_level is not None:
+            query = query.filter(effective_level <= max_level)
+    return apply_limit_and_sample_rate(query, args.limit, args.sample_rate)
+
+
 class VieversysAgent:
     """Agent for generating audio files for lemmas using cloud TTS APIs."""
 
@@ -120,6 +149,7 @@ class VieversysAgent:
         auto_approve: bool = False,
         skip_existing: bool = False,
         tts_engine: str = "openai",
+        tts_model: str = DEFAULT_TTS_MODEL,
     ) -> None:
         """
         Initialize the Vieversys agent.
@@ -131,6 +161,7 @@ class VieversysAgent:
             auto_approve: Whether to automatically approve audio (requires upload_s3)
             skip_existing: Whether to skip lemma/voice combinations that already have audio
             tts_engine: TTS engine to use ('openai', 'polly', 'azure', 'google')
+            tts_model: OpenAI audio model, independent of the general LLM model
         """
         self.config = config
         self.debug = config.debug
@@ -138,6 +169,9 @@ class VieversysAgent:
         self.auto_approve = auto_approve
         self.skip_existing = skip_existing
         self.tts_engine = tts_engine
+        self.tts_model = tts_model
+        if tts_engine == "openai":
+            logger.info("OpenAI TTS model: %s", tts_model)
         self.output_dir = (
             Path(output_dir) if output_dir else Path(tempfile.mkdtemp(prefix="vieversys_"))
         )
@@ -326,6 +360,7 @@ class VieversysAgent:
             result = generate_audio(
                 text=text,
                 voice=gpt_voice.openai_voice,
+                model=self.tts_model,
                 language_code=language_code,
                 character_description=character_description,
             )
@@ -578,6 +613,7 @@ class VieversysAgent:
             result = generate_audio(
                 text=text,
                 voice=gpt_voice.openai_voice,
+                model=self.tts_model,
                 language_code=language_code,
                 is_sentence=True,
                 character_description=character_description,
@@ -1342,6 +1378,11 @@ def get_argument_parser() -> argparse.ArgumentParser:
         "google (Google Cloud TTS), gemini (Gemini TTS)",
     )
     parser.add_argument(
+        "--tts-model",
+        default=DEFAULT_TTS_MODEL,
+        help="OpenAI audio model (independent of --model; default: %(default)s)",
+    )
+    parser.add_argument(
         "--voices",
         nargs="+",
         help="Voice names to use. For OpenAI: character names (ruta, jonas). For cloud engines: voice IDs (e.g., Zhiyu, zh-CN-XiaoxiaoNeural, cmn-CN-Wavenet-A).",
@@ -1439,6 +1480,8 @@ def main() -> int:
 
     # Create agent with config
     tts_engine = getattr(args, "tts_engine", "openai")
+    if tts_engine != "openai" and args.tts_model != DEFAULT_TTS_MODEL:
+        parser.error("--tts-model is only supported with --tts-engine openai")
     agent = VieversysAgent(
         config=config,
         output_dir=args.output_dir,
@@ -1448,6 +1491,7 @@ def main() -> int:
         auto_approve=args.auto_approve,
         skip_existing=(args.mode == "populate-only"),
         tts_engine=tts_engine,
+        tts_model=args.tts_model,
     )
 
     # Convert voice names based on TTS engine
@@ -1516,7 +1560,7 @@ def main() -> int:
 
         session = agent.get_session()
         try:
-            lemmas = get_lemmas_for_agent(session, args)
+            lemmas = _get_lemmas_for_audio(session, args, language_code)
         finally:
             session.close()
 

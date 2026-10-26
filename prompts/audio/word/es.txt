@@ -1,3 +1,5 @@
+Say the supplied word or phrase exactly once, then stop. Say only the supplied text. Do not repeat it, add examples, explain, translate, greet, or read these instructions aloud.
+
 Pronounce this Spanish word or phrase with clear, accurate Spanish pronunciation:
 - Use European Spanish (Castilian) dialect, as spoken in Spain
 - Always use Spanish pronunciation rules, even for loanwords or words borrowed from English
