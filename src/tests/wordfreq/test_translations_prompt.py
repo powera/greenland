@@ -189,3 +189,32 @@ def test_more_languages_than_one_request_raises() -> None:
             "noun",
             languages=languages,
         )
+
+
+# --- Person nouns also ask for male and female words -----------------------
+
+
+@pytest.mark.parametrize(
+    ("pos_type", "pos_subtype", "asks"),
+    [
+        ("noun", "occupation", True),
+        ("noun", "human", True),
+        ("noun", "animal", False),
+        ("noun", None, False),
+        ("verb", "human", False),
+    ],
+)
+def test_gender_fields_only_for_person_nouns(
+    pos_type: str, pos_subtype: Optional[str], asks: bool
+) -> None:
+    built = build_translation_prompt(
+        "actor", ("en", "actor"), "a person who acts", pos_type, pos_subtype, ["es", "zh"]
+    )
+    assert built is not None
+    assert "{gender_requirements}" not in built.context
+    assert ("MALE AND FEMALE WORDS" in built.context) is asks
+    properties = built.schema.properties["spanish_translation"].properties
+    assert properties is not None
+    gender_fields = {"gender_pattern", "male", "female"}
+    assert (gender_fields <= set(properties)) is asks
+    assert not (gender_fields & set(properties)) or asks

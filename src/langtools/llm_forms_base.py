@@ -110,10 +110,14 @@ def query_forms(
     client: UnifiedLLMClient,
     lemma_id: int,
     get_session_func: Callable[[], Session],
+    word: Optional[str] = None,
 ) -> Tuple[Dict[str, str], bool]:
     """Generic form-generation function parameterised by *spec*.
 
     Replaces all per-language ``query_{lang}_{pos}_forms()`` functions.
+    *word* replaces the lemma's own word in the language, for a variant's
+    paradigm (a gender variant's "actriz"); the lemma still supplies the
+    English word, definition and subtype.
     """
     session = get_session_func()
     lemma = session.query(linguistic_db.Lemma).filter(linguistic_db.Lemma.id == lemma_id).first()
@@ -123,7 +127,10 @@ def query_forms(
         return {}, False
 
     # Determine the word in the target language and the English word.
-    if spec.is_source_language:
+    if word:
+        target_word = word
+        english_word = lemma.lemma_text
+    elif spec.is_source_language:
         target_word = lemma.lemma_text
         english_word = lemma.lemma_text
     else:

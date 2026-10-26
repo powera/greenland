@@ -19,6 +19,13 @@ from sqlalchemy.orm import Session
 import constants
 from clients.types import LLMCall
 from storage.crud.difficulty_override import get_all_overrides_for_lemma
+from storage.crud.gender_variant import (
+    GenderVariantAnswer,
+    asks_gender_variants,
+    languages_per_request,
+    convert_llm_response_to_gender_answers,
+    store_gender_variant_answer,
+)
 from storage.models.schema import Lemma
 from storage.translation_helpers import (
     convert_llm_response_to_confidences,
@@ -111,15 +118,25 @@ def build_populate_call(
         lemma.pos_type,
         pos_subtype=lemma.pos_subtype,
         languages=list(languages),
+        ask_gender=asks_gender_variants(lemma),
     )
     if prompt is None:
         return None
     return LLMCall(prompt=prompt.prompt, schema=prompt.schema, context=prompt.context)
 
 
-def populate_groups(missing: Sequence[str]) -> List[List[str]]:
-    """Split missing languages into the groups one request each covers."""
-    return [list(group) for group in split_llm_language_batches(list(missing))]
+def populate_groups(missing: Sequence[str], lemma: Optional[Lemma] = None) -> List[List[str]]:
+    """Split missing languages into the groups one request each covers.
+
+    A person noun's requests carry fewer languages; see
+    storage.crud.gender_variant.languages_per_request.
+    """
+    if lemma is None:
+        return [list(group) for group in split_llm_language_batches(list(missing))]
+    return [
+        list(group)
+        for group in split_llm_language_batches(list(missing), languages_per_request(lemma))
+    ]
 
 
 class PopulateOutcome(NamedTuple):
@@ -130,6 +147,8 @@ class PopulateOutcome(NamedTuple):
     blank: List[str]
     #: Below the confidence floor: recorded in uncertain_llm_results instead.
     uncertain: List[str]
+    #: A person noun's gender_variant_status was written (pair or none).
+    gender_checked: List[str]
 
 
 def store_populated_translations(
@@ -154,6 +173,7 @@ def store_populated_translations(
         source,
         confidences=convert_llm_response_to_confidences(llm_response),
         model=model,
+        gender_answers=convert_llm_response_to_gender_answers(llm_response),
     )
 
 
@@ -167,6 +187,7 @@ def store_translations_by_language(
     confidences: Optional[Dict[str, Optional[float]]] = None,
     model: Optional[str] = None,
     replace_existing: bool = False,
+    gender_answers: Optional[Dict[str, GenderVariantAnswer]] = None,
 ) -> PopulateOutcome:
     """Write language-code-keyed translations for *languages*; the caller commits.
 
@@ -183,19 +204,34 @@ def store_translations_by_language(
     floor as uncertain.  A language absent from it -- an answer that was never
     asked to rate itself, such as a batch sent before the field existed, or a
     cached translation -- is stored as it is.
+
+    A person noun's *gender_answers* (male/female words, from the same
+    answer) are stored with the language's translation and gated on the same
+    confidence, through storage.crud.gender_variant, for a language never
+    checked -- including one whose translation was already present.
     """
-    outcome = PopulateOutcome([], [], [])
+    outcome = PopulateOutcome([], [], [], [])
     for language_code in languages:
         text = (texts.get(language_code) or "").strip()
         if not text:
             outcome.blank.append(language_code)
             continue
-        if not replace_existing and (get_translation(session, lemma, language_code) or "").strip():
-            continue
-        language_metadata = metadata.get(language_code, {})
         confidence: Optional[float] = None
         if confidences is not None and language_code in confidences:
             confidence = confidences[language_code] or 0.0
+        if not replace_existing and (get_translation(session, lemma, language_code) or "").strip():
+            _store_gender_answer(
+                session,
+                lemma,
+                language_code,
+                gender_answers,
+                source,
+                confidence,
+                model,
+                outcome,
+            )
+            continue
+        language_metadata = metadata.get(language_code, {})
         stored = store_llm_translation(
             session,
             lemma,
@@ -211,4 +247,46 @@ def store_translations_by_language(
             outcome.uncertain.append(language_code)
         else:
             outcome.written.append(language_code)
+            _store_gender_answer(
+                session,
+                lemma,
+                language_code,
+                gender_answers,
+                source,
+                confidence,
+                model,
+                outcome,
+            )
     return outcome
+
+
+def _store_gender_answer(
+    session: Session,
+    lemma: Lemma,
+    language_code: str,
+    gender_answers: Optional[Dict[str, GenderVariantAnswer]],
+    source: str,
+    confidence: Optional[float],
+    model: Optional[str],
+    outcome: PopulateOutcome,
+) -> None:
+    """Store one language's gender answer, if the response carried one.
+
+    Only an unchecked language is written, even when regenerating: replacing a
+    checked one would drop hand-curated variants and their audio.  Re-checking
+    is the backfill_gender_variants script's ``--replace``.
+    """
+    answer = (gender_answers or {}).get(language_code)
+    if answer is None or not asks_gender_variants(lemma):
+        return
+    status = store_gender_variant_answer(
+        session,
+        lemma,
+        language_code,
+        answer,
+        source,
+        confidence=confidence,
+        model=model,
+    )
+    if status is not None:
+        outcome.gender_checked.append(language_code)

@@ -20,6 +20,7 @@ from storage.crud.operation_log import (
     log_field_changes,
 )
 from storage.crud.word_token import add_word_token
+from storage.models.guid_prefixes import is_human_subtype
 from storage.models.schema import Lemma, WordToken
 from storage.models.variant_form import (
     GENDER_VARIANT_KEYS,
@@ -104,8 +105,10 @@ def add_variant_form(
         VariantForm: The created or updated row
     """
     if variant_kind == VARIANT_KIND_GENDER:
-        if lemma.pos_type != "noun" or variant_key not in GENDER_VARIANT_KEYS:
-            raise ValueError("Gender variants require a noun and a male/female key")
+        if not is_human_subtype(lemma.pos_type, lemma.pos_subtype):
+            raise ValueError("Gender variants require a person noun (a human subtype)")
+        if variant_key not in GENDER_VARIANT_KEYS:
+            raise ValueError("Gender variants require a male/female key")
 
     existing = (
         session.query(VariantForm)

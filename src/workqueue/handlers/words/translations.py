@@ -24,7 +24,6 @@ from storage.translation_helpers import (
     get_reference_translation,
     get_translation,
     normalize_llm_language_codes,
-    split_llm_language_batches,
 )
 from wordfreq.translation.client import LinguisticClient
 from words.translation_populate import (
@@ -88,7 +87,7 @@ def do_generate_missing_translations(
         debug=Config.DEBUG,
     )
     translations: Dict[str, Any] = {}
-    for language_batch in split_llm_language_batches(missing_languages):
+    for language_batch in populate_groups(missing_languages, lemma):
         batch_translations, success = client.query_translations(
             english_word=lemma.lemma_text,
             reference_translation=(
@@ -256,7 +255,7 @@ def translation_populate_states(
             continue
         states.extend(
             {"lemma_id": lemma.id, "languages": group, "retry_uncertain": retry_uncertain}
-            for group in populate_groups(missing)
+            for group in populate_groups(missing, lemma)
         )
     return states, complete
 
@@ -297,8 +296,11 @@ def _apply_populate(
         model=ctx.model,
     )
     uncertain = f"; uncertain: {', '.join(outcome.uncertain)}" if outcome.uncertain else ""
-    if outcome.written:
-        return Done("written", ", ".join(outcome.written) + uncertain)
+    gender = (
+        f"; gender checked: {', '.join(outcome.gender_checked)}" if outcome.gender_checked else ""
+    )
+    if outcome.written or outcome.gender_checked:
+        return Done("written", ", ".join(outcome.written) + gender + uncertain)
     if outcome.uncertain:
         return Done("rejected", f"below confidence: {', '.join(outcome.uncertain)}")
     if outcome.blank:

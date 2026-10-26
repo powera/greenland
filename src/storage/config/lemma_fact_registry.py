@@ -46,6 +46,17 @@ LEMMA_FACT_DEFINITIONS: Dict[str, LemmaFactDefinition] = {
         ),
         generatable=True,
     ),
+    "referent_gender": LemmaFactDefinition(
+        fact_type="referent_gender",
+        allowed_values=("male", "female"),
+        required_pos=("noun",),
+        display_label="Referent Gender",
+        description=(
+            "A person noun that itself names a man or a woman (boy, mother, husband). "
+            "Its counterpart is a separate lemma, so it has no male/female gender "
+            "variants; absent for every other noun."
+        ),
+    ),
     "numeral": LemmaFactDefinition(
         fact_type="numeral",
         allowed_values=(),

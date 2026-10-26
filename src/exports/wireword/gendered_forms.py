@@ -1,8 +1,9 @@
-"""Export explicitly curated gender counterparts without making them alternatives.
+"""Export person nouns' male/female words without making them alternatives.
 
 The ordinary translation is the unspecified default. Male and female variants
 have independent paradigms and grammatical genders; equal text does not merge
-entries. No kinship or spelling heuristic creates gender counterparts here.
+entries (a common-gender noun repeats its word). They come from the gender
+variant rows (storage.crud.gender_variant); nothing here infers any.
 """
 
 from typing import Any, Dict, List, Mapping, Optional, Sequence, Tuple
