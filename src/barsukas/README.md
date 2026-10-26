@@ -92,3 +92,20 @@ For behavior details beyond that:
 Use `src/barsukas/launch.sh`.
 
 (Operational/server setup instructions are intentionally maintained in a separate repo.)
+
+### Hosted query cache
+
+Golden, hosted, and scholar modes load the release JSONL into one disposable
+SQLite file per storage instance, in the system temporary directory. WAL and
+independent pooled connections let web requests read while the background loader
+writes, without sharing transactions. The cache is rebuilt on startup; it does
+not edit the curated database or the release files and needs writable temporary
+disk space. Initial table population commits every 1,000 rows, mechanical form
+generation every 100 lemmas, and corpus imports in 500-word batches.
+
+The scratch directory follows Python's `TMPDIR` setting. On hosts where `/tmp`
+is a RAM-backed `tmpfs`, set `TMPDIR` to an existing writable directory on local
+disk so the database does not consume its full file size in RAM. SQLite still
+caches pages (normally about 2 MiB per connection), the operating system can
+cache disk pages, and the JSONL backend retains its Python release objects;
+the file size is not the process's RAM requirement.

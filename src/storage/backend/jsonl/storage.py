@@ -79,6 +79,9 @@ class JSONLStorage(BaseStorage):
         # Cached SQLite engine (shared across sessions for read-only mode).
         # Populated once on first query, then reused for all subsequent sessions.
         self._sqlite_engine_lock = Lock()
+        # Keep the disposable query cache alive for this storage's lifetime.
+        # It is deliberately separate from the curated database/release tree.
+        self._sqlite_cache_dir: Optional[tempfile.TemporaryDirectory[str]] = None
         self._cached_sqlite_engine: Optional[Any] = None
         self._sqlite_populated = False
 

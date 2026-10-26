@@ -6,10 +6,38 @@ from threading import Barrier, Event
 from typing import Any
 from unittest.mock import patch
 
+import pytest
+from sqlalchemy import text
+from sqlalchemy.orm import Session
+
 from storage.backend import factory
 from storage.backend.config import BackendType, DataSourceConfig
 from storage.backend.jsonl.session import JSONLSession
 from storage.backend.jsonl.storage import JSONLStorage
+from storage.models.schema import Lemma, WordToken
+
+
+@pytest.mark.parametrize("reader_action", ["commit", "rollback", "close"])
+def test_reader_cannot_finish_writer_transaction(tmp_path: Path, reader_action: str) -> None:
+    storage = JSONLStorage(str(tmp_path))
+    storage.ensure_initialized()
+    warm = storage.create_session()
+    warm.query(Lemma).count()
+    warm.close()
+    engine = storage._cached_sqlite_engine
+    assert engine is not None
+    with Session(engine) as writer, Session(engine) as reader:
+        assert reader.query(WordToken).count() == 0
+        writer.add(WordToken(token="dog", language_code="en"))
+        writer.flush()
+        # Independent connections see only committed data, even during a write.
+        assert reader.query(WordToken).count() == 0
+        getattr(reader, reader_action)()
+        writer.commit()
+    with Session(engine) as check:
+        assert check.query(WordToken).count() == 1
+        assert check.execute(text("PRAGMA journal_mode")).scalar() == "wal"
+    engine.dispose()
 
 
 def test_concurrent_sessions_share_populated_engine(tmp_path: Path) -> None:

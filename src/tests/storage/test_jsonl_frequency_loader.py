@@ -89,6 +89,30 @@ class GoldenMechanicalFormsTest(unittest.TestCase):
         )
         return {row.grammatical_form: row.derivative_form_text for row in rows}
 
+    def test_completed_batches_survive_a_later_generation_failure(self) -> None:
+        from words import mechanical_forms
+
+        for index, word in enumerate(("dog", "cat", "book")):
+            self._noun(word, f"N99_{index:03}")
+        self.session.commit()
+        original = mechanical_forms.generate_lemma_forms
+        calls = 0
+
+        def fail_third(*args: Any, **kwargs: Any) -> dict[str, int]:
+            nonlocal calls
+            calls += 1
+            if calls == 3:
+                raise RuntimeError("interrupted")
+            return original(*args, **kwargs)
+
+        with mock.patch.object(mechanical_forms, "generate_lemma_forms", fail_third):
+            with self.assertRaisesRegex(RuntimeError, "interrupted"):
+                generate_for_session(self.session, languages=["en"], batch_size=2)
+        self.session.rollback()
+        self.assertEqual(self.session.query(DerivativeForm).count(), 8)
+        generate_for_session(self.session, languages=["en"], batch_size=2)
+        self.assertEqual(self.session.query(DerivativeForm).count(), 12)
+
     def test_a_fully_regular_noun_arrives_with_nothing(self) -> None:
         """The premise: the release withholds even "pharmacist"'s own spelling.
 

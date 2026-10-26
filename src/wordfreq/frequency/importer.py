@@ -225,6 +225,7 @@ def _delete_stale_annotations(session: Session, source_name: str, kept_token_ids
         session.query(ExternalLexemeAnnotation).filter(
             ExternalLexemeAnnotation.id.in_(chunk)
         ).delete(synchronize_session=False)
+        session.commit()
     session.commit()
     if stale_ids:
         logger.info(f"Deleted {len(stale_ids)} stale {source_name} annotations")
@@ -303,98 +304,110 @@ def import_frequency_as_annotations(
     try:
         bootstrap_tier_definitions(session, sources=[source_name])
 
-        word_texts = [w[0] for w in words_to_import]
+        inserted_count = 0
+        update_count = 0
+        links_inserted = 0
+        kept_token_ids: set[int] = set()
+        for start in range(0, len(words_to_import), 500):
+            batch = words_to_import[start : start + 500]
+            word_texts = [w[0] for w in batch]
 
-        existing_tokens = (
-            session.query(WordToken)
-            .filter(WordToken.token.in_(word_texts), WordToken.language_code == language_code)
-            .all()
-        )
-        token_map: Dict[str, WordToken] = {t.token: t for t in existing_tokens}
-
-        new_token_texts = [t for t in word_texts if t not in token_map]
-        if new_token_texts:
-            new_tokens = [WordToken(token=t, language_code=language_code) for t in new_token_texts]
-            session.bulk_save_objects(new_tokens, return_defaults=True)
-            session.commit()
-            newly_created = (
+            existing_tokens = (
                 session.query(WordToken)
+                .filter(WordToken.token.in_(word_texts), WordToken.language_code == language_code)
+                .all()
+            )
+            token_map: Dict[str, WordToken] = {t.token: t for t in existing_tokens}
+
+            new_token_texts = [t for t in word_texts if t not in token_map]
+            if new_token_texts:
+                new_tokens = [
+                    WordToken(token=t, language_code=language_code) for t in new_token_texts
+                ]
+                session.bulk_save_objects(new_tokens, return_defaults=True)
+                session.commit()
+                newly_created = (
+                    session.query(WordToken)
+                    .filter(
+                        WordToken.token.in_(new_token_texts),
+                        WordToken.language_code == language_code,
+                    )
+                    .all()
+                )
+                for t in newly_created:
+                    token_map[t.token] = t
+
+            token_ids = [token_map[w].id for w, _ in batch if w in token_map]
+            existing_annotations = (
+                session.query(ExternalLexemeAnnotation)
                 .filter(
-                    WordToken.token.in_(new_token_texts),
-                    WordToken.language_code == language_code,
+                    ExternalLexemeAnnotation.word_token_id.in_(token_ids),
+                    ExternalLexemeAnnotation.source == source_name,
+                    ExternalLexemeAnnotation.pos_hint.is_(None),
+                    ExternalLexemeAnnotation.sense_hint.is_(None),
                 )
                 .all()
             )
-            for t in newly_created:
-                token_map[t.token] = t
+            annotation_map: Dict[int, ExternalLexemeAnnotation] = {
+                a.word_token_id: a for a in existing_annotations
+            }
 
-        token_ids = [token_map[w].id for w, _ in words_to_import if w in token_map]
-        existing_annotations = (
-            session.query(ExternalLexemeAnnotation)
-            .filter(
-                ExternalLexemeAnnotation.word_token_id.in_(token_ids),
-                ExternalLexemeAnnotation.source == source_name,
-                ExternalLexemeAnnotation.pos_hint.is_(None),
-                ExternalLexemeAnnotation.sense_hint.is_(None),
-            )
-            .all()
-        )
-        annotation_map: Dict[int, ExternalLexemeAnnotation] = {
-            a.word_token_id: a for a in existing_annotations
-        }
+            new_rows: List[ExternalLexemeAnnotation] = []
 
-        new_rows: List[ExternalLexemeAnnotation] = []
-        update_count = 0
-
-        for word_text, data in words_to_import:
-            token = token_map.get(word_text)
-            if token is None:
-                logger.warning(f"Token missing after batch create: {word_text}")
-                continue
-            rank_value = data.get("rank")
-            freq_value = data.get("frequency")
-            ordinal_rank: Optional[int] = int(rank_value) if rank_value is not None else None
-            frequency_val: Optional[float] = float(freq_value) if freq_value is not None else None
-            tier_name = rank_to_wordfreq_tier_name(ordinal_rank)
-
-            existing = annotation_map.get(token.id)
-            if existing is None:
-                new_rows.append(
-                    ExternalLexemeAnnotation(
-                        word_token_id=token.id,
-                        source=source_name,
-                        tier_name=tier_name,
-                        ordinal_rank=ordinal_rank,
-                        frequency=frequency_val,
-                        notes=notes_payload,
-                    )
+            for word_text, data in batch:
+                token = token_map.get(word_text)
+                if token is None:
+                    logger.warning(f"Token missing after batch create: {word_text}")
+                    continue
+                rank_value = data.get("rank")
+                freq_value = data.get("frequency")
+                ordinal_rank: Optional[int] = int(rank_value) if rank_value is not None else None
+                frequency_val: Optional[float] = (
+                    float(freq_value) if freq_value is not None else None
                 )
-            else:
-                existing.tier_name = tier_name
-                existing.ordinal_rank = ordinal_rank
-                existing.frequency = frequency_val
-                existing.notes = notes_payload
-                update_count += 1
+                tier_name = rank_to_wordfreq_tier_name(ordinal_rank)
 
-        if new_rows:
-            session.bulk_save_objects(new_rows)
-        session.commit()
+                existing = annotation_map.get(token.id)
+                if existing is None:
+                    new_rows.append(
+                        ExternalLexemeAnnotation(
+                            word_token_id=token.id,
+                            source=source_name,
+                            tier_name=tier_name,
+                            ordinal_rank=ordinal_rank,
+                            frequency=frequency_val,
+                            notes=notes_payload,
+                        )
+                    )
+                else:
+                    existing.tier_name = tier_name
+                    existing.ordinal_rank = ordinal_rank
+                    existing.frequency = frequency_val
+                    existing.notes = notes_payload
+                    update_count += 1
 
-        stale_deleted = _delete_stale_annotations(session, source_name, set(token_ids))
+            if new_rows:
+                session.bulk_save_objects(new_rows)
+            session.commit()
 
-        links_inserted = _link_wordfreq_annotations_to_lemmas(
-            session=session,
-            source_name=source_name,
-            language_code=language_code,
-            tokens=list(token_map.values()),
-        )
+            inserted_count += len(new_rows)
+            kept_token_ids.update(token_ids)
+            links_inserted += _link_wordfreq_annotations_to_lemmas(
+                session=session,
+                source_name=source_name,
+                language_code=language_code,
+                tokens=list(token_map.values()),
+            )
+            session.commit()
+
+        stale_deleted = _delete_stale_annotations(session, source_name, kept_token_ids)
 
         logger.info(
             f"Annotation import complete for {corpus_name}: "
-            f"{len(new_rows)} created, {update_count} updated, "
+            f"{inserted_count} created, {update_count} updated, "
             f"{stale_deleted} stale deleted, {links_inserted} lemma links inserted"
         )
-        return (len(new_rows) + update_count, total_count)
+        return (inserted_count + update_count, total_count)
     except Exception as e:
         logger.error(f"Error importing annotations for {corpus_name}: {e}")
         session.rollback()
