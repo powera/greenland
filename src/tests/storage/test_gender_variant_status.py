@@ -17,13 +17,14 @@ from storage.crud.gender_variant import (
 from storage.crud.uncertain_llm_result import get_uncertain_llm_result
 from storage.crud.variant_form import add_variant_form
 from storage.models.guid_prefixes import human_subtypes, is_human_subtype
-from storage.models.schema import Base, Lemma
+from storage.models.schema import AudioQualityReview, Base, Lemma
 from storage.models.variant_form import (
     GENDER_VARIANT_STATUS_FACT,
     VARIANT_KIND_GENDER,
     VariantForm,
 )
 from storage.translation_helpers import set_translation
+from storage.variant_audio import gender_audio_slot
 from words.translation_populate import store_populated_translations
 
 SOURCE = "test/gender-variant-status"
@@ -307,3 +308,91 @@ def test_common_gender_in_an_ungendered_language_is_none(session: Session) -> No
     answer = GenderVariantAnswer("tailor", "tailor", "masculine", "feminine")
     assert store_gender_variant_answer(session, tailor, "en", answer, SOURCE) == "none"
     assert _rows(session, tailor, "en") == {}
+
+
+def _recording(
+    session: Session, lemma: Lemma, language: str, slot: str, text: str
+) -> AudioQualityReview:
+    audio = AudioQualityReview(
+        guid=lemma.guid,
+        lemma_id=lemma.id,
+        language_code=language,
+        voice_name="coral",
+        grammatical_form=slot,
+        filename=f"{text}.mp3",
+        expected_text=text,
+        manifest_md5=f"md5-{text}",
+        status="approved",
+        s3_prod_url=f"https://example.invalid/{text}.mp3",
+    )
+    session.add(audio)
+    session.flush()
+    return audio
+
+
+def test_replacing_a_word_invalidates_only_its_recordings(session: Session) -> None:
+    actor = _lemma(session, "N36_047", "actor", "occupation")
+    store_gender_variant_answer(
+        session, actor, "es", GenderVariantAnswer("actor", "actriz"), SOURCE
+    )
+    male = _recording(session, actor, "es", gender_audio_slot("male", "noun/es_singular"), "actor")
+    female = _recording(
+        session, actor, "es", gender_audio_slot("female", "noun/es_singular"), "actriz"
+    )
+    female_base = _recording(session, actor, "es", gender_audio_slot("female"), "actriz")
+
+    answer = GenderVariantAnswer("actor", "intérprete", "masculine", "feminine")
+    assert (
+        store_gender_variant_answer(session, actor, "es", answer, SOURCE, replace_existing=True)
+        == "pair"
+    )
+    assert _rows(session, actor, "es")["female"] == ("intérprete", "feminine")
+    assert female.status == "needs_replacement" and female_base.status == "needs_replacement"
+    assert "translation_mismatch" in (female.quality_issues or "")
+    # The unchanged male word keeps its row and its recording.
+    assert male.status == "approved"
+
+
+def test_removing_a_pair_invalidates_its_recordings(session: Session) -> None:
+    cousin = _lemma(session, "N35_076", "cousin", "family_relation")
+    store_gender_variant_answer(
+        session, cousin, "ja", GenderVariantAnswer("いとこ", "従姉妹"), SOURCE
+    )
+    audio = _recording(session, cousin, "ja", gender_audio_slot("female"), "従姉妹")
+    store_gender_variant_answer(
+        session, cousin, "ja", GenderVariantAnswer(), SOURCE, replace_existing=True
+    )
+    assert audio.status == "needs_replacement"
+
+
+def test_changing_one_form_invalidates_only_that_recording(session: Session) -> None:
+    actor = _lemma(session, "N36_047", "actor", "occupation")
+    store_gender_variant_answer(
+        session, actor, "es", GenderVariantAnswer("actor", "actriz"), SOURCE
+    )
+    plural = _recording(
+        session, actor, "es", gender_audio_slot("female", "noun/es_plural"), "actrizes"
+    )
+    base = _recording(session, actor, "es", gender_audio_slot("female"), "actriz")
+    add_variant_form(
+        session,
+        actor,
+        "actrizes",
+        "es",
+        "female",
+        "noun/es_plural",
+        variant_kind=VARIANT_KIND_GENDER,
+        link_word_token=False,
+    )
+    add_variant_form(
+        session,
+        actor,
+        "actrices",
+        "es",
+        "female",
+        "noun/es_plural",
+        variant_kind=VARIANT_KIND_GENDER,
+        link_word_token=False,
+    )
+    assert plural.status == "needs_replacement"
+    assert base.status == "approved"

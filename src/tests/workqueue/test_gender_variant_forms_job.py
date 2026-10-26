@@ -126,3 +126,38 @@ def test_uncertain_paradigm_is_skipped_until_retried(session: Session, actor: Le
     assert ("es", "male") not in keys
     retried = gender_variant_form_states(session, [actor], ["es"], retry_uncertain=True)
     assert ("es", "male") in {(s["language_code"], s["variant_key"]) for s in retried}
+
+
+def _person(session: Session, guid: str, word: str) -> Lemma:
+    lemma = Lemma(
+        guid=guid,
+        lemma_text=word,
+        definition_text=f"A {word}.",
+        pos_type="noun",
+        pos_subtype="occupation",
+    )
+    session.add(lemma)
+    session.flush()
+    return lemma
+
+
+@pytest.mark.parametrize("word", ["fisherwoman", "businessman", "Polish woman", "chairperson"])
+def test_english_counterparts_with_irregular_heads_go_to_the_model(
+    session: Session, word: str
+) -> None:
+    lemma = _person(session, "N36_050", "fisherman")
+    store_gender_variant_answer(session, lemma, "en", GenderVariantAnswer("fisher", word), "test")
+    state = {"lemma_id": lemma.id, "language_code": "en", "variant_key": "female"}
+    assert isinstance(STAGE.prepare(session, state, CTX), LLMCall)
+
+
+def test_english_counterpart_of_an_irregular_lemma_goes_to_the_model(session: Session) -> None:
+    from storage.crud.grammar_fact import add_grammar_fact
+
+    lemma = _person(session, "N36_999", "alumnus")
+    add_grammar_fact(session, lemma.id, "en", "plural", "alumni")
+    store_gender_variant_answer(
+        session, lemma, "en", GenderVariantAnswer("alumnus", "alumna"), "test"
+    )
+    state = {"lemma_id": lemma.id, "language_code": "en", "variant_key": "female"}
+    assert isinstance(STAGE.prepare(session, state, CTX), LLMCall)

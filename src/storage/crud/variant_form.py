@@ -22,6 +22,7 @@ from storage.crud.operation_log import (
 from storage.crud.word_token import add_word_token
 from storage.models.guid_prefixes import is_human_subtype
 from storage.models.schema import Lemma, WordToken
+from storage.variant_audio import invalidate_gender_variant_audio
 from storage.models.variant_form import (
     GENDER_VARIANT_KEYS,
     VARIANT_KIND_GENDER,
@@ -155,6 +156,16 @@ def add_variant_form(
                 FieldChange("grammatical_gender", existing.grammatical_gender, grammatical_gender)
             )
 
+        if variant_kind == VARIANT_KIND_GENDER and existing.variant_form_text != variant_form_text:
+            # A new word under the same stable audio key: the old recording no
+            # longer says it.  A new base word changes the whole paradigm.
+            invalidate_gender_variant_audio(
+                session,
+                lemma.guid,
+                language_code,
+                variant_key,
+                None if (is_base_form or existing.is_base_form) else grammatical_form,
+            )
         existing.variant_form_text = variant_form_text
         existing.is_base_form = is_base_form
         if resolved_token is not None:
@@ -333,6 +344,9 @@ def delete_variant(
         )
         .delete(synchronize_session=False)
     )
+    if deleted and variant_kind == VARIANT_KIND_GENDER:
+        # Its recordings stay keyed to the slot a later variant would reuse.
+        invalidate_gender_variant_audio(session, lemma.guid, language_code, variant_key)
     session.flush()
 
     # One entry for the paradigm rather than one per form: "the grey variant

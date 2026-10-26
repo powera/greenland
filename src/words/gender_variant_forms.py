@@ -129,15 +129,32 @@ def gender_variant_form_states(
     return states
 
 
+# Final words whose English plural the spelling rules get wrong (fishermans,
+# childs), or get right only by luck (German/Germans vs Englishman/Englishmen).
+IRREGULAR_PLURAL_HEADS = ("man", "child", "person", "wife", "life", "self")
+
+
+def _may_have_irregular_plural(word: str) -> bool:
+    head = word.strip().lower().split()[-1] if word.strip() else ""
+    return any(head.endswith(ending) for ending in IRREGULAR_PLURAL_HEADS)
+
+
 def mechanical_variant_forms(
     session: Session, lemma: Lemma, language_code: str, word: str
 ) -> Optional[Dict[str, str]]:
     """A paradigm built without a model, or None to ask one.
 
-    English only.  Countability is a property of the concept, so the lemma's
-    is used; its irregular plural belongs to the default word and is not.
+    English only, and only for a word the spelling rules can be trusted with.
+    build_noun_forms is exact only given the word's own irregular plural, which
+    is a stored fact about the lemma's default word ("fishermen"), not about
+    its counterpart ("fisherwoman").  So a counterpart that may be irregular,
+    or one whose lemma's own plural is irregular, goes to the model, whose
+    answer is gated on confidence.  Countability is a property of the concept,
+    so the lemma's is used.
     """
-    if language_code != "en":
+    if language_code != "en" or _may_have_irregular_plural(word):
+        return None
+    if get_grammar_fact_value(session, lemma.id, "en", "plural"):
         return None
     countability = get_grammar_fact_value(session, lemma.id, "en", "countability")
     return build_noun_forms(word, countability=countability)

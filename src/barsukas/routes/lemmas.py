@@ -49,7 +49,8 @@ from storage.models.schema import (
     LemmaTranslation,
 )
 from storage.models.guid_tombstone import TOMBSTONE_REASON_MANUAL_CORRECTION
-from storage.models.variant_form import VARIANT_KIND_SPELLING, VariantForm
+from storage.models.variant_form import VARIANT_KIND_GENDER, VARIANT_KIND_SPELLING, VariantForm
+from storage.variant_audio import invalidate_gender_variant_audio
 from storage.queries.lemma import build_lemma_search_query
 from words.emoji import (
     EmojiConflictError,
@@ -1267,6 +1268,15 @@ def delete_variant_form(lemma_id: int, form_id: int) -> ResponseReturnValue:
         },
         lemma_id=lemma_id,
     )
+    if form.variant_kind == VARIANT_KIND_GENDER:
+        # Its recording stays under a key a later form would reuse.
+        invalidate_gender_variant_audio(
+            g.db,
+            form.lemma.guid,
+            form.language_code,
+            form.variant_key,
+            None if form.is_base_form else form.grammatical_form,
+        )
     g.db.delete(form)
     g.db.commit()
 

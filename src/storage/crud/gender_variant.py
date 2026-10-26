@@ -258,6 +258,23 @@ def asks_gender_variants(lemma: Lemma) -> bool:
     return is_human_subtype(lemma.pos_type, lemma.pos_subtype) and referent_gender(lemma) is None
 
 
+def _variant_base_word(
+    session: Session, lemma_id: int, language_code: str, variant_key: str
+) -> Optional[str]:
+    row = (
+        session.query(VariantForm)
+        .filter(
+            VariantForm.lemma_id == lemma_id,
+            VariantForm.language_code == language_code,
+            VariantForm.variant_kind == VARIANT_KIND_GENDER,
+            VariantForm.variant_key == variant_key,
+            VariantForm.is_base_form.is_(True),
+        )
+        .first()
+    )
+    return row.variant_form_text if row is not None else None
+
+
 def needs_gender_variant_check(session: Session, lemma: Lemma, language_code: str) -> bool:
     """Whether a person noun's language has neither a status nor variant rows.
 
@@ -336,7 +353,14 @@ def store_gender_variant_answer(
         return None
 
     if replace_existing:
-        for key in (GENDER_VARIANT_MALE, GENDER_VARIANT_FEMALE):
+        new_words = {GENDER_VARIANT_MALE: answer.male, GENDER_VARIANT_FEMALE: answer.female}
+        for key, new_word in new_words.items():
+            # A variant keeping its word keeps its paradigm and recordings;
+            # one whose word changed or went away is removed, and with it the
+            # recordings under its audio keys (storage.variant_audio).
+            current = _variant_base_word(session, lemma.id, language_code, key)
+            if current is not None and answer.is_pair and current == new_word.strip():
+                continue
             delete_variant(
                 session, lemma, key, language_code, variant_kind=VARIANT_KIND_GENDER, source=source
             )
