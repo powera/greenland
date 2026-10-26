@@ -7,10 +7,15 @@ roll back, or close it; the caller decides the transaction boundary.
 import logging
 from typing import Any, Dict, List
 
+from sqlalchemy import or_
 from sqlalchemy.orm import Session
 
-import constants
-from storage.models.schema import Lemma, Sentence, SentenceTranslation, SentenceWordHint
+from storage.crud.sentence import (
+    EXAMPLE_SENTENCE_COLLECTION,
+    sentence_level_from_word_levels,
+    sentence_word_levels,
+)
+from storage.models.schema import Sentence, SentenceTranslation
 
 logger = logging.getLogger(__name__)
 
@@ -23,31 +28,25 @@ def period_for_language(language_code: str) -> str:
 def check_sentence_levels(session: Session, *, fix: bool = False) -> Dict[str, Any]:
     """Find sentence minimum levels that disagree with linked word levels."""
     try:
-        sentences = session.query(Sentence).filter(Sentence.rejected == False).all()  # noqa: E712
+        sentences = (
+            session.query(Sentence)
+            .filter(Sentence.rejected == False)  # noqa: E712
+            # add_word's examples are deliberately unlevelled.
+            .filter(
+                or_(
+                    Sentence.sentence_collection.is_(None),
+                    Sentence.sentence_collection != EXAMPLE_SENTENCE_COLLECTION,
+                )
+            )
+            .all()
+        )
         issues: List[Dict[str, Any]] = []
         fixed_count = 0
         for sentence in sentences:
-            word_hints = (
-                session.query(SentenceWordHint, Lemma)
-                .join(Lemma, SentenceWordHint.lemma_id == Lemma.id)
-                .filter(SentenceWordHint.sentence_id == sentence.id)
-                .all()
-            )
-            difficulty_levels = [
-                (
-                    constants.MAX_DIFFICULTY_LEVEL + 1
-                    if lemma.difficulty_level == constants.EXCLUDE_DIFFICULTY_LEVEL
-                    else lemma.difficulty_level
-                )
-                for _word_hint, lemma in word_hints
-                if lemma.difficulty_level is not None
-            ]
-            if not difficulty_levels:
+            difficulty_levels = sorted(sentence_word_levels(session, sentence.id), reverse=True)
+            expected_level = sentence_level_from_word_levels(difficulty_levels)
+            if expected_level is None:
                 continue
-            difficulty_levels.sort(reverse=True)
-            expected_level = (
-                difficulty_levels[1] if len(difficulty_levels) >= 3 else difficulty_levels[0]
-            )
             if sentence.minimum_level == expected_level:
                 continue
             issues.append(

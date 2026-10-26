@@ -1,10 +1,11 @@
 """CRUD operations for Sentence model."""
 
-from typing import Dict, List, Optional, Tuple, cast
+from typing import Dict, List, Optional, Sequence, Tuple, cast
 
 from sqlalchemy import func
 from sqlalchemy.orm import Session, joinedload
 
+import constants
 from storage.crud.operation_log import (
     SENTENCE_CREATE,
     SENTENCE_DELETE,
@@ -21,8 +22,80 @@ from storage.models.schema import (
     Sentence,
     SentenceTranslation,
     SentenceWord,
+    SentenceWordHint,
 )
 from storage.utils.guid import next_sequence_number
+
+# Collection tag for the example sentences add_word stores (see
+# words.lemma_creation.store_sense_examples). They illustrate one sense and were
+# never placed in the curriculum, so they are deliberately left without a level.
+EXAMPLE_SENTENCE_COLLECTION = "llm_word_examples"
+
+# A sentence with at least this many distinct lemmas is levelled by its
+# second-hardest word rather than its hardest: one unfamiliar word can be
+# understood from context.  Counted in lemmas, so function words (pronouns,
+# articles, prepositions) do not count - "She drinks cold milk" has three.
+CONTEXT_WORD_MIN_LEMMAS = 3
+
+
+def sentence_level_from_word_levels(word_levels: Sequence[int]) -> Optional[int]:
+    """Return a sentence's level from the levels of its distinct lemmas.
+
+    The hardest word sets the level, unless the sentence has
+    CONTEXT_WORD_MIN_LEMMAS or more lemmas, in which case the second-hardest
+    does.  Returns None for an empty list.
+    """
+    if not word_levels:
+        return None
+    ordered = sorted(word_levels, reverse=True)
+    if len(ordered) >= CONTEXT_WORD_MIN_LEMMAS:
+        return ordered[1]
+    return ordered[0]
+
+
+def lemma_level_for_sentence(difficulty_level: Optional[int]) -> Optional[int]:
+    """Map a lemma's difficulty_level to the value used in sentence levelling.
+
+    An excluded lemma (-1) counts as harder than every level, so it never lets
+    a sentence ship early; an unset level is ignored (None).
+    """
+    if difficulty_level is None:
+        return None
+    if difficulty_level == constants.EXCLUDE_DIFFICULTY_LEVEL:
+        return constants.MAX_DIFFICULTY_LEVEL + 1
+    return difficulty_level
+
+
+def sentence_word_levels(session: Session, sentence_id: int) -> List[int]:
+    """Return the levels of the distinct lemmas a sentence uses.
+
+    SentenceWord (the parsed per-position breakdown) is authoritative; a
+    sentence that has not been parsed falls back to its SentenceWordHint rows.
+    Lemmas are de-duplicated, since SentenceWord carries one row per language.
+    """
+    lemma_ids = {
+        lemma_id
+        for (lemma_id,) in session.query(SentenceWord.lemma_id)
+        .filter(SentenceWord.sentence_id == sentence_id, SentenceWord.lemma_id.isnot(None))
+        .all()
+    }
+    if not lemma_ids:
+        lemma_ids = {
+            lemma_id
+            for (lemma_id,) in session.query(SentenceWordHint.lemma_id)
+            .filter(SentenceWordHint.sentence_id == sentence_id)
+            .all()
+        }
+    if not lemma_ids:
+        return []
+    levels = []
+    for (difficulty_level,) in (
+        session.query(Lemma.difficulty_level).filter(Lemma.id.in_(lemma_ids)).all()
+    ):
+        level = lemma_level_for_sentence(difficulty_level)
+        if level is not None:
+            levels.append(level)
+    return levels
 
 
 def next_sentence_guid(session: Session) -> str:
@@ -159,8 +232,8 @@ def get_sentences_by_level(
 def calculate_minimum_level(session: Session, sentence: Sentence) -> Optional[int]:
     """Calculate and update the minimum difficulty level for a sentence.
 
-    The minimum level is the maximum difficulty of all words (lemmas) used
-    in the sentence. This ensures learners know all words before seeing the sentence.
+    See sentence_level_from_word_levels for the rule and sentence_word_levels
+    for which words count.
 
     Args:
         session: Database session
@@ -169,27 +242,9 @@ def calculate_minimum_level(session: Session, sentence: Sentence) -> Optional[in
     Returns:
         Calculated minimum level, or None if no words have levels
     """
-    # Get all words for this sentence that have associated lemmas
-    words_with_lemmas = (
-        session.query(SentenceWord)
-        .filter(SentenceWord.sentence_id == sentence.id, SentenceWord.lemma_id.isnot(None))
-        .options(joinedload(SentenceWord.lemma))
-        .all()
-    )
-
-    if not words_with_lemmas:
-        sentence.minimum_level = None
-        return None
-
-    # Find the maximum difficulty level among all lemmas
-    max_level = None
-    for word in words_with_lemmas:
-        if word.lemma and word.lemma.difficulty_level is not None:
-            if max_level is None or word.lemma.difficulty_level > max_level:
-                max_level = word.lemma.difficulty_level
-
-    sentence.minimum_level = max_level
-    return max_level
+    level = sentence_level_from_word_levels(sentence_word_levels(session, sentence.id))
+    sentence.minimum_level = level
+    return level
 
 
 def update_sentence(

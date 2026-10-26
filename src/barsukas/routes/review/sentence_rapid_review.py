@@ -21,12 +21,8 @@ from sqlalchemy import and_, case, or_
 from sqlalchemy.orm import Query
 
 from langtools.zh.pinyin_helper import generate_pinyin
-from storage.models.schema import (
-    Lemma,
-    Sentence,
-    SentenceTranslation,
-    SentenceWord,
-)
+from storage.crud.sentence import sentence_level_from_word_levels, sentence_word_levels
+from storage.models.schema import Sentence, SentenceTranslation
 
 bp = Blueprint("sentence_rapid_review", __name__, url_prefix="/sentences/rapid-review")
 
@@ -43,38 +39,13 @@ def get_sentence_translations(sentence_id: int) -> Dict[str, str]:
 
 
 def calculate_sentence_minimum_level(sentence_id: int) -> int:
-    """Calculate minimum_level for a sentence based on its word difficulty levels.
+    """Calculate minimum_level for a sentence from its word difficulty levels.
 
-    Returns the max difficulty level of all linked lemmas, or -1 if:
-    - No words are linked to lemmas
-    - Any linked lemma has difficulty_level = -1 or NULL
-
-    Args:
-        sentence_id: The sentence ID to calculate level for
-
-    Returns:
-        Calculated minimum level, or -1 as fallback
+    Uses the shared rule in storage.crud.sentence; returns -1 when no linked
+    word has a level.
     """
-    # Get all words for this sentence that have linked lemmas
-    words_with_lemmas = (
-        g.db.query(SentenceWord, Lemma)
-        .join(Lemma, SentenceWord.lemma_id == Lemma.id)
-        .filter(SentenceWord.sentence_id == sentence_id)
-        .all()
-    )
-
-    if not words_with_lemmas:
-        return -1
-
-    max_level = -1
-    for word, lemma in words_with_lemmas:
-        if lemma.difficulty_level is None or lemma.difficulty_level == -1:
-            # Any unset or -1 level means the sentence level should be -1
-            return -1
-        if lemma.difficulty_level > max_level:
-            max_level = lemma.difficulty_level
-
-    return max_level if max_level > 0 else -1
+    level = sentence_level_from_word_levels(sentence_word_levels(g.db, sentence_id))
+    return level if level is not None else -1
 
 
 def build_sentence_query(

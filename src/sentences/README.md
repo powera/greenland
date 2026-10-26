@@ -6,8 +6,12 @@ entry points and work finders.
 
 ## Generation and translation
 
-- `generation.py` coordinates general LLM and vocabulary-guided examples;
-  `llm_generation.py` and `guided_generation.py` implement them.
+- `generation.py` coordinates general LLM, vocabulary-guided, and simple
+  examples; `llm_generation.py`, `guided_generation.py`, and
+  `simple_generation.py` implement them.  Simple sentences (`--mode simple`)
+  are the A1 set: two per level 1-10 noun, verb, and adjective, each levelled
+  with the shared rule in `storage.crud.sentence` and kept only at level 10 or
+  below.
 - Mechanical runtime practice belongs to `langtools.sentence_patterns`;
   `pattern_pools.py` loads vocabulary and `pattern_coverage.py` audits coverage.
   See `docs/sentence_patterns.md`. These sentences never use buivolas, an LLM,

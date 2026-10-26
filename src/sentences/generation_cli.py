@@ -16,6 +16,12 @@ if GREENLAND_SRC_PATH not in sys.path:
     sys.path.insert(0, GREENLAND_SRC_PATH)
 
 from sentences.generation import SentenceGenerationService
+from sentences.simple_generation import (
+    SIMPLE_MAX_LEVEL,
+    SIMPLE_POS_TYPES,
+    SIMPLE_SENTENCES_PER_LEMMA,
+    simple_sentence_counts,
+)
 from agents.common.common_args import (
     add_backend_args,
     add_common_args,
@@ -48,6 +54,9 @@ Examples:
 
   # Generate guided sentences for all lemmas at a difficulty level
   python -m agents.buivolas --task generate-sentences --mode guided --level 3 --num-sentences 5 --limit 10
+
+  # Fill every level 1-10 noun/verb/adjective up to two simple (A1) sentences
+  python -m agents.buivolas --task generate-sentences --mode simple
         """,
     )
 
@@ -67,8 +76,12 @@ Examples:
     # Arguments for generate-sentences task
     parser.add_argument(
         "--mode",
-        choices=["llm", "guided"],
-        help="Sentence generation mode: llm (basic), guided (vocabulary-aware)",
+        choices=["llm", "guided", "simple"],
+        help=(
+            "Sentence generation mode: llm (basic), guided (vocabulary-aware), "
+            f"simple ({SIMPLE_SENTENCES_PER_LEMMA} A1 sentences per word; without --guid or "
+            f"--level, every level 1-{SIMPLE_MAX_LEVEL} word still short of them)"
+        ),
     )
     parser.add_argument(
         "--num-sentences",
@@ -133,11 +146,87 @@ def _get_llm_lemmas(service: SentenceGenerationService, args: argparse.Namespace
     return lemmas
 
 
+def _get_simple_lemmas(service: SentenceGenerationService, args: argparse.Namespace) -> list[Lemma]:
+    """Lemmas still short of SIMPLE_SENTENCES_PER_LEMMA simple sentences.
+
+    --guid or --level narrow the search; otherwise every curated level
+    1..SIMPLE_MAX_LEVEL noun, verb, and adjective is considered.
+    """
+    if args.guid or args.level:
+        candidates = [
+            lemma for lemma in _get_llm_lemmas(service, args) if lemma.pos_type in SIMPLE_POS_TYPES
+        ]
+    else:
+        from words.lemma_selection import LemmaQueryBuilder
+
+        session = service.get_session()
+        try:
+            candidates = (
+                LemmaQueryBuilder(session)
+                .curated_only()
+                .by_level_range(1, SIMPLE_MAX_LEVEL)
+                .filter_custom(lambda q: q.filter(Lemma.pos_type.in_(SIMPLE_POS_TYPES)))
+                .order_by_id()
+                .build()
+                .all()
+            )
+        finally:
+            session.close()
+
+    session = service.get_session()
+    try:
+        counts = simple_sentence_counts(session)
+    finally:
+        session.close()
+    lemmas = [
+        lemma
+        for lemma in candidates
+        if lemma.guid and counts.get(lemma.guid, 0) < SIMPLE_SENTENCES_PER_LEMMA
+    ]
+    return lemmas[: args.limit] if args.limit else lemmas
+
+
+def _run_simple_inline(service: SentenceGenerationService, args: argparse.Namespace) -> int:
+    """Generate simple sentences in-process (debugging / one-off runs)."""
+    lemmas = _get_simple_lemmas(service, args)
+    if not lemmas:
+        logger.info("No lemmas need simple sentences")
+        return 0
+    total_stored = 0
+    total_failed = 0
+    for index, lemma in enumerate(lemmas, 1):
+        logger.info("[%s/%s] %s (%s)", index, len(lemmas), lemma.lemma_text, lemma.guid)
+        session = service.get_session()
+        try:
+            session_lemma = session.get(Lemma, lemma.id)
+            result = service.simple_generator.generate_and_store(session, session_lemma)
+        finally:
+            session.close()
+        if result.get("skipped"):
+            logger.info("Skipped: %s", result.get("reason"))
+        elif not result.get("success"):
+            logger.error("Generation failed: %s", result.get("error"))
+            total_failed += 1
+        else:
+            total_stored += result.get("storage", {}).get("stored", 0)
+    logger.info(
+        "Simple sentences: %s lemmas, %s stored%s, %s failed",
+        len(lemmas),
+        total_stored,
+        " (dry run)" if args.dry_run else "",
+        total_failed,
+    )
+    return 1 if total_failed else 0
+
+
 def enqueue_generation_work(service: SentenceGenerationService, args: argparse.Namespace) -> int:
     """Discover sentence-generation work and enqueue capability-named tasks."""
     session = service.get_session()
     try:
-        lemmas = _get_llm_lemmas(service, args)
+        if args.mode == "simple":
+            lemmas = _get_simple_lemmas(service, args)
+        else:
+            lemmas = _get_llm_lemmas(service, args)
         if not lemmas:
             logger.error("No supported lemmas found for sentence generation")
             return 1
@@ -179,13 +268,16 @@ def main() -> int:
     args = parser.parse_args()
 
     if not args.mode:
-        parser.error("generate-sentences requires --mode (llm or guided)")
+        parser.error("generate-sentences requires --mode (llm, guided, or simple)")
 
     config = get_data_source_config(args)
     service = SentenceGenerationService(config=config, dry_run=args.dry_run)
 
     if not args.execute_inline:
         return enqueue_generation_work(service, args)
+
+    if args.mode == "simple":
+        return _run_simple_inline(service, args)
 
     if args.task == "generate-sentences":
         if args.mode == "guided":

@@ -1,0 +1,16 @@
+Write {num_sentences} simple A1-level English sentences that each use the word "{word}".
+
+Word: {word}
+Definition: {definition}
+Part of speech: {pos_type}
+{extra_context}
+
+{vocabulary_section}
+
+{previous_sentences}
+
+Requirements:
+1. Each sentence MUST use "{word}" (or an inflected form such as a plural or past tense) with the meaning in the definition above
+2. 4-7 words, one clause, present simple or simple past
+3. Each sentence has a different subject, verb, and situation
+4. Natural: something a person would actually say

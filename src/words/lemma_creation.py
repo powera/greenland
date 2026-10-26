@@ -22,7 +22,7 @@ from sqlalchemy.orm import Session
 
 from storage.crud.derivative_form import add_derivative_form
 from storage.crud.operation_log import log_translation_change
-from storage.crud.sentence import add_sentence
+from storage.crud.sentence import EXAMPLE_SENTENCE_COLLECTION, add_sentence
 from storage.crud.sentence_translation import add_sentence_translation
 from storage.crud.uncertain_llm_result import LLMQuestion, confidence_gated
 from langtools.en.base_forms import en_base_form
@@ -44,14 +44,14 @@ UNSET_DIFFICULTY_LEVEL = -1
 # is created so no second LLM call is needed for them.
 TRANSLATION_LANGUAGES: Tuple[str, ...] = DEFINITIONS_PROMPT_LANGUAGES
 
-# Collection tag for the example sentences the definitions call returns. These
-# are not teaching material: the model wrote them to illustrate one sense of one
-# word, nobody chose them for a curriculum, and they carry no translations. The
-# tag keeps them separable from sentences that were authored as lessons, so a
-# level rollup or an export can exclude them. They are stored with
-# ``minimum_level`` unset for the same reason -- a difficulty would imply they
-# had been placed in the curriculum.
-EXAMPLE_SENTENCE_COLLECTION = "llm_word_examples"
+# EXAMPLE_SENTENCE_COLLECTION tags the example sentences the definitions call
+# returns. These are not teaching material: the model wrote them to illustrate
+# one sense of one word, nobody chose them for a curriculum, and they carry no
+# translations. The tag keeps them separable from sentences that were authored
+# as lessons, so a level rollup or an export can exclude them. They are stored
+# with ``minimum_level`` unset for the same reason -- a difficulty would imply
+# they had been placed in the curriculum. It is defined in storage.crud.sentence
+# so the integrity check can skip them without importing this module.
 
 # How many examples to keep per sense. The prompt asks for up to three and the
 # model generally returns one; the cap is here so a model that returns ten does
