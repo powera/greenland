@@ -1,18 +1,18 @@
-{"guid": "N63_001", "forms": [{"grammatical_form": "noun/en_singular", "text": "captain", "is_base_form": true, "ipa": "/ˈkæptən/", "phonetic": "KAP-tin"}]}
-{"guid": "N63_002", "forms": [{"grammatical_form": "noun/en_singular", "text": "teammate", "is_base_form": true, "ipa": "/ˈtiːmˌmeɪt/", "phonetic": "TEEM-mayt"}]}
-{"guid": "N63_003", "forms": [{"grammatical_form": "noun/en_singular", "text": "opponent", "is_base_form": true, "ipa": "/əˈpoʊnənt/", "phonetic": "uh-POH-nent"}]}
-{"guid": "N63_004", "forms": [{"grammatical_form": "noun/en_singular", "text": "athlete", "is_base_form": true, "ipa": "/ˈæθˌliːt/", "phonetic": "ATH-leet"}]}
-{"guid": "N63_005", "forms": [{"grammatical_form": "noun/en_singular", "text": "rookie", "is_base_form": true, "ipa": "/ˈrʊki/", "phonetic": "ROO-kee"}]}
-{"guid": "N63_006", "forms": [{"grammatical_form": "noun/en_singular", "text": "substitute", "is_base_form": true, "ipa": "/ˈsʌbstəˌtuːt/", "phonetic": "SUB-stuh-toot"}]}
-{"guid": "N63_007", "forms": [{"grammatical_form": "noun/en_singular", "text": "forward", "is_base_form": true, "ipa": "/ˈfɔrwɚd/", "phonetic": "FOR-werd"}]}
-{"guid": "N63_008", "forms": [{"grammatical_form": "noun/en_singular", "text": "defender", "is_base_form": true, "ipa": "/dɪˈfɛndɚ/", "phonetic": "dih-FEN-der"}]}
-{"guid": "N63_009", "forms": [{"grammatical_form": "noun/en_singular", "text": "goalkeeper", "is_base_form": true, "ipa": "/ˈɡoʊlˌkiːpər/", "phonetic": "GOHL-kee-per"}]}
-{"guid": "N63_010", "forms": [{"grammatical_form": "noun/en_singular", "text": "goalie", "is_base_form": true, "ipa": "/ˈɡoʊli/", "phonetic": "GOH-lee"}]}
-{"guid": "N63_011", "forms": [{"grammatical_form": "noun/en_singular", "text": "winger", "is_base_form": true, "ipa": "/ˈwɪŋər/", "phonetic": "WING-er"}]}
-{"guid": "N63_012", "forms": [{"grammatical_form": "noun/en_singular", "text": "champion", "is_base_form": true, "ipa": "/ˈtʃæmpiən/", "phonetic": "CHAM-pee-un"}]}
-{"guid": "N63_013", "forms": [{"grammatical_form": "noun/en_singular", "text": "seed", "is_base_form": true, "ipa": "/siːd/", "phonetic": "SEED"}]}
-{"guid": "N63_014", "forms": [{"grammatical_form": "noun/en_singular", "text": "wild card", "is_base_form": true, "ipa": "/ˈwaɪld ˌkɑrd/", "phonetic": "WYLD-kard"}]}
-{"guid": "N63_015", "forms": [{"grammatical_form": "noun/en_singular", "text": "server", "is_base_form": true, "ipa": "/ˈsɝvər/", "phonetic": "SUR-ver"}]}
+{"guid": "N63_001", "forms": [{"grammatical_form": "noun/en_singular", "text": "captain", "is_base_form": true, "ipa": "/ˈkæptən/", "phonetic": "KAP-tin"}], "grammar_facts": [{"fact_type": "gender_variant_status", "fact_value": "none"}]}
+{"guid": "N63_002", "forms": [{"grammatical_form": "noun/en_singular", "text": "teammate", "is_base_form": true, "ipa": "/ˈtiːmˌmeɪt/", "phonetic": "TEEM-mayt"}], "grammar_facts": [{"fact_type": "gender_variant_status", "fact_value": "none"}]}
+{"guid": "N63_003", "forms": [{"grammatical_form": "noun/en_singular", "text": "opponent", "is_base_form": true, "ipa": "/əˈpoʊnənt/", "phonetic": "uh-POH-nent"}], "grammar_facts": [{"fact_type": "gender_variant_status", "fact_value": "none"}]}
+{"guid": "N63_004", "forms": [{"grammatical_form": "noun/en_singular", "text": "athlete", "is_base_form": true, "ipa": "/ˈæθˌliːt/", "phonetic": "ATH-leet"}], "grammar_facts": [{"fact_type": "gender_variant_status", "fact_value": "none"}]}
+{"guid": "N63_005", "forms": [{"grammatical_form": "noun/en_singular", "text": "rookie", "is_base_form": true, "ipa": "/ˈrʊki/", "phonetic": "ROO-kee"}], "grammar_facts": [{"fact_type": "gender_variant_status", "fact_value": "none"}]}
+{"guid": "N63_006", "forms": [{"grammatical_form": "noun/en_singular", "text": "substitute", "is_base_form": true, "ipa": "/ˈsʌbstəˌtuːt/", "phonetic": "SUB-stuh-toot"}], "grammar_facts": [{"fact_type": "gender_variant_status", "fact_value": "none"}]}
+{"guid": "N63_007", "forms": [{"grammatical_form": "noun/en_singular", "text": "forward", "is_base_form": true, "ipa": "/ˈfɔrwɚd/", "phonetic": "FOR-werd"}], "grammar_facts": [{"fact_type": "gender_variant_status", "fact_value": "none"}]}
+{"guid": "N63_008", "forms": [{"grammatical_form": "noun/en_singular", "text": "defender", "is_base_form": true, "ipa": "/dɪˈfɛndɚ/", "phonetic": "dih-FEN-der"}], "grammar_facts": [{"fact_type": "gender_variant_status", "fact_value": "none"}]}
+{"guid": "N63_009", "forms": [{"grammatical_form": "noun/en_singular", "text": "goalkeeper", "is_base_form": true, "ipa": "/ˈɡoʊlˌkiːpər/", "phonetic": "GOHL-kee-per"}], "grammar_facts": [{"fact_type": "gender_variant_status", "fact_value": "none"}]}
+{"guid": "N63_010", "forms": [{"grammatical_form": "noun/en_singular", "text": "goalie", "is_base_form": true, "ipa": "/ˈɡoʊli/", "phonetic": "GOH-lee"}], "grammar_facts": [{"fact_type": "gender_variant_status", "fact_value": "none"}]}
+{"guid": "N63_011", "forms": [{"grammatical_form": "noun/en_singular", "text": "winger", "is_base_form": true, "ipa": "/ˈwɪŋər/", "phonetic": "WING-er"}], "grammar_facts": [{"fact_type": "gender_variant_status", "fact_value": "none"}]}
+{"guid": "N63_012", "forms": [{"grammatical_form": "noun/en_singular", "text": "champion", "is_base_form": true, "ipa": "/ˈtʃæmpiən/", "phonetic": "CHAM-pee-un"}], "grammar_facts": [{"fact_type": "gender_variant_status", "fact_value": "none"}]}
+{"guid": "N63_013", "forms": [{"grammatical_form": "noun/en_singular", "text": "seed", "is_base_form": true, "ipa": "/siːd/", "phonetic": "SEED"}], "grammar_facts": [{"fact_type": "gender_variant_status", "fact_value": "none"}]}
+{"guid": "N63_014", "forms": [{"grammatical_form": "noun/en_singular", "text": "wild card", "is_base_form": true, "ipa": "/ˈwaɪld ˌkɑrd/", "phonetic": "WYLD-kard"}], "grammar_facts": [{"fact_type": "gender_variant_status", "fact_value": "none"}]}
+{"guid": "N63_015", "forms": [{"grammatical_form": "noun/en_singular", "text": "server", "is_base_form": true, "ipa": "/ˈsɝvər/", "phonetic": "SUR-ver"}], "grammar_facts": [{"fact_type": "gender_variant_status", "fact_value": "none"}]}
 {"guid": "N63_016", "forms": [{"grammatical_form": "noun/en_singular", "text": "grandmaster", "is_base_form": true, "ipa": "/ˈɡrændˌmæstər/", "phonetic": "GRAND-mas-ter"}]}
 {"guid": "N63_017", "forms": [{"grammatical_form": "noun/en_singular", "text": "point guard", "is_base_form": true, "ipa": "/ˈpɔɪnt ˌɡɑrd/", "phonetic": "POINT-gard"}]}
 {"guid": "N63_018", "forms": [{"grammatical_form": "noun/en_singular", "text": "shooting guard", "is_base_form": true, "ipa": "/ˈʃuːtɪŋ ɡɑrd/", "phonetic": "SHOO-ting gard"}]}
@@ -78,7 +78,7 @@
 {"guid": "N63_078", "forms": [{"grammatical_form": "noun/en_singular", "text": "fullback", "is_base_form": true, "ipa": "/ˈfʊlˌbæk/", "phonetic": "FOOL-bak"}]}
 {"guid": "N63_079", "forms": [{"grammatical_form": "noun/en_singular", "text": "sweeper", "is_base_form": true, "ipa": "/ˈswiːpər/", "phonetic": "SWEE-per"}]}
 {"guid": "N63_080", "forms": [{"grammatical_form": "noun/en_singular", "text": "wall", "is_base_form": true, "ipa": "/wɔl/", "phonetic": "WAWL"}]}
-{"guid": "N63_081", "forms": [{"grammatical_form": "noun/en_singular", "text": "influence", "is_base_form": true, "ipa": "/ˈɪnfluəns/", "phonetic": "IN-floo-ens"}]}
+{"guid": "N63_081", "forms": [{"grammatical_form": "noun/en_singular", "text": "influence", "is_base_form": true, "ipa": "/ˈɪnfluəns/", "phonetic": "IN-floo-ens"}], "grammar_facts": [{"fact_type": "gender_variant_status", "fact_value": "none"}]}
 {"guid": "N63_082", "forms": [{"grammatical_form": "noun/en_singular", "text": "base runner", "is_base_form": true}]}
 {"guid": "N63_084", "forms": [{"grammatical_form": "noun/en_singular", "text": "object", "is_base_form": true, "ipa": "/ˈɑbdʒɛkt/", "phonetic": "OB-jekt"}]}
 {"guid": "N63_085", "forms": [{"grammatical_form": "noun/en_singular", "text": "role", "is_base_form": true, "ipa": "/roʊl/", "phonetic": "ROHL"}]}
