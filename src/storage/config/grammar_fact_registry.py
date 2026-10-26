@@ -65,7 +65,8 @@ from __future__ import annotations
 from dataclasses import dataclass, replace
 from typing import Any, Dict, Iterable, Mapping, Tuple
 
-from storage.translation_helpers import TIER_1_LANGUAGES, TIER_2_LANGUAGES
+from storage.models.variant_form import GENDER_VARIANT_STATUS_FACT
+from storage.translation_helpers import LANGUAGE_FIELDS, TIER_1_LANGUAGES, TIER_2_LANGUAGES
 
 VERB_FORM_OVERRIDE_PREFIX = "verb_form_"
 TIER_1_2_LANGUAGES: Tuple[str, ...] = tuple(TIER_1_LANGUAGES + TIER_2_LANGUAGES)
@@ -354,6 +355,22 @@ for checked_form_type in FORM_CHECK_FACT_TYPES:
     )
 
 
+# Durable completion of the person-noun gender check (voras, or the
+# backfill_gender_variants script). Without it a language with no variant rows
+# could be either unchecked or checked with no gendered term. Never set on a
+# lemma that is not a person noun (storage.models.guid_prefixes.is_human_subtype).
+GRAMMAR_FACT_DEFINITIONS[GENDER_VARIANT_STATUS_FACT] = GrammarFactDefinition(
+    fact_type=GENDER_VARIANT_STATUS_FACT,
+    languages=tuple(LANGUAGE_FIELDS),
+    required_pos=("noun",),
+    display_label="Gender Variants",
+    description=(
+        "Person nouns only: pair (male/female variant words exist) or none "
+        "(one word with one grammatical gender serves both)"
+    ),
+)
+
+
 #: Fact types written to, and read back from, ``data/release/lemmas/{lang}.jsonl``.
 #: Nothing mechanical reproduces these, so a rebuild without them loses data.
 #: Keep the reason on each entry; see the module docstring for the rule.
@@ -363,6 +380,9 @@ EXPORTED_FACT_TYPES: Tuple[str, ...] = (
     "feminine_form_status",
     "comparative_status",
     "superlative_status",
+    # Whether a person noun has male/female words in a language; a model or a
+    # person decided it, and "none" is otherwise indistinguishable from unchecked.
+    GENDER_VARIANT_STATUS_FACT,
     # Principal parts. A conjugator takes these as input; they are not
     # derivable from the lemma.
     "infinitive",  # lt

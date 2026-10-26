@@ -182,6 +182,15 @@ def get_argument_parser() -> argparse.ArgumentParser:
             "0.7 confidence before (uncertain_llm_results); by default they are skipped"
         ),
     )
+    parser.add_argument(
+        "--gender-variants",
+        action="store_true",
+        help=(
+            "With --populate, generate the forms (plurals, cases) of person nouns' "
+            "male/female variant words instead of the lemmas' own forms; --task "
+            "picks the language (a noun task) or 'all'"
+        ),
+    )
     add_batch_args(parser)
 
     return parser
@@ -300,6 +309,50 @@ def _run_populate_batch(
         session.close()
 
 
+def _run_gender_variant_forms(
+    agent: Any, lemmas: List[Any], task: str, selected_languages: List[str], args: Any
+) -> int:
+    """Generate the paradigms of person nouns' male/female variant words."""
+    from clients.unified_client import UnifiedLLMClient
+    from words.gender_variant_forms import gender_variant_form_states
+    from workqueue.handlers.words.gender_variant_forms import GENDER_VARIANT_FORMS_JOB
+    from workqueue.llm_batch import run_inline
+
+    languages = [lang for lang, pos in batch_form_tasks(task, selected_languages) if pos == "noun"]
+    if not languages:
+        print("Error: --gender-variants needs a noun task or 'all'")
+        return 1
+    session = agent.get_session()
+    try:
+        states = gender_variant_form_states(session, lemmas, languages, args.retry_uncertain)
+        print(f"Gender variant paradigms to fill: {len(states)} ({', '.join(languages)})")
+        if getattr(args, "batch", False):
+            run_batch_populate(
+                GENDER_VARIANT_FORMS_JOB,
+                states,
+                args,
+                session,
+                "VILKAS AGENT - GENDER VARIANT FORMS",
+                [f"languages: {', '.join(languages)}"],
+            )
+            return 0
+        if args.dry_run or not states:
+            return 0
+        client = UnifiedLLMClient.from_config(agent.config)
+        failed = 0
+        for state in states:
+            outcome = run_inline(session, GENDER_VARIANT_FORMS_JOB, [state], client, args.model)[0]
+            print(
+                f"{state['lemma_id']} {state['language_code']} {state['variant_key']}: "
+                f"{outcome.status}: {outcome.detail}"
+            )
+            if outcome.status == "failed":
+                failed += 1
+        return 1 if failed else 0
+    finally:
+        session.close()
+
+
 def main() -> int:
     """Main entry point for the vilkas agent."""
     # Import here to avoid circular imports
@@ -376,6 +429,11 @@ def main() -> int:
         mode = "populate"
     else:
         mode = "coverage"  # default
+
+    if getattr(args, "gender_variants", False):
+        if mode != "populate":
+            parser.error("--gender-variants only applies with --populate")
+        return _run_gender_variant_forms(agent, lemmas, args.task, selected_languages, args)
 
     # Handle populate mode
     if mode == "populate":

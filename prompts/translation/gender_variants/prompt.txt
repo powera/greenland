@@ -1,0 +1,8 @@
+Give the male and female words for this person noun:
+
+English: "{english_word}"
+Definition: {definition}
+Subtype: {pos_subtype}
+
+The ordinary word in each language:
+{language_words}

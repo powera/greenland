@@ -84,13 +84,35 @@ form that takes either gender depending on who it refers to.
 
 - **Pairs of different words** — actor/actriz, profesor/profesora,
   acteur/actrice.  The lemma's translation is one of those words, and it gets
-  that word's gender.  How the other member of the pair is stored is an open
-  question.
+  that word's gender.  Both words are stored as gender variants (below).
 - **Nouns whose meaning changes with gender** — el capital / la capital,
   le livre / la livre.  Those are separate senses (see above), each with an
   ordinary gender.
 
 How `common` is shown to learners is a display question, not settled here.
+
+### Male and female words for person nouns
+
+Person nouns (`human` and the subtypes that are `kind_of="human"`: family
+relations, occupations, participant roles, nationalities) are expected to have
+male and female words in some language.  They are stored as `variant_kind`
+`gender` variant forms keyed `male` and `female`, each with its own
+grammatical gender; the lemma's translation stays the word for a person of
+unspecified gender.  A common-gender noun gets both variants with the same text
+(el estudiante / la estudiante), since the article still changes.
+
+**`gender_variant_status`** records that a language was checked, for person
+nouns only (absent on every other lemma):
+
+- `pair` — the male/female variant rows exist.
+- `none` — no gendered term: one word with one grammatical gender serves both
+  (English *teacher*, Chinese 老师, Spanish *la persona*).
+- absent — not checked yet.
+
+Voras's word prompt asks the question for new translations; already-translated
+nouns are asked by `scripts/backfill_gender_variants.py`.  English has no
+grammatical gender, so its variants never carry one.  The status is exported:
+like the form-check statuses, it is a decision nothing can rederive.
 
 The LLM decides each noun's gender.  An ending rule
 (`langtools/{es,fr}/gender.py`) cross-checks the answer; when the two

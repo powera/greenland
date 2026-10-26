@@ -57,7 +57,8 @@ class SubtypeDef:
             beak is not an animal but is part of one, so body_part is
             ``part_of=["human", "animal"]``. Unlike ``kind_of`` it may cross
             groups and name several. Like ``group``, both relations are
-            presentation only.
+            presentation only, with one exception: ``kind_of="human"`` marks
+            a person subtype for :func:`is_human_subtype`.
     """
 
     prefix: str
@@ -1619,6 +1620,30 @@ PREFIX_TO_SUBTYPE: Dict[str, tuple[str, str]] = {
 def get_subtype_def(pos_type: str, subtype: str) -> Optional[SubtypeDef]:
     """The definition for one subtype, or None if the pair is unknown."""
     return SUBTYPE_DEFS.get(pos_type, {}).get(subtype)
+
+
+HUMAN_SUBTYPE: str = "human"
+
+
+def is_human_subtype(pos_type: Optional[str], subtype: Optional[str]) -> bool:
+    """Whether a lemma names a person: the noun subtype ``human`` or a kind of it.
+
+    These are the lemmas expected to have male/female counterparts in some
+    language (actor/actriz, mokytojas/mokytoja), so translation asks for them
+    and ``gender_variant_status`` applies.  Following ``kind_of`` means a new
+    person subtype is covered by declaring it a kind of human.
+    """
+    if pos_type != "noun" or not subtype:
+        return False
+    if subtype == HUMAN_SUBTYPE:
+        return True
+    spec = get_subtype_def(pos_type, subtype)
+    return spec is not None and spec.kind_of == HUMAN_SUBTYPE
+
+
+def human_subtypes() -> List[str]:
+    """Every noun subtype :func:`is_human_subtype` accepts, deprecated ones included."""
+    return [subtype for subtype in SUBTYPE_DEFS["noun"] if is_human_subtype("noun", subtype)]
 
 
 def subtype_for_prefix(prefix: str) -> Optional[tuple[str, str]]:

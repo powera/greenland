@@ -23,11 +23,17 @@ and "TV" needs "TVs".  Each variant is identified by a (``variant_kind``,
     kind="expanded",     key="television"  -> television / televisions
     kind="gender",       key="female"      -> actress / actresses
 
-Gender variants are explicitly curated counterparts of one concept (cousin,
-actor, German person), not arbitrary pairs such as aunt/uncle or boy/girl.
+Gender variants are the male and female words for one person concept
+(actor/actress, profesor/profesora, cousin's primo/prima). They exist only on
+person nouns (storage.models.guid_prefixes.is_human_subtype), and the
+expectation is that some language has them for most of those. Separate lemmas
+for different people (aunt/uncle, boy/girl) are not gender variants.
 The lemma's translation and derivative_forms remain the unspecified default;
 gender variants use stable keys "male" and "female", even if their text repeats
-the default. Their grammatical_gender is recorded independently. They are
+the default, as for a common-gender noun (el/la estudiante). Their
+grammatical_gender is recorded independently. Whether a language has been
+checked is the gender_variant_status grammar fact: "pair" with these rows, or
+"none" when one word with one grammatical gender serves both. They are
 exported as gendered_forms, never unconditional accepted-answer alternatives.
 
 ``variant_kind`` is deliberately free-form, and the kinds named in this module
@@ -124,11 +130,24 @@ VARIANT_KIND_EQUIVALENT: str = "equivalent"
 # stays the noun rather than a form of "be".
 VARIANT_KIND_ARCHAIC: str = "archaic"
 
-# Explicit person-gender counterparts of one concept, not arbitrary kinship
-# pairs. The lemma's ordinary translation is the unspecified default. Keys
-# identify referents rather than spellings, so male may repeat the default.
+# Male/female words for one person concept, on person nouns only. The lemma's
+# ordinary translation is the unspecified default. Keys identify referents
+# rather than spellings, so male may repeat the default.
 VARIANT_KIND_GENDER: str = "gender"
-GENDER_VARIANT_KEYS: frozenset[str] = frozenset({"male", "female"})
+GENDER_VARIANT_MALE: str = "male"
+GENDER_VARIANT_FEMALE: str = "female"
+GENDER_VARIANT_KEYS: frozenset[str] = frozenset({GENDER_VARIANT_MALE, GENDER_VARIANT_FEMALE})
+
+# Grammar fact recording that a language was checked for gender variants.
+# Absent means unchecked; it is never set on a lemma that is not a person noun.
+GENDER_VARIANT_STATUS_FACT: str = "gender_variant_status"
+# The language has male/female variant rows.
+GENDER_VARIANT_STATUS_PAIR: str = "pair"
+# No gendered term: one word with one grammatical gender serves both.
+GENDER_VARIANT_STATUS_NONE: str = "none"
+GENDER_VARIANT_STATUSES: frozenset[str] = frozenset(
+    {GENDER_VARIANT_STATUS_PAIR, GENDER_VARIANT_STATUS_NONE}
+)
 
 # The kinds a learner may type as unconditional alternatives. Gender
 # counterparts depend on the prompt's referent and are deliberately excluded.

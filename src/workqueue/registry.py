@@ -47,6 +47,8 @@ from workqueue.handlers.words import (
 )
 from workqueue.handlers.sentences.translation import SENTENCE_TRANSLATION_JOB
 from workqueue.handlers.words.forms import FORMS_JOB
+from workqueue.handlers.words.gender_variant_forms import GENDER_VARIANT_FORMS_JOB
+from workqueue.handlers.words.gender_variants import GENDER_VARIANTS_JOB
 from workqueue.handlers.words.grammar_facts import GRAMMAR_FACT_JOB
 from workqueue.handlers.words.pronunciations import PRONUNCIATIONS_JOB
 from workqueue.handlers.words.translations import TRANSLATIONS_JOB
@@ -113,6 +115,8 @@ TASK_HANDLERS = {
 LLM_JOBS: Dict[str, Job] = {
     LAPE2_JOB.name: LAPE2_JOB,
     FORMS_JOB.name: FORMS_JOB,
+    GENDER_VARIANT_FORMS_JOB.name: GENDER_VARIANT_FORMS_JOB,
+    GENDER_VARIANTS_JOB.name: GENDER_VARIANTS_JOB,
     GRAMMAR_FACT_JOB.name: GRAMMAR_FACT_JOB,
     JONVABALIS_JOB.name: JONVABALIS_JOB,
     PRONUNCIATIONS_JOB.name: PRONUNCIATIONS_JOB,

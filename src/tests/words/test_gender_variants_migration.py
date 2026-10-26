@@ -29,7 +29,6 @@ from storage.models.variant_form import VariantForm
 from storage.variant_audio import gender_audio_slot
 from wordfreq.data.family_relations_sections import COUSIN_SECTION
 from words.difficulty.family_relation_priorities import get_excluded_terms_for_language
-from words.gender_variants import COUSIN_GUID, merge_cousin
 
 
 def _migration() -> ModuleType:
@@ -39,6 +38,14 @@ def _migration() -> ModuleType:
     module = importlib.util.module_from_spec(spec)
     spec.loader.exec_module(module)
     return module
+
+
+COUSIN_GUID: str = _migration().COUSIN_GUID
+
+
+def merge_cousin(session: Session, source_guid: str, gender: str) -> bool:
+    result: bool = _migration().merge_cousin(session, source_guid, gender)
+    return result
 
 
 def _populate(session: Session) -> None:

@@ -33,7 +33,13 @@ def session() -> Iterator[Session]:
 
 
 def test_gender_upsert_keeps_default_and_gender_variants_distinct(session: Session) -> None:
-    lemma = Lemma(guid="N35_076", lemma_text="cousin", definition_text="A cousin.", pos_type="noun")
+    lemma = Lemma(
+        guid="N35_076",
+        lemma_text="cousin",
+        definition_text="A cousin.",
+        pos_type="noun",
+        pos_subtype="family_relation",
+    )
     session.add(lemma)
     session.flush()
     for gender, text in (("male", "primo"), ("female", "prima")):

@@ -1,0 +1,15 @@
+You are a multilingual linguistics expert helping a language-learning database record the male and female words for nouns that name people.
+
+Each word below names a person (a role, a relative, an occupation, a nationality). Its ordinary word in each language is already established - the word to use when the person's gender is not known or does not matter. Your task is to classify, for each language, how that language names a man and a woman in this role, in "gender_pattern":
+
+- separate_words: the language has different words in everyday use (actor / actress, profesor / profesora, mokytojas / mokytoja). Fill "male" and "female", even when one of them is the same as the ordinary word
+- common_gender: the same word, but its article or agreement follows the person. This is very common in Spanish, French, Italian and Portuguese, especially for words ending in -ista, -ante, -ente or -e: el/la artista, el/la cantante, el/la piloto, el/la cónyuge, il/la dentista, le/la pilote, un/une élève. Fill both "male" and "female" with that word
+- one_word: one word with one grammatical gender serves for everyone - most English and Chinese words, and words like Spanish la persona or French la victime. Leave both empty
+
+REQUIREMENTS:
+1. Only give a gendered form that native speakers use in ordinary modern speech. A form that is rare, jocular, dated, pejorative or a dictionary curiosity does not count (French clownesse, Italian soldatessa, German Matrosin, Lithuanian žmogė): use common_gender if the article still changes, otherwise one_word
+2. When the concept itself is a man or a woman (boy, mother, husband, king), use one_word: its counterpart is a different concept. An occupation whose English word happens to be gendered (fisherman, businessman) is not one of these
+3. Do not give a marked compound (Chinese 女演员) when the ordinary word already serves for both
+4. Give the words in lemma form: singular, nominative, without articles
+5. Give each filled word's grammatical gender (masculine, feminine or neuter) in "male_grammatical_gender" and "female_grammatical_gender". Leave them empty when the language has no grammatical gender (English, Chinese) or the words are empty
+6. Give each language its own confidence (0-1): how sure you are of the whole answer for that language, including a one_word answer

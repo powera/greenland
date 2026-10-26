@@ -1190,7 +1190,9 @@ def normalize_llm_language_codes(
     return deduped
 
 
-def split_llm_language_batches(languages: List[str]) -> List[List[str]]:
+def split_llm_language_batches(
+    languages: List[str], max_per_batch: int = MAX_LLM_LANGUAGES_PER_OPERATION
+) -> List[List[str]]:
     """Split normalized language codes into LLM-sized batches.
 
     The requested :data:`ANCIENT_LANGUAGE_GROUP` languages always go together
@@ -1199,8 +1201,9 @@ def split_llm_language_batches(languages: List[str]) -> List[List[str]]:
     request (see words.translation_queries), and a full batch mixing
     the two goes over OpenAI's 2048-token schema limit, so every call for it
     fails.  The group is five languages, so it is never split.  The other
-    languages keep the caller's order, in batches capped at
-    ``MAX_LLM_LANGUAGES_PER_OPERATION``.
+    languages keep the caller's order, in batches capped at *max_per_batch*
+    (``MAX_LLM_LANGUAGES_PER_OPERATION`` unless a caller's schema is larger per
+    language, as a person noun's is).
 
     IDEA (not implemented): group the rest by tier/family too (TIER_1_LANGUAGES,
     TIER_2_LANGUAGES, the additional-Asian languages).  Same-family languages
@@ -1210,8 +1213,7 @@ def split_llm_language_batches(languages: List[str]) -> List[List[str]]:
     modern = [code for code in languages if code not in ANCIENT_LANGUAGE_GROUP]
     ancient = [code for code in languages if code in ANCIENT_LANGUAGE_GROUP]
     batches = [
-        modern[index : index + MAX_LLM_LANGUAGES_PER_OPERATION]
-        for index in range(0, len(modern), MAX_LLM_LANGUAGES_PER_OPERATION)
+        modern[index : index + max_per_batch] for index in range(0, len(modern), max_per_batch)
     ]
     if ancient:
         batches.append(ancient)

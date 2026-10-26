@@ -20,7 +20,9 @@ from storage.crud.operation_log import (
     log_field_changes,
 )
 from storage.crud.word_token import add_word_token
+from storage.models.guid_prefixes import is_human_subtype
 from storage.models.schema import Lemma, WordToken
+from storage.variant_audio import invalidate_gender_variant_audio
 from storage.models.variant_form import (
     GENDER_VARIANT_KEYS,
     VARIANT_KIND_GENDER,
@@ -104,8 +106,10 @@ def add_variant_form(
         VariantForm: The created or updated row
     """
     if variant_kind == VARIANT_KIND_GENDER:
-        if lemma.pos_type != "noun" or variant_key not in GENDER_VARIANT_KEYS:
-            raise ValueError("Gender variants require a noun and a male/female key")
+        if not is_human_subtype(lemma.pos_type, lemma.pos_subtype):
+            raise ValueError("Gender variants require a person noun (a human subtype)")
+        if variant_key not in GENDER_VARIANT_KEYS:
+            raise ValueError("Gender variants require a male/female key")
 
     existing = (
         session.query(VariantForm)
@@ -152,6 +156,16 @@ def add_variant_form(
                 FieldChange("grammatical_gender", existing.grammatical_gender, grammatical_gender)
             )
 
+        if variant_kind == VARIANT_KIND_GENDER and existing.variant_form_text != variant_form_text:
+            # A new word under the same stable audio key: the old recording no
+            # longer says it.  A new base word changes the whole paradigm.
+            invalidate_gender_variant_audio(
+                session,
+                lemma.guid,
+                language_code,
+                variant_key,
+                None if (is_base_form or existing.is_base_form) else grammatical_form,
+            )
         existing.variant_form_text = variant_form_text
         existing.is_base_form = is_base_form
         if resolved_token is not None:
@@ -330,6 +344,9 @@ def delete_variant(
         )
         .delete(synchronize_session=False)
     )
+    if deleted and variant_kind == VARIANT_KIND_GENDER:
+        # Its recordings stay keyed to the slot a later variant would reuse.
+        invalidate_gender_variant_audio(session, lemma.guid, language_code, variant_key)
     session.flush()
 
     # One entry for the paradigm rather than one per form: "the grey variant

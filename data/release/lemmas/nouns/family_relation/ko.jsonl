@@ -1,1 +1,1 @@
-{"guid": "N35_076", "variants": [{"kind": "gender", "key": "female", "forms": [{"grammatical_form": "noun/ko_base", "text": "사촌", "is_base_form": true}]}, {"kind": "gender", "key": "male", "forms": [{"grammatical_form": "noun/ko_base", "text": "사촌", "is_base_form": true}]}]}
+{"guid": "N35_076", "grammar_facts": [{"fact_type": "gender_variant_status", "fact_value": "none"}]}

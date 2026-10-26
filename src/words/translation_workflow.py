@@ -31,6 +31,10 @@ from clients.batch_queue import get_batch_manager
 from storage.backend import create_session as create_backend_session
 from storage.backend.config import BackendType, DataSourceConfig
 from storage.crud.operation_log import log_translation_change
+from storage.crud.gender_variant import (
+    GenderVariantAnswer,
+    convert_llm_response_to_gender_answers,
+)
 from storage.models.schema import Lemma, LemmaTranslation
 from words.translation_populate import (
     PopulateOutcome,
@@ -49,7 +53,6 @@ from storage.translation_helpers import (
     get_language_name,
     get_reference_translation,
     normalize_llm_language_codes,
-    split_llm_language_batches,
     TIER_1_LANGUAGES,
     TIER_2_LANGUAGES,
     TIER_3_LANGUAGES,
@@ -96,6 +99,9 @@ class LemmaTranslations:
     # Languages whose request failed while others succeeded.  ``error`` stays
     # None, since there is something to save, but the run did not finish.
     failed_languages: List[str] = field(default_factory=list)
+    # A person noun's male/female answers per language
+    # (storage.crud.gender_variant); empty for any other lemma.
+    gender_answers: Dict[str, GenderVariantAnswer] = field(default_factory=dict)
 
 
 def select_curated_lemmas(session: Any, limit: Optional[int] = None) -> List[Lemma]:
@@ -425,7 +431,7 @@ class TranslationWorkflow:
             # one request's worth, and ancient languages must go on their own.
             llm_response: Dict[str, Any] = {}
             failed_languages: List[str] = []
-            for language_batch in split_llm_language_batches(list(languages)):
+            for language_batch in populate_groups(languages, lemma):
                 batch_response, success = client.query_translations(
                     english_word=lemma.lemma_text,
                     reference_translation=reference,
@@ -455,6 +461,7 @@ class TranslationWorkflow:
             confidences=convert_llm_response_to_confidences(llm_response),
             metadata=convert_llm_response_to_translation_metadata(llm_response),
             failed_languages=failed_languages,
+            gender_answers=convert_llm_response_to_gender_answers(llm_response),
         )
 
     def save_lemma_translations(
@@ -481,6 +488,7 @@ class TranslationWorkflow:
             source=generated.source or f"voras-agent/{self.config.model}",
             confidences=generated.confidences,
             model=self.config.model,
+            gender_answers=generated.gender_answers,
         )
         session.commit()
         return outcome
@@ -497,7 +505,7 @@ class TranslationWorkflow:
         Barsukas cache is skipped: it would hand back the current translations.
         """
         generated = self.query_llm_translations(session, lemma, languages)
-        outcome = PopulateOutcome([], [], [])
+        outcome = PopulateOutcome([], [], [], [])
         if generated.translations:
             outcome = store_translations_by_language(
                 session,
@@ -509,6 +517,7 @@ class TranslationWorkflow:
                 confidences=generated.confidences,
                 model=self.config.model,
                 replace_existing=True,
+                gender_answers=generated.gender_answers,
             )
             session.commit()
         return generated, outcome
@@ -1083,7 +1092,7 @@ class TranslationWorkflow:
 
                         llm_translations: Dict[str, Any] = {}
                         query_failed = False
-                        for language_batch in populate_groups(missing_lang_codes):
+                        for language_batch in populate_groups(missing_lang_codes, lemma):
                             batch_translations, success = client.query_translations(
                                 english_word=lemma.lemma_text,
                                 reference_translation=(reference_lang_code, reference_translation),
@@ -1122,11 +1131,15 @@ class TranslationWorkflow:
                         confidences_by_lang_code: Optional[Dict[str, Optional[float]]] = (
                             convert_llm_response_to_confidences(llm_translations)
                         )
+                        gender_answers_by_lang_code = convert_llm_response_to_gender_answers(
+                            llm_translations
+                        )
                         translation_source = f"voras-agent/{self.config.model}"
                     else:
                         # Cached translations carry no confidence and are stored as they are.
                         translation_metadata_by_lang_code = {}
                         confidences_by_lang_code = None
+                        gender_answers_by_lang_code = {}
 
                     # Apply translations to lemma (translations_by_lang_code now always uses lang_code keys)
                     if translations_by_lang_code:
@@ -1139,6 +1152,7 @@ class TranslationWorkflow:
                             source=translation_source or f"voras-agent/{self.config.model}",
                             confidences=confidences_by_lang_code,
                             model=self.config.model,
+                            gender_answers=gender_answers_by_lang_code,
                         )
                         for lang_code, language_name in missing_languages:
                             if lang_code in outcome.blank:

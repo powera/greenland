@@ -10,6 +10,8 @@ from typing import Any, Callable, Dict, List, Optional, Tuple
 import util.prompt_loader
 from clients.types import Schema, SchemaProperty
 from storage import database as linguistic_db
+from storage.crud.gender_variant import gender_schema_properties
+from storage.models.guid_prefixes import is_human_subtype
 from storage.translation_helpers import (
     ANCIENT_LANGUAGE_GROUP,
     MAX_LLM_LANGUAGES_PER_OPERATION,
@@ -45,6 +47,23 @@ ANCIENT_STATUS_REQUIREMENTS = """7. For each translation, classify its historica
 ANCIENT_STATUS_NOTE_INSTRUCTION = " Return an empty status note for conventional translations; otherwise briefly explain the marker."
 
 
+# Added to the word-translation context only for a person noun
+# (storage.models.guid_prefixes.is_human_subtype).  The answer becomes the
+# lemma's male/female gender variants and its gender_variant_status; see
+# storage.crud.gender_variant.
+GENDER_REQUIREMENTS = """
+PERSON NOUNS - MALE AND FEMALE WORDS:
+This word names a person. "translation" stays the ordinary word to use when the person's gender is not known or does not matter. For each language also classify how it names a man and a woman in this role, in "gender_pattern":
+   - separate_words: the language has different words in everyday use (actor / actress, profesor / profesora, mokytojas / mokytoja). Fill "male" and "female", even when one of them is the same as "translation"
+   - common_gender: the same word, but its article or agreement follows the person. This is very common in Spanish, French, Italian and Portuguese, especially for words ending in -ista, -ante, -ente or -e: el/la artista, el/la cantante, el/la piloto, el/la cónyuge, il/la dentista, le/la pilote, un/une élève. Fill both with that word
+   - one_word: one word with one grammatical gender serves for everyone - most English and Chinese words, and words like Spanish la persona or French la victime. Leave both empty
+   Rules:
+   - Only give a gendered form that native speakers use in ordinary modern speech. A form that is rare, jocular, dated, pejorative or a dictionary curiosity does not count (French clownesse, Italian soldatessa, German Matrosin, Lithuanian žmogė): use common_gender if the article still changes, otherwise one_word
+   - When the concept itself is a man or a woman (boy, mother, husband, king), use one_word: its counterpart is a different concept. An occupation whose English word happens to be gendered (fisherman, businessman) is not one of these
+   - Give each filled word's grammatical gender (masculine, feminine or neuter) in "male_grammatical_gender" and "female_grammatical_gender"; leave them empty when the language has no grammatical gender (English, Chinese) or the words are empty
+"""
+
+
 def _requests_ancient_language(languages: List[str]) -> bool:
     """Whether any target language is scored on translation_status.
 
@@ -70,6 +89,7 @@ def build_translation_prompt(
     pos_type: str,
     pos_subtype: Optional[str] = None,
     languages: Optional[List[str]] = None,
+    ask_gender: Optional[bool] = None,
 ) -> Optional[TranslationPrompt]:
     """Build the word-translation request without sending it.
 
@@ -87,6 +107,10 @@ def build_translation_prompt(
         languages: ISO language codes to translate to. If None, uses
             ['zh', 'ko', 'fr', 'es', 'de', 'pt', 'sw', 'vi']. At most
             MAX_LLM_LANGUAGES_PER_OPERATION.
+        ask_gender: Whether to ask for male/female words; by default, for any
+            person noun.  A caller holding the lemma passes
+            storage.crud.gender_variant.asks_gender_variants, which also
+            leaves out a noun that itself names a man or a woman.
 
     Returns:
         The prompt, or None when the inputs are unusable (logged).
@@ -126,20 +150,21 @@ def build_translation_prompt(
     # when one is present.  For a living language the answer is "conventional"
     # for nearly every word and is dropped before storage anyway.
     include_status = _requests_ancient_language(languages)
+    include_gender = is_human_subtype(pos_type, pos_subtype) if ask_gender is None else ask_gender
 
     for lang_code in languages:
         lang_config = AVAILABLE_TRANSLATION_LANGUAGES_BY_CODE.get(lang_code)
         if lang_config is None:
             logger.warning(f"Unknown language code '{lang_code}' requested, skipping")
             continue
+        # Undescribed: the language object carries the description, and the
+        # context's requirement 7 defines confidence once rather than per language.
         language_properties = {
-            "translation": SchemaProperty("string", lang_config["description"]),
-            "confidence": SchemaProperty(
-                "number",
-                "Confidence from 0-1 that this is the word a native speaker would use "
-                "for this meaning",
-            ),
+            "translation": SchemaProperty("string"),
+            "confidence": SchemaProperty("number"),
         }
+        if include_gender:
+            language_properties.update(gender_schema_properties())
         if include_status:
             language_properties["translation_status"] = SchemaProperty(
                 "string",
@@ -187,6 +212,7 @@ def build_translation_prompt(
         language_instructions=language_instructions,
         status_requirements=ANCIENT_STATUS_REQUIREMENTS if include_status else "",
         status_note_instruction=ANCIENT_STATUS_NOTE_INSTRUCTION if include_status else "",
+        gender_requirements=GENDER_REQUIREMENTS if include_gender else "",
     )
 
     # Conditionally format reference info and disambiguation instruction
