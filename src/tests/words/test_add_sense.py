@@ -31,7 +31,7 @@ from storage.models.schema import (
 from storage.models.uncertain_llm_result import TOPIC_TRANSLATION
 from storage.models.variant_form import VARIANT_KIND_ABBREVIATION, VariantForm
 from storage.translation_helpers import get_translation
-from wordfreq.translation.definitions import build_subtype_prompt
+from words.definitions import build_subtype_prompt
 from words.add_sense import add_sense, build_sense_prompt, default_sense_prominence
 from words.translation_populate import missing_translation_languages
 

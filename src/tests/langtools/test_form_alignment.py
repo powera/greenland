@@ -45,9 +45,7 @@ else:
     raise ImportError("Could not load enums module")
 
 
-# Define expected form mappings based on what language_forms uses
-# These are the authoritative form names that langtools should match
-# (copied from wordfreq/translation/language_forms/*.py to avoid import issues)
+# Expected form names shared by language generators and the form registry.
 
 LT_NOUN_FORMS = [
     "nominative_singular",

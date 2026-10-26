@@ -6,7 +6,7 @@ from typing import Any, Dict, Optional
 import pytest
 
 from clients.types import Schema
-from wordfreq.translation.definitions import (
+from words.definitions import (
     DEFINITIONS_PROMPT_LANGUAGES,
     query_definitions,
 )
@@ -27,7 +27,7 @@ def test_definitions_prompt_uses_registered_subtypes_and_five_targets(
     monkeypatch: pytest.MonkeyPatch,
 ) -> None:
     monkeypatch.setattr(
-        "wordfreq.translation.definitions.linguistic_db.log_query",
+        "words.definitions.linguistic_db.log_query",
         lambda *args, **kwargs: None,
     )
     client = _CapturingClient()
@@ -59,7 +59,7 @@ def test_definitions_prompt_without_subtype_lists_none(
     monkeypatch: pytest.MonkeyPatch,
 ) -> None:
     monkeypatch.setattr(
-        "wordfreq.translation.definitions.linguistic_db.log_query",
+        "words.definitions.linguistic_db.log_query",
         lambda *args, **kwargs: None,
     )
     client = _CapturingClient()

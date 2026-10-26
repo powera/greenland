@@ -254,7 +254,7 @@ LANGUAGE_HIERARCHY = [
 # This is the storage-side source of truth for supported languages (code,
 # display name). The translation LLM path additionally needs prompt data
 # (description, instructions) kept in AVAILABLE_TRANSLATION_LANGUAGES in
-# wordfreq/translation/constants.py. When adding/removing a language here,
+# words/linguistic_constants.py. When adding/removing a language here,
 # make the matching change there (and in LLM_FIELD_TO_LANG_CODE below), or the
 # active query_translations path will skip it as "unknown".
 # Format: 'code': (language_code, display_name)
@@ -1198,7 +1198,7 @@ def split_llm_language_batches(
     The requested :data:`ANCIENT_LANGUAGE_GROUP` languages always go together
     as one batch of their own, after the others.  Their presence switches on
     a per-language ``translation_status`` field for every language in the
-    request (see wordfreq.translation.translations), and a full batch mixing
+    request (see words.translation_queries), and a full batch mixing
     the two goes over OpenAI's 2048-token schema limit, so every call for it
     fails.  The group is five languages, so it is never split.  The other
     languages keep the caller's order, in batches capped at *max_per_batch*

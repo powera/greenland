@@ -11,13 +11,10 @@ from storage.crud.uncertain_llm_result import get_uncertain_llm_result
 from storage.models.schema import Base, DerivativeForm, Lemma
 from storage.models.uncertain_llm_result import TOPIC_FORMS
 from storage.translation_helpers import set_translation
-from wordfreq.translation.generate_forms_base import (
-    FormGenerationConfig,
-    FormsOutcome,
-    extract_gender_from_forms,
-    process_lemma_forms,
-)
-from wordfreq.translation.generate_forms_tasks import FORM_GENERATION_TASKS, get_task_key
+from words.forms.config import FormGenerationConfig, FormsOutcome
+from words.forms.traits import extract_gender_from_forms
+from words.forms.generation import process_lemma_forms
+from words.forms.tasks import FORM_GENERATION_TASKS, get_task_key
 
 
 class TestExtractGenderFromForms(unittest.TestCase):
@@ -68,9 +65,7 @@ def test_live_low_confidence_forms_are_recorded_and_skipped(tmp_path: Path) -> N
     answer = FormsAnswer({field: "Haus"}, True, 0.4, "not sure")
     client = MagicMock()
 
-    with patch(
-        "wordfreq.translation.generate_forms_base.generate_forms", return_value=answer
-    ) as generate:
+    with patch("words.forms.generation.generate_forms", return_value=answer) as generate:
         # Falsy like a failure, but distinguishable from one.
         first = process_lemma_forms(client, lemma_id, config, task_config)
         assert not first
@@ -84,7 +79,7 @@ def test_live_low_confidence_forms_are_recorded_and_skipped(tmp_path: Path) -> N
         assert generate.call_count == 2
 
     with patch(
-        "wordfreq.translation.generate_forms_base.generate_forms",
+        "words.forms.generation.generate_forms",
         return_value=FormsAnswer({}, False, None, None),
     ):
         failed = process_lemma_forms(client, lemma_id, config, task_config, retry_uncertain=True)

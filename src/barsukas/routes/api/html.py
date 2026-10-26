@@ -122,7 +122,7 @@ def auto_populate_lemma() -> ResponseReturnValue:
 
     try:
         # Use LLM to generate definition, POS type, and POS subtype
-        from wordfreq.translation.client import LinguisticClient
+        from words.linguistic_client import LinguisticClient
 
         base_config = cast(DataSourceConfig, current_app.backend_config)  # type: ignore[attr-defined]
         client = LinguisticClient(

@@ -3,7 +3,7 @@
 Both used to commit, and add_grammar_fact rolled the whole session back on a
 duplicate -- so a preview that rolled back still left facts behind, and a
 duplicate fact silently discarded the caller's other pending writes (the forms
-generate_forms_base had just stored, for one).
+words.forms.persistence had just stored, for one).
 """
 
 from __future__ import annotations

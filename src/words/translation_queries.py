@@ -18,7 +18,7 @@ from storage.translation_helpers import (
     LANGUAGE_NAMES,
     TRANSLATION_STATUS_VALUES,
 )
-from wordfreq.translation.constants import (
+from words.linguistic_constants import (
     AVAILABLE_TRANSLATION_LANGUAGES,
     AVAILABLE_TRANSLATION_LANGUAGES_BY_CODE,
 )

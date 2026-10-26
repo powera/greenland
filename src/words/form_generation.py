@@ -14,8 +14,8 @@ from words.workflow_support import build_default_config
 from storage.backend.config import DataSourceConfig
 from storage.models.schema import Lemma, LemmaTranslation
 from storage.translation_helpers import LANGUAGE_FIELDS, get_translation
-from wordfreq.translation.client import LinguisticClient
-from wordfreq.translation.generate_forms_tasks import get_task_key, process_lemma_for_task
+from words.linguistic_client import LinguisticClient
+from words.forms.tasks import get_task_key, process_lemma_for_task
 from langtools.form_tasks import get_on_demand_pos_types
 
 logger = logging.getLogger(__name__)

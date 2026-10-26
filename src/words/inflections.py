@@ -37,8 +37,8 @@ from storage.translation_helpers import (
     get_translation,
     has_translation_clause,
 )
-from wordfreq.translation.client import LinguisticClient
-from wordfreq.translation.generate_forms_tasks import get_task_key, process_lemma_for_task
+from words.linguistic_client import LinguisticClient
+from words.forms.tasks import get_task_key, process_lemma_for_task
 from langtools.form_registry import FORM_SPECS
 from langtools.form_tasks import get_on_demand_pos_types
 
@@ -380,7 +380,6 @@ class InflectionService:
         model: Optional[str] = None,
         throttle: float = 1.0,
         dry_run: bool = False,
-        use_wiktionary: bool = False,
         retry_uncertain: bool = False,
     ) -> Dict[str, Any]:
         """
@@ -402,7 +401,6 @@ class InflectionService:
             model: LLM model to use for generation (if None, uses config.model)
             throttle: Seconds to wait between API calls
             dry_run: If True, show what would be fixed without making changes
-            use_wiktionary: If True, use Wiktionary instead of LLM for form generation
             retry_uncertain: Also ask for lemmas whose forms a model was
                 uncertain of before; by default they are skipped
 
@@ -473,7 +471,6 @@ class InflectionService:
                 model=effective_model,
                 throttle=throttle,
                 dry_run=dry_run,
-                use_wiktionary=use_wiktionary,
                 retry_uncertain=retry_uncertain,
             )
         else:
@@ -491,7 +488,6 @@ class InflectionService:
         model: Optional[str] = None,
         throttle: float = 1.0,
         dry_run: bool = False,
-        use_wiktionary: bool = False,
         retry_uncertain: bool = False,
     ) -> Dict[str, Any]:
         """
@@ -507,7 +503,6 @@ class InflectionService:
             model: LLM model to use (if None, uses config.model)
             throttle: Seconds to wait between API calls
             dry_run: If True, show what would be fixed without making changes
-            use_wiktionary: If True, use Wiktionary instead of LLM for form generation
             retry_uncertain: Also ask for lemmas whose forms a model was
                 uncertain of before; by default they are skipped
 
@@ -524,7 +519,7 @@ class InflectionService:
             filtered_lemmas = [l for l in lemmas if l.pos_type == pos_type]
 
             # Get task configuration to check for existing forms
-            from wordfreq.translation.generate_forms_tasks import FORM_GENERATION_TASKS
+            from words.forms.tasks import FORM_GENERATION_TASKS
 
             task_config = FORM_GENERATION_TASKS[task_key].config
             expected_grammatical_forms = {g.value for g in task_config.form_mapping.values()}
@@ -586,9 +581,9 @@ class InflectionService:
             total_needs_fix = len(items_needing_forms)
 
         uncertain_skipped = 0
-        if not use_wiktionary and not retry_uncertain:
-            from wordfreq.translation.generate_forms_base import forms_uncertain
-            from wordfreq.translation.generate_forms_tasks import FORM_GENERATION_TASKS
+        if not retry_uncertain:
+            from words.forms.persistence import forms_uncertain
+            from words.forms.tasks import FORM_GENERATION_TASKS
 
             form_config = FORM_GENERATION_TASKS[task_key].config
             session = self.get_session()
@@ -646,28 +641,10 @@ class InflectionService:
                 "would_process": len(items_to_process),
                 "dry_run": True,
                 "sample": items_to_process[:10],
-                "source": "wiktionary" if use_wiktionary else "llm",
+                "source": "llm",
             }
 
-        # Check Wiktionary support if requested
-        if use_wiktionary:
-            from langtools.wiktionary import is_wiktionary_supported
-
-            if not is_wiktionary_supported(language_code, pos_type):
-                logger.error(
-                    f"Wiktionary not supported for {language_code} {pos_type}. "
-                    f"Supported: en/es/fr/lt for nouns/verbs/adjectives/adverbs"
-                )
-                return {
-                    "error": f"Wiktionary not supported for {language_code} {pos_type}",
-                    "total_needing_fix": total_needs_fix,
-                }
-            logger.info(f"Using Wiktionary for {language_name} {pos_type} form generation")
-        else:
-            logger.info(f"Using LLM for {language_name} {pos_type} form generation")
-
-        # Initialize client (only needed for LLM mode)
-        client = None if use_wiktionary else LinguisticClient(config=self.config)
+        client = LinguisticClient(config=self.config)
 
         # Process each item
         successful = 0
@@ -692,24 +669,11 @@ class InflectionService:
                     failed += 1
                     continue
 
-                # Call the appropriate process function
-                if use_wiktionary:
-                    from wordfreq.translation.generate_forms_base import (
-                        process_lemma_forms_wiktionary,
-                    )
-                    from wordfreq.translation.generate_forms_tasks import FORM_GENERATION_TASKS
-
-                    task_config = FORM_GENERATION_TASKS[task_key].config
-                    success = process_lemma_forms_wiktionary(
-                        found_lemma.id, self.config, task_config
-                    )
-                    is_uncertain = False
-                else:
-                    outcome = process_lemma_for_task(
-                        task_key, found_lemma.id, self.config, client, retry_uncertain
-                    )
-                    success = bool(outcome)
-                    is_uncertain = outcome.is_uncertain
+                outcome = process_lemma_for_task(
+                    task_key, found_lemma.id, self.config, client, retry_uncertain
+                )
+                success = bool(outcome)
+                is_uncertain = outcome.is_uncertain
 
                 if success:
                     successful += 1
@@ -721,18 +685,14 @@ class InflectionService:
                     failed += 1
                     logger.error(f"Failed to generate forms for '{item_info['english']}'")
 
-                # Throttle to avoid overloading the API (less important for Wiktionary)
-                if i < len(items_to_process) and not use_wiktionary:
+                if i < len(items_to_process):
                     time.sleep(throttle)
-                elif i < len(items_to_process) and use_wiktionary:
-                    time.sleep(0.1)  # Small delay to be nice to Wiktionary
 
         finally:
             session.close()
 
-        source = "Wiktionary" if use_wiktionary else "LLM"
         logger.info(f"\n{'='*60}")
-        logger.info(f"Fix complete (source: {source}):")
+        logger.info("Fix complete:")
         logger.info(f"  Total needing fix: {total_needs_fix}")
         logger.info(f"  Processed: {len(items_to_process)}")
         logger.info(f"  Successful: {successful}")
@@ -750,7 +710,7 @@ class InflectionService:
             "uncertain": uncertain,
             "uncertain_skipped": uncertain_skipped,
             "dry_run": dry_run,
-            "source": "wiktionary" if use_wiktionary else "llm",
+            "source": "llm",
         }
 
     def run_full_check(self, output_file: Optional[str] = None) -> Dict[str, Any]:

@@ -4,6 +4,13 @@ Word-level LLM helpers (single lemma tasks, not sentence workflows).
 
 ## What lives here
 
+- `linguistic_client.py` — shared client for definition, subtype, and translation queries.
+- `definitions.py`, `translation_queries.py`, and `linguistic_constants.py` —
+  linguistic prompts, query handling, and target-language configuration.
+- `english_forms.py` — default English grammatical forms for added senses.
+- `forms/` — task configuration, form-based grammar traits, confidence-gated
+  storage, and language-specific form generation. Language-specific generators
+  remain in `src/langtools/`.
 - `translation.py` — single-target and multi-target word translation prompt/query helpers.
 - `translation_workflow.py` — translation selection, generation, storage, and
   queueing; the Voras CLI is argument parsing and display over this module.

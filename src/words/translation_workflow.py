@@ -57,12 +57,12 @@ from storage.translation_helpers import (
     TIER_2_LANGUAGES,
     TIER_3_LANGUAGES,
 )
-from wordfreq.translation.constants import AVAILABLE_TRANSLATION_LANGUAGES_BY_CODE
+from words.linguistic_constants import AVAILABLE_TRANSLATION_LANGUAGES_BY_CODE
 from storage.translation_helpers import get_translation
 from storage.translation_helpers import get_translation as get_translation_helper
 from storage.translation_helpers import set_translation as set_translation_helper
 from words.llm_validators import validate_all_translations_for_word
-from wordfreq.translation.client import LinguisticClient
+from words.linguistic_client import LinguisticClient
 
 if TYPE_CHECKING:  # workqueue handlers import this module, so the import below
     # is deferred into the enqueue helpers to keep that cycle unbroken.

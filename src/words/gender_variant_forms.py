@@ -22,8 +22,8 @@ from storage.crud.variant_form import add_variant_form
 from storage.models.guid_prefixes import is_human_subtype
 from storage.models.schema import Lemma
 from storage.models.variant_form import VARIANT_KIND_GENDER, VariantForm
-from wordfreq.translation.generate_forms_base import FormGenerationConfig
-from wordfreq.translation.generate_forms_tasks import FORM_GENERATION_TASKS, get_task_key
+from words.forms.config import FormGenerationConfig
+from words.forms.tasks import FORM_GENERATION_TASKS, get_task_key
 
 logger = logging.getLogger(__name__)
 

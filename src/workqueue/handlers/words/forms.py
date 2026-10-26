@@ -25,13 +25,9 @@ from langtools.llm_forms_base import (
 from storage.database import log_query
 from storage.models.schema import Lemma
 from storage.translation_helpers import get_translation
-from wordfreq.translation.generate_forms_base import (
-    FormGenerationConfig,
-    forms_already_complete,
-    forms_uncertain,
-    store_generated_forms,
-)
-from wordfreq.translation.generate_forms_tasks import FORM_GENERATION_TASKS, get_task_key
+from words.forms.config import FormGenerationConfig
+from words.forms.persistence import forms_already_complete, forms_uncertain, store_generated_forms
+from words.forms.tasks import FORM_GENERATION_TASKS, get_task_key
 from words.form_generation import generate_forms_for_lemma
 from workqueue.llm_batch import Done, Job, Next, Ready, Stage, StageContext
 from workqueue.tools import get_lemma_or_raise, workqueue_payload_handler

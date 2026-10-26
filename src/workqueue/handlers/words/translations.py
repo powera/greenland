@@ -25,7 +25,7 @@ from storage.translation_helpers import (
     get_translation,
     normalize_llm_language_codes,
 )
-from wordfreq.translation.client import LinguisticClient
+from words.linguistic_client import LinguisticClient
 from words.translation_populate import (
     build_populate_call,
     missing_translation_languages,

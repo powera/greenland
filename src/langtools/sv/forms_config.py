@@ -40,6 +40,6 @@ GRAMMATICAL_FORM_OVERRIDES: Dict[str, str] = {
 
 # Form-generation settings per part of speech; see langtools.form_tasks.
 FORM_TASK_SETTINGS: Dict[str, Dict[str, Any]] = {
-    "noun": {"fetcher": "translation", "threshold": 2},
-    "verb": {"fetcher": "translation", "threshold": 2},
+    "noun": {"threshold": 2},
+    "verb": {"threshold": 2},
 }

@@ -20,7 +20,7 @@ Two kinds of dialect live here, told apart by ``translation_target``:
   their own ``LemmaTranslation`` rows, their own LLM prompt configuration, and
   their own release/export column.  Adding one means registering it here *and*
   in ``storage.translation_helpers.LANGUAGE_FIELDS`` /
-  ``wordfreq.translation.constants.AVAILABLE_TRANSLATION_LANGUAGES``.
+  ``words.linguistic_constants.AVAILABLE_TRANSLATION_LANGUAGES``.
 * **Presentation dialects** (``translation_target=False``: es-mx, fr-ca, en-gb)
   carry a prompt note and a TTS locale but store no separate text.  Their
   ``covered_by`` (falling back to ``parent_lang``) names the variant whose
