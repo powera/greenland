@@ -5,6 +5,7 @@ import os
 import tempfile
 from collections import defaultdict
 from pathlib import Path
+from threading import Lock
 from typing import Any, Dict, List, Optional, Set, Type
 
 from storage.backend.base import BaseSession, BaseStorage
@@ -77,6 +78,7 @@ class JSONLStorage(BaseStorage):
 
         # Cached SQLite engine (shared across sessions for read-only mode).
         # Populated once on first query, then reused for all subsequent sessions.
+        self._sqlite_engine_lock = Lock()
         self._cached_sqlite_engine: Optional[Any] = None
         self._sqlite_populated = False
 
