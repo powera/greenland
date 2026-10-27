@@ -20,6 +20,7 @@ find_existing_review() performs the correct lookup for both shapes; callers
 that find a row update it rather than inserting.
 """
 
+import json
 import logging
 from typing import Optional
 
@@ -96,3 +97,31 @@ def clear_review_verdict(review: AudioQualityReview) -> None:
     """
     for field in _VERDICT_FIELDS:
         setattr(review, field, None)
+
+
+def propagate_asset_review(session: Session, review: AudioQualityReview) -> None:
+    """Review a shared recording once, without reviving text-invalidated slots."""
+    if not review.guid or review.sentence_id is not None or not review.manifest_md5:
+        return
+    try:
+        if "translation_mismatch" in json.loads(review.quality_issues or "[]"):
+            return
+    except (TypeError, ValueError):
+        pass
+    for alias in session.query(AudioQualityReview).filter_by(
+        guid=review.guid,
+        language_code=review.language_code,
+        voice_name=review.voice_name,
+        manifest_md5=review.manifest_md5,
+        expected_text=review.expected_text,
+    ):
+        if alias is review:
+            continue
+        try:
+            issues = json.loads(alias.quality_issues or "[]")
+        except (TypeError, ValueError):
+            issues = []
+        if "translation_mismatch" in issues:
+            continue
+        for field in (*_VERDICT_FIELDS, "status", "s3_prod_url", "accepted_at", "accepted_by"):
+            setattr(alias, field, getattr(review, field))

@@ -731,6 +731,10 @@ def invalidate_audio_for_translation_change(
             AudioQualityReview.guid == guid,
             AudioQualityReview.language_code.in_(affected_languages),
             AudioQualityReview.status != "needs_replacement",
+            (
+                AudioQualityReview.grammatical_form.is_(None)
+                | ~AudioQualityReview.grammatical_form.like("variant/gender/%")
+            ),
         )
         .all()
     )

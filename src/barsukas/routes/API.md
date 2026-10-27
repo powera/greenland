@@ -213,7 +213,7 @@ All LLM-invoking endpoints below require JSON body with `"model": "<model-name>"
 - `POST /api/v1/agents/lemma/<guid>/check-pronunciations`
 - `POST /api/llm/<agent>/generate-audio`
   - Bulk lemma audio generation (currently supports `agent=vieversys` and `agent=strazdas`).
-  - Body: `{"guids": [...], "language": "bs", "voice": "...", "include_forms": false, "force": false}`.
+  - Body: `{"guids": [...], "language": "bs", "voice": "...", "tts_engine": "openai", "include_variants": true, "include_forms": false, "force": false}`.
 
 Check endpoints return:
 

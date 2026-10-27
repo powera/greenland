@@ -39,6 +39,7 @@ from audioshoe.coqui import CoquiVoice
 from audioshoe.espeak import EspeakVoice
 from audioshoe.qwen.types import QwenVoice
 from audioshoe.piper import PiperVoice
+from audiotools.review_records import propagate_asset_review
 from barsukas.helpers.audio_helpers import (
     link_audio_to_lemma,
     sync_rejection_to_s3,
@@ -543,6 +544,7 @@ def review_file(review_id: int) -> ResponseReturnValue:
                 f"Failed to sync rejection state for audio {review_id}: {sync_message}"
             )
 
+        propagate_asset_review(g.db, review)
         g.db.commit()
 
         flash("Review updated successfully", "success")
@@ -598,6 +600,7 @@ def quick_update(review_id: int) -> ResponseReturnValue:
                 f"Failed to sync rejection state for audio {review_id}: {sync_message}"
             )
 
+        propagate_asset_review(g.db, review)
         g.db.commit()
 
         return jsonify({"success": True, "status": status})
@@ -617,6 +620,7 @@ def remove_file(review_id: int) -> ResponseReturnValue:
 
     try:
         g.db.delete(review)
+        propagate_asset_review(g.db, review)
         g.db.commit()
         flash("Audio file record removed successfully", "success")
         return redirect(url_for("audio.list_files"))
@@ -795,6 +799,9 @@ def generate() -> ResponseReturnValue:
     voice_names: List[str] = request.form.getlist("voices")
     tts_engine = request.form.get("tts_engine", "openai")
     use_ipa = request.form.get("use_ipa") == "on"
+    include_forms = request.form.get("include_forms") == "on"
+    include_variants = request.form.get("include_variants", "1") != "0"
+    force = request.form.get("force") == "on"
 
     if not language_code:
         flash("Language is required", "error")
@@ -880,23 +887,35 @@ def generate() -> ResponseReturnValue:
             results = strazdas_agent.generate_batch(
                 language_code=language_code,
                 lemmas=lemmas,
+                include_variants=include_variants,
+                include_forms=include_forms,
                 voices=espeak_voice_enums,
                 use_ipa=use_ipa,
+                skip_existing=not force,
             )
         elif tts_engine in ("polly", "azure", "google", GEMINI_ENGINE):
             vieversys_agent = VieversysAgent(
-                config=config, output_dir=str(audio_base_dir), tts_engine=tts_engine
+                config=config,
+                output_dir=str(audio_base_dir),
+                tts_engine=tts_engine,
+                skip_existing=not force,
             )
             results = vieversys_agent.generate_batch(
                 language_code=language_code,
                 lemmas=lemmas,
+                include_variants=include_variants,
+                include_forms=include_forms,
                 cloud_voice_names=voice_names,
             )
         else:
-            vieversys_agent = VieversysAgent(config=config, output_dir=str(audio_base_dir))
+            vieversys_agent = VieversysAgent(
+                config=config, output_dir=str(audio_base_dir), skip_existing=not force
+            )
             results = vieversys_agent.generate_batch(
                 language_code=language_code,
                 lemmas=lemmas,
+                include_variants=include_variants,
+                include_forms=include_forms,
                 voices=gpt_voice_enums,
             )
 
@@ -1114,6 +1133,9 @@ def generate_single(guid: str) -> ResponseReturnValue:
         voices = data.get("voices", ["ash", "alloy", "nova"])
         tts_engine = data.get("tts_engine", "openai")
         use_ipa = data.get("use_ipa", False)
+        include_forms = bool(data.get("include_forms", False))
+        include_variants = bool(data.get("include_variants", True))
+        force = bool(data.get("force", False))
     else:
         language_code = request.form.get("language")
         voices = request.form.getlist("voices")
@@ -1121,6 +1143,9 @@ def generate_single(guid: str) -> ResponseReturnValue:
             voices = ["ash", "alloy", "nova"]
         tts_engine = request.form.get("tts_engine", "openai")
         use_ipa = request.form.get("use_ipa") == "on"
+        include_forms = request.form.get("include_forms") == "on"
+        include_variants = request.form.get("include_variants", "1") != "0"
+        force = request.form.get("force") == "on"
 
     # Find lemma first so we have the lemma_id for redirects
     lemma = g.db.query(Lemma).filter_by(guid=guid).first()
@@ -1151,6 +1176,9 @@ def generate_single(guid: str) -> ResponseReturnValue:
                 "voices": voices,
                 "tts_engine": tts_engine,
                 "use_ipa": use_ipa,
+                "include_forms": include_forms,
+                "include_variants": include_variants,
+                "force": force,
             },
             dedup_key=f"{TaskType.AUDIO_GENERATE_LEMMA}:{lemma.id}:{language_code}:{tts_engine}",
         )

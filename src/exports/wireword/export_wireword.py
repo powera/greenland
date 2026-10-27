@@ -922,6 +922,8 @@ class WirewordExporter:
                 )
                 if gendered_forms:
                     wireword["gendered_forms"] = gendered_forms
+                    if gendered_forms[0].get("audio"):
+                        wireword["audio"] = gendered_forms[0]["audio"]
 
                 wireword_data.append(wireword)
 

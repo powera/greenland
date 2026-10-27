@@ -216,7 +216,9 @@ def api_info() -> ResponseReturnValue:
                 "guids": "Required. List of lemma GUIDs",
                 "language": "Required. Language code (e.g., 'bs')",
                 "voice": "Optional. Voice name for the selected backend/agent. For vieversys/OpenAI, the path_name from /api/v1/audio/voices (e.g. 'amina'); omit to generate all default voices for the language.",
-                "include_forms": "Optional bool. Reserved for form-level generation (currently base lemma only)",
+                "include_forms": "Optional bool. Generate stored inflections too (default false)",
+                "include_variants": "Optional bool. Include stored gender counterparts (default true)",
+                "tts_engine": "Optional engine: openai, polly, azure, google, gemini",
                 "force": "Optional bool. Reserved for overwrite behavior (currently skipped if manifest already exists)",
             },
         },
@@ -515,7 +517,11 @@ def api_generate_audio(agent: str) -> ResponseReturnValue:
     guids = data.get("guids")
     language_code = data.get("language")
     voice_name = data.get("voice")
+    tts_engine = data.get("tts_engine", "openai")
+    if tts_engine not in ("openai", "polly", "azure", "google", "gemini"):
+        return _build_error_response("Unsupported TTS engine", 400)
     include_forms = bool(data.get("include_forms", False))
+    include_variants = bool(data.get("include_variants", True))
     force = bool(data.get("force", False))
     # API callers default to uploading to S3 staging — local-only generation
     # is the exception (one-off debug runs explicitly pass upload_s3=False).
@@ -537,10 +543,14 @@ def api_generate_audio(agent: str) -> ResponseReturnValue:
         config = _get_config_from_request(data)
         if agent == "vieversys":
             vieversys_agent = VieversysAgent(
-                config=config, upload_s3=upload_s3, auto_approve=auto_approve
+                config=config,
+                tts_engine=tts_engine,
+                upload_s3=upload_s3,
+                auto_approve=auto_approve,
+                skip_existing=not force,
             )
             selected_gpt_voices: Optional[List[GptVoice]] = None
-            if isinstance(voice_name, str) and voice_name:
+            if tts_engine == "openai" and isinstance(voice_name, str) and voice_name:
                 # OpenAI-backed voices are addressed by their path_name (e.g.
                 # "amina"); cloud backends (polly/azure/google) use the raw
                 # backend voice id. We try the OpenAI registry first and fall
@@ -552,6 +562,8 @@ def api_generate_audio(agent: str) -> ResponseReturnValue:
                 language_code=language_code,
                 lemmas=lemmas,
                 voices=selected_gpt_voices,
+                include_variants=include_variants,
+                include_forms=include_forms,
                 cloud_voice_names=(
                     [voice_name]
                     if isinstance(voice_name, str) and voice_name and selected_gpt_voices is None
@@ -560,7 +572,13 @@ def api_generate_audio(agent: str) -> ResponseReturnValue:
             )
         elif agent == "strazdas":
             strazdas_agent = StrazdasAgent(config=config, upload_s3=upload_s3)
-            result = strazdas_agent.generate_batch(language_code=language_code, lemmas=lemmas)
+            result = strazdas_agent.generate_batch(
+                language_code=language_code,
+                lemmas=lemmas,
+                include_variants=include_variants,
+                include_forms=include_forms,
+                skip_existing=not force,
+            )
         else:
             return _build_error_response(
                 "Unsupported audio agent. Use 'vieversys' or 'strazdas'", 400
@@ -568,7 +586,7 @@ def api_generate_audio(agent: str) -> ResponseReturnValue:
 
         by_guid: Dict[str, Dict[str, Any]] = {}
         for lemma_result in result.get("lemmas", []):
-            guid_value = lemma_result.get("guid")
+            guid_value = lemma_result.get("guid", lemma_result.get("lemma_guid"))
             if not isinstance(guid_value, str):
                 continue
             if lemma_result.get("success"):
@@ -589,6 +607,7 @@ def api_generate_audio(agent: str) -> ResponseReturnValue:
                 "voice": voice_name,
                 "agent": agent,
                 "include_forms": include_forms,
+                "include_variants": include_variants,
                 "force": force,
                 "total": total,
                 "generated": generated,

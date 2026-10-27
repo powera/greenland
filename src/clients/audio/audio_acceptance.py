@@ -81,6 +81,9 @@ def accept_audio_for_production(
     audio_review.accepted_by = accepted_by
 
     try:
+        from audiotools.review_records import propagate_asset_review
+
+        propagate_asset_review(session, audio_review)
         session.commit()
         logger.info(f"Accepted audio {audio_review_id} for production: {prod_url}")
         return True, f"Audio accepted for production: {prod_url}"

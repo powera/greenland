@@ -53,7 +53,11 @@ def link_audio_to_lemma(
 
 
 def validate_audio_translation(
-    session: Any, guid: str, expected_text: str, language_code: str
+    session: Any,
+    guid: str,
+    expected_text: str,
+    language_code: str,
+    grammatical_form: Optional[str] = None,
 ) -> dict:
     """
     Validate that audio file's expected text matches the current translation in the database.
@@ -83,18 +87,18 @@ def validate_audio_translation(
             "lemma_found": False,
         }
 
-    # Get current translation from database. All languages live in
-    # LemmaTranslation; the per-language Lemma columns are gone.
-    from storage.models.schema import LemmaTranslation
+    from audiotools.lemma_audio import audio_target
+    from langtools.dialect_overrides import get_translation_language
+    from storage.translation_helpers import get_translation
 
-    current_translation = None
-    translation = (
-        session.query(LemmaTranslation)
-        .filter_by(lemma_id=lemma.id, language_code=language_code)
-        .first()
-    )
-    if translation:
-        current_translation = translation.translation
+    try:
+        current_translation = (
+            audio_target(session, lemma, language_code, grammatical_form).text
+            if grammatical_form is not None
+            else get_translation(session, lemma, get_translation_language(language_code))
+        )
+    except ValueError:
+        current_translation = None
 
     # Check if they match
     if current_translation is None:

@@ -9,7 +9,7 @@ from __future__ import annotations
 import logging
 import tempfile
 from pathlib import Path
-from typing import Dict, List, Optional
+from typing import Any, Dict, List, Optional
 
 from flask import current_app
 from sqlalchemy.orm import Session
@@ -26,6 +26,13 @@ from audioshoe.qwen import QwenVoice
 from clients.audio import Voice
 from clients.audio.gpt_voices import GptVoice
 from storage.backend.config import DataSourceConfig
+from langtools.dialect_overrides import get_translation_language
+from audiotools.lemma_audio import (
+    LemmaAudioTarget,
+    audio_target,
+    generate_lemma_audio_targets,
+    reusable_recording,
+)
 from audiotools.review_records import clear_review_verdict, find_existing_review
 from storage.models.schema import AudioQualityReview, Lemma, Sentence, SentenceTranslation
 
@@ -42,6 +49,7 @@ def _upsert_review_record(
     md5_hash: str,
     lemma: Optional[Lemma] = None,
     sentence_id: Optional[int] = None,
+    audio_slot: Optional[str] = None,
 ) -> None:
     """Create or update the AudioQualityReview row for one generated audio file.
 
@@ -70,7 +78,7 @@ def _upsert_review_record(
             language_code=language_code,
             voice_name=voice_name,
             guid=guid,
-            grammatical_form=None,  # Base form
+            grammatical_form=audio_slot,  # Base form
         )
     elif sentence_id is not None and lemma is None:
         guid = f"S_{sentence_id:05d}"  # Synthetic GUID for sentences
@@ -106,7 +114,7 @@ def _upsert_review_record(
             lemma_id=lemma_id,
             language_code=language_code,
             voice_name=voice_name,
-            grammatical_form=None,  # Base form
+            grammatical_form=audio_slot,  # Base form
             filename=filename,
             expected_text=expected_text,
             manifest_md5=md5_hash,
@@ -137,6 +145,26 @@ def _get_audio_output_dir() -> str:
 
 
 def handle_generate_audio(session: Session, payload: Dict) -> str:
+    """Generate default and stored gender counterparts, sharing equal recordings."""
+    lemma = get_lemma_or_raise(session, payload["lemma_id"])
+    result = generate_lemma_audio_targets(
+        session,
+        lemma,
+        payload["language_code"],
+        lambda target: _generate_audio_target(session, dict(payload, audio_slot=target.slot)),
+        include_variants=payload.get("include_variants", True),
+        include_forms=payload.get("include_forms", False),
+        use_ipa=payload.get("use_ipa", False),
+    )
+    if not result["success"]:
+        raise RuntimeError(result.get("error") or "No audio targets found")
+    count = len([voice for voice in result["voices"] if voice.get("success")])
+    if not count:
+        raise RuntimeError("No audio files were generated successfully")
+    return f"Generated audio for {count} recording(s) in {payload['language_code']}"
+
+
+def _generate_audio_target(session: Session, payload: Dict) -> Dict[str, Any]:
     """
     Handle audio generation task.
 
@@ -155,6 +183,8 @@ def handle_generate_audio(session: Session, payload: Dict) -> str:
     voice_names = payload.get("voices", ["ash", "alloy", "nova"])
     tts_engine = payload.get("tts_engine", "openai")
     use_ipa = payload.get("use_ipa", False)
+    audio_slot = payload.get("audio_slot")
+    skip_existing = not payload.get("force", False)
 
     lemma = get_lemma_or_raise(session, lemma_id)
 
@@ -174,6 +204,8 @@ def handle_generate_audio(session: Session, payload: Dict) -> str:
             espeak_voice_enums,
             create_review_record=True,
             use_ipa=use_ipa,
+            audio_slot=audio_slot,
+            skip_existing=skip_existing,
         )
     elif tts_engine == "qwen3":
         qwen_voice_enums = [QwenVoice[v.upper()] for v in voice_names]
@@ -186,27 +218,45 @@ def handle_generate_audio(session: Session, payload: Dict) -> str:
             language_code,
             qwen_voice_enums,
             create_review_record=True,
+            audio_slot=audio_slot,
+            skip_existing=skip_existing,
         )
     elif tts_engine == "piper":
         piper_voice_enums = [PiperVoice[v.upper()] for v in voice_names]
         result = _generate_audio_piper(
-            session, lemma, language_code, piper_voice_enums, audio_output_dir
+            session,
+            lemma,
+            language_code,
+            piper_voice_enums,
+            audio_output_dir,
+            audio_slot,
+            skip_existing,
         )
     elif tts_engine == "coqui":
         coqui_voice_enums = [CoquiVoice[v.upper()] for v in voice_names]
         result = _generate_audio_coqui(
-            session, lemma, language_code, coqui_voice_enums, audio_output_dir
+            session,
+            lemma,
+            language_code,
+            coqui_voice_enums,
+            audio_output_dir,
+            audio_slot,
+            skip_existing,
         )
     elif tts_engine in ("polly", "azure", "google", "gemini"):
         # Cloud TTS engines dispatched through VieversysAgent
         vieversys_agent = VieversysAgent(
-            config=config, output_dir=audio_output_dir, tts_engine=tts_engine
+            config=config,
+            output_dir=audio_output_dir,
+            tts_engine=tts_engine,
+            skip_existing=skip_existing,
         )
         result = vieversys_agent.generate_audio_for_lemma_cloud(
             session,
             lemma,
             language_code,
             voice_names,
+            audio_slot=audio_slot,
         )
     else:
         # Default to OpenAI - convert Voice names to GptVoice objects
@@ -232,26 +282,21 @@ def handle_generate_audio(session: Session, payload: Dict) -> str:
                 f"'{language_code}'. Supported languages: {', '.join(supported_languages)}"
             )
 
-        vieversys_agent = VieversysAgent(config=config, output_dir=audio_output_dir)
+        vieversys_agent = VieversysAgent(
+            config=config, output_dir=audio_output_dir, skip_existing=skip_existing
+        )
         result = vieversys_agent.generate_audio_for_lemma(
             session,
             lemma,
             language_code,
             gpt_voice_list,
             create_review_record=True,
+            audio_slot=audio_slot,
         )
 
-    if not result["success"]:
-        raise RuntimeError(result.get("error", "Audio generation failed"))
-
-    # Count successful voices
-    successful_voices = [v for v in result.get("voices", []) if v.get("success")]
-    voice_count = len(successful_voices)
-
-    if voice_count == 0:
-        raise RuntimeError("No audio files were generated successfully")
-
-    return f"Generated audio for {voice_count} voice(s) in {language_code}"
+    if any(not voice.get("success") for voice in result.get("voices", [])):
+        result["success"] = False
+    return result
 
 
 def _generate_audio_piper(
@@ -260,6 +305,8 @@ def _generate_audio_piper(
     language_code: str,
     voices: List[PiperVoice],
     output_dir: str,
+    audio_slot: Optional[str] = None,
+    skip_existing: bool = True,
 ) -> Dict:
     """
     Generate audio for a lemma using Piper TTS.
@@ -282,7 +329,11 @@ def _generate_audio_piper(
 
     try:
         # Get translation for the language
-        translation = get_translation(session, lemma, language_code)
+        translation = (
+            audio_target(session, lemma, language_code, audio_slot).text
+            if audio_slot is not None
+            else get_translation(session, lemma, get_translation_language(language_code))
+        )
         if not translation:
             return {
                 "success": False,
@@ -297,6 +348,18 @@ def _generate_audio_piper(
         generated_voices = []
         for voice in voices:
             try:
+                if skip_existing and reusable_recording(
+                    session,
+                    lemma,
+                    language_code,
+                    voice.ui_name,
+                    LemmaAudioTarget(audio_slot, translation),
+                    Path(output_dir),
+                ):
+                    generated_voices.append(
+                        {"voice": voice.ui_name, "success": True, "skipped": True}
+                    )
+                    continue
                 # Generate audio
                 result = client.generate_audio(
                     text=translation,
@@ -333,6 +396,7 @@ def _generate_audio_piper(
                     filename=filename,
                     expected_text=translation,
                     md5_hash=md5_hash,
+                    audio_slot=audio_slot,
                 )
                 generated_voices.append({"voice": voice.ui_name, "success": True})
             except Exception as e:
@@ -357,6 +421,8 @@ def _generate_audio_coqui(
     language_code: str,
     voices: List[CoquiVoice],
     output_dir: str,
+    audio_slot: Optional[str] = None,
+    skip_existing: bool = True,
 ) -> Dict:
     """
     Generate audio for a lemma using Coqui TTS.
@@ -379,7 +445,11 @@ def _generate_audio_coqui(
 
     try:
         # Get translation for the language
-        translation = get_translation(session, lemma, language_code)
+        translation = (
+            audio_target(session, lemma, language_code, audio_slot).text
+            if audio_slot is not None
+            else get_translation(session, lemma, get_translation_language(language_code))
+        )
         if not translation:
             return {
                 "success": False,
@@ -394,6 +464,18 @@ def _generate_audio_coqui(
         generated_voices = []
         for voice in voices:
             try:
+                if skip_existing and reusable_recording(
+                    session,
+                    lemma,
+                    language_code,
+                    voice.ui_name,
+                    LemmaAudioTarget(audio_slot, translation),
+                    Path(output_dir),
+                ):
+                    generated_voices.append(
+                        {"voice": voice.ui_name, "success": True, "skipped": True}
+                    )
+                    continue
                 # Generate audio
                 result = client.generate_audio(
                     text=translation,
@@ -430,6 +512,7 @@ def _generate_audio_coqui(
                     filename=filename,
                     expected_text=translation,
                     md5_hash=md5_hash,
+                    audio_slot=audio_slot,
                 )
                 generated_voices.append({"voice": voice.ui_name, "success": True})
             except Exception as e:

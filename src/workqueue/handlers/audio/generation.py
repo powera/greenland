@@ -14,6 +14,9 @@ def do_generate_lemma_audio(
     voices: Optional[List[str]] = None,
     tts_engine: str = "openai",
     use_ipa: bool = False,
+    include_variants: bool = True,
+    include_forms: bool = False,
+    force: bool = False,
     **_: Any,
 ) -> str:
     """Generate audio for a lemma."""
@@ -23,6 +26,9 @@ def do_generate_lemma_audio(
         "voices": voices or ["ash", "alloy", "nova"],
         "tts_engine": tts_engine,
         "use_ipa": use_ipa,
+        "include_variants": include_variants,
+        "include_forms": include_forms,
+        "force": force,
     }
     return handle_generate_audio(session, payload)
 

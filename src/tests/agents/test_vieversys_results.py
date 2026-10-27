@@ -100,5 +100,5 @@ def test_staging_failure_is_reported_and_local_result_retained(tmp_path: Path) -
         result = agent.generate_audio_for_lemma(Mock(), lemma, "es-419", [GptVoice.GPT_ES_F1])
     assert result["success"] is False
     assert result["voices"][0]["error"] == "S3 staging upload failed"
-    assert (tmp_path / "es-419/maria/N06_001_pan.mp3").read_bytes() == b"test-audio"
+    assert Path(result["voices"][0]["file_path"]).read_bytes() == b"test-audio"
     record.assert_called_once()

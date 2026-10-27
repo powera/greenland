@@ -253,6 +253,27 @@ def main() -> int:
         cost_summary,
     )
 
+    run_step(
+        "Gender counterpart forms",
+        [
+            "python",
+            "-m",
+            "agents.vilkas.cli",
+            "--guid",
+            guid,
+            "--task",
+            "all",
+            "--populate",
+            "--gender-variants",
+            "--languages",
+        ]
+        + vilkas_languages
+        + ["--yes"],
+        assume_yes,
+        env,
+        cost_summary,
+    )
+
     # Step 4: Synonyms (Šernas)
     run_step(
         "Synonyms",

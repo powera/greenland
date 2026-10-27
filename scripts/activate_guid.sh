@@ -124,6 +124,9 @@ fi
 run_step "Grammatical forms" \
   python -m agents.vilkas.cli --guid "$GUID" --task all --fix --languages ${VILKAS_LANGUAGES[*]} --yes
 
+run_step "Gender counterpart forms" \
+  python -m agents.vilkas.cli --guid "$GUID" --task all --populate --gender-variants --languages ${VILKAS_LANGUAGES[*]} --yes
+
 # Synonyms and alternative forms (Šernas)
 # Always include English for sernas to generate English synonyms
 SERNAS_LANGUAGES=("${LANGUAGE_LIST[@]}")
