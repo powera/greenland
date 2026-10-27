@@ -40,6 +40,7 @@ from storage.translation_helpers import (
     get_translation,
 )
 from langtools.dialect_overrides import get_base_language
+from langtools.en.conjugation import expand_verb_forms
 from exports.wireword.data_models import ExportStats, create_export_stats
 from exports.wireword.gendered_forms import bulk_gender_variants, build_gendered_forms
 from exports.wireword.readings import (
@@ -1011,10 +1012,11 @@ class WirewordExporter:
         """
         Look up the English translation for a grammatical form from pre-fetched data.
 
-        Two mappings are supported, both from Lithuanian:
+        Supported mappings:
 
-        * Verb conjugations map slot-for-slot: ``verb/lt_1s_present`` ->
-          ``verb/en_1s_present``.
+        * Lithuanian and Spanish verb conjugations map slot-for-slot:
+          ``verb/es_1s_present`` -> ``verb/en_1s_present``. Spanish gerunds
+          use the English present participle slot.
         * Adjective *degree* forms collapse: Lithuanian carries case, number and
           gender on a comparative (``adjective/lt_comparative_nominative_plural_f``)
           where English has the single ``adjective/en_comparative``.  Every
@@ -1034,6 +1036,12 @@ class WirewordExporter:
         """
         if grammatical_form.startswith("verb/lt_"):
             english_form_key = grammatical_form.replace("verb/lt_", "verb/en_")
+            if english_form_key.endswith("_imperative"):
+                english_form_key = english_form_key.removesuffix("_imperative") + "_imp"
+        elif grammatical_form.startswith(("verb/es_", "verb/es-419_")):
+            spanish_slot = grammatical_form.split("_", 1)[1]
+            english_slot = "present_participle" if spanish_slot == "gerund" else spanish_slot
+            english_form_key = f"verb/en_{english_slot}"
         elif grammatical_form.startswith("adjective/lt_comparative_"):
             english_form_key = "adjective/en_comparative"
         elif grammatical_form.startswith("adjective/lt_superlative_"):
@@ -1044,7 +1052,36 @@ class WirewordExporter:
 
         # Look up from pre-fetched data
         lemma_forms = english_forms_by_lemma.get(lemma_id, {})
-        return lemma_forms.get(english_form_key)
+        stored_label = lemma_forms.get(english_form_key)
+        if stored_label:
+            return stored_label
+        if not english_form_key.startswith("verb/en_"):
+            return None
+
+        # Older English records contain principal parts rather than every
+        # person slot. Expand those stored parts without making model calls.
+        infinitive = lemma_forms.get("verb/en_infinitive")
+        if not infinitive:
+            return None
+        english_slot = english_form_key.removeprefix("verb/en_")
+        if english_slot.endswith("_conditional"):
+            return f"would {infinitive}"
+        if english_slot == "habitual_past":
+            return f"used to {infinitive}"
+        past = lemma_forms.get("verb/en_3s_past")
+        past_participle = lemma_forms.get("verb/en_past_participle")
+        if not past or not past_participle:
+            return None
+        expanded_forms = expand_verb_forms(
+            {
+                "infinitive": infinitive,
+                "past": past,
+                "past_participle": past_participle,
+                "3s_present": lemma_forms.get("verb/en_3s_present", ""),
+                "present_participle": lemma_forms.get("verb/en_present_participle", ""),
+            }
+        )
+        return expanded_forms.get(english_slot)
 
     def _generate_derivative_noun_phrases(
         self, lemma: Lemma, base_english: str, base_target: str, entry_level: int
