@@ -184,6 +184,74 @@ def test_lithuanian_degree_forms_take_their_english_label_from_the_en_slot() -> 
     )
 
 
+@pytest.mark.parametrize("language", ["es", "es-419"])
+@pytest.mark.parametrize(
+    ("target_slot", "english_slot", "expected"),
+    [
+        ("1s_present", "1s_present", "I eat"),
+        ("2p_past", "2p_past", "you ate"),
+        ("3p_future", "3p_future", "they will eat"),
+        ("gerund", "present_participle", "eating"),
+        ("past_participle", "past_participle", "eaten"),
+    ],
+)
+def test_spanish_verb_forms_use_stored_english_labels(
+    language: str, target_slot: str, english_slot: str, expected: str
+) -> None:
+    exporter = WirewordExporter(language=language)
+    english_forms = {7: {f"verb/en_{english_slot}": expected}}
+    assert (
+        exporter._get_english_translation_from_prefetched(
+            english_forms, 7, f"verb/{language}_{target_slot}"
+        )
+        == expected
+    )
+    assert (
+        exporter._get_english_translation_from_prefetched(
+            english_forms, 8, f"verb/{language}_{target_slot}"
+        )
+        is None
+    )
+
+
+@pytest.mark.parametrize(
+    ("target_slot", "expected"),
+    [
+        ("verb/es_1s_past", "did"),
+        ("verb/es-419_1p_future", "will do"),
+        ("verb/lt_2s_imperative", "do"),
+        ("verb/lt_1p_conditional", "would do"),
+        ("verb/lt_habitual_past", "used to do"),
+    ],
+)
+def test_compact_english_records_supply_missing_person_and_tense_labels(
+    target_slot: str, expected: str
+) -> None:
+    exporter = WirewordExporter(language="lt")
+    english_forms = {
+        7: {
+            "verb/en_infinitive": "do",
+            "verb/en_3s_present": "does",
+            "verb/en_3s_past": "did",
+            "verb/en_past_participle": "done",
+        }
+    }
+    assert (
+        exporter._get_english_translation_from_prefetched(english_forms, 7, target_slot) == expected
+    )
+
+
+def test_compact_english_be_retains_person_specific_past() -> None:
+    exporter = WirewordExporter(language="es")
+    english_forms = {
+        7: {"verb/en_infinitive": "be", "verb/en_3s_past": "was", "verb/en_past_participle": "been"}
+    }
+    assert (
+        exporter._get_english_translation_from_prefetched(english_forms, 7, "verb/es_2s_past")
+        == "were"
+    )
+
+
 def test_unmapped_languages_still_fall_back_to_a_generated_label() -> None:
     exporter = WirewordExporter(language="fr")
 

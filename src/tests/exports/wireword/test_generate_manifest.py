@@ -337,6 +337,18 @@ def test_generate_manifest_zh_tw_advertises_no_voices_yet(tmp_path: Path) -> Non
     assert manifest["config"]["default_voice"] is None
 
 
+def test_generate_manifest_es_419_advertises_recorded_voices(tmp_path: Path) -> None:
+    """Latin American Spanish exposes its own Maria and Carlos recordings."""
+    _write_level_file(tmp_path)
+
+    success, manifest_path = generate_manifest(str(tmp_path), "es-419")
+
+    assert success
+    manifest = _load_manifest(manifest_path)
+    assert manifest["config"]["available_voices"] == ["maria", "carlos"]
+    assert manifest["config"]["default_voice"] == "maria"
+
+
 def test_slugify_language_name_joins_parenthesized_names() -> None:
     """Display names with punctuation become underscore-joined identifiers.
 
