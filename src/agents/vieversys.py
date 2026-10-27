@@ -68,6 +68,14 @@ from audiotools import s3_ops
 from audiotools.manifest_rebuild import write_manifest_for_directory
 from audiotools.review_records import clear_review_verdict, find_existing_review
 from langtools.dialect_overrides import get_translation_target_dialects
+from langtools.dialect_overrides import get_translation_language
+from audiotools.lemma_audio import (
+    LemmaAudioTarget,
+    audio_target,
+    generate_lemma_audio_targets,
+    lemma_audio_targets,
+    reusable_recording,
+)
 from storage.backend import create_session as create_backend_session
 from storage.backend.config import BackendType, DataSourceConfig
 from storage.models.schema import (
@@ -170,7 +178,9 @@ class VieversysAgent:
         Returns:
             Translation text or None if not available
         """
-        return cast(Optional[str], get_translation(session, lemma, language_code))
+        return cast(
+            Optional[str], get_translation(session, lemma, get_translation_language(language_code))
+        )
 
     def _upload_to_staging_path(
         self,
@@ -242,6 +252,7 @@ class VieversysAgent:
         language_code: str,
         voices: Sequence[GptVoice],
         create_review_record: bool = True,
+        audio_slot: Optional[str] = None,
     ) -> Dict[str, Any]:
         """
         Generate audio files for a lemma in a specific language with multiple voices.
@@ -257,7 +268,11 @@ class VieversysAgent:
             Dict with generation results
         """
         # Get translation text
-        text = self.get_translation_text(session, lemma, language_code)
+        text = (
+            audio_target(session, lemma, language_code, audio_slot).text
+            if audio_slot is not None
+            else self.get_translation_text(session, lemma, language_code)
+        )
         if not text:
             logger.warning(f"No {language_code} translation for lemma {lemma.guid}")
             return {
@@ -279,15 +294,15 @@ class VieversysAgent:
         for gpt_voice in voices:
             # Check if audio already exists for this lemma/language/voice combination
             if self.skip_existing:
-                existing = (
-                    session.query(AudioQualityReview)
-                    .filter_by(
-                        guid=lemma.guid,
-                        language_code=language_code,
-                        voice_name=gpt_voice.path_name,
-                    )
-                    .filter(AudioQualityReview.status != "needs_replacement")
-                    .first()
+                existing = reusable_recording(
+                    session,
+                    lemma,
+                    language_code,
+                    gpt_voice.path_name,
+                    LemmaAudioTarget(audio_slot, text),
+                    self.output_dir,
+                    require_upload=self.upload_s3,
+                    require_approved=self.auto_approve,
                 )
                 if existing:
                     logger.info(
@@ -326,10 +341,8 @@ class VieversysAgent:
                 )
                 continue
 
-            # Create filename and save
-            # Use sanitized text for filename (simple version - just lowercase and replace spaces)
-            safe_text = text.lower().replace(" ", "_")[:50]  # Limit length
-            filename = f"{lemma.guid}_{safe_text}.mp3"
+            # Content addresses preserve assets still referenced by other slots.
+            filename = f"{hashlib.md5(result.audio_data).hexdigest()}.mp3"
 
             # Create language/voice subdirectories using path_name (e.g., "ruta", "jonas")
             voice_dir = self.output_dir / language_code / gpt_voice.path_name
@@ -360,7 +373,7 @@ class VieversysAgent:
                     expected_text=text,
                     guid=lemma.guid,
                     sentence_id=None,
-                    grammatical_form=None,
+                    grammatical_form=audio_slot,
                     generation_params={
                         "model": result.model,
                         "openai_voice": gpt_voice.openai_voice_name,
@@ -408,6 +421,7 @@ class VieversysAgent:
                     s3_staging_url=s3_staging_url,
                     s3_staging_manifest_url=s3_staging_manifest_url,
                     s3_prod_url=s3_prod_url,
+                    audio_slot=audio_slot,
                 )
 
             voices_list.append(
@@ -441,6 +455,7 @@ class VieversysAgent:
         s3_staging_url: Optional[str] = None,
         s3_staging_manifest_url: Optional[str] = None,
         s3_prod_url: Optional[str] = None,
+        audio_slot: Optional[str] = None,
     ) -> None:
         """Create AudioQualityReview record for generated audio."""
         # Determine status based on auto_approve setting
@@ -454,7 +469,7 @@ class VieversysAgent:
             language_code=language_code,
             voice_name=voice_name,
             guid=lemma.guid,
-            grammatical_form=None,  # Base form
+            grammatical_form=audio_slot,  # Base form
         )
 
         if existing:
@@ -478,7 +493,7 @@ class VieversysAgent:
                 sentence_id=None,  # This is lemma audio, not sentence audio
                 language_code=language_code,
                 voice_name=voice_name,
-                grammatical_form=None,  # Base form (not generating derivative forms)
+                grammatical_form=audio_slot,  # Base form (not generating derivative forms)
                 filename=filename,
                 expected_text=text,
                 manifest_md5=md5_hash,
@@ -732,6 +747,7 @@ class VieversysAgent:
         lemma: Lemma,
         language_code: str,
         voice_names: List[str],
+        audio_slot: Optional[str] = None,
     ) -> Dict[str, Any]:
         """
         Generate audio for a lemma using a cloud TTS engine (Polly, Azure, or Google).
@@ -745,7 +761,11 @@ class VieversysAgent:
         Returns:
             Dict with generation results
         """
-        text = self.get_translation_text(session, lemma, language_code)
+        text = (
+            audio_target(session, lemma, language_code, audio_slot).text
+            if audio_slot is not None
+            else self.get_translation_text(session, lemma, language_code)
+        )
         if not text:
             logger.warning(f"No {language_code} translation for lemma {lemma.guid}")
             return {
@@ -766,15 +786,15 @@ class VieversysAgent:
         for voice_name in voice_names:
             # Check if audio already exists
             if self.skip_existing:
-                existing = (
-                    session.query(AudioQualityReview)
-                    .filter_by(
-                        guid=lemma.guid,
-                        language_code=language_code,
-                        voice_name=voice_name,
-                    )
-                    .filter(AudioQualityReview.status != "needs_replacement")
-                    .first()
+                existing = reusable_recording(
+                    session,
+                    lemma,
+                    language_code,
+                    voice_name,
+                    LemmaAudioTarget(audio_slot, text),
+                    self.output_dir,
+                    require_upload=self.upload_s3,
+                    require_approved=self.auto_approve,
                 )
                 if existing:
                     logger.info(
@@ -804,9 +824,8 @@ class VieversysAgent:
                 )
                 continue
 
-            # Save and process audio file
-            safe_text = text.lower().replace(" ", "_")[:50]
-            filename = f"{lemma.guid}_{safe_text}.mp3"
+            # Content addresses preserve assets still referenced by other slots.
+            filename = f"{hashlib.md5(result.audio_data).hexdigest()}.mp3"
 
             voice_dir = self.output_dir / language_code / voice_name
             voice_dir.mkdir(parents=True, exist_ok=True)
@@ -830,7 +849,7 @@ class VieversysAgent:
                     expected_text=text,
                     guid=lemma.guid,
                     sentence_id=None,
-                    grammatical_form=None,
+                    grammatical_form=audio_slot,
                     generation_params={
                         "model": result.model,
                         "engine": self.tts_engine,
@@ -868,6 +887,7 @@ class VieversysAgent:
                 s3_staging_url=s3_staging_url,
                 s3_staging_manifest_url=s3_staging_manifest_url,
                 s3_prod_url=s3_prod_url,
+                audio_slot=audio_slot,
             )
 
             results["voices"].append(
@@ -1024,6 +1044,8 @@ class VieversysAgent:
         lemmas: Optional[List[Lemma]] = None,
         voices: Optional[List[GptVoice]] = None,
         cloud_voice_names: Optional[List[str]] = None,
+        include_variants: bool = True,
+        include_forms: bool = False,
     ) -> Dict[str, Any]:
         """
         Generate audio for a batch of lemmas.
@@ -1039,6 +1061,30 @@ class VieversysAgent:
         """
         session = self.get_session()
         use_cloud = self.tts_engine in ("polly", "azure", "google", GEMINI_ENGINE)
+
+        if use_cloud and not cloud_voice_names:
+            if self.tts_engine == "polly":
+                cloud_voice_names = [
+                    voice.voice_id for voice in PollyVoice.get_voices_for_language(language_code)
+                ]
+            elif self.tts_engine == "azure":
+                cloud_voice_names = [
+                    voice.name.lower()
+                    for voice in AzureVoice.get_voices_for_language(language_code)
+                ]
+            elif self.tts_engine == "google":
+                cloud_voice_names = [
+                    voice.name.lower()
+                    for voice in GoogleTtsVoice.get_voices_for_language(language_code)
+                ]
+            else:
+                supported = GeminiTtsVoice.get_voices_for_language(language_code)
+                cloud_voice_names = [
+                    voice.storage_name for voice in DEFAULT_GEMINI_VOICES if voice in supported
+                ]
+            if not cloud_voice_names:
+                session.close()
+                raise ValueError(f"No {self.tts_engine} voices configured for {language_code}")
 
         if not use_cloud:
             voices = voices or DEFAULT_GPT_VOICES.get(
@@ -1092,14 +1138,23 @@ class VieversysAgent:
             for i, lemma in enumerate(lemmas, 1):
                 logger.info(f"[{i}/{len(lemmas)}] Processing {lemma.guid}")
 
-                if use_cloud and cloud_voice_names:
-                    result = self.generate_audio_for_lemma_cloud(
-                        session, lemma, language_code, cloud_voice_names
+                def generate_target(target: LemmaAudioTarget) -> Dict[str, Any]:
+                    if use_cloud and cloud_voice_names:
+                        return self.generate_audio_for_lemma_cloud(
+                            session, lemma, language_code, cloud_voice_names, audio_slot=target.slot
+                        )
+                    return self.generate_audio_for_lemma(
+                        session,
+                        lemma,
+                        language_code,
+                        voices or [],
+                        create_review_record=True,
+                        audio_slot=target.slot,
                     )
-                else:
-                    result = self.generate_audio_for_lemma(
-                        session, lemma, language_code, voices or [], create_review_record=True
-                    )
+
+                result = generate_lemma_audio_targets(
+                    session, lemma, language_code, generate_target, include_variants, include_forms
+                )
 
                 results["lemmas"].append(result)
                 if result["success"]:
@@ -1263,6 +1318,18 @@ def get_argument_parser() -> argparse.ArgumentParser:
         choices=["check-existing", "populate-only", "regenerate", "coverage"],
         default="coverage",
         help="Operation mode: check-existing (list existing audio), populate-only (generate missing only), regenerate (delete and regenerate), coverage (report only, default)",
+    )
+
+    parser.add_argument(
+        "--include-forms",
+        action="store_true",
+        help="Generate stored inflections as well as base words",
+    )
+    parser.add_argument(
+        "--include-variants",
+        action=argparse.BooleanOptionalAction,
+        default=True,
+        help="Include stored gender counterparts (default)",
     )
 
     # Vieversys-specific arguments
@@ -1486,7 +1553,7 @@ def main() -> int:
                 lang_results = lang_query.all()
                 print(f"\nLanguage: {language_code}")
                 for voice_name, count in lang_results:
-                    print(f"  {voice_name}: {count} audio files")
+                    print(f"  {voice_name}: {count} audio references (slots may share assets)")
             else:
                 all_query = session.query(
                     AudioQualityReview.language_code,
@@ -1499,7 +1566,7 @@ def main() -> int:
                     if lang_code != current_lang:
                         print(f"\n{lang_code}:")
                         current_lang = lang_code
-                    print(f"  {voice_name}: {count} audio files")
+                    print(f"  {voice_name}: {count} audio references (slots may share assets)")
         finally:
             session.close()
         return 0
@@ -1613,27 +1680,35 @@ def main() -> int:
                     voice.path_name for voice in DEFAULT_GPT_VOICES.get(language_code, [])
                 ]
 
-            lemma_guids = [lemma.guid for lemma in lemmas_with_translation]
-            total_voice_combinations = lemma_count * len(selected_voice_names)
+            total_voice_combinations = 0
             existing_voice_combinations = 0
-
-            if lemma_guids and selected_voice_names:
-                existing_rows = (
-                    session.query(AudioQualityReview.guid, AudioQualityReview.voice_name)
-                    .filter(
-                        AudioQualityReview.language_code == language_code,
-                        AudioQualityReview.guid.in_(lemma_guids),
-                        AudioQualityReview.voice_name.in_(selected_voice_names),
+            for selected_lemma in lemmas_with_translation:
+                distinct_targets = {
+                    target.text: target
+                    for target in lemma_audio_targets(
+                        session,
+                        selected_lemma,
+                        language_code,
+                        args.include_variants,
+                        args.include_forms,
                     )
-                    .distinct()
-                    .all()
-                )
-                existing_voice_combinations = len(existing_rows)
-
-            missing_voice_combinations = max(
-                0,
-                total_voice_combinations - existing_voice_combinations,
-            )
+                }
+                for planned_target in distinct_targets.values():
+                    for selected_voice in selected_voice_names:
+                        total_voice_combinations += 1
+                        if reusable_recording(
+                            session,
+                            selected_lemma,
+                            language_code,
+                            selected_voice,
+                            planned_target,
+                            agent.output_dir,
+                            require_upload=agent.upload_s3,
+                            require_approved=agent.auto_approve,
+                            link=False,
+                        ):
+                            existing_voice_combinations += 1
+            missing_voice_combinations = total_voice_combinations - existing_voice_combinations
         finally:
             session.close()
 
@@ -1643,7 +1718,9 @@ def main() -> int:
             voice_count = len(voices)
         else:
             voice_count = len(DEFAULT_GPT_VOICES.get(language_code, []))
-        estimated_calls = lemma_count * voice_count
+        estimated_calls = (
+            missing_voice_combinations if args.mode == "populate-only" else total_voice_combinations
+        )
 
         engine_label = tts_engine.title() if tts_engine != "openai" else "OpenAI"
 
@@ -1658,7 +1735,7 @@ def main() -> int:
             )
             if args.mode == "populate-only":
                 logger.info(
-                    "Populate-only dry-run: %s/%s lemma+voice combinations already have audio; "
+                    "Populate-only dry-run: %s/%s distinct text+voice combinations already have audio; "
                     "%s combinations would be generated.",
                     existing_voice_combinations,
                     total_voice_combinations,
@@ -1676,7 +1753,7 @@ def main() -> int:
             if args.mode == "populate-only":
                 confirmation_message = (
                     f"{confirmation_message}\n"
-                    f"Existing lemma+voice audio combinations: "
+                    f"Existing distinct text+voice audio combinations: "
                     f"{existing_voice_combinations}/{total_voice_combinations}\n"
                     f"Combinations to generate: {missing_voice_combinations}"
                 )
@@ -1696,6 +1773,8 @@ def main() -> int:
             lemmas=lemmas,
             voices=voices,
             cloud_voice_names=cloud_voice_names,
+            include_variants=args.include_variants,
+            include_forms=args.include_forms,
         )
         duration = (datetime.now() - start_time).total_seconds()
 

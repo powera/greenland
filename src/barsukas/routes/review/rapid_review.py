@@ -25,6 +25,7 @@ from flask.typing import ResponseReturnValue
 from sqlalchemy import and_, or_
 from sqlalchemy.orm import joinedload
 
+from audiotools.review_records import propagate_asset_review
 from barsukas.helpers.audio_helpers import sync_rejection_to_s3, validate_audio_translation
 from langtools.zh.pinyin_helper import generate_pinyin
 from storage.models.schema import AudioQualityReview, Lemma, Sentence, SentenceTranslation
@@ -200,6 +201,7 @@ def submit(review_id: int) -> ResponseReturnValue:
                 f"Failed to sync rejection state for audio {review_id}: {sync_message}"
             )
 
+        propagate_asset_review(g.db, review)
         g.db.commit()
 
         # Get next file based on same filters
@@ -271,7 +273,11 @@ def submit(review_id: int) -> ResponseReturnValue:
 
             # Validate audio file against current translation
             validation = validate_audio_translation(
-                g.db, next_review.guid, next_review.expected_text, next_review.language_code
+                g.db,
+                next_review.guid,
+                next_review.expected_text,
+                next_review.language_code,
+                next_review.grammatical_form,
             )
 
             # Get English translation for sentence audio
@@ -390,7 +396,11 @@ def skip(review_id: int) -> ResponseReturnValue:
 
             # Validate audio file against current translation
             validation = validate_audio_translation(
-                g.db, next_review.guid, next_review.expected_text, next_review.language_code
+                g.db,
+                next_review.guid,
+                next_review.expected_text,
+                next_review.language_code,
+                next_review.grammatical_form,
             )
 
             # Get English translation for sentence audio
@@ -453,6 +463,7 @@ def bad_translation(review_id: int) -> ResponseReturnValue:
                 f"Failed to sync rejection state for audio {review_id}: {sync_message}"
             )
 
+        propagate_asset_review(g.db, review)
         g.db.commit()
 
         # Get next file based on same filters
@@ -525,7 +536,11 @@ def bad_translation(review_id: int) -> ResponseReturnValue:
 
             # Validate audio file against current translation
             validation = validate_audio_translation(
-                g.db, next_review.guid, next_review.expected_text, next_review.language_code
+                g.db,
+                next_review.guid,
+                next_review.expected_text,
+                next_review.language_code,
+                next_review.grammatical_form,
             )
 
             # Get English translation for sentence audio

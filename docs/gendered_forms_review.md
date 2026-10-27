@@ -181,3 +181,9 @@ GREENLAND_TEST_MODE=1 PYTHONPATH=src python migrations/20261024_gender_variants.
 The preview includes selected existing records, grammatical/concept facts,
 reference counts, and the exact seed vocabulary. It does not take a backup,
 change SQLite pragmas, or load a writable storage session.
+
+## October 27 implementation update
+
+The generation gap described in the original migration review is now addressed:
+see [gendered_lemma_support.md](gendered_lemma_support.md) for shared assets,
+variant/inflection generation, review behavior, and the remaining data rollout.

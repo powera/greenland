@@ -58,6 +58,14 @@ from audioshoe.qwen import generate_audio as qwen_generate_audio
 from clients.audio import AudioFormat
 from clients.audio.manifest import generate_manifest
 from clients.audio.s3_uploader import S3AudioUploader
+from langtools.dialect_overrides import get_translation_language
+from audiotools.lemma_audio import (
+    LemmaAudioTarget,
+    audio_target,
+    generate_lemma_audio_targets,
+    reusable_recording,
+)
+from audiotools.review_records import clear_review_verdict
 from storage.backend import create_session as create_backend_session
 from storage.backend.config import BackendType, DataSourceConfig
 from storage.models.schema import AudioQualityReview, Lemma, LemmaTranslation
@@ -165,7 +173,9 @@ class StrazdasAgent:
         Returns:
             Translation text or None if not available
         """
-        return cast(Optional[str], get_translation(session, lemma, language_code))
+        return cast(
+            Optional[str], get_translation(session, lemma, get_translation_language(language_code))
+        )
 
     def generate_audio_for_lemma(
         self,
@@ -175,6 +185,8 @@ class StrazdasAgent:
         voices: Sequence[VoiceType],
         create_review_record: bool = True,
         use_ipa: bool = False,
+        audio_slot: Optional[str] = None,
+        skip_existing: bool = True,
     ) -> Dict[str, Any]:
         """
         Generate audio files for a lemma in a specific language with multiple voices.
@@ -191,7 +203,12 @@ class StrazdasAgent:
             Dict with generation results
         """
         # Get translation text
-        text = self.get_translation_text(session, lemma, language_code)
+        target = (
+            audio_target(session, lemma, language_code, audio_slot)
+            if audio_slot is not None
+            else None
+        )
+        text = target.text if target else self.get_translation_text(session, lemma, language_code)
         if not text:
             logger.warning(f"No {language_code} translation for lemma {lemma.guid}")
             return {
@@ -204,7 +221,9 @@ class StrazdasAgent:
         # Check if we should use IPA (only supported for eSpeak)
         ipa_text = None
         if use_ipa and self.tts_backend == TtsBackend.ESPEAK:
-            if hasattr(lemma, "ipa") and lemma.ipa:
+            if target and target.ipa:
+                ipa_text = target.ipa
+            elif audio_slot is None and hasattr(lemma, "ipa") and lemma.ipa:
                 ipa_text = lemma.ipa
                 logger.info(f"Using IPA for generation: {ipa_text}")
 
@@ -220,6 +239,20 @@ class StrazdasAgent:
         }
 
         for voice in voices:
+            voice_name = voice.ui_name if hasattr(voice, "ui_name") else voice.name
+            if skip_existing and not use_ipa:
+                existing = reusable_recording(
+                    session,
+                    lemma,
+                    language_code,
+                    voice_name,
+                    LemmaAudioTarget(audio_slot, text),
+                    self.output_dir,
+                    require_upload=self.upload_s3,
+                )
+                if existing:
+                    voice_results.append({"voice": voice_name, "success": True, "skipped": True})
+                    continue
             logger.info(
                 f"Generating audio: {text} ({language_code}/{voice.name}) "
                 f"[{self.tts_backend.value}]"
@@ -242,9 +275,8 @@ class StrazdasAgent:
                 )
                 continue
 
-            # Create filename and save
-            safe_text = text.lower().replace(" ", "_")[:50]  # Limit length
-            filename = f"{lemma.guid}_{safe_text}.mp3"
+            # Content addresses preserve assets still referenced by other slots.
+            filename = f"{hashlib.md5(result.audio_data).hexdigest()}.mp3"
 
             # Create language/voice subdirectories
             # Use the voice ui_name for unique identification (e.g., "qwen-zh-f1")
@@ -277,7 +309,7 @@ class StrazdasAgent:
                     expected_text=text,
                     guid=lemma.guid,
                     sentence_id=None,
-                    grammatical_form=None,
+                    grammatical_form=audio_slot,
                     generation_params=generation_params,
                 )
 
@@ -309,6 +341,7 @@ class StrazdasAgent:
                     md5_hash,
                     s3_staging_url=s3_staging_url,
                     s3_staging_manifest_url=s3_staging_manifest_url,
+                    audio_slot=audio_slot,
                 )
 
             voice_results.append(
@@ -322,6 +355,7 @@ class StrazdasAgent:
                 }
             )
 
+        results["success"] = all(voice_result.get("success") for voice_result in voice_results)
         return results
 
     def _generate_audio_with_backend(
@@ -396,6 +430,7 @@ class StrazdasAgent:
         md5_hash: str,
         s3_staging_url: Optional[str] = None,
         s3_staging_manifest_url: Optional[str] = None,
+        audio_slot: Optional[str] = None,
     ) -> None:
         """Create AudioQualityReview record for generated audio."""
         # Check if record already exists
@@ -405,13 +440,14 @@ class StrazdasAgent:
                 guid=lemma.guid,
                 language_code=language_code,
                 voice_name=voice_name,
-                grammatical_form=None,  # Base form
+                grammatical_form=audio_slot,  # Base form
             )
             .first()
         )
 
         if existing:
             # Update existing record
+            clear_review_verdict(existing)
             existing.filename = filename
             existing.expected_text = text
             existing.manifest_md5 = md5_hash
@@ -430,7 +466,7 @@ class StrazdasAgent:
                 sentence_id=None,  # This is lemma audio, not sentence audio
                 language_code=language_code,
                 voice_name=voice_name,
-                grammatical_form=None,  # Base form (not generating derivative forms)
+                grammatical_form=audio_slot,  # Base form (not generating derivative forms)
                 filename=filename,
                 expected_text=text,
                 manifest_md5=md5_hash,
@@ -452,6 +488,9 @@ class StrazdasAgent:
         lemmas: Optional[List[Lemma]] = None,
         voices: Optional[List[VoiceType]] = None,
         use_ipa: bool = False,
+        include_variants: bool = True,
+        include_forms: bool = False,
+        skip_existing: bool = True,
     ) -> Dict[str, Any]:
         """
         Generate audio for a batch of lemmas.
@@ -508,12 +547,22 @@ class StrazdasAgent:
             for i, lemma in enumerate(lemmas, 1):
                 logger.info(f"[{i}/{len(lemmas)}] Processing {lemma.guid}")
 
-                result = self.generate_audio_for_lemma(
+                result = generate_lemma_audio_targets(
                     session,
                     lemma,
                     language_code,
-                    voices,
-                    create_review_record=True,
+                    lambda target: self.generate_audio_for_lemma(
+                        session,
+                        lemma,
+                        language_code,
+                        voices,
+                        create_review_record=True,
+                        use_ipa=use_ipa,
+                        audio_slot=target.slot,
+                        skip_existing=skip_existing,
+                    ),
+                    include_variants,
+                    include_forms,
                     use_ipa=use_ipa,
                 )
 
@@ -541,6 +590,14 @@ def get_argument_parser() -> argparse.ArgumentParser:
     add_backend_args(parser)
 
     # Mode selection
+    parser.add_argument("--include-forms", action="store_true", help="Include stored inflections")
+    parser.add_argument(
+        "--include-variants",
+        action=argparse.BooleanOptionalAction,
+        default=True,
+        help="Include stored gender counterparts",
+    )
+    parser.add_argument("--force", action="store_true", help="Regenerate existing recordings")
     parser.add_argument(
         "--mode",
         choices=["check-existing", "populate-only", "regenerate", "coverage"],
@@ -824,6 +881,9 @@ def main() -> int:
             lemmas=lemmas,
             voices=selected_voices,
             use_ipa=args.use_ipa,
+            include_variants=args.include_variants,
+            include_forms=args.include_forms,
+            skip_existing=not args.force,
         )
         duration = (datetime.now() - start_time).total_seconds()
 

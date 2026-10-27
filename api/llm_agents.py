@@ -201,8 +201,10 @@ def generate_audio(
     *,
     guids: List[str],
     language: str,
+    tts_engine: str = "openai",
     voice: Optional[str] = None,
     include_forms: bool = False,
+    include_variants: bool = True,
     force: bool = False,
     upload_s3: bool = True,
     auto_approve: bool = False,
@@ -214,6 +216,10 @@ def generate_audio(
       - "vieversys" — OpenAI TTS (gpt-4o-mini-tts). Use this for cloud-quality
         audio. Also supports polly/azure/google via server-side config.
       - "strazdas" — eSpeak-NG (offline, robotic).
+
+    Gender counterparts are included by default and share identical spoken text.
+    ``include_forms`` also schedules stored inflections. ``tts_engine`` selects
+    the Vieversys backend (openai, polly, azure, google, or gemini).
 
     ``voice`` selects a single voice (use the ``voice_name`` returned by
     :func:`api.audio.list_voices`, e.g. ``"amina"``). Omit it to generate
@@ -238,8 +244,10 @@ def generate_audio(
             {
                 "guids": guids,
                 "language": language,
+                "tts_engine": tts_engine,
                 "voice": voice,
                 "include_forms": include_forms,
+                "include_variants": include_variants,
                 "force": force,
                 "upload_s3": upload_s3,
                 "auto_approve": auto_approve,

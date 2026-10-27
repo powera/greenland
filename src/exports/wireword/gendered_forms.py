@@ -60,6 +60,37 @@ def build_gendered_forms(
     for field in ("grammar_metadata", "grammatical_forms", "audio"):
         if field in wireword:
             default[field] = wireword[field]
+    # Resolve assets by the stored spoken text. Keep all semantic entries and
+    # their grammar separate, even when they reference the same recording.
+    slots_by_text: Dict[str, List[Optional[str]]] = {}
+
+    def register(text: str, slot: Optional[str]) -> None:
+        slots_by_text.setdefault(text, []).append(slot)
+
+    register(wireword["base_target"], None)
+    ordinary_forms = wireword.get("grammatical_forms", {})
+    if isinstance(ordinary_forms, dict):
+        for slot, form in ordinary_forms.items():
+            if isinstance(form, dict) and form.get("target"):
+                register(form["target"], slot)
+    for registered_gender, registered_variant in target_variants.items():
+        for form in registered_variant["forms"]:
+            register(form["text"], gender_audio_slot(registered_gender, form["grammatical_form"]))
+            if form.get("is_base_form"):
+                register(form["text"], gender_audio_slot(registered_gender))
+
+    def shared_audio(text: str, preferred_slot: Optional[str]) -> Dict[str, str]:
+        recordings: Dict[str, str] = (
+            dict(wireword.get("audio", {})) if text == wireword["base_target"] else {}
+        )
+        for slot in slots_by_text.get(text, []):
+            recordings.update(audio_by_guid_form.get((wireword["guid"], slot), {}))
+        recordings.update(audio_by_guid_form.get((wireword["guid"], preferred_slot), {}))
+        return recordings
+
+    default_audio = shared_audio(default["base_target"], None)
+    if default_audio:
+        default["audio"] = default_audio
     result = [default]
     for gender in ("male", "female"):
         variant = target_variants.get(gender)
@@ -81,14 +112,14 @@ def build_gendered_forms(
         }
         if variant.get("grammatical_gender") is not None:
             entry["grammar_metadata"] = {"grammatical_gender": variant["grammatical_gender"]}
-        base_audio = audio_by_guid_form.get((wireword["guid"], gender_audio_slot(gender)))
+        base_audio = shared_audio(bases[0]["text"], gender_audio_slot(gender))
         if base_audio:
             entry["audio"] = base_audio
         forms: List[Dict[str, Any]] = []
         for form in variant["forms"]:
             exported_form = dict(form)
-            form_audio = audio_by_guid_form.get(
-                (wireword["guid"], gender_audio_slot(gender, form["grammatical_form"]))
+            form_audio = shared_audio(
+                form["text"], gender_audio_slot(gender, form["grammatical_form"])
             )
             if form_audio:
                 exported_form["audio"] = form_audio
