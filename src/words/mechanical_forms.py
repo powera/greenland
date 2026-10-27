@@ -35,6 +35,10 @@ claim the generator derived what it was told.
 
 Existing forms and facts are never overwritten, so re-running is safe and
 additive.
+
+The session-wide pass preloads each batch's builder inputs and bulk-writes
+tokens, forms, derived facts and operation logs. Interactive single-lemma
+generation continues to use the ordinary CRUD path.
 """
 
 import argparse
@@ -60,6 +64,7 @@ from storage.crud.operation_log import log_operation
 from storage.crud.word_token import add_word_token
 from storage.models.schema import DerivativeForm, Lemma
 from storage.models.variant_form import VariantForm
+from words.mechanical_batch import MechanicalBatch, current_batch
 
 __all__ = [
     "BASE_FORM_KEY",
@@ -199,69 +204,78 @@ def generate_variant_forms(
 
     Only inflections are ever written; a base form is read, never created.
     """
+    from sqlalchemy.orm import selectinload
+
+    if batch_size is not None and batch_size < 1:
+        raise ValueError("batch_size must be positive")
     counts = {"variants_seen": 0, "forms_added": 0, "rules_declined": 0}
-
-    base_forms: List[VariantForm] = (
-        session.query(VariantForm)
-        .filter(
-            VariantForm.language_code == language_code,
-            VariantForm.is_base_form.is_(True),
+    base_ids = [
+        row.id
+        for row in session.query(VariantForm.id)
+        .filter(VariantForm.language_code == language_code, VariantForm.is_base_form.is_(True))
+        .order_by(VariantForm.id)
+    ]
+    chunk_size = batch_size or 100
+    for start in range(0, len(base_ids), chunk_size):
+        base_forms = (
+            session.query(VariantForm)
+            .options(selectinload(VariantForm.lemma))
+            .filter(VariantForm.id.in_(base_ids[start : start + chunk_size]))
+            .order_by(VariantForm.id)
+            .all()
         )
-        .all()
-    )
-
-    for base_form in base_forms:
-        if batch_size and counts["variants_seen"] and counts["variants_seen"] % batch_size == 0:
-            if not dry_run:
-                session.commit()
-        counts["variants_seen"] += 1
-        lemma = base_form.lemma
-        if lemma is None:
-            continue
-
-        paradigm = _build_variant_paradigm(session, lemma, base_form, language_code)
-        if not paradigm:
-            counts["rules_declined"] += 1
-            continue
-
-        pos_type = lemma.pos_type.lower()
-        existing = {
-            row.grammatical_form
-            for row in session.query(VariantForm).filter(
-                VariantForm.lemma_id == lemma.id,
-                VariantForm.language_code == language_code,
-                VariantForm.variant_kind == base_form.variant_kind,
-                VariantForm.variant_key == base_form.variant_key,
+        lemma_ids = sorted({row.lemma_id for row in base_forms})
+        existing: dict[tuple[int, str, str], set[str]] = {}
+        for row in session.query(
+            VariantForm.lemma_id,
+            VariantForm.variant_kind,
+            VariantForm.variant_key,
+            VariantForm.grammatical_form,
+        ).filter(VariantForm.lemma_id.in_(lemma_ids), VariantForm.language_code == language_code):
+            existing.setdefault((row.lemma_id, row.variant_kind, row.variant_key), set()).add(
+                row.grammatical_form
             )
-        }
-
-        for form_key, form_text in paradigm.items():
-            grammatical_form = resolve_grammatical_form(language_code, pos_type, form_key)
-            if grammatical_form is None or grammatical_form in existing:
-                continue
-            if not form_text or not form_text.strip():
-                continue
-
-            if not dry_run:
-                token = add_word_token(session, form_text, language_code)
-                session.add(
-                    VariantForm(
-                        lemma_id=lemma.id,
-                        language_code=language_code,
-                        variant_kind=base_form.variant_kind,
-                        variant_key=base_form.variant_key,
-                        grammatical_form=grammatical_form,
-                        variant_form_text=form_text,
-                        word_token_id=token.id,
-                        # Only the row already in the database is the base form;
-                        # everything generated here is an inflection of it.
-                        is_base_form=False,
-                        verified=False,
-                        grammatical_gender=base_form.grammatical_gender,
-                    )
+        with MechanicalBatch(session, lemma_ids, language_code) as batch:
+            for base_form in base_forms:
+                counts["variants_seen"] += 1
+                lemma = base_form.lemma
+                if lemma is None:
+                    continue
+                paradigm = _build_variant_paradigm(session, lemma, base_form, language_code)
+                if not paradigm:
+                    counts["rules_declined"] += 1
+                    continue
+                slots = existing.setdefault(
+                    (lemma.id, base_form.variant_kind, base_form.variant_key), set()
                 )
-            counts["forms_added"] += 1
-
+                for form_key, form_text in paradigm.items():
+                    grammatical_form = resolve_grammatical_form(
+                        language_code, lemma.pos_type.lower(), form_key
+                    )
+                    if grammatical_form is None or grammatical_form in slots:
+                        continue
+                    if not form_text or not form_text.strip():
+                        continue
+                    if not dry_run:
+                        batch.variants.append(
+                            dict(
+                                lemma_id=lemma.id,
+                                language_code=language_code,
+                                variant_kind=base_form.variant_kind,
+                                variant_key=base_form.variant_key,
+                                grammatical_form=grammatical_form,
+                                variant_form_text=form_text,
+                                is_base_form=False,
+                                verified=False,
+                                grammatical_gender=base_form.grammatical_gender,
+                            )
+                        )
+                        slots.add(grammatical_form)
+                    counts["forms_added"] += 1
+            if not dry_run:
+                batch.flush()
+        if batch_size and not dry_run:
+            session.commit()
     return counts
 
 
@@ -275,7 +289,7 @@ def generate(
 
     Opens a session from *config* and hands it to :func:`generate_for_session`.
     Callers that already hold a session -- the golden loader works against an
-    in-memory database that no DataSourceConfig can name -- should call that
+    temporary database owned by the JSONL storage -- should call that
     directly.
 
     Returns per-language counts of lemmas examined, forms written, and lemmas
@@ -304,6 +318,7 @@ def generate_lemma_forms(
     ``forms_added``, ``rules_declined`` and ``facts_added``.
     """
     counts = {"lemmas_written": 0, "forms_added": 0, "rules_declined": 0, "facts_added": 0}
+    batch = current_batch(session)
     pos_type = lemma.pos_type.lower()
     if pos_type not in SUPPORTED.get(language_code, ()):
         counts["rules_declined"] += 1
@@ -323,26 +338,38 @@ def generate_lemma_forms(
         fact_value = metadata.get(metadata_key)
         if not fact_value:
             continue
-        if get_grammar_fact_value(session, lemma.id, language_code, fact_type):
+        value = (
+            batch.inputs.fact_value(lemma.id, language_code, fact_type)
+            if batch
+            else get_grammar_fact_value(session, lemma.id, language_code, fact_type)
+        )
+        if value:
             continue
         if not dry_run:
-            add_grammar_fact(
-                session,
-                lemma_id=lemma.id,
-                language_code=language_code,
-                fact_type=fact_type,
-                fact_value=fact_value,
-                notes="derived mechanically by generate_mechanical_forms",
-            )
+            if batch:
+                batch.add_fact(lemma.id, fact_type, fact_value)
+            else:
+                add_grammar_fact(
+                    session,
+                    lemma_id=lemma.id,
+                    language_code=language_code,
+                    fact_type=fact_type,
+                    fact_value=fact_value,
+                    notes="derived mechanically by generate_mechanical_forms",
+                )
         counts["facts_added"] += 1
 
-    existing = {
-        row.grammatical_form
-        for row in session.query(DerivativeForm).filter(
-            DerivativeForm.lemma_id == lemma.id,
-            DerivativeForm.language_code == language_code,
-        )
-    }
+    existing = (
+        set(batch.inputs.forms.get((lemma.id, language_code), {}))
+        if batch
+        else {
+            row.grammatical_form
+            for row in session.query(DerivativeForm).filter(
+                DerivativeForm.lemma_id == lemma.id,
+                DerivativeForm.language_code == language_code,
+            )
+        }
+    )
 
     added = 0
     for form_key, form_text in paradigm.items():
@@ -353,37 +380,53 @@ def generate_lemma_forms(
             continue
 
         if not dry_run:
-            token = add_word_token(session, form_text, language_code)
-            session.add(
-                DerivativeForm(
-                    lemma_id=lemma.id,
-                    derivative_form_text=form_text,
-                    word_token_id=token.id,
-                    language_code=language_code,
-                    grammatical_form=grammatical_form,
-                    is_base_form=(form_key == BASE_FORM_KEY.get((language_code, pos_type))),
-                    verified=False,
+            if batch:
+                batch.forms.append(
+                    dict(
+                        lemma_id=lemma.id,
+                        derivative_form_text=form_text,
+                        language_code=language_code,
+                        grammatical_form=grammatical_form,
+                        is_base_form=(form_key == BASE_FORM_KEY.get((language_code, pos_type))),
+                        verified=False,
+                    )
                 )
-            )
+            else:
+                token = add_word_token(session, form_text, language_code)
+                session.add(
+                    DerivativeForm(
+                        lemma_id=lemma.id,
+                        derivative_form_text=form_text,
+                        word_token_id=token.id,
+                        language_code=language_code,
+                        grammatical_form=grammatical_form,
+                        is_base_form=(form_key == BASE_FORM_KEY.get((language_code, pos_type))),
+                        verified=False,
+                    )
+                )
         added += 1
 
     if added:
         counts["lemmas_written"] += 1
         counts["forms_added"] += added
         if not dry_run:
-            log_operation(
-                session,
-                operation_type="mechanical_forms_generated",
-                source="generate_mechanical_forms",
-                entity_type="derivative_form",
-                lemma_id=lemma.id,
-                details={
-                    "language_code": language_code,
-                    "pos_type": pos_type,
-                    "forms_added": added,
-                    "generator": f"langtools.{language_code} {pos_type}",
-                },
-            )
+            details = {
+                "language_code": language_code,
+                "pos_type": pos_type,
+                "forms_added": added,
+                "generator": f"langtools.{language_code} {pos_type}",
+            }
+            if batch:
+                batch.add_log(lemma.id, details)
+            else:
+                log_operation(
+                    session,
+                    operation_type="mechanical_forms_generated",
+                    source="generate_mechanical_forms",
+                    entity_type="derivative_form",
+                    lemma_id=lemma.id,
+                    details=details,
+                )
     return counts
 
 
@@ -405,6 +448,7 @@ def generate_for_session(
 
     When batch_size is provided, commit after that many lemmas/variants so
     hosted startup does not hold one write transaction for the full dictionary.
+    Otherwise, plan/write in batches of 100 while committing only at the end.
     Existing forms and facts are never overwritten, so this is additive and
     safe to re-run against a database that has already been generated into.
     """
@@ -426,16 +470,27 @@ def generate_for_session(
         }
         stats[language_code] = counts
 
-        lemmas: List[Lemma] = (
-            session.query(Lemma).filter(Lemma.pos_type.in_(language_pos_types)).all()
-        )
-
-        for lemma in lemmas:
-            counts["lemmas_seen"] += 1
-            lemma_counts = generate_lemma_forms(session, lemma, language_code, dry_run=dry_run)
-            for count_key, count_value in lemma_counts.items():
-                counts[count_key] += count_value
-            if batch_size and counts["lemmas_seen"] % batch_size == 0 and not dry_run:
+        lemma_ids = [
+            row.id
+            for row in session.query(Lemma.id)
+            .filter(Lemma.pos_type.in_(language_pos_types))
+            .order_by(Lemma.id)
+        ]
+        chunk_size = batch_size or 100
+        for start in range(0, len(lemma_ids), chunk_size):
+            chunk_ids = lemma_ids[start : start + chunk_size]
+            lemmas = session.query(Lemma).filter(Lemma.id.in_(chunk_ids)).order_by(Lemma.id).all()
+            with MechanicalBatch(session, chunk_ids, language_code) as batch:
+                for lemma in lemmas:
+                    counts["lemmas_seen"] += 1
+                    lemma_counts = generate_lemma_forms(
+                        session, lemma, language_code, dry_run=dry_run
+                    )
+                    for count_key, count_value in lemma_counts.items():
+                        counts[count_key] += count_value
+                if not dry_run:
+                    batch.flush()
+            if batch_size and not dry_run:
                 session.commit()
 
         # A variant inflects by the same rules as the lemma it belongs to,

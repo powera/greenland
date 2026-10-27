@@ -109,6 +109,8 @@ class GoldenMechanicalFormsTest(unittest.TestCase):
             with self.assertRaisesRegex(RuntimeError, "interrupted"):
                 generate_for_session(self.session, languages=["en"], batch_size=2)
         self.session.rollback()
+        self.assertNotIn("mechanical_batch", self.session.info)
+        self.assertNotIn("mechanical_inputs", self.session.info)
         self.assertEqual(self.session.query(DerivativeForm).count(), 8)
         generate_for_session(self.session, languages=["en"], batch_size=2)
         self.assertEqual(self.session.query(DerivativeForm).count(), 12)
