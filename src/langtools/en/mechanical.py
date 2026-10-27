@@ -64,6 +64,11 @@ def _stored_plural(session: Session, lemma: Any) -> Optional[str]:
     # Imported lazily, like read_facts: langtools does not load storage models
     # at import time.
     from storage.models.schema import DerivativeForm
+    from langtools.mechanical_inputs import current_inputs
+
+    snapshot = current_inputs(session)
+    if snapshot is not None:
+        return snapshot.forms.get((lemma.id, "en"), {}).get("noun/en_plural")
 
     row = (
         session.query(DerivativeForm.derivative_form_text)

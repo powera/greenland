@@ -49,6 +49,11 @@ def read_facts(
 ) -> Tuple[Optional[str], ...]:
     """Read several grammar facts for a lemma in one call."""
     from storage.crud.grammar_fact import get_grammar_fact_value
+    from langtools.mechanical_inputs import current_inputs
+
+    snapshot = current_inputs(session)
+    if snapshot is not None:
+        return tuple(snapshot.fact_value(lemma_id, language_code, name) for name in fact_types)
 
     return tuple(
         get_grammar_fact_value(session, lemma_id, language_code, fact_type)
@@ -106,6 +111,7 @@ def base_form_keys() -> Dict[Tuple[str, str], str]:
 def build_for_lemma_with_metadata(session: Session, lemma: Any, language_code: str) -> Paradigm:
     """Return the mechanical paradigm for *lemma* and its paradigm metadata."""
     from storage.translation_helpers import get_translation
+    from langtools.mechanical_inputs import current_inputs
 
     module = _modules().get(language_code)
     pos_type = lemma.pos_type.lower()
@@ -115,7 +121,13 @@ def build_for_lemma_with_metadata(session: Session, lemma: Any, language_code: s
     if getattr(module, "USES_LEMMA_TEXT", False):
         word = lemma.lemma_text
     else:
-        translation = get_translation(session, lemma, language_code)
+        snapshot = current_inputs(session)
+        if snapshot is None:
+            translation = get_translation(session, lemma, language_code)
+        else:
+            from storage.translation_helpers import LANGUAGE_FIELDS
+
+            translation = snapshot.translations.get((lemma.id, LANGUAGE_FIELDS[language_code][0]))
         if not translation:
             return None, {}
         safe_translation = getattr(module, "is_safe_translation", None)
