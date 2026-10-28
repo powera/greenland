@@ -48,6 +48,7 @@ from storage.models.lemma_relation import (
     LemmaRelationMember,
 )
 from storage.models.name_entity import (
+    NAME_GENDER_LABELS,
     NAME_GENDERS,
     NAME_KIND_LABELS,
     NAME_KINDS,
@@ -130,6 +131,7 @@ __all__ = [
     "LemmaRelationMember",
     "LemmaTranslation",
     "MAX_CONCEPT_SOURCES",
+    "NAME_GENDER_LABELS",
     "NAME_GENDERS",
     "NAME_KINDS",
     "NAME_KIND_LABELS",

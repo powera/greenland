@@ -14,7 +14,7 @@
         </nav>
         <h1><i class="bi bi-person-badge"></i> {{ name.display_text }}</h1>
         <p class="text-muted">
-            {{ name.kind_label }}{% if name.gender %}, {{ name.gender }}{% endif %} &mdash;
+            {{ name.kind_label }}{% if name.gender %}, {{ name_gender_labels.get(name.gender, name.gender) }}{% endif %} &mdash;
             used in {{ usage_count }} sentence word{{ 's' if usage_count != 1 else '' }}.
         </p>
     </div>
@@ -42,7 +42,7 @@
                             <option value="">-</option>
                             {% for value in name_genders %}
                                 <option value="{{ value }}" {% if name.gender == value %}selected{% endif %}>
-                                    {{ value }}
+                                    {{ name_gender_labels.get(value, value) }}
                                 </option>
                             {% endfor %}
                         </select>
