@@ -235,6 +235,37 @@ voras.py --regenerate --use-workqueue --yes
 voras.py --populate --languages fr --batch                   # OpenAI batches
 ```
 
+Names use the same `--guid` selector (e.g. `E01_001` for a given name,
+`E02_001` for a family name), or `--all-names` for every kind of name.
+Given names are processed first. Preview without model calls or writes:
+
+```bash
+GREENLAND_TEST_MODE=1 PYTHONPATH=src python src/agents/voras.py --populate --guid E01_001 --languages ru lt --dry-run
+GREENLAND_TEST_MODE=1 PYTHONPATH=src python src/agents/voras.py --populate --all-names --languages lt --limit 20 --dry-run
+```
+
+For an approved live run, remove `GREENLAND_TEST_MODE=1` and `--dry-run`.
+Name mode runs directly; it cannot be combined with lemma filters (`--level`,
+`--pos-type`, `--sample-rate`), cache, batch, or workqueue options.
+Without `--populate`/`--regenerate`, it reports missing renderings/forms.
+Language selection and language batching use the ordinary Voras defaults.
+
+The prompt preserves the original name's identity: John becomes Russian
+Джон, never Иван. It includes the stored name kind and gender hint.
+Lithuanian answers include all seven singular cases. Other languages currently
+store a base form only. `--populate` preserves existing renderings and forms,
+filling missing renderings or incomplete Lithuanian paradigms; `--regenerate`
+explicitly replaces the selected languages, including reviewed values, only
+when the new answer is complete and confident. Failed or uncertain answers
+leave existing data intact and produce a nonzero exit status. Successful
+languages are committed even if another language fails.
+
+Renderings live in `NameTranslation`, forms in `NameDerivativeForm`.
+Non-English forms round-trip through `data/release/names/base.jsonl`; English
+base/possessive forms are regenerated on import. Names remain unlevelled and
+separate from Wireword. Supplying these renderings to sentence translation is
+a follow-on integration.
+
 ### vilkas (Word Forms)
 
 Supports: Lithuanian (lt), French (fr), German (de), Spanish (es, es-419),

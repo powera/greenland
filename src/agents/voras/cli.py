@@ -5,7 +5,8 @@ Voras Agent - Command Line Interface
 This module handles argument parsing, confirmation prompts, and display. The
 translation work itself lives in :mod:`words.translation_workflow` (selection,
 generation, storage, queueing) and :mod:`words.translation_coverage`
-(reporting); queue mechanics live in :mod:`workqueue`.
+(reporting); queue mechanics live in :mod:`workqueue`. Name GUIDs and
+``--all-names`` use :mod:`words.name_translation` directly.
 """
 
 import argparse
@@ -52,7 +53,12 @@ def get_argument_parser() -> argparse.ArgumentParser:
     add_llm_args(parser)
     add_output_args(parser)
     add_processing_args(parser)
-    add_guid_arg(parser, help_text="Process only the lemma with this GUID")
+    add_guid_arg(parser, help_text="Process only the lemma or name with this GUID")
+    parser.add_argument(
+        "--all-names",
+        action="store_true",
+        help="Process names only (all kinds); excludes --guid and lemma filters",
+    )
     add_level_args(parser)
     add_pos_type_args(parser)
     add_backend_args(parser)
@@ -380,6 +386,106 @@ def _run_populate_batch(agent: Any, lemmas: List[Any], args: argparse.Namespace)
         session.close()
 
 
+def validate_name_args(parser: argparse.ArgumentParser, args: argparse.Namespace) -> bool:
+    """Recognize name selection and reject options belonging to lemma workflows."""
+    from storage.guid_router import guid_kind
+
+    selected = args.all_names or bool(args.guid and guid_kind(args.guid) == "name")
+    if not selected:
+        return False
+    if args.all_names and args.guid:
+        parser.error("--all-names and --guid are mutually exclusive")
+    if args.level or args.pos_type or args.sample_rate != 1.0:
+        parser.error("Names cannot use --level, --pos-type, or --sample-rate")
+    if args.batch or args.batch_submit or args.use_workqueue:
+        parser.error(
+            "Name translations currently run directly; batch/workqueue modes are unsupported"
+        )
+    if args.cache_only or args.barsukas_url:
+        parser.error("Name translations do not support the lemma translation cache")
+    if args.retry_uncertain:
+        parser.error(
+            "Name population retries missing answers automatically; omit --retry-uncertain"
+        )
+    if args.output:
+        parser.error("Name coverage prints to stdout; --output is unsupported")
+    if args.throttle < 0:
+        parser.error("--throttle must not be negative")
+    if args.limit is not None and args.limit < 1:
+        parser.error("--limit must be at least 1")
+    return True
+
+
+def _run_names(agent: Any, args: argparse.Namespace) -> int:
+    """Report, populate, or regenerate names without entering lemma selection."""
+    import time
+
+    from sqlalchemy import case
+    from storage.models.name_entity import Name
+    from storage.translation_helpers import split_llm_language_batches
+    from words.name_translation import pending_name_languages, translate_name
+    from words.translation_workflow import resolve_generation_languages
+
+    languages = [code for code in resolve_generation_languages(args.languages) if code != "en"]
+    session = agent.get_session()
+    try:
+        query = session.query(Name)
+        if args.guid:
+            query = query.filter(Name.guid == args.guid)
+        query = query.order_by(case((Name.kind == "given_name", 0), else_=1), Name.guid, Name.id)
+        if args.limit is not None:
+            query = query.limit(args.limit)
+        names = query.all()
+        if not names:
+            print("No names found to process")
+            return 1
+        plans = [
+            (name, languages if args.regenerate else pending_name_languages(name, languages))
+            for name in names
+        ]
+        calls = sum(len(split_llm_language_batches(targets)) for _, targets in plans if targets)
+        for name, targets in plans:
+            print(
+                f"{name.guid} {name.name_text} ({name.kind}): "
+                f"{', '.join(targets) if targets else 'complete'}"
+            )
+        print(f"Names: {len(names)}; languages: {', '.join(languages)}; planned LLM calls: {calls}")
+        if not (args.populate or args.regenerate) or args.dry_run or not calls:
+            return 0
+        if not args.yes:
+            if args.regenerate:
+                print(
+                    "Regeneration replaces selected renderings and forms, including reviewed ones."
+                )
+            response = input(
+                f"Proceed with {calls} name translation call(s) using {args.model}? [y/N]: "
+            )
+            if response.strip().lower() not in ("y", "yes"):
+                print("Aborted.")
+                return 0
+        failed = 0
+        processed = 0
+        for name, targets in plans:
+            if not targets:
+                continue
+            if processed and args.throttle > 0:
+                time.sleep(args.throttle)
+            if not translate_name(
+                session,
+                name,
+                targets,
+                config=agent.config,
+                regenerate=args.regenerate,
+                throttle=args.throttle,
+            ):
+                failed += 1
+            processed += 1
+        print(f"Name translation finished: {failed} name(s) with failed or uncertain answers")
+        return 1 if failed else 0
+    finally:
+        session.close()
+
+
 def main() -> int:
     """Main entry point for the voras agent; returns the process exit status.
 
@@ -391,6 +497,8 @@ def main() -> int:
     parser = get_argument_parser()
     args = parser.parse_args()
 
+    name_selection = validate_name_args(parser, args)
+
     # Validate cache arguments
     validate_cache_args(args)
 
@@ -401,6 +509,9 @@ def main() -> int:
 
     # Create agent with unified configuration
     agent = TranslationWorkflow(config=config)
+
+    if name_selection:
+        return _run_names(agent, args)
 
     # Determine mode from flags (default to coverage if none specified)
     if args.populate:
