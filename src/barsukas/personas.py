@@ -75,6 +75,10 @@ class PersonaConfig:
     allow_restart: bool = True
     allow_exports: bool = True
 
+    # Benchmarks section (dashboard/models/runs, /api/v1/models).  Off for the
+    # read-only release personas, which have no use for it.
+    enable_benchmarks: bool = True
+
 
 # Define the available personas
 PERSONAS: dict[PersonaName, PersonaConfig] = {
@@ -97,6 +101,7 @@ PERSONAS: dict[PersonaName, PersonaConfig] = {
         allow_api_keys=True,
         allow_outbound_calls=True,
         enable_worker=False,  # No worker needed for read-only
+        enable_benchmarks=False,
     ),
     PersonaName.HOSTED: PersonaConfig(
         name=PersonaName.HOSTED,
@@ -109,6 +114,7 @@ PERSONAS: dict[PersonaName, PersonaConfig] = {
         allow_api_keys=False,
         allow_outbound_calls=False,
         enable_worker=False,
+        enable_benchmarks=False,
         allow_restart=False,
         allow_exports=False,
     ),
