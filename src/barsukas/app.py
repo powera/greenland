@@ -91,7 +91,6 @@ from barsukas.routes import (
     sentences,
     settings,
     strings_export,
-    texts,
     trakaido,
     trakaido_activities,
     translations,
@@ -379,7 +378,6 @@ def create_app(
     app.register_blueprint(completeness.bp)
     app.register_blueprint(quality.bp)
     app.register_blueprint(concepts.bp)
-    app.register_blueprint(texts.bp)
     app.register_blueprint(translations.bp)
     app.register_blueprint(overrides.bp)
     app.register_blueprint(agents.bp)
@@ -583,10 +581,7 @@ def create_app(
             return
 
         g.db = app.db_session_factory()
-        if (
-            endpoint_name.startswith(("concepts.", "texts."))
-            and app.concepts_db_session_factory is not None
-        ):
+        if endpoint_name.startswith("concepts.") and app.concepts_db_session_factory is not None:
             g.concepts_db = app.concepts_db_session_factory()
 
     @app.teardown_appcontext

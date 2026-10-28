@@ -43,12 +43,6 @@ The scene path is the same storage with those four things fixed. The bulk
 planner remains the right tool for "fill out level 4 across twelve dialogs";
 the scene path is the right tool for "I want this specific situation covered".
 
-There is also `agents/ozys`, which generates *prose* conversations as
-`TextWork`/`TextVersion` rows for the story library (see `fables_design.md`).
-That path is deliberately separate: its output is a text to read, not a
-sequence of sentence rows to translate, level, and export. A conversation
-generated there stays there.
-
 ## What gets stored
 
 A generated scene becomes ordinary conversation data, the same shape the

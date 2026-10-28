@@ -48,12 +48,6 @@ KNOWN_COMMITTING_HELPERS: Set[str] = {
     "concept.link_wikidata_sub_concept",
     "concept.link_lemma_to_concept",
     "concept.unlink_lemma_from_concept",
-    "text_work.create_text_work",
-    "text_work.update_text_work",
-    "text_work.delete_text_work",
-    "text_work.create_text_version",
-    "text_work.update_text_version",
-    "text_work.delete_text_version",
 }
 
 
