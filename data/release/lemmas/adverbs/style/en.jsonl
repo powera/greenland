@@ -54,3 +54,7 @@
 {"guid": "D01_059", "forms": [{"grammatical_form": "adverb/en_positive", "text": "en passant", "is_base_form": true, "ipa": "/ˌɑːn pɑːˈsɑːnt/", "phonetic": "ahn-pah-SAHN"}]}
 {"guid": "D01_060", "forms": [{"grammatical_form": "adverb/en_positive", "text": "typically", "is_base_form": true, "ipa": "/ˈtɪpɪkli/", "phonetic": "TIP-ih-kuh-lee"}]}
 {"guid": "D01_061", "forms": [{"grammatical_form": "adverb/en_positive", "text": "typically", "is_base_form": true, "ipa": "/ˈtɪpɪkli/", "phonetic": "TIP-ih-kuh-lee"}]}
+{"guid": "D01_062", "forms": [{"grammatical_form": "adverb/en_positive", "text": "normally", "is_base_form": true, "ipa": "/ˈnɔrməli/", "phonetic": "NOR-muh-lee"}]}
+{"guid": "D01_063", "forms": [{"grammatical_form": "adverb/en_positive", "text": "readily", "is_base_form": true, "ipa": "/ˈrɛd.ə.li/", "phonetic": "RED-uh-lee"}]}
+{"guid": "D01_064", "forms": [{"grammatical_form": "adverb/en_positive", "text": "effectively", "is_base_form": true, "ipa": "/ɪˈfɛktɪvli/", "phonetic": "ih-FEK-tiv-lee"}]}
+{"guid": "D01_065", "forms": [{"grammatical_form": "adverb/en_positive", "text": "politely", "is_base_form": true, "ipa": "/pəˈlaɪtli/", "phonetic": "puh-LYTE-lee"}]}

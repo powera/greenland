@@ -193,3 +193,8 @@
 {"guid": "N41_253", "forms": [{"grammatical_form": "noun/en_singular", "text": "agriculture", "is_base_form": true, "ipa": "/ˈæɡrɪˌkʌltʃɚ/", "phonetic": "AG-ri-kul-chur"}]}
 {"guid": "N41_254", "forms": [{"grammatical_form": "noun/en_singular", "text": "irrigation", "is_base_form": true, "ipa": "/ˌɪrɪˈɡeɪʃən/", "phonetic": "ir-ri-GAY-shun"}]}
 {"guid": "N41_255", "forms": [{"grammatical_form": "noun/en_singular", "text": "husbandry", "is_base_form": true, "ipa": "/ˈhʌzbəndri/", "phonetic": "HUHZ-buhn-dree"}]}
+{"guid": "N41_256", "forms": [{"grammatical_form": "noun/en_singular", "text": "treatment", "is_base_form": true, "ipa": "/ˈtritmənt/", "phonetic": "TREET-ment"}]}
+{"guid": "N41_257", "forms": [{"grammatical_form": "noun/en_singular", "text": "checkup", "is_base_form": true, "ipa": "/ˈtʃɛkˌʌp/", "phonetic": "CHEK-up"}]}
+{"guid": "N41_258", "forms": [{"grammatical_form": "noun/en_singular", "text": "vaccination", "is_base_form": true, "ipa": "/ˌvæksəˈneɪʃən/", "phonetic": "vak-suh-NAY-shun"}]}
+{"guid": "N41_259", "forms": [{"grammatical_form": "noun/en_singular", "text": "assistance", "is_base_form": true, "ipa": "/əˈsɪstəns/", "phonetic": "uh-SIS-tuhns"}]}
+{"guid": "N41_260", "forms": [{"grammatical_form": "noun/en_singular", "text": "cooperation", "is_base_form": true, "ipa": "/koʊˌɑːpəˈreɪʃən/", "phonetic": "koh-op-uh-RAY-shun"}]}

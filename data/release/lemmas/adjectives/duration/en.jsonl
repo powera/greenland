@@ -42,3 +42,5 @@
 {"guid": "A13_042", "forms": [{"grammatical_form": "adjective/en_positive", "text": "non-stop", "is_base_form": true, "ipa": "/ˌnɑnˈstɑp/", "phonetic": "NON-stop"}]}
 {"guid": "A13_043", "forms": [{"grammatical_form": "adjective/en_positive", "text": "week-long", "is_base_form": true, "ipa": "/ˈwiːkˌlɔŋ/", "phonetic": "WEEK-long"}]}
 {"guid": "A13_044", "forms": [{"grammatical_form": "adjective/en_positive", "text": "two-year-old", "is_base_form": true}]}
+{"guid": "A13_045", "forms": [{"grammatical_form": "adjective/en_positive", "text": "chronic", "is_base_form": true, "ipa": "/ˈkrɑnɪk/", "phonetic": "KRON-ik"}]}
+{"guid": "A13_046", "forms": [{"grammatical_form": "adjective/en_positive", "text": "temporary", "is_base_form": true, "ipa": "/ˈtɛmpəˌrɛri/", "phonetic": "TEM-puh-rer-ee"}]}

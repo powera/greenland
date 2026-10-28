@@ -13,3 +13,8 @@
 {"guid": "D09_015", "forms": [{"grammatical_form": "adverb/en_positive", "text": "mostly", "is_base_form": true, "ipa": "/ˈmoʊstli/", "phonetic": "MOHST-lee"}]}
 {"guid": "D09_016", "forms": [{"grammatical_form": "adverb/en_positive", "text": "largely", "is_base_form": true, "ipa": "/ˈlɑrdʒli/", "phonetic": "LARJ-lee"}]}
 {"guid": "D09_017", "forms": [{"grammatical_form": "adverb/en_positive", "text": "relatively", "is_base_form": true, "ipa": "/ˈrɛlətɪvli/", "phonetic": "REL-uh-tiv-lee"}]}
+{"guid": "D09_018", "forms": [{"grammatical_form": "adverb/en_positive", "text": "equally", "is_base_form": true, "ipa": "/ˈiːkwəli/", "phonetic": "EE-kwuh-lee"}]}
+{"guid": "D09_019", "forms": [{"grammatical_form": "adverb/en_positive", "text": "significantly", "is_base_form": true, "ipa": "/sɪɡˈnɪfɪkəntli/", "phonetic": "sig-NIF-ih-kunt-lee"}]}
+{"guid": "D09_020", "forms": [{"grammatical_form": "adverb/en_positive", "text": "increasingly", "is_base_form": true, "ipa": "/ɪnˈkriːsɪŋli/", "phonetic": "in-KREE-sing-lee"}]}
+{"guid": "D09_021", "forms": [{"grammatical_form": "adverb/en_positive", "text": "essentially", "is_base_form": true, "ipa": "/ɪˈsɛnʃəli/", "phonetic": "ih-SEN-shuh-lee"}]}
+{"guid": "D09_022", "forms": [{"grammatical_form": "adverb/en_positive", "text": "sufficiently", "is_base_form": true, "ipa": "/səˈfɪʃəntli/", "phonetic": "suh-FISH-uhnt-lee"}]}

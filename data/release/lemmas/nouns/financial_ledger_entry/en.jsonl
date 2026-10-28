@@ -16,3 +16,20 @@
 {"guid": "N76_033", "variants": [{"kind": "equivalent", "key": "legacy", "forms": [{"grammatical_form": "noun/en_singular", "text": "legacy", "is_base_form": true}]}]}
 {"guid": "N76_034", "forms": [{"grammatical_form": "noun/en_singular", "text": "processing fee", "is_base_form": true}]}
 {"guid": "N76_037", "forms": [{"grammatical_form": "noun/en_singular", "text": "certificate of deposit", "is_base_form": true}], "variants": [{"kind": "equivalent", "key": "CD", "forms": [{"grammatical_form": "noun/en_singular", "text": "CD", "is_base_form": true}]}]}
+{"guid": "N76_039", "forms": [{"grammatical_form": "noun/en_singular", "text": "rent", "is_base_form": true, "ipa": "/rɛnt/", "phonetic": "RENT"}]}
+{"guid": "N76_040", "forms": [{"grammatical_form": "noun/en_singular", "text": "budget", "is_base_form": true, "ipa": "/ˈbʌdʒɪt/", "phonetic": "BUJ-it"}]}
+{"guid": "N76_041", "forms": [{"grammatical_form": "noun/en_singular", "text": "deposit", "is_base_form": true, "ipa": "/dɪˈpɑzɪt/", "phonetic": "dih-POZ-it"}]}
+{"guid": "N76_042", "forms": [{"grammatical_form": "noun/en_singular", "text": "bill", "is_base_form": true, "ipa": "/bɪl/", "phonetic": "BIL"}]}
+{"guid": "N76_043", "forms": [{"grammatical_form": "noun/en_singular", "text": "charge", "is_base_form": true, "ipa": "/tʃɑrdʒ/", "phonetic": "CHARJ"}]}
+{"guid": "N76_044", "forms": [{"grammatical_form": "noun/en_singular", "text": "loan", "is_base_form": true, "ipa": "/loʊn/", "phonetic": "LOHN"}]}
+{"guid": "N76_045", "forms": [{"grammatical_form": "noun/en_singular", "text": "savings", "is_base_form": true, "ipa": "/ˈseɪvɪŋz/", "phonetic": "SAY-vings"}]}
+{"guid": "N76_046", "forms": [{"grammatical_form": "noun/en_singular", "text": "expense", "is_base_form": true, "ipa": "/ɪkˈspɛns/", "phonetic": "ik-SPENS"}]}
+{"guid": "N76_047", "forms": [{"grammatical_form": "noun/en_singular", "text": "income", "is_base_form": true, "ipa": "/ˈɪnˌkʌm/", "phonetic": "IN-kum"}]}
+{"guid": "N76_048", "forms": [{"grammatical_form": "noun/en_singular", "text": "discount", "is_base_form": true, "ipa": "/ˈdɪskaʊnt/", "phonetic": "DIS-kownt"}]}
+{"guid": "N76_049", "forms": [{"grammatical_form": "noun/en_singular", "text": "installment", "is_base_form": true, "ipa": "/ɪnˈstɔlmənt/", "phonetic": "in-STALL-ment"}]}
+{"guid": "N76_050", "forms": [{"grammatical_form": "noun/en_singular", "text": "refund", "is_base_form": true, "ipa": "/ˈriˌfʌnd/", "phonetic": "REE-fund"}]}
+{"guid": "N76_051", "forms": [{"grammatical_form": "noun/en_singular", "text": "service charge", "is_base_form": true, "ipa": "/ˈsɝvɪs tʃɑrdʒ/", "phonetic": "SUR-vis charj"}]}
+{"guid": "N76_052", "forms": [{"grammatical_form": "noun/en_singular", "text": "salary", "is_base_form": true, "ipa": "/ˈsæləri/", "phonetic": "SAL-uh-ree"}]}
+{"guid": "N76_053", "forms": [{"grammatical_form": "noun/en_singular", "text": "wage", "is_base_form": true, "ipa": "/weɪdʒ/", "phonetic": "WAYJ"}]}
+{"guid": "N76_054", "forms": [{"grammatical_form": "noun/en_singular", "text": "pension", "is_base_form": true, "ipa": "/ˈpɛnʃən/", "phonetic": "PEN-shun"}]}
+{"guid": "N76_055", "forms": [{"grammatical_form": "noun/en_singular", "text": "subscription", "is_base_form": true, "ipa": "/səbˈskrɪpʃən/", "phonetic": "sub-SKRIP-shun"}]}

@@ -28,3 +28,9 @@
 {"guid": "N04_034", "variants": [{"kind": "equivalent", "key": "recurrence", "forms": [{"grammatical_form": "noun/en_singular", "text": "recurrence", "is_base_form": true}]}]}
 {"guid": "N04_035", "forms": [{"grammatical_form": "noun/en_singular", "text": "tooth decay", "is_base_form": true}]}
 {"guid": "N04_036", "forms": [{"grammatical_form": "noun/en_singular", "text": "fungal infection", "is_base_form": true}]}
+{"guid": "N04_039", "forms": [{"grammatical_form": "noun/en_singular", "text": "symptom", "is_base_form": true, "ipa": "/ˈsɪmp.təm/", "phonetic": "SIMP-tum"}]}
+{"guid": "N04_040", "forms": [{"grammatical_form": "noun/en_singular", "text": "side effect", "is_base_form": true, "ipa": "/ˈsaɪd ɪˌfɛkt/", "phonetic": "SIDE ih-FEKT"}]}
+{"guid": "N04_041", "forms": [{"grammatical_form": "noun/en_singular", "text": "bruise", "is_base_form": true, "ipa": "/bruːz/", "phonetic": "BROOZ"}]}
+{"guid": "N04_042", "forms": [{"grammatical_form": "noun/en_singular", "text": "swelling", "is_base_form": true, "ipa": "/ˈswɛlɪŋ/", "phonetic": "SWEL-ing"}]}
+{"guid": "N04_043", "forms": [{"grammatical_form": "noun/en_singular", "text": "rash", "is_base_form": true, "ipa": "/ræʃ/", "phonetic": "RASH"}]}
+{"guid": "N04_044", "forms": [{"grammatical_form": "noun/en_singular", "text": "nausea", "is_base_form": true, "ipa": "/ˈnɔːziə/", "phonetic": "NAW-zee-uh"}]}

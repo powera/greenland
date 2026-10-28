@@ -228,3 +228,9 @@
 {"guid": "A05_360", "forms": [{"grammatical_form": "adjective/en_positive", "text": "self-evident", "is_base_form": true}]}
 {"guid": "A05_361", "forms": [{"grammatical_form": "adjective/en_positive", "text": "wonderful", "is_base_form": true, "ipa": "/ˈwʌndɚfəl/", "phonetic": "WUN-der-ful"}]}
 {"guid": "A05_362", "forms": [{"grammatical_form": "adjective/en_positive", "text": "wonderful", "is_base_form": true, "ipa": "/ˈwʌndɚfəl/", "phonetic": "WUN-der-ful"}]}
+{"guid": "A05_363", "forms": [{"grammatical_form": "adjective/en_positive", "text": "affordable", "is_base_form": true, "ipa": "/əˈfɔrdəbəl/", "phonetic": "uh-FOR-duh-buhl"}]}
+{"guid": "A05_364", "forms": [{"grammatical_form": "adjective/en_positive", "text": "costly", "is_base_form": true, "ipa": "/ˈkɔstli/", "phonetic": "KAWST-lee"}]}
+{"guid": "A05_365", "forms": [{"grammatical_form": "adjective/en_positive", "text": "convenient", "is_base_form": true, "ipa": "/kənˈviːniənt/", "phonetic": "kuhn-VEE-nee-uhnt"}]}
+{"guid": "A05_366", "forms": [{"grammatical_form": "adjective/en_positive", "text": "competent", "is_base_form": true, "ipa": "/ˈkɑmpɪtənt/", "phonetic": "KOM-puh-tent"}]}
+{"guid": "A05_367", "forms": [{"grammatical_form": "adjective/en_positive", "text": "reliable", "is_base_form": true, "ipa": "/rɪˈlaɪəbəl/", "phonetic": "ri-LIE-uh-bul"}]}
+{"guid": "A05_368", "forms": [{"grammatical_form": "adjective/en_positive", "text": "relevant", "is_base_form": true, "ipa": "/ˈrɛləvənt/", "phonetic": "REL-uh-vuhnt"}]}

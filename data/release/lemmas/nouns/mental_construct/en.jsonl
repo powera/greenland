@@ -43,3 +43,5 @@
 {"guid": "N20_062", "forms": [{"grammatical_form": "noun/en_singular", "text": "colonial ideology", "is_base_form": true}]}
 {"guid": "N20_067", "variants": [{"kind": "equivalent", "key": "prejudice", "forms": [{"grammatical_form": "noun/en_singular", "text": "prejudice", "is_base_form": true}]}]}
 {"guid": "N20_068", "forms": [{"grammatical_form": "noun/en_singular", "text": "self-consciousness", "is_base_form": true}]}
+{"guid": "N20_070", "forms": [{"grammatical_form": "noun/en_singular", "text": "expectation", "is_base_form": true, "ipa": "/ˌɛkspɛkˈteɪʃən/", "phonetic": "ek-spek-TAY-shun"}]}
+{"guid": "N20_071", "forms": [{"grammatical_form": "noun/en_singular", "text": "confidence", "is_base_form": true, "ipa": "/ˈkɑːnfɪdəns/", "phonetic": "KON-fi-dens"}]}

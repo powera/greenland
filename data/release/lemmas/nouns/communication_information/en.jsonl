@@ -175,3 +175,12 @@
 {"guid": "N50_269", "forms": [{"grammatical_form": "noun/en_singular", "text": "article", "is_base_form": true, "ipa": "/ˈɑrtɪkəl/", "phonetic": "AR-ti-kuhl"}]}
 {"guid": "N50_270", "forms": [{"grammatical_form": "noun/en_singular", "text": "invitation", "is_base_form": true, "ipa": "/ˌɪnvəˈteɪʃən/", "phonetic": "in-vuh-TAY-shun"}]}
 {"guid": "N50_271", "forms": [{"grammatical_form": "noun/en_singular", "text": "invitation", "is_base_form": true, "ipa": "/ˌɪnvəˈteɪʃən/", "phonetic": "in-vuh-TAY-shun"}]}
+{"guid": "N50_272", "forms": [{"grammatical_form": "noun/en_singular", "text": "confirmation", "is_base_form": true, "ipa": "/ˌkɑːnfərˈmeɪʃən/", "phonetic": "kon-fer-MAY-shun"}]}
+{"guid": "N50_273", "forms": [{"grammatical_form": "noun/en_singular", "text": "enquiry", "is_base_form": true, "ipa": "/ɪnˈkwaɪəri/", "phonetic": "en-KWY-uh-ree"}]}
+{"guid": "N50_274", "forms": [{"grammatical_form": "noun/en_singular", "text": "apology", "is_base_form": true, "ipa": "/əˈpɑːlədʒi/", "phonetic": "uh-PAH-luh-jee"}]}
+{"guid": "N50_275", "forms": [{"grammatical_form": "noun/en_singular", "text": "encouragement", "is_base_form": true, "ipa": "/ɪnˈkɝːɪdʒmənt/", "phonetic": "en-KUR-ij-ment"}]}
+{"guid": "N50_276", "forms": [{"grammatical_form": "noun/en_singular", "text": "password", "is_base_form": true, "ipa": "/ˈpæsˌwɝd/", "phonetic": "PASS-wurd"}]}
+{"guid": "N50_277", "forms": [{"grammatical_form": "noun/en_singular", "text": "notification", "is_base_form": true, "ipa": "/ˌnoʊtɪfɪˈkeɪʃən/", "phonetic": "NOH-tuh-fuh-KAY-shun"}]}
+{"guid": "N50_278", "forms": [{"grammatical_form": "noun/en_singular", "text": "headline", "is_base_form": true, "ipa": "/ˈhɛdˌlaɪn/", "phonetic": "HED-line"}]}
+{"guid": "N50_279", "forms": [{"grammatical_form": "noun/en_singular", "text": "rumor", "is_base_form": true, "ipa": "/ˈruːmər/", "phonetic": "ROO-mer"}]}
+{"guid": "N50_280", "forms": [{"grammatical_form": "noun/en_singular", "text": "misinformation", "is_base_form": true, "ipa": "/ˌmɪsɪnfɚˈmeɪʃən/", "phonetic": "mis-in-fer-MAY-shun"}]}

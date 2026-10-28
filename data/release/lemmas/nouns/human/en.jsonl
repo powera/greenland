@@ -121,3 +121,24 @@
 {"guid": "N01_236", "forms": [{"grammatical_form": "noun/en_singular", "text": "success", "is_base_form": true, "ipa": "/səkˈsɛs/", "phonetic": "suk-SESS"}]}
 {"guid": "N01_237", "forms": [{"grammatical_form": "noun/en_singular", "text": "contact", "is_base_form": true, "ipa": "/ˈkɑn.tækt/", "phonetic": "KON-takt"}]}
 {"guid": "N01_238", "forms": [{"grammatical_form": "noun/en_singular", "text": "contact", "is_base_form": true, "ipa": "/ˈkɑn.tækt/", "phonetic": "KON-takt"}]}
+{"guid": "N01_239", "forms": [{"grammatical_form": "noun/en_singular", "text": "Christian", "is_base_form": true, "ipa": "/ˈkrɪstʃən/", "phonetic": "KRIS-chun"}]}
+{"guid": "N01_240", "forms": [{"grammatical_form": "noun/en_singular", "text": "Muslim", "is_base_form": true, "ipa": "/ˈmʌzlɪm/", "phonetic": "MUZ-lim"}]}
+{"guid": "N01_241", "forms": [{"grammatical_form": "noun/en_singular", "text": "Jew", "is_base_form": true, "ipa": "/dʒuː/", "phonetic": "JOO"}]}
+{"guid": "N01_242", "forms": [{"grammatical_form": "noun/en_singular", "text": "Hindu", "is_base_form": true, "ipa": "/ˈhɪn.duː/", "phonetic": "HIN-doo"}]}
+{"guid": "N01_243", "forms": [{"grammatical_form": "noun/en_singular", "text": "Buddhist", "is_base_form": true, "ipa": "/ˈbuːdɪst/", "phonetic": "BOO-dist"}]}
+{"guid": "N01_244", "forms": [{"grammatical_form": "noun/en_singular", "text": "Sikh", "is_base_form": true, "ipa": "/siːk/", "phonetic": "SEEK"}]}
+{"guid": "N01_245", "forms": [{"grammatical_form": "noun/en_singular", "text": "Catholic", "is_base_form": true, "ipa": "/ˈkæθəlɪk/", "phonetic": "KATH-uh-lik"}]}
+{"guid": "N01_246", "forms": [{"grammatical_form": "noun/en_singular", "text": "Protestant", "is_base_form": true, "ipa": "/ˈprɑː.tə.stənt/", "phonetic": "PRO-tuh-stunt"}]}
+{"guid": "N01_247", "forms": [{"grammatical_form": "noun/en_singular", "text": "Taoist", "is_base_form": true, "ipa": "/ˈtaʊɪst/", "phonetic": "TOW-ist"}]}
+{"guid": "N01_248", "forms": [{"grammatical_form": "noun/en_singular", "text": "Confucian", "is_base_form": true, "ipa": "/kənˈfjuːʃən/", "phonetic": "kuhn-FYOO-shuhn"}]}
+{"guid": "N01_249", "forms": [{"grammatical_form": "noun/en_singular", "text": "Lutheran", "is_base_form": true, "ipa": "/ˈluːθərən/", "phonetic": "LOO-thuh-run"}]}
+{"guid": "N01_250", "forms": [{"grammatical_form": "noun/en_singular", "text": "Anglican", "is_base_form": true, "ipa": "/ˈæŋɡlɪkən/", "phonetic": "ANG-gli-kuhn"}]}
+{"guid": "N01_251", "forms": [{"grammatical_form": "noun/en_singular", "text": "Baptist", "is_base_form": true, "ipa": "/ˈbæptɪst/", "phonetic": "BAP-tist"}]}
+{"guid": "N01_252", "forms": [{"grammatical_form": "noun/en_singular", "text": "Mormon", "is_base_form": true, "ipa": "/ˈmɔrmən/", "phonetic": "MOR-mun"}]}
+{"guid": "N01_253", "forms": [{"grammatical_form": "noun/en_singular", "text": "Methodist", "is_base_form": true, "ipa": "/ˈmɛθədɪst/", "phonetic": "METH-uh-dist"}]}
+{"guid": "N01_254", "forms": [{"grammatical_form": "noun/en_singular", "text": "Evangelical", "is_base_form": true, "ipa": "/ˌiːvænˈdʒɛlɪkəl/", "phonetic": "ee-van-JEL-ih-kuhl"}]}
+{"guid": "N01_255", "forms": [{"grammatical_form": "noun/en_singular", "text": "saint", "is_base_form": true, "ipa": "/seɪnt/", "phonetic": "SAYNT"}], "variants": [{"kind": "abbreviation", "key": "St", "forms": [{"grammatical_form": "noun/en_singular", "text": "St", "is_base_form": true}]}]}
+{"guid": "N01_256", "forms": [{"grammatical_form": "noun/en_singular", "text": "patient", "is_base_form": true, "ipa": "/ˈpeɪʃənt/", "phonetic": "PAY-shunt"}]}
+{"guid": "N01_257", "forms": [{"grammatical_form": "noun/en_singular", "text": "landlord", "is_base_form": true, "ipa": "/ˈlændˌlɔrd/", "phonetic": "LAND-lord"}]}
+{"guid": "N01_258", "forms": [{"grammatical_form": "noun/en_singular", "text": "tenant", "is_base_form": true, "ipa": "/ˈtɛnənt/", "phonetic": "TEN-uhnt"}]}
+{"guid": "N01_259", "forms": [{"grammatical_form": "noun/en_singular", "text": "colleague", "is_base_form": true, "ipa": "/ˈkɑˌliɡ/", "phonetic": "KAH-leeg"}]}

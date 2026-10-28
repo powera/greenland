@@ -142,3 +142,6 @@
 {"guid": "N36_170", "forms": [{"grammatical_form": "noun/en_singular", "text": "beekeeper", "is_base_form": true, "ipa": "/ˈbiˌkipər/", "phonetic": "BEE-kee-per"}]}
 {"guid": "N36_171", "forms": [{"grammatical_form": "noun/en_singular", "text": "farrier", "is_base_form": true, "ipa": "/ˈfɛriɚ/", "phonetic": "FAIR-ee-er"}]}
 {"guid": "N36_172", "forms": [{"grammatical_form": "noun/en_singular", "text": "sharecropper", "is_base_form": true, "ipa": "/ˈʃɛrˌkrɑpər/", "phonetic": "SHAIR-krah-per"}]}
+{"guid": "N36_173", "forms": [{"grammatical_form": "noun/en_singular", "text": "responsibility", "is_base_form": true, "ipa": "/rɪˌspɑːnsəˈbɪləti/", "phonetic": "ri-spon-suh-BIL-uh-tee"}]}
+{"guid": "N36_174", "forms": [{"grammatical_form": "noun/en_singular", "text": "vacancy", "is_base_form": true, "ipa": "/ˈveɪkənsi/", "phonetic": "VAY-kuhn-see"}]}
+{"guid": "N36_175", "forms": [{"grammatical_form": "noun/en_singular", "text": "profession", "is_base_form": true, "ipa": "/prəˈfɛʃən/", "phonetic": "pruh-FESH-uhn"}]}
