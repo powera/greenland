@@ -1,2 +1,5 @@
 {"guid": "D13_001", "forms": [{"grammatical_form": "adverb/en_positive", "text": "generally", "is_base_form": true, "ipa": "/ˈdʒɛnərəli/", "phonetic": "JEN-er-uh-lee"}]}
 {"guid": "D13_002", "forms": [{"grammatical_form": "adverb/en_positive", "text": "commonly", "is_base_form": true, "ipa": "/ˈkɑmənli/", "phonetic": "KOM-un-lee"}]}
+{"guid": "D13_003", "forms": [{"grammatical_form": "adverb/en_positive", "text": "occasionally", "is_base_form": true, "ipa": "/əˈkeɪʒənəli/", "phonetic": "uh-KAY-zhuh-nuh-lee"}]}
+{"guid": "D13_004", "forms": [{"grammatical_form": "adverb/en_positive", "text": "rarely", "is_base_form": true, "ipa": "/ˈrɛrli/", "phonetic": "RAIR-lee"}]}
+{"guid": "D13_005", "forms": [{"grammatical_form": "adverb/en_positive", "text": "constantly", "is_base_form": true, "ipa": "/ˈkɑnstəntli/", "phonetic": "KON-stunt-lee"}]}

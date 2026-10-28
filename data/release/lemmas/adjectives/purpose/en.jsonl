@@ -54,3 +54,5 @@
 {"guid": "A09_058", "forms": [{"grammatical_form": "adjective/en_positive", "text": "one-man", "is_base_form": true}]}
 {"guid": "A09_059", "forms": [{"grammatical_form": "adjective/en_positive", "text": "computer-generated", "is_base_form": true}]}
 {"guid": "A09_065", "forms": [{"grammatical_form": "adjective/en_positive", "text": "arable", "is_base_form": true, "ipa": "/ˈɛrəbəl/", "phonetic": "AIR-uh-bul"}]}
+{"guid": "A09_066", "forms": [{"grammatical_form": "adjective/en_positive", "text": "financial", "is_base_form": true, "ipa": "/faɪˈnænʃəl/", "phonetic": "fy-NAN-shuhl"}]}
+{"guid": "A09_067", "forms": [{"grammatical_form": "adjective/en_positive", "text": "electronic", "is_base_form": true, "ipa": "/ɪˌlɛkˈtrɑnɪk/", "phonetic": "ih-lek-TRAH-nik"}]}

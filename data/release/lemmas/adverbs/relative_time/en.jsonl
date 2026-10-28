@@ -23,3 +23,9 @@
 {"guid": "D04_027", "forms": [{"grammatical_form": "adverb/en_positive", "text": "previously", "is_base_form": true, "ipa": "/ˈpriːviəsli/", "phonetic": "PREE-vee-us-lee"}]}
 {"guid": "D04_028", "forms": [{"grammatical_form": "adverb/en_positive", "text": "hence", "is_base_form": true, "ipa": "/hɛns/", "phonetic": "HENS"}]}
 {"guid": "D04_029", "forms": [{"grammatical_form": "adverb/en_positive", "text": "yet", "is_base_form": true, "ipa": "/jɛt/", "phonetic": "YET"}], "grammar_facts": [{"fact_type": "gradability", "fact_value": "non_gradable"}, {"fact_type": "comparative_status", "fact_value": "not_applicable"}, {"fact_type": "superlative_status", "fact_value": "not_applicable"}]}
+{"guid": "D04_030", "forms": [{"grammatical_form": "adverb/en_positive", "text": "initially", "is_base_form": true, "ipa": "/ɪˈnɪʃəli/", "phonetic": "ih-NISH-uh-lee"}]}
+{"guid": "D04_031", "forms": [{"grammatical_form": "adverb/en_positive", "text": "ultimately", "is_base_form": true, "ipa": "/ˈʌltəmətli/", "phonetic": "UHL-tuh-mit-lee"}]}
+{"guid": "D04_032", "forms": [{"grammatical_form": "adverb/en_positive", "text": "formerly", "is_base_form": true, "ipa": "/ˈfɔrmərli/", "phonetic": "FOR-mer-lee"}]}
+{"guid": "D04_033", "forms": [{"grammatical_form": "adverb/en_positive", "text": "subsequently", "is_base_form": true, "ipa": "/ˈsʌbsɪkwəntli/", "phonetic": "SUB-suh-kwent-lee"}]}
+{"guid": "D04_034", "forms": [{"grammatical_form": "adverb/en_positive", "text": "afterwards", "is_base_form": true, "ipa": "/ˈæftɚwɚdz/", "phonetic": "AF-ter-werdz"}]}
+{"guid": "D04_035", "forms": [{"grammatical_form": "adverb/en_positive", "text": "shortly", "is_base_form": true, "ipa": "/ˈʃɔrtli/", "phonetic": "SHORT-lee"}]}

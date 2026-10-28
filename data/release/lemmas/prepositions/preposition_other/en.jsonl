@@ -37,3 +37,4 @@
 {"guid": "R99_048", "forms": [{"grammatical_form": "preposition/base", "text": "since", "is_base_form": true, "ipa": "/sɪns/", "phonetic": "SINS"}]}
 {"guid": "R99_049", "forms": [{"grammatical_form": "preposition/base", "text": "until", "is_base_form": true, "ipa": "/ənˈtɪl/", "phonetic": "un-TIL"}]}
 {"guid": "R99_050", "forms": [{"grammatical_form": "preposition/base", "text": "like", "is_base_form": true, "ipa": "/laɪk/", "phonetic": "LYKE"}]}
+{"guid": "R99_051", "forms": [{"grammatical_form": "preposition/base", "text": "according to", "is_base_form": true}]}

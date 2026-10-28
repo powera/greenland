@@ -267,3 +267,6 @@
 {"guid": "V01_269", "forms": [{"grammatical_form": "verb/en_infinitive", "text": "mow", "is_base_form": true, "ipa": "/moʊ/", "phonetic": "MOH"}]}
 {"guid": "V01_270", "forms": [{"grammatical_form": "verb/en_infinitive", "text": "prune", "is_base_form": true, "ipa": "/pruːn/", "phonetic": "PROON"}]}
 {"guid": "V01_271", "forms": [{"grammatical_form": "verb/en_infinitive", "text": "brand", "is_base_form": true, "ipa": "/brænd/", "phonetic": "BRAND"}]}
+{"guid": "V01_272", "forms": [{"grammatical_form": "verb/en_infinitive", "text": "download", "is_base_form": true, "ipa": "/ˈdaʊnˌloʊd/", "phonetic": "DOWN-load"}]}
+{"guid": "V01_273", "forms": [{"grammatical_form": "verb/en_infinitive", "text": "upload", "is_base_form": true, "ipa": "/ˈʌpˌloʊd/", "phonetic": "UP-load"}]}
+{"guid": "V01_274", "forms": [{"grammatical_form": "verb/en_infinitive", "text": "install", "is_base_form": true, "ipa": "/ɪnˈstɔl/", "phonetic": "in-STALL"}]}

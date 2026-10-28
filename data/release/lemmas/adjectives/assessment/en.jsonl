@@ -5,3 +5,5 @@
 {"guid": "A31_005", "forms": [{"grammatical_form": "adjective/en_positive", "text": "basic", "is_base_form": true, "ipa": "/ˈbeɪsɪk/", "phonetic": "BAY-sik"}]}
 {"guid": "A31_006", "forms": [{"grammatical_form": "adjective/en_positive", "text": "rare", "is_base_form": true, "ipa": "/rɛr/", "phonetic": "RAIR"}]}
 {"guid": "A31_007", "forms": [{"grammatical_form": "adjective/en_positive", "text": "effective", "is_base_form": true, "ipa": "/ɪˈfɛktɪv/", "phonetic": "ih-FEK-tiv"}]}
+{"guid": "A31_008", "forms": [{"grammatical_form": "adjective/en_positive", "text": "misleading", "is_base_form": true, "ipa": "/ˌmɪsˈliːdɪŋ/", "phonetic": "mis-LEE-ding"}]}
+{"guid": "A31_009", "forms": [{"grammatical_form": "adjective/en_positive", "text": "accurate", "is_base_form": true, "ipa": "/ˈækjərət/", "phonetic": "AK-yuh-ruht"}]}

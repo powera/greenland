@@ -11,3 +11,5 @@
 {"guid": "N58_020", "forms": [{"grammatical_form": "noun/en_singular", "text": "habeas corpus", "is_base_form": true}]}
 {"guid": "N58_021", "forms": [{"grammatical_form": "noun/en_singular", "text": "release form", "is_base_form": true}]}
 {"guid": "N58_023", "forms": [{"grammatical_form": "noun/en_singular", "text": "article", "is_base_form": true, "ipa": "/ˈɑrtɪkəl/", "phonetic": "AR-ti-kuhl"}]}
+{"guid": "N58_024", "forms": [{"grammatical_form": "noun/en_singular", "text": "guarantee", "is_base_form": true, "ipa": "/ˌɡærənˈti/", "phonetic": "GAIR-un-tee"}]}
+{"guid": "N58_025", "forms": [{"grammatical_form": "noun/en_singular", "text": "warranty", "is_base_form": true, "ipa": "/ˈwɔr.ən.ti/", "phonetic": "WOR-uhn-tee"}]}

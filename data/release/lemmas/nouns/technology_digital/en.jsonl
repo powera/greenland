@@ -57,3 +57,8 @@
 {"guid": "N52_072", "forms": [{"grammatical_form": "noun/en_singular", "text": "online platform", "is_base_form": true}], "variants": [{"kind": "equivalent", "key": "platform", "forms": [{"grammatical_form": "noun/en_singular", "text": "platform", "is_base_form": true}]}]}
 {"guid": "N52_074", "variants": [{"kind": "equivalent", "key": "link", "forms": [{"grammatical_form": "noun/en_singular", "text": "link", "is_base_form": true}]}]}
 {"guid": "N52_075", "forms": [{"grammatical_form": "noun/en_singular", "text": "feature", "is_base_form": true, "ipa": "/ˈfiːtʃər/", "phonetic": "FEE-cher"}]}
+{"guid": "N52_076", "forms": [{"grammatical_form": "noun/en_singular", "text": "account", "is_base_form": true, "ipa": "/əˈkaʊnt/", "phonetic": "uh-KOWNT"}]}
+{"guid": "N52_077", "forms": [{"grammatical_form": "noun/en_singular", "text": "attachment", "is_base_form": true, "ipa": "/əˈtætʃmənt/", "phonetic": "uh-TACH-muhnt"}]}
+{"guid": "N52_078", "forms": [{"grammatical_form": "noun/en_singular", "text": "folder", "is_base_form": true, "ipa": "/ˈfoʊldər/", "phonetic": "FOHL-der"}]}
+{"guid": "N52_079", "forms": [{"grammatical_form": "noun/en_singular", "text": "backup", "is_base_form": true, "ipa": "/ˈbækˌʌp/", "phonetic": "BAK-up"}]}
+{"guid": "N52_080", "forms": [{"grammatical_form": "noun/en_singular", "text": "update", "is_base_form": true, "ipa": "/ˈʌpˌdeɪt/", "phonetic": "up-DAYT"}]}
