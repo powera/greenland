@@ -67,3 +67,21 @@
 {"guid": "A24_072", "forms": [{"grammatical_form": "adjective/en_positive", "text": "independent", "is_base_form": true, "ipa": "/ˌɪndɪˈpɛndənt/", "phonetic": "in-duh-PEN-dent"}]}
 {"guid": "A24_073", "forms": [{"grammatical_form": "adjective/en_positive", "text": "cultural", "is_base_form": true, "ipa": "/ˈkʌltʃərəl/", "phonetic": "KUL-chuh-rul"}]}
 {"guid": "A24_074", "forms": [{"grammatical_form": "adjective/en_positive", "text": "multi-party", "is_base_form": true}]}
+{"guid": "A24_075", "forms": [{"grammatical_form": "adjective/en_positive", "text": "Christian", "is_base_form": true, "ipa": "/ˈkrɪstʃən/", "phonetic": "KRIS-chuhn"}]}
+{"guid": "A24_076", "forms": [{"grammatical_form": "adjective/en_positive", "text": "Muslim", "is_base_form": true, "ipa": "/ˈmʌzlɪm/", "phonetic": "MUZ-lim"}]}
+{"guid": "A24_077", "forms": [{"grammatical_form": "adjective/en_positive", "text": "Islamic", "is_base_form": true, "ipa": "/ɪzˈlɑmɪk/", "phonetic": "iz-LAH-mik"}]}
+{"guid": "A24_078", "forms": [{"grammatical_form": "adjective/en_positive", "text": "Jewish", "is_base_form": true, "ipa": "/ˈdʒuːɪʃ/", "phonetic": "JOO-ish"}]}
+{"guid": "A24_079", "forms": [{"grammatical_form": "adjective/en_positive", "text": "Hindu", "is_base_form": true, "ipa": "/ˈhɪn.duː/", "phonetic": "HIN-doo"}]}
+{"guid": "A24_080", "forms": [{"grammatical_form": "adjective/en_positive", "text": "Buddhist", "is_base_form": true, "ipa": "/ˈbuːdɪst/", "phonetic": "BOO-dist"}]}
+{"guid": "A24_081", "forms": [{"grammatical_form": "adjective/en_positive", "text": "Sikh", "is_base_form": true, "ipa": "/siːk/", "phonetic": "SEEK"}]}
+{"guid": "A24_082", "forms": [{"grammatical_form": "adjective/en_positive", "text": "Catholic", "is_base_form": true, "ipa": "/ˈkæθəlɪk/", "phonetic": "KATH-uh-lik"}]}
+{"guid": "A24_083", "forms": [{"grammatical_form": "adjective/en_positive", "text": "Protestant", "is_base_form": true, "ipa": "/ˈprɑtɪstənt/", "phonetic": "PROT-uh-stuhnt"}]}
+{"guid": "A24_084", "forms": [{"grammatical_form": "adjective/en_positive", "text": "Taoist", "is_base_form": true, "ipa": "/ˈdaʊɪst/", "phonetic": "TAO-ist"}]}
+{"guid": "A24_085", "forms": [{"grammatical_form": "adjective/en_positive", "text": "Confucian", "is_base_form": true, "ipa": "/kənˈfjuːʃən/", "phonetic": "kuhn-FYOO-shuhn"}]}
+{"guid": "A24_086", "forms": [{"grammatical_form": "adjective/en_positive", "text": "Shinto", "is_base_form": true, "ipa": "/ˈʃɪnˌtoʊ/", "phonetic": "SHIN-toh"}]}
+{"guid": "A24_087", "forms": [{"grammatical_form": "adjective/en_positive", "text": "Orthodox", "is_base_form": true, "ipa": "/ˈɔrθəˌdɑks/", "phonetic": "OR-thuh-doks"}]}
+{"guid": "A24_088", "forms": [{"grammatical_form": "adjective/en_positive", "text": "Lutheran", "is_base_form": true, "ipa": "/ˈluːθərən/", "phonetic": "LOO-thuh-run"}]}
+{"guid": "A24_089", "forms": [{"grammatical_form": "adjective/en_positive", "text": "Anglican", "is_base_form": true, "ipa": "/ˈæŋɡlɪkən/", "phonetic": "ANG-gluh-kuhn"}]}
+{"guid": "A24_090", "forms": [{"grammatical_form": "adjective/en_positive", "text": "Baptist", "is_base_form": true, "ipa": "/ˈbæptɪst/", "phonetic": "BAP-tist"}]}
+{"guid": "A24_091", "forms": [{"grammatical_form": "adjective/en_positive", "text": "Mormon", "is_base_form": true, "ipa": "/ˈmɔrmən/", "phonetic": "MOR-mun"}]}
+{"guid": "A24_092", "forms": [{"grammatical_form": "adjective/en_positive", "text": "Methodist", "is_base_form": true, "ipa": "/ˈmɛθədɪst/", "phonetic": "METH-uh-dist"}]}

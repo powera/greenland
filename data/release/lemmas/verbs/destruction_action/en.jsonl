@@ -18,3 +18,4 @@
 {"guid": "V03_018", "grammar_facts": [{"fact_type": "past", "fact_value": "executed"}, {"fact_type": "past_participle", "fact_value": "executed"}]}
 {"guid": "V03_019", "grammar_facts": [{"fact_type": "past", "fact_value": "foiled"}, {"fact_type": "past_participle", "fact_value": "foiled"}]}
 {"guid": "V03_020", "forms": [{"grammatical_form": "verb/en_infinitive", "text": "slaughter", "is_base_form": true, "ipa": "/ˈslɔtər/", "phonetic": "SLAW-ter"}]}
+{"guid": "V03_021", "forms": [{"grammatical_form": "verb/en_infinitive", "text": "delete", "is_base_form": true, "ipa": "/dɪˈliːt/", "phonetic": "dih-LEET"}]}

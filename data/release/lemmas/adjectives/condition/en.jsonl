@@ -55,3 +55,5 @@
 {"guid": "A17_055", "forms": [{"grammatical_form": "adjective/en_positive", "text": "active", "is_base_form": true, "ipa": "/ˈæk.tɪv/", "phonetic": "AK-tiv"}]}
 {"guid": "A17_056", "forms": [{"grammatical_form": "adjective/en_positive", "text": "rare", "is_base_form": true, "ipa": "/rɛr/", "phonetic": "RAIR"}]}
 {"guid": "A17_057", "forms": [{"grammatical_form": "adjective/en_positive", "text": "fallow", "is_base_form": true, "ipa": "/ˈfæloʊ/", "phonetic": "FAL-oh"}]}
+{"guid": "A17_058", "forms": [{"grammatical_form": "adjective/en_positive", "text": "mild", "is_base_form": true, "ipa": "/maɪld/", "phonetic": "MYLD"}]}
+{"guid": "A17_059", "forms": [{"grammatical_form": "adjective/en_positive", "text": "secure", "is_base_form": true, "ipa": "/sɪˈkjʊr/", "phonetic": "sih-KYOOR"}]}

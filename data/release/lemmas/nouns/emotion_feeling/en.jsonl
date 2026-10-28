@@ -40,3 +40,5 @@
 {"guid": "N23_049", "forms": [{"grammatical_form": "noun/en_singular", "text": "self-consciousness", "is_base_form": true}]}
 {"guid": "N23_050", "variants": [{"kind": "equivalent", "key": "security", "forms": [{"grammatical_form": "noun/en_singular", "text": "security", "is_base_form": true}]}]}
 {"guid": "N23_055", "forms": [{"grammatical_form": "noun/en_singular", "text": "response", "is_base_form": true, "ipa": "/rɪˈspɑns/", "phonetic": "ri-SPONS"}]}
+{"guid": "N23_056", "forms": [{"grammatical_form": "noun/en_singular", "text": "sympathy", "is_base_form": true, "ipa": "/ˈsɪmpəθi/", "phonetic": "SIM-puh-thee"}]}
+{"guid": "N23_057", "forms": [{"grammatical_form": "noun/en_singular", "text": "resentment", "is_base_form": true, "ipa": "/rɪˈzɛntmənt/", "phonetic": "ri-ZENT-ment"}]}

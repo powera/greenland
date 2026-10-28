@@ -146,3 +146,5 @@
 {"guid": "N08_246", "forms": [{"grammatical_form": "noun/en_singular", "text": "beehive", "is_base_form": true, "ipa": "/ˈbiˌhaɪv/", "phonetic": "BEE-hyv"}]}
 {"guid": "N08_247", "forms": [{"grammatical_form": "noun/en_singular", "text": "harness", "is_base_form": true, "ipa": "/ˈhɑrnəs/", "phonetic": "HAR-nis"}]}
 {"guid": "N08_248", "forms": [{"grammatical_form": "noun/en_singular", "text": "yoke", "is_base_form": true, "ipa": "/joʊk/", "phonetic": "YOAK"}]}
+{"guid": "N08_249", "forms": [{"grammatical_form": "noun/en_singular", "text": "bargain", "is_base_form": true, "ipa": "/ˈbɑrɡən/", "phonetic": "BAR-gin"}]}
+{"guid": "N08_250", "forms": [{"grammatical_form": "noun/en_singular", "text": "replacement", "is_base_form": true, "ipa": "/rɪˈpleɪsmənt/", "phonetic": "rih-PLAYS-muhnt"}]}

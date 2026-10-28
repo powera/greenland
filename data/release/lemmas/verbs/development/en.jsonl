@@ -24,3 +24,4 @@
 {"guid": "V07_024", "grammar_facts": [{"fact_type": "past", "fact_value": "fueled"}, {"fact_type": "past_participle", "fact_value": "fueled"}]}
 {"guid": "V07_025", "grammar_facts": [{"fact_type": "past", "fact_value": "experienced"}, {"fact_type": "past_participle", "fact_value": "experienced"}]}
 {"guid": "V07_026", "grammar_facts": [{"fact_type": "past", "fact_value": "gathered"}, {"fact_type": "past_participle", "fact_value": "gathered"}]}
+{"guid": "V07_027", "forms": [{"grammatical_form": "verb/en_infinitive", "text": "heal", "is_base_form": true, "ipa": "/hiːl/", "phonetic": "HEEL"}]}

@@ -45,3 +45,6 @@
 {"guid": "N26_057", "forms": [{"grammatical_form": "noun/en_singular", "text": "peoples", "is_base_form": true}]}
 {"guid": "N26_058", "forms": [{"grammatical_form": "noun/en_singular", "text": "co-worker", "is_base_form": true}], "variants": [{"kind": "equivalent", "key": "co-workers", "forms": [{"grammatical_form": "noun/en_singular", "text": "co-workers", "is_base_form": true}]}]}
 {"guid": "N26_059", "forms": [{"grammatical_form": "noun/en_singular", "text": "core group", "is_base_form": true}], "variants": [{"kind": "equivalent", "key": "core", "forms": [{"grammatical_form": "noun/en_singular", "text": "core", "is_base_form": true}]}]}
+{"guid": "N26_063", "forms": [{"grammatical_form": "noun/en_singular", "text": "queue", "is_base_form": true, "ipa": "/kjuː/", "phonetic": "KYOO"}]}
+{"guid": "N26_064", "forms": [{"grammatical_form": "noun/en_singular", "text": "staff", "is_base_form": true, "ipa": "/stæf/", "phonetic": "STAF"}]}
+{"guid": "N26_065", "forms": [{"grammatical_form": "noun/en_singular", "text": "workforce", "is_base_form": true, "ipa": "/ˈwɝkˌfɔrs/", "phonetic": "WURK-fors"}]}

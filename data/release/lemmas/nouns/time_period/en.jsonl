@@ -63,3 +63,7 @@
 {"guid": "N25_077", "forms": [{"grammatical_form": "noun/en_singular", "text": "half-life", "is_base_form": true}]}
 {"guid": "N25_078", "forms": [{"grammatical_form": "noun/en_singular", "text": "quarter hour", "is_base_form": true}]}
 {"guid": "N25_079", "forms": [{"grammatical_form": "noun/en_singular", "text": "run-up", "is_base_form": true}]}
+{"guid": "N25_080", "forms": [{"grammatical_form": "noun/en_singular", "text": "deadline", "is_base_form": true, "ipa": "/ˈdɛdˌlaɪn/", "phonetic": "DED-line"}]}
+{"guid": "N25_081", "forms": [{"grammatical_form": "noun/en_singular", "text": "opening hours", "is_base_form": true, "ipa": "/ˈoʊpənɪŋ ˈaʊərz/", "phonetic": "OH-puh-ning OW-erz"}]}
+{"guid": "N25_082", "forms": [{"grammatical_form": "noun/en_singular", "text": "shift", "is_base_form": true, "ipa": "/ʃɪft/", "phonetic": "SHIFT"}]}
+{"guid": "N25_083", "forms": [{"grammatical_form": "noun/en_singular", "text": "overtime", "is_base_form": true, "ipa": "/ˈoʊvərˌtaɪm/", "phonetic": "OH-ver-time"}]}

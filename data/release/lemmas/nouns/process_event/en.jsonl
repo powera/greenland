@@ -231,3 +231,16 @@
 {"guid": "N24_347", "forms": [{"grammatical_form": "noun/en_singular", "text": "union", "is_base_form": true, "ipa": "/ˈjuːnjən/", "phonetic": "YOON-yun"}]}
 {"guid": "N24_348", "forms": [{"grammatical_form": "noun/en_singular", "text": "response", "is_base_form": true, "ipa": "/rɪˈspɑns/", "phonetic": "ri-SPONS"}]}
 {"guid": "N24_349", "forms": [{"grammatical_form": "noun/en_singular", "text": "invitation", "is_base_form": true, "ipa": "/ˌɪnvəˈteɪʃən/", "phonetic": "in-vuh-TAY-shun"}]}
+{"guid": "N24_350", "forms": [{"grammatical_form": "noun/en_singular", "text": "recovery", "is_base_form": true, "ipa": "/rɪˈkʌvəri/", "phonetic": "ri-KUH-vuh-ree"}]}
+{"guid": "N24_351", "forms": [{"grammatical_form": "noun/en_singular", "text": "emergency", "is_base_form": true, "ipa": "/ɪˈmɝdʒənsi/", "phonetic": "ih-MUR-juhn-see"}]}
+{"guid": "N24_352", "forms": [{"grammatical_form": "noun/en_singular", "text": "appointment", "is_base_form": true, "ipa": "/əˈpɔɪntmənt/", "phonetic": "uh-POINT-ment"}]}
+{"guid": "N24_353", "forms": [{"grammatical_form": "noun/en_singular", "text": "delay", "is_base_form": true, "ipa": "/dɪˈleɪ/", "phonetic": "dih-LAY"}]}
+{"guid": "N24_354", "forms": [{"grammatical_form": "noun/en_singular", "text": "booking", "is_base_form": true, "ipa": "/ˈbʊkɪŋ/", "phonetic": "BOOK-ing"}]}
+{"guid": "N24_355", "forms": [{"grammatical_form": "noun/en_singular", "text": "reservation", "is_base_form": true, "ipa": "/ˌrɛzərˈveɪʃən/", "phonetic": "rez-er-VAY-shun"}]}
+{"guid": "N24_356", "forms": [{"grammatical_form": "noun/en_singular", "text": "request", "is_base_form": true, "ipa": "/rɪˈkwɛst/", "phonetic": "ri-KWEST"}]}
+{"guid": "N24_357", "forms": [{"grammatical_form": "noun/en_singular", "text": "cancellation", "is_base_form": true, "ipa": "/ˌkæn.səˈleɪ.ʃən/", "phonetic": "kan-suh-LAY-shuhn"}]}
+{"guid": "N24_358", "forms": [{"grammatical_form": "noun/en_singular", "text": "promotion", "is_base_form": true, "ipa": "/prəˈmoʊʃən/", "phonetic": "pruh-MOH-shun"}]}
+{"guid": "N24_359", "forms": [{"grammatical_form": "noun/en_singular", "text": "retirement", "is_base_form": true, "ipa": "/rɪˈtaɪɚmənt/", "phonetic": "rih-TIRE-ment"}]}
+{"guid": "N24_360", "forms": [{"grammatical_form": "noun/en_singular", "text": "compromise", "is_base_form": true, "ipa": "/ˈkɑm.pɹəˌmaɪz/", "phonetic": "KOM-pruh-mize"}]}
+{"guid": "N24_361", "forms": [{"grammatical_form": "noun/en_singular", "text": "conflict", "is_base_form": true, "ipa": "/ˈkɑn.flɪkt/", "phonetic": "KON-flikt"}]}
+{"guid": "N24_362", "forms": [{"grammatical_form": "noun/en_singular", "text": "rejection", "is_base_form": true, "ipa": "/rɪˈdʒɛkʃən/", "phonetic": "ri-JEK-shuhn"}]}

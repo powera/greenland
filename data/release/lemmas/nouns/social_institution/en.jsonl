@@ -93,3 +93,14 @@
 {"guid": "N55_109", "forms": [{"grammatical_form": "noun/en_singular", "text": "union", "is_base_form": true, "ipa": "/ˈjuːnjən/", "phonetic": "YOON-yun"}]}
 {"guid": "N55_110", "forms": [{"grammatical_form": "noun/en_singular", "text": "union", "is_base_form": true, "ipa": "/ˈjuːnjən/", "phonetic": "YOON-yun"}]}
 {"guid": "N55_111", "forms": [{"grammatical_form": "noun/en_singular", "text": "non-governmental organization", "is_base_form": true}], "variants": [{"kind": "abbreviation", "key": "NGO", "forms": [{"grammatical_form": "noun/en_singular", "text": "NGO", "is_base_form": true}, {"grammatical_form": "noun/en_plural", "text": "NGOs", "is_base_form": false}]}]}
+{"guid": "N55_112", "forms": [{"grammatical_form": "noun/en_singular", "text": "Christianity", "is_base_form": true, "ipa": "/ˌkrɪstʃiˈænəti/", "phonetic": "KRIS-chee-AN-uh-tee"}]}
+{"guid": "N55_113", "forms": [{"grammatical_form": "noun/en_singular", "text": "Islam", "is_base_form": true, "ipa": "/ɪˈslɑːm/", "phonetic": "is-LAHM"}]}
+{"guid": "N55_114", "forms": [{"grammatical_form": "noun/en_singular", "text": "Judaism", "is_base_form": true, "ipa": "/ˈdʒuːdəˌɪzəm/", "phonetic": "JOO-duh-iz-um"}]}
+{"guid": "N55_115", "forms": [{"grammatical_form": "noun/en_singular", "text": "Hinduism", "is_base_form": true, "ipa": "/ˈhɪn.duˌɪz.əm/", "phonetic": "HIN-doo-iz-um"}]}
+{"guid": "N55_116", "forms": [{"grammatical_form": "noun/en_singular", "text": "Buddhism", "is_base_form": true, "ipa": "/ˈbʊdɪzəm/", "phonetic": "BOO-diz-um"}]}
+{"guid": "N55_117", "forms": [{"grammatical_form": "noun/en_singular", "text": "Sikhism", "is_base_form": true, "ipa": "/ˈsɪkɪzəm/", "phonetic": "SIK-iz-um"}]}
+{"guid": "N55_118", "forms": [{"grammatical_form": "noun/en_singular", "text": "Catholicism", "is_base_form": true, "ipa": "/kəˈθɑːlɪˌsɪzəm/", "phonetic": "kuh-THOL-uh-siz-um"}]}
+{"guid": "N55_119", "forms": [{"grammatical_form": "noun/en_singular", "text": "Protestantism", "is_base_form": true, "ipa": "/ˈprɑtɪstənˌtɪzəm/", "phonetic": "PROT-uh-stuhn-tiz-um"}]}
+{"guid": "N55_120", "forms": [{"grammatical_form": "noun/en_singular", "text": "Taoism", "is_base_form": true, "ipa": "/ˈtaʊɪzəm/", "phonetic": "TOW-iz-um"}]}
+{"guid": "N55_121", "forms": [{"grammatical_form": "noun/en_singular", "text": "Confucianism", "is_base_form": true, "ipa": "/kənˈfjuːʃəˌnɪzəm/", "phonetic": "kuhn-FYOO-shuh-niz-uhm"}]}
+{"guid": "N55_122", "forms": [{"grammatical_form": "noun/en_singular", "text": "Shinto", "is_base_form": true, "ipa": "/ˈʃɪn.toʊ/", "phonetic": "SHIN-toh"}]}

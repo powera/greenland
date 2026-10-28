@@ -5,3 +5,4 @@
 {"guid": "D03_005", "grammar_facts": [{"fact_type": "gradability", "fact_value": "non_gradable"}, {"fact_type": "comparative_status", "fact_value": "not_applicable"}, {"fact_type": "superlative_status", "fact_value": "not_applicable"}]}
 {"guid": "D03_006", "forms": [{"grammatical_form": "adverb/en_positive", "text": "this afternoon", "is_base_form": true}]}
 {"guid": "D03_007", "forms": [{"grammatical_form": "adverb/en_positive", "text": "this evening", "is_base_form": true}]}
+{"guid": "D03_008", "forms": [{"grammatical_form": "adverb/en_positive", "text": "currently", "is_base_form": true, "ipa": "/ˈkɝːəntli/", "phonetic": "KUR-uhnt-lee"}]}
