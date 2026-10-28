@@ -432,9 +432,11 @@ def create_app(
     # The benchmarks section is only enabled when the postgres URL can be built.
     # Under TESTING the benchmarks section stays disabled: building the URL reads
     # the real Postgres key off disk and the request hooks open live connections,
-    # neither of which belongs in a test run.
+    # neither of which belongs in a test run.  Personas can also opt out
+    # (golden/hosted do).
     bench_postgres_url: Optional[str] = None
-    if not app.config.get("TESTING"):
+    benchmarks_wanted = persona is None or persona.enable_benchmarks
+    if benchmarks_wanted and not app.config.get("TESTING"):
         try:
             from benchmarks.config import BenchmarkConfig
 
