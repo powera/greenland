@@ -232,7 +232,9 @@ def _fetch_words_at_level(level: int, foreign_lang: str, limit: int = 40) -> Lis
                 "level": lemma.difficulty_level,
             }
         )
-    return _weighted_sample_by_level(words, level, limit)
+    sampled = _weighted_sample_by_level(words, level, limit)
+    g.activity_words = sampled
+    return sampled
 
 
 # ---------------------------------------------------------------------------
@@ -764,6 +766,8 @@ def _pick_lemma_audio(lemma_id: int, language_code: str) -> Optional[AudioQualit
         .filter(AudioQualityReview.lemma_id == lemma_id)
         .filter(AudioQualityReview.language_code == language_code)
         .filter(AudioQualityReview.sentence_id.is_(None))
+        .filter(AudioQualityReview.grammatical_form.is_(None))
+        .filter(AudioQualityReview.status.in_(["approved", "approved_with_issues"]))
         .all()
     )
     if not reviews:
@@ -868,6 +872,26 @@ def _render_activity(
     changes them via the controls form or just navigates between activities.
     """
     context = {**_common_template_vars(level, interface_lang, foreign_lang), **extra}
+    inspection_words: List[Dict[str, Any]] = []
+    for candidate in getattr(g, "activity_words", []):
+        recording = _pick_lemma_audio(candidate["id"], foreign_lang)
+        inspection_words.append(
+            {
+                **candidate,
+                "url": url_for("lemmas.view_lemma", lemma_id=candidate["id"]),
+                "audio_url": (
+                    url_for(
+                        "audio.serve_audio_file",
+                        language=recording.language_code,
+                        voice=recording.voice_name,
+                        filename=recording.filename,
+                    )
+                    if recording
+                    else None
+                ),
+            }
+        )
+    context["inspection_words"] = inspection_words
     response = make_response(render_template(template_name, **context))
     response.set_cookie(
         _LEVEL_COOKIE,
