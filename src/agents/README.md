@@ -39,7 +39,6 @@ can launch or that back a Barsukas page.
 | **sarka** | magpie | Bulk vocabulary-driven conversations | shim → `sentences/`, queue | yes | yes |
 | **genys** | woodpecker | Parse a document into sentences and stage unknown words | inline | via workqueue | yes |
 | **erelis** | eagle | False lemma links (lemma's translation absent from sentence translation) | inline | no | no |
-| **ozys** | billy goat | Story-library texts (retellings, learner conversations) | inline | yes (Texts) | yes |
 | **vovere** family | squirrel | Concept encyclopedia: generate / rank red links / create from Q-ids | inline, batch | yes (Concepts) | yes |
 | **vieversys** | lark | Cloud TTS audio (OpenAI, Polly, Azure, Google, Gemini) | inline, queue | yes | TTS |
 | **strazdas** | thrush | Local TTS audio (eSpeak-NG, Qwen3-TTS) | inline | yes | no |
@@ -72,8 +71,8 @@ Barsukas integrity page.  vieversys is the production audio path.
   `sentences.import.document` task).
 - gandras is needed whenever audio is generated on another machine.
 - strazdas is the free/local audio path; quality is below vieversys.
-- ozys and the vovere family serve the story library and concept
-  encyclopedia; Barsukas Texts/Concepts pages call the same code.
+- the vovere family serves the concept encyclopedia; the Barsukas Concepts
+  pages call the same code.
 - lokys's checks are still available, but Barsukas calls the underlying
   checks per-lemma (`/api/llm/lokys/...`); the bulk CLI is a candidate to be
   absorbed by a lemma-review batch job (see "Batching an agent").
@@ -466,18 +465,6 @@ gegute.py --populate --use-workqueue          # Enqueue instead of running inlin
 `--validate` reports problems rather than applying corrections: the findings
 name an equivalent id for a human to act on, so an unreviewed LLM call cannot
 overwrite curated data.
-
-### ozys (Story Library Texts)
-
-Writes the text of an *authored* text work (fable, folk tale, fairy tale,
-myth, legend, conversation) and stores it as a `TextVersion`.  Refuses
-canonical works (poems, songs, speeches), whose texts are transcribed.  The
-Barsukas Texts page calls the same agent.
-
-```bash
-ozys/ozys.py --slug The_Three_Billy_Goats_Gruff
-ozys/ozys.py --slug At_the_Doctors_Office --difficulty 2 --dry-run
-```
 
 ### vovere family (Concept Encyclopedia)
 
