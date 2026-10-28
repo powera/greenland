@@ -96,19 +96,28 @@ class TestLemmaRoutes:
         assert response.status_code == 200
 
     def test_view_lemma_returns_200(self, client: FlaskClient) -> None:
-        response = client.get("/lemmas/1")
+        response = client.get("/lemmas/V01_001")
         assert response.status_code == 200
 
     def test_view_lemma_contains_lemma_text(self, client: FlaskClient) -> None:
-        response = client.get("/lemmas/1")
+        response = client.get("/lemmas/V01_001")
         html = response.data.decode()
         assert "eat" in html
 
     def test_view_lemma_subpages_return_200(self, client: FlaskClient) -> None:
         for subpage in LEMMA_SUBPAGES:
-            response = client.get(f"/lemmas/1/{subpage}")
-            assert response.status_code == 200, f"/lemmas/1/{subpage}"
-            assert "eat" in response.data.decode(), f"/lemmas/1/{subpage}"
+            response = client.get(f"/lemmas/V01_001/{subpage}")
+            assert response.status_code == 200, f"/lemmas/V01_001/{subpage}"
+            assert "eat" in response.data.decode(), f"/lemmas/V01_001/{subpage}"
+
+    def test_legacy_integer_url_redirects_to_guid(self, client: FlaskClient) -> None:
+        response = client.get("/lemmas/1/forms")
+        assert response.status_code == 302
+        assert response.headers["Location"].endswith("/lemmas/V01_001/forms")
+
+    def test_unknown_guid_returns_404(self, client: FlaskClient) -> None:
+        response = client.get("/lemmas/V99_999")
+        assert response.status_code == 404
 
     def test_view_nonexistent_lemma_redirects(self, client: FlaskClient) -> None:
         response = client.get("/lemmas/9999")
@@ -121,7 +130,7 @@ class TestLemmaRoutes:
             assert response.status_code == 302, f"/lemmas/9999/{subpage}"
 
     def test_view_second_lemma(self, client: FlaskClient) -> None:
-        response = client.get("/lemmas/2")
+        response = client.get("/lemmas/N01_001")
         assert response.status_code == 200
         html = response.data.decode()
         assert "house" in html
