@@ -106,11 +106,11 @@ def test_get_or_create_name_fills_a_missing_gender_only(session: Session) -> Non
     name, _ = get_or_create_name(session, name_text="Robin", kind="given_name")
     assert name.gender is None
 
-    get_or_create_name(session, name_text="Robin", kind="given_name", gender="neutral")
-    assert name.gender == "neutral"
+    get_or_create_name(session, name_text="Robin", kind="given_name", gender="unisex")
+    assert name.gender == "unisex"
 
     get_or_create_name(session, name_text="Robin", kind="given_name", gender="feminine")
-    assert name.gender == "neutral"
+    assert name.gender == "unisex"
 
 
 def test_same_text_different_kind_are_separate_names(session: Session) -> None:

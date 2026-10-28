@@ -77,8 +77,25 @@ NAME_KIND_LABELS: dict[str, str] = {
 
 # Optional gender hint. Languages that decline names (Lithuanian) or select
 # honorifics by gender need it; it is a hint for generation and translation,
-# never a claim about a real person.
-NAME_GENDERS: tuple[str, ...] = ("masculine", "feminine", "neutral")
+# never a claim about a real person. A five-point scale because many given
+# names are not binary: "Leslie" leans one way but is used both ways, while
+# "Pat" and "Jean" (masculine in French, feminine in English) are fully shared.
+NAME_GENDERS: tuple[str, ...] = (
+    "masculine",
+    "mostly_masculine",
+    "unisex",
+    "mostly_feminine",
+    "feminine",
+)
+
+# Display labels for the genders, for selects and listings.
+NAME_GENDER_LABELS: dict[str, str] = {
+    "masculine": "Masculine",
+    "mostly_masculine": "Mostly masculine",
+    "unisex": "Unisex",
+    "mostly_feminine": "Mostly feminine",
+    "feminine": "Feminine",
+}
 
 
 def is_valid_name_kind(kind: str) -> bool:

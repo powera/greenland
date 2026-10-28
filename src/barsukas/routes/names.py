@@ -31,6 +31,7 @@ from storage.crud.name_entity import (
     update_name,
 )
 from storage.models.name_entity import (
+    NAME_GENDER_LABELS,
     NAME_GENDERS,
     NAME_KIND_LABELS,
     NAME_KINDS,
@@ -79,6 +80,8 @@ def list_names_view() -> ResponseReturnValue:
         kind=kind,
         name_kinds=NAME_KINDS,
         name_kind_labels=NAME_KIND_LABELS,
+        name_genders=NAME_GENDERS,
+        name_gender_labels=NAME_GENDER_LABELS,
     )
 
 
@@ -132,6 +135,7 @@ def detail(name_id: int) -> Union[str, Response]:
         name_kinds=NAME_KINDS,
         name_kind_labels=NAME_KIND_LABELS,
         name_genders=NAME_GENDERS,
+        name_gender_labels=NAME_GENDER_LABELS,
     )
 
 

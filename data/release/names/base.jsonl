@@ -1,4 +1,20 @@
-{"guid": "E01_001", "kind": "given_name", "name_text": "John", "gender": "masculine", "translations": {}, "notes": "First names session (unlinked-token cleanup)"}
+{"guid": "E01_001", "kind": "given_name", "name_text": "John", "gender": "masculine", "translations": {"lt": "Džonas"}, "forms": [{"language_code": "lt", "grammatical_form": "noun/lt_accusative_singular", "derivative_form_text": "Džoną", "is_base_form": false}, {"language_code": "lt", "grammatical_form": "noun/lt_dative_singular", "derivative_form_text": "Džonui", "is_base_form": false}, {"language_code": "lt", "grammatical_form": "noun/lt_genitive_singular", "derivative_form_text": "Džono", "is_base_form": false}, {"language_code": "lt", "grammatical_form": "noun/lt_instrumental_singular", "derivative_form_text": "Džonu", "is_base_form": false}, {"language_code": "lt", "grammatical_form": "noun/lt_locative_singular", "derivative_form_text": "Džone", "is_base_form": false}, {"language_code": "lt", "grammatical_form": "noun/lt_nominative_singular", "derivative_form_text": "Džonas", "is_base_form": true}, {"language_code": "lt", "grammatical_form": "noun/lt_vocative_singular", "derivative_form_text": "Džonai", "is_base_form": false}], "notes": "First names session (unlinked-token cleanup)"}
 {"guid": "E01_002", "kind": "given_name", "name_text": "James", "gender": "masculine", "translations": {}, "notes": "First names session (unlinked-token cleanup)"}
 {"guid": "E01_003", "kind": "given_name", "name_text": "William", "gender": "masculine", "translations": {}, "notes": "First names session (unlinked-token cleanup)"}
 {"guid": "E01_004", "kind": "given_name", "name_text": "Mary", "gender": "feminine", "translations": {}, "notes": "First names session (unlinked-token cleanup)"}
+{"guid": "E01_005", "kind": "given_name", "name_text": "George", "gender": "masculine", "translations": {}}
+{"guid": "E01_006", "kind": "given_name", "name_text": "Charles", "gender": "masculine", "translations": {}}
+{"guid": "E01_007", "kind": "given_name", "name_text": "Robert", "gender": "masculine", "translations": {}}
+{"guid": "E01_008", "kind": "given_name", "name_text": "Thomas", "gender": "masculine", "translations": {}}
+{"guid": "E01_009", "kind": "given_name", "name_text": "David", "gender": "masculine", "translations": {}}
+{"guid": "E01_010", "kind": "given_name", "name_text": "Paul", "gender": "masculine", "translations": {}}
+{"guid": "E01_011", "kind": "given_name", "name_text": "Henry", "gender": "masculine", "translations": {}}
+{"guid": "E01_012", "kind": "given_name", "name_text": "Peter", "gender": "masculine", "translations": {}}
+{"guid": "E01_013", "kind": "given_name", "name_text": "Joseph", "gender": "masculine", "translations": {}}
+{"guid": "E01_014", "kind": "given_name", "name_text": "Richard", "gender": "masculine", "translations": {}}
+{"guid": "E01_015", "kind": "given_name", "name_text": "Louis", "gender": "masculine", "translations": {}}
+{"guid": "E01_016", "kind": "given_name", "name_text": "Michael", "gender": "masculine", "translations": {}}
+{"guid": "E01_017", "kind": "given_name", "name_text": "Alexander", "gender": "masculine", "translations": {}}
+{"guid": "E01_018", "kind": "given_name", "name_text": "Tom", "gender": "masculine", "translations": {}}
+{"guid": "E01_019", "kind": "given_name", "name_text": "Christian", "gender": "masculine", "translations": {}}
+{"guid": "E01_020", "kind": "given_name", "name_text": "Jean", "gender": "unisex", "translations": {}}

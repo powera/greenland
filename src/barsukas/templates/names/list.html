@@ -66,9 +66,9 @@
                     <label for="gender" class="form-label">Gender</label>
                     <select class="form-select" id="gender" name="gender">
                         <option value="">-</option>
-                        <option value="masculine">Masculine</option>
-                        <option value="feminine">Feminine</option>
-                        <option value="neutral">Neutral</option>
+                        {% for value in name_genders %}
+                            <option value="{{ value }}">{{ name_gender_labels.get(value, value) }}</option>
+                        {% endfor %}
                     </select>
                 </div>
                 <div class="col-md-3 d-flex align-items-end">
@@ -106,7 +106,7 @@
                     {% endif %}
                 </td>
                 <td><span class="badge bg-secondary">{{ name.kind_label }}</span></td>
-                <td>{{ name.gender or '-' }}</td>
+                <td>{{ name_gender_labels.get(name.gender, name.gender) if name.gender else '-' }}</td>
                 <td>{{ rendering_counts.get(name.id, 0) }}</td>
                 <td>
                     {% if name.verified %}

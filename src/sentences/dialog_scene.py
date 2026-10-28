@@ -324,7 +324,10 @@ def build_scene_schema() -> Schema:
                         },
                         "gender": {
                             "type": "string",
-                            "description": "masculine, feminine, or neutral; omit for non-people",
+                            "description": (
+                                "masculine, mostly_masculine, unisex, mostly_feminine, or "
+                                "feminine; omit for non-people"
+                            ),
                         },
                         "role": {
                             "type": "string",
