@@ -16,6 +16,22 @@
     <div id="tk-session-summary" class="tk-session-summary" hidden></div>
 
     <div class="trakaido-activity-grid">
+        {% for kind, title, description in [
+            ('grammar-phrases', 'Grammar Phrases', 'Translate rule-built phrases and inspect missing grammar requirements.'),
+            ('number-arithmetic', 'Number Arithmetic', 'Read number words and solve sums and differences.'),
+            ('emoji-count', 'Emoji Count', 'Count pictures and produce the number word.'),
+            ('declension', 'Declension', 'Identify cases from stored forms, accepting syncretic cases.'),
+            ('conjugation', 'Conjugation', 'Practice stored person and tense forms.'),
+            ('pronouns', 'Pronouns', 'Practice translated pronoun vocabulary.'),
+            ('numbers', 'Numbers', 'Recognize cardinal and ordinal vocabulary.'),
+            ('emoji-choice', 'Emoji Choice', 'Match a concept emoji to its target word.'),
+            ('listen-repeat', 'Listen and Repeat', 'Replay reviewed recordings and assess your spoken repetition.'),
+            ('vocabulary-list', 'Vocabulary List', 'Inspect sampled vocabulary, recordings and source records.')
+        ] %}
+        <a class="trakaido-activity-card" href="{{ url_for('trakaido_inspection.inspect_activity', kind=kind) }}">
+            <h2>{{ title }}</h2><p>{{ description }}</p>
+        </a>
+        {% endfor %}
         <a class="trakaido-activity-card" href="{{ url_for('trakaido_activities.sentence_patterns') }}">
             <div class="trakaido-activity-icon">&#9999;</div>
             <h2>Sentence Patterns</h2>

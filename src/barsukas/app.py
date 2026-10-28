@@ -93,6 +93,7 @@ from barsukas.routes import (
     strings_export,
     trakaido,
     trakaido_activities,
+    trakaido_inspection,
     translations,
     wireword,
     word_tokens,
@@ -404,6 +405,7 @@ def create_app(
     app.register_blueprint(strings_export.bp)
     app.register_blueprint(trakaido.bp)
     app.register_blueprint(trakaido_activities.bp)
+    app.register_blueprint(trakaido_inspection.bp)
     app.register_blueprint(pattern_sentences.bp)
     app.register_blueprint(peleda.bp)
     app.register_blueprint(phrases.bp)

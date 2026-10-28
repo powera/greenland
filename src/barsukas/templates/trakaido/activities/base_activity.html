@@ -61,6 +61,19 @@
             Next &#8594;
         </button>
     </div>
+    {% if inspection_words %}
+    <details class="mt-4">
+        <summary>Inspect sampled vocabulary and recordings</summary>
+        <p>This is the candidate pool for this round, including distractors. Audio requires an approved base recording.</p>
+        <table class="table"><thead><tr><th>Lemma</th><th>Target</th><th>Audio</th></tr></thead><tbody>
+        {% for word in inspection_words %}
+        <tr><td><a href="{{ word.url }}">{{ word.english }}</a></td><td>{{ word.foreign }}</td><td>
+            {% if word.audio_url %}<audio controls preload="none" src="{{ word.audio_url }}"></audio>{% else %}Missing approved base recording{% endif %}
+        </td></tr>
+        {% endfor %}
+        </tbody></table>
+    </details>
+    {% endif %}
 </div>
 {% endblock %}
 
