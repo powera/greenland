@@ -176,7 +176,7 @@ def test_the_lemma_page_lists_the_guids_that_lemma_used_to_have(
 
 def test_a_lemma_with_no_history_shows_no_panel(client: FlaskClient) -> None:
     """The panel is hidden rather than rendered empty for the usual case."""
-    response = client.get("/lemmas/1")
+    response = client.get("/lemmas/V01_001")
 
     assert response.status_code == 200
     assert "Previous GUIDs" not in response.data.decode()
