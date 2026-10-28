@@ -1,0 +1,48 @@
+{% extends "base.html" %}
+{% block title %}{{ activity_title }}{% endblock %}
+{% block content %}
+<h1>{{ activity_title }}</h1>
+<p>{{ description }}</p>
+<p><a href="{{ url_for('trakaido_activities.activities_index') }}">All activities</a></p>
+<form method="get" class="d-flex gap-3 mb-3 align-items-end">
+    <label>Vocabulary ceiling<select name="level" class="form-select">
+        {% for candidate in available_levels %}<option value="{{ candidate }}" {% if candidate == level %}selected{% endif %}>{{ candidate }}</option>{% endfor %}
+    </select></label>
+    <label>Target language<select name="foreign_lang" class="form-select">
+        {% for code, name in supported_languages.items() %}<option value="{{ code }}" {% if code == foreign_lang %}selected{% endif %}>{{ name }}</option>{% endfor %}
+    </select></label>
+    <button class="btn btn-primary" type="submit">Load</button>
+</form>
+<p>{{ pool_count }} eligible items {% if kind == 'grammar-phrases' %}rendered from vocabulary up to this level{% else %}in this sample (up to 400 lemmas){% endif %}. This preview reads the database; it does not verify release/export coverage.</p>
+{% if vocabulary %}
+<table class="table"><thead><tr><th>Source</th><th>Target</th><th>Audio</th><th>Inspect</th></tr></thead><tbody>
+{% for entry in vocabulary %}<tr><td>{{ entry.source }}</td><td>{{ entry.target }}</td><td>{% if entry.audio %}<audio controls preload="none" src="{{ entry.audio }}"></audio>{% else %}Missing approved base recording{% endif %}</td><td><a href="{{ entry.url }}">{{ entry.guid or entry.id }}</a></td></tr>{% endfor %}
+</tbody></table>
+{% elif question %}
+<div class="card card-body mb-3">
+    <h2>{{ question.prompt }}</h2>
+    <p>{{ question.note }}</p>
+    {% if kind == 'listen-repeat' and question.audio %}<audio controls preload="none" src="{{ question.audio }}"></audio>{% endif %}
+    {% if kind == 'listen-repeat' %}
+        <p>Say “{{ question.target }}” aloud. Replay and compare. This preview does not record your voice or grade pronunciation.</p>
+    {% elif feedback %}<p class="alert alert-info">{{ feedback }}</p>
+    {% else %}
+    <form method="post" action="{{ url_for('trakaido_inspection.inspect_activity', kind=kind, level=level, foreign_lang=foreign_lang) }}">
+        {% if question.options %}
+        <div class="d-flex flex-wrap gap-2">{% for option in question.options %}<button class="btn btn-outline-primary" name="answer" value="{{ option }}" type="submit">{{ option }}</button>{% endfor %}</div>
+        {% else %}
+        <label for="answer">Target-language answer</label><input class="form-control mb-2" id="answer" name="answer" autocomplete="off" required>
+        <button class="btn btn-primary" type="submit">Check</button>
+        {% endif %}
+    </form>
+    {% endif %}
+    <details class="mt-3"><summary>Inspect content and accepted answers</summary>
+        <p>{{ question.source }} → {{ question.target }}</p><p>{{ question.answers|join(' / ') }}</p>
+        {% if question.audio and kind != 'listen-repeat' %}<p>Answer recording</p><audio controls preload="none" src="{{ question.audio }}"></audio>{% elif not question.audio %}<p>No approved recording for this exact word/form.</p>{% endif %}
+        <a href="{{ question.url }}">Open lemma {{ question.guid or question.id }}</a>
+    </details>
+</div>
+{% else %}<p class="alert alert-warning">No eligible content for this language and level. Review the requirements below or choose another level.</p>{% endif %}
+<a class="btn btn-secondary" href="{{ url_for('trakaido_inspection.inspect_activity', kind=kind, level=level, foreign_lang=foreign_lang) }}">Next / refresh sample</a>
+{% if skipped %}<div class="mt-3"><h2>Missing requirements in this sample</h2><ul>{% for reason, count in skipped.items() %}<li>{{ reason }}: {{ count }}</li>{% endfor %}</ul></div>{% endif %}
+{% endblock %}
