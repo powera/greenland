@@ -8,6 +8,7 @@ from flask import Flask, g
 from sqlalchemy import Table, create_engine
 from sqlalchemy.orm import Session
 
+from storage.models.lemma_fact import LemmaFact
 from storage.models.schema import Lemma
 from worksheets import register
 from worksheets.activities.matching import build_matching
@@ -71,6 +72,7 @@ def test_emoji_pdf_and_missing_font(monkeypatch):
 def test_selection_excludes_revealed_answers_duplicate_words_and_clues():
     engine = create_engine("sqlite://")
     cast(Table, Lemma.__table__).create(engine)
+    cast(Table, LemmaFact.__table__).create(engine)
     with Session(engine) as session:
         for number, word in enumerate(WORDS):
             session.add(

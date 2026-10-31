@@ -19,6 +19,37 @@ class LemmaFactDefinition:
 
 RETIRED_LEMMA_FACT_TYPES = frozenset({"quantifiable", "has_individual_instances"})
 
+# Every part of speech a lemma row carries; for facts about any sense.
+ALL_LEMMA_POS_TYPES: Tuple[str, ...] = (
+    "adjective",
+    "adverb",
+    "conjunction",
+    "determiner",
+    "interjection",
+    "noun",
+    "numeral",
+    "preposition",
+    "pronoun",
+    "verb",
+)
+
+# content_flag: why a sense might be unsuitable for young learners.  A reason,
+# not an age, so each consumer sets its own policy (a high-school worksheet may
+# allow death_illness and violence_weapons but never sexual).  "none" is a
+# rating that was made; an absent row means the sense has not been rated.
+CONTENT_FLAG_NONE = "none"
+CONTENT_FLAG_VALUES: Tuple[str, ...] = (
+    CONTENT_FLAG_NONE,
+    "death_illness",
+    "violence_weapons",
+    "alcohol_drugs",
+    "anatomy",
+    "bodily_crude",
+    "sexual",
+    "disturbing",
+    "offensive",
+)
+
 
 LEMMA_FACT_DEFINITIONS: Dict[str, LemmaFactDefinition] = {
     "individuation": LemmaFactDefinition(
@@ -56,6 +87,24 @@ LEMMA_FACT_DEFINITIONS: Dict[str, LemmaFactDefinition] = {
             "Its counterpart is a separate lemma, so it has no male/female gender "
             "variants; absent for every other noun."
         ),
+    ),
+    "content_flag": LemmaFactDefinition(
+        fact_type="content_flag",
+        allowed_values=CONTENT_FLAG_VALUES,
+        required_pos=ALL_LEMMA_POS_TYPES,
+        display_label="Content Flag",
+        description=(
+            "The main reason this sense might be unsuitable for a young child's "
+            "worksheet, judging this sense only and not other senses of the same "
+            "spelling: none (ordinary for young children: cat, run, happy, sad); "
+            "death_illness (die, funeral, cancer); violence_weapons (gun, kill, war); "
+            "alcohol_drugs (beer, cigarette, cocaine, also gambling); anatomy "
+            "(intimate body parts in a neutral sense); bodily_crude (fart, vomit, "
+            "toilet humour); sexual (sexual activity or content); disturbing "
+            "(abuse, torture, suicide, cruelty); offensive (slurs, insults, "
+            "profanity). Pick the most serious reason when several apply."
+        ),
+        generatable=True,
     ),
     "numeral": LemmaFactDefinition(
         fact_type="numeral",

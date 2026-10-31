@@ -52,7 +52,11 @@ from typing import Any, Dict, List, Optional, Set, Tuple
 from sqlalchemy.orm import Session
 
 from storage import translation_helpers
-from storage.config.lemma_fact_registry import RETIRED_LEMMA_FACT_TYPES, validate_lemma_fact
+from storage.config.lemma_fact_registry import (
+    LEMMA_FACT_DEFINITIONS,
+    RETIRED_LEMMA_FACT_TYPES,
+    validate_lemma_fact,
+)
 from storage.models.lemma_fact import LemmaFact
 from storage.models.schema import Lemma, LemmaTranslation
 
@@ -313,9 +317,10 @@ def apply_lemma_facts(lemma: Lemma, record: Dict[str, Any]) -> None:
             raise ValueError(
                 f"Retired lemma fact {fact_type}; run the release concept-fact migration"
             )
-        if fact_type in {"individuation", "concreteness"}:
-            if lemma.pos_type != "noun":
-                raise ValueError(f"{fact_type} applies only to noun concepts")
+        definition = LEMMA_FACT_DEFINITIONS.get(fact_type)
+        if definition is not None:
+            if lemma.pos_type not in definition.required_pos:
+                raise ValueError(f"{fact_type} does not apply to {lemma.pos_type} lemmas")
             error = validate_lemma_fact(fact_type, fact_value)
             if error:
                 raise ValueError(error)

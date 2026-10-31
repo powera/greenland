@@ -21,7 +21,9 @@ from langtools.en.utils import (
     generate_regular_plural,
     generate_superlative,
 )
+from storage.config.lemma_fact_registry import CONTENT_FLAG_NONE, CONTENT_FLAG_VALUES
 from storage.models.grammar_fact import GrammarFact
+from storage.models.lemma_fact import LemmaFact
 from storage.models.lemma_relation import (
     RELATION_TYPE_DERIVATIONAL,
     RELATION_TYPE_SYNONYM,
@@ -50,6 +52,16 @@ _HEADWORD = re.compile(r"[a-z]{2,16}")
 _FORM_TEXT = re.compile(r"[a-z][a-z'-]*( [a-z][a-z'-]*)?")
 
 
+# How the content_flag lemma fact restricts selection:
+#   exclude_flagged  unrated senses allowed; flagged ones only if their flag is allowed
+#   reviewed_only    only senses rated "none" or with an allowed flag
+#   any              no restriction
+CONTENT_POLICIES: tuple[str, ...] = ("exclude_flagged", "reviewed_only", "any")
+CONTENT_FLAGS: tuple[str, ...] = tuple(
+    flag for flag in CONTENT_FLAG_VALUES if flag != CONTENT_FLAG_NONE
+)
+
+
 @dataclass(frozen=True)
 class SelectionFilters:
     """Restrictions shared by every activity's word selection."""
@@ -57,6 +69,9 @@ class SelectionFilters:
     category: str = ""
     yle_tier: str = ""
     max_frequency_rank: Optional[int] = None
+    content_policy: str = "exclude_flagged"
+    # Flags the user has chosen to permit, such as death_illness for older students.
+    allowed_flags: frozenset[str] = frozenset()
 
 
 def _filtered_query(
@@ -75,6 +90,19 @@ def _filtered_query(
             LemmaTier.source == YLE_SOURCE, LemmaTier.tier_name.in_(allowed_tiers)
         )
         query = query.filter(Lemma.id.in_(tier_lemmas))
+    if filters.content_policy not in CONTENT_POLICIES:
+        raise ValueError("Unknown content policy.")
+    if not filters.allowed_flags <= set(CONTENT_FLAGS):
+        raise ValueError("Unknown content flag.")
+    if filters.content_policy != "any":
+        acceptable = {CONTENT_FLAG_NONE} | filters.allowed_flags
+        rated = session.query(LemmaFact.lemma_id).filter(LemmaFact.fact_type == "content_flag")
+        if filters.content_policy == "reviewed_only":
+            query = query.filter(Lemma.id.in_(rated.filter(LemmaFact.fact_value.in_(acceptable))))
+        else:
+            query = query.filter(
+                Lemma.id.notin_(rated.filter(LemmaFact.fact_value.notin_(acceptable)))
+            )
     if filters.max_frequency_rank is not None:
         query = query.filter(
             Lemma.frequency_rank.isnot(None),
