@@ -14,6 +14,8 @@ from worksheets.activities.spelling import build_spelling
 from worksheets.activities.word_forms import build_word_forms
 from worksheets.models import Worksheet
 from worksheets.sources import (
+    CONTENT_FLAGS,
+    CONTENT_POLICIES,
     FORM_KINDS,
     YLE_TIERS,
     SelectionFilters,
@@ -107,8 +109,10 @@ def index() -> ResponseReturnValue:
         "yle_tier": values.get("yle_tier", ""),
         "max_rank": values.get("max_rank", ""),
         "irregular_only": values.get("irregular_only", ""),
+        "content_policy": values.get("content_policy", "exclude_flagged"),
         "page_size": values.get("page_size", "letter"),
     }
+    allowed_flags = values.getlist("allowed_flags")
     categories = sorted(
         {row[0] for row in g.db.query(Lemma.pos_subtype).distinct().all() if row[0]}
     )
@@ -134,8 +138,16 @@ def index() -> ResponseReturnValue:
             action = values.get("action", "preview")
             if action not in {"preview", "student", "answers"}:
                 raise ValueError("Unknown worksheet action.")
+            if settings["content_policy"] not in CONTENT_POLICIES:
+                raise ValueError("Unknown content policy.")
+            if not set(allowed_flags) <= set(CONTENT_FLAGS):
+                raise ValueError("Unknown content flag.")
             filters = SelectionFilters(
-                settings["category"], settings["yle_tier"], _parse_rank(settings["max_rank"])
+                settings["category"],
+                settings["yle_tier"],
+                _parse_rank(settings["max_rank"]),
+                settings["content_policy"],
+                frozenset(allowed_flags),
             )
             worksheet = build_worksheet(
                 g.db,
@@ -166,6 +178,8 @@ def index() -> ResponseReturnValue:
             categories=categories,
             activity_groups=ACTIVITY_GROUPS,
             yle_tiers=YLE_TIERS,
+            content_flags=CONTENT_FLAGS,
+            allowed_flags=allowed_flags,
             worksheet=worksheet,
             error=error,
         ),

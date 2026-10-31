@@ -138,6 +138,26 @@ def test_noun_dimensions_reject_invalid_values_and_other_parts_of_speech() -> No
         apply_lemma_facts(lemma, {"facts": {"concreteness": "mixed"}})
     assert lemma.lemma_facts == []
     lemma.pos_type = "verb"
-    with pytest.raises(ValueError, match="only to noun"):
+    with pytest.raises(ValueError, match="does not apply to verb"):
         apply_lemma_facts(lemma, {"facts": {"individuation": "individual"}})
+    assert lemma.lemma_facts == []
+
+
+def test_content_flag_round_trips_on_any_part_of_speech() -> None:
+    session = _make_session()
+    verb = Lemma(guid="V01_001", lemma_text="kill", definition_text="d", pos_type="verb")
+    session.add(verb)
+    session.commit()
+    apply_lemma_facts(verb, {"facts": {"content_flag": "violence_weapons"}})
+    session.commit()
+    assert _record(verb)["facts"] == {"content_flag": "violence_weapons"}
+
+
+def test_release_import_validates_every_registered_fact() -> None:
+    session = _make_session()
+    lemma = _lemma(session)
+    with pytest.raises(ValueError, match="Invalid value"):
+        apply_lemma_facts(lemma, {"facts": {"content_flag": "mature"}})
+    with pytest.raises(ValueError, match="does not apply to noun"):
+        apply_lemma_facts(lemma, {"facts": {"numeral": "7"}})
     assert lemma.lemma_facts == []

@@ -475,6 +475,7 @@ def test_verb_principal_parts_are_in_same_call_as_classifications(session: Sessi
         "fr__auxiliary_verb": answer("avoir"),
         "fr__verb_reflexivity": answer("non_reflexive"),
         "fr__past_participle": answer("marché"),
+        "concept__content_flag": answer("none"),
     }
     assert save(session, plan, data).written == len(keys)
 

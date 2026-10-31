@@ -7,6 +7,7 @@ from sqlalchemy import create_engine
 from sqlalchemy.orm import Session
 
 from storage.models.grammar_fact import GrammarFact
+from storage.models.lemma_fact import LemmaFact
 from storage.models.lemma_relation import LemmaRelationGroup, LemmaRelationMember
 from storage.models.schema import Base, DerivativeForm, Lemma, LemmaTier, WordToken
 from worksheets.activities.families import build_families
@@ -28,6 +29,7 @@ TABLES = [
     Lemma.__table__,
     LemmaTier.__table__,
     GrammarFact.__table__,
+    LemmaFact.__table__,
     DerivativeForm.__table__,
     LemmaRelationGroup.__table__,
     LemmaRelationMember.__table__,
@@ -262,3 +264,49 @@ def test_normalize_rhyme_key_folds_known_variants() -> None:
     assert normalize_rhyme_key("ɜːrd") == normalize_rhyme_key("ɝd")
     assert normalize_rhyme_key("eɪbəl") == normalize_rhyme_key("eɪbl")
     assert normalize_rhyme_key("ɒɡ") == "ɑɡ"
+
+
+def _flag(session: Session, lemma: Lemma, value: str) -> None:
+    session.add(LemmaFact(lemma_id=lemma.id, fact_type="content_flag", fact_value=value))
+
+
+def _plural_bases(session: Session, count: int, filters: SelectionFilters) -> set[str]:
+    return {entry.base for entry in select_word_forms(session, count, "plural", 1, filters)}
+
+
+def test_content_policies_and_allowed_flags(session: Session) -> None:
+    facts = {"number_type": "regular"}
+    _flag(session, _lemma(session, "N1", "cat", "noun", facts=facts), "none")
+    _flag(session, _lemma(session, "N2", "gun", "noun", facts=facts), "violence_weapons")
+    _flag(session, _lemma(session, "N3", "beer", "noun", facts=facts), "alcohol_drugs")
+    _lemma(session, "N4", "kite", "noun", facts=facts)  # unrated
+    assert _plural_bases(session, 2, SelectionFilters()) == {"cat", "kite"}
+    with pytest.raises(ValueError, match="Only 2"):
+        select_word_forms(session, 3, "plural", 1)
+    reviewed = SelectionFilters(content_policy="reviewed_only")
+    assert _plural_bases(session, 1, reviewed) == {"cat"}
+    older = SelectionFilters(
+        content_policy="reviewed_only", allowed_flags=frozenset({"violence_weapons"})
+    )
+    assert _plural_bases(session, 2, older) == {"cat", "gun"}
+    assert _plural_bases(session, 4, SelectionFilters(content_policy="any")) == {
+        "cat",
+        "gun",
+        "beer",
+        "kite",
+    }
+    with pytest.raises(ValueError, match="Unknown content flag"):
+        select_word_forms(session, 1, "plural", 1, SelectionFilters(allowed_flags=frozenset({"x"})))
+
+
+def test_flagged_member_removes_its_whole_synonym_group(session: Session) -> None:
+    big = _lemma(session, "A1", "big", "adjective")
+    large = _lemma(session, "A2", "large", "adjective")
+    drunk = _lemma(session, "A3", "drunk", "adjective")
+    tipsy = _lemma(session, "A4", "tipsy", "adjective")
+    _flag(session, drunk, "alcohol_drugs")
+    _group(session, "synonym", big, large)
+    _group(session, "synonym", drunk, tipsy)
+    assert [pair.text in {"big", "large"} for pair in select_synonym_pairs(session, 1, 1)] == [True]
+    with pytest.raises(ValueError, match="Only 1"):
+        select_synonym_pairs(session, 2, 1)

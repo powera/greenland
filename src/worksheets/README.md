@@ -48,6 +48,13 @@ fonts produce a form error rather than a PDF with replacement squares.
 
 Choose a category, Cambridge YLE tier (cumulative: Movers includes Starters), an
 optional maximum frequency rank, 2–20 questions, version number, and US Letter/A4.
+**Content** uses the `content_flag` lemma fact, an enum of reasons a sense may be
+unsuitable (none, death_illness, violence_weapons, alcohol_drugs, anatomy,
+bodily_crude, sexual, disturbing, offensive). "Leave out flagged words" (the
+default) keeps unrated senses; "Reviewed words only" keeps only senses rated
+`none`; either way, checked flags are allowed (e.g. death_illness for older
+students). The flag is per sense, so spelling-based risk in scramble and
+missing-letter sheets is not covered by it.
 For families, synonyms and rhymes every shown word must pass the filters. Preview
 includes answers and source GUIDs for review. Download the student PDF and a
 separate answer key. The same settings reproduce content while the database
