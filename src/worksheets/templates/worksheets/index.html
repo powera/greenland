@@ -1,0 +1,48 @@
+{% extends "base.html" %}
+{% block title %}English worksheets{% endblock %}
+{% block content %}
+<h1>English worksheets</h1>
+<p>English-to-English spelling and matching practice. Preview content for suitability before printing; existing definitions are not graded for children.</p>
+{% if error %}<div class="alert alert-danger" role="alert">{{ error }}</div>{% endif %}
+<form method="post" class="mb-4">
+  <div class="row g-3">
+    <div class="col-md-4"><label class="form-label" for="activity">Activity</label>
+      <select class="form-select" id="activity" name="activity">
+        {% for value, label in [('missing', 'Spelling: missing letters'), ('scramble', 'Spelling: scramble'), ('matching', 'Match words to clues')] %}
+        <option value="{{ value }}" {% if settings.activity == value %}selected{% endif %}>{{ label }}</option>
+        {% endfor %}
+      </select>
+    </div>
+    <div class="col-md-4"><label class="form-label" for="clue_type">Clues</label>
+      <select class="form-select" id="clue_type" name="clue_type">
+        {% for value, label in [('definition', 'English definitions'), ('emoji', 'Emoji')] %}
+        <option value="{{ value }}" {% if settings.clue_type == value %}selected{% endif %}>{{ label }}</option>
+        {% endfor %}
+      </select>
+    </div>
+    <div class="col-md-4"><label class="form-label" for="category">Category</label>
+      <select class="form-select" id="category" name="category"><option value="">All categories</option>
+        {% for category in categories %}<option {% if settings.category == category %}selected{% endif %}>{{ category }}</option>{% endfor %}
+      </select>
+    </div>
+    <div class="col-md-4"><label class="form-label" for="count">Questions (2–20)</label><input class="form-control" type="number" min="2" max="20" required id="count" name="count" value="{{ settings.count }}"></div>
+    <div class="col-md-4"><label class="form-label" for="seed">Version number</label><input class="form-control" type="number" required id="seed" name="seed" value="{{ settings.seed }}"><div class="form-text">Change this to select another version. Keep it unchanged to download the previewed questions.</div></div>
+    <div class="col-md-4"><label class="form-label" for="page_size">Paper</label><select class="form-select" id="page_size" name="page_size">
+      {% for value, label in [('letter', 'US Letter'), ('a4', 'A4')] %}<option value="{{ value }}" {% if settings.page_size == value %}selected{% endif %}>{{ label }}</option>{% endfor %}
+    </select></div>
+  </div>
+  <div class="mt-3">
+    <button class="btn btn-primary" name="action" value="preview">Preview</button>
+    <button class="btn btn-outline-primary" name="action" value="student">Student PDF</button>
+    <button class="btn btn-outline-secondary" name="action" value="answers">Answer key PDF</button>
+  </div>
+</form>
+{% if worksheet %}
+<h2>{{ worksheet.title }} preview</h2><p>{{ worksheet.instructions }}</p>
+<table class="table"><thead><tr><th>#</th><th>Question</th><th>Clue</th><th>Answer</th><th>Source</th></tr></thead><tbody>
+{% for question in worksheet.questions %}<tr><td>{{ loop.index }}</td><td>{{ question.prompt }}</td><td>{{ question.clue }}</td><td>{{ question.answer }}</td><td>{{ question.source_id }}</td></tr>{% endfor %}
+</tbody></table>
+{% if worksheet.choices %}<h3>Clues</h3><ol type="A">{% for clue in worksheet.choices %}<li>{{ clue }}</li>{% endfor %}</ol>{% endif %}
+<p class="text-muted">Answer columns and source identifiers appear only in this preview. Check clues for ambiguity, especially emoji and anagrams.</p>
+{% endif %}
+{% endblock %}

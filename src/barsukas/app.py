@@ -406,6 +406,9 @@ def create_app(
     app.register_blueprint(strings_export.bp)
     app.register_blueprint(trakaido.bp)
     app.register_blueprint(trakaido_activities.bp)
+    from worksheets import register as register_worksheets
+
+    register_worksheets(app)
     app.register_blueprint(pattern_sentences.bp)
     app.register_blueprint(peleda.bp)
     app.register_blueprint(phrases.bp)

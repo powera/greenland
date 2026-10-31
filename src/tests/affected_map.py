@@ -53,6 +53,7 @@ DIRECTORY_MAP: dict[str, tuple[str, ...]] = {
     "verification": ("words", "storage"),
     "wordfreq": ("wordfreq", "words", "sentences", "storage"),
     "words": ("words", "agents", "sentences", "barsukas", "quality"),
+    "worksheets": ("worksheets",),
     "workqueue": ("workqueue", "barsukas", "sentences", "words"),
 }
 
