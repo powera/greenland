@@ -2,15 +2,16 @@
 {% block title %}English worksheets{% endblock %}
 {% block content %}
 <h1>English worksheets</h1>
-<p>English-to-English spelling and matching practice. Preview content for suitability before printing; existing definitions are not graded for children.</p>
+<p>English-to-English spelling, word-form, and word-relationship practice. Preview content for suitability before printing; existing definitions are not graded for children.</p>
 {% if error %}<div class="alert alert-danger" role="alert">{{ error }}</div>{% endif %}
 <form method="post" class="mb-4">
   <div class="row g-3">
     <div class="col-md-4"><label class="form-label" for="activity">Activity</label>
       <select class="form-select" id="activity" name="activity">
-        {% for value, label in [('missing', 'Spelling: missing letters'), ('scramble', 'Spelling: scramble'), ('matching', 'Match words to clues')] %}
+        {% for group, options in activity_groups %}<optgroup label="{{ group }}">
+        {% for value, label in options %}
         <option value="{{ value }}" {% if settings.activity == value %}selected{% endif %}>{{ label }}</option>
-        {% endfor %}
+        {% endfor %}</optgroup>{% endfor %}
       </select>
     </div>
     <div class="col-md-4"><label class="form-label" for="clue_type">Clues</label>
@@ -19,12 +20,25 @@
         <option value="{{ value }}" {% if settings.clue_type == value %}selected{% endif %}>{{ label }}</option>
         {% endfor %}
       </select>
+      <div class="form-text">Used by spelling and clue matching only.</div>
     </div>
     <div class="col-md-4"><label class="form-label" for="category">Category</label>
       <select class="form-select" id="category" name="category"><option value="">All categories</option>
         {% for category in categories %}<option {% if settings.category == category %}selected{% endif %}>{{ category }}</option>{% endfor %}
       </select>
     </div>
+    <div class="col-md-4"><label class="form-label" for="yle_tier">Cambridge YLE words</label>
+      <select class="form-select" id="yle_tier" name="yle_tier"><option value="">Any word</option>
+        {% for tier in yle_tiers %}<option value="{{ tier }}" {% if settings.yle_tier == tier %}selected{% endif %}>{{ tier|capitalize }}{% if not loop.first %} and easier{% endif %}</option>{% endfor %}
+      </select>
+      <div class="form-text">Starters, Movers and Flyers are the young-learner word lists.</div>
+    </div>
+    <div class="col-md-4"><label class="form-label" for="max_rank">Maximum frequency rank</label><input class="form-control" type="number" min="1" id="max_rank" name="max_rank" value="{{ settings.max_rank }}"><div class="form-text">Blank for no limit; 1000 keeps the most common words.</div></div>
+    <div class="col-md-4 d-flex align-items-end"><div class="form-check">
+      <input class="form-check-input" type="checkbox" id="irregular_only" name="irregular_only" value="1" {% if settings.irregular_only %}checked{% endif %}>
+      <label class="form-check-label" for="irregular_only">Irregular forms only</label>
+      <div class="form-text">Word-form activities: mice, went/gone, better/best.</div>
+    </div></div>
     <div class="col-md-4"><label class="form-label" for="count">Questions (2–20)</label><input class="form-control" type="number" min="2" max="20" required id="count" name="count" value="{{ settings.count }}"></div>
     <div class="col-md-4"><label class="form-label" for="seed">Version number</label><input class="form-control" type="number" required id="seed" name="seed" value="{{ settings.seed }}"><div class="form-text">Change this to select another version. Keep it unchanged to download the previewed questions.</div></div>
     <div class="col-md-4"><label class="form-label" for="page_size">Paper</label><select class="form-select" id="page_size" name="page_size">

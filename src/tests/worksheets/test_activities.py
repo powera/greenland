@@ -14,7 +14,7 @@ from worksheets.activities.matching import build_matching
 from worksheets.activities.spelling import build_spelling
 from worksheets.models import Word
 from worksheets.rendering.pdf import render_pdf
-from worksheets.sources import select_words
+from worksheets.sources import SelectionFilters, select_words
 
 WORDS = [
     Word("a", "cat", "A small household animal.", "🐈"),
@@ -94,7 +94,7 @@ def test_selection_excludes_revealed_answers_duplicate_words_and_clues():
         with pytest.raises(ValueError, match="Only 3"):
             select_words(session, 4, "emoji", 4)
         with pytest.raises(ValueError, match="Only 0"):
-            select_words(session, 2, "emoji", 4, "absent")
+            select_words(session, 2, "emoji", 4, SelectionFilters(category="absent"))
 
 
 def test_barsukas_registration_preview_and_download(monkeypatch):

@@ -25,7 +25,10 @@ from reportlab.platypus import (
     TableStyle,
 )
 
+from worksheets.activities.word_forms import BLANK
 from worksheets.models import Worksheet
+
+ANSWER_LINE = "__________________"
 
 
 def _emoji_image(glyph: str) -> Image:
@@ -121,11 +124,11 @@ def render_pdf(worksheet: Worksheet, page_size: str = "letter", answers: bool = 
             text = f"{number}. {question.answer}"
             story.append(Paragraph(escape(text), styles["Normal"]))
             continue
-        block: list[Flowable] = [
-            Paragraph(
-                escape(f"{number}. {question.prompt}    __________________"), styles["Normal"]
-            )
-        ]
+        # Prompts with their own blanks (word forms, families) need no trailing line.
+        line = (
+            question.prompt if BLANK in question.prompt else f"{question.prompt}    {ANSWER_LINE}"
+        )
+        block: list[Flowable] = [Paragraph(escape(f"{number}. {line}"), styles["Normal"])]
         if question.clue:
             block.append(
                 _emoji_image(question.clue)
