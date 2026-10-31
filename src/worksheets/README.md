@@ -10,7 +10,7 @@ Barsukas installs this package with `from worksheets import register` and
 `register(app)`. Open **Trakaido → English Worksheets**, or `/worksheets/`.
 There is no CLI, separate server, teacher portal, or learner tracking.
 
-- `activities/`: renderer-independent spelling and matching builders.
+- `activities/`: renderer-independent spelling, matching, word-form and family builders.
 - `models.py`: source words, questions, and worksheets, retaining sense GUIDs.
 - `sources.py`: read-only selection from the existing Barsukas database session.
 - `rendering/`: PDF layout and local emoji rasterization.
@@ -28,8 +28,27 @@ fonts produce a form error rather than a PDF with replacement squares.
 1. **Spelling — missing letters:** fill gaps using an English definition or emoji.
 2. **Spelling — scramble:** rearrange letters using a definition or emoji clue.
 3. **Matching:** match English words to independently shuffled definitions or emojis.
+4. **Word forms:** plurals, past tense, past participles, both principal parts, and
+   comparison (-er/-est, more/most). Verb parts come from the stored `past` and
+   `past_participle` grammar facts; plurals and comparison follow the production
+   precedence (stored form, then grammar fact, then `langtools.en` rule). Plurale and
+   singulare tantum nouns are skipped. **Irregular forms only** keeps words whose
+   form differs from the spelling rule (mice, went/gone, better/best). A spelling
+   whose senses inflect differently (hang: hung/hanged) is used only with its
+   disambiguation as the clue.
+5. **Word families:** one derivational family per line with one member blanked and
+   its part of speech shown.
+6. **Synonym matching** and **rhyme matching:** pairs from synonym relation groups,
+   or from rhyme keys of the English base-form IPA. Each synonym group is used once
+   per sheet. Rhyme keys are folded across known transcription variants (length
+   marks, ɝ/ɜːr, ɒ/ɑ, syllabic consonants) as a stopgap until the English IPA is
+   normalized, and no two rhyme families on one sheet share a three-letter spelling
+   ending, so a family split by an inconsistent transcription cannot make a clue
+   match two words.
 
-Choose a category, 2–20 questions, version number, and US Letter/A4. Preview
+Choose a category, Cambridge YLE tier (cumulative: Movers includes Starters), an
+optional maximum frequency rank, 2–20 questions, version number, and US Letter/A4.
+For families, synonyms and rhymes every shown word must pass the filters. Preview
 includes answers and source GUIDs for review. Download the student PDF and a
 separate answer key. The same settings reproduce content while the database
 remains unchanged; a changed database can change the selection.
@@ -55,7 +74,7 @@ The answer key records the intended sense/word; anagrams may admit alternatives.
 | Pronunciation practice | Pronunciation difficulty and sound structure linked to the relevant English pronunciation/variety |
 | Word transformations | Candidate chains built from classified words, followed by human review of the intended spelling/sound changes |
 | Meaning in context / best word | Sense-linked, child-suitable examples and reviewed distractors; author/review screens |
-| Word parts and families | Reviewed prefix, suffix, root, and family relationships with instructional explanations |
+| Word parts | Reviewed prefix, suffix, and root relationships with instructional explanations (derivational families exist already) |
 | Reading comprehension | Authored passages and questions with correct answers and age/content suitability |
 | Silent and oral fluency | Passages with word counts and difficulty; timing/accuracy/comprehension recording sheets. PDFs support manual practice, not automatic measurement |
 | Sentence editing and word use | Reviewed prompts, acceptable answers, and feedback/rubrics |
