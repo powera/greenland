@@ -121,7 +121,7 @@ class GptVoice(Enum):
     """
 
     # Lithuanian voices
-    GPT_LT_F1 = ("lt", "f", 1, Voice.CORAL)
+    GPT_LT_F1 = ("lt", "f", 1, Voice.SHIMMER)
     GPT_LT_F2 = ("lt", "f", 2, Voice.ALLOY)
     GPT_LT_M1 = ("lt", "m", 1, Voice.ASH)
     GPT_LT_M2 = ("lt", "m", 2, Voice.ECHO)
@@ -381,7 +381,7 @@ SUPPORTED_LANGUAGES = list(DEFAULT_GPT_VOICES.keys())
 CHARACTER_NAMES: Dict[str, Dict[str, str]] = {
     # Lithuanian
     "lt": {
-        "f1": "Rūta",  # Female, primary (Nova)
+        "f1": "Rūta",  # Female, primary (Shimmer)
         "f2": "Eglė",  # Female, secondary (Alloy)
         "m1": "Jonas",  # Male, primary (Ash)
         "m2": "Tomas",  # Male, secondary (Echo)

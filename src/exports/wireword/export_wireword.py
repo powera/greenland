@@ -28,7 +28,6 @@ from storage.models.lemma_fact import LemmaFact
 from storage.models.variant_form import ACCEPTED_ANSWER_VARIANT_KINDS, VariantForm
 from storage.models.schema import (
     SYNONYM_GRAMMATICAL_FORMS,
-    AudioQualityReview,
     DerivativeForm,
     Lemma,
     WordToken,
@@ -42,6 +41,7 @@ from storage.translation_helpers import (
 from langtools.dialect_overrides import get_base_language
 from langtools.en.conjugation import expand_verb_forms
 from exports.wireword.data_models import ExportStats, create_export_stats
+from exports.wireword.audio import build_audio_index
 from exports.wireword.gendered_forms import bulk_gender_variants, build_gendered_forms
 from exports.wireword.readings import (
     build_target_reading_fields,
@@ -457,7 +457,7 @@ class WirewordExporter:
 
         Args:
             session: Database session
-            guid: Lemma GUID (e.g., "N01_001") or word text (e.g., "gyventi")
+            guid: Current lemma GUID (e.g., "N01_001")
             language: Language code (e.g., "zh")
             grammatical_form: Optional grammatical form (e.g., "1s_present"), None for base form
 
@@ -466,29 +466,7 @@ class WirewordExporter:
             {"ash": "ab4d3513...", "alloy": "cd567890..."}
             Returns None if no audio available.
         """
-        # Query all audio records for this word and form
-        query = session.query(AudioQualityReview).filter_by(guid=guid, language_code=language)
-
-        # Filter by grammatical form (None matches NULL in database)
-        if grammatical_form is None:
-            query = query.filter(AudioQualityReview.grammatical_form.is_(None))
-        else:
-            query = query.filter_by(grammatical_form=grammatical_form)
-
-        audio_records = query.all()
-
-        if not audio_records:
-            return None
-
-        # Build dict of voice -> MD5 hash
-        audio_hashes = {}
-        for audio in audio_records:
-            # Only include audio that is in production (has s3_prod_url)
-            # and has not been rejected (status != needs_replacement)
-            if audio.s3_prod_url and audio.status != "needs_replacement":
-                audio_hashes[audio.voice_name] = audio.manifest_md5
-
-        return audio_hashes if audio_hashes else None
+        return build_audio_index(session, [guid], language).get((guid, grammatical_form))
 
     def export_to_wireword_format(
         self,
@@ -565,29 +543,13 @@ class WirewordExporter:
                 session, lemma_ids, [self.language, self.source_language]
             )
 
-            # Bulk fetch all audio records for all GUIDs (base forms only)
-            all_audio_records = (
-                session.query(AudioQualityReview)
-                .filter(
-                    AudioQualityReview.guid.in_(guids),
-                    AudioQualityReview.language_code == self.language,
-                )
-                .all()
+            # Select unambiguous current audio for base words, forms, and variants.
+            audio_by_guid_form = build_audio_index(
+                session,
+                guids,
+                self.language,
+                include_staging=self.include_unreviewed_audio,
             )
-            # Index by (guid, grammatical_form) for quick lookup
-            audio_by_guid_form: Dict[Tuple[str, Optional[str]], Dict[str, str]] = {}
-            for audio in all_audio_records:
-                # Always exclude rejected audio
-                if audio.status == "needs_replacement":
-                    continue
-
-                # Include if in production OR (if flag is True and in staging)
-                if audio.s3_prod_url or (self.include_unreviewed_audio and audio.s3_staging_url):
-                    key = (audio.guid, audio.grammatical_form)
-                    if key not in audio_by_guid_form:
-                        audio_by_guid_form[key] = {}
-                    audio_by_guid_form[key][audio.voice_name] = audio.manifest_md5
-            logger.info(f"Bulk fetched {len(all_audio_records)} audio records")
 
             grammar_facts_by_lemma = bulk_get_effective_grammar_facts(
                 session, lemma_ids, self.language
@@ -1467,28 +1429,12 @@ class WirewordExporter:
                     ] = form.derivative_form_text
 
             # Bulk fetch all audio records for all GUIDs
-            all_audio_records = (
-                session.query(AudioQualityReview)
-                .filter(
-                    AudioQualityReview.guid.in_(guids),
-                    AudioQualityReview.language_code == self.language,
-                )
-                .all()
+            audio_by_guid_form = build_audio_index(
+                session,
+                guids,
+                self.language,
+                include_staging=self.include_unreviewed_audio,
             )
-            # Index by (guid, grammatical_form) for quick lookup
-            audio_by_guid_form: Dict[Tuple[str, Optional[str]], Dict[str, str]] = {}
-            for audio in all_audio_records:
-                # Always exclude rejected audio
-                if audio.status == "needs_replacement":
-                    continue
-
-                # Include if in production OR (if flag is True and in staging)
-                if audio.s3_prod_url or (self.include_unreviewed_audio and audio.s3_staging_url):
-                    key = (audio.guid, audio.grammatical_form)
-                    if key not in audio_by_guid_form:
-                        audio_by_guid_form[key] = {}
-                    audio_by_guid_form[key][audio.voice_name] = audio.manifest_md5
-            logger.info(f"Bulk fetched {len(all_audio_records)} audio records")
 
             # Transform to WireWord format using pre-fetched data
             wireword_data = []

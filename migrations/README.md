@@ -63,3 +63,22 @@ languages. It names the three levels and moves the catalog senses still at
 `scripts/wordlists/import_geography_catalog.py`, which adds the rest of the
 catalog through `add_sense`. The 20261009 migration is superseded by that
 script and should not be re-applied.
+
+## Audio references after category changes
+
+`20261101_repair_audio_guids.py` reconnects audio metadata left on retired GUIDs
+by subtype/category changes. It follows subtype-only tombstone chains, checks
+current spoken text (including stored variants/forms), and preserves existing
+review verdicts and S3 assets. Multiple takes for the same current audio slot
+are reported as conflicts and left alone. An explicit `--prefer-review-id ID`
+selects a historical take and retains the displaced take under the old GUID.
+
+```bash
+GREENLAND_TEST_MODE=1 PYTHONPATH=src python migrations/20261101_repair_audio_guids.py
+GREENLAND_DISABLE_LLM=1 PYTHONPATH=src python -m storage.backup create --label repair-audio-guids
+GREENLAND_DISABLE_LLM=1 PYTHONPATH=src python migrations/20261101_repair_audio_guids.py --apply
+```
+
+The migration is safe to rerun and does not upload or delete audio. Future
+subtype changes carry audio references forward in the same transaction as the
+lemma and tombstone; recordings for cleared translations/forms are invalidated.
