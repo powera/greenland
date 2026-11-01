@@ -155,3 +155,14 @@ def are_ipa_equivalent(model_ipa: str, reference_ipa: str, threshold: float = 0.
 def is_ipa_levenshtein_match(model_ipa: str, reference_ipa: str, threshold: float = 0.8) -> bool:
     """Alias for weighted-Levenshtein IPA matching semantics."""
     return are_ipa_equivalent(model_ipa=model_ipa, reference_ipa=reference_ipa, threshold=threshold)
+
+
+def invalid_english_ipa_characters(ipa_value: str) -> set[str]:
+    """Return unsupported characters, without guessing pronunciation from spelling.
+
+    Accept broad English IPA, common rhotic conventions, syllabic consonants,
+    affricate ties, and optional delimiters. Bare IPA and multiword forms are valid.
+    This is an alphabet check, not proof that a transcription matches a word.
+    """
+    allowed = _IPA_CHARS | frozenset("gɵʔɫˑ\u0329\u032f\u032c\u0303\u0361\u035c/[](). ,-")
+    return set(unicodedata.normalize("NFC", ipa_value)) - allowed

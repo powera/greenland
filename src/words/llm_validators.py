@@ -20,6 +20,7 @@ import constants
 import util.prompt_loader
 from clients.types import LLMCall, Schema, SchemaProperty
 from clients.unified_client import UnifiedLLMClient
+from ipa.normalization import invalid_english_ipa_characters
 
 logger = logging.getLogger(__name__)
 
@@ -453,14 +454,14 @@ def build_pronunciation_call(
                     "boolean", "True if the current pronunciation is incorrect or missing"
                 ),
                 "suggested_ipa": SchemaProperty(
-                    "string", "Correct IPA pronunciation (e.g., /ˈwɜːrd/)"
+                    "string", "Correct General American IPA pronunciation (e.g., /wɝd/)"
                 ),
                 "suggested_phonetic": SchemaProperty(
                     "string", "Simplified phonetic pronunciation (e.g., WURD)"
                 ),
                 "alternative_pronunciations": SchemaProperty(
                     type="array",
-                    description="List of alternative pronunciations (British English, regional variations, etc.)",
+                    description="Return an empty list; only General American English is required.",
                     items={
                         "type": "object",
                         "properties": {
@@ -524,7 +525,6 @@ def build_pronunciation_call(
     if language_code == "en":
         # Load English-specific context from file
         context = util.prompt_loader.get_context("pronunciation", "single")
-        prompt_template = util.prompt_loader.get_prompt("pronunciation", "single")
     else:
         # Build streamlined multilingual context
         context = f"""You are a pronunciation expert for {language_name}.
@@ -540,7 +540,6 @@ Requirements:
   - Should be pronounceable by someone unfamiliar with IPA
 - Confidence: Score from 0.0 to 1.0
 """
-        prompt_template = None  # Will build prompt inline
 
     # Build context for non-English words differently
     if language_code != "en":
@@ -554,13 +553,19 @@ Requirements:
             "\n".join(context_parts) if context_parts else f"Word form in {language_name}"
         )
     else:
-        # For English, use example sentence or definition
+        # Keep sense and tense together; a lemma's sentence may use another tense.
+        english_context = [f"Part of speech: {pos_type}"]
+        if grammatical_form:
+            english_context.append(f"Grammatical form (including tense): {grammatical_form}")
+        if definition:
+            english_context.append(f"Definition: {definition}")
         if example_sentence:
-            context_info = f'Context sentence: "{example_sentence}"'
-        elif definition:
-            context_info = f"Definition: {definition}"
-        else:
-            context_info = f"The word '{word}' is used here."
+            english_context.append(f'Example sentence: "{example_sentence}"')
+        english_context.append(
+            "Pronounce the requested grammatical form and sense. The example sentence "
+            "is supporting context and may use a different tense or inflection."
+        )
+        context_info = "\n".join(english_context)
 
     if ipa_pronunciation or phonetic_pronunciation:
         # Validation mode
@@ -612,40 +617,12 @@ If incorrect, provide the correct pronunciations. If correct, confirm them."""
 
 Provide IPA and simplified phonetic (romanization) pronunciations following standard {language_name} phonology."""
         else:
-            # For English, build detailed word description with grammatical form and definition
-            word_desc = f"'{word}'"
-            context_parts = []
+            prompt = f"""Provide the General American English pronunciation for '{word}':
 
-            if grammatical_form:
-                context_parts.append(f"Grammatical form: {grammatical_form}")
-            if definition:
-                context_parts.append(f"Definition: {definition}")
+{context_info}
 
-            additional_context = "\n".join(context_parts) if context_parts else ""
-
-            if additional_context:
-                prompt = f"""Provide the pronunciation for the word {word_desc}:
-
-{additional_context}
-
-Important: Pay attention to the grammatical form and definition to determine the correct pronunciation,
-especially for words with multiple pronunciations depending on usage (e.g., "read", "tear", "wind").
-
-Return the IPA and simplified phonetic pronunciation, along with any alternative pronunciations."""
-            else:
-                # Fallback to template if no additional context
-                if prompt_template is not None:
-                    prompt = prompt_template.format(
-                        word=word,
-                        sentence=(
-                            context_info
-                            if "sentence" in context_info.lower()
-                            else f"Context: {context_info}"
-                        ),
-                    )
-                else:
-                    # Fallback prompt if template is unavailable
-                    prompt = f"Provide the pronunciation for the word '{word}':\n\n{context_info}"
+Use the definition and grammatical form, including tense, to disambiguate homographs
+such as read, tear, and wind. Return the IPA and simplified phonetic pronunciation."""
 
     return LLMCall(prompt=prompt, schema=schema, context=context)
 
@@ -653,6 +630,14 @@ Return the IPA and simplified phonetic pronunciation, along with any alternative
 def interpret_pronunciation(data: Dict[str, Any], language_code: str) -> Dict[str, Any]:
     """Fill the fields the non-English schema leaves out, as callers expect them."""
     result = dict(data)
+    if language_code == "en" and result.get("suggested_ipa"):
+        invalid_characters = invalid_english_ipa_characters(result["suggested_ipa"])
+        if invalid_characters:
+            result["suggested_ipa"] = ""
+            result["confidence"] = 0.0
+            result["issues"] = list(result.get("issues") or []) + [
+                f"Unsupported IPA characters: {sorted(invalid_characters)!r}"
+            ]
     if language_code != "en":
         result.setdefault("alternative_pronunciations", [])
         result.setdefault("notes", "")
@@ -852,6 +837,9 @@ def build_batch_pronunciation_call(
     # Build additional context for non-English
     if language_code != "en" and english_translation:
         definition = f"{definition} (English: {english_translation})"
+
+    if language_code == "en":
+        context += "\nFor English, use General American pronunciation only."
 
     prompt = prompt_template.format(
         lemma=lemma,

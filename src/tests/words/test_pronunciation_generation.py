@@ -2,6 +2,8 @@
 
 from unittest.mock import patch
 
+import pytest
+
 from sqlalchemy import create_engine
 from sqlalchemy.orm import Session
 
@@ -486,3 +488,68 @@ def test_low_confidence_pronunciation_is_recorded_and_skipped_next_time() -> Non
     finally:
         session.close()
         engine.dispose()
+
+
+@pytest.mark.parametrize("ipa", ["IPA", "/>truː/", "Iːvəl", "/pi:s/"])
+def test_rejects_invalid_english_ipa_without_overwriting(ipa: str) -> None:
+    engine = create_engine("sqlite:///:memory:")
+    Base.metadata.create_all(engine)
+    with Session(engine) as session:
+        lemma = Lemma(lemma_text="tree", definition_text="a woody plant", pos_type="noun")
+        session.add(lemma)
+        session.flush()
+        form = DerivativeForm(
+            lemma_id=lemma.id,
+            language_code="en",
+            derivative_form_text="tree",
+            grammatical_form="noun/en_singular",
+            is_base_form=True,
+            ipa_pronunciation="/triː/",
+            phonetic_pronunciation="TREE",
+        )
+        session.add(form)
+        session.flush()
+        assert (
+            store_target_pronunciation(
+                session, lemma, PronunciationTarget.for_form(form), ipa, "bad", confidence=0.99
+            )
+            is False
+        )
+        assert form.ipa_pronunciation == "/triː/"
+        assert form.phonetic_pronunciation == "TREE"
+    engine.dispose()
+
+
+def test_canonical_english_inflections_selected_without_optional_forms() -> None:
+    from words.pronunciation_generation import plan_pronunciation_targets
+
+    engine = create_engine("sqlite:///:memory:")
+    Base.metadata.create_all(engine)
+    with Session(engine) as session:
+        lemma = Lemma(lemma_text="read", definition_text="to comprehend text", pos_type="verb")
+        session.add(lemma)
+        session.flush()
+        for label, text, base in [
+            ("verb/en_infinitive", "read", True),
+            ("verb/en_1s_past", "read", False),
+            ("verb/en_3s_present", "reads", False),
+            ("verb/en_1s_future", "will read", False),
+            ("verb/en_past_participle", "read", False),
+        ]:
+            session.add(
+                DerivativeForm(
+                    lemma_id=lemma.id,
+                    language_code="en",
+                    derivative_form_text=text,
+                    grammatical_form=label,
+                    is_base_form=base,
+                )
+            )
+        session.flush()
+        targets = plan_pronunciation_targets(session, lemma, "en")
+        assert {t.grammatical_form for t in targets} == {
+            "verb/en_infinitive",
+            "verb/en_1s_past",
+            "verb/en_3s_present",
+        }
+    engine.dispose()
