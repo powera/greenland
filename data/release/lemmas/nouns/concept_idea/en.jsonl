@@ -4,7 +4,7 @@
 {"guid": "N17_072", "forms": [{"grammatical_form": "noun/en_singular", "text": "magic", "is_base_form": true, "ipa": "/ˈmædʒ.ɪk/", "phonetic": "MAD-jik"}]}
 {"guid": "N17_076", "forms": [{"grammatical_form": "noun/en_singular", "text": "body", "is_base_form": true, "ipa": "/ˈbɑdi/", "phonetic": "BAH-dee"}]}
 {"guid": "N17_080", "forms": [{"grammatical_form": "noun/en_singular", "text": "matter", "is_base_form": true, "ipa": "[ˈmætər]", "phonetic": "MAT-ər"}]}
-{"guid": "N17_081", "forms": [{"grammatical_form": "noun/en_singular", "text": "fact", "is_base_form": true, "ipa": "fact", "phonetic": "FAKT"}]}
+{"guid": "N17_081", "forms": [{"grammatical_form": "noun/en_singular", "text": "fact", "is_base_form": true, "ipa": "/fækt/", "phonetic": "FAKT"}]}
 {"guid": "N17_087", "forms": [{"grammatical_form": "noun/en_singular", "text": "sight", "is_base_form": true, "ipa": "/saɪt/", "phonetic": "SIGH-t"}]}
 {"guid": "N17_089", "forms": [{"grammatical_form": "noun/en_singular", "text": "control", "is_base_form": true, "ipa": "/kənˈtroʊl/", "phonetic": "KON-troh-l"}]}
 {"guid": "N17_094", "forms": [{"grammatical_form": "noun/en_singular", "text": "sort", "is_base_form": true, "ipa": "/sɔːrt/", "phonetic": "SOR-t"}]}

@@ -15,6 +15,7 @@ from sqlalchemy.orm import Session
 from words.workflow_support import build_default_config
 import constants
 from langtools.form_registry import FORM_SPECS
+from ipa.normalization import invalid_english_ipa_characters
 from storage.backend.config import DataSourceConfig
 from storage.crud.derivative_form import (
     add_derivative_form,
@@ -369,6 +370,17 @@ def store_target_pronunciation(
     Returns:
         Whether anything was written; None for an answer below min_confidence.
     """
+    effective_ipa = ipa or target.known_ipa
+    if target.language_code == "en" and effective_ipa:
+        invalid_characters = invalid_english_ipa_characters(effective_ipa)
+        if invalid_characters:
+            logger.warning(
+                "Rejected IPA for %r: unsupported characters %r",
+                target.word,
+                sorted(invalid_characters),
+            )
+            return False
+
     if target.kind == "form":
         form = session.get(DerivativeForm, target.form_id)
         if form is None:
@@ -533,5 +545,7 @@ def generate_pronunciations_for_lemma(
                 f"Pronunciation of '{target.word}' below confidence ({confidence:.2f}); "
                 "recorded as uncertain"
             )
+        elif ipa or phonetic:
+            errors.append(f"Pronunciation of '{target.word}' rejected; not stored")
 
     return generated_count, errors

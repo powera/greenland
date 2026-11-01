@@ -26,7 +26,7 @@
 {"guid": "N06_032", "forms": [{"grammatical_form": "noun/en_singular", "text": "pickle", "is_base_form": true, "ipa": "/pɪk(ə)l/", "phonetic": "PIK(uhl)"}]}
 {"guid": "N06_033", "forms": [{"grammatical_form": "noun/en_singular", "text": "mustard", "is_base_form": true, "ipa": "/ˈmʌs.tɚd/", "phonetic": "MUSS-turd"}]}
 {"guid": "N06_034", "forms": [{"grammatical_form": "noun/en_singular", "text": "ketchup", "is_base_form": true, "ipa": "/kəˈtʃɛp/", "phonetic": "KUH-chehp"}]}
-{"guid": "N06_035", "forms": [{"grammatical_form": "noun/en_singular", "text": "mayonnaise", "is_base_form": true, "ipa": "IPA", "phonetic": "phonetic"}]}
+{"guid": "N06_035", "forms": [{"grammatical_form": "noun/en_singular", "text": "mayonnaise", "is_base_form": true, "ipa": "/ˈmeɪəˌneɪz/", "phonetic": "MAY-uh-nayz"}]}
 {"guid": "N06_036", "forms": [{"grammatical_form": "noun/en_singular", "text": "vinegar", "is_base_form": true, "ipa": "/ˈvaɪn.ɡɚ/", "phonetic": "VINE-ger"}]}
 {"guid": "N06_037", "forms": [{"grammatical_form": "noun/en_singular", "text": "cooking oil", "is_base_form": true, "ipa": "/ˌkuːkɪŋ ˈɔɪl/", "phonetic": "COO-king OIL"}]}
 {"guid": "N06_038", "forms": [{"grammatical_form": "noun/en_singular", "text": "flour", "is_base_form": true, "ipa": "/flaʊər/", "phonetic": "FLA-wur"}], "grammar_facts": [{"fact_type": "countability", "fact_value": "both"}, {"fact_type": "number_type", "fact_value": "regular"}, {"fact_type": "animacy", "fact_value": "inanimate"}, {"fact_type": "plural_status", "fact_value": "regular"}]}

@@ -61,7 +61,26 @@ def pronunciation_required_filter(include_optional_forms: bool = False) -> Colum
     if include_optional_forms:
         return true()
 
-    common_form_filter = DerivativeForm.grammatical_form.in_(COMMON_SURFACED_GRAMMATICAL_FORMS)
+    # Canonical English keys; keep legacy labels for old rows and other languages.
+    english_common_forms = {
+        "noun/en_singular",
+        "noun/en_plural",
+        "adjective/en_positive",
+        "adverb/en_positive",
+        "verb/en_infinitive",
+        *(
+            f"verb/en_{person}_{tense}"
+            for person in ("1s", "2s", "3s", "1p", "2p", "3p")
+            for tense in ("present", "past")
+        ),
+    }
+    common_form_filter = or_(
+        DerivativeForm.grammatical_form.in_(COMMON_SURFACED_GRAMMATICAL_FORMS),
+        and_(
+            DerivativeForm.language_code == "en",
+            DerivativeForm.grammatical_form.in_(english_common_forms),
+        ),
+    )
     skip_english_future_filter = not_(
         and_(
             DerivativeForm.language_code == "en",

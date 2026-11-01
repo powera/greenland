@@ -15,12 +15,8 @@ For each word, provide:
 - Use familiar English spelling patterns (e.g., "SOO-duh-nim" for "pseudonym")
 - This should be readable by someone unfamiliar with IPA
 
-3. Alternative pronunciations if relevant (British English, regional variations, etc.)
-- Provide as a list of objects with separate fields:
-  - dialect: The dialect or variant (e.g., "British", "Australian", "Southern US")
-  - ipa: IPA pronunciation for this dialect
-  - phonetic: Simplified phonetic pronunciation for this dialect (optional but recommended)
+3. A confidence score (0-1) indicating how certain you are of the pronunciation
 
-4. A confidence score (0-1) indicating how certain you are of the pronunciation
+4. Any additional notes about the pronunciation
 
-5. Any additional notes about the pronunciation
+Only General American English is required; do not supply other dialects.

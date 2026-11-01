@@ -7,6 +7,7 @@ import logging
 from typing import Any, Dict, Optional
 
 from clients.unified_client import UnifiedLLMClient
+from ipa.normalization import invalid_english_ipa_characters
 from storage.backend.config import DataSourceConfig
 
 import util.prompt_loader
@@ -119,6 +120,17 @@ def generate_ipa_pronunciation(
 
     if not isinstance(result, dict):
         return {"success": False, "error": "Structured response is not an object"}
+
+    if language_code.lower() == "en":
+        ipa_value = result.get("ipa")
+        if not isinstance(ipa_value, str) or not ipa_value.strip():
+            return {"success": False, "error": "Missing English IPA transcription"}
+        invalid_characters = invalid_english_ipa_characters(ipa_value)
+        if invalid_characters:
+            return {
+                "success": False,
+                "error": f"Unsupported IPA characters: {sorted(invalid_characters)!r}",
+            }
 
     merged: Dict[str, Any] = {"success": True}
     merged.update(result)
