@@ -276,7 +276,7 @@ def _plural_bases(session: Session, count: int, filters: SelectionFilters) -> se
 
 def test_content_policies_and_allowed_flags(session: Session) -> None:
     facts = {"number_type": "regular"}
-    _flag(session, _lemma(session, "N1", "cat", "noun", facts=facts), "none")
+    _flag(session, _lemma(session, "N1", "cat", "noun", facts=facts), "all_ages")
     _flag(session, _lemma(session, "N2", "gun", "noun", facts=facts), "violence_weapons")
     _flag(session, _lemma(session, "N3", "beer", "noun", facts=facts), "alcohol_drugs")
     _lemma(session, "N4", "kite", "noun", facts=facts)  # unrated
