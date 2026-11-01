@@ -21,7 +21,7 @@ from langtools.en.utils import (
     generate_regular_plural,
     generate_superlative,
 )
-from storage.config.lemma_fact_registry import CONTENT_FLAG_NONE, CONTENT_FLAG_VALUES
+from storage.config.lemma_fact_registry import CONTENT_FLAG_ALL_AGES, CONTENT_FLAG_VALUES
 from storage.models.grammar_fact import GrammarFact
 from storage.models.lemma_fact import LemmaFact
 from storage.models.lemma_relation import (
@@ -54,11 +54,11 @@ _FORM_TEXT = re.compile(r"[a-z][a-z'-]*( [a-z][a-z'-]*)?")
 
 # How the content_flag lemma fact restricts selection:
 #   exclude_flagged  unrated senses allowed; flagged ones only if their flag is allowed
-#   reviewed_only    only senses rated "none" or with an allowed flag
+#   reviewed_only    only senses rated "all_ages" or with an allowed flag
 #   any              no restriction
 CONTENT_POLICIES: tuple[str, ...] = ("exclude_flagged", "reviewed_only", "any")
 CONTENT_FLAGS: tuple[str, ...] = tuple(
-    flag for flag in CONTENT_FLAG_VALUES if flag != CONTENT_FLAG_NONE
+    flag for flag in CONTENT_FLAG_VALUES if flag != CONTENT_FLAG_ALL_AGES
 )
 
 
@@ -95,7 +95,7 @@ def _filtered_query(
     if not filters.allowed_flags <= set(CONTENT_FLAGS):
         raise ValueError("Unknown content flag.")
     if filters.content_policy != "any":
-        acceptable = {CONTENT_FLAG_NONE} | filters.allowed_flags
+        acceptable = {CONTENT_FLAG_ALL_AGES} | filters.allowed_flags
         rated = session.query(LemmaFact.lemma_id).filter(LemmaFact.fact_type == "content_flag")
         if filters.content_policy == "reviewed_only":
             query = query.filter(Lemma.id.in_(rated.filter(LemmaFact.fact_value.in_(acceptable))))

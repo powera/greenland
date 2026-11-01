@@ -35,15 +35,15 @@ ALL_LEMMA_POS_TYPES: Tuple[str, ...] = (
 
 # content_flag: why a sense might be unsuitable for young learners.  A reason,
 # not an age, so each consumer sets its own policy (a high-school worksheet may
-# allow death_illness and violence_weapons but never sexual).  "none" is a
+# allow death_illness and violence_weapons but never sexual).  "all_ages" is a
 # rating that was made; an absent row means the sense has not been rated.
-CONTENT_FLAG_NONE = "none"
+CONTENT_FLAG_ALL_AGES = "all_ages"
 CONTENT_FLAG_VALUES: Tuple[str, ...] = (
-    CONTENT_FLAG_NONE,
+    CONTENT_FLAG_ALL_AGES,
     "death_illness",
     "violence_weapons",
     "alcohol_drugs",
-    "anatomy",
+    "intimate_anatomy",
     "bodily_crude",
     "sexual",
     "disturbing",
@@ -96,11 +96,13 @@ LEMMA_FACT_DEFINITIONS: Dict[str, LemmaFactDefinition] = {
         description=(
             "The main reason this sense might be unsuitable for a young child's "
             "worksheet, judging this sense only and not other senses of the same "
-            "spelling: none (ordinary for young children: cat, run, happy, sad); "
+            "spelling: all_ages (fine for young children: cat, run, happy, sad); "
             "death_illness (die, funeral, cancer); violence_weapons (gun, kill, war); "
-            "alcohol_drugs (beer, cigarette, cocaine, also gambling); anatomy "
-            "(intimate body parts in a neutral sense); bodily_crude (fart, vomit, "
-            "toilet humour); sexual (sexual activity or content); disturbing "
+            "alcohol_drugs (beer, cigarette, cocaine, also gambling); "
+            "intimate_anatomy (genitals and breasts named neutrally: penis, vulva, "
+            "breast; ordinary body parts such as arm or stomach are all_ages); "
+            "bodily_crude (fart, vomit, toilet humour); sexual (sexual activity or "
+            "content); disturbing "
             "(abuse, torture, suicide, cruelty); offensive (slurs, insults, "
             "profanity). Pick the most serious reason when several apply."
         ),
