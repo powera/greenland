@@ -469,6 +469,7 @@ def handle_lemma_type_subtype_change(
     3. Clear/invalidate translations, when the type changed
     4. Delete derivative forms, when the type changed (they're tied to the
        specific POS) or when the caller asks for it on a subtype change
+    5. Carry audio references to the new GUID, invalidating cleared text/forms
 
     A subtype change alone keeps the forms by default: a plural is the same
     whether "polynomial" is a knowledge_domain or a mathematical_concept, and
@@ -510,6 +511,7 @@ def handle_lemma_type_subtype_change(
         "tombstone_created": False,
         "translations_cleared": 0,
         "derivative_forms_deleted": 0,
+        "audio_records_moved": 0,
     }
 
     # Store old values
@@ -673,6 +675,18 @@ def handle_lemma_type_subtype_change(
             new_value=None,
         )
         session.delete(form)
+
+    if old_guid and lemma.guid and old_guid != lemma.guid:
+        from storage.crud.lemma_audio import move_lemma_audio_guid
+
+        result["audio_records_moved"] = move_lemma_audio_guid(
+            session,
+            lemma,
+            old_guid,
+            lemma.guid,
+            invalidate_all=type_changed,
+            invalidate_forms=drop_forms,
+        )
 
     # Mark as unverified since this is a significant change
     lemma.verified = False
