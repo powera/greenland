@@ -1,4 +1,3 @@
-{"guid": "V06_001", "grammar_facts": [{"fact_type": "infinitive", "fact_value": "būti"}, {"fact_type": "3s_present", "fact_value": "yra"}, {"fact_type": "3s_past", "fact_value": "buvo"}, {"fact_type": "verb_reflexivity", "fact_value": "non_reflexive"}]}
 {"guid": "V06_002", "grammar_facts": [{"fact_type": "infinitive", "fact_value": "turėti"}, {"fact_type": "3s_present", "fact_value": "turi"}, {"fact_type": "3s_past", "fact_value": "turėjo"}, {"fact_type": "verb_reflexivity", "fact_value": "non_reflexive"}]}
 {"guid": "V06_003", "grammar_facts": [{"fact_type": "infinitive", "fact_value": "uždirbti"}, {"fact_type": "3s_present", "fact_value": "uždirba"}, {"fact_type": "3s_past", "fact_value": "uždirbo"}]}
 {"guid": "V06_004", "grammar_facts": [{"fact_type": "infinitive", "fact_value": "pirkti"}, {"fact_type": "3s_present", "fact_value": "perka"}, {"fact_type": "3s_past", "fact_value": "pirko"}, {"fact_type": "verb_reflexivity", "fact_value": "non_reflexive"}]}

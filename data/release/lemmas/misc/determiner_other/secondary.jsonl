@@ -3,7 +3,7 @@
 {"guid": "T99_003", "translations": {"ro": "aceia", "pl": "tamte", "th": "พวกนั้น", "ms": "itu", "ta": "அவை", "kn": "ಅವರು", "uk": "ті", "bn": "ওরা", "hi": "वे", "tr": "şu", "bs": "ti"}}
 {"guid": "T99_004", "translations": {"ro": "câțiva", "pl": "niektórzy", "th": "บาง", "ms": "beberapa", "ta": "சிலர்", "kn": "ಕೆಲವರು", "uk": "деякі", "bn": "কিছু", "hi": "कुछ", "tr": "bazı", "bs": "neki"}}
 {"guid": "T99_005", "translations": {"ro": "oricare", "pl": "jakikolwiek", "th": "ใด ๆ", "ms": "mana-mana", "ta": "எந்தவிதமான", "kn": "ಯಾವುದೇ", "uk": "будь-який", "bn": "যে কোনো", "hi": "कोई", "tr": "herhangi bir", "bs": "bilo koji"}}
-{"guid": "T99_006", "translations": {"ro": "altul", "pl": "inny", "th": "อีก", "ms": "satu lagi", "ta": "மற்றொன்று", "kn": "ಮತ್ತೊಂದು", "uk": "інший", "bn": "অন্যোটি", "hi": "अन्य", "tr": "başka", "bs": "drugi"}}
+{"guid": "T99_006", "translations": {"ro": "încă un", "pl": "jeszcze jeden", "th": "อีก", "ms": "satu lagi", "ta": "இன்னொன்று", "kn": "ಮತ್ತೊಂದು", "uk": "ще один", "bn": "আরেকটি", "hi": "एक और", "tr": "bir ... daha", "bs": "još jedan"}}
 {"guid": "T99_007", "translations": {"ro": "alt", "pl": "inny", "th": "อื่น", "ms": "lain", "ta": "மறைந்த", "kn": "ಇನ್ನೊಂದು", "uk": "інший", "bn": "অন্য", "hi": "अन्य", "tr": "diğer", "bs": "drugi"}}
 {"guid": "T99_008", "translations": {"ro": "puțin", "pl": "kilka", "th": "ไม่กี่", "ms": "sedikit", "ta": "சில", "kn": "ಕೆಲವರು", "uk": "кілька", "bn": "কিছুমাত্র", "hi": "कुछ", "tr": "az", "bs": "malo"}}
 {"guid": "T99_009", "translations": {"ro": "astfel", "pl": "taki", "th": "เช่นนั้น", "ms": "sebegitu", "ta": "அத்தகைய", "kn": "ಅಂತಹ", "uk": "такий", "bn": "এমন", "hi": "ऐसा", "tr": "böyle", "bs": "takav"}}

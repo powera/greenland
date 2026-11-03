@@ -29,7 +29,6 @@
 {"guid": "A18_029", "translations": {"ro": "zgomotos", "pl": "głośny", "th": "ดัง", "ms": "bising", "ta": "உரத்த", "kn": "ಜೋರಾದ", "uk": "гучний", "bn": "শক্ত শব্দযুক্ত", "hi": "तेज़ आवाज़ वाला", "tr": "gürültülü"}}
 {"guid": "A18_030", "translations": {"ro": "slab", "pl": "przyciemniony", "th": "สลัว", "ms": "malap", "ta": "மங்கலான", "kn": "ಮಸುಕಾದ", "uk": "приглушений", "bn": "অন্ধকারময়", "hi": "অন্ধকারময়", "tr": "loş", "bs": "prigušen"}}
 {"guid": "A18_031", "translations": {"ro": "flămând", "pl": "głodny", "th": "หิว", "ms": "lapar", "ta": "பசியான", "kn": "ಹಸಿದ", "uk": "голодний", "bn": "ক্ষুধার্ত", "hi": "भूखा", "tr": "aç", "bs": "gladan"}}
-{"guid": "A18_032", "translations": {"ro": "bolnav", "pl": "chory", "th": "ป่วย", "ms": "sakit", "ta": "நோய்வாய்ப்பட்ட", "kn": "ಅನಾರೋಗ್ಯದ", "uk": "хворий", "bn": "অসুস্থ", "hi": "बीमार", "tr": "hasta", "bs": "bolestan"}}
 {"guid": "A18_033", "translations": {"ro": "strălucitor", "pl": "lśniący", "th": "ส่องแสง", "ms": "bercahaya", "ta": "ஒளிரும்", "kn": "ಹೊಳೆಯುವ", "uk": "сяючий", "bn": "উজ্জ্বল", "hi": "चमकदार", "tr": "parlak", "bs": "sjajan"}}
 {"guid": "A18_034", "translations": {"ro": "familiar", "pl": "znajomy", "th": "คุ้นเคย", "ms": "biasa", "ta": "பரிச்சயமான", "kn": "ಪರಿಚಿತ", "uk": "знайомий", "bn": "পরিচিত", "hi": "परिचित", "tr": "tanıdık", "bs": "poznat"}}
 {"guid": "A18_035", "translations": {"ro": "bogat", "pl": "bogaty", "th": "รวย", "ms": "kaya", "ta": "பணக்கார", "kn": "ಶ್ರೀಮಂತ", "uk": "заможний", "bn": "ধনী", "hi": "अਮੀर", "tr": "zengin", "bs": "bogat"}}

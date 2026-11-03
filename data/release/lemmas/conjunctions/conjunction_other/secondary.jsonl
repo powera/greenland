@@ -6,7 +6,7 @@
 {"guid": "C99_015", "translations": {"ro": "deci", "pl": "więc", "th": "ดังนั้น", "ms": "jadi", "ta": "ஆகவே", "kn": "ಅतः", "uk": "отже", "bn": "অতএব", "hi": "अतः", "tr": "öyleyse", "bs": "dakle"}}
 {"guid": "C99_017", "translations": {"ro": "că", "pl": "że", "th": "ว่า", "ms": "bahawa", "ta": "என்று", "kn": "ಅಂದು/ಅದನ್ನು/ಎಂದು", "uk": "що", "bn": "যে", "hi": "कि", "tr": "ki", "bs": "da"}}
 {"guid": "C99_024", "translations": {"ro": "decât", "pl": "niż", "th": "กว่า", "ms": "daripada", "ta": "விட", "kn": "ಕಿಂತ", "uk": "ніж", "bn": "তুলনায়/তুলে", "hi": "की तुलना में", "tr": "-den/-dan", "bs": "nego"}}
-{"guid": "C99_037", "translations": {"ro": "până (către)", "pl": "aż (aż do)", "th": "จนกว่า", "ms": "sehingga", "ta": "வரை", "kn": "ಯಾವ ತನಕ", "uk": "доки", "bn": "যতক্ষণ", "hi": "जब तक", "tr": "-ene kadar", "bs": "dok"}}
+{"guid": "C99_037", "translations": {"ro": "până când", "pl": "aż", "th": "จนกว่า", "ms": "sehingga", "ta": "வரை", "kn": "ಯಾವ ತನಕ", "uk": "доки", "bn": "যতক্ষণ", "hi": "जब तक", "tr": "-ene kadar", "bs": "dok"}}
 {"guid": "C99_038", "translations": {"ro": "deși", "pl": "choć", "th": "ถึงแม้", "ms": "walaupun", "ta": "என்றாலும்", "kn": "ಯಾವುದೆಂದರೆನಕ್ಕೂ", "uk": "хоча", "bn": "যদিও", "hi": "हालाँकि", "tr": "rağmen", "bs": "iako"}}
 {"guid": "C99_039", "translations": {"ro": "în timp ce", "pl": "podczas gdy", "th": "ในขณะที่", "ms": "semasa", "ta": "பேராற் போது / என்றால்", "kn": "ಒಂದೇ ಸಮಯದಲ್ಲಿ / ಇದರವರೆಗೆ", "uk": "поки", "bn": "যতক্ষণ (যতক্ষণ)", "hi": "जबकि", "tr": "-ken", "bs": "dok"}}
 {"guid": "C99_040", "translations": {"ro": "deși", "pl": "chociaż", "th": "แม้ว่า", "ms": "walaupun", "ta": "இதினபரிசோத்நீ?", "kn": "ಯ الرغم that?", "uk": "хоча", "bn": "যদিও", "hi": "हालाँकि", "tr": "rağmen", "bs": "iako"}}

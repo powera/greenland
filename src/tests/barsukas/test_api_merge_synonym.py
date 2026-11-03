@@ -91,11 +91,9 @@ def test_merge_synonym_tombstones_adds_synonyms_and_deletes_source(
             .all()
         )
         synonym_by_language = {row.language_code: row.derivative_form_text for row in synonym_rows}
+        # es/fr/lt match the main lemma's translation, so no synonym form repeats it.
         assert synonym_by_language == {
             "en": "evidently",
-            "es": "obviamente",
-            "fr": "Évidemment",
-            "lt": "akivaizdžiai",
             "zh": "明显地",
         }
     finally:

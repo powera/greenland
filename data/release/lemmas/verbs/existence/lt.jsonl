@@ -15,3 +15,4 @@
 {"guid": "V11_017", "grammar_facts": [{"fact_type": "infinitive", "fact_value": "išlikti"}, {"fact_type": "3s_present", "fact_value": "išlieka"}, {"fact_type": "3s_past", "fact_value": "išliko"}]}
 {"guid": "V11_027", "grammar_facts": [{"fact_type": "verb_reflexivity", "fact_value": "non_reflexive"}, {"fact_type": "infinitive", "fact_value": "būti"}, {"fact_type": "3s_present", "fact_value": "yra"}, {"fact_type": "3s_past", "fact_value": "buvo"}]}
 {"guid": "V11_028", "grammar_facts": [{"fact_type": "verb_reflexivity", "fact_value": "non_reflexive"}, {"fact_type": "infinitive", "fact_value": "būti"}, {"fact_type": "3s_present", "fact_value": "yra"}, {"fact_type": "3s_past", "fact_value": "buvo"}]}
+{"guid": "V11_029", "grammar_facts": [{"fact_type": "infinitive", "fact_value": "būti"}, {"fact_type": "3s_present", "fact_value": "yra"}, {"fact_type": "3s_past", "fact_value": "buvo"}, {"fact_type": "verb_reflexivity", "fact_value": "non_reflexive"}]}
