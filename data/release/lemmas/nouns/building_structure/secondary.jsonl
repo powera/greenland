@@ -42,7 +42,6 @@
 {"guid": "N07_059", "translations": {"ro": "depozit", "pl": "magazyn", "th": "โกดัง", "ms": "gudang", "ta": "கிடங்கு", "kn": "ಗೋದಾಮು", "uk": "склад", "bn": "গুদাম", "hi": "गोदाम", "tr": "depo", "bs": "skladište"}}
 {"guid": "N07_060", "translations": {"ro": "clinică", "pl": "klinika", "th": "คลินิก", "ms": "klinik", "ta": "மருத்துவமனை", "kn": "ಚಿಕಿತ್ಸಾಲಯ", "uk": "клініка", "bn": "ক্লিনিক", "hi": "क्लिनिक", "tr": "klinik", "bs": "klinika"}}
 {"guid": "N07_061", "translations": {"ro": "studio", "pl": "studio", "th": "สตูดิโอ", "ms": "studio", "ta": "பணியறை", "kn": "ಸ್ಟುಡಿಯೊ", "uk": "студія", "bn": "স্টুডিও", "hi": "स्टूडियो", "tr": "stüdyo"}}
-{"guid": "N07_062", "translations": {"ro": "magazin", "pl": "sklep", "th": "ร้าน", "ms": "kedai", "ta": "கடை", "kn": "ಅಂಗಡಿ", "uk": "магазин", "bn": "দোকান", "hi": "दुकान", "tr": "mağaza", "bs": "prodavnica"}}
 {"guid": "N07_064", "translations": {"ro": "port", "pl": "port", "th": "ท่าเรือ", "ms": "bandar pelabuhan", "ta": "துறைமுகம்", "kn": "ಬಂದರು", "uk": "порт", "bn": "বন্দর", "hi": "बंदरगाह", "tr": "liman kenti", "bs": "luka"}}
 {"guid": "N07_069", "translations": {"ro": "ring", "pl": "ring", "th": "เวที", "ms": "gelanggang tinju", "ta": "குத்துச்சண்டை அரங்கம்", "kn": "ಬಾಕ್ಸಿಂಗ್ ರಿಂಗ್", "uk": "ринг", "bn": "রিং", "hi": "रिंग", "tr": "boks ringi"}}
 {"guid": "N07_070", "translations": {"ms": "sekolah menengah", "hi": "उच्च विद्यालय", "tr": "lise", "bs": "srednja škola"}}

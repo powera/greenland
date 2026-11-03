@@ -12,14 +12,12 @@
 {"guid": "A05_040", "translations": {"ro": "real", "pl": "prawdziwy", "th": "จริง", "ms": "sebenar", "ta": "உண்மை", "kn": "ವಾಸ್ತವ", "uk": "реальний", "bn": "বাস্তব", "hi": "वास्तविक", "tr": "gerçek", "bs": "stvaran"}}
 {"guid": "A05_041", "translations": {"ro": "clar", "pl": "jasny", "th": "ชัดเจน", "ms": "jelas", "ta": "தெளிவு", "kn": "ಸ್ಪಷ್ಟ", "uk": "чіткий", "bn": "স্পষ্ট", "hi": "स्पष्ट", "tr": "açık", "bs": "jasan"}}
 {"guid": "A05_042", "translations": {"ro": "simplu", "pl": "prosty", "th": "เรียบง่าย", "ms": "sederhana", "ta": "சரள", "kn": "ಸರಳ", "uk": "простий", "bn": "সহজ", "hi": "सरल", "tr": "basit", "bs": "jednostavan"}}
-{"guid": "A05_043", "translations": {"ro": "corect", "pl": "prawidłowy", "th": "ถูกต้อง", "ms": "betul", "ta": "தகவிர்த்து?", "kn": "ಸರಿ", "uk": "правильний", "bn": "সঠিক", "hi": "सही", "tr": "doğru", "bs": "tačan"}}
+{"guid": "A05_043", "translations": {"ro": "corect", "pl": "prawidłowy", "th": "ถูกต้อง", "ms": "betul", "ta": "சரியான", "kn": "ಸರಿ", "uk": "правильний", "bn": "সঠিক", "hi": "सही", "tr": "doğru", "bs": "tačan"}}
 {"guid": "A05_044", "translations": {"ro": "greșit", "pl": "zły", "th": "ผิด", "ms": "salah", "ta": "தவறு", "kn": "ತಪ್ಪು", "uk": "неправильний", "bn": "ভুল", "hi": "गलत", "tr": "yanlış", "bs": "netačan"}}
 {"guid": "A05_045", "translations": {"ro": "liber", "pl": "wolny", "th": "อิสระ", "ms": "bebas", "ta": "சுதந்திரமான", "kn": "ಸ್ವತಂತ್ರ", "uk": "вільний", "bn": "স্বাধীন", "hi": "स्वतंत्र", "tr": "özgür", "bs": "slobodan"}}
 {"guid": "A05_046", "translations": {"ro": "plin", "pl": "pełny", "th": "เต็ม", "ms": "penuh", "ta": "பூரண", "kn": "ಪೂರ್ಣ", "uk": "повний", "bn": "পূর্ণ", "hi": "पूर्ण", "tr": "dolu", "bs": "pun"}}
 {"guid": "A05_047", "translations": {"ro": "gol", "pl": "pusty", "th": "ว่าง", "ms": "kosong", "ta": "வெற்று", "kn": "ಖಾಲಿ", "uk": "порожній", "bn": "খালি", "hi": "खाली", "tr": "boş", "bs": "prazan"}}
 {"guid": "A05_048", "translations": {"ro": "grozav", "pl": "świetny", "th": "ยอดเยี่ยม", "ms": "hebat", "ta": "சிறந்த", "kn": "ಉತ್ತಮ", "uk": "відмінний", "bn": "উত্তম", "hi": "उत्कृष्ट", "tr": "harika", "bs": "izvrstan"}}
-{"guid": "A05_049", "translations": {"ro": "mic", "pl": "mały", "th": "เล็ก", "ms": "kecil", "ta": "சிறிய", "kn": "ಚಿಕ್ಕ", "uk": "малий", "bn": "ছোট", "hi": "छोटा", "tr": "küçük", "bs": "mali"}}
-{"guid": "A05_050", "translations": {"ro": "drept", "pl": "słuszny", "th": "ถูกต้อง", "ms": "betul", "ta": "சரியான", "kn": "ಸರಿಯಾದ", "uk": "правильний", "bn": "সঠিক", "hi": "सही", "tr": "doğru", "bs": "ispravan"}}
 {"guid": "A05_051", "translations": {"ro": "propriu", "pl": "własny", "th": "ของตัวเอง", "ms": "sendiri", "ta": "சுய", "kn": "ಸ್ವಂತ", "uk": "власний", "bn": "নিজের", "hi": "स्वयं", "tr": "kendi", "bs": "vlastiti"}}
 {"guid": "A05_052", "translations": {"ro": "adevărat", "pl": "prawdziwy", "th": "จริง", "ms": "benar", "ta": "செய்தி", "kn": "ನಿಜ", "uk": "істинний", "bn": "সত্য", "hi": "सत्य", "tr": "gerçek", "bs": "istinit"}}
 {"guid": "A05_054", "translations": {"ro": "capabil", "pl": "zdolny", "th": "สามารถ", "ms": "mampu", "ta": "பலவேண்டும்", "kn": "ಸಾಮರ್ಥ್ಯವಂತ", "uk": "здатний", "bn": "ক্ষমতাসম্পন্ন", "hi": "सक्षम", "tr": "yetenekli", "bs": "sposoban"}}
@@ -35,7 +33,6 @@
 {"guid": "A05_071", "translations": {"ro": "periculos", "pl": "niebezpieczny", "th": "อันตราย", "ms": "berbahaya", "ta": "பாதுகாப்பற்ற", "kn": "ಅಪಾಯಕಾರಿ", "uk": "небезпечний", "bn": "ঝুঁকিপূর্ণ", "hi": "खतरनाक", "tr": "tehlikeli", "bs": "opasan"}}
 {"guid": "A05_073", "translations": {"ro": "antic", "pl": "starodawny", "th": "โบราณ", "ms": "kuno", "ta": "பண்டைய", "kn": "ಪ್ರಾಚೀನ", "uk": "стародавній", "bn": "প্রাচীন", "hi": "प्राचीन", "tr": "antik"}}
 {"guid": "A05_074", "translations": {"ro": "drăguț", "pl": "ładny", "th": "สวย", "ms": "cantik", "ta": "அழகான", "kn": "ಸುಂದರ", "uk": "гарний", "bn": "সুন্দর", "hi": "सुंदर", "tr": "güzel", "bs": "lijep"}}
-{"guid": "A05_076", "translations": {"ro": "rapid", "pl": "szybki", "th": "รวดเร็ว", "ms": "cepat", "ta": "விரைவு", "kn": "ವೇಗವಾದ", "uk": "швидкий", "bn": "দ্রুত", "hi": "तेज़", "tr": "hızlı", "bs": "brz"}}
 {"guid": "A05_079", "translations": {"ro": "furios", "pl": "wściekły", "th": "โกรธจัด", "ms": "marah", "ta": "கோபமான", "kn": "ಊಶಾರಿತ", "uk": "розлючений", "bn": "ক্রুদ্ধ", "hi": "क्रोधित", "tr": "kızgın", "bs": "ljut"}}
 {"guid": "A05_083", "translations": {"ro": "complet", "pl": "pełny", "th": "สมบูรณ์", "ms": "lengkap", "ta": "முழுமையான", "kn": "ಸಂಪೂರ್ಣ", "uk": "повний", "bn": "সম্পূর্ণ", "hi": "पूर्ण", "tr": "tam", "bs": "potpun"}}
 {"guid": "A05_085", "translations": {"ro": "puternic", "pl": "potężny", "th": "ทรงพลัง", "ms": "perkasa", "ta": "வலிமையான", "kn": "ಶಕ್ತಿಶಾಲಿ", "uk": "могутній", "bn": "শক্তিশালী", "hi": "शक्तिशाली", "tr": "güçlü", "bs": "moćan"}}

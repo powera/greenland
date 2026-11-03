@@ -1,6 +1,5 @@
 {"guid": "A01_001", "translations": {"ro": "mare", "pl": "duży", "th": "ใหญ่", "ms": "besar", "ta": "பெரிய", "kn": "ದೊಡ್ಡ", "uk": "великий", "bn": "বড়", "hi": "बड़ा", "tr": "büyük", "bs": "velik"}}
 {"guid": "A01_002", "translations": {"ro": "mic", "pl": "mały", "th": "เล็ก", "ms": "kecil", "ta": "சிறிய", "kn": "ಸಣ್ಣ", "uk": "малий", "bn": "ছোট", "hi": "छोटा", "tr": "küçük", "bs": "mali"}}
-{"guid": "A01_003", "translations": {"ro": "mare", "pl": "duży", "th": "ใหญ่", "ms": "besar", "ta": "பெரிய", "kn": "ದೊಡ್ಡ", "uk": "великий", "bn": "বড়", "hi": "बड़ा", "tr": "büyük", "bs": "velik"}}
 {"guid": "A01_004", "translations": {"ro": "minuscul", "pl": "malutki", "th": "จิ๋ว", "ms": "kecil", "ta": "மிகச்சிறிய", "kn": "ಅತಿಸಣ್ಣ", "uk": "крихітний", "bn": "ক্ষুদ্র", "hi": "नन्हा", "tr": "minicik", "bs": "sićušan"}}
 {"guid": "A01_005", "translations": {"ro": "imens", "pl": "ogromny", "th": "มหึมา", "ms": "sangat besar", "ta": "மகத்தான", "kn": "ಬೃಹತ್", "uk": "величезний", "bn": "বিশাল", "hi": "विशाल", "tr": "devasa", "bs": "ogroman"}}
 {"guid": "A01_006", "translations": {"ro": "mediu", "pl": "średni", "th": "ปานกลาง", "ms": "sederhana", "ta": "நடுத்தரமான", "kn": "ಮಧ್ಯಮ", "uk": "середній", "bn": "মধ্যম", "hi": "मध्यम", "tr": "orta büyüklükte", "bs": "srednji"}}

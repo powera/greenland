@@ -39,7 +39,6 @@
 {"guid": "N07_058", "grammar_facts": [{"fact_type": "grammatical_gender", "fact_value": "feminine"}, {"fact_type": "countability", "fact_value": "countable"}, {"fact_type": "number_type", "fact_value": "plurale_tantum"}]}
 {"guid": "N07_060", "grammar_facts": [{"fact_type": "grammatical_gender", "fact_value": "feminine"}]}
 {"guid": "N07_061", "grammar_facts": [{"fact_type": "grammatical_gender", "fact_value": "feminine"}]}
-{"guid": "N07_062", "grammar_facts": [{"fact_type": "grammatical_gender", "fact_value": "feminine"}, {"fact_type": "countability", "fact_value": "countable"}, {"fact_type": "number_type", "fact_value": "regular"}]}
 {"guid": "N07_064", "grammar_facts": [{"fact_type": "grammatical_gender", "fact_value": "masculine"}]}
 {"guid": "N07_069", "grammar_facts": [{"fact_type": "grammatical_gender", "fact_value": "masculine"}]}
 {"guid": "N07_070", "grammar_facts": [{"fact_type": "grammatical_gender", "fact_value": "feminine"}, {"fact_type": "countability", "fact_value": "countable"}, {"fact_type": "number_type", "fact_value": "regular"}]}

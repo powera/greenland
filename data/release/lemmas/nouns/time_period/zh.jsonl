@@ -18,7 +18,7 @@
 {"guid": "N25_025", "grammar_facts": [{"fact_type": "countability", "fact_value": "countable"}, {"fact_type": "measure_words", "fact_value": "个"}]}
 {"guid": "N25_026", "grammar_facts": [{"fact_type": "countability", "fact_value": "countable"}, {"fact_type": "measure_words", "fact_value": "个"}]}
 {"guid": "N25_028", "grammar_facts": [{"fact_type": "countability", "fact_value": "countable"}, {"fact_type": "measure_words", "fact_value": "个"}]}
-{"guid": "N25_029", "synonyms": [{"grammatical_form": "synonym", "text": "时期"}], "grammar_facts": [{"fact_type": "countability", "fact_value": "countable"}, {"fact_type": "measure_words", "fact_value": "个"}]}
+{"guid": "N25_029", "grammar_facts": [{"fact_type": "countability", "fact_value": "countable"}, {"fact_type": "measure_words", "fact_value": "个"}]}
 {"guid": "N25_030", "grammar_facts": [{"fact_type": "countability", "fact_value": "countable"}, {"fact_type": "measure_words", "fact_value": "秒"}]}
 {"guid": "N25_031", "grammar_facts": [{"fact_type": "countability", "fact_value": "countable"}]}
 {"guid": "N25_032", "grammar_facts": [{"fact_type": "countability", "fact_value": "countable"}, {"fact_type": "measure_words", "fact_value": "个"}]}

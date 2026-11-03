@@ -1514,7 +1514,8 @@ def merge_lemma_synonym(main_guid: str, synonym_guid: str) -> ResponseReturnValu
     part of speech, and at least three non-empty translations must match exactly
     after whitespace normalization and case folding. On success the synonym
     lemma's base text/translations are added as ``synonym`` derivative forms on
-    the main lemma, the synonym GUID is tombstoned, sentence/audio references are
+    the main lemma (skipping languages where the two translations already
+    match), the synonym GUID is tombstoned, sentence/audio references are
     repointed to the main lemma, and the synonym lemma row is deleted.
     """
     if main_guid == synonym_guid:
@@ -1556,7 +1557,12 @@ def merge_lemma_synonym(main_guid: str, synonym_guid: str) -> ResponseReturnValu
 
     added_synonyms: List[Dict[str, Optional[str]]] = []
     existing_synonyms: List[Dict[str, str]] = []
+    matched_language_set = set(matched_languages)
     for language_code, synonym_text in synonym_translations.items():
+        # Where both lemmas share a translation, a synonym form would only
+        # repeat the main lemma's own translation.
+        if language_code in matched_language_set:
+            continue
         if _main_has_synonym(main_lemma.id, language_code, synonym_text):
             existing_synonyms.append({"language_code": language_code, "text": synonym_text})
             continue
