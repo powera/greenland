@@ -14,7 +14,7 @@ import logging
 import time
 import unicodedata
 from pathlib import Path
-from typing import Any, Optional
+from typing import Any, Optional, Tuple
 
 import requests
 
@@ -69,14 +69,41 @@ PROMPTS_DIR = Path(__file__).parent.parent.parent.parent / "prompts" / "audio"
 _prompt_cache: dict[tuple[str, str], str] = {}
 
 
-def _normalize_transcript(text: str) -> str:
+# Lithuanian accentuation marks (acute, grave, tilde).  Realtime sometimes writes
+# them in its transcript ("Púikus"); they mark stress, not a different word.  No
+# Lithuanian letter uses them, unlike the ogonek, dot, macron and caron of
+# ą ė ū š, which stay significant.  Other languages keep them: ñ and más spell.
+_LT_STRESS_MARKS = frozenset({"̀", "́", "̃"})
+
+
+def _normalize_transcript(text: str, language_code: str = "") -> str:
     """Ignore capitalization, punctuation, and spacing while retaining word boundaries."""
     normalized = unicodedata.normalize("NFC", text).casefold()
+    if language_code == "lt":
+        decomposed = unicodedata.normalize("NFD", normalized)
+        normalized = unicodedata.normalize(
+            "NFC", "".join(c for c in decomposed if c not in _LT_STRESS_MARKS)
+        )
     return " ".join(
         "".join(
             " " if unicodedata.category(character).startswith("P") else character
             for character in normalized
         ).split()
+    )
+
+
+def transcript_matches(
+    expected: str, transcript: Optional[str], language_code: str = ""
+) -> Optional[bool]:
+    """Whether a Realtime transcript says ``expected``; None when there is no transcript.
+
+    Syllabified speech ("li-go-NI-ne" for "ligoninė") does not match: the
+    hyphens normalize to word breaks.  Lithuanian stress marks are ignored.
+    """
+    if transcript is None or not transcript.strip():
+        return None
+    return _normalize_transcript(transcript, language_code) == _normalize_transcript(
+        expected, language_code
     )
 
 
@@ -91,7 +118,7 @@ def _log_realtime_transcript(
             language_code,
             voice.value,
         )
-    elif _normalize_transcript(transcript) != _normalize_transcript(expected):
+    elif not transcript_matches(expected, transcript, language_code):
         logger.warning(
             "Realtime TTS transcript mismatch: expected=%r actual=%r language=%s voice=%s",
             expected,
@@ -430,13 +457,16 @@ class OpenAITTSClient:
         speed: float,
         language_code: str,
         is_sentence: bool,
-    ) -> bytes:
+    ) -> Tuple[bytes, Optional[str]]:
         """Collect GA Realtime PCM output and encode it for existing callers.
 
         The session is framed as a recording session (see
         get_realtime_session_instructions) and the text is sent as the next
         user turn, labelled in the target language (get_realtime_turn_text),
         rather than appended to the instructions.
+
+        Returns the encoded audio and the model's output transcript (None when
+        it sent none).
         """
         from websocket import create_connection
 
@@ -458,6 +488,7 @@ class OpenAITTSClient:
         deadline = time.monotonic() + self.timeout
         chunks: list[bytes] = []
         transcript_received = False
+        transcript: Optional[str] = None
         try:
             connection.send(
                 json.dumps(
@@ -527,7 +558,10 @@ class OpenAITTSClient:
                     chunks.append(base64.b64decode(event["delta"], validate=True))
                 elif event_type == "response.output_audio_transcript.done":
                     transcript_received = True
-                    _log_realtime_transcript(text, event.get("transcript"), language_code, voice)
+                    event_transcript = event.get("transcript")
+                    if isinstance(event_transcript, str):
+                        transcript = event_transcript
+                    _log_realtime_transcript(text, event_transcript, language_code, voice)
                 elif event_type == "response.output_text.done":
                     logger.debug("Realtime TTS output text: %r", event.get("text"))
                 elif event_type == "response.done":
@@ -553,7 +587,8 @@ class OpenAITTSClient:
         if not pcm_data:
             raise ValueError("Realtime TTS returned no audio")
         validate_pcm_audio(pcm_data, text)
-        return _encode_pcm(trim_pcm_silence(pcm_data), audio_format, speed, self.timeout)
+        audio_data = _encode_pcm(trim_pcm_silence(pcm_data), audio_format, speed, self.timeout)
+        return audio_data, transcript
 
     def generate_audio(
         self,
@@ -619,7 +654,7 @@ class OpenAITTSClient:
 
         try:
             if model.startswith("gpt-realtime"):
-                audio_data = self._generate_realtime(
+                audio_data, transcript = self._generate_realtime(
                     text,
                     voice,
                     model,
@@ -636,6 +671,8 @@ class OpenAITTSClient:
                     language_code=language_code,
                     model=model,
                     duration_ms=(time.time() - start_time) * 1000,
+                    transcript=transcript,
+                    transcript_matches=transcript_matches(text, transcript, language_code),
                 )
             # Make API request
             url = f"{API_BASE}/audio/speech"

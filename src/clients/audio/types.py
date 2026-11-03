@@ -47,3 +47,7 @@ class AudioGenerationResult:
     duration_ms: float
     success: bool = True
     error: Optional[str] = None
+    # What the model says it spoke, and whether that matches ``text``.  Only
+    # Realtime reports a transcript; None means no check was possible.
+    transcript: Optional[str] = None
+    transcript_matches: Optional[bool] = None
