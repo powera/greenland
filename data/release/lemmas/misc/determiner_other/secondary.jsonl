@@ -15,3 +15,5 @@
 {"guid": "T99_015", "translations": {"ro": "niciun", "pl": "żaden", "th": "ไม่มีใคร", "ms": "kedua-duanya tidak", "ta": "யாருமில்லை", "kn": "ಯಾವುದೂ ಇಲ್ಲ", "uk": "жоден", "bn": "কোনোটিই নয়", "hi": "कोई नहीं", "tr": "hiçbiri", "bs": "nijedan"}}
 {"guid": "T99_016", "translations": {"ro": "oricare", "pl": "którykolwiek", "th": "อย่างใดอย่างหนึ่ง", "ms": "mana-mana", "ta": "ஒன்றில் ஏதேனும்", "kn": "ಯಾವುದಲಾದರೂ", "uk": "будь-який", "bn": "যেকোনো", "hi": "कोई भी", "tr": "herhangi biri", "bs": "bilo koji od njih dvojice"}}
 {"guid": "T99_017", "translations": {"ro": "fiecare", "pl": "każdy", "th": "ทุก", "ms": "setiap", "ta": "ஒவ்வொரு", "kn": "ಪ್ರತಿ", "uk": "кожен", "bn": "প্রতি", "hi": "प्रति", "tr": "her", "bs": "svaki"}}
+{"guid": "T99_018", "translations": {"ms": "semua", "hi": "सभी", "tr": "bütün"}}
+{"guid": "T99_019", "translations": {"ms": "tiada", "hi": "कोई नहीं", "tr": "hiçbir"}}

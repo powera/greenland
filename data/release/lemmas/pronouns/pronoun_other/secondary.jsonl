@@ -16,3 +16,4 @@
 {"guid": "P99_016", "translations": {"ro": "nimic", "pl": "nic", "th": "ไม่มีอะไร", "ms": "tiada apa-apa", "ta": "எதுமில்லை", "kn": "ಯಾವುದೂ", "uk": "нічого", "bn": "কিছুই", "hi": "कुछ भी नहीं", "tr": "hiçbir şey", "bs": "ništa"}}
 {"guid": "P99_017", "translations": {"ro": "totul", "pl": "wszystko", "th": "ทุกอย่าง", "ms": "segala-galanya", "ta": "எல்லாம்", "kn": "ಎಲ್ಲವೂ", "uk": "усе", "bn": "সবকিছু", "hi": "सबकुछ", "tr": "her şey", "bs": "sve"}}
 {"guid": "P99_018", "translations": {"ro": "nimeni", "pl": "nikt", "th": "ไม่มีใคร", "ms": "tiada", "ta": "யாருமே இல்லை", "kn": "ಯಾರೂ", "uk": "ніхто", "bn": "কেউই নয়", "hi": "कोई नहीं", "tr": "hiçbiri", "bs": "nijedan"}}
+{"guid": "P99_019", "translations": {"ms": "apa-apa", "hi": "कुछ भी", "tr": "herhangi bir şey"}}

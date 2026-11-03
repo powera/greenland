@@ -29,3 +29,9 @@
 {"guid": "R99_040", "translations": {"ms": "setiap", "hi": "प्रति", "tr": "başına"}}
 {"guid": "R99_041", "translations": {"ms": "di seluruh", "hi": "भर में", "tr": "her yerinde"}}
 {"guid": "R99_042", "translations": {"ms": "setengah selepas", "hi": "साढ़े", "tr": "buçuk"}}
+{"guid": "R99_043", "translations": {"ms": "di atas", "hi": "पर", "tr": "üzerinde"}}
+{"guid": "R99_046", "translations": {"ms": "di dalam", "hi": "में", "tr": "içinde"}}
+{"guid": "R99_047", "translations": {"ms": "di", "hi": "पर", "tr": "-de/-da"}}
+{"guid": "R99_048", "translations": {"ms": "sejak", "hi": "से", "tr": "-den beri"}}
+{"guid": "R99_049", "translations": {"ms": "sehingga", "hi": "तक", "tr": "-e kadar"}}
+{"guid": "R99_050", "translations": {"ms": "seperti", "hi": "जैसा", "tr": "gibi"}}

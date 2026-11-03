@@ -6,7 +6,7 @@
 {"guid": "N12_049", "forms": [{"grammatical_form": "noun/en_singular", "text": "drill", "is_base_form": true, "ipa": "/drɪl/", "phonetic": "DRILL"}]}
 {"guid": "N12_050", "forms": [{"grammatical_form": "noun/en_singular", "text": "wrench", "is_base_form": true, "ipa": "/rɛntʃ/", "phonetic": "RENTCH"}]}
 {"guid": "N12_051", "forms": [{"grammatical_form": "noun/en_singular", "text": "ladder", "is_base_form": true, "ipa": "/ˈlædər/", "phonetic": "LAH-dər"}]}
-{"guid": "N12_054", "forms": [{"grammatical_form": "noun/en_singular", "text": "scissors", "is_base_form": true, "ipa": "/ˈsɪzərz/", "phonetic": "SIZ-ərz"}], "grammar_facts": [{"fact_type": "number_type", "fact_value": "plurale_tantum"}, {"fact_type": "animacy", "fact_value": "inanimate"}, {"fact_type": "plural_status", "fact_value": "regular"}]}
+{"guid": "N12_054", "forms": [{"grammatical_form": "noun/en_singular", "text": "scissors", "is_base_form": true, "ipa": "/ˈsɪzərz/", "phonetic": "SIZ-ərz"}], "grammar_facts": [{"fact_type": "number_type", "fact_value": "plurale_tantum"}, {"fact_type": "animacy", "fact_value": "inanimate"}, {"fact_type": "plural_status", "fact_value": "regular"}, {"fact_type": "countability", "fact_value": "countable"}]}
 {"guid": "N12_059", "forms": [{"grammatical_form": "noun/en_singular", "text": "pliers", "is_base_form": true}, {"grammatical_form": "noun/en_plural", "text": "pliers", "is_base_form": false}]}
 {"guid": "N12_067", "forms": [{"grammatical_form": "noun/en_singular", "text": "apparatus", "is_base_form": true}, {"grammatical_form": "noun/en_plural", "text": "apparatuses", "is_base_form": false}]}
 {"guid": "N12_078", "forms": [{"grammatical_form": "noun/en_singular", "text": "extension cord", "is_base_form": true}]}
