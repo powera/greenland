@@ -3,4 +3,5 @@
 {"guid": "D09_003", "grammar_facts": [{"fact_type": "comparative_status", "fact_value": "not_applicable"}, {"fact_type": "superlative_status", "fact_value": "not_applicable"}]}
 {"guid": "D09_004", "grammar_facts": [{"fact_type": "comparative_status", "fact_value": "not_applicable"}, {"fact_type": "superlative_status", "fact_value": "not_applicable"}]}
 {"guid": "D09_005", "grammar_facts": [{"fact_type": "comparative_status", "fact_value": "not_applicable"}, {"fact_type": "superlative_status", "fact_value": "not_applicable"}]}
+{"guid": "D09_006", "grammar_facts": [{"fact_type": "comparative", "fact_value": "más"}, {"fact_type": "comparative_status", "fact_value": "override"}, {"fact_type": "superlative", "fact_value": "muchísimo"}, {"fact_type": "superlative_status", "fact_value": "override"}]}
 {"guid": "D09_007", "grammar_facts": [{"fact_type": "comparative_status", "fact_value": "not_applicable"}, {"fact_type": "superlative_status", "fact_value": "not_applicable"}]}
