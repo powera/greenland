@@ -102,3 +102,43 @@ def test_staging_failure_is_reported_and_local_result_retained(tmp_path: Path) -
     assert result["voices"][0]["error"] == "S3 staging upload failed"
     assert Path(result["voices"][0]["file_path"]).read_bytes() == b"test-audio"
     record.assert_called_once()
+
+
+def test_transcript_mismatch_is_recorded_as_needs_replacement(tmp_path: Path) -> None:
+    import json
+    from unittest.mock import Mock, patch
+    from agents.vieversys import VieversysAgent
+    from clients.audio.gpt_voices import GptVoice
+    from clients.audio.types import AudioGenerationResult, Voice
+    from storage.backend.config import DataSourceConfig
+    from storage.models.schema import AudioQualityReview, Lemma
+
+    agent = VieversysAgent(DataSourceConfig(), output_dir=str(tmp_path), upload_s3=False)
+    agent.auto_approve = True
+    lemma = Lemma(id=7, guid="N07_003", lemma_text="hospital", pos_type="noun")
+    generated = AudioGenerationResult(
+        audio_data=b"test-audio",
+        text="ligoninė",
+        voice=Voice.MARIN,
+        language_code="lt",
+        model="test",
+        duration_ms=100,
+        transcript="li-go-NI-ne",
+        transcript_matches=False,
+    )
+    session = Mock()
+    with (
+        patch.object(agent, "get_translation_text", return_value="ligoninė"),
+        patch("agents.vieversys.generate_audio", return_value=generated),
+        patch("agents.vieversys.find_existing_review", return_value=None),
+    ):
+        result = agent.generate_audio_for_lemma(session, lemma, "lt", [GptVoice.GPT_LT_F1])
+
+    assert result["voices"][0]["transcript_mismatch"] == "li-go-NI-ne"
+    (review,) = [call.args[0] for call in session.add.call_args_list]
+    assert isinstance(review, AudioQualityReview)
+    # Even under --auto-approve a mismatched take is never served.
+    assert review.status == "needs_replacement"
+    assert review.accepted_at is None
+    assert json.loads(review.quality_issues or "") == ["transcript_mismatch"]
+    assert review.notes == "Realtime transcript: 'li-go-NI-ne'"

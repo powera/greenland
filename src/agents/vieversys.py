@@ -14,6 +14,7 @@ stored in AudioQualityReview with 'pending_review' status.
 
 import argparse
 import hashlib
+import json
 import logging
 import sys
 import tempfile
@@ -379,6 +380,17 @@ class VieversysAgent:
             # Content addresses preserve assets still referenced by other slots.
             filename = f"{hashlib.md5(result.audio_data).hexdigest()}.mp3"
 
+            # A take whose transcript says something else ("li-go-NI-ne") is kept
+            # for listening but never served; a later populate-only run redoes it.
+            mismatched_transcript = (
+                result.transcript if result.transcript_matches is False else None
+            )
+            if mismatched_transcript:
+                logger.warning(
+                    f"Transcript mismatch for {lemma.guid}/{language_code}/"
+                    f"{gpt_voice.path_name}: expected {text!r}, heard {mismatched_transcript!r}"
+                )
+
             # Create language/voice subdirectories using path_name (e.g., "ruta", "jonas")
             voice_dir = self.output_dir / language_code / gpt_voice.path_name
             voice_dir.mkdir(parents=True, exist_ok=True)
@@ -431,7 +443,7 @@ class VieversysAgent:
 
                     # If auto-approve, also upload to production
                     # Production path: prod/{language}/{voice_path_name}/{md5}.mp3
-                    if self.auto_approve:
+                    if self.auto_approve and not mismatched_transcript:
                         prod_success, prod_url = self._upload_to_prod_path(
                             file_path, md5_hash, language_code, voice_path_name
                         )
@@ -457,6 +469,7 @@ class VieversysAgent:
                     s3_staging_manifest_url=s3_staging_manifest_url,
                     s3_prod_url=s3_prod_url,
                     audio_slot=audio_slot,
+                    mismatched_transcript=mismatched_transcript,
                 )
 
             voices_list.append(
@@ -468,6 +481,7 @@ class VieversysAgent:
                         if self.upload_s3 and not s3_staging_url
                         else None
                     ),
+                    "transcript_mismatch": mismatched_transcript,
                     "filename": filename,
                     "file_path": str(file_path),
                     "md5": md5_hash,
@@ -491,12 +505,23 @@ class VieversysAgent:
         s3_staging_manifest_url: Optional[str] = None,
         s3_prod_url: Optional[str] = None,
         audio_slot: Optional[str] = None,
+        mismatched_transcript: Optional[str] = None,
     ) -> None:
-        """Create AudioQualityReview record for generated audio."""
+        """Create AudioQualityReview record for generated audio.
+
+        ``mismatched_transcript`` is what the model said instead of ``text``;
+        such a take is stored as needs_replacement, which nothing serves.
+        """
         # Determine status based on auto_approve setting
-        status = "approved" if self.auto_approve else "pending_review"
-        accepted_at = datetime.now() if self.auto_approve else None
-        accepted_by = "vieversys-auto" if self.auto_approve else None
+        approved = self.auto_approve and not mismatched_transcript
+        if mismatched_transcript:
+            status = "needs_replacement"
+        else:
+            status = "approved" if approved else "pending_review"
+        accepted_at = datetime.now() if approved else None
+        accepted_by = "vieversys-auto" if approved else None
+        quality_issues = json.dumps(["transcript_mismatch"]) if mismatched_transcript else None
+        notes = f"Realtime transcript: {mismatched_transcript!r}" if mismatched_transcript else None
 
         # Check if record already exists
         existing = find_existing_review(
@@ -520,6 +545,8 @@ class VieversysAgent:
             existing.accepted_at = accepted_at
             existing.accepted_by = accepted_by
             clear_review_verdict(existing)
+            existing.quality_issues = quality_issues
+            existing.notes = notes
             logger.debug(f"Updated existing review record for {lemma.guid}")
         else:
             # Create new record
@@ -538,6 +565,8 @@ class VieversysAgent:
                 staging_agent="vieversys" if s3_staging_url else None,
                 lemma_id=lemma.id,
                 status=status,
+                quality_issues=quality_issues,
+                notes=notes,
                 accepted_at=accepted_at,
                 accepted_by=accepted_by,
             )
@@ -1351,9 +1380,9 @@ def get_argument_parser() -> argparse.ArgumentParser:
     # Mode selection
     parser.add_argument(
         "--mode",
-        choices=["check-existing", "populate-only", "regenerate", "coverage"],
+        choices=["check-existing", "populate-only", "coverage"],
         default="coverage",
-        help="Operation mode: check-existing (list existing audio), populate-only (generate missing only), regenerate (delete and regenerate), coverage (report only, default)",
+        help="Operation mode: check-existing (list existing audio), populate-only (generate missing or needs_replacement audio), coverage (report only, default)",
     )
 
     parser.add_argument(
@@ -1474,7 +1503,7 @@ def main() -> int:
     config = get_data_source_config(args)
 
     # Validate mode-specific requirements
-    if args.mode in ["populate-only", "regenerate"] and language_code is None:
+    if args.mode == "populate-only" and language_code is None:
         print(f"Error: --languages is required for --mode {args.mode}")
         sys.exit(1)
 
@@ -1485,9 +1514,7 @@ def main() -> int:
     agent = VieversysAgent(
         config=config,
         output_dir=args.output_dir,
-        upload_s3=(
-            args.upload_s3 and not args.dry_run and args.mode in {"populate-only", "regenerate"}
-        ),
+        upload_s3=(args.upload_s3 and not args.dry_run and args.mode == "populate-only"),
         auto_approve=args.auto_approve,
         skip_existing=(args.mode == "populate-only"),
         tts_engine=tts_engine,
@@ -1552,7 +1579,7 @@ def main() -> int:
     # Get lemmas to process (either single lemma from --guid or batch)
     # Only needed for modes that process lemmas (not coverage, check-existing, or sentence generation)
     lemmas = None
-    if args.mode in ["populate-only", "regenerate"] and not args.generate_sentences:
+    if args.mode == "populate-only" and not args.generate_sentences:
         # Require language for lemma processing
         if language_code is None:
             print("Error: --languages is required for lemma processing")
@@ -1644,7 +1671,7 @@ def main() -> int:
             session.close()
         return 0
 
-    elif args.mode in ["populate-only", "regenerate"]:
+    elif args.mode == "populate-only":
         # Validate language is required
         if language_code is None:
             print(f"Error: --languages is required for --mode {args.mode}")

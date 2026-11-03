@@ -303,6 +303,36 @@ class TestRealtimeTTS(unittest.TestCase):
         self.assertTrue(result.success, result.error)
         self.assertIn("transcript mismatch", logs.output[0])
         self.assertIn("actual='hacer hacer hacer'", logs.output[0])
+        self.assertEqual(result.transcript, "hacer hacer hacer")
+        self.assertIs(result.transcript_matches, False)
+
+    def test_transcript_matches(self) -> None:
+        from clients.audio.openai_tts import transcript_matches
+
+        self.assertIs(transcript_matches("ligoninė", "Ligoninė."), True)
+        self.assertIs(transcript_matches("ligoninė", "li-go-NI-ne"), False)
+        self.assertIs(transcript_matches("ligoninė", "ligonine"), False)
+        self.assertIsNone(transcript_matches("ligoninė", None))
+        self.assertIsNone(transcript_matches("ligoninė", "  "))
+
+    def test_lithuanian_stress_marks_match(self) -> None:
+        from clients.audio.openai_tts import transcript_matches
+
+        for expected, transcript in (
+            ("puikus", "Púikus"),
+            ("kalendorius", "kalendórius"),
+            ("vidurinė mokykla", "vidurínė mokyklà"),
+            ("ranka", "rankã"),
+        ):
+            with self.subTest(transcript=transcript):
+                self.assertIs(transcript_matches(expected, transcript, "lt"), True)
+        # Letters, not stress: ū and ė are different sounds; syllables still fail.
+        self.assertIs(transcript_matches("didžiulis", "didžiūlis", "lt"), False)
+        self.assertIs(transcript_matches("lauke", "laukė", "lt"), False)
+        self.assertIs(transcript_matches("savas", "sá-vas", "lt"), False)
+        # Elsewhere the same marks spell: más and año are not mas and ano.
+        self.assertIs(transcript_matches("mas", "más", "es"), False)
+        self.assertIs(transcript_matches("ano", "año", "es"), False)
 
     @patch("clients.audio.openai_tts.clients.lib.assert_llm_calls_enabled")
     @patch("websocket.create_connection")
@@ -396,6 +426,8 @@ class TestRealtimeTTS(unittest.TestCase):
             character_description="A calm speaker",
         )
         self.assertTrue(result.success, result.error)
+        self.assertIsNone(result.transcript)
+        self.assertIsNone(result.transcript_matches)
         with wave.open(io.BytesIO(result.audio_data), "rb") as wav_file:
             self.assertEqual(wav_file.getframerate(), 24000)
             self.assertEqual(wav_file.readframes(_ms(50)), pcm)
