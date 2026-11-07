@@ -18,7 +18,7 @@ from sqlalchemy.orm import Session
 from langtools.es.conjugation import conjugate_for_dialect
 from langtools.es.forms_config import VERB_CONFIG
 from langtools.es.inflection import build_adjective_forms, build_noun_forms
-from langtools.form_patterns import expand_fields
+from langtools.form_patterns import expand_stored_fields
 from langtools.mechanical_forms import Paradigm, read_facts
 
 POS_TYPES: Tuple[str, ...] = ("noun", "adjective", "verb")
@@ -29,7 +29,7 @@ BASE_FORM_KEYS: Dict[str, str] = {
     "verb": "infinitive",
 }
 
-_VERB_SLOTS: List[str] = expand_fields(VERB_CONFIG)
+_VERB_SLOTS: List[str] = expand_stored_fields(VERB_CONFIG)
 
 # Registry slots the conjugator fills under the same name.
 _NON_FINITE_FORMS = ("infinitive", "gerund", "past_participle")

@@ -58,6 +58,7 @@ from exports.wireword.helpers import (
     normalize_translation_text,
 )
 from exports.wireword.generate_manifest import generate_manifest, load_level_metadata
+from langtools.form_registry import is_mechanical_only_form
 from langtools.form_tasks import get_base_grammatical_form
 from words.cognates import detect_cognate
 from words.emoji import emoji_values
@@ -529,6 +530,10 @@ class WirewordExporter:
             )
             derivative_forms_by_lemma: Dict[int, List[DerivativeForm]] = {}
             for form in all_derivative_forms:
+                # Rule-only reading slots (Spanish imperfect, French
+                # conditional, ...) are stored for annotation, not quizzing.
+                if is_mechanical_only_form(form.language_code, form.grammatical_form):
+                    continue
                 if form.lemma_id not in derivative_forms_by_lemma:
                     derivative_forms_by_lemma[form.lemma_id] = []
                 derivative_forms_by_lemma[form.lemma_id].append(form)
@@ -804,6 +809,7 @@ class WirewordExporter:
                     build_target_reading_fields(
                         self.language,
                         entry["target_language"],
+                        grammar_facts_by_lemma.get(lemma_id, {}),
                     )
                 )
 
@@ -1385,6 +1391,11 @@ class WirewordExporter:
             )
             logger.info("Bulk fetched translations and difficulty levels")
 
+            # Grammar facts carry reading overrides (zh ``pinyin``) for the base.
+            verb_facts_by_lemma = bulk_get_effective_grammar_facts(
+                session, [lemma.id for lemma in lemmas], self.language
+            )
+
             # For non-English source languages, bulk fetch source translations
             verb_source_translations_by_id: Dict[int, Optional[str]] = {}
             if self.source_language != "en":
@@ -1402,6 +1413,10 @@ class WirewordExporter:
             )
             derivative_forms_by_lemma: Dict[int, List[DerivativeForm]] = {}
             for form in all_derivative_forms:
+                # Rule-only reading slots (Spanish imperfect, French
+                # conditional, ...) are stored for annotation, not quizzing.
+                if is_mechanical_only_form(form.language_code, form.grammatical_form):
+                    continue
                 if form.lemma_id not in derivative_forms_by_lemma:
                     derivative_forms_by_lemma[form.lemma_id] = []
                 derivative_forms_by_lemma[form.lemma_id].append(form)
@@ -1681,7 +1696,11 @@ class WirewordExporter:
                     if audio_hashes:
                         wireword["audio"] = audio_hashes
 
-                wireword.update(build_target_reading_fields(self.language, base_target))
+                wireword.update(
+                    build_target_reading_fields(
+                        self.language, base_target, verb_facts_by_lemma.get(lemma.id, {})
+                    )
+                )
 
                 # Add optional fields
                 verb_source_alt_key = (

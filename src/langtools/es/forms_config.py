@@ -28,6 +28,18 @@ VERB_CONFIG: Dict[str, Any] = {
     # Non-finite forms: the citation form, the gerund (estoy hablando) and the
     # masculine singular past participle (he hablado).
     "extra_forms": ["infinitive", "gerund", "past_participle"],
+    # Built by the conjugator and stored for reading running text, but kept
+    # out of the LLM schema and the WireWord quiz export (see
+    # langtools.form_patterns.mechanical_only_fields).  Names match the
+    # conjugator's own keys; there is no 1s imperative.
+    "mechanical_forms": [
+        *(
+            f"{person}_{tense}"
+            for tense in ("imperfect", "conditional", "subjunctive_present")
+            for person in ("1s", "2s", "3s", "1p", "2p", "3p")
+        ),
+        *(f"{person}_imperative" for person in ("2s", "3s", "1p", "2p", "3p")),
+    ],
     "query_type": "spanish_verb_conjugations",
     "schema_name": "SpanishVerbConjugations",
 }

@@ -2,11 +2,11 @@
 
 from __future__ import annotations
 
-from typing import Any, Callable, Optional, Sequence
+from typing import Any, Callable, Mapping, Optional, Sequence
 
 from langtools.dialect_overrides import get_base_language
 from langtools.ja.romaji_helper import generate_hiragana, generate_romaji
-from langtools.zh.pinyin_helper import generate_pinyin
+from langtools.zh.pinyin_helper import generate_pinyin, word_reading
 
 ReadingGenerator = Callable[[str], Optional[str]]
 
@@ -70,8 +70,18 @@ def get_manifest_reading_config(language_code: str) -> Optional[dict[str, Any]]:
     }
 
 
-def build_target_reading_fields(language_code: str, target_text: Optional[str]) -> dict[str, str]:
-    """Build word-level or grammatical-form reading fields for a target string."""
+def build_target_reading_fields(
+    language_code: str,
+    target_text: Optional[str],
+    grammar_facts: Optional[Mapping[str, Optional[str]]] = None,
+) -> dict[str, str]:
+    """Build word-level or grammatical-form reading fields for a target string.
+
+    *grammar_facts* is the lemma's facts in this language.  Pass them only for
+    the lemma's own base text: a ``pinyin`` fact is the reading of that word in
+    this sense (长 "long" is cháng, where pypinyin says zhǎng), and applying it
+    to an inflected form or an alternative spelling would misread that text.
+    """
     if not target_text:
         return {}
 
@@ -79,9 +89,15 @@ def build_target_reading_fields(language_code: str, target_text: Optional[str]) 
     if not generators:
         return {}
 
+    pinyin_override = (grammar_facts or {}).get("pinyin")
     reading_fields: dict[str, str] = {}
     for system_id, generator in generators.items():
-        reading_value = generator(target_text)
+        reading_value: Optional[str] = None
+        if system_id == "pinyin" and pinyin_override:
+            reading = word_reading(target_text, pinyin_override)
+            reading_value = reading.spaced if reading else None
+        if not reading_value:
+            reading_value = generator(target_text)
         if reading_value:
             reading_fields[f"target_{system_id}"] = reading_value
 
