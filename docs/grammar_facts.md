@@ -52,6 +52,7 @@ with the rule should not be added.
 | `declension_class` | classification | `1`–`5` (Lithuanian; derived, not exported) |
 | `measure_words` | classification | a Chinese classifier, optionally `个 (alt: 只, 头)` |
 | `fanciful_collective` | classification | an ornamental English collective ("a murder of crows") |
+| `pinyin` | override | zh/zh-tw reading of this sense, tone-marked syllables separated by spaces, one per character (长 "long": `cháng`).  Only where pypinyin is wrong; `langtools.zh.pinyin_helper.word_reading` flags the likely cases (`ambiguous_positions`) |
 | `infinitive`, `3s_present`, `3s_past`, `1s_present`, `1s_past`, `1s_future`, `past`, `past_participle` | principal part | the form's text |
 | `plural`, `feminine_form`, `comparative`, `superlative`, `verb_form_<slot>` | override | the form's text |
 

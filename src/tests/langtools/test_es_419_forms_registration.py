@@ -118,8 +118,13 @@ def test_mechanical_generator_covers_both_spanish_varieties() -> None:
             resolve_grammatical_form(language_code, "verb", "3s_past")
             == f"verb/{language_code}_3s_past"
         )
-        # Tenses with no registry slot are skipped, not approximated.
-        assert resolve_grammatical_form(language_code, "verb", "1s_imperfect") is None
+        # The reading-only tenses (mechanical_forms) have slots of their own.
+        assert (
+            resolve_grammatical_form(language_code, "verb", "1s_imperfect")
+            == f"verb/{language_code}_1s_imperfect"
+        )
+        # Keys with no registry slot are skipped, not approximated.
+        assert resolve_grammatical_form(language_code, "verb", "1s_preterite") is None
         assert (
             resolve_grammatical_form(language_code, "adjective", "singular_f")
             == f"adjective/{language_code}_singular_f"

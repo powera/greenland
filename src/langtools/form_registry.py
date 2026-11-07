@@ -11,7 +11,12 @@ from pathlib import Path
 from typing import Any, Dict, List, Optional, Tuple
 
 from clients.types import SchemaProperty
-from langtools.form_patterns import expand_enum_names, expand_fields
+from langtools.form_patterns import (
+    expand_enum_names,
+    expand_enum_values,
+    expand_fields,
+    mechanical_only_fields,
+)
 from langtools.llm_forms_base import LanguageFormSpec
 from storage.models.enums import GrammaticalForm
 
@@ -195,6 +200,11 @@ def _make_tense_only_verb_spec(lang_code: str, lang_name: str) -> LanguageFormSp
 
 FORM_SPECS: Dict[Tuple[str, str], LanguageFormSpec] = {}
 
+# Language code (dialects included) -> GrammaticalForm values of the slots its
+# forms_config lists under ``mechanical_forms``: stored and exported for
+# reading, but outside the LLM schema and the WireWord quiz export.
+MECHANICAL_ONLY_FORMS: Dict[str, frozenset[str]] = {}
+
 
 # ===== Pattern A: singular/plural nouns + 6-person verbs =====
 # Standard languages with singular/plural nouns and 6-person x 3-tense verbs.
@@ -364,7 +374,14 @@ def _auto_register_from_forms_configs() -> None:
             if pos_type not in _POS_TYPE_MAP:
                 continue
 
+            extra_fields = mechanical_only_fields(cfg)
             for form_lang_code, form_lang_name in registrations:
+                if extra_fields:
+                    values = expand_enum_values(cfg, form_lang_code, pos_type)
+                    MECHANICAL_ONLY_FORMS[form_lang_code] = MECHANICAL_ONLY_FORMS.get(
+                        form_lang_code, frozenset()
+                    ) | frozenset(values[field] for field in extra_fields)
+
                 spec_key = (form_lang_code, pos_type)
                 if spec_key in FORM_SPECS:
                     continue  # hand-coded entry takes precedence
@@ -380,3 +397,12 @@ def _auto_register_from_forms_configs() -> None:
 
 
 _auto_register_from_forms_configs()
+
+
+def is_mechanical_only_form(language_code: str, grammatical_form: str) -> bool:
+    """Whether *grammatical_form* is a rule-only slot of *language_code*.
+
+    These slots (Spanish imperfect, French conditional, ...) are stored so a
+    reader can resolve them, but are not quiz material: WireWord skips them.
+    """
+    return grammatical_form in MECHANICAL_ONLY_FORMS.get(language_code, frozenset())

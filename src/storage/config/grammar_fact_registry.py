@@ -138,6 +138,28 @@ GRAMMAR_FACT_DEFINITIONS: Dict[str, GrammarFactDefinition] = {
         description="Chinese measure words/classifiers for nouns",
         generatable=True,
     ),
+    "pinyin": GrammarFactDefinition(
+        fact_type="pinyin",
+        languages=("zh", "zh-tw"),
+        required_pos=(
+            "noun",
+            "verb",
+            "adjective",
+            "adverb",
+            "numeral",
+            "pronoun",
+            "preposition",
+            "conjunction",
+            "determiner",
+            "interjection",
+        ),
+        display_label="Pinyin",
+        description=(
+            "Reading override for this sense, in tone-marked pinyin with syllables "
+            "separated by spaces (长 'grow': zhǎng).  Only where pypinyin reads the "
+            "word wrongly; see langtools.zh.pinyin_helper.word_reading."
+        ),
+    ),
     "fanciful_collective": GrammarFactDefinition(
         fact_type="fanciful_collective",
         languages=("en",),
@@ -403,6 +425,7 @@ EXPORTED_FACT_TYPES: Tuple[str, ...] = (
     "feminine_form",  # fr irregular feminine adjective
     "comparative",  # irregular comparative
     "superlative",  # irregular superlative
+    "pinyin",  # zh reading where pypinyin picks the wrong one for this sense
     "number_type",  # exceptional number behavior (plurale tantum, etc.)
     "gradability",  # selects which comparison strategy applies at all
     # GENERATED, and exported anyway: an LLM writes these, which is not a

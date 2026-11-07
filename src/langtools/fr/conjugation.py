@@ -587,8 +587,6 @@ _COMPOUND_VERBS: Dict[str, Tuple[str, str]] = {
     # connaître family
     "reconnaître": ("re", "connaître"),
     # recevoir family
-    "apercevoir": ("aper", "recevoir"),
-    "concevoir": ("con", "recevoir"),
     # partir / sortir / dormir / sentir / servir
     "repartir": ("re", "partir"),
     "ressortir": ("res", "sortir"),
@@ -667,6 +665,232 @@ def _expand_compound(prefix: str, base_entry: Dict[str, object]) -> Dict[str, st
 
 
 # ---------------------------------------------------------------------------
+# Verbs built on a stripped base: con-cevoir is not con + recevoir
+# ---------------------------------------------------------------------------
+# (prefix, base, part of the base to drop): "concevoir" is "con" + "recevoir"
+# with its "re" removed, so "reçois" -> "conçois" and "recevr-" -> "concevr-".
+# Listing these in _COMPOUND_VERBS built "conreçois".
+
+_STEM_COMPOUNDS: Dict[str, Tuple[str, str, str]] = {
+    "concevoir": ("con", "recevoir", "re"),
+    "apercevoir": ("aper", "recevoir", "re"),
+    "décevoir": ("dé", "recevoir", "re"),
+    "percevoir": ("per", "recevoir", "re"),
+}
+
+
+def _strip_entry(entry: Dict[str, object], strip: str) -> Dict[str, object]:
+    """Return a copy of an irregular entry with *strip* removed from each form."""
+
+    def _cut(text: str) -> str:
+        return text[len(strip) :] if text.startswith(strip) else text
+
+    present = entry["present"]
+    assert isinstance(present, list)
+    future_stem = entry["future_stem"]
+    assert isinstance(future_stem, str)
+    pp = entry["pp"]
+    assert isinstance(pp, tuple)
+    stripped: Dict[str, object] = {
+        "present": [_cut(form) for form in present],
+        "future_stem": _cut(future_stem),
+        "pp": (_cut(pp[0]), _cut(pp[1])),
+    }
+    impf_stem = entry.get("impf_stem")
+    if isinstance(impf_stem, str):
+        stripped["impf_stem"] = _cut(impf_stem)
+    return stripped
+
+
+# ---------------------------------------------------------------------------
+# Conditional, present subjunctive, passé simple and imperative
+# ---------------------------------------------------------------------------
+# These are stored for reading running text (see forms_config
+# VERB_MECHANICAL_FORMS).  All four derive from forms already built:
+#   conditional  -- the future stem + the imperfect endings (parlerais)
+#   subjunctive  -- the 3p present stem for je/tu/il/ils, the imperfect for
+#                   nous/vous (viennent -> vienne, venions)
+#   imperative   -- the present, with -es/-as dropping their s (parle, va)
+#   passé simple -- a stem and one of four ending sets; regular verbs take
+#                   theirs from the infinitive, irregular ones from the table
+#                   below.  An irregular verb missing from it gets no passé
+#                   simple rather than a guessed one.
+
+_PASSE_SIMPLE_ENDINGS: Dict[str, List[str]] = {
+    "a": ["ai", "as", "a", "âmes", "âtes", "èrent"],
+    "i": ["is", "is", "it", "îmes", "îtes", "irent"],
+    "u": ["us", "us", "ut", "ûmes", "ûtes", "urent"],
+    "in": ["ins", "ins", "int", "înmes", "întes", "inrent"],
+}
+
+# Irregular-table verb -> (passé simple stem, ending set).
+_IRREGULAR_PASSE_SIMPLE: Dict[str, Tuple[str, str]] = {
+    "être": ("f", "u"),
+    "avoir": ("e", "u"),
+    "aller": ("all", "a"),
+    "faire": ("f", "i"),
+    "asseoir": ("ass", "i"),
+    "pouvoir": ("p", "u"),
+    "vouloir": ("voul", "u"),
+    "devoir": ("d", "u"),
+    "savoir": ("s", "u"),
+    "recevoir": ("reç", "u"),
+    "voir": ("v", "i"),
+    "prévoir": ("prév", "i"),
+    "dire": ("d", "i"),
+    "écrire": ("écriv", "i"),
+    "lire": ("l", "u"),
+    "conduire": ("conduis", "i"),
+    "battre": ("batt", "i"),
+    "plaindre": ("plaign", "i"),
+    "produire": ("produis", "i"),
+    "inscrire": ("inscriv", "i"),
+    "prendre": ("pr", "i"),
+    "mettre": ("m", "i"),
+    "connaître": ("conn", "u"),
+    "naître": ("naqu", "i"),
+    "vivre": ("véc", "u"),
+    "boire": ("b", "u"),
+    "croire": ("cr", "u"),
+    "venir": ("v", "in"),
+    "tenir": ("t", "in"),
+    "partir": ("part", "i"),
+    "sortir": ("sort", "i"),
+    "dormir": ("dorm", "i"),
+    "sentir": ("sent", "i"),
+    "servir": ("serv", "i"),
+    "mourir": ("mour", "u"),
+    "courir": ("cour", "u"),
+    "ouvrir": ("ouvr", "i"),
+    "couvrir": ("couvr", "i"),
+    "offrir": ("offr", "i"),
+    "souffrir": ("souffr", "i"),
+    "envoyer": ("envoy", "a"),
+}
+
+# Present subjunctives not built from the 3p present / imperfect stems.
+_IRREGULAR_SUBJUNCTIVE: Dict[str, List[str]] = {
+    "être": ["sois", "sois", "soit", "soyons", "soyez", "soient"],
+    "avoir": ["aie", "aies", "ait", "ayons", "ayez", "aient"],
+    "aller": ["aille", "ailles", "aille", "allions", "alliez", "aillent"],
+    "faire": ["fasse", "fasses", "fasse", "fassions", "fassiez", "fassent"],
+    "pouvoir": ["puisse", "puisses", "puisse", "puissions", "puissiez", "puissent"],
+    "savoir": ["sache", "saches", "sache", "sachions", "sachiez", "sachent"],
+    "vouloir": ["veuille", "veuilles", "veuille", "voulions", "vouliez", "veuillent"],
+}
+
+# Imperatives taken from the subjunctive rather than the present: (tu, nous, vous).
+_IRREGULAR_IMPERATIVE: Dict[str, Tuple[str, str, str]] = {
+    "être": ("sois", "soyons", "soyez"),
+    "avoir": ("aie", "ayons", "ayez"),
+    "savoir": ("sache", "sachons", "sachez"),
+    "vouloir": ("veuille", "veuillons", "veuillez"),
+}
+
+_IMPERATIVE_PERSONS = ("2s", "1p", "2p")
+
+
+def _compound_base(verb: str) -> Optional[Tuple[str, str, str]]:
+    """Return ``(prefix, base, strip)`` when *verb* is built on another verb."""
+    if verb in _COMPOUND_VERBS:
+        prefix, base = _COMPOUND_VERBS[verb]
+        return prefix, base, ""
+    return _STEM_COMPOUNDS.get(verb)
+
+
+def _passe_simple(verb: str) -> Optional[List[str]]:
+    """Return the six passé simple forms of *verb*, or None when unknown."""
+    stem: str
+    ending_set: str
+    compound = _compound_base(verb)
+    if verb in _IRREGULAR_PASSE_SIMPLE:
+        stem, ending_set = _IRREGULAR_PASSE_SIMPLE[verb]
+    elif compound is not None and compound[1] in _IRREGULAR_PASSE_SIMPLE:
+        prefix, base, strip = compound
+        base_stem, ending_set = _IRREGULAR_PASSE_SIMPLE[base]
+        if strip and base_stem.startswith(strip):
+            base_stem = base_stem[len(strip) :]
+        stem = prefix + base_stem
+    elif verb in _IRREGULAR_FORMS:
+        return None
+    elif verb.endswith("er") and len(verb) > 2:
+        stem = verb[:-2]
+        endings = _PASSE_SIMPLE_ENDINGS["a"]
+        forms: List[str] = []
+        for ending in endings:
+            # Soft g / c before a and â (mangeai, commençâmes), not before è.
+            if stem.endswith("g") and ending[0] in "aâ":
+                forms.append(stem + "e" + ending)
+            elif stem.endswith("c") and ending[0] in "aâ":
+                forms.append(stem[:-1] + "ç" + ending)
+            else:
+                forms.append(stem + ending)
+        return forms
+    elif verb.endswith(("ir", "re")) and len(verb) > 2:
+        stem, ending_set = verb[:-2], "i"
+    else:
+        return None
+    return [stem + ending for ending in _PASSE_SIMPLE_ENDINGS[ending_set]]
+
+
+def _irregular_for(verb: str, table: Dict[str, List[str]]) -> Optional[List[str]]:
+    """Look *verb* up in *table*, prefixing a compound's base (refaire -> refasse)."""
+    if verb in table:
+        return table[verb]
+    compound = _compound_base(verb)
+    if compound is not None and not compound[2] and compound[1] in table:
+        return [compound[0] + form for form in table[compound[1]]]
+    return None
+
+
+def _add_derived_moods(verb: str, forms: Dict[str, str]) -> Dict[str, str]:
+    """Add conditional, subjunctive, passé simple and imperative to *forms*.
+
+    *verb* is the non-reflexive infinitive and *forms* its plain paradigm.
+    A mood whose inputs are missing is left out rather than guessed.
+    """
+    completed = dict(forms)
+
+    future_1s = forms.get("1s_future", "")
+    if future_1s.endswith("ai"):
+        for person, ending in zip(_PERSONS, _IMPERFECT):
+            completed[f"{person}_cond"] = future_1s[:-2] + ending
+
+    subjunctive = _irregular_for(verb, _IRREGULAR_SUBJUNCTIVE)
+    if subjunctive is None:
+        third_plural = forms.get("3p_present", "")
+        impf_1p = forms.get("1p_impf", "")
+        impf_2p = forms.get("2p_impf", "")
+        if third_plural.endswith("ent") and impf_1p and impf_2p:
+            stem = third_plural[:-3]
+            subjunctive = [stem + "e", stem + "es", stem + "e", impf_1p, impf_2p, third_plural]
+    if subjunctive is not None:
+        for person, form in zip(_PERSONS, subjunctive):
+            completed[f"{person}_subj"] = form
+
+    passe_simple = _passe_simple(verb)
+    if passe_simple is not None:
+        for person, form in zip(_PERSONS, passe_simple):
+            completed[f"{person}_ps"] = form
+
+    imperative: Optional[Tuple[str, str, str]] = _IRREGULAR_IMPERATIVE.get(verb)
+    if imperative is None:
+        tu = forms.get("2s_present", "")
+        nous = forms.get("1p_present", "")
+        vous = forms.get("2p_present", "")
+        if tu and nous and vous:
+            # -er verbs, ouvrir-type verbs and aller lose the s: parle, ouvre, va.
+            if tu.endswith(("es", "as")):
+                tu = tu[:-1]
+            imperative = (tu, nous, vous)
+    if imperative is not None:
+        for person, form in zip(_IMPERATIVE_PERSONS, imperative):
+            completed[f"{person}_imp"] = form
+
+    return completed
+
+
+# ---------------------------------------------------------------------------
 # Pre-built lookup table (populated once at import time)
 # ---------------------------------------------------------------------------
 
@@ -679,8 +903,13 @@ for _verb, (_prefix, _base) in _COMPOUND_VERBS.items():
     if _base in _IRREGULAR_DATA:
         _IRREGULAR_FORMS[_verb] = _expand_compound(_prefix, _IRREGULAR_DATA[_base])
 
+for _verb, (_prefix, _base, _strip) in _STEM_COMPOUNDS.items():
+    _IRREGULAR_FORMS[_verb] = _expand_compound(
+        _prefix, _strip_entry(_IRREGULAR_DATA[_base], _strip)
+    )
+
 # clean up module-level loop variables
-del _verb, _entry, _prefix, _base
+del _verb, _entry, _prefix, _base, _strip
 
 # ---------------------------------------------------------------------------
 # Public API
@@ -700,7 +929,9 @@ def conjugate(infinitive: str) -> Optional[Dict[str, str]]:
         return None
     if "infinitive" in conjugation.forms:
         return dict(conjugation.forms)
-    return _add_non_finite_forms(conjugation.word, conjugation.forms)
+    return _add_derived_moods(
+        conjugation.word, _add_non_finite_forms(conjugation.word, conjugation.forms)
+    )
 
 
 def conjugate_detailed(infinitive: str) -> Tuple[VerbConjugation, bool]:
@@ -732,10 +963,18 @@ def conjugate_detailed(infinitive: str) -> Tuple[VerbConjugation, bool]:
         base_result, base_success = conjugate_detailed(base_verb)
         if not base_success or not base_result.forms:
             return VerbConjugation(word=verb), False
-        reflexive_forms = _add_non_finite_forms(base_verb, base_result.forms)
+        reflexive_forms = _add_derived_moods(
+            base_verb, _add_non_finite_forms(base_verb, base_result.forms)
+        )
         clitics = {"1s": "me", "2s": "te", "3s": "se", "1p": "nous", "2p": "vous", "3p": "se"}
+        # The affirmative imperative puts a stressed pronoun after the verb:
+        # lève-toi, levons-nous, levez-vous.
+        imperative_clitics = {"2s": "toi", "1p": "nous", "2p": "vous"}
         for form_key, form_value in list(reflexive_forms.items()):
             person = form_key.split("_", 1)[0]
+            if form_key.endswith("_imp"):
+                reflexive_forms[form_key] = f"{form_value}-{imperative_clitics[person]}"
+                continue
             clitic = clitics.get(person)
             if form_key == "present_participle":
                 clitic = "se"

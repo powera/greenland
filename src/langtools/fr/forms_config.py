@@ -26,9 +26,21 @@ NOUN_CONFIG: Dict[str, Any] = {
     "schema_name": "FrenchNounForms",
 }
 
+# Built by the conjugator and stored for reading running text, but kept out of
+# the LLM schema and the WireWord quiz export (see
+# langtools.form_patterns.mechanical_only_fields): conditional, present
+# subjunctive, passé simple, and the three imperative persons.
+VERB_MECHANICAL_FORMS: List[str] = [
+    *(f"{person}_{tense}" for tense in ["cond", "subj", "ps"] for person in _PERSONS),
+    "2s_imp",
+    "1p_imp",
+    "2p_imp",
+]
+
 VERB_CONFIG: Dict[str, Any] = {
     "type": "explicit",
     "forms": VERB_FORMS,
+    "mechanical_forms": VERB_MECHANICAL_FORMS,
     "query_type": "french_verb_conjugations",
     "schema_name": "FrenchVerbConjugations",
 }

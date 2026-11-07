@@ -11,6 +11,13 @@ Given a config dict (from a ``forms_config.py``), the helpers here produce:
 
 These are consumed by ``enums.py`` (dynamic member creation) and
 ``form_registry.py`` (FORM_SPECS auto-build).
+
+A config may also list ``mechanical_forms``: slots that the language's rules
+(``langtools/<lang>/mechanical.py``) build and store, but that are *not* part
+of the LLM form schema.  They get GrammaticalForm members and derivative_forms
+rows like any other slot, so a reader can look up "hablaba" or "parlerait",
+yet asking a model for a word's forms stays the size it was, and quiz exports
+(WireWord) leave them out -- see :func:`mechanical_only_fields`.
 """
 
 from typing import Any, Dict, List, Tuple
@@ -77,6 +84,25 @@ def expand_fields(config: Dict[str, Any]) -> List[str]:
     raise ValueError(f"Unknown pattern type: {pattern!r}")
 
 
+def mechanical_only_fields(config: Dict[str, Any]) -> List[str]:
+    """Return the rule-built slots of *config* that the LLM schema omits.
+
+    Order is preserved and a slot already produced by :func:`expand_fields`
+    is not repeated.
+    """
+    llm_fields = set(expand_fields(config))
+    extra: List[str] = []
+    for field in config.get("mechanical_forms", []):
+        if field not in llm_fields and field not in extra:
+            extra.append(field)
+    return extra
+
+
+def expand_stored_fields(config: Dict[str, Any]) -> List[str]:
+    """Return every slot that may be stored: the LLM fields plus mechanical ones."""
+    return expand_fields(config) + mechanical_only_fields(config)
+
+
 def expand_enum_values(config: Dict[str, Any], lang_code: str, pos_type: str) -> Dict[str, str]:
     """Map each form field to its enum *value* string.
 
@@ -84,7 +110,7 @@ def expand_enum_values(config: Dict[str, Any], lang_code: str, pos_type: str) ->
     """
     _, val_prefix = _pos_parts(pos_type)
     lc = lang_code.lower()
-    return {field: f"{val_prefix}/{lc}_{field}" for field in expand_fields(config)}
+    return {field: f"{val_prefix}/{lc}_{field}" for field in expand_stored_fields(config)}
 
 
 def enum_member_language(lang_code: str) -> str:
@@ -104,7 +130,9 @@ def expand_enum_names(config: Dict[str, Any], lang_code: str, pos_type: str) -> 
     """
     member_prefix, _ = _pos_parts(pos_type)
     uc = enum_member_language(lang_code)
-    return {field: f"{member_prefix}_{uc}_{field.upper()}" for field in expand_fields(config)}
+    return {
+        field: f"{member_prefix}_{uc}_{field.upper()}" for field in expand_stored_fields(config)
+    }
 
 
 def get_all_enum_pairs(
@@ -113,5 +141,5 @@ def get_all_enum_pairs(
     """Return ``(member_name, value_string)`` pairs for every form."""
     names = expand_enum_names(config, lang_code, pos_type)
     values = expand_enum_values(config, lang_code, pos_type)
-    fields = expand_fields(config)
+    fields = expand_stored_fields(config)
     return [(names[f], values[f]) for f in fields]

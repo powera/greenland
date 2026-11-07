@@ -8,7 +8,8 @@ for Chinese text. Degrades gracefully if required libraries are not available.
 
 import logging
 import re
-from typing import Optional
+from dataclasses import dataclass
+from typing import List, Optional, Tuple
 
 from langtools.ruby_html import wrap_unannotated_ruby
 
@@ -16,7 +17,8 @@ logger = logging.getLogger(__name__)
 
 # Try to import pypinyin, gracefully handle if not available
 try:
-    from pypinyin import Style, lazy_pinyin
+    from pypinyin import Style, lazy_pinyin, pinyin as _pinyin_table
+    from pypinyin.constants import PHRASES_DICT as _PHRASES_DICT
 
     PYPINYIN_AVAILABLE = True
 except ImportError:
@@ -97,6 +99,199 @@ def generate_pinyin(chinese_text: str) -> Optional[str]:
     except Exception as e:
         logger.warning(f"Failed to generate pinyin for '{chinese_text}': {e}")
         return None
+
+
+_HAN_CHAR = re.compile(r"[\u3400-\u4dbf\u4e00-\u9fff\uf900-\ufaff]")
+
+# Syllables that need an apostrophe when they do not start the word: Xī'ān,
+# nǚ'ér.  Tone marks are stripped before the test.
+_APOSTROPHE_INITIALS = ("a", "o", "e")
+_TONE_MARK_FOLD = str.maketrans("āáǎàōóǒòēéěèīíǐìūúǔùǖǘǚǜü", "aaaaooooeeeeiiiiuuuuvvvvv")
+
+
+# Characters whose everyday readings differ by sense or word (长 cháng "long"
+# / zhǎng "grow", 行 xíng / háng).  pypinyin lists rare readings for thousands
+# of characters, so asking it alone flags half the vocabulary; only these are
+# worth a reviewer's time when no phrase settles them.
+COMMON_POLYPHONES: frozenset[str] = frozenset(
+    "长行重还乐好发种只着得地都便少数调为应差教觉角传曾分量干空参尽"
+    "处当解难背朝薄假间将散相正省更降露几划缝弹扎累哄冲兴称奔担蒙恶强"
+    "似宿率塞片圈血盛藏属折转"
+)
+
+
+@dataclass(frozen=True)
+class WordReading:
+    """The pinyin of one dictionary word, for exports and annotation.
+
+    ``syllables`` has one entry per Han character, in order, so a consumer can
+    put a reading over each character; a run of non-Han text (the "T" of T恤)
+    is its own entry, unchanged.  ``pinyin`` is the word written as one unit,
+    the way dictionaries print it ("yínháng", "Xī'ān" -> "xī'ān").
+    ``ambiguous_positions`` lists the indices of ``syllables`` whose character
+    has several readings that neither an override nor a pypinyin phrase
+    settled: those are guesses and worth a reviewer's look (bare 长 reads
+    zhǎng, which is wrong for "long").  ``source`` is ``"override"`` when the
+    lemma's ``pinyin`` grammar fact supplied the reading, else ``"pypinyin"``.
+    """
+
+    syllables: Tuple[str, ...]
+    pinyin: str
+    ambiguous_positions: Tuple[int, ...]
+    source: str
+
+    @property
+    def spaced(self) -> str:
+        """Syllables separated by spaces: the WireWord ``target_pinyin`` style."""
+        return " ".join(self.syllables)
+
+    @property
+    def is_ambiguous(self) -> bool:
+        return bool(self.ambiguous_positions)
+
+
+def _split_runs(text: str) -> List[str]:
+    """Split *text* into single Han characters and maximal non-Han runs."""
+    pieces: List[str] = []
+    buffer = ""
+    for char in text:
+        if _HAN_CHAR.match(char):
+            if buffer.strip():
+                pieces.append(buffer.strip())
+            buffer = ""
+            pieces.append(char)
+        else:
+            buffer += char
+    if buffer.strip():
+        pieces.append(buffer.strip())
+    return pieces
+
+
+# Adjectives are stored with attributive 的 (正确的).  Word-final, it is the
+# particle "de" and is written apart from the word: zhèngquè de.
+_ATTRIBUTIVE_SUFFIX = "的"
+
+
+def _join_word(syllables: Tuple[str, ...], breaks: frozenset[int]) -> str:
+    """Write syllables as one unit, with a space before each index in *breaks*.
+
+    Within a word, syllables run together with the apostrophe pinyin requires
+    (xī'ān); *breaks* marks where a new word starts (使更活泼 -> shǐ gèng huópō),
+    a non-Han run begins or ends, or a word-final particle stands apart.
+    """
+    written = ""
+    for index, syllable in enumerate(syllables):
+        if index and written:
+            if index in breaks:
+                written += " "
+            elif (
+                syllable.lower().translate(_TONE_MARK_FOLD).startswith(_APOSTROPHE_INITIALS)
+                and written[-1].isalpha()
+            ):
+                written += "'"
+        written += syllable
+    return written
+
+
+def _word_breaks(
+    pieces: List[str], han_flags: Tuple[bool, ...], particle_last: bool
+) -> frozenset[int]:
+    """Piece indices that start a new written word."""
+    breaks = {i for i in range(1, len(pieces)) if not han_flags[i] or not han_flags[i - 1]}
+    if particle_last:
+        breaks.add(len(pieces) - 1)
+    if JIEBA_AVAILABLE:
+        # Segment each Han run; a phrase-length translation is several words.
+        start = 0
+        while start < len(pieces):
+            if not han_flags[start]:
+                start += 1
+                continue
+            end = start
+            while end < len(pieces) and han_flags[end]:
+                end += 1
+            offset = start
+            for segment in jieba.cut("".join(pieces[start:end]), cut_all=False):
+                if offset != start:
+                    breaks.add(offset)
+                offset += len(segment)
+            start = end
+    return frozenset(breaks)
+
+
+def _settled_by_phrase(text: str, index: int) -> bool:
+    """Whether a pypinyin phrase of 2+ characters covers ``text[index]``."""
+    for start in range(0, index + 1):
+        for end in range(index + 1, len(text) + 1):
+            if end - start >= 2 and text[start:end] in _PHRASES_DICT:
+                return True
+    return False
+
+
+def word_reading(chinese_text: str, override: Optional[str] = None) -> Optional[WordReading]:
+    """Return the reading of one dictionary word, or None when there is none.
+
+    *override* is the lemma's ``pinyin`` grammar fact: tone-marked syllables
+    separated by spaces, one per Han character ("zhǎng").  It is used when its
+    syllable count matches the word and ignored (with a warning) otherwise, so
+    a stale override cannot misalign the characters.
+
+    Readings are citation tones: no 一/不 tone sandhi, neutral tone left
+    unmarked (的 -> "de").  Traditional characters are read through their
+    simplified forms, as in :func:`generate_pinyin`.
+    """
+    if not chinese_text or not is_chinese(chinese_text):
+        return None
+    text = to_simplified(chinese_text.strip())
+    pieces = _split_runs(text)
+    han_indices = [i for i, piece in enumerate(pieces) if _HAN_CHAR.match(piece)]
+    han_flags = tuple(bool(_HAN_CHAR.match(piece)) for piece in pieces)
+    particle_last = len(han_indices) > 1 and pieces[-1] == _ATTRIBUTIVE_SUFFIX
+
+    if override:
+        override_syllables = override.split()
+        if len(override_syllables) == len(han_indices):
+            syllables = list(pieces)
+            for position, syllable in zip(han_indices, override_syllables):
+                syllables[position] = syllable
+            frozen = tuple(syllables)
+            breaks = _word_breaks(pieces, han_flags, particle_last)
+            return WordReading(frozen, _join_word(frozen, breaks), (), "override")
+        logger.warning(
+            "Ignoring pinyin override %r for %r: %d syllables for %d characters",
+            override,
+            chinese_text,
+            len(override_syllables),
+            len(han_indices),
+        )
+
+    if not PYPINYIN_AVAILABLE:
+        return None
+    han_text = "".join(pieces[i] for i in han_indices)
+    try:
+        readings = lazy_pinyin(han_text, style=Style.TONE)
+    except Exception as exc:  # pragma: no cover - pypinyin failure
+        logger.warning("Failed to generate pinyin for %r: %s", chinese_text, exc)
+        return None
+    if len(readings) != len(han_indices):
+        return None
+
+    syllables = list(pieces)
+    ambiguous: List[int] = []
+    for han_position, (piece_index, reading) in enumerate(zip(han_indices, readings)):
+        if particle_last and piece_index == len(pieces) - 1:
+            syllables[piece_index] = "de"
+            continue
+        syllables[piece_index] = reading
+        char = pieces[piece_index]
+        if char not in COMMON_POLYPHONES:
+            continue
+        candidates = _pinyin_table(char, style=Style.TONE, heteronym=True)[0]
+        if len(set(candidates)) > 1 and not _settled_by_phrase(han_text, han_position):
+            ambiguous.append(piece_index)
+    frozen = tuple(syllables)
+    breaks = _word_breaks(pieces, han_flags, particle_last)
+    return WordReading(frozen, _join_word(frozen, breaks), tuple(ambiguous), "pypinyin")
 
 
 def generate_pinyin_sort_key(chinese_text: str) -> Optional[str]:
