@@ -127,7 +127,9 @@ def _dialect_variant_entry(dialect_code: str) -> Optional[Dict[str, Any]]:
     return entry
 
 
-def build_variants_registry(language: str) -> Optional[Dict[str, Any]]:
+def build_variants_registry(
+    language: str, wordlists_root: Optional[Path] = None
+) -> Optional[Dict[str, Any]]:
     """Build the ``variants.json`` payload for a base *language*.
 
     Returns ``None`` when the language has no regional varieties to offer, or
@@ -154,6 +156,10 @@ def build_variants_registry(language: str) -> Optional[Dict[str, Any]]:
     if len(variants) < 2:
         return None
 
+    if wordlists_root is not None:
+        for variant in variants:
+            variant["source_languages"] = discover_source_languages(wordlists_root, variant["id"])
+
     from storage.translation_helpers import LANGUAGE_NAMES
 
     return {
@@ -163,6 +169,30 @@ def build_variants_registry(language: str) -> Optional[Dict[str, Any]]:
         "default_variant": normalized,
         "variants": variants,
     }
+
+
+def discover_source_languages(wordlists_root: Path, language: str) -> List[str]:
+    """Read availability from completed exports, independently for each variety."""
+    sources: set[str] = set()
+    directories = [wordlists_root / f"lang_{language}"]
+    directories.extend(sorted(wordlists_root.glob(f"lang_{language}_from_*")))
+    for directory in directories:
+        manifest_path = directory / "generated" / "wireword" / "wireword_manifest_v2.json"
+        if not manifest_path.is_file():
+            continue
+        try:
+            manifest = json.loads(manifest_path.read_text(encoding="utf-8"))
+            expected_source = (
+                directory.name.split("_from_", 1)[1] if "_from_" in directory.name else "en"
+            )
+            if (
+                manifest.get("language_code") == language
+                and manifest.get("source_language_code", "en") == expected_source
+            ):
+                sources.add(expected_source)
+        except (OSError, ValueError, AttributeError):
+            logger.warning("Ignoring unreadable variant manifest %s", manifest_path)
+    return sorted(sources, key=lambda source: (source != "en", source))
 
 
 def generate_variants(wireword_dir: str, language: str) -> Tuple[bool, Optional[str]]:
@@ -177,7 +207,14 @@ def generate_variants(wireword_dir: str, language: str) -> Tuple[bool, Optional[
         language has no regional varieties -- which is a success, not a
         failure: shipping no file is how a single-variant language is spelled.
     """
-    registry = build_variants_registry(language)
+    output_path = Path(wireword_dir)
+    wordlists_root = (
+        output_path.parents[2]
+        if output_path.parent.name == "generated"
+        and output_path.parent.parent.name.startswith("lang_")
+        else None
+    )
+    registry = build_variants_registry(language, wordlists_root)
     if registry is None:
         logger.debug("No regional variants for %s; not emitting %s", language, VARIANTS_FILENAME)
         return True, None

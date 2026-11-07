@@ -23,7 +23,7 @@ from storage.translation_helpers import (
     TIER_2_LANGUAGES,
 )
 from storage.backend.factory import create_session
-from langtools.dialect_overrides import normalize_language_code
+from langtools.dialect_overrides import get_dialect_override, normalize_language_code
 from exports.wireword.export_manager import WIREWORD_EXPORT_LANGUAGES, TrakaidoExporter
 from exports.wireword.generate_manifest import generate_manifest, load_level_metadata
 from exports.wireword.generate_variants import generate_variants
@@ -427,7 +427,18 @@ class WirewordExportService:
             # storage dialects writes one; for everything else this is a no-op
             # returning a None path, because a missing file is how the client
             # spells "one variant".
-            variants_success, variants_path = generate_variants(wireword_dir, self.language)
+            registry_dir = Path(wireword_dir)
+            registry_language = self.language
+            dialect = get_dialect_override(self.language)
+            if registry_dir.parent.parent.name == f"lang_{self.language_suffix}":
+                registry_language = dialect.parent_lang if dialect else self.language
+                registry_dir = (
+                    registry_dir.parents[2] / f"lang_{registry_language}" / "generated" / "wireword"
+                )
+                registry_dir.mkdir(parents=True, exist_ok=True)
+            variants_success, variants_path = generate_variants(
+                str(registry_dir), registry_language
+            )
             if not variants_success:
                 logger.error("  Failed to write variants.json")
                 return False, results

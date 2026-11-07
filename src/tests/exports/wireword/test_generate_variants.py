@@ -35,7 +35,7 @@ def test_default_variant_is_present_among_the_variants() -> None:
 
 def test_every_storage_dialect_is_offered_as_a_variant() -> None:
     """A dialect with its own bundle is reachable, or learners cannot pick it."""
-    offered = set()
+    offered: set[str] = set()
     for lang in ("es", "zh", "pt"):
         registry = build_variants_registry(lang)
         assert registry is not None, lang
@@ -119,3 +119,21 @@ def test_registry_entries_carry_every_required_field(tmp_path: Path) -> None:
         for variant in registry["variants"]:
             assert required <= set(variant), f"{lang}/{variant['id']}"
             assert all(variant[key] for key in required - {"default_regions"})
+
+
+def test_registry_discovers_sources_per_variant(tmp_path: Path) -> None:
+    for language, sources in {"es": ["en", "fr", "zh"], "es-419": ["en", "fr"]}.items():
+        for source in sources:
+            suffix = "" if source == "en" else f"_from_{source}"
+            directory = tmp_path / f"lang_{language}{suffix}" / "generated" / "wireword"
+            directory.mkdir(parents=True)
+            (directory / "wireword_manifest_v2.json").write_text(
+                json.dumps({"language_code": language, "source_language_code": source})
+            )
+    (tmp_path / "lang_es-419_from_zh" / "generated" / "wireword").mkdir(parents=True)
+    base_dir = tmp_path / "lang_es" / "generated" / "wireword"
+    success, path = generate_variants(str(base_dir), "es")
+    assert success and path
+    registry = _load(path)
+    assert registry["variants"][0]["source_languages"] == ["en", "fr", "zh"]
+    assert registry["variants"][1]["source_languages"] == ["en", "fr"]
