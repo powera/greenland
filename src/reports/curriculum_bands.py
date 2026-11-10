@@ -6,8 +6,8 @@ packer got them wrong:
 **Missing data means uncommon.** A lemma with no ``frequency_rank``, or one
 no corpus lists at all, sorts as :data:`UNRANKED_SENTINEL` -- never ahead of a
 word with corpus evidence. The second case matters because the stored rank of
-a word below every corpus cap comes from its tiers alone (vodka and anesthetic
-both sit at 3758 from Basic English "extended"). Tier evidence (CEFR, Cambridge
+a word below every corpus cap still carries its tiers, so a tiered one ranks a
+little ahead of the floor without any corpus saying so. Tier evidence (CEFR, Cambridge
 YLE, Basic English) only breaks ties between equal ranks. The old packer sorted
 on tier *first*, so a YLE-listed word with no wordfreq data jumped ahead of
 every corpus-ranked word.
@@ -30,12 +30,14 @@ from storage.crud.operation_log import FieldChange, log_field_changes
 from storage.models.schema import Lemma, LemmaTier
 from wordfreq.data.cohorts import US_STATES
 from wordfreq.data.family_relations_sections import ALL_SECTIONS
-from wordfreq.frequency.combined_rank import lemmas_without_corpus_evidence
+from wordfreq.frequency.combined_rank import lemmas_without_corpus_evidence, no_evidence_rank
 
-# The rank the combined-rank rollup assigns a lemma no corpus lists. It is a
-# harmonic mean of per-corpus unknown ranks, not a configured constant, so it
-# only moves if the corpus set or their caps change.
-UNRANKED_SENTINEL = 9783
+# The rank the combined-rank rollup assigns a lemma no corpus and no tier lists:
+# the harmonic mean of every source's unknown rank, and the worst rank it can
+# assign.  Computed from the corpus configuration, so it moves with the corpus
+# set and caps (16376 after the Nov 2026 cap increase; 9783 before, when a
+# lemma no corpus listed was scored from its tiers alone).
+UNRANKED_SENTINEL = no_evidence_rank()
 
 PROMINENCE_ORDER: Mapping[Optional[str], int] = {
     "very_common": 0,

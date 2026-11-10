@@ -165,7 +165,7 @@ WIKIPEDIA_CORPORA: Dict[str, WikipediaCorpus] = {
         # A single register with a small vocabulary: past a few thousand words
         # the list is proper nouns and one-article jargon rather than
         # mathematical English.
-        max_words=4000,
+        max_words=6000,
         description="Mathematics in depth, from arithmetic to category theory",
     ),
     "wiki_geography": WikipediaCorpus(
@@ -177,7 +177,7 @@ WIKIPEDIA_CORPORA: Dict[str, WikipediaCorpus] = {
         # The narrowest subject matter of the three: a river article and a city
         # article share their descriptive vocabulary and little else, so past a
         # few thousand words the list is place names rather than English.
-        max_words=4500,
+        max_words=9000,
         description="Wikipedia's 1204 Level 4 geography articles, from continents to cities",
     ),
     "wiki_biology": WikipediaCorpus(
@@ -188,7 +188,7 @@ WIKIPEDIA_CORPORA: Dict[str, WikipediaCorpus] = {
         # Mostly the names of organisms, which are proper-noun-like and shared
         # between few articles: a beetle article and a fern article have little
         # vocabulary in common past the anatomical terms.
-        max_words=4500,
+        max_words=9000,
         description="Wikipedia's Level 4 organisms and anatomy articles",
     ),
     "wiki_modern_life": WikipediaCorpus(
@@ -199,7 +199,7 @@ WIKIPEDIA_CORPORA: Dict[str, WikipediaCorpus] = {
         min_articles=15,
         # Two everyday registers rather than one technical one, so the tail
         # stays ordinary English further down than wiki_math's does.
-        max_words=5000,
+        max_words=10000,
         description="Wikipedia's Level 4 everyday-life and technology articles",
     ),
     "wiki_arts": WikipediaCorpus(
@@ -211,7 +211,7 @@ WIKIPEDIA_CORPORA: Dict[str, WikipediaCorpus] = {
         # The critical metalanguage this corpus exists for -- narrative, genre,
         # motif, counterpoint, chiaroscuro -- is ordinary educated English and
         # its tail stays ordinary further down than a technical corpus's.
-        max_words=5000,
+        max_words=10000,
         description="Wikipedia's Level 4 arts articles, from architecture to film",
     ),
     "wiki_society": WikipediaCorpus(
@@ -222,7 +222,7 @@ WIKIPEDIA_CORPORA: Dict[str, WikipediaCorpus] = {
         min_articles=15,
         # Abstract institutional prose, which repeats a broad vocabulary rather
         # than a narrow technical one, so its tail is thicker than wiki_math's.
-        max_words=5500,
+        max_words=11000,
         description="Wikipedia's Level 4 society, philosophy and religion articles",
     ),
     "wiki_linguistics": WikipediaCorpus(
@@ -234,7 +234,7 @@ WIKIPEDIA_CORPORA: Dict[str, WikipediaCorpus] = {
         # The terminology this corpus exists for is dense and technical, but
         # its tail is the ordinary English of grammar description -- "ending",
         # "stem", "borrowed", "spoken" -- so it runs deeper than wiki_math's.
-        max_words=4500,
+        max_words=9000,
         description="Wikipedia's Level 5 language articles, from phonetics to writing systems",
     ),
     "wiki_physical_science": WikipediaCorpus(
@@ -245,7 +245,7 @@ WIKIPEDIA_CORPORA: Dict[str, WikipediaCorpus] = {
         # Largely named compounds, particles and reactions, which are
         # proper-noun-like and shared between few articles, so the useful yield
         # sits in the first few thousand words as wiki_math's does.
-        max_words=4000,
+        max_words=8000,
         description="Wikipedia's Level 4 physical science and molecular biology articles",
     ),
     "wiki_history": WikipediaCorpus(
@@ -257,7 +257,7 @@ WIKIPEDIA_CORPORA: Dict[str, WikipediaCorpus] = {
         # Overwhelmingly proper nouns once past the connective prose, and
         # analyze_book separates those per document, so the ordinary-English
         # tail thins out early.
-        max_words=4500,
+        max_words=9000,
         description="Wikipedia's Level 4 history and biography articles",
     ),
 }

@@ -269,6 +269,47 @@ def test_lemma_with_no_signal_gets_all_unknown_floors() -> None:
         session.close()
 
 
+def test_lemma_absent_from_every_corpus_takes_their_unknown_floors() -> None:
+    """No corpus listing the lemma still counts every corpus's unknown rank.
+
+    The lemma lands on no_evidence_rank(), and the single-lemma rescore agrees
+    with the bulk pass.
+    """
+    session = _make_session()
+    cooking = CorpusConfig(
+        name="cooking", description="t", file_path="x", max_words=10, max_unknown_rank=2000
+    )
+    try:
+        with patch.object(combined_rank, "get_enabled_corpus_configs", return_value=[cooking]):
+            salt = _add_lemma(session, "salt", "N01")
+            t_salt = _add_token_with_freq(session, "salt", "cooking", 100.0, ordinal_rank=1)
+            _add_form(session, salt, "salt", word_token=t_salt)
+            ghost = _add_lemma(session, "ghost", "N99")
+            _add_form(session, ghost, "ghost", word_token=None)
+            session.commit()
+
+            result = _patched_run(session)
+            single = combined_rank.recalculate_lemma_rank(session, ghost.id, dry_run=True)
+            floor = combined_rank.no_evidence_rank()
+
+        assert "wordfreq_cooking_unknown" in result["sources_used"]
+        session.expire_all()
+        scored = session.query(Lemma).filter_by(guid="N99").one()
+        # 4 / (1/2000 + 1/7500 + 1/25000 + 1/7500) = 4959
+        assert scored.frequency_rank == 4959
+        assert single == 4959
+        assert floor == 4959
+    finally:
+        session.close()
+
+
+def test_no_evidence_rank_is_the_worst_rank_a_listed_lemma_can_get() -> None:
+    """Any listing, in a corpus or a tier, ranks a lemma better than the floor."""
+    floor = combined_rank.no_evidence_rank()
+    assert floor > combined_rank.YLE_UNKNOWN_RANK
+    assert floor < combined_rank.CEFR_UNKNOWN_RANK
+
+
 def test_corpus_weight_zero_excludes_corpus() -> None:
     """A corpus with weight 0 in the DB is excluded entirely."""
     session = _make_session()

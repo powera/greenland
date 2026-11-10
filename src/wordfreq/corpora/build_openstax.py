@@ -60,7 +60,7 @@ DEFAULT_FULL_WEIGHT_CHAPTER_TOKENS = 5000
 
 # A topic corpus, like wiki_society and eu_parliament_debates: a corpus's word
 # count is also its weight in combined_rank.
-DEFAULT_MAX_WORDS = 5500
+DEFAULT_MAX_WORDS = 11000
 
 
 def read_book_chapters(cache_dir: Path, books: Sequence[OpenStaxBook]) -> List[Tuple[str, str]]:

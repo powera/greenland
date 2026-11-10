@@ -83,7 +83,7 @@ DEFAULT_FULL_WEIGHT_OPINION_TOKENS = 4000
 # support a longer list, but a corpus's word count is also its weight in
 # combined_rank, and there is no reason for this one to reach further down its
 # tail than the novels reach down theirs.
-DEFAULT_MAX_WORDS = 10000
+DEFAULT_MAX_WORDS = 15000
 
 
 def _load_phrases(args: argparse.Namespace) -> Dict[str, int]:

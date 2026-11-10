@@ -31,15 +31,16 @@ English lemma:
   * Basic English — fixed synthetic ranks per tier (``basic``/``extended``),
     weight 1.0.
 
-Per-lemma combined rank is the weighted harmonic mean of the sources that
-actually contributed:
+Per-lemma combined rank is the weighted harmonic mean over every corpus and
+tier source, each contributing either the lemma's rank there or that source's
+unknown rank:
 
     combined = sum(w_i) / sum(w_i / rank_i)
 
-Lemmas with zero contributing sources keep their existing ``frequency_rank``
-value (so noisy partial runs do not wipe data). Lemmas whose only forms are
-multi-word (no ``word_token_id``) rolling up to zero across all corpora can
-still receive a rank from tier signals alone.
+A lemma absent from every source therefore lands on :func:`no_evidence_rank`,
+the worst rank the rollup can assign; reports use it as the "unranked"
+sentinel.  Lemmas with zero contributing sources (no corpora and no tiers
+configured) keep their existing ``frequency_rank``.
 """
 
 from __future__ import annotations
@@ -144,8 +145,10 @@ _BATCH_SIZE: int = 1000
 # Floor used when a wordfreq corpus has no entry for a lemma. Each corpus
 # can override this via ``CorpusConfig.max_unknown_rank``; when neither is
 # set, we fall back to this value (chosen to be larger than the largest
-# corpus we currently load).
-_DEFAULT_UNKNOWN_RANK: int = 20000
+# corpus we currently load).  It also caps every configured value -- the
+# effective rank is min(max_unknown_rank, max(corpus size, this)) -- so it
+# must be at least the largest max_unknown_rank, or that cap is silently cut.
+_DEFAULT_UNKNOWN_RANK: int = 30000
 
 
 def _english_lemma_ids(session: Session) -> List[int]:
@@ -474,14 +477,36 @@ def _harmonic_mean(weighted_ranks: List[Tuple[float, int]]) -> Optional[int]:
     return int(round(total_weight / weighted_inv))
 
 
+def no_evidence_rank() -> int:
+    """The rank of a lemma no corpus and no tier lists: the rollup's floor.
+
+    Every source contributes its unknown rank, so this is the harmonic mean of
+    those, weighted as the rollup weights them.  Worked out from the in-code
+    corpus configuration rather than the database, so it can be a module-level
+    sentinel; a corpus's unknown rank is ``min(max_unknown_rank,
+    _DEFAULT_UNKNOWN_RANK)`` because every corpus is smaller than the default.
+    Changing a corpus cap, weight or the enabled set moves it.
+    """
+    contributors: List[Tuple[float, int]] = []
+    for cfg in get_enabled_corpus_configs():
+        if cfg.corpus_weight <= 0.0:
+            continue
+        contributors.append(
+            (cfg.corpus_weight, cfg.get_effective_unknown_rank(0, _DEFAULT_UNKNOWN_RANK))
+        )
+    contributors.extend((weight, unknown) for _, _, weight, unknown in _TIER_SOURCES)
+    rank = _harmonic_mean(contributors)
+    assert rank is not None, "the tier sources always contribute"
+    return rank
+
+
 def lemmas_without_corpus_evidence(session: Session, lemma_ids: List[int]) -> set[int]:
     """The lemmas no enabled corpus ranks any form of.
 
-    Their ``frequency_rank`` is built from tier signals alone:
-    :func:`recalculate_lemma_rank` only adds a corpus's unknown rank once some
-    other corpus has a hit, so a word below every corpus cap (vodka, vaccine)
-    is scored by its CEFR/Basic English tier and can look common. A caller
-    that must read missing data as "uncommon" uses this to discount them.
+    Their ``frequency_rank`` is every corpus's unknown rank plus their tiers,
+    so a tiered one (vodka, vaccine) still ranks a little better than
+    :func:`no_evidence_rank`.  A caller that must read missing corpus data as
+    "unranked" outright uses this to discount them.
 
     Exactly the lemmas for which :func:`get_lemma_corpus_rank` is None in
     every enabled corpus, worked out in bulk: that is None unless some form
@@ -565,12 +590,13 @@ def recalculate_lemma_rank(
         exponent = get_corpus_zipf_exponent(session, corpus_name)
         corpus_ranks[corpus_name] = get_lemma_corpus_rank(session, lemma_id, corpus_name, exponent)
 
-    has_wordfreq_hit = any(rank is not None for rank in corpus_ranks.values())
+    # A corpus that does not list the lemma contributes its unknown rank
+    # whether or not any other corpus does: see calculate_lemma_combined_ranks.
     for corpus_name, weight in corpus_weights.items():
         rank = corpus_ranks[corpus_name]
         if rank is not None:
             contributors.append((weight, rank))
-        elif has_wordfreq_hit:
+        else:
             cfg = cfgs_by_name.get(corpus_name)
             if cfg is None:
                 unknown_rank = _DEFAULT_UNKNOWN_RANK
@@ -688,22 +714,20 @@ def calculate_lemma_combined_ranks(
     for lemma_id in lemma_ids:
         contributors: List[Tuple[float, int]] = []
 
-        # Track whether this lemma had a positive signal in *any* wordfreq
-        # corpus. Only then do we apply the unknown-rank floor for the other
-        # wordfreq corpora — otherwise a lemma with zero wordfreq presence
-        # would be ranked purely from "missing everywhere" floors, which is
-        # misleading. Tier-only lemmas continue to fall through to the
-        # tier-source contributors below.
-        has_wordfreq_hit = any(
-            per_corpus_ranks[name].get(lemma_id) is not None for name in corpus_weights
-        )
-
+        # A corpus that does not list the lemma contributes its unknown rank,
+        # even when no corpus lists it.  Absence from every corpus is evidence
+        # of rarity, just as absence from a tier list is: scoring such a lemma
+        # from its tiers alone let a word below every corpus cap look common
+        # (vodka at a CEFR rank), and left every untiered one on the tier-only
+        # floor of 9783 instead of the true "absent everywhere" rank, which is
+        # what no_evidence_rank() computes.  A multi-word lemma with no token
+        # of its own sinks to that floor too; it rises once the corpora carry it.
         for corpus_name, weight in corpus_weights.items():
             rank = per_corpus_ranks[corpus_name].get(lemma_id)
             if rank is not None:
                 contributors.append((weight, rank))
                 sources_used.add(f"wordfreq_{corpus_name}")
-            elif has_wordfreq_hit:
+            else:
                 contributors.append((weight, unknown_rank_by_corpus[corpus_name]))
                 sources_used.add(f"wordfreq_{corpus_name}_unknown")
 
@@ -790,6 +814,8 @@ __all__ = [
     "get_corpus_unknown_rank",
     "get_corpus_zipf_exponent",
     "get_lemma_corpus_rank",
+    "lemmas_without_corpus_evidence",
+    "no_evidence_rank",
     "recalculate_lemma_rank",
 ]
 
