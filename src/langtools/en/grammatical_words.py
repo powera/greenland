@@ -62,6 +62,13 @@ ENGLISH_PERSONAL_PRONOUNS: Final[frozenset[str]] = frozenset(
         "their",
         "theirs",
         "themselves",
+        # Archaic second person, kept so old texts ("thou art", "ye shall")
+        # parse; pronouns are not lemmas, so these cannot be variant rows.
+        "thou",
+        "thee",
+        "thy",
+        "thine",
+        "ye",
     ]
 )
 
@@ -362,6 +369,11 @@ _DISPLAY_HEADWORDS: Final[dict[str, str]] = {
     "yours": "you",
     "yourself": "you",
     "yourselves": "you",
+    "thou": "you",
+    "thee": "you",
+    "thy": "you",
+    "thine": "you",
+    "ye": "you",
     "him": "he",
     "his": "he",
     "himself": "he",

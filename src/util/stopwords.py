@@ -159,6 +159,30 @@ NON_LEXICAL_TOKENS = {
     "ed": "abbreviation",
     "eds": "abbreviation",
     "vol": "abbreviation",
+    "km": "abbreviation",
+    "cm": "abbreviation",
+    "mm": "abbreviation",
+    # Pieces the tokenizer splits off a longer written form: ordinal suffixes
+    # ("19th"), elided contractions ("'em", "'tis"), "en" from "en route", and
+    # "fro", which only occurs in "to and fro".
+    "th": "fragment",
+    "em": "fragment",
+    "tis": "fragment",
+    "en": "fragment",
+    "fro": "fragment",
+    # Hesitation sounds and exclamations with no meaning a lemma could carry.
+    # Interjections that do have one (wow, ouch, hello) are lemmas.
+    "oh": "interjection",
+    "ah": "interjection",
+    "ha": "interjection",
+    "eh": "interjection",
+    "er": "interjection",
+    "lo": "interjection",
+    # Dialect spellings of function words.  A dialect form of a lemma is a
+    # variant of that lemma; these spell pronouns and articles, which are not
+    # lemmas, so there is nothing to attach them to.
+    "tha": "dialect_function_word",
+    "yer": "dialect_function_word",
     # Prefixes split off hyphenated compounds by the tokenizer ("non-linear"
     # becomes "non" and "linear").  Held back until the most frequent
     # compounds for each prefix have been imported (see
