@@ -78,9 +78,9 @@ DEFAULT_MIN_WORDS = 300
 # removed.  Shorter chapters count proportionally less.
 DEFAULT_FULL_WEIGHT_CHAPTER_TOKENS = 3000
 
-# A topic corpus like wiki_society (5500), not a general one like the novels:
+# A topic corpus like wiki_society (11000), not a general one like the novels:
 # a corpus's word count is also its weight in combined_rank.
-DEFAULT_MAX_WORDS = 5500
+DEFAULT_MAX_WORDS = 11000
 
 
 # The American-English reference for spelling folds: a US corpus's vocabulary,

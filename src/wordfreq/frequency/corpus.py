@@ -71,37 +71,46 @@ class CorpusConfig:
 # began joining multi-word forms: each "will <verb>" and "more <adjective>" is
 # its own token competing for a slot (~660 of them against the current
 # database), so the old caps would have pushed ordinary vocabulary off the
-# bottom of every list. These values must stay in step with the matching
-# max_words in wordfreq.corpora.book_lists. The wiki corpora are not built by that
-# pipeline and is unaffected.
+# bottom of every list.
+#
+# In Nov 2026 every cap was raised again so ranks can tell a 10000th word from
+# a 15000th one, which the curriculum now reaches: the general book corpora
+# 10000 -> 15000, the wiki corpora doubled, and the rest doubled when under
+# 7500 and raised by half when over it.  max_unknown_rank stays at twice
+# max_words throughout.
+#
+# Each max_words must stay in step with the builder that writes the corpus file:
+# wordfreq.corpora.book_lists for the Gutenberg-built corpora,
+# wordfreq.corpora.build_wikipedia for the wiki ones, and DEFAULT_MAX_WORDS in
+# build_scotus, build_europarl, build_openstax and build_wpalh.
 CORPUS_CONFIGS = [
     CorpusConfig(
         name="19th_books",
         description="Word frequency data from 19th century books",
         file_path="19th_books.json",
-        max_words=10000,
+        max_words=15000,
         file_type="json",
         value_type="auto",
         corpus_weight=0.8,
-        max_unknown_rank=20000,
+        max_unknown_rank=30000,
         enabled=True,
     ),
     CorpusConfig(
         name="20th_books",
         description="Word frequency data from 20th century books",
         file_path="20th_books.json",
-        max_words=10000,
+        max_words=15000,
         file_type="json",
         value_type="auto",
         corpus_weight=0.9,
-        max_unknown_rank=20000,
+        max_unknown_rank=30000,
         enabled=True,
     ),
     CorpusConfig(
         name="wiki_math",
         description="Word frequency data from Wikipedia mathematics articles",
         file_path="wiki_math.json",
-        max_words=4000,
+        max_words=6000,
         file_type="json",
         value_type="auto",
         # A single narrow register, and the smallest corpus here at 294
@@ -109,15 +118,17 @@ CORPUS_CONFIGS = [
         # mathematical vocabulary the other seven barely touch, not by
         # describing how English is weighted, so it is weighted below
         # early_modern_science -- which is also technical, but broader.
+        # Capped below the wiki doubling: with min_articles=5 only ~6500 words
+        # qualify at all, so 8000 would not have been reached.
         corpus_weight=0.5,
-        max_unknown_rank=8000,
+        max_unknown_rank=12000,
         enabled=True,
     ),
     CorpusConfig(
         name="wiki_geography",
         description="Word frequency data from Wikipedia Level 4 geography articles",
         file_path="wiki_geography.json",
-        max_words=4500,
+        max_words=9000,
         file_type="json",
         value_type="auto",
         # Narrower than the general corpora and mostly about places, so it says less
@@ -125,28 +136,28 @@ CORPUS_CONFIGS = [
         # It earns its weight on the descriptive vocabulary of terrain, climate
         # and settlement, which the other corpora reach only in passing.
         corpus_weight=0.5,
-        max_unknown_rank=9000,
+        max_unknown_rank=18000,
         enabled=True,
     ),
     CorpusConfig(
         name="wiki_biology",
         description="Word frequency data from Wikipedia organism and anatomy articles",
         file_path="wiki_biology.json",
-        max_words=4500,
+        max_words=9000,
         file_type="json",
         value_type="auto",
         # Narrow in the same way wiki_math is: the subject matter is largely
         # the names of organisms, so it earns its weight on the anatomical and
         # descriptive vocabulary rather than on how English is weighted.
         corpus_weight=0.5,
-        max_unknown_rank=9000,
+        max_unknown_rank=18000,
         enabled=True,
     ),
     CorpusConfig(
         name="wiki_modern_life",
         description="Word frequency data from Wikipedia everyday-life and technology articles",
         file_path="wiki_modern_life.json",
-        max_words=5000,
+        max_words=10000,
         file_type="json",
         value_type="auto",
         # The one corpus here covering modern material life -- appliances,
@@ -154,14 +165,14 @@ CORPUS_CONFIGS = [
         # topic corpora because that vocabulary is ordinary English the book
         # corpora simply predate, not a technical register.
         corpus_weight=0.8,
-        max_unknown_rank=10000,
+        max_unknown_rank=20000,
         enabled=True,
     ),
     CorpusConfig(
         name="wiki_arts",
         description="Word frequency data from Wikipedia Level 4 arts articles",
         file_path="wiki_arts.json",
-        max_words=5000,
+        max_words=10000,
         file_type="json",
         value_type="auto",
         # The critical metalanguage of the arts -- narrative, genre, motif,
@@ -171,14 +182,14 @@ CORPUS_CONFIGS = [
         # corpora: those *are* literature, and narrative English is not the
         # vocabulary used to write *about* literature.
         corpus_weight=0.8,
-        max_unknown_rank=10000,
+        max_unknown_rank=20000,
         enabled=True,
     ),
     CorpusConfig(
         name="wiki_society",
         description="Word frequency data from Wikipedia Level 4 society, philosophy and religion articles",
         file_path="wiki_society.json",
-        max_words=5500,
+        max_words=11000,
         file_type="json",
         value_type="auto",
         # Abstract institutional vocabulary -- law, politics, economics,
@@ -186,14 +197,14 @@ CORPUS_CONFIGS = [
         # ordinary educated English rather than a technical register.  The
         # broadest of the topic corpora, so it is weighted highest of them.
         corpus_weight=0.8,
-        max_unknown_rank=11000,
+        max_unknown_rank=22000,
         enabled=True,
     ),
     CorpusConfig(
         name="wiki_linguistics",
         description="Word frequency data from Wikipedia Level 5 language articles",
         file_path="wiki_linguistics.json",
-        max_words=4500,
+        max_words=9000,
         file_type="json",
         value_type="auto",
         # The metalanguage of grammar, phonetics and writing -- morpheme,
@@ -204,14 +215,14 @@ CORPUS_CONFIGS = [
         # words ("language", "word", "vowel") are already well attested
         # elsewhere.
         corpus_weight=0.5,
-        max_unknown_rank=9000,
+        max_unknown_rank=18000,
         enabled=True,
     ),
     CorpusConfig(
         name="wiki_physical_science",
         description="Word frequency data from Wikipedia Level 4 physical science and molecular biology articles",
         file_path="wiki_physical_science.json",
-        max_words=4000,
+        max_words=8000,
         file_type="json",
         value_type="auto",
         # Narrow in the way wiki_math and wiki_biology are: much of the subject
@@ -219,14 +230,14 @@ CORPUS_CONFIGS = [
         # weight on the process vocabulary -- oxidize, dissolve, orbit,
         # pressure, decay -- rather than on how English is weighted.
         corpus_weight=0.5,
-        max_unknown_rank=8000,
+        max_unknown_rank=16000,
         enabled=True,
     ),
     CorpusConfig(
         name="wiki_history",
         description="Word frequency data from Wikipedia Level 4 history and biography articles",
         file_path="wiki_history.json",
-        max_words=4500,
+        max_words=9000,
         file_type="json",
         value_type="auto",
         # The largest corpus here by article count, but overwhelmingly proper
@@ -235,51 +246,51 @@ CORPUS_CONFIGS = [
         # revolt -- is real but narrow, so it is weighted with the other topic
         # corpora rather than with the general ones.
         corpus_weight=0.6,
-        max_unknown_rank=9000,
+        max_unknown_rank=18000,
         enabled=True,
     ),
     CorpusConfig(
         name="early_modern_science",
         description="Word frequency data from early modern science writing, Boyle to Osler",
         file_path="early_modern_science.json",
-        max_words=5200,
+        max_words=10400,
         file_type="json",
         value_type="auto",
         # Technical prose of its period: good coverage of words the novels
         # never use, but not how everyday English is weighted.
         corpus_weight=0.6,
-        max_unknown_rank=10400,
+        max_unknown_rank=20800,
         enabled=True,
     ),
     CorpusConfig(
         name="religious_translated",
         description="Word frequency data from old religious works in English translation",
         file_path="religious_translated.json",
-        max_words=5200,
+        max_words=10400,
         file_type="json",
         value_type="auto",
         # Archaic, heavily translated register: useful for coverage of words the
         # novels miss, but not a guide to how modern English is weighted.
         corpus_weight=0.5,
-        max_unknown_rank=10400,
+        max_unknown_rank=20800,
         enabled=True,
     ),
     CorpusConfig(
         name="cooking",
         description="Word frequency data from Cookbooks",
         file_path="cooking.json",
-        max_words=2600,
+        max_words=5200,
         file_type="json",
         value_type="frequency",
         corpus_weight=0.7,
-        max_unknown_rank=5200,
+        max_unknown_rank=10400,
         enabled=True,
     ),
     CorpusConfig(
         name="legal_scotus",
         description="Word frequency data from Supreme Court opinions, 1997-2006",
         file_path="legal_scotus.json",
-        max_words=10000,
+        max_words=15000,
         file_type="json",
         value_type="auto",
         # The only corpus here written after 1938, and the reason it exists:
@@ -288,14 +299,14 @@ CORPUS_CONFIGS = [
         # opinion's register is formal and its subject matter is whatever
         # happened to be litigated, not how everyday English is distributed.
         corpus_weight=0.7,
-        max_unknown_rank=20000,
+        max_unknown_rank=30000,
         enabled=True,
     ),
     CorpusConfig(
         name="eu_parliament_debates",
         description="Word frequency data from European Parliament debates, 1996-2011",
         file_path="eu_parliament_debates.json",
-        max_words=5500,
+        max_words=11000,
         file_type="json",
         value_type="auto",
         # The vocabulary of debating politics -- bilateral, quotas, coalition,
@@ -304,14 +315,14 @@ CORPUS_CONFIGS = [
         # narrow, and its commonest institutional words ("Commission",
         # "Member States") say little about how English is distributed.
         corpus_weight=0.5,
-        max_unknown_rank=11000,
+        max_unknown_rank=22000,
         enabled=True,
     ),
     CorpusConfig(
         name="openstax_science",
         description="Word frequency data from OpenStax science and computing textbooks",
         file_path="openstax_science.json",
-        max_words=5500,
+        max_words=11000,
         file_type="json",
         value_type="auto",
         # Modern introductory textbook prose -- biology, chemistry, physics,
@@ -319,14 +330,14 @@ CORPUS_CONFIGS = [
         # with the topic corpora: wiki_physical_science and wiki_biology cover
         # much of the same subject matter, and at ~2.6M tokens it is small.
         corpus_weight=0.5,
-        max_unknown_rank=11000,
+        max_unknown_rank=22000,
         enabled=True,
     ),
     CorpusConfig(
         name="openstax_society",
         description="Word frequency data from OpenStax social science and history textbooks",
         file_path="openstax_society.json",
-        max_words=5500,
+        max_words=11000,
         file_type="json",
         value_type="auto",
         # Psychology, sociology, economics, government, history and philosophy
@@ -334,14 +345,14 @@ CORPUS_CONFIGS = [
         # corpora for now: ~2.7M tokens, and whether it should be merged with
         # openstax_science is still open.
         corpus_weight=0.5,
-        max_unknown_rank=11000,
+        max_unknown_rank=22000,
         enabled=True,
     ),
     CorpusConfig(
         name="wpa_life_histories",
         description="Word frequency data from WPA Federal Writers' Project life-history interviews, 1936-1940",
         file_path="wpa_life_histories.json",
-        max_words=10000,
+        max_words=15000,
         file_type="json",
         value_type="auto",
         # The only conversational corpus here: ordinary Americans talking
@@ -350,7 +361,7 @@ CORPUS_CONFIGS = [
         # typescript, and a tail of misreadings survives the correction pass
         # ("hose" is mostly "those").
         corpus_weight=0.5,
-        max_unknown_rank=20000,
+        max_unknown_rank=30000,
         enabled=True,
     ),
 ]
