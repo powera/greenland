@@ -462,10 +462,13 @@ EXCLUDED_TERMS["zh-tw"] = EXCLUDED_TERMS["zh"]
 
 PROMOTED_TERMS: Dict[str, Dict[str, int]] = {
     "zh": {
-        label: FAMILY_TIER_LEVELS[1]
-        for label in AGE_DISTINGUISHED_SIBLINGS
-        + GRANDPARENTS_DISTINGUISHED
-        + AUNTS_UNCLES_DISTINGUISHED
+        **{
+            label: FAMILY_TIER_LEVELS[1]
+            for label in AGE_DISTINGUISHED_SIBLINGS + GRANDPARENTS_DISTINGUISHED
+        },
+        # Aunts and uncles wait for tier 2 with the other languages' generic
+        # aunt/uncle, rather than crowding level 5.
+        **{label: FAMILY_TIER_LEVELS[2] for label in AUNTS_UNCLES_DISTINGUISHED},
     },
 }
 PROMOTED_TERMS["zh-tw"] = PROMOTED_TERMS["zh"]
