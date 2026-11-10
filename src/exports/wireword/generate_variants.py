@@ -17,6 +17,12 @@ The registry is built from ``langtools.dialect_overrides``: the base language's
 entry in ``BASE_VARIANTS`` plus every storage dialect of it that carries picker
 metadata.  Presentation dialects (es-mx) are deliberately excluded -- they store
 no wirewords of their own, so there is no directory for a client to load.
+
+Each variant's ``source_languages`` (the learner languages it has a bundle for)
+is ``en`` plus its entry in :data:`RELEASED_SOURCE_LANGUAGES`.  That list is
+hardcoded rather than discovered from exports on disk: other source languages
+(bn, kn, pl, ro, uk) are exported but experimental, and listing a source here
+is the decision that turns it on in the apps.
 """
 
 import json
@@ -24,7 +30,7 @@ import logging
 import os
 import sys
 from pathlib import Path
-from typing import Any, Dict, List, Optional, Tuple
+from typing import Any, Dict, List, Mapping, Optional, Tuple
 
 # Add the src directory to the path for imports
 GREENLAND_SRC_PATH = str(Path(__file__).parent.parent.parent)
@@ -45,6 +51,19 @@ VARIANTS_FILENAME = "variants.json"
 # Schema version of the emitted registry.  Bump only alongside a client that
 # understands the new shape.
 VARIANTS_SCHEMA_VERSION = 1
+
+# The released non-English source languages for each variant; ``en`` is always
+# offered and is not listed.  A variant absent from this map offers ``en`` only.
+# Add a source only once its lang_{variant}_from_{source} export is current.
+RELEASED_SOURCE_LANGUAGES: Mapping[str, Tuple[str, ...]] = {
+    "es": ("fr", "zh"),
+    "es-419": ("fr", "zh"),
+}
+
+
+def released_source_languages(variant_code: str) -> List[str]:
+    """Return the source languages *variant_code* is offered in, ``en`` first."""
+    return ["en", *RELEASED_SOURCE_LANGUAGES.get(variant_code, ())]
 
 
 def get_variant_directory(lang_code: str) -> str:
@@ -94,7 +113,7 @@ def _base_variant_entry(base_lang: str) -> Optional[Dict[str, Any]]:
     if base.flag:
         entry["flag"] = base.flag
     entry["default_regions"] = list(base.regions)
-    entry["source_languages"] = ["en"]
+    entry["source_languages"] = released_source_languages(base_lang)
     return entry
 
 
@@ -123,13 +142,11 @@ def _dialect_variant_entry(dialect_code: str) -> Optional[Dict[str, Any]]:
     if override.variant_flag:
         entry["flag"] = override.variant_flag
     entry["default_regions"] = list(override.variant_regions)
-    entry["source_languages"] = ["en"]
+    entry["source_languages"] = released_source_languages(dialect_code)
     return entry
 
 
-def build_variants_registry(
-    language: str, wordlists_root: Optional[Path] = None
-) -> Optional[Dict[str, Any]]:
+def build_variants_registry(language: str) -> Optional[Dict[str, Any]]:
     """Build the ``variants.json`` payload for a base *language*.
 
     Returns ``None`` when the language has no regional varieties to offer, or
@@ -156,10 +173,6 @@ def build_variants_registry(
     if len(variants) < 2:
         return None
 
-    if wordlists_root is not None:
-        for variant in variants:
-            variant["source_languages"] = discover_source_languages(wordlists_root, variant["id"])
-
     from storage.translation_helpers import LANGUAGE_NAMES
 
     return {
@@ -169,30 +182,6 @@ def build_variants_registry(
         "default_variant": normalized,
         "variants": variants,
     }
-
-
-def discover_source_languages(wordlists_root: Path, language: str) -> List[str]:
-    """Read availability from completed exports, independently for each variety."""
-    sources: set[str] = set()
-    directories = [wordlists_root / f"lang_{language}"]
-    directories.extend(sorted(wordlists_root.glob(f"lang_{language}_from_*")))
-    for directory in directories:
-        manifest_path = directory / "generated" / "wireword" / "wireword_manifest_v2.json"
-        if not manifest_path.is_file():
-            continue
-        try:
-            manifest = json.loads(manifest_path.read_text(encoding="utf-8"))
-            expected_source = (
-                directory.name.split("_from_", 1)[1] if "_from_" in directory.name else "en"
-            )
-            if (
-                manifest.get("language_code") == language
-                and manifest.get("source_language_code", "en") == expected_source
-            ):
-                sources.add(expected_source)
-        except (OSError, ValueError, AttributeError):
-            logger.warning("Ignoring unreadable variant manifest %s", manifest_path)
-    return sorted(sources, key=lambda source: (source != "en", source))
 
 
 def generate_variants(wireword_dir: str, language: str) -> Tuple[bool, Optional[str]]:
@@ -207,14 +196,7 @@ def generate_variants(wireword_dir: str, language: str) -> Tuple[bool, Optional[
         language has no regional varieties -- which is a success, not a
         failure: shipping no file is how a single-variant language is spelled.
     """
-    output_path = Path(wireword_dir)
-    wordlists_root = (
-        output_path.parents[2]
-        if output_path.parent.name == "generated"
-        and output_path.parent.parent.name.startswith("lang_")
-        else None
-    )
-    registry = build_variants_registry(language, wordlists_root)
+    registry = build_variants_registry(language)
     if registry is None:
         logger.debug("No regional variants for %s; not emitting %s", language, VARIANTS_FILENAME)
         return True, None

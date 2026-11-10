@@ -121,19 +121,29 @@ def test_registry_entries_carry_every_required_field(tmp_path: Path) -> None:
             assert all(variant[key] for key in required - {"default_regions"})
 
 
-def test_registry_discovers_sources_per_variant(tmp_path: Path) -> None:
-    for language, sources in {"es": ["en", "fr", "zh"], "es-419": ["en", "fr"]}.items():
-        for source in sources:
-            suffix = "" if source == "en" else f"_from_{source}"
-            directory = tmp_path / f"lang_{language}{suffix}" / "generated" / "wireword"
-            directory.mkdir(parents=True)
-            (directory / "wireword_manifest_v2.json").write_text(
-                json.dumps({"language_code": language, "source_language_code": source})
-            )
-    (tmp_path / "lang_es-419_from_zh" / "generated" / "wireword").mkdir(parents=True)
+def test_spanish_variants_offer_only_the_released_sources() -> None:
+    registry = build_variants_registry("es")
+    assert registry is not None
+    sources = {variant["id"]: variant["source_languages"] for variant in registry["variants"]}
+    assert sources == {"es": ["en", "fr", "zh"], "es-419": ["en", "fr", "zh"]}
+
+
+def test_variant_without_released_sources_offers_english_only() -> None:
+    registry = build_variants_registry("zh")
+    assert registry is not None
+    assert all(variant["source_languages"] == ["en"] for variant in registry["variants"])
+
+
+def test_experimental_exports_on_disk_are_not_offered(tmp_path: Path) -> None:
+    """Sources are a hardcoded release list, not whatever happens to be exported."""
+    experimental = tmp_path / "lang_es_from_bn" / "generated" / "wireword"
+    experimental.mkdir(parents=True)
+    (experimental / "wireword_manifest_v2.json").write_text(
+        json.dumps({"language_code": "es", "source_language_code": "bn"})
+    )
     base_dir = tmp_path / "lang_es" / "generated" / "wireword"
+    base_dir.mkdir(parents=True)
     success, path = generate_variants(str(base_dir), "es")
     assert success and path
-    registry = _load(path)
-    assert registry["variants"][0]["source_languages"] == ["en", "fr", "zh"]
-    assert registry["variants"][1]["source_languages"] == ["en", "fr"]
+    for variant in _load(path)["variants"]:
+        assert "bn" not in variant["source_languages"]
