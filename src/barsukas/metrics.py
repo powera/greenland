@@ -14,7 +14,7 @@ import time
 from contextlib import contextmanager
 from functools import wraps
 from pathlib import Path
-from typing import Any, Callable, Dict, Generator, Optional, TypeVar
+from typing import Any, Callable, Dict, Generator, Iterable, Optional, Tuple, TypeVar
 
 try:
     from prometheus_client import Counter, Gauge, Histogram, generate_latest
@@ -45,6 +45,9 @@ class _NoOpMetric:
         pass
 
     def observe(self, amount: float) -> None:
+        pass
+
+    def clear(self) -> None:
         pass
 
 
@@ -169,6 +172,42 @@ if HAS_PROMETHEUS:
         "Number of open file descriptors",
         registry=REGISTRY,
     )
+
+    # Batch poller metrics.  The remote gauges hold what OpenAI reported on the
+    # poller's last pass, so scraping them never makes an API call.
+    BATCH_POLLER_POLLS = Counter(
+        "barsukas_batch_poller_polls_total",
+        "Batch poller iterations, by outcome",
+        ["outcome"],
+        registry=REGISTRY,
+    )
+
+    BATCH_POLLER_LAST_POLL = Gauge(
+        "barsukas_batch_poller_last_poll_timestamp_seconds",
+        "Unix time the batch poller last finished an iteration without error",
+        registry=REGISTRY,
+    )
+
+    BATCH_REMOTE_STATUS = Gauge(
+        "barsukas_batch_remote_status",
+        "1 for each in-flight batch, labelled with the status OpenAI last reported",
+        ["batch_id", "agent", "status"],
+        registry=REGISTRY,
+    )
+
+    BATCH_REMOTE_REQUESTS = Gauge(
+        "barsukas_batch_remote_requests",
+        "Request counts OpenAI last reported for each in-flight batch",
+        ["batch_id", "agent", "state"],
+        registry=REGISTRY,
+    )
+
+    BATCH_QUEUE_REQUESTS = Gauge(
+        "barsukas_batch_queue_requests",
+        "Rows in the local batch-tracking database, by agent, operation and status",
+        ["agent", "operation", "status"],
+        registry=REGISTRY,
+    )
 else:
     REGISTRY = None  # type: ignore[assignment]
     REQUEST_COUNT = _NOOP  # type: ignore[assignment]
@@ -187,6 +226,44 @@ else:
     MEMORY_USAGE_PERCENT = _NOOP  # type: ignore[assignment]
     PROCESS_START_TIME = _NOOP  # type: ignore[assignment]
     OPEN_FILE_DESCRIPTORS = _NOOP  # type: ignore[assignment]
+    BATCH_POLLER_POLLS = _NOOP  # type: ignore[assignment]
+    BATCH_POLLER_LAST_POLL = _NOOP  # type: ignore[assignment]
+    BATCH_REMOTE_STATUS = _NOOP  # type: ignore[assignment]
+    BATCH_REMOTE_REQUESTS = _NOOP  # type: ignore[assignment]
+    BATCH_QUEUE_REQUESTS = _NOOP  # type: ignore[assignment]
+
+
+def record_batch_poll(ok: bool) -> None:
+    """Count one poller iteration; a clean one also stamps the last-poll time."""
+    BATCH_POLLER_POLLS.labels(outcome="ok" if ok else "error").inc()
+    if ok:
+        BATCH_POLLER_LAST_POLL.set(time.time())
+
+
+def set_remote_batch_metrics(batches: Iterable[Tuple[str, str, Dict[str, Any]]]) -> None:
+    """Replace the remote gauges with this pass's ``(batch_id, agent, info)``.
+
+    ``info`` is the dict OpenAI returned for the batch.  Batches no longer in
+    flight drop out, since the gauges are cleared first.
+    """
+    BATCH_REMOTE_STATUS.clear()
+    BATCH_REMOTE_REQUESTS.clear()
+    for batch_id, agent, info in batches:
+        BATCH_REMOTE_STATUS.labels(
+            batch_id=batch_id, agent=agent, status=str(info.get("status"))
+        ).set(1)
+        counts = info.get("request_counts") or {}
+        for state in ("total", "completed", "failed"):
+            BATCH_REMOTE_REQUESTS.labels(batch_id=batch_id, agent=agent, state=state).set(
+                counts.get(state, 0)
+            )
+
+
+def set_batch_queue_metrics(rows: Iterable[Tuple[str, str, str, int]]) -> None:
+    """Replace the local gauge with ``(agent, operation, status, count)`` rows."""
+    BATCH_QUEUE_REQUESTS.clear()
+    for agent, operation, status, count in rows:
+        BATCH_QUEUE_REQUESTS.labels(agent=agent, operation=operation, status=status).set(count)
 
 
 def update_resource_metrics() -> None:
