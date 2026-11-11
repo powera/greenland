@@ -25,6 +25,7 @@ from clients.lib import LLMCallsDisabledError
 from clients.types import LLMCall, Response, Schema, SchemaProperty
 from workqueue.llm_batch import (
     Done,
+    FanOut,
     Job,
     Next,
     Ready,
@@ -464,3 +465,108 @@ def test_batch_request_body_matches_the_live_builder(
     start_batch_run(MagicMock(), manager, fake.job, [{"lemma_id": 5}], _MODEL)
     sent = batch_client.batches["batch-0"][0]["body"]
     assert sent == build_responses_request(_MODEL, "one:5", json_schema=_SCHEMA)
+
+
+# --- Fan-out ----------------------------------------------------------------
+
+
+class FanOutJob:
+    """Stage one fans item ``n`` out into ``n`` parts; stage two runs per item.
+
+    Stage one's apply records the joined answers, so a test can see that it ran
+    once per item, on every part.
+    """
+
+    def __init__(self) -> None:
+        self.joined: Dict[int, Dict[str, Any]] = {}
+        self.stage_two: Dict[int, str] = {}
+        self.job = Job(
+            name="fan",
+            stages=(
+                Stage("fan.parts", self.prepare_parts, self.apply_parts),
+                Stage("fan.after", self.prepare_after, self.apply_after),
+            ),
+            item_key=lambda state: str(state["lemma_id"]),
+        )
+
+    def prepare_parts(self, session: Any, state: Dict[str, Any], ctx: StageContext) -> Any:
+        n = state["lemma_id"]
+        return FanOut({f"p{i}": LLMCall(prompt=f"part:{n}:{i}", schema=_SCHEMA) for i in range(n)})
+
+    def apply_parts(
+        self, session: Any, state: Dict[str, Any], data: Dict[str, Any], ctx: StageContext
+    ) -> Any:
+        assert state["lemma_id"] not in self.joined, "applied twice"
+        self.joined[state["lemma_id"]] = data
+        return Next(state)
+
+    def prepare_after(self, session: Any, state: Dict[str, Any], ctx: StageContext) -> Any:
+        return LLMCall(prompt=f"after:{state['lemma_id']}", schema=_SCHEMA)
+
+    def apply_after(
+        self, session: Any, state: Dict[str, Any], data: Dict[str, Any], ctx: StageContext
+    ) -> Any:
+        self.stage_two[state["lemma_id"]] = data["value"]
+        return Done("written")
+
+
+def _echo(prompt: str) -> str:
+    return prompt
+
+
+def test_inline_fan_out_applies_once_with_every_part() -> None:
+    fan = FanOutJob()
+    results = run_inline(MagicMock(), fan.job, [{"lemma_id": 2}, {"lemma_id": 0}], FakeChatClient(_echo), _MODEL)  # type: ignore[arg-type]
+    assert results == [Done("written"), Done("written")]
+    assert fan.joined[2] == {"p0": {"value": "part:2:0"}, "p1": {"value": "part:2:1"}}
+    # An empty fan-out goes straight to apply.
+    assert fan.joined[0] == {}
+
+
+def test_fan_out_joins_parts_split_across_batches(
+    manager: BatchQueueManager, batch_client: FakeBatchClient
+) -> None:
+    fan = FanOutJob()
+    report = start_batch_run(
+        MagicMock(), manager, fan.job, [{"lemma_id": 3}], _MODEL, items_per_batch=2
+    )
+    assert report.calls == 3
+    assert report.batch_ids == ["batch-0", "batch-1"]
+
+    first = _complete(fan, manager, batch_client, "batch-0", _echo)  # type: ignore[arg-type]
+    assert fan.joined == {}  # the third part is still out
+    assert first["next_stage_calls"] == 0
+
+    second = _complete(fan, manager, batch_client, "batch-1", _echo)  # type: ignore[arg-type]
+    assert fan.joined[3] == {f"p{i}": {"value": f"part:3:{i}"} for i in range(3)}
+    assert second["carried"] == 1
+    assert second["next_stage_calls"] == 1
+
+    _complete(fan, manager, batch_client, "batch-2", _echo)  # type: ignore[arg-type]
+    assert fan.stage_two == {3: "after:3"}
+
+
+def test_fan_out_part_in_a_failed_batch_joins_as_none(
+    manager: BatchQueueManager, batch_client: FakeBatchClient
+) -> None:
+    fan = FanOutJob()
+    start_batch_run(MagicMock(), manager, fan.job, [{"lemma_id": 2}], _MODEL, items_per_batch=1)
+    _complete(fan, manager, batch_client, "batch-0", _echo)  # type: ignore[arg-type]
+    assert fan.joined == {}
+
+    fail_batch(fan.job, "batch-1", manager, MagicMock())
+    assert fan.joined[2] == {"p0": {"value": "part:2:0"}, "p1": None}
+    # The item carried on, so stage two went out.
+    assert batch_client.prompts("batch-2") == ["after:2"]
+
+
+def test_completing_a_fan_out_twice_applies_once(
+    manager: BatchQueueManager, batch_client: FakeBatchClient
+) -> None:
+    fan = FanOutJob()
+    start_batch_run(MagicMock(), manager, fan.job, [{"lemma_id": 2}], _MODEL)
+    _complete(fan, manager, batch_client, "batch-0", _echo)  # type: ignore[arg-type]
+    rows = manager.get_completed_requests(batch_id="batch-0")
+    again = complete_rows(fan.job, rows, MagicMock(), "batch-0", manager)
+    assert again["processed"] == 0
+    assert len(fan.joined) == 1

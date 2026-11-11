@@ -117,9 +117,22 @@ def get_argument_parser() -> argparse.ArgumentParser:
         "--stage-words",
         nargs="+",
         metavar="WORD",
-        help="Stage mode: Stage these specific words to pending_imports, instead of "
-        "sourcing candidates from the frequency check. Use @FILE to read words from a "
-        "file (one per line, blank lines and #-comments ignored)",
+        help="Add these specific words through add_word, as OpenAI batches (a senses "
+        "batch, then one subtype request per sense); the Barsukas batch poller writes the "
+        "lemmas. Use @FILE to read words from a file (one per line, blank lines and "
+        "#-comments ignored)",
+    )
+    parser.add_argument(
+        "--level",
+        type=int,
+        default=-1,
+        help="[--stage-words] Level for every lemma created (default: -1, unset)",
+    )
+    parser.add_argument(
+        "--items-per-batch",
+        type=int,
+        default=500,
+        help="[--stage-words] Requests per OpenAI batch (default: 500)",
     )
     parser.add_argument(
         "--target-language",
@@ -305,55 +318,35 @@ def main() -> int:
             print(f"\nError: {results.get('error', 'Unknown error')}")
         return _exit_status(results)
 
-    # Handle --stage-words mode (explicit word list rather than the frequency check)
+    # Handle --stage-words mode: an explicit word list, added as OpenAI batches
     if args.stage_words:
+        from agents.common.batch_run import is_openai_model
+
         try:
             words = _resolve_word_arguments(args.stage_words)
         except OSError as exc:
             print(f"\nError reading word list: {exc}")
             return 1
         if not words:
-            print("\nNo words to stage.")
+            print("\nNo words to add.")
             return 0
+        if not is_openai_model(args.model):
+            parser.error(
+                f"--stage-words uses the OpenAI Batch API; --model {args.model} is not an "
+                "OpenAI model"
+            )
+        if args.items_per_batch < 1:
+            parser.error("--items-per-batch must be at least 1")
 
-        if not confirm_operation(
-            message=f"Model: {args.model}\nTarget language: {args.target_language}\n"
-            f"Words: {', '.join(words)}\n\nWords will be added to pending_imports for review",
-            estimated_calls=len(words) if not args.yes and not args.dry_run else None,
-            skip_confirmation=args.yes,
-            dry_run=args.dry_run,
-        ):
-            print("Aborted.")
-            return 0
-
-        results = agent.stage_explicit_words(
-            words=words,
-            limit=args.limit,
-            model=args.model,
-            throttle=args.throttle,
-            dry_run=args.dry_run,
-            target_language=args.target_language,
+        skipped_existing = agent.submit_words_batch(
+            words, args, difficulty_level=args.level, limit=args.limit
         )
-
-        if "error" in results:
-            print(f"\nError: {results['error']}")
-        else:
-            skipped_existing = results.get("skipped_existing", [])
-            if skipped_existing:
-                print(
-                    f"\nSkipped {len(skipped_existing)} already known or excluded: "
-                    f"{', '.join(skipped_existing)}"
-                )
-            if args.dry_run:
-                print(f"\nDRY RUN: Would stage {results['would_stage']} of {len(words)} words")
-            else:
-                print(f"\nStaging complete:")
-                print(f"  Processed: {results['processed']}")
-                print(f"  Staged: {results['staged']}")
-                print(f"  Skipped (already pending): {results['skipped_already_pending']}")
-                print(f"  Failed: {results['failed']}")
-                print(f"\nUse --list-pending to review staged words")
-        return _exit_status(results)
+        if skipped_existing:
+            print(
+                f"\nSkipped {len(skipped_existing)} already known or excluded: "
+                f"{', '.join(skipped_existing)}"
+            )
+        return 0
 
     # Handle --stage mode
     if args.stage:
