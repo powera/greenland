@@ -152,6 +152,8 @@ NON_LEXICAL_TOKENS = {
     "ibn": "name_particle",
     "und": "name_particle",
     "au": "name_particle",
+    "los": "name_particle",
+    "della": "name_particle",
     # Abbreviations: Latin ("et al.", "etc.") and citation shorthand.
     "et": "abbreviation",
     "etc": "abbreviation",
@@ -162,6 +164,17 @@ NON_LEXICAL_TOKENS = {
     "km": "abbreviation",
     "cm": "abbreviation",
     "mm": "abbreviation",
+    "viz": "abbreviation",
+    "vols": "abbreviation",
+    "col": "abbreviation",
+    "fol": "abbreviation",
+    "nom": "abbreviation",
+    "spp": "abbreviation",
+    # File extensions, domain suffixes and HTML entity names left in wiki text.
+    "jpg": "markup",
+    "com": "markup",
+    "ndash": "markup",
+    "mdash": "markup",
     # Pieces the tokenizer splits off a longer written form: ordinal suffixes
     # ("19th"), elided contractions ("'em", "'tis"), "en" from "en route", and
     # "fro", which only occurs in "to and fro".
@@ -170,6 +183,15 @@ NON_LEXICAL_TOKENS = {
     "tis": "fragment",
     "en": "fragment",
     "fro": "fragment",
+    # Halves of fixed foreign phrases: "ad hoc", "status quo", "vice versa",
+    # "lingua franca", "E. coli", and "ing" from "-ing" in grammar text.
+    "hoc": "fragment",
+    "quo": "fragment",
+    "versa": "fragment",
+    "lingua": "fragment",
+    "franca": "fragment",
+    "coli": "fragment",
+    "ing": "fragment",
     # Hesitation sounds and exclamations with no meaning a lemma could carry.
     # Interjections that do have one (wow, ouch, hello) are lemmas.
     "oh": "interjection",
@@ -196,6 +218,12 @@ NON_LEXICAL_TOKENS = {
     # "multi": "hyphen_prefix",
     # "co": "hyphen_prefix",
     # "un": "hyphen_prefix",
+    # "inter": "hyphen_prefix",
+    # "proto": "hyphen_prefix",
+    # "neo": "hyphen_prefix",
+    # "pseudo": "hyphen_prefix",
+    # "quasi": "hyphen_prefix",
+    # "ultra": "hyphen_prefix",
 }
 
 # Create a flat list of all stopwords for easier use
