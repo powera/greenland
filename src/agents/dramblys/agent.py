@@ -556,53 +556,48 @@ Only include words where you're confident they have a {pos_subtype} {pos_type} m
         finally:
             session.close()
 
-    def stage_explicit_words(
+    def submit_words_batch(
         self,
         words: List[str],
+        args: Any,
+        difficulty_level: int,
         limit: Optional[int] = None,
-        model: str = constants.DEFAULT_MODEL,
-        throttle: float = 1.0,
-        dry_run: bool = False,
-        target_language: str = "lt",
-    ) -> Dict[str, Any]:
-        """
-        Stage a caller-supplied list of words to the pending_imports table.
+    ) -> List[str]:
+        """Add a caller-supplied list of words through add_word, as OpenAI batches.
 
-        Same staging path as stage_missing_words_for_import, differing only in
-        where the candidate words come from: an explicit list rather than the
-        frequency check. Useful for working a hand-curated batch, where the
-        words were chosen elsewhere and the frequency corpora have nothing to
-        say about them.
-
-        The LLM sees only the word -- query_definitions takes a word and an
-        optional example sentence -- so the frequency fields the staging path
-        prints are supplied empty here. They exist for display, not for the
-        prompt.
+        Each word is an item of ``workqueue.handlers.words.add_word.ADD_WORD_JOB``:
+        a batched senses call, then one batched subtype call per selected sense,
+        then add_word's own write -- lemmas at ``difficulty_level``, doubtful
+        senses to pending_imports.  The Barsukas batch poller (or ``python -m
+        agents.common.batch complete``) applies each stage as its batch lands.
 
         Words the database already accounts for in any English form -- a lemma,
         a derivative form, an alternate spelling -- and words on the exclusions
-        list are dropped before any LLM call. Staging re-checks pending_imports
-        itself, so a repeat run costs nothing.
+        list are dropped before anything is queued, and the job checks again
+        before writing.
 
         Args:
-            words: English words to stage
-            limit: Maximum number of words to stage
-            model: LLM model to use for definitions
-            throttle: Seconds to wait between API calls
-            dry_run: If True, show what would be staged without making changes
-            target_language: Language code for disambiguation translations
+            words: English words to add.
+            args: Parsed CLI args (``model``, ``items_per_batch``, ``dry_run``,
+                ``yes``), as ``run_batch_populate`` reads them.
+            difficulty_level: Level for every lemma created.
+            limit: Maximum number of words to submit.
 
         Returns:
-            Dictionary with staging results, plus "skipped_existing" naming the
-            words dropped as already-known or excluded.
+            The words dropped as already known or excluded.
         """
+        # Imported here, as everything under workqueue is: its registry
+        # imports job modules that import agents.
+        from agents.common.batch_run import run_batch_populate
+        from workqueue.handlers.words.add_word import ADD_WORD_JOB, add_word_state
+
         session = self.get_session()
         try:
             # Exclusions count as existing: this gates imports, so a word
             # rejected once should not be proposed again.
             existing_words = filter_existing_english_words(session, words, include_exclusions=True)
 
-            candidates: List[Dict[str, Any]] = []
+            candidates: List[str] = []
             skipped_existing: List[str] = []
             seen: Set[str] = set()
             for word in words:
@@ -613,33 +608,25 @@ Only include words where you're confident they have a {pos_subtype} {pos_type} m
                 if word_lower in existing_words:
                     skipped_existing.append(word)
                     continue
-                candidates.append(
-                    {
-                        "word": word,
-                        "overall_rank": None,
-                        "corpus_frequencies": [],
-                    }
-                )
+                candidates.append(word)
+            if limit is not None:
+                candidates = candidates[:limit]
 
-            if skipped_existing:
-                logger.info(
-                    f"Skipping {len(skipped_existing)} word(s) already known or excluded: "
-                    f"{', '.join(skipped_existing)}"
-                )
-
-            results = pending_staging.stage_missing_words_for_import(
-                session=session,
-                missing_words=candidates,
-                db_path=self.db_path or constants.WORDFREQ_DB_PATH,
-                limit=limit,
-                model=model,
-                throttle=throttle,
-                dry_run=dry_run,
-                target_language=target_language,
-                debug=self.debug,
+            run_batch_populate(
+                ADD_WORD_JOB,
+                [
+                    add_word_state(word, source="dramblys", difficulty_level=difficulty_level)
+                    for word in candidates
+                ],
+                args,
+                session,
+                "DRAMBLYS - BATCH ADD WORDS",
+                [
+                    f"Words: {len(candidates)} ({len(skipped_existing)} already known or excluded)",
+                    f"Level: {difficulty_level}",
+                ],
             )
-            results["skipped_existing"] = skipped_existing
-            return results
+            return skipped_existing
         finally:
             session.close()
 

@@ -190,8 +190,11 @@ dramblys.py --fix --limit 20 --yes    # Process 20 missing words
 
 # Stage instead of creating (no LLM until approval)
 dramblys.py --stage --limit 50
-dramblys.py --stage-words @words.txt  # One word per line, #-comments ignored
 dramblys.py --add-subtype --pos-type noun --pos-subtype animals --stage-only
+
+# Add a word list through add_word as OpenAI batches (senses, then one subtype
+# request per sense); the Barsukas batch poller writes the lemmas
+dramblys.py --stage-words @words.txt --level 1399  # One word per line, #-comments ignored
 
 # Pending import queue (implementation lives in words/pending_imports/)
 dramblys.py --list-pending                    # Everything waiting for review

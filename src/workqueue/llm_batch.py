@@ -3,8 +3,9 @@
 A *job* is up to three *stages*.  Each stage is two plain functions:
 
 * ``prepare(session, state, ctx)`` reads the database and returns an
-  ``LLMCall`` to make, a ``Ready`` answer that needs no model (a copy from a
-  sibling language, say), or ``Done`` to stop (nothing to do, or invalid).
+  ``LLMCall`` to make, a ``FanOut`` of several calls to join (see below), a
+  ``Ready`` answer that needs no model (a copy from a sibling language, say),
+  or ``Done`` to stop (nothing to do, or invalid).
   It makes no LLM call, and normally writes nothing; a job whose prepare
   does write (a mechanical path that records what it inferred) says so with
   ``Job.prepare_writes``, and a dry run then counts its items unprepared.
@@ -25,6 +26,15 @@ The glue here runs a job two ways with the same semantics:
 Both runners treat a stage as a barrier: no item starts stage N+1 until every
 item of the run has finished stage N (applied, rejected or failed).  Stage N+1
 is prepared only then, so its prompts read what stage N wrote for *all* items.
+
+**Fan-out.**  A stage that needs a number of calls per item known only at run
+time returns ``FanOut({part_key: LLMCall})``.  Each part is a request (a row)
+of its own, carrying ``part`` and the item's full ``parts`` list in its
+metadata; the parts of one item may land in different batches.  Once every
+part has finished, the item's ``apply`` runs once on ``{part_key: answer or
+None}``, and its outcome is recorded on the first part's row (the others are
+marked ``joined``).  The join comes before the barrier, so the barrier still
+counts items, not requests.
 
 Batch progress lives on the ``BatchQueue`` rows in the batch-tracking database;
 there are no other tables.  A row's ``custom_id`` is
@@ -118,6 +128,21 @@ class Ready:
 
 
 @dataclass(frozen=True)
+class FanOut:
+    """Several calls for one item, joined before ``apply``.
+
+    For a stage whose call count is only known at run time -- one subtype call
+    per sense a word turned out to have.  Each part is sent as its own request.
+    ``apply`` runs once, after every part has finished, and receives a dict
+    mapping each part's key to its answer, or to None when that part failed
+    (no answer, or one that would not parse).  An empty ``calls`` goes straight
+    to ``apply`` with ``{}``.
+    """
+
+    calls: Dict[str, LLMCall]
+
+
+@dataclass(frozen=True)
 class StageContext:
     """What a stage may want to know about how it is being run."""
 
@@ -125,7 +150,7 @@ class StageContext:
     via: Literal["inline", "batch"]
 
 
-PrepareOutcome = Union[LLMCall, Ready, Done]
+PrepareOutcome = Union[LLMCall, FanOut, Ready, Done]
 ApplyOutcome = Union[Done, Next]
 PrepareFn = Callable[[Session, Dict[str, Any], StageContext], PrepareOutcome]
 ApplyFn = Callable[[Session, Dict[str, Any], Dict[str, Any], StageContext], ApplyOutcome]
@@ -226,8 +251,13 @@ def _run_stage_inline(
         prepared = stage.prepare(session, state, ctx)
         if isinstance(prepared, Done):
             return prepared
+        data: Dict[str, Any]
         if isinstance(prepared, Ready):
             data = prepared.data
+        elif isinstance(prepared, FanOut):
+            data = {
+                part: _call_part_inline(client, ctx, call) for part, call in prepared.calls.items()
+            }
         else:
             response = client.generate_chat(model=ctx.model, **prepared.chat_kwargs())
             data = response.structured_data
@@ -243,9 +273,45 @@ def _run_stage_inline(
         return Done("failed", str(exc))
 
 
+def _call_part_inline(
+    client: "UnifiedLLMClient", ctx: StageContext, call: LLMCall
+) -> Optional[Dict[str, Any]]:
+    """One fan-out part, live.  A failed part is None, as it is in a batch."""
+    try:
+        response = client.generate_chat(model=ctx.model, **call.chat_kwargs())
+    except LLMCallsDisabledError:
+        raise
+    except Exception as exc:
+        logger.error("Fan-out part failed: %s", exc)
+        return None
+    data = response.structured_data
+    return data if isinstance(data, dict) else None
+
+
 # ---------------------------------------------------------------------------
 # Batch: start
 # ---------------------------------------------------------------------------
+
+
+@dataclass(frozen=True)
+class _Request:
+    """One request to send: a whole item's call, or one part of a fan-out."""
+
+    key: str
+    state: Dict[str, Any]
+    call: LLMCall
+    part: Optional[str] = None
+    parts: Tuple[str, ...] = ()
+
+
+def _requests_for(key: str, state: Dict[str, Any], prepared: LLMCall | FanOut) -> List[_Request]:
+    """The requests a prepared call or fan-out sends."""
+    if isinstance(prepared, LLMCall):
+        return [_Request(key, state, prepared)]
+    parts = tuple(prepared.calls)
+    return [
+        _Request(key, state, call, part=part, parts=parts) for part, call in prepared.calls.items()
+    ]
 
 
 @dataclass
@@ -292,7 +358,7 @@ def start_batch_run(
     stage = job.stages[0]
     open_keys = open_item_keys(manager, job)
     seen: Set[str] = set()
-    calls: List[Tuple[str, Dict[str, Any], LLMCall]] = []
+    calls: List[_Request] = []
     carried: List[Tuple[str, Dict[str, Any]]] = []
 
     for state in states:
@@ -306,8 +372,10 @@ def start_batch_run(
             report.unprepared += 1
             continue
         prepared = stage.prepare(session, state, ctx)
-        if isinstance(prepared, LLMCall):
-            calls.append((key, state, prepared))
+        if isinstance(prepared, FanOut) and not prepared.calls:
+            prepared = Ready({})
+        if isinstance(prepared, (LLMCall, FanOut)):
+            calls.extend(_requests_for(key, state, prepared))
             continue
         if isinstance(prepared, Done):
             report.resolved_without_llm[prepared.status] += 1
@@ -436,11 +504,14 @@ def _submit_calls(
     job: Job,
     run_id: str,
     stage_index: int,
-    calls: Sequence[Tuple[str, Dict[str, Any], LLMCall]],
+    calls: Sequence[_Request],
     model: str,
     items_per_batch: int,
 ) -> List[str]:
-    """Queue *calls* as rows and submit them, ``items_per_batch`` to a batch."""
+    """Queue *calls* as rows and submit them, ``items_per_batch`` to a batch.
+
+    The limit counts requests, so a fan-out's parts may straddle batches.
+    """
     if items_per_batch < 1:
         raise ValueError("items_per_batch must be at least 1")
     stage = job.stages[stage_index]
@@ -448,32 +519,31 @@ def _submit_calls(
     for start in range(0, len(calls), items_per_batch):
         chunk = calls[start : start + items_per_batch]
         rows: List[BatchQueue] = []
-        for key, state, call in chunk:
-            custom_id = _custom_id(job, run_id, stage_index, key)
+        for request in chunk:
+            row_key = request.key if request.part is None else f"{request.key}#{request.part}"
+            custom_id = _custom_id(job, run_id, stage_index, row_key)
             body = build_responses_request(
                 model,
-                call.prompt,
-                context=call.context,
-                json_schema=call.schema,
-                max_tokens=call.max_tokens,
+                request.call.prompt,
+                context=request.call.context,
+                json_schema=request.call.schema,
+                max_tokens=request.call.max_tokens,
             )
+            extra: Dict[str, Any] = {
+                "run_id": run_id,
+                "item_key": request.key,
+                "state": request.state,
+                "model": model,
+                "items_per_batch": items_per_batch,
+            }
+            if request.part is not None:
+                extra["part"] = request.part
+                extra["parts"] = list(request.parts)
             rows.append(
                 manager.queue_request(
                     custom_id=custom_id,
                     request_body=body,
-                    metadata=_metadata(
-                        job,
-                        custom_id,
-                        stage,
-                        state,
-                        {
-                            "run_id": run_id,
-                            "item_key": key,
-                            "state": state,
-                            "model": model,
-                            "items_per_batch": items_per_batch,
-                        },
-                    ),
+                    metadata=_metadata(job, custom_id, stage, request.state, extra),
                     endpoint=BATCH_ENDPOINT,
                 )
             )
@@ -546,16 +616,28 @@ def complete_rows(
 
     _fail_unanswered_rows(manager, batch_id)
     run_ids: Set[str] = set()
+    outcomes: List[Tuple[ApplyOutcome, bool]] = []
     for row in rows:
         extra = request_extra(row)
         if extra.get("applied") or "run_id" not in extra:
             continue
         run_ids.add(str(extra["run_id"]))
+        if "part" in extra:
+            # Applied with its siblings once all of them have finished.
+            continue
         results["processed"] += 1
         outcome = _apply_row(job, row, extra, session, batch_id)
         _record_outcome(row, outcome, is_last_stage=_is_last_stage(job, row))
         manager.db.commit()
-        if isinstance(outcome, Next) and not _is_last_stage(job, row):
+        outcomes.append((outcome, _is_last_stage(job, row)))
+
+    for run_id in sorted(run_ids):
+        joined = _join_finished_parts(job, run_id, manager, session)
+        results["processed"] += len(joined)
+        outcomes.extend(joined)
+
+    for outcome, is_last_stage in outcomes:
+        if isinstance(outcome, Next) and not is_last_stage:
             results["carried"] += 1
         elif isinstance(outcome, Done) and outcome.status == "written":
             results["updated"] += 1
@@ -567,6 +649,70 @@ def complete_rows(
     for run_id in sorted(run_ids):
         results["next_stage_calls"] += advance_run(job, run_id, manager, session)
     return results
+
+
+def _join_finished_parts(
+    job: Job, run_id: str, manager: BatchQueueManager, session: Session
+) -> List[Tuple[ApplyOutcome, bool]]:
+    """Apply every fan-out item of *run_id* whose parts have all finished.
+
+    A part has finished once it is answered, failed or cancelled.  The item's
+    ``apply`` gets ``{part: answer or None}``; its outcome goes on the first
+    part's row and the rest are marked ``joined``, all in one commit, so a
+    second call finds nothing to do.
+
+    Returns:
+        ``(outcome, is_last_stage)`` for each item applied.
+    """
+    groups: Dict[Tuple[str, str], List[Tuple[BatchQueue, Dict[str, Any]]]] = {}
+    for row in manager.get_requests_by_custom_id_prefix(f"{job.name}:{run_id}:"):
+        extra = request_extra(row)
+        if "part" in extra and not extra.get("applied"):
+            group_key = (str(row.operation_type), str(extra["item_key"]))
+            groups.setdefault(group_key, []).append((row, extra))
+
+    joined: List[Tuple[ApplyOutcome, bool]] = []
+    for (operation_type, _item_key), members in sorted(groups.items()):
+        if any(row.status in _OPEN_STATUSES for row, _extra in members):
+            continue
+        expected = set(members[0][1].get("parts") or [])
+        present = {str(extra["part"]) for _row, extra in members}
+        if not expected <= present:
+            # A part row is missing (not yet queued); wait rather than guess.
+            continue
+        members.sort(key=lambda member: member[0].id)
+        primary, primary_extra = members[0]
+        data = {str(extra["part"]): _part_answer(row) for row, extra in members}
+        stage = job.stages[job.stage_index(operation_type)]
+        model = str(primary_extra.get("model") or "")
+        try:
+            outcome = stage.apply(
+                session, dict(primary_extra["state"]), data, StageContext(model, "batch")
+            )
+            session.commit()
+        except Exception as exc:
+            session.rollback()
+            logger.error("Failed to apply fan-out %s: %s", primary.custom_id, exc)
+            outcome = Done("failed", str(exc))
+        is_last = _is_last_stage(job, primary)
+        _record_outcome(primary, outcome, is_last_stage=is_last)
+        for row, _extra in members[1:]:
+            update_request_extra(row, applied=True, outcome="joined")
+        manager.db.commit()
+        joined.append((outcome, is_last))
+    return joined
+
+
+def _part_answer(row: BatchQueue) -> Optional[Dict[str, Any]]:
+    """A fan-out part's parsed answer, or None if it failed or will not parse."""
+    if row.status != BatchRequestStatus.COMPLETED.value or not row.response_body:
+        return None
+    try:
+        data = json.loads(batch_response_text(json.loads(row.response_body)))
+    except Exception as exc:
+        logger.error("Unparsable answer for %s: %s", row.custom_id, exc)
+        return None
+    return data if isinstance(data, dict) else None
 
 
 def is_staged_row(row: BatchQueue) -> bool:
@@ -654,6 +800,9 @@ def advance_run(job: Job, run_id: str, manager: BatchQueueManager, session: Sess
     # through a stage without a batch, so loop until a batch is out or the run
     # has nothing left.
     for _ in range(MAX_STAGES):
+        # A fan-out whose last part failed (a failed batch reaches here through
+        # fail_batch, not complete_rows) is joined before the barrier is read.
+        _join_finished_parts(job, run_id, manager, session)
         rows = manager.get_requests_by_custom_id_prefix(f"{job.name}:{run_id}:")
         extras = [(row, request_extra(row)) for row in rows]
         if any(_row_is_open(row, extra) for row, extra in extras):
@@ -697,7 +846,7 @@ def _start_next_stage(
         model = str(group[0][1].get("model") or "")
         items_per_batch = int(group[0][1].get("items_per_batch") or DEFAULT_ITEMS_PER_BATCH)
         ctx = StageContext(model=model, via="batch")
-        calls: List[Tuple[str, Dict[str, Any], LLMCall]] = []
+        calls: List[_Request] = []
         for row, extra in group:
             key = str(extra["item_key"])
             state = dict(extra["next_state"])
@@ -707,10 +856,12 @@ def _start_next_stage(
                 logger.error("Stage %s prepare failed for %s: %s", stage.name, state, exc)
                 update_request_extra(row, next_outcome="failed", next_detail=str(exc))
                 continue
+            if isinstance(prepared, FanOut) and not prepared.calls:
+                prepared = Ready({})
             if isinstance(prepared, Done):
                 update_request_extra(row, next_outcome=prepared.status, next_detail=prepared.detail)
-            if isinstance(prepared, LLMCall):
-                calls.append((key, state, prepared))
+            if isinstance(prepared, (LLMCall, FanOut)):
+                calls.extend(_requests_for(key, state, prepared))
             elif isinstance(prepared, Ready):
                 outcome = _apply_ready(session, stage, state, prepared, ctx)
                 if isinstance(outcome, Next) and stage_index < len(job.stages) - 1:

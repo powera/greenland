@@ -140,6 +140,64 @@ def query_definitions(
         logger.error("Invalid word parameter provided")
         return [], False
 
+    context, prompt, schema = build_definitions_prompt(
+        word, pos_type=pos_type, ask_subtype=ask_subtype, example_sentence=example_sentence
+    )
+
+    # Get model name from parameter or client attribute
+    model_name: str = cast(str, model or getattr(client, "model", constants.DEFAULT_MODEL))
+
+    try:
+        # Make a single API call without retries
+        response = client.generate_chat(
+            prompt=prompt, model=model_name, json_schema=schema, context=context
+        )
+
+        # Log successful query
+        session = get_session_func()
+        try:
+            linguistic_db.log_query(
+                session,
+                word=word,
+                query_type="definitions",
+                prompt=prompt,
+                response=json.dumps(response.structured_data),
+                model=model_name,
+            )
+        except Exception as log_err:
+            logger.error(f"Failed to log successful query: {log_err}")
+
+        # Validate and return response data
+        if (
+            response.structured_data
+            and isinstance(response.structured_data, dict)
+            and "definitions" in response.structured_data
+            and isinstance(response.structured_data["definitions"], list)
+        ):
+            return response.structured_data["definitions"], True
+        else:
+            logger.warning(f"Invalid response format for word '{word}'")
+            return [], False
+
+    except Exception as e:
+        # More specific error logging
+        logger.error(f"Error querying definitions for '{word}': {type(e).__name__}: {e}")
+        return [], False
+
+
+def build_definitions_prompt(
+    word: str,
+    *,
+    pos_type: Optional[str] = None,
+    ask_subtype: bool = True,
+    example_sentence: Optional[str] = None,
+) -> Tuple[str, str, Schema]:
+    """Build the context, prompt and schema for one word's senses call.
+
+    The call :func:`query_definitions` makes, described rather than made, so a
+    batch job (``workqueue.handlers.words.add_word``) sends exactly the same
+    request.  The arguments are :func:`query_definitions`'s.
+    """
     schema = Schema(
         name="WordDefinitions",
         description="Definitions and forms for a word",
@@ -278,46 +336,7 @@ def query_definitions(
         prompt += f"\n\nList only the senses in which '{word}' is used as a {pos_type}."
     if example_sentence:
         prompt += f'\n\nContext: this word appears in the sentence: "{example_sentence}"'
-
-    # Get model name from parameter or client attribute
-    model_name: str = cast(str, model or getattr(client, "model", constants.DEFAULT_MODEL))
-
-    try:
-        # Make a single API call without retries
-        response = client.generate_chat(
-            prompt=prompt, model=model_name, json_schema=schema, context=context
-        )
-
-        # Log successful query
-        session = get_session_func()
-        try:
-            linguistic_db.log_query(
-                session,
-                word=word,
-                query_type="definitions",
-                prompt=prompt,
-                response=json.dumps(response.structured_data),
-                model=model_name,
-            )
-        except Exception as log_err:
-            logger.error(f"Failed to log successful query: {log_err}")
-
-        # Validate and return response data
-        if (
-            response.structured_data
-            and isinstance(response.structured_data, dict)
-            and "definitions" in response.structured_data
-            and isinstance(response.structured_data["definitions"], list)
-        ):
-            return response.structured_data["definitions"], True
-        else:
-            logger.warning(f"Invalid response format for word '{word}'")
-            return [], False
-
-    except Exception as e:
-        # More specific error logging
-        logger.error(f"Error querying definitions for '{word}': {type(e).__name__}: {e}")
-        return [], False
+    return context, prompt, schema
 
 
 def build_subtype_prompt(

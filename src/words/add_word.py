@@ -31,11 +31,14 @@ splitting one lexeme across two rows.
 
 import functools
 import logging
-from dataclasses import dataclass, field
+from dataclasses import asdict, dataclass, field
 from typing import Any, Dict, List, Optional, Tuple
 
 from sqlalchemy import func
+from sqlalchemy.exc import IntegrityError
 from sqlalchemy.orm import Session
+
+from clients.types import LLMCall
 
 from langtools.en.utils import (
     generate_3s_present,
@@ -67,6 +70,7 @@ from words.linguistic_constants import MAJOR_POS_TYPES
 from words.definitions import (
     SENSE_PROMINENCE_ORDER,
     SUBTYPED_POS_TYPES,
+    build_subtype_prompt,
     select_senses_to_add,
 )
 from words.lemma_creation import (
@@ -743,14 +747,10 @@ def _query_senses(
     definitions_list, success = client.query_definitions(word, pos_type=pos_type, ask_subtype=False)
     if not success or not definitions_list:
         return []
-    if pos_type is None:
-        return list(definitions_list)
-    return [sense for sense in definitions_list if (sense.get("pos") or "").lower() == pos_type]
+    return keep_pos(definitions_list, pos_type)
 
 
-def _query_subtypes(
-    client: LinguisticClient, word: str, senses: List[Dict[str, Any]]
-) -> Optional[str]:
+def _query_subtypes(client: LinguisticClient, plan: "SensePlan") -> Optional[str]:
     """Fill in each selected sense's ``pos_subtype``, one LLM call per sense.
 
     The senses call can only list every part of speech's subtypes as bare
@@ -759,21 +759,18 @@ def _query_subtypes(
     subtypes with their descriptions and examples. The catch-all stays on
     offer: a sense that takes it goes to the pending queue as before.
 
-    Only selected senses pay for it, and only those with a real choice
-    (:data:`SUBTYPED_POS_TYPES`). A closed class gets its part of speech, which
-    :func:`_normalize_subtype` turns into its only subtype, ``<pos>_other``.
+    Only selected senses pay for it, and only those with a real choice; see
+    :func:`subtype_sense_indexes`.
 
     Returns:
         An error message if a call failed, else None. Every call is made before
         anything is written, so a failure leaves nothing half-added.
     """
-    for sense in senses:
+    for index in subtype_sense_indexes(plan):
+        sense = plan.senses[index]
         pos_type = (sense.get("pos") or "").lower()
         definition_text = str(sense.get("definition") or "").strip()
-        if pos_type not in SUBTYPED_POS_TYPES or not definition_text:
-            sense["pos_subtype"] = pos_type
-            continue
-        subtype, success = client.query_sense_subtype(word, definition_text, pos_type)
+        subtype, success = client.query_sense_subtype(plan.word, definition_text, pos_type)
         if not success:
             return f"subtype call failed for sense {definition_text[:60]!r}"
         sense["pos_subtype"] = subtype
@@ -856,6 +853,116 @@ def _missing_sense_translations(sense: Dict[str, Any]) -> List[str]:
     ]
 
 
+@dataclass
+class SensePlan:
+    """The senses add_word chose for one word, before subtypes and writes.
+
+    The pipeline's state between its LLM calls.  :func:`add_word` builds it in
+    one process; the batch job (``workqueue.handlers.words.add_word``) carries
+    it between stages through :meth:`to_state` / :meth:`from_state`, which is
+    why every field is plain JSON.
+    """
+
+    word: str
+    senses: List[Dict[str, Any]]
+    dropped: List[str]
+    frequency_rank: Optional[int]
+    frequency_rank_source: Optional[str]
+    best_corpus_rank: Optional[int]
+
+    def to_state(self) -> Dict[str, Any]:
+        return asdict(self)
+
+    @classmethod
+    def from_state(cls, data: Dict[str, Any]) -> "SensePlan":
+        return cls(**data)
+
+
+def check_word_absent(session: Session, word: str, pos_type: Optional[str]) -> Optional[str]:
+    """The existence guard: why the word should not be added, or None.
+
+    Returns an :class:`AddWordResult` status (``error`` or ``already_exists``)
+    when the add should stop before any LLM call.
+    """
+    if not word:
+        return "error"
+    if pos_type is not None:
+        if pos_type not in MAJOR_POS_TYPES:
+            return "error"
+        if _pos_already_present(session, word, pos_type):
+            return "already_exists"
+    elif word_exists_in_english(session, word, include_exclusions=True):
+        # include_exclusions=True because this gates an import -- a word
+        # rejected once should not be re-added.
+        return "already_exists"
+    return None
+
+
+def keep_pos(
+    definitions_list: List[Dict[str, Any]], pos_type: Optional[str]
+) -> List[Dict[str, Any]]:
+    """Drop senses of another part of speech when the add asked for one.
+
+    The model treats ``pos_type`` as a preference; see :func:`_query_senses`.
+    """
+    if pos_type is None:
+        return list(definitions_list)
+    return [sense for sense in definitions_list if (sense.get("pos") or "").lower() == pos_type]
+
+
+def plan_senses(
+    session: Session,
+    word: str,
+    definitions_list: List[Dict[str, Any]],
+    pos_type: Optional[str] = None,
+) -> SensePlan:
+    """Look up the word's frequency and select the senses to add.
+
+    The step between the senses call and the subtype calls: the lookup needs
+    the POS the senses call returned, and selection is sized by the rank.
+    """
+    frequency_rank, rank_source, corpus_info = _lookup_frequency(
+        session, word, pos_type or _leading_pos_type(definitions_list)
+    )
+    best_corpus_rank = min((c["rank"] for c in corpus_info if c["rank"] is not None), default=None)
+    senses, dropped = _select_senses(definitions_list, frequency_rank)
+    return SensePlan(
+        word=word,
+        senses=senses,
+        dropped=dropped,
+        frequency_rank=frequency_rank,
+        frequency_rank_source=rank_source,
+        best_corpus_rank=best_corpus_rank,
+    )
+
+
+def subtype_sense_indexes(plan: SensePlan) -> List[int]:
+    """The senses that need a subtype call; every other sense gets its POS now.
+
+    A closed class gets its part of speech, which :func:`_normalize_subtype`
+    turns into its only subtype, ``<pos>_other``.  Only a sense of a
+    :data:`SUBTYPED_POS_TYPES` part of speech with a definition has a choice
+    worth a call.
+    """
+    indexes: List[int] = []
+    for index, sense in enumerate(plan.senses):
+        pos_type = (sense.get("pos") or "").lower()
+        definition_text = str(sense.get("definition") or "").strip()
+        if pos_type in SUBTYPED_POS_TYPES and definition_text:
+            indexes.append(index)
+        else:
+            sense["pos_subtype"] = pos_type
+    return indexes
+
+
+def subtype_call(word: str, sense: Dict[str, Any]) -> LLMCall:
+    """The subtype call for one sense, as :func:`_query_subtypes` makes it live."""
+    context, prompt, schema = build_subtype_prompt(
+        word, str(sense.get("definition") or "").strip(), (sense.get("pos") or "").lower()
+    )
+    return LLMCall(prompt=prompt, schema=schema, context=context)
+
+
 def add_word(
     session: Session,
     word: str,
@@ -921,17 +1028,12 @@ def add_word(
         )
 
     # Existence guard: lemmas, disambiguated lemmas, en derivative forms and
-    # alternate spellings. include_exclusions=True because this gates an import
-    # -- a word rejected once should not be re-added.
-    if pos_type is not None:
-        if _pos_already_present(session, normalized, pos_type):
-            return AddWordResult(word=normalized, status="already_exists")
-    elif word_exists_in_english(session, normalized, include_exclusions=True):
+    # alternate spellings.
+    if check_word_absent(session, normalized, pos_type) is not None:
         return AddWordResult(word=normalized, status="already_exists")
 
     client_config = config.with_model(model) if model else config
     client = LinguisticClient(config=client_config)
-    client_model = client_config.model
 
     # The definitions call comes first because the frequency lookup needs the
     # word's POS to know which inflections to look for, and only the LLM knows
@@ -941,32 +1043,83 @@ def add_word(
     if not definitions_list:
         return AddWordResult(word=normalized, status="no_definitions")
 
-    frequency_rank, rank_source, corpus_info = _lookup_frequency(
-        session, normalized, pos_type or _leading_pos_type(definitions_list)
-    )
-    best_corpus_rank = min((c["rank"] for c in corpus_info if c["rank"] is not None), default=None)
-
-    senses, dropped = _select_senses(definitions_list, frequency_rank)
-    if not senses:
-        return AddWordResult(
-            word=normalized,
-            status="no_definitions",
-            frequency_rank=frequency_rank,
-            frequency_rank_source=rank_source,
-            dropped_senses=dropped,
-        )
+    plan = plan_senses(session, normalized, definitions_list, pos_type)
+    if not plan.senses:
+        return plan_result(plan, "no_definitions")
 
     # Before validation, which routes catch-all senses to review by subtype.
-    subtype_error = _query_subtypes(client, normalized, senses)
+    subtype_error = _query_subtypes(client, plan)
     if subtype_error is not None:
-        return AddWordResult(
-            word=normalized,
-            status="error",
-            frequency_rank=frequency_rank,
-            frequency_rank_source=rank_source,
-            dropped_senses=dropped,
-            error=subtype_error,
-        )
+        return plan_result(plan, "error", error=subtype_error)
+
+    return write_senses(
+        session,
+        plan,
+        source=source,
+        model=client_config.model,
+        difficulty_level=difficulty_level,
+    )
+
+
+def _run_lemma_write_retrying(session: Session, write: Any) -> Any:
+    """:func:`run_lemma_write`, retried once if another process took the GUID.
+
+    The GUID mutex covers every thread of one process (Barsukas's requests,
+    task worker and batch poller), not a second process -- a CLI completing a
+    batch while Barsukas adds a word.  There the UNIQUE guid column turns the
+    race into an IntegrityError; ``run_lemma_write`` has rolled back, so the
+    retry reads the highest GUID afresh and mints the next one.
+    """
+    try:
+        return run_lemma_write(session, write)
+    except IntegrityError as exc:
+        if "guid" not in str(exc.orig).lower():
+            raise
+        logger.warning("Lemma GUID taken by another process; retrying once: %s", exc.orig)
+        return run_lemma_write(session, write)
+
+
+def plan_result(plan: SensePlan, status: str, error: Optional[str] = None) -> AddWordResult:
+    """An :class:`AddWordResult` for a plan that stopped before any write."""
+    return AddWordResult(
+        word=plan.word,
+        status=status,
+        frequency_rank=plan.frequency_rank,
+        frequency_rank_source=plan.frequency_rank_source,
+        dropped_senses=list(plan.dropped),
+        error=error,
+    )
+
+
+def write_senses(
+    session: Session,
+    plan: SensePlan,
+    *,
+    source: str,
+    model: Optional[str],
+    difficulty_level: int = DIFFICULTY_LEVEL,
+) -> AddWordResult:
+    """Validate a plan whose senses all have a subtype, then write it.
+
+    The last step of :func:`add_word`, and the whole of the batch job's final
+    apply: one lemma per sense, committed per sense through
+    :func:`run_lemma_write`, or a pending-import row for a sense bound for
+    review.  No LLM call.
+
+    Args:
+        session: Database session.
+        plan: Every sense must carry ``pos_subtype`` by now.
+        source: Operation-log source tag.
+        model: The model that answered, for attribution.
+        difficulty_level: Level to create every lemma at.
+    """
+    normalized = plan.word
+    senses = plan.senses
+    dropped = list(plan.dropped)
+    frequency_rank = plan.frequency_rank
+    rank_source = plan.frequency_rank_source
+    best_corpus_rank = plan.best_corpus_rank
+    client_model = model
 
     # Validate the whole selected batch before committing its first sense. The
     # structured schema requires these fields, but an LLM can still satisfy a
@@ -1086,7 +1239,7 @@ def add_word(
             # Commit per sense: a multi-sense word is a series of small writes,
             # so a failure on a later sense does not discard the earlier ones.
             try:
-                new_lemma, stored_translations = run_lemma_write(
+                new_lemma, stored_translations = _run_lemma_write_retrying(
                     session,
                     functools.partial(
                         create_sense_lemma,
