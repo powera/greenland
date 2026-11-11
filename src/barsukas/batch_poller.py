@@ -27,10 +27,12 @@ from __future__ import annotations
 import logging
 import threading
 import time
-from typing import Callable, Optional
+from typing import Any, Callable, Optional
 
+from sqlalchemy import func
 from sqlalchemy.orm import Session
 
+from barsukas.metrics import record_batch_poll, set_remote_batch_metrics
 from clients.batch_queue import (
     BatchQueue,
     BatchQueueManager,
@@ -166,8 +168,10 @@ def poll_once(main_session_factory: Callable[[], Session]) -> None:
     try:
         manager = BatchQueueManager(batch_session, OpenAIBatchClient())
         active = _collect_active_batch_ids(batch_session)
+        remote: list[tuple[str, str, dict[str, Any]]] = []
         if not active:
             logger.debug("No in-flight Barsukas batches")
+            set_remote_batch_metrics(remote)
             return
 
         logger.info("Checking %s in-flight batch(es): %s", len(active), active)
@@ -180,6 +184,7 @@ def poll_once(main_session_factory: Callable[[], Session]) -> None:
 
             status = info.get("status")
             logger.info("Batch %s (%s) status: %s", batch_id, agent_name, status)
+            remote.append((batch_id, agent_name, info))
 
             if status in _TERMINAL_FAILED_STATUSES:
                 _fail_staged_job_batch(agent_name, batch_id, manager, main_session_factory)
@@ -214,6 +219,26 @@ def poll_once(main_session_factory: Callable[[], Session]) -> None:
                 logger.exception("Failed to apply results for batch %s", batch_id)
             finally:
                 main_session.close()
+        set_remote_batch_metrics(remote)
+    finally:
+        batch_session.close()
+
+
+def batch_queue_counts() -> list[tuple[str, str, str, int]]:
+    """``(agent, operation, status, count)`` for every row in the batch-tracking DB."""
+    batch_session = create_batch_database_session()
+    try:
+        rows = (
+            batch_session.query(
+                BatchQueue.agent_name,
+                BatchQueue.operation_type,
+                BatchQueue.status,
+                func.count(BatchQueue.id),
+            )
+            .group_by(BatchQueue.agent_name, BatchQueue.operation_type, BatchQueue.status)
+            .all()
+        )
+        return [(agent, operation, status, count) for agent, operation, status, count in rows]
     finally:
         batch_session.close()
 
@@ -231,8 +256,10 @@ def run_poller(
     while not stop_event.is_set():
         try:
             poll_once(main_session_factory)
+            record_batch_poll(ok=True)
         except Exception:
             logger.exception("Batch poller iteration failed")
+            record_batch_poll(ok=False)
         if stop_event.wait(timeout=interval_seconds):
             break
     logger.info("Batch poller stopped")

@@ -41,6 +41,7 @@ from barsukas.metrics import (
     get_metrics_output,
     instrument_sqlalchemy_engine,
     record_llm_call,
+    set_batch_queue_metrics,
     set_build_info_metrics,
     set_server_mode_metrics,
 )
@@ -647,6 +648,12 @@ def create_app(
             readonly=readonly,
             debug=debug,
         )
+        try:
+            from barsukas.batch_poller import batch_queue_counts
+
+            set_batch_queue_metrics(batch_queue_counts())
+        except Exception:
+            logger.exception("Failed to read batch-tracking counts for /metrics")
 
         return Response(get_metrics_output(), mimetype="text/plain; charset=utf-8")
 
