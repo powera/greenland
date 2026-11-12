@@ -68,6 +68,31 @@ class TestLithuanianMechanicalDeclension(unittest.TestCase):
         self.assertEqual(t_stem["genitive_singular"], "nykščio")
         self.assertEqual(t_stem["accusative_singular"], "nykštį")
 
+    def test_i_vowel_endings_keep_the_plain_stem(self) -> None:
+        # Only an -i- before a back vowel palatalizes.  In -is, -i, -ie, -ies
+        # and -imi the "i" is the ending's own vowel, so the stem keeps its t/d:
+        # "dviratis" (not "dviračis") but "dviračio".
+        masc = decline_noun("dviratis", grammatical_gender="masculine")
+        assert masc is not None
+        self.assertEqual(masc["nominative_singular"], "dviratis")
+        self.assertEqual(masc["vocative_singular"], "dvirati")
+        self.assertEqual(masc["genitive_singular"], "dviračio")
+        self.assertEqual(masc["nominative_plural"], "dviračiai")
+
+        d_stem = decline_noun("žodis", grammatical_gender="masculine")
+        assert d_stem is not None
+        self.assertEqual(d_stem["nominative_singular"], "žodis")
+        self.assertEqual(d_stem["genitive_singular"], "žodžio")
+
+        fem = decline_noun("naktis", grammatical_gender="feminine")
+        assert fem is not None
+        self.assertEqual(fem["nominative_singular"], "naktis")
+        self.assertEqual(fem["genitive_singular"], "nakties")
+        self.assertEqual(fem["vocative_singular"], "naktie")
+        self.assertEqual(fem["instrumental_singular"], "naktimi")
+        self.assertEqual(fem["dative_singular"], "nakčiai")
+        self.assertEqual(fem["genitive_plural"], "nakčių")
+
     def test_non_dental_stems_are_unchanged(self) -> None:
         forms = decline_noun("traukinys")
         assert forms is not None
