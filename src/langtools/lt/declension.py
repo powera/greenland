@@ -261,15 +261,21 @@ _PATTERNS: tuple[DeclensionPattern, ...] = (
 )
 
 
+# Vowels after which a preceding "i" only marks softness instead of being the
+# ending's own vowel.
+_BACK_VOWELS: frozenset[str] = frozenset("aąouųū")
+
+
 def _join(stem: str, palatalized_stem: str, suffix: str) -> str:
     """Attach *suffix* to whichever stem its first vowel calls for.
 
-    An -i- ending triggers palatalization of a final t/d; every other ending
-    takes the plain stem.  The classes already spell their -i- endings with a
-    leading "i" ("io", "iai", "ių"), so the suffix itself is the condition and
-    no per-class table is needed.
+    An "i" that only marks softness before a back vowel ("io", "iai", "ių")
+    palatalizes a final t/d; every other ending takes the plain stem.  An "i"
+    that is itself the ending's vowel does not: "dviratis", "dvirati",
+    "nakties", "naktie" and "naktimi" keep their t.  The suffix itself is the
+    condition, so no per-class table is needed.
     """
-    if suffix.startswith("i"):
+    if len(suffix) > 1 and suffix[0] == "i" and suffix[1] in _BACK_VOWELS:
         return palatalized_stem + suffix
     return stem + suffix
 
