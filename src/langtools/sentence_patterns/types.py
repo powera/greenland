@@ -63,6 +63,8 @@ class SlotNoun:
     gender: Optional[Gender] = None
     gender_fact: Optional[str] = None
     measure_word: Optional[str] = None
+    # Other classifiers equally correct for one item (zh 椅子: 张 beside 把).
+    alternate_measure_words: Tuple[str, ...] = ()
     level: Optional[int] = None
     forms: Dict[str, str] = field(default_factory=dict)
 

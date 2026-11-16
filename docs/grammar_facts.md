@@ -50,7 +50,9 @@ with the rule should not be added.
 | `gradability` | classification | `synthetic` (-er/-est), `periphrastic` (more/most), `non_gradable` |
 | `number_type` | classification | `regular`, `plurale_tantum`, `singulare_tantum` (legacy values: `uncountable`, `both`) |
 | `declension_class` | classification | `1`–`5` (Lithuanian; derived, not exported) |
-| `measure_words` | classification | a Chinese classifier, optionally `个 (alt: 只, 头)` |
+| `measure_words` | classification | the primary Chinese measure word: the default word after 一 (椅子 `把`; for mass nouns a container, 汤 `碗`) |
+| `measure_words_alternates` | classification | other classifiers equally correct for one item, `", "`-joined, most common first (椅子 `张`), or `none` |
+| `measure_words_portions` | classification | other containers/measures, `", "`-joined (汤 `杯, 锅, 份`), or `none`.  Both lists exclude the primary; Wireword ships them as lists (see `langtools.zh.measure_words`) |
 | `fanciful_collective` | classification | an ornamental English collective ("a murder of crows") |
 | `pinyin` | override | zh/zh-tw reading of this sense, tone-marked syllables separated by spaces, one per character (长 "long": `cháng`).  Only where pypinyin is wrong; `langtools.zh.pinyin_helper.word_reading` flags the likely cases (`ambiguous_positions`) |
 | `infinitive`, `3s_present`, `3s_past`, `1s_present`, `1s_past`, `1s_future`, `past`, `past_participle` | principal part | the form's text |

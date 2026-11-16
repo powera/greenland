@@ -17,6 +17,7 @@ from langtools.fr import sentence_patterns as fr
 from langtools.lt import sentence_patterns as lt
 from langtools.sentence_patterns.common import COLORABLE_GROUPS, OBJECT_GROUPS, strip_disambiguation
 from langtools.zh import sentence_patterns as zh
+from langtools.zh.measure_words import ALTERNATES_FACT, parse_measure_word_list
 from langtools.sentence_patterns.types import Gender, SlotAdjective, SlotNoun, WordPools
 from storage.models.grammar_fact import GrammarFact
 from storage.models.schema import DerivativeForm, Lemma, LemmaTranslation
@@ -116,6 +117,9 @@ def load_pools(session: Session, language_code: str, max_level: Optional[int] = 
     measure_words = (
         _facts(session, noun_ids, language_code, "measure_words") if language_code == "zh" else {}
     )
+    alternate_measure_words = (
+        _facts(session, noun_ids, language_code, ALTERNATES_FACT) if language_code == "zh" else {}
+    )
 
     nouns: List[SlotNoun] = []
     for lemma, target in nouns_translated:
@@ -139,6 +143,9 @@ def load_pools(session: Session, language_code: str, max_level: Optional[int] = 
                 gender=gender,
                 gender_fact=gender_fact,
                 measure_word=measure_words.get(lemma.id),
+                alternate_measure_words=tuple(
+                    parse_measure_word_list(alternate_measure_words.get(lemma.id)) or ()
+                ),
                 level=lemma.difficulty_level,
                 forms=noun_forms.get(lemma.id, {}),
             )

@@ -27,7 +27,8 @@ The pair is orthogonal, and three of the four quadrants are occupied::
                      superlative, feminine_form,   verb_transitivity,
                      number_type, gradability,     verb_reflexivity,
                      1s_*/3s_*/3p_* principal parts auxiliary_verb,
-                                                   measure_words,
+                                                   measure_words (+ _alternates,
+                                                   _portions),
                                                    fanciful_collective,
                                                    past
     EXPORTED=no      -- must stay empty --         declension_class
@@ -135,7 +136,29 @@ GRAMMAR_FACT_DEFINITIONS: Dict[str, GrammarFactDefinition] = {
         languages=("zh",),
         required_pos=("noun",),
         display_label="Measure Words",
-        description="Chinese measure words/classifiers for nouns",
+        description="Chinese primary measure word: the default word after 一 for this noun",
+        generatable=True,
+    ),
+    "measure_words_alternates": GrammarFactDefinition(
+        fact_type="measure_words_alternates",
+        languages=("zh",),
+        required_pos=("noun",),
+        display_label="Alternate Measure Words",
+        description=(
+            "Other Chinese classifiers equally correct for one item, comma-separated, "
+            "most common first (椅子: 张), or none.  See langtools.zh.measure_words."
+        ),
+        generatable=True,
+    ),
+    "measure_words_portions": GrammarFactDefinition(
+        fact_type="measure_words_portions",
+        languages=("zh",),
+        required_pos=("noun",),
+        display_label="Portion Measure Words",
+        description=(
+            "Other Chinese container/measure words for this noun, comma-separated, "
+            "most common first (汤: 杯, 锅, 份), or none.  See langtools.zh.measure_words."
+        ),
         generatable=True,
     ),
     "pinyin": GrammarFactDefinition(
@@ -432,6 +455,8 @@ EXPORTED_FACT_TYPES: Tuple[str, ...] = (
     # mechanical derivation -- regenerating costs money and two runs need not
     # agree, so the file is the record.
     "measure_words",  # zh classifiers
+    "measure_words_alternates",  # zh, other classifiers for one item
+    "measure_words_portions",  # zh, containers/measures
     "fanciful_collective",  # en ornamental collective nouns
     # GENERATED lexical classifications. No Python derives any of these from
     # the release tree, so the EXPORTED rule puts all of them here: without

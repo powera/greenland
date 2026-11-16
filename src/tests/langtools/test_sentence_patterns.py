@@ -154,6 +154,26 @@ def test_chinese_needs_measure_word() -> None:
     }
 
 
+def test_chinese_accepts_alternate_measure_words() -> None:
+    chair = SlotNoun(
+        guid="N_chair",
+        english="chair",
+        target="椅子",
+        group="small_movable_object",
+        countability="countable",
+        english_countability="countable",
+        english_plural="chairs",
+        measure_word="把",
+        alternate_measure_words=("张",),
+    )
+    result = render("zh", WordPools([chair], []), ["have", "number"])
+    (have,) = _find(result, "have", "3p")
+    assert have.target == "他们有一把椅子"
+    assert {"他们有一张椅子", "她们有一张椅子", "她们有一把椅子"} <= set(have.also_accepted)
+    two = [s for s in _find(result, "number", "1s") if s.target == "我有两把椅子"]
+    assert two and "我有两张椅子" in two[0].also_accepted
+
+
 def test_chinese_strips_attributive_de() -> None:
     afraid = SlotAdjective("A_afraid", "afraid", "害怕的", "feeling")
     (sentence,) = _find(render("zh", WordPools([], [afraid])), "feeling", "1s")

@@ -10,7 +10,7 @@ pattern rather than a singular and a plural one.
 Trakaido has no Chinese drill yet; this is the reference for one.
 """
 
-from typing import Dict, List, Optional, Sequence, Tuple
+from typing import Callable, Dict, List, Optional, Sequence, Tuple
 
 from langtools.sentence_patterns.common import (
     COLORABLE_GROUPS,
@@ -74,6 +74,19 @@ def _clause(subject: Subject, rest: str) -> Tuple[str, List[str]]:
     return f"{pronoun}{rest}", [f"{feminine}{rest}"] if feminine else []
 
 
+def _measured_clause(
+    subject: Subject, noun: SlotNoun, build_rest: Callable[[str], str]
+) -> Tuple[str, List[str]]:
+    """The clause with the primary measure word; each alternate (一张椅子 beside
+    一把椅子) is accepted too."""
+    assert noun.measure_word is not None
+    correct, accepted = _clause(subject, build_rest(noun.measure_word))
+    for alternate in noun.alternate_measure_words:
+        alternate_correct, alternate_accepted = _clause(subject, build_rest(alternate))
+        accepted.extend([alternate_correct, *alternate_accepted])
+    return correct, accepted
+
+
 # -- candidates ---------------------------------------------------------------
 
 
@@ -111,14 +124,15 @@ def _want(words: Sequence[SlotWord], subject: Optional[Subject]) -> List[Outcome
     assert subject is not None
     noun = _noun(words)
     if is_mass(noun):
-        thing, english_thing = noun.target, noun.english
+        correct, accepted = _clause(subject, f"想要{noun.target}")
+        english_thing = noun.english
     elif not noun.measure_word:
         return [missing("want", noun, "measure_words")]
     else:
-        thing, english_thing = f"一{noun.measure_word}{noun.target}", english_indefinite(
-            noun.english
+        correct, accepted = _measured_clause(
+            subject, noun, lambda measure: f"想要一{measure}{noun.target}"
         )
-    correct, accepted = _clause(subject, f"想要{thing}")
+        english_thing = english_indefinite(noun.english)
     english = english_clause(subject, "want", english_thing)
     return [sentence("want", (noun,), english, correct, subject, tuple(accepted))]
 
@@ -128,7 +142,9 @@ def _have(words: Sequence[SlotWord], subject: Optional[Subject]) -> List[Outcome
     noun = _noun(words)
     if not noun.measure_word:
         return [missing("have", noun, "measure_words")]
-    correct, accepted = _clause(subject, f"有一{noun.measure_word}{noun.target}")
+    correct, accepted = _measured_clause(
+        subject, noun, lambda measure: f"有一{measure}{noun.target}"
+    )
     english = english_clause(subject, "have", english_indefinite(noun.english))
     return [sentence("have", (noun,), english, correct, subject, tuple(accepted))]
 
@@ -161,6 +177,10 @@ def _color(words: Sequence[SlotWord], subject: Optional[Subject]) -> List[Outcom
             (noun, color),
             f"This {noun.english} is {color.english}.",
             f"这{noun.measure_word}{noun.target}是{_predicate(color)}的",
+            also_accepted=tuple(
+                f"这{alternate}{noun.target}是{_predicate(color)}的"
+                for alternate in noun.alternate_measure_words
+            ),
         )
     ]
 
@@ -184,7 +204,9 @@ def _number(words: Sequence[SlotWord], subject: Optional[Subject]) -> List[Outco
         return [missing("number", noun, "en plural")]
     results: List[Outcome] = []
     for value, chinese in NUMBERS.items():
-        correct, accepted = _clause(subject, f"有{chinese}{noun.measure_word}{noun.target}")
+        correct, accepted = _measured_clause(
+            subject, noun, lambda measure: f"有{chinese}{measure}{noun.target}"
+        )
         english = english_clause(subject, "have", f"{ENGLISH_NUMBERS[value]} {noun.english_plural}")
         results.append(sentence("number", (noun,), english, correct, subject, tuple(accepted)))
     return results

@@ -10,6 +10,7 @@ from sqlalchemy.orm import Session
 
 from agents.lape2.planner import Question, RequestPlan, question_key, source_snapshot, stored_values
 from langtools.inflection import inflect
+from langtools.zh.measure_words import format_measure_word_list
 from storage.crud.operation_log import log_entity_operation
 from storage.crud.uncertain_llm_result import LLMQuestion, confidence_gated
 from storage.models.grammar_fact import GrammarFact
@@ -32,7 +33,12 @@ class ApplyReport:
     errors: dict[str, str] = field(default_factory=dict)
 
 
-def validate_answer(question: Question, raw: Any) -> Answer:
+def validate_answer(question: Question, raw: Any, exclude: str | None = None) -> Answer:
+    """Check one raw answer; a list-valued answer comes back in its stored form.
+
+    ``exclude`` is dropped from a list answer (the primary measure word, which a
+    model predictably repeats among the alternates).
+    """
     # Accept explanations from already submitted batches using the old schema.
     if not isinstance(raw, dict) or set(raw) not in (
         {"value", "confidence"},
@@ -40,6 +46,10 @@ def validate_answer(question: Question, raw: Any) -> Answer:
     ):
         raise ValueError("Answer must contain value and confidence, with an optional explanation")
     value, confidence, explanation = raw["value"], raw["confidence"], raw.get("explanation", "")
+    if question.list_valued:
+        if not isinstance(value, list) or not all(isinstance(item, str) for item in value):
+            raise ValueError("Value must be a list of strings")
+        value = format_measure_word_list(value, exclude=exclude)
     if not isinstance(value, str) or not isinstance(explanation, str):
         raise ValueError("Value and explanation must be strings")
     if (
@@ -208,7 +218,14 @@ def apply_answers(
             report.skipped += 1
             continue
         try:
-            answer = validate_answer(question, data.get(question.key))
+            # The list facts sit beside the primary measure word, which lands
+            # first (catalog order) when it was asked in the same request.
+            primary = (
+                current.get(question_key("measure_words", question.language_code))
+                if question.list_valued
+                else None
+            )
+            answer = validate_answer(question, data.get(question.key), exclude=primary)
             if (
                 question.kind == "override"
                 and question.key in current

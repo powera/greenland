@@ -40,6 +40,7 @@ from storage.translation_helpers import (
 )
 from langtools.dialect_overrides import get_base_language
 from langtools.en.conjugation import expand_verb_forms
+from langtools.zh.measure_words import LIST_FACT_TYPES, measure_word_lists
 from exports.wireword.data_models import ExportStats, create_export_stats
 from exports.wireword.audio import build_audio_index
 from exports.wireword.gendered_forms import bulk_gender_variants, build_gendered_forms
@@ -854,7 +855,16 @@ class WirewordExporter:
                 grammar_facts = grammar_facts_by_lemma.get(lemma_id, {})
 
                 if grammar_facts:
-                    wireword["grammar_metadata"] = grammar_facts
+                    # zh measure-word lists ship as lists ([] for "none"); an
+                    # unchecked list is absent, so the app can tell the two apart.
+                    wireword["grammar_metadata"] = {
+                        **{
+                            fact_type: value
+                            for fact_type, value in grammar_facts.items()
+                            if fact_type not in LIST_FACT_TYPES
+                        },
+                        **measure_word_lists(grammar_facts),
+                    }
 
                 if lemma.pos_type == "noun":
                     wireword.update(concept_facts_by_lemma.get(lemma_id, {}))

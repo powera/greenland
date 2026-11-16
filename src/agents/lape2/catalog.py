@@ -18,6 +18,9 @@ class FactSpec:
     kind: Kind
     instruction: str
     values: tuple[str, ...] = ()
+    #: The model answers with a list of strings; stored joined (see
+    #: langtools.zh.measure_words), with an empty list stored as "none".
+    list_valued: bool = False
 
     @property
     def completion_type(self) -> str:
@@ -66,7 +69,19 @@ SPECS: tuple[FactSpec, ...] = (
     FactSpec(
         "measure_words",
         "classification",
-        "The preferred classifier or measure expression for this Chinese noun in this sense. Return the Chinese text without a numeral, pinyin or explanation; do not force 个 on materials or abstract concepts.",
+        "The default word after 一 for ONE of this Chinese noun in this sense: its classifier (只 for a cat, 把 for a chair), or for a mass noun its default container or measure (碗 for soup, 杯 for water). Use 个 only where it is the normal choice; do not force 个 on materials or abstract concepts. Return the Chinese text without a numeral, pinyin or explanation.",
+    ),
+    FactSpec(
+        "measure_words_alternates",
+        "classification",
+        "Other classifiers a native speaker would accept for ONE of this noun in this sense, besides measure_words (张 as well as 把 for a chair; 道 for soup served as a course). Include 个 if it is acceptable for this noun. No containers or measures (those belong in measure_words_portions) and never 种. Most common first; an empty list if there are none.",
+        list_valued=True,
+    ),
+    FactSpec(
+        "measure_words_portions",
+        "classification",
+        "Other container or measure words commonly used with this noun in this sense (杯, 锅, 份 for soup; 片, 块 for bread). Exclude measure_words itself. Most common first; an empty list if there are none.",
+        list_valued=True,
     ),
     FactSpec(
         "animacy",
