@@ -389,8 +389,8 @@ the top 420.  "Prudie", from the advice column, still ranks ~280.
 The list runs to 15000 words, like the book corpora; its cutoff word occurs
 ~17 times.  A 20000 list was tried and reaches more of the vocabulary this
 corpus is for (derision, congenial, pristine rank 15000-19000), but its cutoff
-word occurs only ~11 times.  ~3.6M tokens from 3,819 articles.  Not yet
-registered in `CORPUS_CONFIGS`.
+word occurs only ~11 times.  ~3.6M tokens from 3,819 articles.  Registered
+in `CORPUS_CONFIGS` at weight 0.8, with 19th_books and the broad wiki corpora.
 
 ## The Wikipedia corpora
 

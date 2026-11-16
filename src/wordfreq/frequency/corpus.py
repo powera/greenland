@@ -370,6 +370,24 @@ CORPUS_CONFIGS = [
         max_unknown_rank=30000,
         enabled=True,
     ),
+    CorpusConfig(
+        name="oanc_slate",
+        description="Word frequency data from Slate magazine articles (Open American National Corpus), 1996-2000",
+        file_path="oanc_slate.json",
+        # In step with build_oanc.DEFAULT_MAX_WORDS.
+        max_words=15000,
+        file_type="json",
+        value_type="auto",
+        # Modern general-audience American prose on every subject -- the
+        # register of charisma, meticulous and anecdote, which the book
+        # corpora predate.  Weighted with 19th_books and the broad wiki
+        # corpora, just under 20th_books: it is general English, but one
+        # magazine's house style over five years, and its topics lean to
+        # late-1990s politics (Clinton, impeachment).
+        corpus_weight=0.8,
+        max_unknown_rank=30000,
+        enabled=True,
+    ),
 ]
 
 
