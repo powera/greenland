@@ -164,8 +164,9 @@ WIKIPEDIA_CORPORA: Dict[str, WikipediaCorpus] = {
         min_articles=5,
         # A single register with a small vocabulary: past a few thousand words
         # the list is proper nouns and one-article jargon rather than
-        # mathematical English.
-        max_words=6000,
+        # mathematical English.  At 6000 the cutoff word occurred ~6 times;
+        # at 4500 it occurs ~12.
+        max_words=4500,
         description="Mathematics in depth, from arithmetic to category theory",
     ),
     "wiki_geography": WikipediaCorpus(
@@ -234,7 +235,8 @@ WIKIPEDIA_CORPORA: Dict[str, WikipediaCorpus] = {
         # The terminology this corpus exists for is dense and technical, but
         # its tail is the ordinary English of grammar description -- "ending",
         # "stem", "borrowed", "spoken" -- so it runs deeper than wiki_math's.
-        max_words=9000,
+        # At 9000 the cutoff word occurred ~8 times; at 8000 it occurs ~13.
+        max_words=8000,
         description="Wikipedia's Level 5 language articles, from phonetics to writing systems",
     ),
     "wiki_physical_science": WikipediaCorpus(
@@ -252,12 +254,19 @@ WIKIPEDIA_CORPORA: Dict[str, WikipediaCorpus] = {
         name="wiki_history",
         articles=HISTORY_ARTICLES,
         # 2606 documents across two lists, the largest corpus here, so a word
-        # must reach more of them than in the thousand-document lists.
-        min_articles=30,
-        # Overwhelmingly proper nouns once past the connective prose, and
-        # analyze_book separates those per document, so the ordinary-English
-        # tail thins out early.
-        max_words=9000,
+        # must reach more of them than in the thousand-document lists.  Was
+        # 30 (~1.2% of articles, in line with the other wiki lists) until Nov
+        # 2026; 25 lets in more words concentrated in a few articles.
+        min_articles=25,
+        # About a third proper nouns past rank 9000, but the 17.5M-token
+        # corpus still has depth: the 20000th word scores ~44 (the 9000th
+        # ~165), and many lowercase words between 9000 and 20000 were missing
+        # from the database in Nov 2026 (usurper, foothold, arrogance,
+        # retaliate).  The ~28,500 words passing min_articles end in a few
+        # hundred scoring under 5: lowercase spellings of names ("wellington",
+        # "zionist"), which pass the article test on the combined spelling but
+        # score only their rare lowercase uses.  Keep the cap well short of them.
+        max_words=20000,
         description="Wikipedia's Level 4 history and biography articles",
     ),
 }
