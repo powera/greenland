@@ -18,6 +18,12 @@ things are still done here:
   onto one line keeps a capitalized word that happens to start a line ("and
   Los\\nAngeles") from reading as sentence-initial.
 
+Slate's daily "Today's Papers" column is recognised by
+:func:`is_press_roundup` so the builder can leave it out.  It is about a sixth
+of the articles, every one in the same press-review idiom ("leads with",
+"fronts") and dense with paper abbreviations (NYT, LAT, USAT, WP); the stories
+it summarises are covered by other articles in the same corpus.
+
 Nothing here touches the network or the database.
 """
 
@@ -28,6 +34,23 @@ from typing import Iterator, NamedTuple
 # A paragraph break: a blank line, or a line break followed by indentation.
 PARAGRAPH_BREAK_RE = re.compile(r"\n\s*\n|\n(?=[ \t])")
 WHITESPACE_RE = re.compile(r"\s+")
+
+# --- Press roundups ("Today's Papers") ----------------------------------------
+
+# The column's shorthand for the papers it reviews.  Ordinary articles name a
+# paper in full; three abbreviations is a roundup whatever its opening says
+# ("What's news today?", "The Hong Kong sell-off leads all around").
+PAPER_ABBREVIATION_RE = re.compile(r"\b(?:NYT|LAT|USAT|WP|WSJ)\b")
+MIN_PAPER_ABBREVIATIONS = 3
+
+# Otherwise, an opening paragraph naming a paper together with the column's
+# verbs.  "front-page" is deliberately absent: media criticism uses it too
+# ("read the headline on yesterday's front page").
+PAPER_NAME_RE = re.compile(
+    r"New York Times|Washington Post|Los Angeles Times|USA Today|Wall Street Journal|\bpapers\b"
+)
+ROUNDUP_VERB_RE = re.compile(r"\b(?:leads? with|lead stor(?:y|ies)|goes with|go with|fronts)\b")
+OPENING_CHARS = 300
 
 
 class OancDocument(NamedTuple):
@@ -52,6 +75,18 @@ def clean_document(raw: str, *, drop_headline: bool = True) -> str:
         _, _, text = text.partition("\n")
     paragraphs = [WHITESPACE_RE.sub(" ", block).strip() for block in PARAGRAPH_BREAK_RE.split(text)]
     return "\n\n".join(paragraph for paragraph in paragraphs if paragraph)
+
+
+def is_press_roundup(text: str) -> bool:
+    """Whether a cleaned Slate document is a "Today's Papers" press roundup.
+
+    Matches 711 of the 4,530 Slate articles; a hand check of the matches found
+    one false positive, a reader letter discussing the papers.
+    """
+    if len(PAPER_ABBREVIATION_RE.findall(text)) >= MIN_PAPER_ABBREVIATIONS:
+        return True
+    opening = text.split("\n\n", 1)[0][:OPENING_CHARS]
+    return bool(PAPER_NAME_RE.search(opening) and ROUNDUP_VERB_RE.search(opening))
 
 
 def iter_documents(

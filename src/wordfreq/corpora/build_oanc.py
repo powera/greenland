@@ -14,11 +14,12 @@ the shared ``frequency_build`` code, as for every other corpus.
 Only ``slate`` is supported so far: 4,531 Slate magazine articles from
 1996-2000 (~4.2M words), for modern general-audience American prose -- the
 register where "charisma", "meticulous" and "pristine" occur and the book
-corpora cannot supply them.  About a sixth of the articles are the daily
-"Today's Papers" press roundup, which is formulaic ("leads with", "fronts")
-and full of paper abbreviations (NYT, LAT, USAT); they are counted like any
-other article.  Spoken subcorpora such as Switchboard are transcripts and will
-need their own cleaning before they are added here.
+corpora cannot supply them.  The 711 daily "Today's Papers" press roundups
+are left out (see :func:`oanc_text.is_press_roundup`): they are formulaic
+("leads with", "fronts"), full of paper abbreviations (NYT, LAT, USAT), and
+summarise stories other articles cover.  ``--keep-press-roundups`` counts
+them.  Spoken subcorpora such as Switchboard are transcripts and will need
+their own cleaning before they are added here.
 
 No network.  No database access either, unless ``--phrases-from-db`` is passed:
 that reads the multi-word lemma forms so "credit card" is counted as one token.
@@ -45,7 +46,7 @@ from wordfreq.corpora.frequency_build import (
     build_corpus_payload,
     write_corpus_json,
 )
-from wordfreq.corpora.oanc_text import iter_documents
+from wordfreq.corpora.oanc_text import is_press_roundup, iter_documents
 
 logger = logging.getLogger(__name__)
 
@@ -63,11 +64,12 @@ DEFAULT_MIN_CHARS = 500
 # Matches the WPA interviews, which are a similar length.
 DEFAULT_FULL_WEIGHT_TOKENS = 1500
 
-# Longer than the 15000 of the book corpora (see build_scotus.DEFAULT_MAX_WORDS):
-# the vocabulary this corpus is for -- meticulous, pristine, conundrum -- ranks
-# 15000-20000 here, so a 15000 list would cut exactly those words.  About 25,600
-# words pass the 8-document minimum, so the list fills.
-DEFAULT_MAX_WORDS = 20000
+# Matches the book corpora; see build_scotus.DEFAULT_MAX_WORDS.  The cutoff
+# word occurs ~17 times, a little under the ~20 a word needs to rank reliably
+# (reached at about 13500).  A 20000 list was tried and would reach more of
+# the vocabulary this corpus is for (pristine 18830, conundrum 18491), but
+# its cutoff word occurs only ~11 times.
+DEFAULT_MAX_WORDS = 15000
 
 
 def corpus_name(subcorpus: str) -> str:
@@ -91,6 +93,7 @@ def analyze_subcorpus(
     subcorpus_dir: Path,
     *,
     min_chars: int = DEFAULT_MIN_CHARS,
+    keep_press_roundups: bool = False,
     phrases: Optional[Dict[str, int]] = None,
 ) -> List[BookAnalysis]:
     """Analyze every cached document of one subcorpus.
@@ -98,16 +101,23 @@ def analyze_subcorpus(
     Args:
         subcorpus_dir: ``<cache>/<subcorpus>`` as written by ``download_oanc``.
         min_chars: Skip documents shorter than this once cleaned.
+        keep_press_roundups: Count "Today's Papers" roundups too.
         phrases: Multi-word forms to count as single tokens.
 
     Returns:
         One :class:`BookAnalysis` per document.
     """
     analyses: List[BookAnalysis] = []
+    skipped = 0
     for document in iter_documents(subcorpus_dir, min_chars=min_chars):
+        if not keep_press_roundups and is_press_roundup(document.text):
+            skipped += 1
+            continue
         analyses.append(analyze_book(document.slug, document.text, phrases=phrases))
         if len(analyses) % 1000 == 0:
             logger.info("%d documents analyzed", len(analyses))
+    if skipped:
+        logger.info("%d press roundups left out", skipped)
     return analyses
 
 
@@ -180,6 +190,11 @@ def main() -> int:
         ),
     )
     parser.add_argument(
+        "--keep-press-roundups",
+        action="store_true",
+        help='Count the "Today\'s Papers" press roundups (left out by default)',
+    )
+    parser.add_argument(
         "--phrases-from-db",
         action="store_true",
         help="Count known multi-word lemma forms as single tokens",
@@ -212,7 +227,12 @@ def main() -> int:
         phrases = _load_phrases(args)
         logger.info("Phrase index: %d multi-word forms", len(phrases))
 
-    analyses = analyze_subcorpus(subcorpus_dir, min_chars=args.min_chars, phrases=phrases)
+    analyses = analyze_subcorpus(
+        subcorpus_dir,
+        min_chars=args.min_chars,
+        keep_press_roundups=args.keep_press_roundups,
+        phrases=phrases,
+    )
     if not analyses:
         logger.error("No documents could be read from %s", subcorpus_dir)
         return 1

@@ -77,7 +77,7 @@ and writes only the JSON files, which are in version control. It took about
 | `eu_parliament_debates` | 35s | `data/working/europarl` |
 | 2 OpenStax | 20s | `data/working/openstax` |
 | `wpa_life_histories` | 30s | `/Volumes/Dorothy Day/wpalh` (extracted text) |
-| `oanc_slate` | ~1 min | `/Volumes/Dorothy Day/oanc` |
+| `oanc_slate` | ~1 min | `/Volumes/Dorothy Day/data/oanc` |
 | 9 Wikipedia | ~10 min (`wiki_history` alone 3.5 min) | `data/working/wiki_cache`; the dump is needed only for uncached titles |
 
 ```bash
@@ -368,7 +368,7 @@ development; they ask that derived frequency lists be contributed back.
 
 ```bash
 # 1. Download the GrAF release (~660MB, one tarball) and extract Slate's
-#    primary texts to "/Volumes/Dorothy Day/oanc/slate" (constants.OANC_CACHE_DIR;
+#    primary texts to "/Volumes/Dorothy Day/data/oanc/slate" (constants.OANC_CACHE_DIR;
 #    override with $GREENLAND_OANC_CACHE or --dest).  Resumes.
 PYTHONPATH=src python src/wordfreq/corpora/download_oanc.py
 
@@ -380,11 +380,16 @@ The text needs little cleaning: each article's title-case headline is dropped
 and hard-wrapped lines are rejoined.  The archive carries a macOS `._` file
 beside every text; both the downloader and the reader skip them.
 
-The list runs to 20000 words, not the book corpora's 15000, because the
-vocabulary it is for ranks 15000-20000 here.  About a sixth of the articles
-are the daily "Today's Papers" press roundup, so the paper abbreviations rank
-high (NYT ~135, WP ~170, LAT ~210, USAT ~420), as does "Prudie" from the
-advice column; none of them can match a lemma.  ~4.1M tokens.  Not yet
+The 711 daily "Today's Papers" press roundups are left out
+(`oanc_text.is_press_roundup`; `--keep-press-roundups` counts them).  They are
+a sixth of the articles, all in the same press-review idiom, and summarise
+stories other articles cover; with them in, NYT, WP, LAT and USAT ranked in
+the top 420.  "Prudie", from the advice column, still ranks ~280.
+
+The list runs to 15000 words, like the book corpora; its cutoff word occurs
+~17 times.  A 20000 list was tried and reaches more of the vocabulary this
+corpus is for (derision, congenial, pristine rank 15000-19000), but its cutoff
+word occurs only ~11 times.  ~3.6M tokens from 3,819 articles.  Not yet
 registered in `CORPUS_CONFIGS`.
 
 ## The Wikipedia corpora

@@ -9,7 +9,7 @@ that read file names.
 from pathlib import Path, PurePosixPath
 
 from wordfreq.corpora.download_oanc import member_target
-from wordfreq.corpora.oanc_text import clean_document, iter_documents
+from wordfreq.corpora.oanc_text import clean_document, is_press_roundup, iter_documents
 
 
 def test_member_target_keeps_requested_subcorpus_text() -> None:
@@ -42,3 +42,22 @@ def test_iter_documents_skips_resource_forks_and_short_texts(tmp_path: Path) -> 
     (tmp_path / "1" / "B.txt").write_text("Title\n\nShort.\n")
     documents = list(iter_documents(tmp_path, min_chars=10))
     assert [document.slug for document in documents] == ["1/A"]
+
+
+def test_press_roundup_by_opening_or_abbreviations() -> None:
+    # Real openings: one names the papers and their leads, one only uses the
+    # column's abbreviations further down.
+    assert is_press_roundup("The New York Times leads with the battle for Russia. More.")
+    assert is_press_roundup(
+        "What's news today? Depends on the majors.\n\n"
+        "The NYT goes local, the LAT stays abroad, and USAT splits the difference."
+    )
+
+
+def test_press_roundup_ignores_media_criticism() -> None:
+    # Naming a paper and its front page is ordinary Slate media criticism.
+    assert not is_press_roundup(
+        'Exhibit A: "Minority Growth Slips," read the headline on yesterday\'s '
+        "front page of the New York Times. The story was wrong."
+    )
+    assert not is_press_roundup("It was inevitable that--as the New York Times reports--it rained.")

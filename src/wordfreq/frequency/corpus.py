@@ -110,7 +110,7 @@ CORPUS_CONFIGS = [
         name="wiki_math",
         description="Word frequency data from Wikipedia mathematics articles",
         file_path="wiki_math.json",
-        max_words=6000,
+        max_words=4500,
         file_type="json",
         value_type="auto",
         # A single narrow register, and the smallest corpus here at 294
@@ -119,9 +119,11 @@ CORPUS_CONFIGS = [
         # describing how English is weighted, so it is weighted below
         # early_modern_science -- which is also technical, but broader.
         # Capped below the wiki doubling: with min_articles=5 only ~6500 words
-        # qualify at all, so 8000 would not have been reached.
+        # qualify at all, so 8000 would not have been reached.  Cut again
+        # from 6000 to 4500 in Nov 2026, where the cutoff word still occurs
+        # ~12 times rather than ~6.
         corpus_weight=0.5,
-        max_unknown_rank=12000,
+        max_unknown_rank=9000,
         enabled=True,
     ),
     CorpusConfig(
@@ -204,7 +206,8 @@ CORPUS_CONFIGS = [
         name="wiki_linguistics",
         description="Word frequency data from Wikipedia Level 5 language articles",
         file_path="wiki_linguistics.json",
-        max_words=9000,
+        # Cut from 9000 in Nov 2026; see build_wikipedia's wiki_linguistics entry.
+        max_words=8000,
         file_type="json",
         value_type="auto",
         # The metalanguage of grammar, phonetics and writing -- morpheme,
@@ -215,7 +218,7 @@ CORPUS_CONFIGS = [
         # words ("language", "word", "vowel") are already well attested
         # elsewhere.
         corpus_weight=0.5,
-        max_unknown_rank=18000,
+        max_unknown_rank=16000,
         enabled=True,
     ),
     CorpusConfig(
@@ -237,7 +240,8 @@ CORPUS_CONFIGS = [
         name="wiki_history",
         description="Word frequency data from Wikipedia Level 4 history and biography articles",
         file_path="wiki_history.json",
-        max_words=9000,
+        # Raised from 9000 in Nov 2026; see build_wikipedia's wiki_history entry.
+        max_words=20000,
         file_type="json",
         value_type="auto",
         # The largest corpus here by article count, but overwhelmingly proper
@@ -246,7 +250,7 @@ CORPUS_CONFIGS = [
         # revolt -- is real but narrow, so it is weighted with the other topic
         # corpora rather than with the general ones.
         corpus_weight=0.6,
-        max_unknown_rank=18000,
+        max_unknown_rank=40000,
         enabled=True,
     ),
     CorpusConfig(
@@ -279,18 +283,20 @@ CORPUS_CONFIGS = [
         name="cooking",
         description="Word frequency data from Cookbooks",
         file_path="cooking.json",
-        max_words=5200,
+        # Cut from 5200 in Nov 2026; see book_lists' cooking entry.
+        max_words=3500,
         file_type="json",
         value_type="frequency",
         corpus_weight=0.7,
-        max_unknown_rank=10400,
+        max_unknown_rank=7000,
         enabled=True,
     ),
     CorpusConfig(
         name="legal_scotus",
         description="Word frequency data from Supreme Court opinions, 1997-2006",
         file_path="legal_scotus.json",
-        max_words=15000,
+        # Cut from 15000 in Nov 2026; see build_scotus.DEFAULT_MAX_WORDS.
+        max_words=12500,
         file_type="json",
         value_type="auto",
         # The only corpus here written after 1938, and the reason it exists:
@@ -299,7 +305,7 @@ CORPUS_CONFIGS = [
         # opinion's register is formal and its subject matter is whatever
         # happened to be litigated, not how everyday English is distributed.
         corpus_weight=0.7,
-        max_unknown_rank=30000,
+        max_unknown_rank=25000,
         enabled=True,
     ),
     CorpusConfig(

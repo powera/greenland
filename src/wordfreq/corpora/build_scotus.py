@@ -78,12 +78,10 @@ DEFAULT_MIN_YEAR = 1997
 # runs to about 10000 tokens.
 DEFAULT_FULL_WEIGHT_OPINION_TOKENS = 4000
 
-# Matches the 19th- and 20th-century book corpora, which this one sits
-# alongside in CORPUS_CONFIGS.  It is a larger corpus (~5M tokens) and could
-# support a longer list, but a corpus's word count is also its weight in
-# combined_rank, and there is no reason for this one to reach further down its
-# tail than the novels reach down theirs.
-DEFAULT_MAX_WORDS = 15000
+# Shorter than the 15000 of the 19th- and 20th-century book corpora it sits
+# alongside in CORPUS_CONFIGS: at 15000 the cutoff word occurred only ~8 times,
+# the legal tail being thinner than the novels'.  At 12500 it occurs ~15 times.
+DEFAULT_MAX_WORDS = 12500
 
 
 def _load_phrases(args: argparse.Namespace) -> Dict[str, int]:

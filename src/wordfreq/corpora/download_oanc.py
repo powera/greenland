@@ -18,7 +18,7 @@ beside standoff XML annotations.  Only the primary text is needed, so only the
 ``<cache>/<subcorpus>/<relative path>``, which is the layout
 :mod:`wordfreq.corpora.oanc_text` reads.  The cache is
 ``$GREENLAND_OANC_CACHE``, else ``constants.OANC_CACHE_DIR`` on the external
-corpus drive (``/Volumes/Dorothy Day/oanc``), which must be mounted.
+corpus drive (``/Volumes/Dorothy Day/data/oanc``), which must be mounted.
 
 The download resumes (see :func:`download_europarl.download_archive`); an
 archive already in place is not fetched again, and extraction skips files

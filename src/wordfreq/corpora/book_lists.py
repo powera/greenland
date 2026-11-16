@@ -564,7 +564,9 @@ BOOK_LISTS: Dict[str, BookList] = {
     "cooking": BookList(
         corpus_name="cooking",
         description="Word frequency data from Cookbooks",
-        max_words=5200,
+        # Ten books, ~0.95M tokens: at 5200 the cutoff word occurred ~5 times.
+        # At 3500 it occurs ~14 times.
+        max_words=3500,
         books=COOKING_BOOKS,
     ),
 }
