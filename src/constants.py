@@ -76,9 +76,17 @@ WORDFREQ_DB_PATH = os.path.join(WORDFREQ_DATA_DIR, "linguistics.sqlite")
 GUTENBERG_CACHE_DIR = os.path.join(PROJECT_ROOT, "data", "working", "gutenberg")
 IPA_DICT_PATH = os.path.join(WORDFREQ_DATA_DIR, "en_US_ipadict.txt")
 
+# External drive holding the large corpus sources (the Wikipedia dump, the WPA
+# PDFs, the OANC archive).  Builders whose cache defaults here fail with a
+# "not found" error when the drive is not mounted; pass --source-dir instead.
+EXTERNAL_CORPUS_ROOT = "/Volumes/Dorothy Day"
+
 # Wiki corpus directories
 # WIKI_CORPUS_BASE_PATH = os.path.join(PROJECT_ROOT, "data", "wikicorpus")
-WIKI_CORPUS_BASE_PATH = "/Volumes/Dorothy Day/wikipedia/2022_MAY"
+WIKI_CORPUS_BASE_PATH = os.path.join(EXTERNAL_CORPUS_ROOT, "wikipedia", "2022_MAY")
+# Open American National Corpus archive and extracted texts; see
+# wordfreq.corpora.download_oanc.
+OANC_CACHE_DIR = os.path.join(EXTERNAL_CORPUS_ROOT, "oanc")
 WIKI_CORPUS_PREFIX = "enwiki-20220501"
 # Wikitext read out of the dump, kept out of git (data/working is ignored).
 # Seeking and decompressing a ~2MB multistream block per article is the
