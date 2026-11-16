@@ -1,6 +1,6 @@
 # Corpus generation
 
-Builds the `data/wordfreq/*.json` word-frequency corpora. Six builders share
+Builds the `data/wordfreq/*.json` word-frequency corpora. Seven builders share
 this directory, and everything after text extraction is common code in
 `frequency_build.py` — proper-noun detection, per-document weighting and the
 output format are the same for all of them:
@@ -13,6 +13,7 @@ output format are the same for all of them:
 | `build_wikipedia.py` | A Wikipedia dump snapshot | `wiki_math`, `wiki_geography`, `wiki_biology`, `wiki_modern_life`, `wiki_arts`, `wiki_society`, `wiki_linguistics`, `wiki_physical_science`, `wiki_history` |
 | `build_openstax.py` | OpenStax textbooks, pinned by commit | `openstax_science`, `openstax_society` |
 | `build_wpalh.py` | WPA life-history interviews, Library of Congress | `wpa_life_histories` |
+| `build_oanc.py` | Open American National Corpus subcorpora | `oanc_slate` |
 
 ## Regenerating every corpus
 
@@ -76,6 +77,7 @@ and writes only the JSON files, which are in version control. It took about
 | `eu_parliament_debates` | 35s | `data/working/europarl` |
 | 2 OpenStax | 20s | `data/working/openstax` |
 | `wpa_life_histories` | 30s | `/Volumes/Dorothy Day/wpalh` (extracted text) |
+| `oanc_slate` | ~1 min | `/Volumes/Dorothy Day/oanc` |
 | 9 Wikipedia | ~10 min (`wiki_history` alone 3.5 min) | `data/working/wiki_cache`; the dump is needed only for uncached titles |
 
 ```bash
@@ -90,6 +92,7 @@ for c in openstax_science openstax_society; do
 done
 python src/wordfreq/corpora/build_wpalh.py \
     --source-dir "/Volumes/Dorothy Day/wpalh" --phrases-from-db
+python src/wordfreq/corpora/build_oanc.py --phrases-from-db
 for c in wiki_arts wiki_society wiki_linguistics wiki_physical_science \
          wiki_history wiki_math wiki_geography wiki_biology wiki_modern_life; do
     python src/wordfreq/corpora/build_wikipedia.py --corpus $c --phrases-from-db
@@ -352,6 +355,37 @@ layer; nothing here runs OCR.  The cleanup, in `wpalh_text.py`:
 
 The result is ~4.8M tokens from 2,623 interviews.  Registered in
 `CORPUS_CONFIGS` at weight 0.5, with the other topic corpora.
+
+## The OANC Slate corpus
+
+`oanc_slate` is built from the Slate subcorpus of the Open American National
+Corpus (https://anc.org/data/oanc/): 4,531 magazine articles from 1996-2000,
+for modern general-audience American prose.  The book corpora predate words
+like "charisma" in their everyday sense, and "meticulous", "pristine" and
+"conundrum" are too rare in them to rank.  The OANC is described by its
+publishers as free for research and development, including commercial
+development; they ask that derived frequency lists be contributed back.
+
+```bash
+# 1. Download the GrAF release (~660MB, one tarball) and extract Slate's
+#    primary texts to "/Volumes/Dorothy Day/oanc/slate" (constants.OANC_CACHE_DIR;
+#    override with $GREENLAND_OANC_CACHE or --dest).  Resumes.
+PYTHONPATH=src python src/wordfreq/corpora/download_oanc.py
+
+# 2. Build the corpus JSON.
+PYTHONPATH=src python src/wordfreq/corpora/build_oanc.py --phrases-from-db
+```
+
+The text needs little cleaning: each article's title-case headline is dropped
+and hard-wrapped lines are rejoined.  The archive carries a macOS `._` file
+beside every text; both the downloader and the reader skip them.
+
+The list runs to 20000 words, not the book corpora's 15000, because the
+vocabulary it is for ranks 15000-20000 here.  About a sixth of the articles
+are the daily "Today's Papers" press roundup, so the paper abbreviations rank
+high (NYT ~135, WP ~170, LAT ~210, USAT ~420), as does "Prudie" from the
+advice column; none of them can match a lemma.  ~4.1M tokens.  Not yet
+registered in `CORPUS_CONFIGS`.
 
 ## The Wikipedia corpora
 
