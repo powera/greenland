@@ -19,7 +19,8 @@ from storage.translation_helpers import (
     get_translation,
 )
 
-PLAN_VERSION = 1
+# 2: Question.list_valued.
+PLAN_VERSION = 2
 
 
 def question_key(fact_type: str, language_code: str | None) -> str:
@@ -33,6 +34,7 @@ class Question:
     kind: Kind
     instruction: str
     values: tuple[str, ...]
+    list_valued: bool = False
 
     @property
     def key(self) -> str:
@@ -56,7 +58,9 @@ class RequestPlan:
 
     @classmethod
     def from_dict(cls, data: dict[str, Any]) -> RequestPlan:
-        if data.get("version") != PLAN_VERSION:
+        # Version 1 manifests (batches still in flight) have no list-valued
+        # questions, so the field's default reads them correctly.
+        if data.get("version") not in (1, PLAN_VERSION):
             raise ValueError("Unsupported Lape2 request plan version")
         return cls(
             lemma_id=data["lemma_id"],
@@ -184,6 +188,7 @@ def plan_request(
                     spec.kind,
                     spec.instruction,
                     spec.allowed_values(language_code),
+                    spec.list_valued,
                 )
             )
     return RequestPlan(lemma.id, source, known, tuple(questions), tuple(uncertain))

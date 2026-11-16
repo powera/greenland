@@ -1,5 +1,9 @@
 """
 Measure Words Task - Generate Chinese measure words/classifiers for nouns.
+
+Writes the primary ``measure_words`` fact only.  The alternate and portion
+lists (``measure_words_alternates``, ``measure_words_portions``) come from
+Lape2; see langtools.zh.measure_words.
 """
 
 import logging

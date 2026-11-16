@@ -60,7 +60,7 @@ def lemma(session: Session, text: str = "cat", pos: str = "noun", **translations
     return word
 
 
-def answer(value: str, confidence: float = 0.95) -> dict[str, Any]:
+def answer(value: str | list[str], confidence: float = 0.95) -> dict[str, Any]:
     return {"value": value, "confidence": confidence}
 
 
@@ -311,6 +311,81 @@ def test_multilingual_answers_and_concepts_persist_independently(session: Sessio
     assert not plan_request(
         session, word, ["fr", "zh"], facts=["grammatical_gender", "measure_words", "individuation"]
     ).questions
+
+
+MEASURE_FACTS = ["measure_words", "measure_words_alternates", "measure_words_portions"]
+
+
+def test_measure_word_lists_use_array_schema_and_store_joined(session: Session) -> None:
+    word = lemma(session, "chair", zh="椅子")
+    plan = plan_request(session, word, ["zh"], facts=MEASURE_FACTS)
+    query = build_query(plan)
+    alternates_schema = query.schema.properties["zh__measure_words_alternates"].properties
+    primary_schema = query.schema.properties["zh__measure_words"].properties
+    assert alternates_schema is not None and primary_schema is not None
+    assert alternates_schema["value"].type == "array"
+    assert primary_schema["value"].type == "string"
+    assert RequestPlan.from_dict(json.loads(json.dumps(plan.to_dict()))) == plan
+    report = save(
+        session,
+        plan,
+        {
+            "zh__measure_words": answer("把"),
+            # The primary repeated among the alternates is dropped, not fatal.
+            "zh__measure_words_alternates": answer(["把", "张", "个"]),
+            "zh__measure_words_portions": answer([]),
+        },
+    )
+    assert report.written == 3 and report.rejected == 0
+    assert stored_values(session, word.id) == {
+        "zh__measure_words": "把",
+        "zh__measure_words_alternates": "张, 个",
+        "zh__measure_words_portions": "none",
+    }
+    assert not plan_request(session, word, ["zh"], facts=MEASURE_FACTS).questions
+
+
+def test_measure_word_lists_exclude_an_already_stored_primary(session: Session) -> None:
+    word = lemma(session, "chair", zh="椅子")
+    session.add(
+        GrammarFact(
+            lemma_id=word.id, language_code="zh", fact_type="measure_words", fact_value="把"
+        )
+    )
+    session.commit()
+    plan = plan_request(session, word, ["zh"], facts=MEASURE_FACTS)
+    assert {question.key for question in plan.questions} == {
+        "zh__measure_words_alternates",
+        "zh__measure_words_portions",
+    }
+    save(
+        session,
+        plan,
+        {
+            "zh__measure_words_alternates": answer(["张", "把"]),
+            "zh__measure_words_portions": answer(["排"]),
+        },
+    )
+    assert stored_values(session, word.id)["zh__measure_words_alternates"] == "张"
+
+
+@pytest.mark.parametrize("value", ["张", ["一张"], ["zhāng"], [1]])
+def test_malformed_measure_word_lists_are_rejected(session: Session, value: Any) -> None:
+    word = lemma(session, "chair", zh="椅子")
+    plan = plan_request(session, word, ["zh"], facts=["measure_words_alternates"])
+    (question,) = [q for q in plan.questions if q.fact_type == "measure_words_alternates"]
+    with pytest.raises(ValueError):
+        validate_answer(question, {"value": value, "confidence": 0.9})
+
+
+def test_version_one_manifests_are_still_read(session: Session) -> None:
+    word = lemma(session)
+    plan = plan_request(session, word, ["en"], facts=["countability"])
+    data = plan.to_dict()
+    data["version"] = 1
+    for item in data["questions"]:
+        del item["list_valued"]
+    assert RequestPlan.from_dict(json.loads(json.dumps(data))) == plan
 
 
 def test_uncertainty_is_per_answer_and_retry_only_includes_unfinished_facts(

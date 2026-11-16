@@ -60,12 +60,14 @@ def build_query(plan: RequestPlan) -> LLMCall:
     question_keys: list[str] = []
     for question in sorted(plan.questions, key=lambda item: item.key):
         # Definitions and value sets live once in shared context.
+        value = (
+            SchemaProperty("array", items={"type": "string"})
+            if question.list_valued
+            else SchemaProperty("string")
+        )
         properties[question.key] = SchemaProperty(
             "object",
-            properties={
-                "value": SchemaProperty("string"),
-                "confidence": SchemaProperty("number"),
-            },
+            properties={"value": value, "confidence": SchemaProperty("number")},
         )
         question_keys.append(question.key)
     # Keep the frozen source intact for stale-result checks, while omitting

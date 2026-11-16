@@ -33,6 +33,8 @@ from sqlalchemy.orm import Session
 import constants
 from langtools.dialect_overrides import get_base_language
 from langtools.grammatical_word_schema import GRAMMATICAL_SUBCATEGORY_KEYS
+from langtools.zh.measure_words import LIST_FACT_TYPES as MEASURE_WORD_LIST_FACT_TYPES
+from langtools.zh.measure_words import measure_word_lists
 from langtools.zh.pinyin_helper import word_reading
 from storage.backend.config import BackendType, DataSourceConfig
 from storage.backend.factory import create_session
@@ -61,6 +63,8 @@ READER_FACT_TYPES: Tuple[str, ...] = (
     "verb_reflexivity",
     "auxiliary_verb",
     "measure_words",
+    "measure_words_alternates",
+    "measure_words_portions",
 )
 
 #: Part of speech for each grammatical-word subcategory.
@@ -325,9 +329,12 @@ class ReadingLexiconExporter:
                 gloss[code] = text
         if gloss:
             entry["gloss"] = gloss
-        reader_facts = {
-            fact_type: value for fact_type in READER_FACT_TYPES if (value := facts.get(fact_type))
+        reader_facts: Dict[str, Any] = {
+            fact_type: value
+            for fact_type in READER_FACT_TYPES
+            if fact_type not in MEASURE_WORD_LIST_FACT_TYPES and (value := facts.get(fact_type))
         }
+        reader_facts.update(measure_word_lists(facts))
         if reader_facts:
             entry["facts"] = reader_facts
         if get_base_language(self.language) == "zh":
