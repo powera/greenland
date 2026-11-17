@@ -27,6 +27,8 @@ VOLUME_FAMILIES = (
     VolumeFamily("Advanced Character, Thought and Feelings", (1300, 1310, 1311)),
     VolumeFamily("Advanced Actions, Change and Movement", (1301, 1320, 1321)),
     VolumeFamily("Figurative Language and Imagery", (1182, 1330)),
+    VolumeFamily("Adverbs", (105, 324)),
+    VolumeFamily("Advanced Adverbs", (1340, 1341)),
 )
 
 
@@ -99,16 +101,20 @@ class VolumeAllocator:
 
 
 def balance_volumes(
-    session: Session, config: DataSourceConfig, *, dry_run: bool = False
+    session: Session,
+    config: DataSourceConfig,
+    *,
+    dry_run: bool = False,
+    families: Sequence[VolumeFamily] = VOLUME_FAMILIES,
 ) -> dict[str, Any]:
-    """Register the five continuation volumes and minimally rebalance existing senses."""
+    """Register selected continuation volumes and minimally rebalance existing senses."""
     if not dry_run:
         session.connection().exec_driver_sql("BEGIN IMMEDIATE")
     metadata = {row.level: row for row in list_curriculum_levels(session)}
     additions: list[dict[str, Any]] = []
     moves: list[PlannedMove] = []
     results: list[dict[str, Any]] = []
-    for family in VOLUME_FAMILIES:
+    for family in families:
         base = metadata.get(family.levels[0])
         if base is None or base.name != family.name:
             raise ValueError(f"Missing or changed family base: {family.levels[0]}")

@@ -387,6 +387,9 @@ def test_prepare_accepts_registered_catalogue_and_uses_examples(
     context = store.get("sense:test-guid")["request"]["body"]["input"][0]["content"]
     assert "Disease transmission." in context and "pathogen" in context
     assert context.count("1018 |") == 1
+    assert "never a reason to prefer them" in context
+    assert "do not default downward" in context
+    assert "advanced secondary sense" in context
     session.close()
     store.db.close()
 
@@ -674,4 +677,41 @@ def test_metadata_patch_can_explicitly_replace_editorial_boundaries(
     assert review.get_curriculum_level(session, 1182).notes == patch[0]["notes"]  # type: ignore[union-attr]
     session.commit()
     assert review.update_levels(session, config, patch) == 0
+    session.close()
+
+
+def test_names_for_existing_general_levels_and_explicit_staging_metadata(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    from reports.curriculum_bands import band_of
+
+    session, lemma = session_with_lemma()
+    monkeypatch.setattr(review, "create_backup", lambda *args, **kwargs: tmp_path / "backup")
+    config = review.DataSourceConfig(
+        backend_type=review.BackendType.SQLITE, sqlite_path=str(tmp_path / "unused")
+    )
+    patch = [
+        dict(level=134, name="Health Care and Recovery", cefr="B1"),
+        dict(level=1399, name="Staging: Awaiting Curriculum Placement", reserved=True),
+    ]
+    assert review.update_levels(session, config, patch) == 2
+    assert band_of(1399) == "gap"
+    assert lemma.difficulty_level == 1085
+    assert review.get_curriculum_level(session, 134).name == "Health Care and Recovery"  # type: ignore[union-attr]
+    assert review.update_levels(session, config, patch) == 0
+    session.close()
+
+
+def test_topic_installer_cannot_turn_reserved_staging_into_a_topic(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    session, _ = session_with_lemma()
+    monkeypatch.setattr(review, "create_backup", lambda *args, **kwargs: tmp_path / "backup")
+    config = review.DataSourceConfig(
+        backend_type=review.BackendType.SQLITE, sqlite_path=str(tmp_path / "unused")
+    )
+    with pytest.raises(ValueError, match="topic number"):
+        review.install_topics(
+            session, config, [dict(level=1399, name="Not a topic", reserved=True, boundary="No")]
+        )
     session.close()

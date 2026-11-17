@@ -268,10 +268,35 @@ def prepare(
         owner = placer.lean_owner(weights, senses)
         shortlist = placer.shortlist(query, None if owner else weights)
         shortlist = [entry for entry in shortlist if entry.level in {item.level for item in menu}]
-        prompt = build_prompt(query, shortlist, menu, weights, None, senses, owner)
+        prompt = build_prompt(
+            query,
+            shortlist,
+            menu,
+            weights,
+            "bulk review never offers levels below 100",
+            senses,
+            owner,
+        )
         allowed = [item.level for item in menu]
         context = build_context([item for item in menu if item.level != 1399])
+        context += (
+            "\nConservative general-unit policy: spelling-level CEFR is only a permission "
+            "to consider levels 100–499, never a reason to prefer them. Judge the exact "
+            "definition. A familiar headword can have a formal, technical, figurative or "
+            "otherwise advanced secondary sense. Prefer its matching advanced landing "
+            "point in that case. Only choose a general unit when this specific sense is "
+            "clearly ordinary everyday vocabulary and a direct match for that unit; "
+            "explain that sense-level evidence in the reasoning. In uncertainty, prefer "
+            "an appropriate advanced unit or no suitable level; do not default downward.\n"
+        )
         context += volume_context()
+        context += (
+            "\nFor adverbs, distinguish ordinary B1-or-easier units 105/324 from advanced units. "
+            "Advanced general manner/usage belongs in 1340/1341; prefer 1342 for degree/focus, "
+            "1343 for stance/evidence/certainty, 1344 for discourse linking, and 1345 for "
+            "time/frequency/direction when the DEFINITION fits. Domain-specific senses may "
+            "still belong to their domain. Never use an unoffered level.\n"
+        )
         context += (
             "\n1399 | Staging: placement undecided. fit=none means no suitable level; "
             "do not force a fit. Judge this GUID and definition independently of siblings. "
@@ -436,14 +461,19 @@ def install_topics(
 def update_levels(
     session: Session, config: DataSourceConfig, entries: Sequence[dict[str, Any]]
 ) -> int:
-    """Apply an explicit editorial metadata patch, preserving other level fields."""
+    """Apply explicit level names/metadata; staging requires reserved=True acknowledgement."""
     session.connection().exec_driver_sql("BEGIN IMMEDIATE")
     updates: list[tuple[dict[str, Any], Any]] = []
     seen: set[int] = set()
     for entry in entries:
         number = entry["level"]
-        if type(number) is not int or band_of(number) != "topic" or number in seen:
-            raise ValueError(f"Invalid, reserved or duplicate topic level: {number}")
+        if (
+            type(number) is not int
+            or not constants.MIN_DIFFICULTY_LEVEL <= number <= constants.MAX_DIFFICULTY_LEVEL
+            or number in seen
+            or (number == constants.STAGING_DIFFICULTY_LEVEL and entry.get("reserved") is not True)
+        ):
+            raise ValueError(f"Invalid, reserved or duplicate curriculum level: {number}")
         seen.add(number)
         existing = get_curriculum_level(session, number)
         name = entry.get("name", existing.name if existing else "")
@@ -1054,7 +1084,7 @@ def main() -> None:
             if not args.catalogue:
                 raise ValueError("--catalogue metadata JSON is required")
             print(
-                f"Updated {update_levels(session, config, json.loads(args.catalogue.read_text()))} topic levels"
+                f"Updated {update_levels(session, config, json.loads(args.catalogue.read_text()))} curriculum levels"
             )
         elif args.action == "install-topics":
             if not args.catalogue:

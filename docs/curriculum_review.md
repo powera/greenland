@@ -247,3 +247,34 @@ a full family is not grounds to force a different subject.
 Restart Barsukas through `api.admin.restart()` before the next batch to load the
 updated completion allocator. This metadata/rebalancing action makes no paid
 calls and does not retry failed requests.
+
+## Additional landing points; no redistribution of existing senses
+
+The metadata-only patch [curriculum_general_landing_levels.json](curriculum_general_landing_levels.json)
+adds Adverbs 2 at **324 (B1)** and the following **C1** topics:
+
+- 1340/1341: Advanced Adverbs, volumes 1 and 2, for general advanced manner/usage.
+- 1342: Advanced Degree and Focus Adverbs.
+- 1343: Advanced Stance and Certainty Adverbs.
+- 1344: Advanced Linking and Organizing Adverbs.
+- 1345: Advanced Time, Frequency and Direction Adverbs.
+- 1350: Advanced Feelings and Reactions, continuing 100.
+- 1351: Advanced Ideas, Roles and Results, continuing 222.
+- 1352: Advanced Describing and Qualifying Words, continuing 106/318.
+
+It also names the already-occupied 134, 151, 176, 216, 227, 278, 281, 296, 312
+and 341 units, and labels the reserved 1399 staging sentinel. It does not infer
+CEFR ratings for those ten previously unnamed general units. Updating metadata
+never relocates their existing senses.
+
+105/324 and 1340/1341 are separate equivalent-volume families with separate
+CEFR bands and boundaries. Future **new** placements use the emptier permitted
+volume, while existing senses stay put. No rebalancing action is part of this
+metadata installation. All new advanced units start empty.
+
+Future prompts explicitly treat headword CEFR as permission to consider a
+general unit, not a reason to prefer it. A secondary, formal, figurative or
+otherwise advanced sense should use its matching advanced landing point.
+A 100–499 recommendation needs clear definition-level everyday suitability and
+a direct match to the specific unit, explained in the reasoning. Ambiguity must
+not default downward. General-unit consideration remains opt-in via `--cefr-pass`.

@@ -403,5 +403,111 @@
       "glacial (slow)",
       "kernel (essential core)"
     ]
+  },
+  {
+    "level": 1340,
+    "name": "Advanced Adverbs",
+    "cefr": "C1",
+    "boundary": "Advanced general manner and usage adverbs that do not fit a dedicated adverb type or specialist subject. Share this boundary with volume 2. Exclude ordinary A1\u2013B1 senses (105/324), degree/focus (1342), stance/certainty (1343), linking (1344), and time/frequency/direction (1345).",
+    "examples": [
+      "meticulously",
+      "haphazardly",
+      "painstakingly"
+    ]
+  },
+  {
+    "level": 1341,
+    "name": "Advanced Adverbs 2",
+    "cefr": "C1",
+    "boundary": "Advanced general manner and usage adverbs that do not fit a dedicated adverb type or specialist subject. Share this boundary with volume 2. Exclude ordinary A1\u2013B1 senses (105/324), degree/focus (1342), stance/certainty (1343), linking (1344), and time/frequency/direction (1345).",
+    "examples": [
+      "meticulously",
+      "haphazardly",
+      "painstakingly"
+    ]
+  },
+  {
+    "level": 1342,
+    "name": "Advanced Degree and Focus Adverbs",
+    "cefr": "C1",
+    "boundary": "Advanced adverb senses expressing extent, intensity, approximation, limitation, emphasis or focus. Exclude general manner, stance/certainty, discourse linking and literal temporal/spatial direction. Familiar headword CEFR does not make every intensifying sense elementary.",
+    "examples": [
+      "markedly",
+      "exceedingly",
+      "solely",
+      "profoundly"
+    ]
+  },
+  {
+    "level": 1343,
+    "name": "Advanced Stance and Certainty Adverbs",
+    "cefr": "C1",
+    "boundary": "Advanced epistemic, evidential, attitudinal and viewpoint adverb senses: how a claim is known, qualified, interpreted or regarded. Exclude ordinary manner, mere degree, and discourse connectors.",
+    "examples": [
+      "presumably",
+      "ostensibly",
+      "arguably",
+      "admittedly"
+    ]
+  },
+  {
+    "level": 1344,
+    "name": "Advanced Linking and Organizing Adverbs",
+    "cefr": "C1",
+    "boundary": "Advanced adverbs connecting or organizing propositions, arguments or discourse through contrast, consequence, addition, concession or sequence. Ordinary connectors remain in general units, including 227.",
+    "examples": [
+      "nonetheless",
+      "conversely",
+      "furthermore",
+      "consequently"
+    ]
+  },
+  {
+    "level": 1345,
+    "name": "Advanced Time, Frequency and Direction Adverbs",
+    "cefr": "C1",
+    "boundary": "Advanced temporal, frequency, duration, spatial-location and directional adverb senses. Exclude argumentative/discourse sequencing (1344), epistemic stance (1343), and ordinary everyday time/direction adverbs in general units.",
+    "examples": [
+      "hitherto",
+      "intermittently",
+      "subsequently",
+      "homeward"
+    ]
+  },
+  {
+    "level": 1350,
+    "name": "Advanced Feelings and Reactions",
+    "cefr": "C1",
+    "boundary": "Advanced or nuanced senses of emotions, affective reactions, emotional expressions and their sources or effects; a continuation of 100. Ordinary everyday feelings remain at 100/303. Character/cognition belongs in 1300-family units, and clinical/academic psychology belongs in 1062.",
+    "examples": [
+      "consternation",
+      "elation",
+      "apprehension",
+      "resentment"
+    ]
+  },
+  {
+    "level": 1351,
+    "name": "Advanced Ideas, Roles and Results",
+    "cefr": "C1",
+    "boundary": "Advanced abstract noun senses for ideas, conceptual roles, functions, implications, outcomes, achievements and fulfillment; a continuation of 222. Exclude ordinary everyday noun senses, concrete objects, and clear specialist meanings with their own topic. Do not infer sense difficulty solely from spelling-level CEFR.",
+    "examples": [
+      "contingency",
+      "ramification",
+      "capacity (official role)",
+      "satisfaction (fulfillment of a requirement)"
+    ]
+  },
+  {
+    "level": 1352,
+    "name": "Advanced Describing and Qualifying Words",
+    "cefr": "C1",
+    "boundary": "Advanced or nuanced adjective senses qualifying condition, composition, scope, suitability, implications or interpretation; a shared advanced continuation of 106 and 318. Ordinary everyday descriptions remain in general units. Prefer specific specialist topics when the definition is explicitly domain-specific; adverbs have separate units.",
+    "examples": [
+      "provisional",
+      "intrinsic",
+      "virtual (in effect)",
+      "fine (subtle or finely divided)"
+    ]
   }
 ]
