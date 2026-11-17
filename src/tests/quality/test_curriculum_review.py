@@ -534,3 +534,122 @@ def test_level_metadata_patch_preserves_existing_fields_and_reserves_staging(
             session, config, [dict(level=1399, name="Not a real topic", cefr="C2")]
         )
     session.close()
+
+
+def test_inventory_sample_is_frozen_and_does_not_read_release_diff(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    session, lemma = session_with_lemma()
+    lemma.difficulty_level = 1399
+    for index in range(3):
+        session.add(
+            Lemma(
+                guid=f"N72_sample{index}",
+                lemma_text=f"sample-{index}",
+                definition_text="A test sense.",
+                pos_type="noun",
+                difficulty_level=1399,
+            )
+        )
+    session.commit()
+    monkeypatch.setattr(
+        review,
+        "release_rows",
+        lambda commit: (_ for _ in ()).throw(AssertionError("No release diff")),
+    )
+    store = review.ReviewStore(tmp_path / "sample.sqlite")
+    assert (
+        review.prepare(
+            session, store, "old", "new", "staging", "gpt-5-mini", inventory=True, limit=2, seed=7
+        )
+        == 2
+    )
+    selection = store.get("selection")
+    assert selection["population"] == 4 and len(selection["guids"]) == 2
+    before = store.rows()
+    assert (
+        review.prepare(
+            session, store, "old", "new", "staging", "gpt-5-mini", inventory=True, limit=2, seed=7
+        )
+        == 2
+    )
+    assert store.rows() == before
+    assert store.get("selection") == selection
+    for record in before:
+        schema = record["request"]["body"]["text"]["format"]["schema"]
+        assert schema["properties"]["level"]["enum"] == [0, *record["allowed"]]
+        assert schema["properties"]["alternatives"]["items"]["enum"] == record["allowed"]
+    store.db.close()
+    session.close()
+
+
+def test_stats_report_actual_destinations_and_unresolved_senses(tmp_path: Path) -> None:
+    session, lemma = session_with_lemma()
+    lemma.difficulty_level = 1042
+    second = Lemma(
+        guid="N72_waiting",
+        lemma_text="waiting",
+        definition_text="A test sense.",
+        pos_type="noun",
+        difficulty_level=1399,
+    )
+    session.add(second)
+    review.set_curriculum_level(session, 1042, "Mechanics and Machines", cefr="C1")
+    session.commit()
+    store = review.ReviewStore(tmp_path / "stats.sqlite")
+    store.put("sense:test-guid", dict(guid="test-guid", current_level=1399))
+    store.put(
+        "sense:N72_waiting",
+        dict(
+            guid="N72_waiting",
+            current_level=1399,
+            suggestion=dict(fit="none"),
+            applied=dict(level=1399),
+        ),
+    )
+    store.put("sense:N72_missing", dict(guid="N72_missing", current_level=1399))
+    tracking = review.create_batch_database_session(str(tmp_path / "tracking.sqlite"))
+    report = review.placement_stats(session, store, tracking)
+    assert report["selected"] == 3 and report["missing"] == 1
+    assert report["moved"] == 1 and report["still_staging"] == 1
+    assert report["no_suitable_level"] == 1
+    assert report["destinations"][0] == dict(
+        level=1042, name="Mechanics and Machines", cefr="C1", count=1
+    )
+    tracking.close()
+    store.db.close()
+    session.close()
+
+
+def test_prepare_cli_forwards_inventory_sample_flags(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    import sys
+    from unittest.mock import Mock
+
+    prepare = Mock(return_value=1400)
+    monkeypatch.setattr(review, "prepare", prepare)
+    monkeypatch.setattr(review, "create_session", lambda config: Mock())
+    monkeypatch.setattr(
+        sys,
+        "argv",
+        [
+            "review",
+            "prepare",
+            "--review",
+            str(tmp_path / "cli.sqlite"),
+            "--phase",
+            "staging",
+            "--inventory",
+            "--limit",
+            "1400",
+            "--seed",
+            "20261117",
+            "--cefr-pass",
+        ],
+    )
+    review.main()
+    assert prepare.call_args.kwargs["inventory"] is True
+    assert prepare.call_args.kwargs["limit"] == 1400
+    assert prepare.call_args.kwargs["seed"] == 20261117
+    assert prepare.call_args.kwargs["cefr_pass"] is True

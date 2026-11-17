@@ -157,3 +157,35 @@ Keep journals, generated inventories, approvals and database backups untracked.
 Use the existing level-warning audit after placement and the ordinary database
 release export workflow. Re-leveling 1399 and designing additional advanced or
 numbered units remain the next curriculum task.
+
+## Sampling the staging inventory and reporting outcomes
+
+To choose a reproducible cohort from all current staging GUIDs, independently of
+release-diff membership, prepare with `--inventory --phase staging --limit 1400
+--seed 20261117`. The fixed-seed sample is selected uniformly, then frozen in
+the journal with its population size. Resume uses the frozen GUIDs, not a fresh
+sample. Use `--cefr-pass` to offer 100–499 to eligible A1/A2/B1 senses; B2 still
+requires explicit exceptional GUIDs, and C1/C2/unranked stay in topics or staging.
+The provider schema constrains both primary and alternative levels to the
+per-sense menu, retaining 0 for “no suitable level”.
+
+After the earlier topic review has been completed editorially (including manual
+resolution of failures), `--topics-reviewed` records that explicit acknowledgement
+when submitting staging. Alternatively, provide the completed `--topic-review`
+journal as above. This acknowledgement does not edit or resubmit the earlier jobs.
+
+```sh
+GREENLAND_TEST_MODE=1 PYTHONPATH=src python -m quality.curriculum_review prepare \
+  --review /tmp/staging-review.sqlite --phase staging --inventory --limit 1400 \
+  --seed 20261117 --cefr-pass
+PYTHONPATH=src python -m quality.curriculum_review submit-all \
+  --review /tmp/staging-review.sqlite --batch-size 350 --apply-results --topics-reviewed
+GREENLAND_TEST_MODE=1 PYTHONPATH=src python -m quality.curriculum_review stats \
+  --review /tmp/staging-review.sqlite --output /tmp/staging-placement-stats.json
+```
+
+Statistics compare the frozen starting assignments with actual current database
+levels. They report destination counts/titles/CEFR, moved senses, those still at
+1399, no-fit suggestions, applied receipts, missing senses, and latest shared-queue
+outcomes per GUID. “Still staging” while the job runs includes pending or failed
+requests as well as valid no-fit decisions; queue outcomes distinguish them.

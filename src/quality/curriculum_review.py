@@ -4,6 +4,8 @@ import argparse
 import fcntl
 import hashlib
 import json
+import random
+from collections import Counter
 import sqlite3
 import subprocess
 import sys
@@ -141,6 +143,9 @@ def prepare(
     catalogue: Sequence[dict[str, Any]] = (),
     cefr_pass: bool = False,
     b2_exceptions: Sequence[str] = (),
+    inventory: bool = False,
+    limit: int | None = None,
+    seed: int = 20261117,
 ) -> int:
     """Freeze a complete phase before submitting anything; resume only identical runs."""
     settings = dict(
@@ -152,11 +157,40 @@ def prepare(
         cefr_pass=cefr_pass,
         b2_exceptions=list(b2_exceptions),
     )
+    if inventory:
+        if phase != "staging" or (limit is not None and limit < 1):
+            raise ValueError("Inventory sampling requires staging and a positive limit")
+        settings.update(inventory=True, limit=limit, seed=seed)
     previous = store.get("settings")
     if previous is not None and previous != settings:
         raise ValueError("Use a separate review database for different settings")
     store.put("settings", settings)
-    before, after = release_rows(old), release_rows(new)
+    if inventory:
+        selection = store.get("selection")
+        if selection is None:
+            population = [
+                row[0]
+                for row in session.query(Lemma.guid)
+                .filter(
+                    Lemma.difficulty_level == constants.STAGING_DIFFICULTY_LEVEL,
+                    Lemma.guid.isnot(None),
+                )
+                .order_by(Lemma.guid)
+            ]
+            if limit is not None and limit > len(population):
+                raise ValueError("Requested sample exceeds staging inventory")
+            sampled_guids = sorted(random.Random(seed).sample(population, limit or len(population)))
+            selection = dict(
+                guids=sampled_guids,
+                population=len(population),
+                seed=seed,
+                source_level=constants.STAGING_DIFFICULTY_LEVEL,
+            )
+            store.put("selection", selection)
+        guids = selection["guids"]
+    else:
+        before, after = release_rows(old), release_rows(new)
+        guids = sorted(after.keys() - before.keys())
     placer = LevelPlacer(session, {})
     occupied = {row[0] for row in session.query(Lemma.difficulty_level).distinct()}
     occupied.update(placer.titles)
@@ -206,7 +240,7 @@ def prepare(
             title = placer.titles[max(parents)] if parents else "Untitled topic"
             placer.menu.append(MenuLevel(number, f"{title} — existing extension {number}"))
     count = 0
-    for guid in sorted(after.keys() - before.keys()):
+    for guid in guids:
         lemma = session.query(Lemma).filter(Lemma.guid == guid).one_or_none()
         if lemma is None:
             raise ValueError(f"Release sense missing locally: {guid}")
@@ -244,6 +278,15 @@ def prepare(
             "Only the destinations in this context are allowed. "
             "The current level may be wrong. Preserve on-topic senses.\n"
         )
+        # Enforce the menu in the provider schema as well as validating on receipt.
+        schema = {
+            **PLACEMENT_JSON_SCHEMA,
+            "properties": {
+                **PLACEMENT_JSON_SCHEMA["properties"],
+                "level": {"type": "integer", "enum": [0, *allowed]},
+                "alternatives": {"type": "array", "items": {"type": "integer", "enum": allowed}},
+            },
+        }
         request = dict(
             custom_id=guid,
             method="POST",
@@ -256,7 +299,7 @@ def prepare(
                     dict(role="user", content=f"GUID: {guid}; current level: {level}\n" + prompt),
                 ],
                 max_tokens=4096,
-                json_schema=PLACEMENT_JSON_SCHEMA,
+                json_schema=schema,
             ),
         )
         store.put(
@@ -780,12 +823,71 @@ def collect_all(
     return complete
 
 
+def placement_stats(session: Session, store: ReviewStore, batch_session: Session) -> dict[str, Any]:
+    """Count actual destinations for this fixed cohort, including unresolved staging."""
+    from clients.batch_queue import BatchQueue, request_extra
+
+    refresh_results(session, store)
+    records = store.rows()
+    original = {record["guid"]: record["current_level"] for record in records}
+    current = {
+        row.guid: row.difficulty_level
+        for row in session.query(Lemma).filter(Lemma.guid.in_(original))
+    }
+    titles = {row.level: row for row in list_curriculum_levels(session)}
+    destinations = Counter(current.values())
+    outcomes: dict[str, str] = {}
+    for row in (
+        batch_session.query(BatchQueue)
+        .filter(BatchQueue.agent_name == "curriculum_review")
+        .order_by(BatchQueue.id)
+    ):
+        extra = request_extra(row)
+        state = extra.get("state") or {}
+        if state.get("review_id") == store.get("run_id"):
+            guid = state["record"]["guid"]
+            outcomes[guid] = str(extra.get("outcome") or row.status)
+    return dict(
+        selected=len(records),
+        missing=len(original.keys() - current.keys()),
+        selection=store.get("selection"),
+        moved=sum(current[guid] != old for guid, old in original.items() if guid in current),
+        still_staging=destinations.get(constants.STAGING_DIFFICULTY_LEVEL, 0),
+        valid_suggestions=sum(bool(record.get("suggestion")) for record in records),
+        applied=sum(bool(record.get("applied")) for record in records),
+        no_suitable_level=sum(
+            record.get("suggestion", {}).get("fit") == "none" for record in records
+        ),
+        queue_outcomes=dict(Counter(outcomes.values())),
+        destinations=[
+            dict(
+                level=level,
+                name=(
+                    titles[level].name
+                    if level in titles
+                    else (
+                        "Staging: placement undecided"
+                        if level == constants.STAGING_DIFFICULTY_LEVEL
+                        else "Untitled"
+                    )
+                ),
+                cefr=titles[level].cefr if level in titles else None,
+                count=count,
+            )
+            for level, count in sorted(
+                destinations.items(), key=lambda pair: (pair[0] is None, pair[0] or 0)
+            )
+        ],
+    )
+
+
 def main() -> None:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument(
         "action",
         choices=[
             "prepare",
+            "stats",
             "submit",
             "collect",
             "preview",
@@ -821,7 +923,21 @@ def main() -> None:
     parser.add_argument(
         "--batch-id", help="Reconcile an ambiguous submission using its OpenAI batch ID"
     )
-    parser.add_argument("--limit", type=int, default=500)
+    parser.add_argument(
+        "--limit", type=int, help="Inventory sample size, or items considered by submit"
+    )
+    parser.add_argument(
+        "--inventory",
+        action="store_true",
+        help="Sample the current staging inventory instead of a release diff",
+    )
+    parser.add_argument("--seed", type=int, default=20261117)
+    parser.add_argument(
+        "--topics-reviewed",
+        action="store_true",
+        help="Acknowledge completed editorial review, including manually resolved failures",
+    )
+    parser.add_argument("--output", type=Path, help="JSON statistics output path")
     parser.add_argument("--batch-size", type=int, default=325)
     parser.add_argument(
         "--apply-results",
@@ -845,10 +961,26 @@ def main() -> None:
     store = ReviewStore(args.review)
     session = create_session(config)
     try:
-        if args.action == "apply-results":
+        if args.action == "stats":
+            batch_session = create_batch_database_session()
+            try:
+                report = placement_stats(session, store, batch_session)
+            finally:
+                batch_session.close()
+            rendered = json.dumps(report, indent=2)
+            if args.output:
+                args.output.write_text(rendered + "\n")
+            print(rendered)
+        elif args.action == "apply-results":
             print(json.dumps(apply_results(session, config, store)), flush=True)
         elif args.action in ("submit", "submit-all"):
-            if store.get("settings")["phase"] == "staging":
+            if store.get("settings")["phase"] == "staging" and args.topics_reviewed:
+                if not args.dry_run:
+                    store.put(
+                        "topics_complete",
+                        dict(acknowledged=True, source="explicit editorial acknowledgement"),
+                    )
+            elif store.get("settings")["phase"] == "staging" and not store.get("topics_complete"):
                 if not args.topic_review:
                     raise ValueError("--topic-review is required before staging")
                 topics = ReviewStore(args.topic_review)
@@ -882,7 +1014,7 @@ def main() -> None:
                     args.batch_size,
                     apply_on_collect=args.apply_results,
                     dry_run=args.dry_run,
-                    limit=args.limit if args.action == "submit" else None,
+                    limit=(args.limit or 500) if args.action == "submit" else None,
                 )
             finally:
                 batch_session.close()
@@ -939,6 +1071,9 @@ def main() -> None:
                     args.model,
                     catalogue=json.loads(args.catalogue.read_text()) if args.catalogue else [],
                     cefr_pass=args.cefr_pass,
+                    inventory=args.inventory,
+                    limit=args.limit,
+                    seed=args.seed,
                     b2_exceptions=(
                         json.loads(args.b2_exceptions.read_text()) if args.b2_exceptions else []
                     ),
