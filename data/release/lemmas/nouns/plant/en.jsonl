@@ -40,3 +40,27 @@
 {"guid": "N05_049", "forms": [{"grammatical_form": "noun/en_singular", "text": "rye", "is_base_form": true, "ipa": "/raɪ/", "phonetic": "RYE"}]}
 {"guid": "N05_050", "forms": [{"grammatical_form": "noun/en_singular", "text": "hedgerow", "is_base_form": true, "ipa": "/ˈhɛdʒˌroʊ/", "phonetic": "HEJ-roh"}]}
 {"guid": "N05_051", "forms": [{"grammatical_form": "noun/en_singular", "text": "wheat", "is_base_form": true, "ipa": "/wit/", "phonetic": "WEET"}], "grammar_facts": [{"fact_type": "countability", "fact_value": "both"}, {"fact_type": "number_type", "fact_value": "regular"}, {"fact_type": "animacy", "fact_value": "inanimate"}, {"fact_type": "plural_status", "fact_value": "regular"}]}
+{"guid": "N05_052", "forms": [{"grammatical_form": "noun/en_singular", "text": "mint", "is_base_form": true, "ipa": "/mɪnt/", "phonetic": "MINT"}]}
+{"guid": "N05_053", "forms": [{"grammatical_form": "noun/en_singular", "text": "oat", "is_base_form": true, "ipa": "/oʊt/", "phonetic": "OHT"}]}
+{"guid": "N05_054", "forms": [{"grammatical_form": "noun/en_singular", "text": "parsley", "is_base_form": true, "ipa": "/ˈpɑrsli/", "phonetic": "PARS-lee"}]}
+{"guid": "N05_055", "forms": [{"grammatical_form": "noun/en_singular", "text": "plum", "is_base_form": true, "ipa": "/plʌm/", "phonetic": "PLUM"}]}
+{"guid": "N05_056", "forms": [{"grammatical_form": "noun/en_singular", "text": "grove", "is_base_form": true, "ipa": "/ɡroʊv/", "phonetic": "GROHV"}]}
+{"guid": "N05_057", "forms": [{"grammatical_form": "noun/en_singular", "text": "hedge", "is_base_form": true, "ipa": "/hɛdʒ/", "phonetic": "HEJ"}]}
+{"guid": "N05_058", "forms": [{"grammatical_form": "noun/en_singular", "text": "thicket", "is_base_form": true, "ipa": "/ˈθɪkɪt/", "phonetic": "THIK-it"}]}
+{"guid": "N05_059", "forms": [{"grammatical_form": "noun/en_singular", "text": "algae", "is_base_form": true, "ipa": "/ˈældʒi/", "phonetic": "AL-jee"}]}
+{"guid": "N05_060", "forms": [{"grammatical_form": "noun/en_singular", "text": "fir", "is_base_form": true, "ipa": "/fɝ/", "phonetic": "FUR"}]}
+{"guid": "N05_061", "forms": [{"grammatical_form": "noun/en_singular", "text": "fungi", "is_base_form": true, "ipa": "/ˈfʌŋɡaɪ/", "phonetic": "FUN-jye"}]}
+{"guid": "N05_062", "forms": [{"grammatical_form": "noun/en_singular", "text": "maize", "is_base_form": true, "ipa": "/meɪz/", "phonetic": "MAYZ"}]}
+{"guid": "N05_063", "forms": [{"grammatical_form": "noun/en_singular", "text": "cane", "is_base_form": true, "ipa": "/keɪn/", "phonetic": "KAYN"}]}
+{"guid": "N05_064", "forms": [{"grammatical_form": "noun/en_singular", "text": "willow", "is_base_form": true, "ipa": "/ˈwɪloʊ/", "phonetic": "WIL-oh"}]}
+{"guid": "N05_065", "forms": [{"grammatical_form": "noun/en_singular", "text": "ivy", "is_base_form": true, "ipa": "/ˈaɪvi/", "phonetic": "EYE-vee"}]}
+{"guid": "N05_066", "forms": [{"grammatical_form": "noun/en_singular", "text": "spruce", "is_base_form": true, "ipa": "/sprus/", "phonetic": "SPROOS"}]}
+{"guid": "N05_067", "forms": [{"grammatical_form": "noun/en_singular", "text": "sage", "is_base_form": true, "ipa": "/seɪdʒ/", "phonetic": "SAYJ"}]}
+{"guid": "N05_068", "forms": [{"grammatical_form": "noun/en_singular", "text": "timber", "is_base_form": true, "ipa": "/ˈtɪmbər/", "phonetic": "TIM-ber"}]}
+{"guid": "N05_069", "forms": [{"grammatical_form": "noun/en_singular", "text": "chili", "is_base_form": true, "ipa": "/ˈtʃɪli/", "phonetic": "CHIL-ee"}]}
+{"guid": "N05_070", "forms": [{"grammatical_form": "noun/en_singular", "text": "lily", "is_base_form": true, "ipa": "/ˈlɪli/", "phonetic": "LIL-ee"}]}
+{"guid": "N05_071", "forms": [{"grammatical_form": "noun/en_singular", "text": "maple", "is_base_form": true, "ipa": "/ˈmeɪpəl/", "phonetic": "MAY-puhl"}]}
+{"guid": "N05_072", "forms": [{"grammatical_form": "noun/en_singular", "text": "ash", "is_base_form": true, "ipa": "/æʃ/", "phonetic": "ASH"}]}
+{"guid": "N05_073", "forms": [{"grammatical_form": "noun/en_singular", "text": "cedar", "is_base_form": true, "ipa": "/ˈsiːdər/", "phonetic": "SEE-der"}]}
+{"guid": "N05_074", "forms": [{"grammatical_form": "noun/en_singular", "text": "chestnut", "is_base_form": true, "ipa": "/ˈtʃɛsˌnʌt/", "phonetic": "CHES-nut"}]}
+{"guid": "N05_075", "forms": [{"grammatical_form": "noun/en_singular", "text": "herb", "is_base_form": true, "ipa": "/ɝb/", "phonetic": "URB"}]}

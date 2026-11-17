@@ -78,6 +78,132 @@
 {"guid": "V08_078", "grammar_facts": [{"fact_type": "past", "fact_value": "gained"}, {"fact_type": "past_participle", "fact_value": "gained"}]}
 {"guid": "V08_079", "grammar_facts": [{"fact_type": "past", "fact_value": "abandoned"}, {"fact_type": "past_participle", "fact_value": "abandoned"}]}
 {"guid": "V08_080", "forms": [{"grammatical_form": "verb/en_infinitive", "text": "wilt", "is_base_form": true}, {"grammatical_form": "verb/en_1s_present", "text": "wilt", "is_base_form": false}, {"grammatical_form": "verb/en_2s_present", "text": "wilt", "is_base_form": false}, {"grammatical_form": "verb/en_3s_present", "text": "wilts", "is_base_form": false}, {"grammatical_form": "verb/en_1p_present", "text": "wilt", "is_base_form": false}, {"grammatical_form": "verb/en_2p_present", "text": "wilt", "is_base_form": false}, {"grammatical_form": "verb/en_3p_present", "text": "wilt", "is_base_form": false}, {"grammatical_form": "verb/en_1s_past", "text": "wilted", "is_base_form": false}, {"grammatical_form": "verb/en_2s_past", "text": "wilted", "is_base_form": false}, {"grammatical_form": "verb/en_3s_past", "text": "wilted", "is_base_form": false}, {"grammatical_form": "verb/en_1p_past", "text": "wilted", "is_base_form": false}, {"grammatical_form": "verb/en_2p_past", "text": "wilted", "is_base_form": false}, {"grammatical_form": "verb/en_3p_past", "text": "wilted", "is_base_form": false}, {"grammatical_form": "verb/en_1s_future", "text": "will wilt", "is_base_form": false}, {"grammatical_form": "verb/en_2s_future", "text": "will wilt", "is_base_form": false}, {"grammatical_form": "verb/en_3s_future", "text": "will wilt", "is_base_form": false}, {"grammatical_form": "verb/en_1p_future", "text": "will wilt", "is_base_form": false}, {"grammatical_form": "verb/en_2p_future", "text": "will wilt", "is_base_form": false}, {"grammatical_form": "verb/en_3p_future", "text": "will wilt", "is_base_form": false}, {"grammatical_form": "verb/en_2s_imp", "text": "wilt", "is_base_form": false}, {"grammatical_form": "verb/en_2p_imp", "text": "wilt", "is_base_form": false}, {"grammatical_form": "verb/en_present_participle", "text": "wilting", "is_base_form": false}, {"grammatical_form": "verb/en_past_participle", "text": "wilted", "is_base_form": false}]}
-{"guid": "V08_081", "forms": [{"grammatical_form": "verb/en_infinitive", "text": "recover", "is_base_form": true, "ipa": "/rɪˈkʌvər/", "phonetic": "ri-KUH-ver"}]}
+{"guid": "V08_081", "forms": [{"grammatical_form": "verb/en_infinitive", "text": "recover", "is_base_form": true, "ipa": "/rɪˈkʌvər/", "phonetic": "ri-KUH-ver"}], "grammar_facts": [{"fact_type": "past", "fact_value": "recovered"}, {"fact_type": "past_participle", "fact_value": "recovered"}]}
 {"guid": "V08_082", "forms": [{"grammatical_form": "verb/en_infinitive", "text": "reschedule", "is_base_form": true, "ipa": "/ˌriːˈskedʒuːl/", "phonetic": "ree-SKEJ-ool"}]}
 {"guid": "V08_083", "forms": [{"grammatical_form": "verb/en_infinitive", "text": "postpone", "is_base_form": true, "ipa": "/poʊstˈpoʊn/", "phonetic": "pohst-POHN"}]}
+{"guid": "V08_084", "forms": [{"grammatical_form": "verb/en_infinitive", "text": "chill", "is_base_form": true, "ipa": "/tʃɪl/", "phonetic": "CHIL"}]}
+{"guid": "V08_085", "forms": [{"grammatical_form": "verb/en_infinitive", "text": "chill", "is_base_form": true, "ipa": "/tʃɪl/", "phonetic": "CHIL"}]}
+{"guid": "V08_086", "forms": [{"grammatical_form": "verb/en_infinitive", "text": "dilute", "is_base_form": true, "ipa": "/daɪˈlut/", "phonetic": "dye-LOOT"}]}
+{"guid": "V08_087", "forms": [{"grammatical_form": "verb/en_infinitive", "text": "dilute", "is_base_form": true, "ipa": "/daɪˈlut/", "phonetic": "dye-LOOT"}]}
+{"guid": "V08_088", "forms": [{"grammatical_form": "verb/en_infinitive", "text": "exhaust", "is_base_form": true, "ipa": "/ɪɡˈzɔst/", "phonetic": "ig-ZAWST"}]}
+{"guid": "V08_089", "forms": [{"grammatical_form": "verb/en_infinitive", "text": "fuse", "is_base_form": true, "ipa": "/fjuːz/", "phonetic": "FYOOZ"}]}
+{"guid": "V08_090", "forms": [{"grammatical_form": "verb/en_infinitive", "text": "blend", "is_base_form": true, "ipa": "/blɛnd/", "phonetic": "BLEND"}]}
+{"guid": "V08_091", "forms": [{"grammatical_form": "verb/en_infinitive", "text": "depart", "is_base_form": true, "ipa": "/dɪˈpɑrt/", "phonetic": "dih-PART"}]}
+{"guid": "V08_092", "forms": [{"grammatical_form": "verb/en_infinitive", "text": "disadvantage", "is_base_form": true, "ipa": "/ˌdɪsədˈvæntɪdʒ/", "phonetic": "dis-uhd-VAN-tij"}]}
+{"guid": "V08_093", "forms": [{"grammatical_form": "verb/en_infinitive", "text": "restrict", "is_base_form": true, "ipa": "/rɪˈstrɪkt/", "phonetic": "rih-STRIKT"}], "grammar_facts": [{"fact_type": "past", "fact_value": "restricted"}, {"fact_type": "past_participle", "fact_value": "restricted"}]}
+{"guid": "V08_094", "forms": [{"grammatical_form": "verb/en_infinitive", "text": "swell", "is_base_form": true, "ipa": "/swɛl/", "phonetic": "SWEL"}]}
+{"guid": "V08_095", "forms": [{"grammatical_form": "verb/en_infinitive", "text": "swell", "is_base_form": true, "ipa": "/swɛl/", "phonetic": "SWEL"}]}
+{"guid": "V08_096", "forms": [{"grammatical_form": "verb/en_infinitive", "text": "temper", "is_base_form": true, "ipa": "/ˈtɛmpɚ/", "phonetic": "TEM-per"}]}
+{"guid": "V08_097", "forms": [{"grammatical_form": "verb/en_infinitive", "text": "unite", "is_base_form": true, "ipa": "/juˈnaɪt/", "phonetic": "yoo-NYTE"}], "grammar_facts": [{"fact_type": "past", "fact_value": "united"}, {"fact_type": "past_participle", "fact_value": "united"}]}
+{"guid": "V08_098", "forms": [{"grammatical_form": "verb/en_infinitive", "text": "unite", "is_base_form": true, "ipa": "/juˈnaɪt/", "phonetic": "yoo-NYTE"}], "grammar_facts": [{"fact_type": "past", "fact_value": "united"}, {"fact_type": "past_participle", "fact_value": "united"}]}
+{"guid": "V08_099", "forms": [{"grammatical_form": "verb/en_infinitive", "text": "corrupt", "is_base_form": true, "ipa": "/kəˈrʌpt/", "phonetic": "kuh-RUPT"}]}
+{"guid": "V08_100", "forms": [{"grammatical_form": "verb/en_infinitive", "text": "halt", "is_base_form": true, "ipa": "/hɔlt/", "phonetic": "HAWLT"}]}
+{"guid": "V08_101", "forms": [{"grammatical_form": "verb/en_infinitive", "text": "relieve", "is_base_form": true, "ipa": "/rɪˈliv/", "phonetic": "ri-LEEV"}]}
+{"guid": "V08_102", "forms": [{"grammatical_form": "verb/en_infinitive", "text": "relieve", "is_base_form": true, "ipa": "/rɪˈliv/", "phonetic": "ri-LEEV"}]}
+{"guid": "V08_103", "forms": [{"grammatical_form": "verb/en_infinitive", "text": "spark", "is_base_form": true, "ipa": "/spɑrk/", "phonetic": "SPARK"}]}
+{"guid": "V08_104", "forms": [{"grammatical_form": "verb/en_infinitive", "text": "tame", "is_base_form": true, "ipa": "/teɪm/", "phonetic": "TAYM"}]}
+{"guid": "V08_105", "forms": [{"grammatical_form": "verb/en_infinitive", "text": "hasten", "is_base_form": true, "ipa": "/ˈheɪsən/", "phonetic": "HAY-suhn"}]}
+{"guid": "V08_106", "forms": [{"grammatical_form": "verb/en_infinitive", "text": "incline", "is_base_form": true, "ipa": "/ɪnˈklaɪn/", "phonetic": "in-KLINE"}], "grammar_facts": [{"fact_type": "past", "fact_value": "inclined"}, {"fact_type": "past_participle", "fact_value": "inclined"}]}
+{"guid": "V08_107", "forms": [{"grammatical_form": "verb/en_infinitive", "text": "reinforce", "is_base_form": true, "ipa": "/ˌriːɪnˈfɔrs/", "phonetic": "ree-in-FORSS"}]}
+{"guid": "V08_108", "forms": [{"grammatical_form": "verb/en_infinitive", "text": "reinforce", "is_base_form": true, "ipa": "/ˌriːɪnˈfɔrs/", "phonetic": "ree-in-FORSS"}]}
+{"guid": "V08_109", "forms": [{"grammatical_form": "verb/en_infinitive", "text": "stabilize", "is_base_form": true, "ipa": "/ˈsteɪbəˌlaɪz/", "phonetic": "STAY-buh-lyze"}]}
+{"guid": "V08_110", "forms": [{"grammatical_form": "verb/en_infinitive", "text": "tan", "is_base_form": true, "ipa": "/tæn/", "phonetic": "TAN"}]}
+{"guid": "V08_111", "forms": [{"grammatical_form": "verb/en_infinitive", "text": "tilt", "is_base_form": true, "ipa": "/tɪlt/", "phonetic": "TILT"}]}
+{"guid": "V08_112", "forms": [{"grammatical_form": "verb/en_infinitive", "text": "accommodate", "is_base_form": true, "ipa": "/əˈkɑməˌdeɪt/", "phonetic": "uh-KOM-uh-dayt"}]}
+{"guid": "V08_113", "forms": [{"grammatical_form": "verb/en_infinitive", "text": "divorce", "is_base_form": true, "ipa": "/dɪˈvɔrs/", "phonetic": "dih-VORSS"}]}
+{"guid": "V08_114", "forms": [{"grammatical_form": "verb/en_infinitive", "text": "induce", "is_base_form": true, "ipa": "/ɪnˈduːs/", "phonetic": "in-DOOS"}], "grammar_facts": [{"fact_type": "past", "fact_value": "induced"}, {"fact_type": "past_participle", "fact_value": "induced"}]}
+{"guid": "V08_115", "forms": [{"grammatical_form": "verb/en_infinitive", "text": "merge", "is_base_form": true, "ipa": "/mɝdʒ/", "phonetic": "MERJ"}]}
+{"guid": "V08_116", "forms": [{"grammatical_form": "verb/en_infinitive", "text": "merge", "is_base_form": true, "ipa": "/mɝdʒ/", "phonetic": "MERJ"}]}
+{"guid": "V08_117", "forms": [{"grammatical_form": "verb/en_infinitive", "text": "obscure", "is_base_form": true, "ipa": "/əbˈskjʊr/", "phonetic": "ub-SKYOOR"}]}
+{"guid": "V08_118", "forms": [{"grammatical_form": "verb/en_infinitive", "text": "pivot", "is_base_form": true, "ipa": "/ˈpɪvət/", "phonetic": "PIV-uht"}]}
+{"guid": "V08_119", "forms": [{"grammatical_form": "verb/en_infinitive", "text": "disgrace", "is_base_form": true, "ipa": "/dɪsˈɡreɪs/", "phonetic": "dis-GRAYS"}]}
+{"guid": "V08_120", "forms": [{"grammatical_form": "verb/en_infinitive", "text": "muddy", "is_base_form": true, "ipa": "/ˈmʌdi/", "phonetic": "MUH-dee"}]}
+{"guid": "V08_121", "forms": [{"grammatical_form": "verb/en_infinitive", "text": "plump", "is_base_form": true, "ipa": "/plʌmp/", "phonetic": "PLUMP"}]}
+{"guid": "V08_122", "forms": [{"grammatical_form": "verb/en_infinitive", "text": "reconcile", "is_base_form": true, "ipa": "/ˈrɛkənˌsaɪl/", "phonetic": "REK-un-sile"}]}
+{"guid": "V08_123", "forms": [{"grammatical_form": "verb/en_infinitive", "text": "rot", "is_base_form": true, "ipa": "/rɑt/", "phonetic": "ROT"}]}
+{"guid": "V08_124", "forms": [{"grammatical_form": "verb/en_infinitive", "text": "sober", "is_base_form": true, "ipa": "/ˈsoʊbɚ/", "phonetic": "SOH-ber"}]}
+{"guid": "V08_125", "forms": [{"grammatical_form": "verb/en_infinitive", "text": "disrupt", "is_base_form": true, "ipa": "/dɪsˈrʌpt/", "phonetic": "dis-RUPT"}]}
+{"guid": "V08_126", "forms": [{"grammatical_form": "verb/en_infinitive", "text": "surge", "is_base_form": true, "ipa": "/sɝdʒ/", "phonetic": "SURJ"}]}
+{"guid": "V08_127", "forms": [{"grammatical_form": "verb/en_infinitive", "text": "verge", "is_base_form": true, "ipa": "/vɝdʒ/", "phonetic": "VERJ"}]}
+{"guid": "V08_128", "forms": [{"grammatical_form": "verb/en_infinitive", "text": "affect", "is_base_form": true, "ipa": "/əˈfɛkt/", "phonetic": "uh-FEKT"}], "grammar_facts": [{"fact_type": "past", "fact_value": "affected"}, {"fact_type": "past_participle", "fact_value": "affected"}]}
+{"guid": "V08_129", "forms": [{"grammatical_form": "verb/en_infinitive", "text": "ease", "is_base_form": true, "ipa": "/iːz/", "phonetic": "EEZ"}]}
+{"guid": "V08_130", "forms": [{"grammatical_form": "verb/en_infinitive", "text": "ease", "is_base_form": true, "ipa": "/iːz/", "phonetic": "EEZ"}]}
+{"guid": "V08_131", "forms": [{"grammatical_form": "verb/en_infinitive", "text": "possess", "is_base_form": true, "ipa": "/pəˈzɛs/", "phonetic": "puh-ZESS"}]}
+{"guid": "V08_132", "forms": [{"grammatical_form": "verb/en_infinitive", "text": "split", "is_base_form": true, "ipa": "/splɪt/", "phonetic": "SPLIT"}]}
+{"guid": "V08_133", "forms": [{"grammatical_form": "verb/en_infinitive", "text": "split", "is_base_form": true, "ipa": "/splɪt/", "phonetic": "SPLIT"}]}
+{"guid": "V08_134", "forms": [{"grammatical_form": "verb/en_infinitive", "text": "amend", "is_base_form": true, "ipa": "/əˈmɛnd/", "phonetic": "uh-MEND"}]}
+{"guid": "V08_135", "forms": [{"grammatical_form": "verb/en_infinitive", "text": "exempt", "is_base_form": true, "ipa": "/ɪɡˈzɛmpt/", "phonetic": "ig-ZEMPT"}]}
+{"guid": "V08_136", "forms": [{"grammatical_form": "verb/en_infinitive", "text": "accelerate", "is_base_form": true, "ipa": "/əkˈsɛləˌreɪt/", "phonetic": "ak-SEL-uh-rayt"}]}
+{"guid": "V08_137", "forms": [{"grammatical_form": "verb/en_infinitive", "text": "accelerate", "is_base_form": true, "ipa": "/əkˈsɛləˌreɪt/", "phonetic": "ak-SEL-uh-rayt"}]}
+{"guid": "V08_138", "forms": [{"grammatical_form": "verb/en_infinitive", "text": "diffuse", "is_base_form": true, "ipa": "/dɪˈfjuz/", "phonetic": "dih-FYOOZ"}]}
+{"guid": "V08_139", "forms": [{"grammatical_form": "verb/en_infinitive", "text": "diffuse", "is_base_form": true, "ipa": "/dɪˈfjuz/", "phonetic": "dih-FYOOZ"}]}
+{"guid": "V08_140", "forms": [{"grammatical_form": "verb/en_infinitive", "text": "eclipse", "is_base_form": true, "ipa": "/ɪˈklɪps/", "phonetic": "ih-KLIPS"}]}
+{"guid": "V08_141", "forms": [{"grammatical_form": "verb/en_infinitive", "text": "precipitate", "is_base_form": true, "ipa": "/prɪˈsɪpɪˌteɪt/", "phonetic": "prih-SIP-uh-tayt"}]}
+{"guid": "V08_142", "forms": [{"grammatical_form": "verb/en_infinitive", "text": "complement", "is_base_form": true, "ipa": "/ˈkɑmpləˌmɛnt/", "phonetic": "KOM-pluh-ment"}]}
+{"guid": "V08_143", "forms": [{"grammatical_form": "verb/en_infinitive", "text": "conjugate", "is_base_form": true, "ipa": "/ˈkɑndʒəˌɡeɪt/", "phonetic": "KON-juh-gayt"}]}
+{"guid": "V08_144", "forms": [{"grammatical_form": "verb/en_infinitive", "text": "converge", "is_base_form": true, "ipa": "/kənˈvɝdʒ/", "phonetic": "kuhn-VURJ"}]}
+{"guid": "V08_145", "forms": [{"grammatical_form": "verb/en_infinitive", "text": "converge", "is_base_form": true, "ipa": "/kənˈvɝdʒ/", "phonetic": "kuhn-VURJ"}]}
+{"guid": "V08_146", "forms": [{"grammatical_form": "verb/en_infinitive", "text": "curl", "is_base_form": true, "ipa": "/kɝl/", "phonetic": "KURL"}]}
+{"guid": "V08_147", "forms": [{"grammatical_form": "verb/en_infinitive", "text": "degenerate", "is_base_form": true, "ipa": "/dɪˈdʒɛnəˌreɪt/", "phonetic": "duh-JEN-uh-rayt"}]}
+{"guid": "V08_148", "forms": [{"grammatical_form": "verb/en_infinitive", "text": "integrate", "is_base_form": true, "ipa": "/ˈɪntəˌɡreɪt/", "phonetic": "IN-tuh-grayt"}], "grammar_facts": [{"fact_type": "past", "fact_value": "integrated"}, {"fact_type": "past_participle", "fact_value": "integrated"}]}
+{"guid": "V08_149", "forms": [{"grammatical_form": "verb/en_infinitive", "text": "maximize", "is_base_form": true, "ipa": "/ˈmæk.səˌmaɪz/", "phonetic": "MAK-suh-mize"}]}
+{"guid": "V08_150", "forms": [{"grammatical_form": "verb/en_infinitive", "text": "minimize", "is_base_form": true, "ipa": "/ˈmɪnəˌmaɪz/", "phonetic": "MIN-uh-mize"}]}
+{"guid": "V08_151", "forms": [{"grammatical_form": "verb/en_infinitive", "text": "multiply", "is_base_form": true, "ipa": "/ˈmʌltəˌplaɪ/", "phonetic": "MUL-tuh-ply"}]}
+{"guid": "V08_152", "forms": [{"grammatical_form": "verb/en_infinitive", "text": "simplify", "is_base_form": true, "ipa": "/ˈsɪmpləˌfaɪ/", "phonetic": "SIM-pluh-fy"}]}
+{"guid": "V08_153", "forms": [{"grammatical_form": "verb/en_infinitive", "text": "simplify", "is_base_form": true, "ipa": "/ˈsɪmpləˌfaɪ/", "phonetic": "SIM-pluh-fy"}]}
+{"guid": "V08_154", "forms": [{"grammatical_form": "verb/en_infinitive", "text": "damp", "is_base_form": true, "ipa": "/dæmp/", "phonetic": "DAMP"}]}
+{"guid": "V08_155", "forms": [{"grammatical_form": "verb/en_infinitive", "text": "damp", "is_base_form": true, "ipa": "/dæmp/", "phonetic": "DAMP"}]}
+{"guid": "V08_156", "forms": [{"grammatical_form": "verb/en_infinitive", "text": "dull", "is_base_form": true, "ipa": "/dʌl/", "phonetic": "DULL"}]}
+{"guid": "V08_157", "forms": [{"grammatical_form": "verb/en_infinitive", "text": "leap", "is_base_form": true, "ipa": "/lip/", "phonetic": "LEEP"}]}
+{"guid": "V08_158", "forms": [{"grammatical_form": "verb/en_infinitive", "text": "leap", "is_base_form": true, "ipa": "/lip/", "phonetic": "LEEP"}]}
+{"guid": "V08_159", "forms": [{"grammatical_form": "verb/en_infinitive", "text": "retreat", "is_base_form": true, "ipa": "/rɪˈtrit/", "phonetic": "ri-TREET"}]}
+{"guid": "V08_160", "forms": [{"grammatical_form": "verb/en_infinitive", "text": "rid", "is_base_form": true, "ipa": "/rɪd/", "phonetic": "RID"}]}
+{"guid": "V08_161", "forms": [{"grammatical_form": "verb/en_infinitive", "text": "trigger", "is_base_form": true, "ipa": "/ˈtrɪɡər/", "phonetic": "TRIG-er"}]}
+{"guid": "V08_162", "forms": [{"grammatical_form": "verb/en_infinitive", "text": "fade", "is_base_form": true, "ipa": "/feɪd/", "phonetic": "FAYD"}]}
+{"guid": "V08_163", "forms": [{"grammatical_form": "verb/en_infinitive", "text": "fade", "is_base_form": true, "ipa": "/feɪd/", "phonetic": "FAYD"}]}
+{"guid": "V08_164", "forms": [{"grammatical_form": "verb/en_infinitive", "text": "fade", "is_base_form": true, "ipa": "/feɪd/", "phonetic": "FAYD"}]}
+{"guid": "V08_165", "forms": [{"grammatical_form": "verb/en_infinitive", "text": "fade", "is_base_form": true, "ipa": "/feɪd/", "phonetic": "FAYD"}]}
+{"guid": "V08_166", "forms": [{"grammatical_form": "verb/en_infinitive", "text": "fade", "is_base_form": true, "ipa": "/feɪd/", "phonetic": "FAYD"}]}
+{"guid": "V08_167", "forms": [{"grammatical_form": "verb/en_infinitive", "text": "glide", "is_base_form": true, "ipa": "/ɡlaɪd/", "phonetic": "GLYD"}]}
+{"guid": "V08_168", "forms": [{"grammatical_form": "verb/en_infinitive", "text": "knit", "is_base_form": true, "ipa": "/nɪt/", "phonetic": "NIT"}]}
+{"guid": "V08_169", "forms": [{"grammatical_form": "verb/en_infinitive", "text": "orphan", "is_base_form": true, "ipa": "/ˈɔrfən/", "phonetic": "OR-fuhn"}]}
+{"guid": "V08_170", "forms": [{"grammatical_form": "verb/en_infinitive", "text": "relax", "is_base_form": true, "ipa": "/rɪˈlæks/", "phonetic": "ri-LAKS"}]}
+{"guid": "V08_171", "forms": [{"grammatical_form": "verb/en_infinitive", "text": "relax", "is_base_form": true, "ipa": "/rɪˈlæks/", "phonetic": "ri-LAKS"}]}
+{"guid": "V08_172", "forms": [{"grammatical_form": "verb/en_infinitive", "text": "renew", "is_base_form": true, "ipa": "/rɪˈnuː/", "phonetic": "ri-NOO"}]}
+{"guid": "V08_173", "forms": [{"grammatical_form": "verb/en_infinitive", "text": "renew", "is_base_form": true, "ipa": "/rɪˈnuː/", "phonetic": "ri-NOO"}]}
+{"guid": "V08_174", "forms": [{"grammatical_form": "verb/en_infinitive", "text": "shave", "is_base_form": true, "ipa": "/ʃeɪv/", "phonetic": "SHAYV"}]}
+{"guid": "V08_175", "forms": [{"grammatical_form": "verb/en_infinitive", "text": "slim", "is_base_form": true, "ipa": "/slɪm/", "phonetic": "SLIM"}]}
+{"guid": "V08_176", "forms": [{"grammatical_form": "verb/en_infinitive", "text": "spice", "is_base_form": true, "ipa": "/spaɪs/", "phonetic": "SPYS"}]}
+{"guid": "V08_177", "forms": [{"grammatical_form": "verb/en_infinitive", "text": "bias", "is_base_form": true, "ipa": "/ˈbaɪəs/", "phonetic": "BYE-us"}]}
+{"guid": "V08_178", "forms": [{"grammatical_form": "verb/en_infinitive", "text": "compensate", "is_base_form": true, "ipa": "/ˈkɑːmpənˌseɪt/", "phonetic": "KOM-pen-sayt"}]}
+{"guid": "V08_179", "forms": [{"grammatical_form": "verb/en_infinitive", "text": "diminish", "is_base_form": true, "ipa": "/dɪˈmɪnɪʃ/", "phonetic": "duh-MIN-ish"}]}
+{"guid": "V08_180", "forms": [{"grammatical_form": "verb/en_infinitive", "text": "diminish", "is_base_form": true, "ipa": "/dɪˈmɪnɪʃ/", "phonetic": "duh-MIN-ish"}]}
+{"guid": "V08_181", "forms": [{"grammatical_form": "verb/en_infinitive", "text": "enhance", "is_base_form": true, "ipa": "/ɪnˈhæns/", "phonetic": "en-HANS"}]}
+{"guid": "V08_182", "forms": [{"grammatical_form": "verb/en_infinitive", "text": "offset", "is_base_form": true, "ipa": "/ɔfˈsɛt/", "phonetic": "awf-SET"}]}
+{"guid": "V08_183", "forms": [{"grammatical_form": "verb/en_infinitive", "text": "stimulate", "is_base_form": true, "ipa": "/ˈstɪmjəˌleɪt/", "phonetic": "STIM-yuh-layt"}]}
+{"guid": "V08_184", "forms": [{"grammatical_form": "verb/en_infinitive", "text": "taint", "is_base_form": true, "ipa": "/teɪnt/", "phonetic": "TAYNT"}]}
+{"guid": "V08_185", "forms": [{"grammatical_form": "verb/en_infinitive", "text": "alternate", "is_base_form": true, "ipa": "/ˈɔltərˌneɪt/", "phonetic": "AWL-ter-nayt"}]}
+{"guid": "V08_186", "forms": [{"grammatical_form": "verb/en_infinitive", "text": "cure", "is_base_form": true, "ipa": "/kjʊr/", "phonetic": "KYOOR"}]}
+{"guid": "V08_187", "forms": [{"grammatical_form": "verb/en_infinitive", "text": "founder", "is_base_form": true, "ipa": "/ˈfaʊndər/", "phonetic": "FOWN-der"}]}
+{"guid": "V08_188", "forms": [{"grammatical_form": "verb/en_infinitive", "text": "mould", "is_base_form": true, "ipa": "/moʊld/", "phonetic": "MOHLD"}]}
+{"guid": "V08_189", "forms": [{"grammatical_form": "verb/en_infinitive", "text": "thrust", "is_base_form": true, "ipa": "/θrʌst/", "phonetic": "THRUST"}]}
+{"guid": "V08_190", "forms": [{"grammatical_form": "verb/en_infinitive", "text": "enable", "is_base_form": true, "ipa": "/ɪˈneɪbəl/", "phonetic": "en-AY-buhl"}], "grammar_facts": [{"fact_type": "past", "fact_value": "enabled"}, {"fact_type": "past_participle", "fact_value": "enabled"}]}
+{"guid": "V08_191", "forms": [{"grammatical_form": "verb/en_infinitive", "text": "moderate", "is_base_form": true, "ipa": "/ˈmɑːdəˌreɪt/", "phonetic": "MOD-uh-rayt"}]}
+{"guid": "V08_192", "forms": [{"grammatical_form": "verb/en_infinitive", "text": "peak", "is_base_form": true, "ipa": "/piːk/", "phonetic": "PEEK"}]}
+{"guid": "V08_193", "forms": [{"grammatical_form": "verb/en_infinitive", "text": "reverse", "is_base_form": true, "ipa": "/rɪˈvɝs/", "phonetic": "rih-VURS"}], "grammar_facts": [{"fact_type": "past", "fact_value": "reversed"}, {"fact_type": "past_participle", "fact_value": "reversed"}]}
+{"guid": "V08_194", "forms": [{"grammatical_form": "verb/en_infinitive", "text": "reverse", "is_base_form": true, "ipa": "/rɪˈvɝs/", "phonetic": "rih-VURS"}], "grammar_facts": [{"fact_type": "past", "fact_value": "reversed"}, {"fact_type": "past_participle", "fact_value": "reversed"}]}
+{"guid": "V08_195", "forms": [{"grammatical_form": "verb/en_infinitive", "text": "ascend", "is_base_form": true, "ipa": "/əˈsɛnd/", "phonetic": "uh-SEND"}]}
+{"guid": "V08_196", "forms": [{"grammatical_form": "verb/en_infinitive", "text": "boost", "is_base_form": true, "ipa": "/buːst/", "phonetic": "BOOST"}]}
+{"guid": "V08_197", "forms": [{"grammatical_form": "verb/en_infinitive", "text": "confine", "is_base_form": true, "ipa": "/kənˈfaɪn/", "phonetic": "kuhn-FINE"}], "grammar_facts": [{"fact_type": "past", "fact_value": "confined"}, {"fact_type": "past_participle", "fact_value": "confined"}]}
+{"guid": "V08_198", "forms": [{"grammatical_form": "verb/en_infinitive", "text": "disguise", "is_base_form": true, "ipa": "/dɪsˈɡaɪz/", "phonetic": "dis-GIZE"}]}
+{"guid": "V08_199", "forms": [{"grammatical_form": "verb/en_infinitive", "text": "lapse", "is_base_form": true, "ipa": "/læps/", "phonetic": "LAPS"}]}
+{"guid": "V08_200", "forms": [{"grammatical_form": "verb/en_infinitive", "text": "lapse", "is_base_form": true, "ipa": "/læps/", "phonetic": "LAPS"}]}
+{"guid": "V08_201", "forms": [{"grammatical_form": "verb/en_infinitive", "text": "mute", "is_base_form": true, "ipa": "/mjut/", "phonetic": "MYOOT"}]}
+{"guid": "V08_202", "forms": [{"grammatical_form": "verb/en_infinitive", "text": "revive", "is_base_form": true, "ipa": "/rɪˈvaɪv/", "phonetic": "ri-VIVE"}]}
+{"guid": "V08_203", "forms": [{"grammatical_form": "verb/en_infinitive", "text": "revive", "is_base_form": true, "ipa": "/rɪˈvaɪv/", "phonetic": "ri-VIVE"}]}
+{"guid": "V08_204", "forms": [{"grammatical_form": "verb/en_infinitive", "text": "alter", "is_base_form": true, "ipa": "/ˈɔltər/", "phonetic": "AWL-ter"}]}
+{"guid": "V08_205", "forms": [{"grammatical_form": "verb/en_infinitive", "text": "alter", "is_base_form": true, "ipa": "/ˈɔltər/", "phonetic": "AWL-ter"}]}
+{"guid": "V08_206", "forms": [{"grammatical_form": "verb/en_infinitive", "text": "attract", "is_base_form": true, "ipa": "/əˈtrækt/", "phonetic": "uh-TRAKT"}]}
+{"guid": "V08_207", "forms": [{"grammatical_form": "verb/en_infinitive", "text": "dawn", "is_base_form": true, "ipa": "/dɔn/", "phonetic": "DAWN"}]}
+{"guid": "V08_208", "forms": [{"grammatical_form": "verb/en_infinitive", "text": "render", "is_base_form": true, "ipa": "/ˈrɛndər/", "phonetic": "REN-der"}]}
+{"guid": "V08_209", "forms": [{"grammatical_form": "verb/en_infinitive", "text": "shed", "is_base_form": true, "ipa": "/ʃɛd/", "phonetic": "SHED"}]}

@@ -21,7 +21,11 @@
 {"guid": "N37_025", "forms": [{"grammatical_form": "noun/en_singular", "text": "polyhedron", "is_base_form": true, "ipa": "/ˌpɑliˈhiːdrən/", "phonetic": "pol-ee-HEE-drun"}]}
 {"guid": "N37_026", "forms": [{"grammatical_form": "noun/en_singular", "text": "torus", "is_base_form": true, "ipa": "/ˈtɔrəs/", "phonetic": "TOR-us"}]}
 {"guid": "N37_027", "forms": [{"grammatical_form": "noun/en_singular", "text": "sector", "is_base_form": true, "ipa": "/ˈsɛktɚ/", "phonetic": "SEK-ter"}]}
-{"guid": "N37_028", "forms": [{"grammatical_form": "noun/en_singular", "text": "centre", "is_base_form": true, "ipa": "/ˈsɛntər/", "phonetic": "SEN-ter"}]}
+{"guid": "N37_028", "forms": [{"grammatical_form": "noun/en_singular", "text": "center", "is_base_form": true, "ipa": "/ˈsɛntər/", "phonetic": "SEN-ter"}], "variants": [{"kind": "spelling", "key": "centre", "forms": [{"grammatical_form": "noun/en_singular", "text": "centre", "is_base_form": true, "ipa": "/ˈsɛntər/", "phonetic": "SEN-ter"}]}]}
 {"guid": "N37_029", "forms": [{"grammatical_form": "noun/en_singular", "text": "coil", "is_base_form": true, "ipa": "/kɔɪl/", "phonetic": "KOYL"}]}
 {"guid": "N37_030", "forms": [{"grammatical_form": "noun/en_singular", "text": "cross-section", "is_base_form": true, "ipa": "/ˈkrɔs ˌsɛkʃən/", "phonetic": "KROSS-SEK-shun"}]}
 {"guid": "N37_031", "forms": [{"grammatical_form": "noun/en_singular", "text": "outline", "is_base_form": true, "ipa": "/ˈaʊtˌlaɪn/", "phonetic": "OUT-line"}]}
+{"guid": "N37_033", "forms": [{"grammatical_form": "noun/en_singular", "text": "helix", "is_base_form": true, "ipa": "/ˈhiːlɪks/", "phonetic": "HEE-liks"}]}
+{"guid": "N37_034", "forms": [{"grammatical_form": "noun/en_singular", "text": "arc", "is_base_form": true, "ipa": "/ɑrk/", "phonetic": "ARK"}]}
+{"guid": "N37_035", "forms": [{"grammatical_form": "noun/en_singular", "text": "ellipse", "is_base_form": true, "ipa": "/ɪˈlɪps/", "phonetic": "ih-LIPS"}]}
+{"guid": "N37_036", "forms": [{"grammatical_form": "noun/en_singular", "text": "loop", "is_base_form": true, "ipa": "/luːp/", "phonetic": "LOOP"}]}

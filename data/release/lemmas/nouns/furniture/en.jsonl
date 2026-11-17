@@ -17,3 +17,8 @@
 {"guid": "N39_022", "forms": [{"grammatical_form": "noun/en_singular", "text": "rug", "is_base_form": true, "ipa": "/rʌɡ/", "phonetic": "RUG"}]}
 {"guid": "N39_023", "forms": [{"grammatical_form": "noun/en_singular", "text": "sofa", "is_base_form": true, "ipa": "/ˈsoʊfə/", "phonetic": "SOH-fuh"}], "variants": [{"kind": "equivalent", "key": "couch", "forms": [{"grammatical_form": "noun/en_singular", "text": "couch", "is_base_form": true, "ipa": "/kʌtʃ/", "phonetic": "KOTCH"}]}], "grammar_facts": [{"fact_type": "countability", "fact_value": "countable"}, {"fact_type": "number_type", "fact_value": "regular"}, {"fact_type": "animacy", "fact_value": "inanimate"}, {"fact_type": "plural_status", "fact_value": "regular"}]}
 {"guid": "N39_024", "forms": [{"grammatical_form": "noun/en_singular", "text": "carpet runner", "is_base_form": true}]}
+{"guid": "N39_025", "forms": [{"grammatical_form": "noun/en_singular", "text": "console", "is_base_form": true, "ipa": "/kənˈsoʊl/", "phonetic": "kun-SOHL"}]}
+{"guid": "N39_026", "forms": [{"grammatical_form": "noun/en_singular", "text": "stool", "is_base_form": true, "ipa": "/stuːl/", "phonetic": "STOOL"}]}
+{"guid": "N39_027", "forms": [{"grammatical_form": "noun/en_singular", "text": "cot", "is_base_form": true, "ipa": "/kɑt/", "phonetic": "KOT"}]}
+{"guid": "N39_028", "forms": [{"grammatical_form": "noun/en_singular", "text": "cot", "is_base_form": true, "ipa": "/kɑt/", "phonetic": "KOT"}]}
+{"guid": "N39_029", "forms": [{"grammatical_form": "noun/en_singular", "text": "bureau", "is_base_form": true, "ipa": "/ˈbjʊroʊ/", "phonetic": "BYOO-roh"}]}

@@ -1,3 +1,21 @@
 {"guid": "V19_001", "grammar_facts": [{"fact_type": "past", "fact_value": "failed"}, {"fact_type": "past_participle", "fact_value": "failed"}]}
 {"guid": "V19_002", "grammar_facts": [{"fact_type": "past", "fact_value": "abandoned"}, {"fact_type": "past_participle", "fact_value": "abandoned"}]}
 {"guid": "V19_003", "grammar_facts": [{"fact_type": "past", "fact_value": "completed"}, {"fact_type": "past_participle", "fact_value": "completed"}]}
+{"guid": "V19_004", "forms": [{"grammatical_form": "verb/en_infinitive", "text": "bother", "is_base_form": true, "ipa": "/ˈbɑðɚ/", "phonetic": "BAH-thur"}]}
+{"guid": "V19_005", "forms": [{"grammatical_form": "verb/en_infinitive", "text": "neglect", "is_base_form": true, "ipa": "/nɪˈɡlɛkt/", "phonetic": "nig-LEKT"}]}
+{"guid": "V19_006", "forms": [{"grammatical_form": "verb/en_infinitive", "text": "refrain", "is_base_form": true, "ipa": "/rɪˈfreɪn/", "phonetic": "ri-FRAYN"}]}
+{"guid": "V19_007", "forms": [{"grammatical_form": "verb/en_infinitive", "text": "endeavour", "is_base_form": true, "ipa": "/ɪnˈdɛvər/", "phonetic": "en-DEV-er"}]}
+{"guid": "V19_008", "forms": [{"grammatical_form": "verb/en_infinitive", "text": "commence", "is_base_form": true, "ipa": "/kəˈmɛns/", "phonetic": "kuh-MENS"}]}
+{"guid": "V19_009", "forms": [{"grammatical_form": "verb/en_infinitive", "text": "initiate", "is_base_form": true, "ipa": "/ɪˈnɪʃiˌeɪt/", "phonetic": "ih-NISH-ee-ayt"}]}
+{"guid": "V19_010", "forms": [{"grammatical_form": "verb/en_infinitive", "text": "accomplish", "is_base_form": true, "ipa": "/əˈkɑmplɪʃ/", "phonetic": "uh-KOM-plish"}], "grammar_facts": [{"fact_type": "past", "fact_value": "accomplished"}, {"fact_type": "past_participle", "fact_value": "accomplished"}]}
+{"guid": "V19_011", "forms": [{"grammatical_form": "verb/en_infinitive", "text": "pause", "is_base_form": true, "ipa": "/pɔz/", "phonetic": "PAWZ"}]}
+{"guid": "V19_012", "forms": [{"grammatical_form": "verb/en_infinitive", "text": "pause", "is_base_form": true, "ipa": "/pɔz/", "phonetic": "PAWZ"}]}
+{"guid": "V19_013", "forms": [{"grammatical_form": "verb/en_infinitive", "text": "quit", "is_base_form": true, "ipa": "/kwɪt/", "phonetic": "KWIT"}]}
+{"guid": "V19_014", "forms": [{"grammatical_form": "verb/en_infinitive", "text": "quit", "is_base_form": true, "ipa": "/kwɪt/", "phonetic": "KWIT"}]}
+{"guid": "V19_015", "forms": [{"grammatical_form": "verb/en_infinitive", "text": "interrupt", "is_base_form": true, "ipa": "/ˌɪntəˈrʌpt/", "phonetic": "in-ter-RUPT"}]}
+{"guid": "V19_016", "forms": [{"grammatical_form": "verb/en_infinitive", "text": "defer", "is_base_form": true, "ipa": "/dɪˈfɝ/", "phonetic": "dih-FER"}]}
+{"guid": "V19_017", "forms": [{"grammatical_form": "verb/en_infinitive", "text": "terminate", "is_base_form": true, "ipa": "/ˈtɝməˌneɪt/", "phonetic": "TER-muh-nayt"}]}
+{"guid": "V19_018", "forms": [{"grammatical_form": "verb/en_infinitive", "text": "cease", "is_base_form": true, "ipa": "/sis/", "phonetic": "SEES"}], "grammar_facts": [{"fact_type": "past", "fact_value": "ceased"}, {"fact_type": "past_participle", "fact_value": "ceased"}]}
+{"guid": "V19_019", "forms": [{"grammatical_form": "verb/en_infinitive", "text": "cease", "is_base_form": true, "ipa": "/sis/", "phonetic": "SEES"}], "grammar_facts": [{"fact_type": "past", "fact_value": "ceased"}, {"fact_type": "past_participle", "fact_value": "ceased"}]}
+{"guid": "V19_020", "forms": [{"grammatical_form": "verb/en_infinitive", "text": "endeavor", "is_base_form": true, "ipa": "/ɪnˈdɛvər/", "phonetic": "en-DEV-er"}]}
+{"guid": "V19_021", "forms": [{"grammatical_form": "verb/en_infinitive", "text": "pursue", "is_base_form": true, "ipa": "/pərˈsuː/", "phonetic": "per-SOO"}]}

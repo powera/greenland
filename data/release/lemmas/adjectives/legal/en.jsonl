@@ -35,16 +35,12 @@
 {"guid": "A27_035", "forms": [{"grammatical_form": "adjective/en_positive", "text": "injunctive", "is_base_form": true, "ipa": "/ɪnˈdʒʌŋktɪv/", "phonetic": "in-JUNK-tiv"}]}
 {"guid": "A27_036", "forms": [{"grammatical_form": "adjective/en_positive", "text": "postconviction", "is_base_form": true, "ipa": "/ˌpoʊst kənˈvɪkʃən/", "phonetic": "POHST-kuhn-VIK-shun"}]}
 {"guid": "A27_037", "forms": [{"grammatical_form": "adjective/en_positive", "text": "per curiam", "is_base_form": true, "ipa": "/pər ˈkjʊriəm/", "phonetic": "per KYOO-ree-um"}]}
-{"guid": "A27_038", "forms": [{"grammatical_form": "adjective/en_positive", "text": "de facto", "is_base_form": true, "ipa": "/də ˈfæktoʊ/", "phonetic": "duh-FAK-toh"}]}
 {"guid": "A27_039", "forms": [{"grammatical_form": "adjective/en_positive", "text": "ultra vires", "is_base_form": true, "ipa": "/ˌʌltrə ˈvaɪriːz/", "phonetic": "UL-truh VY-rees"}]}
 {"guid": "A27_040", "forms": [{"grammatical_form": "adjective/en_positive", "text": "ex post facto", "is_base_form": true}]}
 {"guid": "A27_041", "forms": [{"grammatical_form": "adjective/en_positive", "text": "prima facie", "is_base_form": true}]}
-{"guid": "A27_042", "forms": [{"grammatical_form": "adjective/en_positive", "text": "de jure", "is_base_form": true}]}
 {"guid": "A27_043", "forms": [{"grammatical_form": "adjective/en_positive", "text": "de novo", "is_base_form": true}]}
-{"guid": "A27_044", "forms": [{"grammatical_form": "adjective/en_positive", "text": "sui generis", "is_base_form": true}]}
 {"guid": "A27_045", "forms": [{"grammatical_form": "adjective/en_positive", "text": "bona fide", "is_base_form": true}]}
 {"guid": "A27_046", "forms": [{"grammatical_form": "adjective/en_positive", "text": "pro se", "is_base_form": true}]}
-{"guid": "A27_047", "forms": [{"grammatical_form": "adjective/en_positive", "text": "pro bono", "is_base_form": true}]}
 {"guid": "A27_048", "forms": [{"grammatical_form": "adjective/en_positive", "text": "ab initio", "is_base_form": true}]}
 {"guid": "A27_049", "forms": [{"grammatical_form": "adjective/en_positive", "text": "in personam", "is_base_form": true}]}
 {"guid": "A27_050", "forms": [{"grammatical_form": "adjective/en_positive", "text": "in rem", "is_base_form": true}]}
@@ -77,3 +73,36 @@
 {"guid": "A27_078", "forms": [{"grammatical_form": "adjective/en_positive", "text": "capital", "is_base_form": true, "ipa": "/ˈkæpɪtəl/", "phonetic": "KAP-uh-tul"}]}
 {"guid": "A27_079", "forms": [{"grammatical_form": "adjective/en_positive", "text": "capital", "is_base_form": true, "ipa": "/ˈkæpɪtəl/", "phonetic": "KAP-uh-tul"}]}
 {"guid": "A27_080", "forms": [{"grammatical_form": "adjective/en_positive", "text": "normative", "is_base_form": true, "ipa": "/ˈnɔrmətɪv/", "phonetic": "NOR-muh-tiv"}]}
+{"guid": "A27_082", "forms": [{"grammatical_form": "adjective/en_positive", "text": "lawful", "is_base_form": true, "ipa": "/ˈlɔfəl/", "phonetic": "LAW-ful"}]}
+{"guid": "A27_083", "forms": [{"grammatical_form": "adjective/en_positive", "text": "unequal", "is_base_form": true, "ipa": "/ʌnˈiːkwəl/", "phonetic": "un-EE-kwal"}]}
+{"guid": "A27_084", "forms": [{"grammatical_form": "adjective/en_positive", "text": "unlimited", "is_base_form": true, "ipa": "/ʌnˈlɪmɪtɪd/", "phonetic": "un-LIM-uh-tid"}]}
+{"guid": "A27_085", "forms": [{"grammatical_form": "adjective/en_positive", "text": "void", "is_base_form": true, "ipa": "/vɔɪd/", "phonetic": "VOID"}]}
+{"guid": "A27_086", "forms": [{"grammatical_form": "adjective/en_positive", "text": "immune", "is_base_form": true, "ipa": "/ɪˈmjun/", "phonetic": "ih-MYOON"}]}
+{"guid": "A27_087", "forms": [{"grammatical_form": "adjective/en_positive", "text": "compulsory", "is_base_form": true, "ipa": "/kəmˈpʌlsəri/", "phonetic": "kuhm-PUHL-suh-ree"}]}
+{"guid": "A27_088", "forms": [{"grammatical_form": "adjective/en_positive", "text": "sworn", "is_base_form": true, "ipa": "/swɔrn/", "phonetic": "SWORN"}]}
+{"guid": "A27_089", "forms": [{"grammatical_form": "adjective/en_positive", "text": "absolute", "is_base_form": true, "ipa": "/ˈæb.səˌlut/", "phonetic": "AB-suh-loot"}]}
+{"guid": "A27_090", "forms": [{"grammatical_form": "adjective/en_positive", "text": "civil", "is_base_form": true, "ipa": "/ˈsɪvəl/", "phonetic": "SIV-uhl"}]}
+{"guid": "A27_091", "forms": [{"grammatical_form": "adjective/en_positive", "text": "formal", "is_base_form": true, "ipa": "/ˈfɔrməl/", "phonetic": "FOR-mul"}]}
+{"guid": "A27_092", "forms": [{"grammatical_form": "adjective/en_positive", "text": "minor", "is_base_form": true, "ipa": "/ˈmaɪnər/", "phonetic": "MY-ner"}]}
+{"guid": "A27_093", "forms": [{"grammatical_form": "adjective/en_positive", "text": "contractual", "is_base_form": true, "ipa": "/kənˈtræktʃuəl/", "phonetic": "kun-TRAK-choo-uhl"}]}
+{"guid": "A27_094", "forms": [{"grammatical_form": "adjective/en_positive", "text": "exempt", "is_base_form": true, "ipa": "/ɪɡˈzɛmpt/", "phonetic": "ig-ZEMPT"}]}
+{"guid": "A27_095", "forms": [{"grammatical_form": "adjective/en_positive", "text": "illegitimate", "is_base_form": true, "ipa": "/ˌɪlɪˈdʒɪtəmət/", "phonetic": "il-uh-JIT-uh-mit"}]}
+{"guid": "A27_096", "forms": [{"grammatical_form": "adjective/en_positive", "text": "liable", "is_base_form": true, "ipa": "/ˈlaɪəbəl/", "phonetic": "LYE-uh-buhl"}]}
+{"guid": "A27_097", "forms": [{"grammatical_form": "adjective/en_positive", "text": "liable", "is_base_form": true, "ipa": "/ˈlaɪəbəl/", "phonetic": "LYE-uh-buhl"}]}
+{"guid": "A27_098", "forms": [{"grammatical_form": "adjective/en_positive", "text": "penal", "is_base_form": true, "ipa": "/ˈpiːnəl/", "phonetic": "PEE-nuhl"}]}
+{"guid": "A27_099", "forms": [{"grammatical_form": "adjective/en_positive", "text": "punishable", "is_base_form": true, "ipa": "/ˈpʌnɪʃəbəl/", "phonetic": "PUN-ish-uh-buhl"}]}
+{"guid": "A27_100", "forms": [{"grammatical_form": "adjective/en_positive", "text": "unlawful", "is_base_form": true, "ipa": "/ʌnˈlɔfəl/", "phonetic": "un-LAW-ful"}]}
+{"guid": "A27_101", "forms": [{"grammatical_form": "adjective/en_positive", "text": "vested", "is_base_form": true, "ipa": "/ˈvɛstɪd/", "phonetic": "VES-tid"}]}
+{"guid": "A27_102", "forms": [{"grammatical_form": "adjective/en_positive", "text": "mandatory", "is_base_form": true, "ipa": "/ˈmæn.dəˌtɔr.i/", "phonetic": "MAN-duh-tor-ee"}]}
+{"guid": "A27_103", "forms": [{"grammatical_form": "adjective/en_positive", "text": "unauthorized", "is_base_form": true, "ipa": "/ˌʌnˈɔθəˌraɪzd/", "phonetic": "un-AW-thuh-ryzed"}]}
+{"guid": "A27_104", "forms": [{"grammatical_form": "adjective/en_positive", "text": "unauthorized", "is_base_form": true, "ipa": "/ˌʌnˈɔθəˌraɪzd/", "phonetic": "un-AW-thuh-ryzed"}]}
+{"guid": "A27_105", "forms": [{"grammatical_form": "adjective/en_positive", "text": "arbitrary", "is_base_form": true, "ipa": "/ˈɑrbəˌtrɛri/", "phonetic": "AR-bi-trair-ee"}]}
+{"guid": "A27_106", "forms": [{"grammatical_form": "adjective/en_positive", "text": "hereditary", "is_base_form": true, "ipa": "/həˈrɛdəˌtɛri/", "phonetic": "huh-REH-duh-tair-ee"}]}
+{"guid": "A27_107", "forms": [{"grammatical_form": "adjective/en_positive", "text": "privileged", "is_base_form": true, "ipa": "/ˈprɪvəlɪdʒd/", "phonetic": "PRIV-uh-lijd"}]}
+{"guid": "A27_108", "forms": [{"grammatical_form": "adjective/en_positive", "text": "sovereign", "is_base_form": true, "ipa": "/ˈsɑvrən/", "phonetic": "SOV-rin"}]}
+{"guid": "A27_109", "forms": [{"grammatical_form": "adjective/en_positive", "text": "forbidden", "is_base_form": true, "ipa": "/fərˈbɪdən/", "phonetic": "fer-BID-en"}]}
+{"guid": "A27_110", "forms": [{"grammatical_form": "adjective/en_positive", "text": "forbidden", "is_base_form": true, "ipa": "/fərˈbɪdən/", "phonetic": "fer-BID-en"}]}
+{"guid": "A27_111", "forms": [{"grammatical_form": "adjective/en_positive", "text": "illegal", "is_base_form": true, "ipa": "/ɪˈliːɡəl/", "phonetic": "ih-LEE-guhl"}]}
+{"guid": "A27_112", "forms": [{"grammatical_form": "adjective/en_positive", "text": "illegal", "is_base_form": true, "ipa": "/ɪˈliːɡəl/", "phonetic": "ih-LEE-guhl"}]}
+{"guid": "A27_113", "forms": [{"grammatical_form": "adjective/en_positive", "text": "innocent", "is_base_form": true, "ipa": "/ˈɪnəsənt/", "phonetic": "IN-uh-sent"}]}
+{"guid": "A27_114", "forms": [{"grammatical_form": "adjective/en_positive", "text": "valid", "is_base_form": true, "ipa": "/ˈvælɪd/", "phonetic": "VAL-id"}]}

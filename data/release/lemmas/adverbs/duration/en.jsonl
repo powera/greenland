@@ -4,3 +4,8 @@
 {"guid": "D05_007", "forms": [{"grammatical_form": "adverb/en_positive", "text": "full-time", "is_base_form": true, "ipa": "/ˌfʊl ˈtaɪm/", "phonetic": "FULL-time"}]}
 {"guid": "D05_008", "forms": [{"grammatical_form": "adverb/en_positive", "text": "part-time", "is_base_form": true, "ipa": "/ˌpɑrtˈtaɪm/", "phonetic": "PART-time"}]}
 {"guid": "D05_009", "forms": [{"grammatical_form": "adverb/en_positive", "text": "gradually", "is_base_form": true, "ipa": "/ˈɡrædʒuəli/", "phonetic": "GRAJ-oo-uh-lee"}]}
+{"guid": "D05_010", "forms": [{"grammatical_form": "adverb/en_positive", "text": "ad infinitum", "is_base_form": true, "ipa": "/ˌæd ˌɪn.fɪˈnuː.təm/", "phonetic": "ad in-fi-NYOO-tum"}]}
+{"guid": "D05_011", "forms": [{"grammatical_form": "adverb/en_positive", "text": "awhile", "is_base_form": true, "ipa": "/əˈwaɪl/", "phonetic": "uh-WHILE"}]}
+{"guid": "D05_012", "forms": [{"grammatical_form": "adverb/en_positive", "text": "indefinitely", "is_base_form": true, "ipa": "/ɪnˈdɛfənətli/", "phonetic": "in-DEF-uh-nit-lee"}]}
+{"guid": "D05_013", "forms": [{"grammatical_form": "adverb/en_positive", "text": "continually", "is_base_form": true, "ipa": "/kənˈtɪnjuəli/", "phonetic": "kun-TIN-yoo-uh-lee"}]}
+{"guid": "D05_014", "forms": [{"grammatical_form": "adverb/en_positive", "text": "continuously", "is_base_form": true, "ipa": "/kənˈtɪn.ju.əs.li/", "phonetic": "kun-TIN-yoo-us-lee"}]}

@@ -2,3 +2,5 @@
 {"guid": "N79_002", "forms": [{"grammatical_form": "noun/en_singular", "text": "monster", "is_base_form": true, "ipa": "/ˈmɒnstər/", "phonetic": "MON-s-tuh-er"}]}
 {"guid": "N79_003", "forms": [{"grammatical_form": "noun/en_singular", "text": "dwarf", "is_base_form": true, "ipa": "/dwɔrf/", "phonetic": "DWORF"}]}
 {"guid": "N79_004", "forms": [{"grammatical_form": "noun/en_singular", "text": "giant", "is_base_form": true, "ipa": "/ˈdʒaɪ.ənt/", "phonetic": "JY-uh-nt"}]}
+{"guid": "N79_005", "forms": [{"grammatical_form": "noun/en_singular", "text": "fairy", "is_base_form": true, "ipa": "/ˈfɛri/", "phonetic": "FAIR-ee"}]}
+{"guid": "N79_006", "forms": [{"grammatical_form": "noun/en_singular", "text": "witch", "is_base_form": true, "ipa": "/wɪtʃ/", "phonetic": "WICH"}]}

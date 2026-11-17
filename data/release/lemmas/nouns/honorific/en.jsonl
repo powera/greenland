@@ -16,3 +16,11 @@
 {"guid": "N48_016", "forms": [{"grammatical_form": "noun/en_singular", "text": "sultan", "is_base_form": true, "ipa": "/ˈsʌltən/", "phonetic": "SUL-tun"}]}
 {"guid": "N48_017", "forms": [{"grammatical_form": "noun/en_singular", "text": "caliph", "is_base_form": true, "ipa": "/ˈkeɪlɪf/", "phonetic": "KAY-lif"}]}
 {"guid": "N48_018", "forms": [{"grammatical_form": "noun/en_singular", "text": "governor-general", "is_base_form": true, "ipa": "/ˌɡʌvərnər ˈdʒɛnərəl/", "phonetic": "GUH-ver-ner JEN-er-uhl"}]}
+{"guid": "N48_019", "forms": [{"grammatical_form": "noun/en_singular", "text": "princess", "is_base_form": true, "ipa": "/ˈprɪnˌsɛs/", "phonetic": "prin-SES"}]}
+{"guid": "N48_020", "forms": [{"grammatical_form": "noun/en_singular", "text": "duke", "is_base_form": true, "ipa": "/duːk/", "phonetic": "DOOK"}]}
+{"guid": "N48_021", "forms": [{"grammatical_form": "noun/en_singular", "text": "madame", "is_base_form": true, "ipa": "/məˈdæm/", "phonetic": "muh-DAM"}]}
+{"guid": "N48_022", "forms": [{"grammatical_form": "noun/en_singular", "text": "dame", "is_base_form": true, "ipa": "/deɪm/", "phonetic": "DAYM"}]}
+{"guid": "N48_023", "forms": [{"grammatical_form": "noun/en_singular", "text": "Mr", "is_base_form": true, "ipa": "/ˈmɪstər/", "phonetic": "MIS-ter"}]}
+{"guid": "N48_024", "forms": [{"grammatical_form": "noun/en_singular", "text": "Mrs", "is_base_form": true, "ipa": "/ˈmɪsɪz/", "phonetic": "MIS-iz"}]}
+{"guid": "N48_025", "forms": [{"grammatical_form": "noun/en_singular", "text": "Ms", "is_base_form": true, "ipa": "/mɪz/", "phonetic": "miz"}]}
+{"guid": "N48_026", "forms": [{"grammatical_form": "noun/en_singular", "text": "doctor", "is_base_form": true, "ipa": "/ˈdɑktər/", "phonetic": "DOK-ter"}], "variants": [{"kind": "abbreviation", "key": "Dr", "forms": [{"grammatical_form": "noun/en_singular", "text": "Dr", "is_base_form": true}]}, {"kind": "spelling", "key": "Doctor", "forms": [{"grammatical_form": "noun/en_singular", "text": "Doctor", "is_base_form": true}]}]}

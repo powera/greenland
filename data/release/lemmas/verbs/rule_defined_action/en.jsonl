@@ -47,3 +47,28 @@
 {"guid": "V14_047", "forms": [{"grammatical_form": "verb/en_infinitive", "text": "cancel", "is_base_form": true, "ipa": "/ˈkænsəl/", "phonetic": "KAN-suhl"}]}
 {"guid": "V14_048", "forms": [{"grammatical_form": "verb/en_infinitive", "text": "log in", "is_base_form": true, "ipa": "/lɔɡ ˈɪn/", "phonetic": "LOG-IN"}]}
 {"guid": "V14_049", "forms": [{"grammatical_form": "verb/en_infinitive", "text": "log out", "is_base_form": true, "ipa": "/lɔɡ aʊt/", "phonetic": "LOG-OUT"}]}
+{"guid": "V14_050", "forms": [{"grammatical_form": "verb/en_infinitive", "text": "bless", "is_base_form": true, "ipa": "/blɛs/", "phonetic": "BLES"}]}
+{"guid": "V14_051", "forms": [{"grammatical_form": "verb/en_infinitive", "text": "qualify", "is_base_form": true, "ipa": "/ˈkwɑləˌfaɪ/", "phonetic": "KWOL-uh-fye"}]}
+{"guid": "V14_052", "forms": [{"grammatical_form": "verb/en_infinitive", "text": "swear", "is_base_form": true, "ipa": "/swɛr/", "phonetic": "SWAIR"}]}
+{"guid": "V14_053", "forms": [{"grammatical_form": "verb/en_infinitive", "text": "toss", "is_base_form": true, "ipa": "/tɔs/", "phonetic": "TAWS"}]}
+{"guid": "V14_054", "forms": [{"grammatical_form": "verb/en_infinitive", "text": "convict", "is_base_form": true, "ipa": "/kənˈvɪkt/", "phonetic": "kun-VIKT"}]}
+{"guid": "V14_055", "forms": [{"grammatical_form": "verb/en_infinitive", "text": "divorce", "is_base_form": true, "ipa": "/dɪˈvɔrs/", "phonetic": "dih-VORSS"}]}
+{"guid": "V14_056", "forms": [{"grammatical_form": "verb/en_infinitive", "text": "stake", "is_base_form": true, "ipa": "/steɪk/", "phonetic": "STAYK"}]}
+{"guid": "V14_057", "forms": [{"grammatical_form": "verb/en_infinitive", "text": "slate", "is_base_form": true, "ipa": "/sleɪt/", "phonetic": "SLAYT"}]}
+{"guid": "V14_058", "forms": [{"grammatical_form": "verb/en_infinitive", "text": "vote", "is_base_form": true, "ipa": "/voʊt/", "phonetic": "VOHT"}]}
+{"guid": "V14_059", "forms": [{"grammatical_form": "verb/en_infinitive", "text": "comply", "is_base_form": true, "ipa": "/kəmˈplaɪ/", "phonetic": "kuhm-PLY"}]}
+{"guid": "V14_060", "forms": [{"grammatical_form": "verb/en_infinitive", "text": "sue", "is_base_form": true, "ipa": "/suː/", "phonetic": "SOO"}]}
+{"guid": "V14_061", "forms": [{"grammatical_form": "verb/en_infinitive", "text": "uphold", "is_base_form": true, "ipa": "/ʌpˈhoʊld/", "phonetic": "up-HOULD"}]}
+{"guid": "V14_062", "forms": [{"grammatical_form": "verb/en_infinitive", "text": "violate", "is_base_form": true, "ipa": "/ˈvaɪəˌleɪt/", "phonetic": "VY-uh-layt"}]}
+{"guid": "V14_063", "forms": [{"grammatical_form": "verb/en_infinitive", "text": "bet", "is_base_form": true, "ipa": "/bɛt/", "phonetic": "BET"}]}
+{"guid": "V14_064", "forms": [{"grammatical_form": "verb/en_infinitive", "text": "copyright", "is_base_form": true, "ipa": "/ˈkɑːpiˌraɪt/", "phonetic": "KOP-ee-rite"}]}
+{"guid": "V14_065", "forms": [{"grammatical_form": "verb/en_infinitive", "text": "obey", "is_base_form": true, "ipa": "/oʊˈbeɪ/", "phonetic": "oh-BAY"}]}
+{"guid": "V14_066", "forms": [{"grammatical_form": "verb/en_infinitive", "text": "adhere", "is_base_form": true, "ipa": "/ədˈhɪr/", "phonetic": "ad-HEER"}]}
+{"guid": "V14_067", "forms": [{"grammatical_form": "verb/en_infinitive", "text": "assess", "is_base_form": true, "ipa": "/əˈsɛs/", "phonetic": "uh-SESS"}]}
+{"guid": "V14_068", "forms": [{"grammatical_form": "verb/en_infinitive", "text": "conform", "is_base_form": true, "ipa": "/kənˈfɔrm/", "phonetic": "kun-FORM"}]}
+{"guid": "V14_069", "forms": [{"grammatical_form": "verb/en_infinitive", "text": "default", "is_base_form": true, "ipa": "/dɪˈfɔlt/", "phonetic": "dee-FAWLT"}]}
+{"guid": "V14_070", "forms": [{"grammatical_form": "verb/en_infinitive", "text": "default", "is_base_form": true, "ipa": "/dɪˈfɔlt/", "phonetic": "dee-FAWLT"}]}
+{"guid": "V14_071", "forms": [{"grammatical_form": "verb/en_infinitive", "text": "ban", "is_base_form": true, "ipa": "/bæn/", "phonetic": "BAN"}]}
+{"guid": "V14_072", "forms": [{"grammatical_form": "verb/en_infinitive", "text": "cap", "is_base_form": true, "ipa": "/kæp/", "phonetic": "KAP"}]}
+{"guid": "V14_073", "forms": [{"grammatical_form": "verb/en_infinitive", "text": "abide", "is_base_form": true, "ipa": "/əˈbaɪd/", "phonetic": "uh-BIDE"}]}
+{"guid": "V14_074", "forms": [{"grammatical_form": "verb/en_infinitive", "text": "pursue", "is_base_form": true, "ipa": "/pərˈsuː/", "phonetic": "per-SOO"}]}

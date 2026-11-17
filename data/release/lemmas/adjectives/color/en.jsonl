@@ -11,3 +11,30 @@
 {"guid": "A02_011", "grammar_facts": [{"fact_type": "gradability", "fact_value": "synthetic"}, {"fact_type": "comparative_status", "fact_value": "regular"}, {"fact_type": "superlative_status", "fact_value": "regular"}]}
 {"guid": "A02_017", "forms": [{"grammatical_form": "adjective/en_positive", "text": "reddish-brown", "is_base_form": true, "ipa": "/ˈrɛdɪʃ ˈbraʊn/", "phonetic": "RED-ish-BROWN"}]}
 {"guid": "A02_019", "forms": [{"grammatical_form": "adjective/en_positive", "text": "blue-green", "is_base_form": true, "ipa": "/ˌbluːˈɡriːn/", "phonetic": "BLOO-green"}]}
+{"guid": "A02_023", "forms": [{"grammatical_form": "adjective/en_positive", "text": "browned", "is_base_form": true, "ipa": "/braʊnd/", "phonetic": "BROWNED"}]}
+{"guid": "A02_024", "forms": [{"grammatical_form": "adjective/en_positive", "text": "ginger", "is_base_form": true, "ipa": "/ˈdʒɪndʒər/", "phonetic": "JIN-jer"}]}
+{"guid": "A02_025", "forms": [{"grammatical_form": "adjective/en_positive", "text": "sandy", "is_base_form": true, "ipa": "/ˈsændi/", "phonetic": "SAN-dee"}]}
+{"guid": "A02_026", "forms": [{"grammatical_form": "adjective/en_positive", "text": "scarlet", "is_base_form": true, "ipa": "/ˈskɑrlɪt/", "phonetic": "SKAR-lit"}]}
+{"guid": "A02_027", "forms": [{"grammatical_form": "adjective/en_positive", "text": "rosy", "is_base_form": true, "ipa": "/ˈroʊzi/", "phonetic": "ROH-zee"}]}
+{"guid": "A02_028", "forms": [{"grammatical_form": "adjective/en_positive", "text": "sombre", "is_base_form": true, "ipa": "/ˈsɑmbɚ/", "phonetic": "SOM-ber"}]}
+{"guid": "A02_029", "forms": [{"grammatical_form": "adjective/en_positive", "text": "amber", "is_base_form": true, "ipa": "/ˈæmbɚ/", "phonetic": "AM-ber"}]}
+{"guid": "A02_030", "forms": [{"grammatical_form": "adjective/en_positive", "text": "crimson", "is_base_form": true, "ipa": "/ˈkrɪm.zən/", "phonetic": "KRIM-zuhn"}]}
+{"guid": "A02_031", "forms": [{"grammatical_form": "adjective/en_positive", "text": "flushed", "is_base_form": true, "ipa": "/flʌʃt/", "phonetic": "FLUSHT"}]}
+{"guid": "A02_032", "forms": [{"grammatical_form": "adjective/en_positive", "text": "greenish", "is_base_form": true, "ipa": "/ˈɡriːnɪʃ/", "phonetic": "GREEN-ish"}]}
+{"guid": "A02_033", "forms": [{"grammatical_form": "adjective/en_positive", "text": "ruddy", "is_base_form": true, "ipa": "/ˈrʌdi/", "phonetic": "RUD-ee"}]}
+{"guid": "A02_034", "forms": [{"grammatical_form": "adjective/en_positive", "text": "ruddy", "is_base_form": true, "ipa": "/ˈrʌdi/", "phonetic": "RUD-ee"}]}
+{"guid": "A02_035", "forms": [{"grammatical_form": "adjective/en_positive", "text": "yellowish", "is_base_form": true, "ipa": "/ˈjɛloʊɪʃ/", "phonetic": "YEL-oh-ish"}]}
+{"guid": "A02_036", "forms": [{"grammatical_form": "adjective/en_positive", "text": "golden", "is_base_form": true, "ipa": "/ˈɡoʊldən/", "phonetic": "GOHL-duhn"}]}
+{"guid": "A02_037", "forms": [{"grammatical_form": "adjective/en_positive", "text": "golden", "is_base_form": true, "ipa": "/ˈɡoʊldən/", "phonetic": "GOHL-duhn"}]}
+{"guid": "A02_038", "forms": [{"grammatical_form": "adjective/en_positive", "text": "golden", "is_base_form": true, "ipa": "/ˈɡoʊldən/", "phonetic": "GOHL-duhn"}]}
+{"guid": "A02_039", "forms": [{"grammatical_form": "adjective/en_positive", "text": "fluorescent", "is_base_form": true, "ipa": "/ˌflɔːˈrɛsənt/", "phonetic": "flohr-ESS-unt"}]}
+{"guid": "A02_040", "forms": [{"grammatical_form": "adjective/en_positive", "text": "saturated", "is_base_form": true, "ipa": "/ˈsætʃəˌreɪtɪd/", "phonetic": "SA-chuh-ray-tid"}]}
+{"guid": "A02_041", "forms": [{"grammatical_form": "adjective/en_positive", "text": "dull", "is_base_form": true, "ipa": "/dʌl/", "phonetic": "DULL"}]}
+{"guid": "A02_042", "forms": [{"grammatical_form": "adjective/en_positive", "text": "ivory", "is_base_form": true, "ipa": "/ˈaɪvəri/", "phonetic": "EYE-vuh-ree"}]}
+{"guid": "A02_043", "forms": [{"grammatical_form": "adjective/en_positive", "text": "dusty", "is_base_form": true, "ipa": "/ˈdʌsti/", "phonetic": "DUS-tee"}]}
+{"guid": "A02_044", "forms": [{"grammatical_form": "adjective/en_positive", "text": "nude", "is_base_form": true, "ipa": "/nuːd/", "phonetic": "NOOD"}]}
+{"guid": "A02_045", "forms": [{"grammatical_form": "adjective/en_positive", "text": "brilliant", "is_base_form": true, "ipa": "/ˈbrɪljənt/", "phonetic": "BRIL-yunt"}]}
+{"guid": "A02_046", "forms": [{"grammatical_form": "adjective/en_positive", "text": "reddish", "is_base_form": true, "ipa": "/ˈrɛdɪʃ/", "phonetic": "RED-ish"}]}
+{"guid": "A02_047", "forms": [{"grammatical_form": "adjective/en_positive", "text": "shaded", "is_base_form": true, "ipa": "/ˈʃeɪdɪd/", "phonetic": "SHAY-did"}]}
+{"guid": "A02_048", "forms": [{"grammatical_form": "adjective/en_positive", "text": "silvery", "is_base_form": true, "ipa": "/ˈsɪlvəri/", "phonetic": "SIL-ver-ee"}]}
+{"guid": "A02_049", "forms": [{"grammatical_form": "adjective/en_positive", "text": "wan", "is_base_form": true, "ipa": "/wɑn/", "phonetic": "WAN"}]}

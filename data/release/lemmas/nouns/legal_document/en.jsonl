@@ -13,3 +13,16 @@
 {"guid": "N58_023", "forms": [{"grammatical_form": "noun/en_singular", "text": "article", "is_base_form": true, "ipa": "/ˈɑrtɪkəl/", "phonetic": "AR-ti-kuhl"}]}
 {"guid": "N58_024", "forms": [{"grammatical_form": "noun/en_singular", "text": "guarantee", "is_base_form": true, "ipa": "/ˌɡærənˈti/", "phonetic": "GAIR-un-tee"}]}
 {"guid": "N58_025", "forms": [{"grammatical_form": "noun/en_singular", "text": "warranty", "is_base_form": true, "ipa": "/ˈwɔr.ən.ti/", "phonetic": "WOR-uhn-tee"}]}
+{"guid": "N58_026", "forms": [{"grammatical_form": "noun/en_singular", "text": "deed", "is_base_form": true, "ipa": "/did/", "phonetic": "DEED"}]}
+{"guid": "N58_027", "forms": [{"grammatical_form": "noun/en_singular", "text": "rider", "is_base_form": true, "ipa": "/ˈraɪdər/", "phonetic": "RY-der"}]}
+{"guid": "N58_028", "forms": [{"grammatical_form": "noun/en_singular", "text": "mortgage", "is_base_form": true, "ipa": "/ˈmɔrɡɪdʒ/", "phonetic": "MOR-gij"}]}
+{"guid": "N58_029", "forms": [{"grammatical_form": "noun/en_singular", "text": "charter", "is_base_form": true, "ipa": "/ˈtʃɑrtɚ/", "phonetic": "CHAR-ter"}]}
+{"guid": "N58_030", "forms": [{"grammatical_form": "noun/en_singular", "text": "charter", "is_base_form": true, "ipa": "/ˈtʃɑrtɚ/", "phonetic": "CHAR-ter"}]}
+{"guid": "N58_031", "forms": [{"grammatical_form": "noun/en_singular", "text": "deposition", "is_base_form": true, "ipa": "/ˌdɛpəˈzɪʃən/", "phonetic": "dep-uh-ZISH-un"}]}
+{"guid": "N58_032", "forms": [{"grammatical_form": "noun/en_singular", "text": "exclusion", "is_base_form": true, "ipa": "/ɪkˈskluːʒən/", "phonetic": "ik-SKLOO-zhun"}]}
+{"guid": "N58_033", "forms": [{"grammatical_form": "noun/en_singular", "text": "commission", "is_base_form": true, "ipa": "/kəˈmɪʃən/", "phonetic": "kuh-MISH-un"}]}
+{"guid": "N58_034", "forms": [{"grammatical_form": "noun/en_singular", "text": "treaty", "is_base_form": true, "ipa": "/ˈtriːti/", "phonetic": "TREE-tee"}]}
+{"guid": "N58_035", "forms": [{"grammatical_form": "noun/en_singular", "text": "document", "is_base_form": true, "ipa": "/ˈdɑkjəmənt/", "phonetic": "DAK-yuh-ment"}]}
+{"guid": "N58_036", "forms": [{"grammatical_form": "noun/en_singular", "text": "constitution", "is_base_form": true, "ipa": "/ˌkɑːnstɪˈtuːʃən/", "phonetic": "kon-stuh-TOO-shun"}], "variants": [{"kind": "spelling", "key": "Constitution", "forms": [{"grammatical_form": "noun/en_singular", "text": "Constitution", "is_base_form": true}]}]}
+{"guid": "N58_037", "forms": [{"grammatical_form": "noun/en_singular", "text": "act", "is_base_form": true, "ipa": "/ækt/", "phonetic": "AKT"}], "variants": [{"kind": "spelling", "key": "Act", "forms": [{"grammatical_form": "noun/en_singular", "text": "Act", "is_base_form": true}]}]}
+{"guid": "N58_038", "forms": [{"grammatical_form": "noun/en_singular", "text": "membership", "is_base_form": true, "ipa": "/ˈmɛmbɚˌʃɪp/", "phonetic": "MEM-ber-ship"}]}

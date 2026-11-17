@@ -5,3 +5,13 @@
 {"guid": "N75_005", "grammar_facts": [{"fact_type": "countability", "fact_value": "countable"}, {"fact_type": "number_type", "fact_value": "regular"}, {"fact_type": "animacy", "fact_value": "inanimate"}, {"fact_type": "plural_status", "fact_value": "regular"}]}
 {"guid": "N75_006", "forms": [{"grammatical_form": "noun/en_singular", "text": "credit card", "is_base_form": true}], "grammar_facts": [{"fact_type": "countability", "fact_value": "countable"}, {"fact_type": "number_type", "fact_value": "regular"}, {"fact_type": "animacy", "fact_value": "inanimate"}, {"fact_type": "plural", "fact_value": "credit cards"}, {"fact_type": "plural_status", "fact_value": "override"}]}
 {"guid": "N75_010", "forms": [{"grammatical_form": "noun/en_singular", "text": "bank transfer", "is_base_form": true, "ipa": "/ˈbæŋk ˌtrænsfɚ/", "phonetic": "BANK TRANS-fer"}]}
+{"guid": "N75_011", "forms": [{"grammatical_form": "noun/en_singular", "text": "dough", "is_base_form": true, "ipa": "/doʊ/", "phonetic": "DOH"}]}
+{"guid": "N75_012", "forms": [{"grammatical_form": "noun/en_singular", "text": "euro", "is_base_form": true, "ipa": "/ˈjʊroʊ/", "phonetic": "YUR-oh"}]}
+{"guid": "N75_013", "forms": [{"grammatical_form": "noun/en_singular", "text": "penny", "is_base_form": true, "ipa": "/ˈpɛni/", "phonetic": "PEN-ee"}]}
+{"guid": "N75_014", "forms": [{"grammatical_form": "noun/en_singular", "text": "penny", "is_base_form": true, "ipa": "/ˈpɛni/", "phonetic": "PEN-ee"}]}
+{"guid": "N75_015", "forms": [{"grammatical_form": "noun/en_singular", "text": "francs", "is_base_form": true, "ipa": "/fræŋks/", "phonetic": "FRANKS"}]}
+{"guid": "N75_016", "forms": [{"grammatical_form": "noun/en_singular", "text": "pound", "is_base_form": true, "ipa": "/paʊnd/", "phonetic": "POWND"}]}
+{"guid": "N75_017", "forms": [{"grammatical_form": "noun/en_singular", "text": "grand", "is_base_form": true, "ipa": "/ɡrænd/", "phonetic": "GRAND"}]}
+{"guid": "N75_018", "forms": [{"grammatical_form": "noun/en_singular", "text": "buck", "is_base_form": true, "ipa": "/bʌk/", "phonetic": "BUK"}]}
+{"guid": "N75_019", "forms": [{"grammatical_form": "noun/en_singular", "text": "cent", "is_base_form": true, "ipa": "/sɛnt/", "phonetic": "SENT"}]}
+{"guid": "N75_020", "forms": [{"grammatical_form": "noun/en_singular", "text": "cent", "is_base_form": true, "ipa": "/sɛnt/", "phonetic": "SENT"}]}

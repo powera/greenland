@@ -6,3 +6,8 @@
 {"guid": "D03_006", "forms": [{"grammatical_form": "adverb/en_positive", "text": "this afternoon", "is_base_form": true}]}
 {"guid": "D03_007", "forms": [{"grammatical_form": "adverb/en_positive", "text": "this evening", "is_base_form": true}]}
 {"guid": "D03_008", "forms": [{"grammatical_form": "adverb/en_positive", "text": "currently", "is_base_form": true, "ipa": "/ˈkɝːəntli/", "phonetic": "KUR-uhnt-lee"}]}
+{"guid": "D03_009", "forms": [{"grammatical_form": "adverb/en_positive", "text": "overnight", "is_base_form": true, "ipa": "/ˌoʊvɚˈnaɪt/", "phonetic": "OH-ver-NYTE"}]}
+{"guid": "D03_010", "forms": [{"grammatical_form": "adverb/en_positive", "text": "promptly", "is_base_form": true, "ipa": "/ˈprɑmptli/", "phonetic": "PROMPT-lee"}]}
+{"guid": "D03_011", "forms": [{"grammatical_form": "adverb/en_positive", "text": "historically", "is_base_form": true, "ipa": "/hɪˈstɔrɪkli/", "phonetic": "hi-STOR-ih-kuh-lee"}]}
+{"guid": "D03_012", "forms": [{"grammatical_form": "adverb/en_positive", "text": "nowadays", "is_base_form": true, "ipa": "/ˈnaʊəˌdeɪz/", "phonetic": "NOW-uh-dayz"}]}
+{"guid": "D03_013", "forms": [{"grammatical_form": "adverb/en_positive", "text": "simultaneously", "is_base_form": true, "ipa": "/ˌsaɪməlˈteɪniəsli/", "phonetic": "sigh-mul-TAY-nee-us-lee"}]}

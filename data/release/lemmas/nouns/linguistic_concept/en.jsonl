@@ -40,3 +40,27 @@
 {"guid": "N67_052", "forms": [{"grammatical_form": "noun/en_singular", "text": "present tense", "is_base_form": true}], "variants": [{"kind": "equivalent", "key": "present", "forms": [{"grammatical_form": "noun/en_singular", "text": "present", "is_base_form": true}]}]}
 {"guid": "N67_055", "forms": [{"grammatical_form": "noun/en_singular", "text": "object", "is_base_form": true, "ipa": "/ˈɑbdʒɛkt/", "phonetic": "OB-jekt"}]}
 {"guid": "N67_056", "forms": [{"grammatical_form": "noun/en_singular", "text": "article", "is_base_form": true, "ipa": "/ˈɑrtɪkəl/", "phonetic": "AR-ti-kuhl"}]}
+{"guid": "N67_057", "forms": [{"grammatical_form": "noun/en_singular", "text": "lingua franca", "is_base_form": true, "ipa": "/ˌlɪŋɡwə ˈfræŋkə/", "phonetic": "LING-gwuh FRANG-kuh"}]}
+{"guid": "N67_058", "forms": [{"grammatical_form": "noun/en_singular", "text": "imagery", "is_base_form": true, "ipa": "/ˈɪmɪdʒəri/", "phonetic": "IM-ij-ree"}]}
+{"guid": "N67_059", "forms": [{"grammatical_form": "noun/en_singular", "text": "ambiguity", "is_base_form": true, "ipa": "/ˌæm.bɪˈɡjuː.ə.t̬i/", "phonetic": "am-big-YOO-uh-tee"}]}
+{"guid": "N67_060", "forms": [{"grammatical_form": "noun/en_singular", "text": "emphasis", "is_base_form": true, "ipa": "/ˈɛmfəsɪs/", "phonetic": "EM-fuh-sis"}]}
+{"guid": "N67_061", "forms": [{"grammatical_form": "noun/en_singular", "text": "phrase", "is_base_form": true, "ipa": "/freɪz/", "phonetic": "FRAYZ"}]}
+{"guid": "N67_062", "forms": [{"grammatical_form": "noun/en_singular", "text": "usage", "is_base_form": true, "ipa": "/ˈjuːsɪdʒ/", "phonetic": "YOO-sij"}]}
+{"guid": "N67_063", "forms": [{"grammatical_form": "noun/en_singular", "text": "delta", "is_base_form": true, "ipa": "/ˈdɛltə/", "phonetic": "DEL-tuh"}]}
+{"guid": "N67_064", "forms": [{"grammatical_form": "noun/en_singular", "text": "nomenclature", "is_base_form": true, "ipa": "/ˈnoʊmənˌkleɪtʃər/", "phonetic": "noh-MEN-kluh-cher"}]}
+{"guid": "N67_065", "forms": [{"grammatical_form": "noun/en_singular", "text": "nomenclature", "is_base_form": true, "ipa": "/ˈnoʊmənˌkleɪtʃər/", "phonetic": "noh-MEN-kluh-cher"}]}
+{"guid": "N67_066", "forms": [{"grammatical_form": "noun/en_singular", "text": "complement", "is_base_form": true, "ipa": "/ˈkɑmpləmənt/", "phonetic": "KOM-pluh-ment"}]}
+{"guid": "N67_067", "forms": [{"grammatical_form": "noun/en_singular", "text": "conditional", "is_base_form": true, "ipa": "/kənˈdɪʃənəl/", "phonetic": "kun-DISH-uh-nul"}]}
+{"guid": "N67_068", "forms": [{"grammatical_form": "noun/en_singular", "text": "inversion", "is_base_form": true, "ipa": "/ɪnˈvɝːʒən/", "phonetic": "in-VUR-zhun"}]}
+{"guid": "N67_069", "forms": [{"grammatical_form": "noun/en_singular", "text": "metaphor", "is_base_form": true, "ipa": "/ˈmɛtəˌfɔr/", "phonetic": "MET-uh-for"}]}
+{"guid": "N67_070", "forms": [{"grammatical_form": "noun/en_singular", "text": "ad", "is_base_form": true, "ipa": "/ˌeɪˈdiː/", "phonetic": "AY-DEE"}]}
+{"guid": "N67_071", "forms": [{"grammatical_form": "noun/en_singular", "text": "abbreviation", "is_base_form": true, "ipa": "/əˌbriːviˈeɪʃən/", "phonetic": "uh-BREE-vee-AY-shun"}]}
+{"guid": "N67_072", "forms": [{"grammatical_form": "noun/en_singular", "text": "antecedent", "is_base_form": true, "ipa": "/ˌæntɪˈsidənt/", "phonetic": "an-tuh-SEE-dent"}]}
+{"guid": "N67_073", "forms": [{"grammatical_form": "noun/en_singular", "text": "articulation", "is_base_form": true, "ipa": "/ɑrˌtɪkjəˈleɪʃən/", "phonetic": "ar-tik-yuh-LAY-shun"}]}
+{"guid": "N67_074", "forms": [{"grammatical_form": "noun/en_singular", "text": "auxiliary", "is_base_form": true, "ipa": "/ɔɡˈzɪljəri/", "phonetic": "awg-ZIL-yuh-ree"}]}
+{"guid": "N67_075", "forms": [{"grammatical_form": "noun/en_singular", "text": "contraction", "is_base_form": true, "ipa": "/kənˈtrækʃən/", "phonetic": "kun-TRAK-shun"}]}
+{"guid": "N67_076", "forms": [{"grammatical_form": "noun/en_singular", "text": "imperative", "is_base_form": true, "ipa": "/ɪmˈpɛrətɪv/", "phonetic": "im-PER-uh-tiv"}]}
+{"guid": "N67_077", "forms": [{"grammatical_form": "noun/en_singular", "text": "possessive", "is_base_form": true, "ipa": "/pəˈzɛsɪv/", "phonetic": "puh-ZES-iv"}]}
+{"guid": "N67_078", "forms": [{"grammatical_form": "noun/en_singular", "text": "predicate", "is_base_form": true, "ipa": "/ˈprɛdɪkət/", "phonetic": "PRED-uh-kit"}]}
+{"guid": "N67_079", "forms": [{"grammatical_form": "noun/en_singular", "text": "shorthand", "is_base_form": true, "ipa": "/ˈʃɔrtˌhænd/", "phonetic": "SHORT-hand"}]}
+{"guid": "N67_080", "forms": [{"grammatical_form": "noun/en_singular", "text": "transcription", "is_base_form": true, "ipa": "/trænˈskrɪpʃən/", "phonetic": "tran-SKRIP-shun"}]}

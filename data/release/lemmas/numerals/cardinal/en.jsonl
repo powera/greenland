@@ -101,3 +101,5 @@
 {"guid": "Z01_101", "forms": [{"grammatical_form": "numeral/en_cardinal", "text": "ninety-seven", "is_base_form": true}]}
 {"guid": "Z01_102", "forms": [{"grammatical_form": "numeral/en_cardinal", "text": "ninety-eight", "is_base_form": true}]}
 {"guid": "Z01_103", "forms": [{"grammatical_form": "numeral/en_cardinal", "text": "ninety-nine", "is_base_form": true}]}
+{"guid": "Z01_104", "forms": [{"grammatical_form": "numeral/en_cardinal", "text": "billion", "is_base_form": true, "ipa": "/ˈbɪljən/", "phonetic": "BIL-yun"}]}
+{"guid": "Z01_105", "forms": [{"grammatical_form": "numeral/en_cardinal", "text": "trillion", "is_base_form": true, "ipa": "/ˈtrɪljən/", "phonetic": "TRIL-yun"}]}

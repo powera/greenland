@@ -3,3 +3,15 @@
 {"guid": "N74_003", "forms": [{"grammatical_form": "noun/en_singular", "text": "fossil", "is_base_form": true, "ipa": "/ˈfɑsəl/", "phonetic": "FOS-uhl"}]}
 {"guid": "N74_004", "forms": [{"grammatical_form": "noun/en_singular", "text": "rock", "is_base_form": true, "ipa": "/rɑːk/", "phonetic": "ROCK"}]}
 {"guid": "N74_007", "forms": [{"grammatical_form": "noun/en_singular", "text": "shell", "is_base_form": true, "ipa": "/ʃɛl/", "phonetic": "SHEL"}]}
+{"guid": "N74_010", "forms": [{"grammatical_form": "noun/en_singular", "text": "pearl", "is_base_form": true, "ipa": "/pɝl/", "phonetic": "PURL"}]}
+{"guid": "N74_011", "forms": [{"grammatical_form": "noun/en_singular", "text": "spark", "is_base_form": true, "ipa": "/spɑrk/", "phonetic": "SPARK"}]}
+{"guid": "N74_012", "forms": [{"grammatical_form": "noun/en_singular", "text": "turf", "is_base_form": true, "ipa": "/tɝf/", "phonetic": "TURF"}]}
+{"guid": "N74_013", "forms": [{"grammatical_form": "noun/en_singular", "text": "gem", "is_base_form": true, "ipa": "/dʒɛm/", "phonetic": "JEM"}]}
+{"guid": "N74_014", "forms": [{"grammatical_form": "noun/en_singular", "text": "beads", "is_base_form": true, "ipa": "/biːdz/", "phonetic": "BEEDZ"}]}
+{"guid": "N74_015", "forms": [{"grammatical_form": "noun/en_singular", "text": "flint", "is_base_form": true, "ipa": "/flɪnt/", "phonetic": "FLINT"}]}
+{"guid": "N74_016", "forms": [{"grammatical_form": "noun/en_singular", "text": "sod", "is_base_form": true, "ipa": "/sɑd/", "phonetic": "SOD"}]}
+{"guid": "N74_017", "forms": [{"grammatical_form": "noun/en_singular", "text": "groundwater", "is_base_form": true, "ipa": "/ˈɡraʊndˌwɔtər/", "phonetic": "GROUND-waw-ter"}]}
+{"guid": "N74_018", "forms": [{"grammatical_form": "noun/en_singular", "text": "ore", "is_base_form": true, "ipa": "/ɔr/", "phonetic": "OR"}]}
+{"guid": "N74_019", "forms": [{"grammatical_form": "noun/en_singular", "text": "frost", "is_base_form": true, "ipa": "/frɔst/", "phonetic": "FRAWST"}]}
+{"guid": "N74_020", "forms": [{"grammatical_form": "noun/en_singular", "text": "log", "is_base_form": true, "ipa": "/lɔɡ/", "phonetic": "LOG"}]}
+{"guid": "N74_021", "forms": [{"grammatical_form": "noun/en_singular", "text": "flakes", "is_base_form": true, "ipa": "/fleɪks/", "phonetic": "FLAYKS"}]}
