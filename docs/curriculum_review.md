@@ -12,7 +12,7 @@ metadata or placement changes.
 
 ## Topic catalogue and bounds
 
-[The topic catalogue](curriculum_topic_proposal.json) defines 26 additional
+[The topic catalogue](curriculum_topic_proposal.json) defines the additional
 subjects, their boundaries, illustrative examples and editorial CEFR estimates.
 [The metadata patch](curriculum_level_metadata.json) names 10 legacy untitled
 levels and fills 40 missing C1/C2 estimates. Existing A2/B1/B2 classifications
@@ -39,7 +39,8 @@ GREENLAND_DISABLE_LLM=1 PYTHONPATH=src python -m quality.curriculum_review updat
 
 Both commands validate before writing, use logged curriculum CRUD, and take a
 **minor** backup before changes. Identical reruns are no-ops. Metadata patches
-preserve notes, prerequisites, extra fields and translations on existing rows.
+preserve prerequisites, extra fields and translations on existing rows. Notes are
+preserved unless the patch explicitly supplies replacement editorial boundaries.
 The metadata patch expects missing CEFR tags and refuses a conflicting edit.
 
 ## Offline preparation
@@ -189,3 +190,21 @@ levels. They report destination counts/titles/CEFR, moved senses, those still at
 1399, no-fit suggestions, applied receipts, missing senses, and latest shared-queue
 outcomes per GUID. “Still staging” while the job runs includes pending or failed
 requests as well as valid no-fit decisions; queue outcomes distinguish them.
+
+
+## Narrowing the advanced general units
+
+The catch-all split reviews the senses at 1180 and 1182 together. The metadata
+patch [curriculum_catchall_levels.json](curriculum_catchall_levels.json) gives
+seven C1 units explicit boundaries, including five new units at 1300–1304:
+physical description/degree; figurative imagery; character/thought/feelings;
+actions/change/movement; everyday life/roles/objects; evaluation/value/certainty;
+and abstract states/relations/consequences. Ordinary abstract vocabulary is not
+inherently figurative, and an unfamiliar literal sense is not automatically a
+candidate for either broad general unit.
+
+The editorial split is by GUID and definition, not by headword. Recognizable
+physical-image metaphors remain in 1182. Clear specialist senses return to their
+existing topics (for example, scientific light to physics and a defense mechanism
+to psychology). Future preparation reads the narrowed boundaries from database
+notes. No capacity quota forces a fit, and 1399 remains a valid unresolved choice.

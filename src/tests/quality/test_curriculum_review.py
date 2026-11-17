@@ -653,3 +653,25 @@ def test_prepare_cli_forwards_inventory_sample_flags(
     assert prepare.call_args.kwargs["limit"] == 1400
     assert prepare.call_args.kwargs["seed"] == 20261117
     assert prepare.call_args.kwargs["cefr_pass"] is True
+
+
+def test_metadata_patch_can_explicitly_replace_editorial_boundaries(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    session, _ = session_with_lemma()
+    review.set_curriculum_level(
+        session, 1182, "Figurative Language and Imagery", cefr="C1", notes="Too broad"
+    )
+    session.commit()
+    monkeypatch.setattr(review, "create_backup", lambda *args, **kwargs: tmp_path / "backup")
+    config = review.DataSourceConfig(
+        backend_type=review.BackendType.SQLITE, sqlite_path=str(tmp_path / "unused")
+    )
+    patch = [
+        dict(level=1182, notes="Physical-image metaphors only; exclude ordinary abstract states.")
+    ]
+    assert review.update_levels(session, config, patch) == 1
+    assert review.get_curriculum_level(session, 1182).notes == patch[0]["notes"]  # type: ignore[union-attr]
+    session.commit()
+    assert review.update_levels(session, config, patch) == 0
+    session.close()

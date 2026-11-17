@@ -448,14 +448,15 @@ def update_levels(
         cefr = normalize_cefr(entry.get("cefr", existing.cefr if existing else None))
         if not isinstance(name, str) or not name.strip():
             raise ValueError(f"A title is required: {number}")
-        if existing and existing.name == name and existing.cefr == cefr:
+        notes = entry.get("notes", existing.notes if existing else None)
+        if existing and existing.name == name and existing.cefr == cefr and existing.notes == notes:
             continue
         if (
             "expected_cefr" in entry
             and (existing.cefr if existing else None) != entry["expected_cefr"]
         ):
             raise ValueError(f"CEFR metadata changed since preview: {number}")
-        updates.append((dict(entry, name=name, cefr=cefr), existing))
+        updates.append((dict(entry, name=name, cefr=cefr, notes=notes), existing))
     if updates:
         print("Minor backup:", create_backup(config, "name-topic-levels", tier="minor"), flush=True)
         for patch, original in updates:
@@ -466,7 +467,7 @@ def update_levels(
                 cefr=patch["cefr"],
                 prerequisites=original.get_prerequisites() if original else (),
                 extra=original.get_extra() if original else None,
-                notes=original.notes if original else patch.get("notes"),
+                notes=patch["notes"],
                 source="curriculum-review/update-levels",
             )
     session.commit()

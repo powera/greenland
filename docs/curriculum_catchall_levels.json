@@ -1,0 +1,51 @@
+[
+  {
+    "level": 1180,
+    "name": "Advanced Description, Appearance and Degree",
+    "cefr": "C1",
+    "notes": "Physical and sensory descriptions, appearance, degree, quantity, extent and manner. Exclude evaluations of merit or certainty (1303), character and inner life (1300), concrete actions (1301), and everyday objects/roles (1302).\nExamples (illustrative, not mandatory members): picturesque, nominal (small amount), enormously",
+    "expected_cefr": "C1"
+  },
+  {
+    "level": 1182,
+    "name": "Figurative Language and Imagery",
+    "cefr": "C1",
+    "notes": "Conventional nonliteral senses with a recognizable physical, natural or concrete image. This is not a destination for every abstract word or an unfamiliar literal sense. Exclude plain personal qualities (1300), evaluations (1303), and abstract states/relations (1304).\nExamples (illustrative, not mandatory members): wavelength (mutual understanding), glacial (slow), kernel (essential core)",
+    "expected_cefr": "C1"
+  },
+  {
+    "level": 1300,
+    "name": "Advanced Character, Thought and Feelings",
+    "cefr": "C1",
+    "notes": "Everyday advanced vocabulary for character, attitudes, emotions, thought, personal judgment and interpersonal behavior. Exclude clinical/academic psychology (1062), general evaluation of objects or claims (1303), and physical-image metaphors (1182).\nExamples (illustrative, not mandatory members): pragmatic, aspiration, indignant, consolation",
+    "expected_cefr": null
+  },
+  {
+    "level": 1301,
+    "name": "Advanced Actions, Change and Movement",
+    "cefr": "C1",
+    "notes": "Concrete or everyday actions, movement, handling, gradual change, time and spatial arrangement. Exclude technical domain processes, personal thought/feeling (1300), metaphorical images (1182), and abstract conditions/causality (1304).\nExamples (illustrative, not mandatory members): thrust, prolong, accommodate, clockwise",
+    "expected_cefr": null
+  },
+  {
+    "level": 1302,
+    "name": "Advanced Everyday Life, Roles and Objects",
+    "cefr": "C1",
+    "notes": "Daily living, household items, clothing, accommodation, services, social titles/roles and practical routines. Exclude specialist domain senses, abstract states (1304), evaluation (1303), and descriptive modifiers without a daily-life topic (1180).\nExamples (illustrative, not mandatory members): lodging, housekeeping, recipient, postal",
+    "expected_cefr": null
+  },
+  {
+    "level": 1303,
+    "name": "Advanced Evaluation, Value and Certainty",
+    "cefr": "C1",
+    "notes": "General judgments about merit, usefulness, importance, correctness, originality and certainty, expressed as adjectives, nouns, adverbs or verbs. Exclude personal temperament and emotional states (1300), sensory description or mere degree (1180), specialist formal logic, and concrete imagery (1182).\nExamples (illustrative, not mandatory members): indispensable, negligible, merit, undoubtedly",
+    "expected_cefr": null
+  },
+  {
+    "level": 1304,
+    "name": "Advanced States, Relations and Consequences",
+    "cefr": "C1",
+    "notes": "Abstract conditions, limits, dependencies, mutual relations, developments, outcomes and causal/temporal relationships. Exclude personal emotions/attitudes (1300), concrete actions or movements (1301), evaluative claims (1303), recognizable figurative images (1182), and specialist domain terms.\nExamples (illustrative, not mandatory members): conditional, parameter (scope limit), onset, succession",
+    "expected_cefr": null
+  }
+]
