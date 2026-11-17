@@ -1,0 +1,288 @@
+[
+  {
+    "level": 1004,
+    "name": "Visual Art and Design",
+    "boundary": "Art materials, composition and design practice; exclude musical performance and general aesthetic adjectives.",
+    "examples": [
+      "palette",
+      "engraving",
+      "typography"
+    ],
+    "cefr": "C1"
+  },
+  {
+    "level": 1006,
+    "name": "Music and Performance",
+    "boundary": "Musical structure and performance; exclude general art and electronics.",
+    "examples": [
+      "syncopation",
+      "cadence",
+      "overture"
+    ],
+    "cefr": "C1"
+  },
+  {
+    "level": 1014,
+    "name": "Ecology and Conservation",
+    "boundary": "Organisms in ecosystems and conservation; exclude cellular biology and geographic landforms.",
+    "examples": [
+      "habitat",
+      "biodiversity",
+      "invasive"
+    ],
+    "cefr": "C1"
+  },
+  {
+    "level": 1016,
+    "name": "Genetics and Cellular Biology",
+    "boundary": "Heredity and cellular processes; exclude figurative reproduction and social inheritance.",
+    "examples": [
+      "chromosome",
+      "mitosis",
+      "allele"
+    ],
+    "cefr": "C2"
+  },
+  {
+    "level": 1018,
+    "name": "Disease and Epidemiology",
+    "boundary": "Disease transmission and population health; exclude medicines and purely anatomical terms.",
+    "examples": [
+      "vector (disease carrier)",
+      "pathogen",
+      "outbreak"
+    ],
+    "cefr": "C1"
+  },
+  {
+    "level": 1024,
+    "name": "Geology and Earth Processes",
+    "boundary": "Rocks, strata and geological change; exclude human geography.",
+    "examples": [
+      "sediment",
+      "erosion",
+      "fault (geological)"
+    ],
+    "cefr": "C1"
+  },
+  {
+    "level": 1026,
+    "name": "Weather and Climate",
+    "boundary": "Atmosphere, weather systems and climate; exclude astronomical bodies.",
+    "examples": [
+      "humidity",
+      "monsoon",
+      "isobar"
+    ],
+    "cefr": "C1"
+  },
+  {
+    "level": 1029,
+    "name": "Agriculture and Land Management",
+    "boundary": "Cultivation and agricultural production; exclude cooking and wild ecosystems.",
+    "examples": [
+      "irrigation",
+      "crop rotation",
+      "pasture"
+    ],
+    "cefr": "C1"
+  },
+  {
+    "level": 1034,
+    "name": "Historical Periods and Movements",
+    "boundary": "Named historical periods and historical change; exclude current civic procedures.",
+    "examples": [
+      "Reconstruction (US history)",
+      "Renaissance",
+      "feudalism"
+    ],
+    "cefr": "C1"
+  },
+  {
+    "level": 1036,
+    "name": "Government and Civic Institutions",
+    "boundary": "Government institutions and public administration; exclude litigation and social theory.",
+    "examples": [
+      "legislature",
+      "bureaucracy",
+      "constituency"
+    ],
+    "cefr": "C1"
+  },
+  {
+    "level": 1038,
+    "name": "War and Diplomacy",
+    "boundary": "Military organization, conflict and international relations; exclude metaphorical attacks.",
+    "examples": [
+      "armistice",
+      "siege",
+      "treaty"
+    ],
+    "cefr": "C1"
+  },
+  {
+    "level": 1042,
+    "name": "Mechanics and Machines",
+    "boundary": "Machine parts and mechanical motion; exclude mathematical uses.",
+    "examples": [
+      "differential (gearing)",
+      "torque",
+      "piston"
+    ],
+    "cefr": "C1"
+  },
+  {
+    "level": 1044,
+    "name": "Construction and Civil Engineering",
+    "boundary": "Built structures, construction and infrastructure; exclude historical periods.",
+    "examples": [
+      "reconstruction (building)",
+      "scaffolding",
+      "abutment"
+    ],
+    "cefr": "C1"
+  },
+  {
+    "level": 1046,
+    "name": "Electronics and Electrical Engineering",
+    "boundary": "Circuits and electrical devices; exclude figurative connections.",
+    "examples": [
+      "capacitor",
+      "resistor",
+      "voltage"
+    ],
+    "cefr": "C2"
+  },
+  {
+    "level": 1048,
+    "name": "Computing and Software",
+    "boundary": "Computational systems, programming and networking; exclude ordinary senses of technical homonyms.",
+    "examples": [
+      "compiler",
+      "algorithm",
+      "protocol (computing)"
+    ],
+    "cefr": "C1"
+  },
+  {
+    "level": 1052,
+    "name": "Materials and Chemical Processes",
+    "boundary": "Material properties and chemical transformations; exclude fixed element cohorts.",
+    "examples": [
+      "polymer",
+      "oxidation",
+      "alloy"
+    ],
+    "cefr": "C2"
+  },
+  {
+    "level": 1058,
+    "name": "Physics and Measurement",
+    "boundary": "Physical principles and scientific measurement; exclude figurative wavelengths.",
+    "examples": [
+      "wavelength (physics)",
+      "momentum (physics)",
+      "calibration"
+    ],
+    "cefr": "C2"
+  },
+  {
+    "level": 1062,
+    "name": "Psychology and Cognition",
+    "boundary": "Mental processes and psychological constructs; exclude casual evaluations.",
+    "examples": [
+      "cognition",
+      "conditioning",
+      "perception"
+    ],
+    "cefr": "C1"
+  },
+  {
+    "level": 1064,
+    "name": "Society and Social Behavior",
+    "boundary": "Social conventions, groups and interactions; exclude mathematical norms and religious doctrine.",
+    "examples": [
+      "norm (social)",
+      "conformity",
+      "solidarity"
+    ],
+    "cefr": "C1"
+  },
+  {
+    "level": 1068,
+    "name": "Philosophy and Ethics",
+    "boundary": "Philosophical arguments and ethical frameworks; exclude religious offices and everyday praise.",
+    "examples": [
+      "epistemology",
+      "utilitarianism",
+      "determinism"
+    ],
+    "cefr": "C2"
+  },
+  {
+    "level": 1072,
+    "name": "Economics and Markets",
+    "boundary": "Economic mechanisms and market analysis; exclude accounting procedures.",
+    "examples": [
+      "inflation",
+      "elasticity (economics)",
+      "monopoly"
+    ],
+    "cefr": "C1"
+  },
+  {
+    "level": 1074,
+    "name": "Finance and Accounting",
+    "boundary": "Financial instruments, accounts and financial reporting; exclude general quantities.",
+    "examples": [
+      "equity (finance)",
+      "depreciation",
+      "liquidity"
+    ],
+    "cefr": "C1"
+  },
+  {
+    "level": 1076,
+    "name": "Business and Organizations",
+    "boundary": "Organizational management and commercial operations; exclude legal proceedings.",
+    "examples": [
+      "procurement",
+      "logistics",
+      "merger"
+    ],
+    "cefr": "C1"
+  },
+  {
+    "level": 1082,
+    "name": "Statistics and Data Analysis",
+    "boundary": "Probability, statistical inference and data interpretation; exclude social norms.",
+    "examples": [
+      "variance",
+      "regression",
+      "sampling"
+    ],
+    "cefr": "C2"
+  },
+  {
+    "level": 1112,
+    "name": "Communication and Rhetoric",
+    "boundary": "Discourse, rhetorical devices and communication practices; exclude grammatical structure.",
+    "examples": [
+      "metaphor",
+      "rhetoric",
+      "paraphrase"
+    ],
+    "cefr": "C1"
+  },
+  {
+    "level": 1182,
+    "name": "Figurative Meaning and Abstract Relations",
+    "boundary": "Established figurative senses and abstract interpersonal relations; exclude literal scientific senses and domain-specific constructs.",
+    "examples": [
+      "wavelength (mutual understanding)",
+      "astronomical (enormous)",
+      "relationship (connection)"
+    ],
+    "cefr": "C1"
+  }
+]

@@ -151,7 +151,7 @@ class BatchQueueManager:
         db_session: Session,
         batch_client: Optional[OpenAIBatchClient] = None,
         debug: bool = False,
-    ):
+    ) -> None:
         """Initialize batch queue manager.
 
         Args:
@@ -160,10 +160,21 @@ class BatchQueueManager:
             debug: Enable debug logging
         """
         self.db = db_session
-        self.batch_client = batch_client or OpenAIBatchClient(debug=debug)
+        self._batch_client = batch_client
         self.debug = debug
         if debug:
             logger.setLevel(logging.DEBUG)
+
+    @property
+    def batch_client(self) -> OpenAIBatchClient:
+        """Load credentials only when a remote operation actually needs the client."""
+        if self._batch_client is None:
+            self._batch_client = OpenAIBatchClient(debug=self.debug)
+        return self._batch_client
+
+    @batch_client.setter
+    def batch_client(self, client: OpenAIBatchClient) -> None:
+        self._batch_client = client
 
     def queue_request(
         self,

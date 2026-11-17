@@ -1,0 +1,252 @@
+[
+  {
+    "level": 1002,
+    "name": "Specific Family Relationships",
+    "cefr": "C1",
+    "expected_cefr": null
+  },
+  {
+    "level": 1004,
+    "name": "Visual Art and Design",
+    "cefr": "C1",
+    "expected_cefr": null
+  },
+  {
+    "level": 1006,
+    "name": "Music and Performance",
+    "cefr": "C1",
+    "expected_cefr": null
+  },
+  {
+    "level": 1014,
+    "name": "Ecology and Conservation",
+    "cefr": "C1",
+    "expected_cefr": null
+  },
+  {
+    "level": 1015,
+    "name": "Biology and Anatomy II",
+    "cefr": "C1",
+    "expected_cefr": null,
+    "notes": "Continuation of biological and anatomical vocabulary; exclude figurative senses and unrelated everyday uses."
+  },
+  {
+    "level": 1016,
+    "name": "Genetics and Cellular Biology",
+    "cefr": "C2",
+    "expected_cefr": null
+  },
+  {
+    "level": 1018,
+    "name": "Disease and Epidemiology",
+    "cefr": "C1",
+    "expected_cefr": null
+  },
+  {
+    "level": 1024,
+    "name": "Geology and Earth Processes",
+    "cefr": "C1",
+    "expected_cefr": null
+  },
+  {
+    "level": 1025,
+    "name": "Geography and Migration II",
+    "cefr": "C1",
+    "expected_cefr": null,
+    "notes": "Continuation of physical and human geography; civic institutions belong in Government and Civic Institutions."
+  },
+  {
+    "level": 1026,
+    "name": "Weather and Climate",
+    "cefr": "C1",
+    "expected_cefr": null
+  },
+  {
+    "level": 1029,
+    "name": "Agriculture and Land Management",
+    "cefr": "C1",
+    "expected_cefr": null
+  },
+  {
+    "level": 1031,
+    "name": "Extended Countries",
+    "cefr": "C1",
+    "expected_cefr": null
+  },
+  {
+    "level": 1032,
+    "name": "Extended Nationalities and Ethnicities",
+    "cefr": "C1",
+    "expected_cefr": null
+  },
+  {
+    "level": 1033,
+    "name": "Extended Languages",
+    "cefr": "C1",
+    "expected_cefr": null
+  },
+  {
+    "level": 1034,
+    "name": "Historical Periods and Movements",
+    "cefr": "C1",
+    "expected_cefr": null
+  },
+  {
+    "level": 1036,
+    "name": "Government and Civic Institutions",
+    "cefr": "C1",
+    "expected_cefr": null
+  },
+  {
+    "level": 1038,
+    "name": "War and Diplomacy",
+    "cefr": "C1",
+    "expected_cefr": null
+  },
+  {
+    "level": 1042,
+    "name": "Mechanics and Machines",
+    "cefr": "C1",
+    "expected_cefr": null
+  },
+  {
+    "level": 1044,
+    "name": "Construction and Civil Engineering",
+    "cefr": "C1",
+    "expected_cefr": null
+  },
+  {
+    "level": 1045,
+    "name": "Industrial Technology and Processes II",
+    "cefr": "C1",
+    "expected_cefr": null,
+    "notes": "Continuation of industrial materials, equipment and production processes; pure mathematics and computing have their own units."
+  },
+  {
+    "level": 1046,
+    "name": "Electronics and Electrical Engineering",
+    "cefr": "C2",
+    "expected_cefr": null
+  },
+  {
+    "level": 1048,
+    "name": "Computing and Software",
+    "cefr": "C1",
+    "expected_cefr": null
+  },
+  {
+    "level": 1052,
+    "name": "Materials and Chemical Processes",
+    "cefr": "C2",
+    "expected_cefr": null
+  },
+  {
+    "level": 1056,
+    "name": "Physical Science and Astronomy",
+    "cefr": "C1",
+    "expected_cefr": null,
+    "notes": "Physical science, optics and astronomical phenomena; exclude figurative senses such as mutual wavelength."
+  },
+  {
+    "level": 1058,
+    "name": "Physics and Measurement",
+    "cefr": "C2",
+    "expected_cefr": null
+  },
+  {
+    "level": 1062,
+    "name": "Psychology and Cognition",
+    "cefr": "C1",
+    "expected_cefr": null
+  },
+  {
+    "level": 1064,
+    "name": "Society and Social Behavior",
+    "cefr": "C1",
+    "expected_cefr": null
+  },
+  {
+    "level": 1065,
+    "name": "Religion and Society II",
+    "cefr": "C1",
+    "expected_cefr": null,
+    "notes": "Continuation of religious practice and social institutions; ordinary emotions, anatomy and legal offenses belong in their own topics."
+  },
+  {
+    "level": 1068,
+    "name": "Philosophy and Ethics",
+    "cefr": "C2",
+    "expected_cefr": null
+  },
+  {
+    "level": 1072,
+    "name": "Economics and Markets",
+    "cefr": "C1",
+    "expected_cefr": null
+  },
+  {
+    "level": 1074,
+    "name": "Finance and Accounting",
+    "cefr": "C1",
+    "expected_cefr": null
+  },
+  {
+    "level": 1075,
+    "name": "Legal Terms and Proceedings II",
+    "cefr": "C1",
+    "expected_cefr": null,
+    "notes": "Continuation of legal procedures and decisions; exclude general evaluative adjectives."
+  },
+  {
+    "level": 1076,
+    "name": "Business and Organizations",
+    "cefr": "C1",
+    "expected_cefr": null
+  },
+  {
+    "level": 1078,
+    "name": "Agriculture and Farm Life",
+    "cefr": "C1",
+    "expected_cefr": null,
+    "notes": "Farm crops, livestock, tools and daily farming activities; Agriculture and Land Management covers cultivation systems and land management."
+  },
+  {
+    "level": 1082,
+    "name": "Statistics and Data Analysis",
+    "cefr": "C2",
+    "expected_cefr": null
+  },
+  {
+    "level": 1085,
+    "name": "Mathematics and Quantitative Reasoning",
+    "cefr": "C2",
+    "expected_cefr": null,
+    "notes": "Mathematical quantities, operations and deduction; exclude mechanical, biological and social senses of technical homonyms."
+  },
+  {
+    "level": 1095,
+    "name": "Food and Cooking 4",
+    "cefr": "C1",
+    "expected_cefr": null,
+    "notes": "Continuation of culinary ingredients, preparation and tastes; anatomical and figurative senses belong elsewhere."
+  },
+  {
+    "level": 1112,
+    "name": "Communication and Rhetoric",
+    "cefr": "C1",
+    "expected_cefr": null
+  },
+  {
+    "level": 1115,
+    "name": "Linguistics and Language II",
+    "cefr": "C2",
+    "expected_cefr": null,
+    "notes": "Continuation of language structure, linguistic analysis and terminology; historical periods and ordinary rebuilding are outside this unit."
+  },
+  {
+    "level": 1182,
+    "name": "Figurative Meaning and Abstract Relations",
+    "cefr": "C1",
+    "expected_cefr": null
+  }
+]

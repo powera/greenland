@@ -7,6 +7,9 @@ import sys
 import tempfile
 import unittest
 from datetime import datetime
+from pathlib import Path
+
+import pytest
 from unittest.mock import MagicMock, Mock, patch
 
 sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), "../..")))
@@ -599,3 +602,24 @@ class BatchRequestMetadataTestCase(unittest.TestCase):
 
 if __name__ == "__main__":
     unittest.main()
+
+
+def test_manager_defers_remote_client_until_needed(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    """Queue planning must not load credentials or initialize a remote client."""
+    from unittest.mock import Mock
+
+    from clients.batch_queue import BatchQueueManager, create_batch_database_session
+
+    factory = Mock()
+    monkeypatch.setattr("clients.batch_queue.OpenAIBatchClient", factory)
+    session = create_batch_database_session(str(tmp_path / "lazy.sqlite"))
+    try:
+        manager = BatchQueueManager(session)
+        factory.assert_not_called()
+        assert manager.batch_client is factory.return_value
+        assert manager.batch_client is factory.return_value
+        factory.assert_called_once_with(debug=False)
+    finally:
+        session.close()

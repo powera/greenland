@@ -105,3 +105,14 @@ def _lemma(
         sense_prominence=prominence,
         frequency_rank=rank,
     )
+
+
+def test_topic_extension_keeps_staging_reserved() -> None:
+    import constants
+    from reports.curriculum_bands import band_of
+
+    assert constants.MAX_DIFFICULTY_LEVEL == 1499
+    for level in (1000, 1299, 1300, 1380, 1398, 1400, 1499):
+        assert band_of(level) == "topic"
+    assert band_of(1399) == "gap"
+    assert band_of(1500) == "gap"
