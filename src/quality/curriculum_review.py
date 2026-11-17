@@ -46,6 +46,7 @@ from storage.crud.curriculum_level import (
 )
 from storage.crud.operation_log import log_entity_operation
 from wordfreq.data.cohorts import COHORT_LEVELS
+from quality.curriculum_volumes import VolumeAllocator, balance_volumes, volume_context
 
 
 def release_rows(commit: str) -> dict[str, dict[str, Any]]:
@@ -270,6 +271,7 @@ def prepare(
         prompt = build_prompt(query, shortlist, menu, weights, None, senses, owner)
         allowed = [item.level for item in menu]
         context = build_context([item for item in menu if item.level != 1399])
+        context += volume_context()
         context += (
             "\n1399 | Staging: placement undecided. fit=none means no suitable level; "
             "do not force a fit. Judge this GUID and definition independently of siblings. "
@@ -575,6 +577,7 @@ def apply_results(session: Session, config: DataSourceConfig, store: ReviewStore
     counts = dict(moved=0, kept=0, blocked=0)
     ready: list[tuple[dict[str, Any], Lemma, int]] = []
     recovered: list[dict[str, Any]] = []
+    allocator = VolumeAllocator(session)
     for record in store.rows():
         if not record.get("suggestion") or record.get("applied"):
             continue
@@ -627,6 +630,7 @@ def apply_results(session: Session, config: DataSourceConfig, store: ReviewStore
             store.put("sense:" + guid, record)
             counts["blocked"] += 1
             continue
+        target = allocator.choose(target, record["allowed"], lemma.difficulty_level)
         ready.append((record, lemma, target))
     moves = [
         PlannedMove(
@@ -898,6 +902,7 @@ def main() -> None:
             "update-levels",
             "run-one",
             "apply-results",
+            "balance-volumes",
             "submit-all",
             "collect-all",
             "watch",
@@ -972,6 +977,8 @@ def main() -> None:
             if args.output:
                 args.output.write_text(rendered + "\n")
             print(rendered)
+        elif args.action == "balance-volumes":
+            print(json.dumps(balance_volumes(session, config, dry_run=args.dry_run), indent=2))
         elif args.action == "apply-results":
             print(json.dumps(apply_results(session, config, store)), flush=True)
         elif args.action in ("submit", "submit-all"):

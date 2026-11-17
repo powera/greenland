@@ -208,3 +208,42 @@ physical-image metaphors remain in 1182. Clear specialist senses return to their
 existing topics (for example, scientific light to physics and a defense mechanism
 to psychology). Future preparation reads the narrowed boundaries from database
 notes. No capacity quota forces a fit, and 1399 remains a valid unresolved choice.
+
+## Balanced numbered volumes
+
+The equivalent-volume families are:
+
+- Character, thought and feelings: 1300, 1310 (volume 2), 1311 (volume 3).
+- Actions, change and movement: 1301, 1320 (volume 2), 1321 (volume 3).
+- Figurative language and imagery: 1182, 1330 (volume 2).
+
+All volumes in a family share its meaning boundary, examples and CEFR. The
+additional metadata is in [curriculum_volume_levels.json](curriculum_volume_levels.json).
+They are continuations of a subject, not separate sense categories or a difficulty
+sequence. Other subjects and fixed cohorts are unchanged.
+
+```sh
+GREENLAND_TEST_MODE=1 PYTHONPATH=src python -m quality.curriculum_review balance-volumes \
+  --review /tmp/volume-review.sqlite --dry-run
+GREENLAND_DISABLE_LLM=1 PYTHONPATH=src python -m quality.curriculum_review balance-volumes \
+  --review /tmp/volume-review.sqlite
+```
+
+The action checks every number/title/CEFR/boundary for conflicts, takes a minor
+backup, installs missing volumes and redistributes only excess senses into
+underfilled sibling volumes. It moves the minimum number needed for counts to
+differ by at most one, is safe to repeat, and logs every GUID move.
+
+Future placement asks the model for the correct subject family. Application
+selects the least-filled equivalent volume using **current database counts**
+under the writer lock, rather than the older counts frozen in the prompts.
+Bulk application reserves slots for its planned moves. This keeps a large run
+balanced even if every answer suggests volume 1. A sense already correctly in
+the same family stays put, and allocation never chooses an unoffered volume or
+a different subject. The original model suggestion and actual assigned volume
+are both recorded. No-fit decisions still use 1399. Size targets remain soft;
+a full family is not grounds to force a different subject.
+
+Restart Barsukas through `api.admin.restart()` before the next batch to load the
+updated completion allocator. This metadata/rebalancing action makes no paid
+calls and does not retry failed requests.

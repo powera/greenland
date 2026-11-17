@@ -210,3 +210,47 @@ def test_dry_run_uses_no_remote_client_and_writes_no_rows(
     session.close()
     tracking.close()
     store.db.close()
+
+
+def test_completion_balances_family_while_preserving_model_suggestion(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    session, tracking, store, manager, _ = setup_review(tmp_path, 1)
+    for level, name in (
+        (1300, "Advanced Character, Thought and Feelings"),
+        (1310, "Advanced Character, Thought and Feelings 2"),
+        (1311, "Advanced Character, Thought and Feelings 3"),
+    ):
+        review.set_curriculum_level(
+            session, level, name, cefr="C1", notes="Identical subject boundary"
+        )
+    session.add(
+        Lemma(
+            guid="N72_existing",
+            lemma_text="already taught",
+            definition_text="Character sense.",
+            pos_type="noun",
+            difficulty_level=1300,
+        )
+    )
+    session.commit()
+    record = store.rows()[0]
+    record["allowed"] = [1300, 1310, 1311, 1399]
+    store.put("sense:" + record["guid"], record)
+    monkeypatch.setattr(batch, "create_backup", lambda *args, **kwargs: tmp_path / "backup")
+    ids = review.submit_all(session, store, manager, 350, apply_on_collect=True)
+    rows = finish(tracking, ids[0], answer(1300))
+    result = complete_rows(batch.PLACEMENT_JOB, rows, session, ids[0], manager)
+    assert result["updated"] == 1
+    assert session.query(Lemma).filter(Lemma.guid == record["guid"]).one().difficulty_level == 1310
+    receipt = (
+        session.query(OperationLog)
+        .filter(OperationLog.operation_type == "curriculum_placement_applied")
+        .one()
+    )
+    fact = json.loads(receipt.fact)
+    assert fact["suggested_level"] == 1300 and fact["level"] == 1310
+    assert fact["suggestion"]["level"] == 1300
+    session.close()
+    tracking.close()
+    store.db.close()

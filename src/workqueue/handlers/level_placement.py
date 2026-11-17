@@ -8,6 +8,7 @@ from sqlalchemy.orm import Session
 from clients.lib import schema_from_dict
 from clients.types import LLMCall
 from quality.curriculum_review import checked_suggestion, fingerprint
+from quality.curriculum_volumes import VolumeAllocator
 from reports.curriculum_bands import PlannedMove, apply_moves, RankEvidence, effective_rank
 from reports.level_candidates import IndexRow, LevelIndex, query_for_lemma
 from storage.backend import BackendType, DataSourceConfig
@@ -148,6 +149,7 @@ def _apply(
     target = 1399 if suggestion["fit"] == "none" else suggestion["level"]
     if type(target) is not int or target not in record["allowed"]:
         raise ValueError("Destination is not allowed")
+    target = VolumeAllocator(session).choose(target, record["allowed"], lemma.difficulty_level)
     if target != lemma.difficulty_level:
         _backup_once(session, state)
         apply_moves(
@@ -158,7 +160,8 @@ def _apply(
                     record["guid"],
                     lemma.difficulty_level,
                     target,
-                    suggestion["reasoning"],
+                    suggestion["reasoning"]
+                    + f"; family volume allocation from suggested {suggestion['level']}",
                 )
             ],
             source=source,
@@ -173,6 +176,7 @@ def _apply(
             original_fingerprint=record["fingerprint"],
             applied_fingerprint=_current_fingerprint(session, lemma),
             level=target,
+            suggested_level=suggestion["level"],
             suggestion=suggestion,
         ),
     )
