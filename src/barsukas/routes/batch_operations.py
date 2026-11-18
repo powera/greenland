@@ -134,7 +134,7 @@ def view_batch(batch_id: str) -> ResponseReturnValue:
 
 @bp.route("/<batch_id>/check-status", methods=["POST"])
 def check_batch_status(batch_id: str) -> ResponseReturnValue:
-    """Refresh batch status from OpenAI and retrieve results if completed.
+    """Refresh status and retrieve available results from any terminal batch.
 
     Always redirects back to the detail page. Status and any retrieval outcome
     are surfaced via flashed messages.
@@ -151,7 +151,12 @@ def check_batch_status(batch_id: str) -> ResponseReturnValue:
         status = info.get("status")
         flash(f"OpenAI status: {status}", "info")
 
-        if status == BatchStatus.COMPLETED.value:
+        if status in (
+            BatchStatus.COMPLETED.value,
+            BatchStatus.EXPIRED.value,
+            BatchStatus.CANCELLED.value,
+            BatchStatus.FAILED.value,
+        ):
             try:
                 manager.retrieve_batch_results(batch_id)
                 flash("Results retrieved from OpenAI.", "success")

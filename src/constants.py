@@ -41,11 +41,11 @@ RELEASE_DIR = os.path.join(PROJECT_ROOT, "data", "release")
 #               hand, filled from 1
 #   100-499     "named" units, each a single pos_subtype (Animals 3, Body
 #               Parts, Appliances 2)
-#   1000-1299   topic-specific extensions, outside the general course
+#   1000-1499   topic-specific extensions (except reserved staging 1399), outside the general course
 #
-# Above the bands, 1399 is the staging level: where a new sense is parked until
+# Within the numeric topic range, 1399 is the staging sentinel: where a new sense is parked until
 # its level is assessed.  It is a valid stored level (so the API accepts it) but
-# belongs to no band, which is why the topic band has its own maximum.
+# belongs to no band; band classification must explicitly exclude it.
 #
 # The gaps are the point. Each old level 21-64 maps to ``100 + (old-21)*5``,
 # and the five numbers it owns are where its single-topic units go: the level
@@ -62,9 +62,9 @@ CORE_DIFFICULTY_LEVEL_MAX: int = 30
 NAMED_DIFFICULTY_LEVEL_MIN: int = 100
 GENERAL_DIFFICULTY_LEVEL_MAX: int = 499
 TOPIC_DIFFICULTY_LEVEL_MIN: int = 1000
-TOPIC_DIFFICULTY_LEVEL_MAX: int = 1299
+TOPIC_DIFFICULTY_LEVEL_MAX: int = 1499
 STAGING_DIFFICULTY_LEVEL: int = 1399
-MAX_DIFFICULTY_LEVEL: int = STAGING_DIFFICULTY_LEVEL
+MAX_DIFFICULTY_LEVEL: int = TOPIC_DIFFICULTY_LEVEL_MAX
 EXCLUDE_DIFFICULTY_LEVEL: int = -1
 
 # Wordfreq directories

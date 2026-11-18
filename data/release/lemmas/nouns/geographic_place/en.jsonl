@@ -48,3 +48,25 @@
 {"guid": "N56_066", "forms": [{"grammatical_form": "noun/en_singular", "text": "metropolitan area", "is_base_form": true}], "variants": [{"kind": "equivalent", "key": "metro", "forms": [{"grammatical_form": "noun/en_singular", "text": "metro", "is_base_form": true}]}]}
 {"guid": "N56_069", "forms": [{"grammatical_form": "noun/en_singular", "text": "neighborhood", "is_base_form": true, "ipa": "/ˈneɪbɚˌhʊd/", "phonetic": "NAY-ber-hood"}], "grammar_facts": [{"fact_type": "countability", "fact_value": "countable"}, {"fact_type": "number_type", "fact_value": "regular"}, {"fact_type": "animacy", "fact_value": "inanimate"}, {"fact_type": "plural_status", "fact_value": "regular"}]}
 {"guid": "N56_070", "forms": [{"grammatical_form": "noun/en_singular", "text": "neighborhood", "is_base_form": true, "ipa": "/ˈneɪbɚˌhʊd/", "phonetic": "NAY-ber-hood"}], "grammar_facts": [{"fact_type": "countability", "fact_value": "countable"}, {"fact_type": "number_type", "fact_value": "regular"}, {"fact_type": "animacy", "fact_value": "inanimate"}, {"fact_type": "plural_status", "fact_value": "regular"}]}
+{"guid": "N56_071", "forms": [{"grammatical_form": "noun/en_singular", "text": "terra incognita", "is_base_form": true, "ipa": "/ˈtɛrə ˌɪnˈkɑɡnɪtə/", "phonetic": "TEH-ruh in-kog-NEE-tuh"}]}
+{"guid": "N56_072", "forms": [{"grammatical_form": "noun/en_singular", "text": "grid", "is_base_form": true, "ipa": "/ɡrɪd/", "phonetic": "GRID"}]}
+{"guid": "N56_073", "forms": [{"grammatical_form": "noun/en_singular", "text": "neighbourhood", "is_base_form": true, "ipa": "/ˈneɪbɚˌhʊd/", "phonetic": "NAY-ber-hood"}]}
+{"guid": "N56_074", "forms": [{"grammatical_form": "noun/en_singular", "text": "ward", "is_base_form": true, "ipa": "/wɔrd/", "phonetic": "WARD"}]}
+{"guid": "N56_075", "forms": [{"grammatical_form": "noun/en_singular", "text": "frontier", "is_base_form": true, "ipa": "/frʌnˈtɪr/", "phonetic": "frun-TEER"}]}
+{"guid": "N56_076", "forms": [{"grammatical_form": "noun/en_singular", "text": "parish", "is_base_form": true, "ipa": "/ˈpɛrɪʃ/", "phonetic": "PAIR-ish"}]}
+{"guid": "N56_077", "forms": [{"grammatical_form": "noun/en_singular", "text": "vicinity", "is_base_form": true, "ipa": "/vəˈsɪnəti/", "phonetic": "vuh-SIN-uh-tee"}]}
+{"guid": "N56_078", "forms": [{"grammatical_form": "noun/en_singular", "text": "homeland", "is_base_form": true, "ipa": "/ˈhoʊmˌlænd/", "phonetic": "HOME-land"}]}
+{"guid": "N56_079", "forms": [{"grammatical_form": "noun/en_singular", "text": "subcontinent", "is_base_form": true, "ipa": "/ˌsʌbˈkɑːntɪnənt/", "phonetic": "sub-KON-tuh-nent"}]}
+{"guid": "N56_080", "forms": [{"grammatical_form": "noun/en_singular", "text": "locality", "is_base_form": true, "ipa": "/loʊˈkæləti/", "phonetic": "loh-KAL-uh-tee"}]}
+{"guid": "N56_081", "forms": [{"grammatical_form": "noun/en_singular", "text": "interior", "is_base_form": true, "ipa": "/ɪnˈtɪriɚ/", "phonetic": "in-TEER-ee-er"}]}
+{"guid": "N56_082", "forms": [{"grammatical_form": "noun/en_singular", "text": "location", "is_base_form": true, "ipa": "/loʊˈkeɪʃən/", "phonetic": "loh-KAY-shun"}]}
+{"guid": "N56_083", "forms": [{"grammatical_form": "noun/en_singular", "text": "site", "is_base_form": true, "ipa": "/saɪt/", "phonetic": "SITE"}]}
+{"guid": "N56_084", "forms": [{"grammatical_form": "noun/en_singular", "text": "hub", "is_base_form": true, "ipa": "/hʌb/", "phonetic": "HUB"}]}
+{"guid": "N56_085", "forms": [{"grammatical_form": "noun/en_singular", "text": "colony", "is_base_form": true, "ipa": "/ˈkɑləni/", "phonetic": "KAH-luh-nee"}]}
+{"guid": "N56_086", "forms": [{"grammatical_form": "noun/en_singular", "text": "pit", "is_base_form": true, "ipa": "/pɪt/", "phonetic": "PIT"}]}
+{"guid": "N56_087", "forms": [{"grammatical_form": "noun/en_singular", "text": "domain", "is_base_form": true, "ipa": "/doʊˈmeɪn/", "phonetic": "doh-MAYN"}]}
+{"guid": "N56_088", "forms": [{"grammatical_form": "noun/en_singular", "text": "zone", "is_base_form": true, "ipa": "/zoʊn/", "phonetic": "ZOHN"}]}
+{"guid": "N56_089", "forms": [{"grammatical_form": "noun/en_singular", "text": "dominion", "is_base_form": true, "ipa": "/dəˈmɪnjən/", "phonetic": "duh-MIN-yun"}]}
+{"guid": "N56_090", "forms": [{"grammatical_form": "noun/en_singular", "text": "county", "is_base_form": true, "ipa": "/ˈkaʊnti/", "phonetic": "KOWN-tee"}], "variants": [{"kind": "spelling", "key": "County", "forms": [{"grammatical_form": "noun/en_singular", "text": "County", "is_base_form": true}]}]}
+{"guid": "N56_091", "forms": [{"grammatical_form": "noun/en_singular", "text": "democracy", "is_base_form": true, "ipa": "/dɪˈmɑːkrəsi/", "phonetic": "duh-MOK-ruh-see"}]}
+{"guid": "N56_092", "forms": [{"grammatical_form": "noun/en_singular", "text": "strip", "is_base_form": true, "ipa": "/strɪp/", "phonetic": "STRIP"}]}

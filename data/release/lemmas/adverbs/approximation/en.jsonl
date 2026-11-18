@@ -2,3 +2,7 @@
 {"guid": "D11_002", "forms": [{"grammatical_form": "adverb/en_positive", "text": "roughly", "is_base_form": true, "ipa": "/ˈrʌfli/", "phonetic": "RUFF-lee"}]}
 {"guid": "D11_003", "forms": [{"grammatical_form": "adverb/en_positive", "text": "literally", "is_base_form": true, "ipa": "/ˈlɪtərəli/", "phonetic": "LIT-er-uh-lee"}]}
 {"guid": "D11_004", "forms": [{"grammatical_form": "adverb/en_positive", "text": "precisely", "is_base_form": true, "ipa": "/prɪˈsaɪsli/", "phonetic": "prih-SISE-lee"}]}
+{"guid": "D11_005", "forms": [{"grammatical_form": "adverb/en_positive", "text": "loosely", "is_base_form": true, "ipa": "/ˈluːsli/", "phonetic": "LOOS-lee"}]}
+{"guid": "D11_006", "forms": [{"grammatical_form": "adverb/en_positive", "text": "narrowly", "is_base_form": true, "ipa": "/ˈnɛroʊli/", "phonetic": "NAIR-oh-lee"}]}
+{"guid": "D11_007", "forms": [{"grammatical_form": "adverb/en_positive", "text": "practically", "is_base_form": true, "ipa": "/ˈpræktɪkli/", "phonetic": "PRAK-tih-klee"}]}
+{"guid": "D11_008", "forms": [{"grammatical_form": "adverb/en_positive", "text": "virtually", "is_base_form": true, "ipa": "/ˈvɝtʃuəli/", "phonetic": "VUR-choo-uh-lee"}]}

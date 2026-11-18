@@ -7,3 +7,14 @@
 {"guid": "D16_007", "forms": [{"grammatical_form": "adverb/en_positive", "text": "namely", "is_base_form": true, "ipa": "/ˈneɪmli/", "phonetic": "NAYM-lee"}]}
 {"guid": "D16_008", "forms": [{"grammatical_form": "adverb/en_positive", "text": "besides", "is_base_form": true, "ipa": "/bɪˈsaɪdz/", "phonetic": "bih-SYDZ"}]}
 {"guid": "D16_009", "forms": [{"grammatical_form": "adverb/en_positive", "text": "admittedly", "is_base_form": true, "ipa": "/ədˈmɪtɪdli/", "phonetic": "ad-MIT-id-lee"}]}
+{"guid": "D16_010", "forms": [{"grammatical_form": "adverb/en_positive", "text": "anyhow", "is_base_form": true, "ipa": "/ˈɛniˌhaʊ/", "phonetic": "EN-ee-how"}]}
+{"guid": "D16_011", "forms": [{"grammatical_form": "adverb/en_positive", "text": "lastly", "is_base_form": true, "ipa": "/ˈlæstli/", "phonetic": "LAST-lee"}]}
+{"guid": "D16_012", "forms": [{"grammatical_form": "adverb/en_positive", "text": "secondly", "is_base_form": true, "ipa": "/ˈsɛkəndli/", "phonetic": "SEK-uhn-dee"}]}
+{"guid": "D16_013", "forms": [{"grammatical_form": "adverb/en_positive", "text": "firstly", "is_base_form": true, "ipa": "/ˈfɝstli/", "phonetic": "FURST-lee"}]}
+{"guid": "D16_014", "forms": [{"grammatical_form": "adverb/en_positive", "text": "thereby", "is_base_form": true, "ipa": "/ˌðɛrˈbaɪ/", "phonetic": "thair-BY"}]}
+{"guid": "D16_015", "forms": [{"grammatical_form": "adverb/en_positive", "text": "alternatively", "is_base_form": true, "ipa": "/ɔlˈtɝnətɪvli/", "phonetic": "awl-TER-nuh-tiv-lee"}]}
+{"guid": "D16_016", "forms": [{"grammatical_form": "adverb/en_positive", "text": "conversely", "is_base_form": true, "ipa": "/kənˈvɝsli/", "phonetic": "kun-VURSS-lee"}]}
+{"guid": "D16_017", "forms": [{"grammatical_form": "adverb/en_positive", "text": "nonetheless", "is_base_form": true, "ipa": "/ˌnʌnðəˈlɛs/", "phonetic": "nun-thuh-LESS"}]}
+{"guid": "D16_018", "forms": [{"grammatical_form": "adverb/en_positive", "text": "accordingly", "is_base_form": true, "ipa": "/əˈkɔrdɪŋli/", "phonetic": "uh-KOR-ding-lee"}]}
+{"guid": "D16_019", "forms": [{"grammatical_form": "adverb/en_positive", "text": "additionally", "is_base_form": true, "ipa": "/əˈdɪʃənəli/", "phonetic": "uh-DISH-uh-nuh-lee"}]}
+{"guid": "D16_020", "forms": [{"grammatical_form": "adverb/en_positive", "text": "thirdly", "is_base_form": true, "ipa": "/ˈθɝdli/", "phonetic": "THURD-lee"}]}

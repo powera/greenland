@@ -261,3 +261,5 @@
 {"guid": "N45_264", "forms": [{"grammatical_form": "noun/en_singular", "text": "Greenland", "is_base_form": true, "ipa": "/ˈɡriːnlənd/", "phonetic": "GREEN-lund"}]}
 {"guid": "N45_265", "forms": [{"grammatical_form": "noun/en_singular", "text": "Northern Ireland", "is_base_form": true, "ipa": "/ˌnɔrðərn ˈaɪərlənd/", "phonetic": "NOR-thurn EYE-er-lund"}]}
 {"guid": "N45_266", "forms": [{"grammatical_form": "noun/en_singular", "text": "Latin America", "is_base_form": true}]}
+{"guid": "N45_267", "forms": [{"grammatical_form": "noun/en_singular", "text": "tropics", "is_base_form": true, "ipa": "/ˈtrɑpɪks/", "phonetic": "TROP-iks"}]}
+{"guid": "N45_268", "forms": [{"grammatical_form": "noun/en_singular", "text": "homeland", "is_base_form": true, "ipa": "/ˈhoʊmˌlænd/", "phonetic": "HOME-land"}]}

@@ -26,3 +26,12 @@
 {"guid": "N13_039", "forms": [{"grammatical_form": "noun/en_singular", "text": "highway exit", "is_base_form": true}], "variants": [{"kind": "equivalent", "key": "exit", "forms": [{"grammatical_form": "noun/en_singular", "text": "exit", "is_base_form": true}]}]}
 {"guid": "N13_041", "forms": [{"grammatical_form": "noun/en_singular", "text": "sewer system", "is_base_form": true}]}
 {"guid": "N13_045", "variants": [{"kind": "equivalent", "key": "terminus", "forms": [{"grammatical_form": "noun/en_singular", "text": "terminus", "is_base_form": true}]}]}
+{"guid": "N13_046", "forms": [{"grammatical_form": "noun/en_singular", "text": "grid", "is_base_form": true, "ipa": "/ɡrɪd/", "phonetic": "GRID"}]}
+{"guid": "N13_047", "forms": [{"grammatical_form": "noun/en_singular", "text": "alley", "is_base_form": true, "ipa": "/ˈæli/", "phonetic": "AL-ee"}]}
+{"guid": "N13_048", "forms": [{"grammatical_form": "noun/en_singular", "text": "curb", "is_base_form": true, "ipa": "/kɝb/", "phonetic": "KERB"}]}
+{"guid": "N13_049", "forms": [{"grammatical_form": "noun/en_singular", "text": "incline", "is_base_form": true, "ipa": "/ˈɪnˌklaɪn/", "phonetic": "IN-kline"}]}
+{"guid": "N13_050", "forms": [{"grammatical_form": "noun/en_singular", "text": "trench", "is_base_form": true, "ipa": "/trɛntʃ/", "phonetic": "TRENCH"}]}
+{"guid": "N13_051", "forms": [{"grammatical_form": "noun/en_singular", "text": "junction", "is_base_form": true, "ipa": "/ˈdʒʌŋkʃən/", "phonetic": "JUNK-shun"}]}
+{"guid": "N13_052", "forms": [{"grammatical_form": "noun/en_singular", "text": "roadway", "is_base_form": true, "ipa": "/ˈroʊdˌweɪ/", "phonetic": "ROHD-way"}]}
+{"guid": "N13_053", "forms": [{"grammatical_form": "noun/en_singular", "text": "drainage", "is_base_form": true, "ipa": "/ˈdreɪnɪdʒ/", "phonetic": "DRAY-nij"}]}
+{"guid": "N13_054", "forms": [{"grammatical_form": "noun/en_singular", "text": "avenue", "is_base_form": true, "ipa": "/ˈævəˌnuː/", "phonetic": "AV-uh-noo"}]}

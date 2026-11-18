@@ -43,3 +43,26 @@
 {"guid": "N40_057", "forms": [{"grammatical_form": "noun/en_singular", "text": "express train", "is_base_form": true}], "variants": [{"kind": "equivalent", "key": "express", "forms": [{"grammatical_form": "noun/en_singular", "text": "express", "is_base_form": true}]}]}
 {"guid": "N40_059", "forms": [{"grammatical_form": "noun/en_singular", "text": "local train", "is_base_form": true}], "variants": [{"kind": "equivalent", "key": "local", "forms": [{"grammatical_form": "noun/en_singular", "text": "local", "is_base_form": true}]}]}
 {"guid": "N40_060", "forms": [{"grammatical_form": "noun/en_singular", "text": "wagon", "is_base_form": true, "ipa": "/ˈwæɡən/", "phonetic": "WAG-un"}]}
+{"guid": "N40_061", "forms": [{"grammatical_form": "noun/en_singular", "text": "cutter", "is_base_form": true, "ipa": "/ˈkʌtər/", "phonetic": "KUT-er"}]}
+{"guid": "N40_062", "forms": [{"grammatical_form": "noun/en_singular", "text": "spacecraft", "is_base_form": true, "ipa": "/ˈspeɪsˌkræft/", "phonetic": "SPACE-craft"}]}
+{"guid": "N40_063", "forms": [{"grammatical_form": "noun/en_singular", "text": "cab", "is_base_form": true, "ipa": "/kæb/", "phonetic": "KAB"}]}
+{"guid": "N40_064", "forms": [{"grammatical_form": "noun/en_singular", "text": "float", "is_base_form": true, "ipa": "/floʊt/", "phonetic": "FLOHT"}]}
+{"guid": "N40_065", "forms": [{"grammatical_form": "noun/en_singular", "text": "tire", "is_base_form": true, "ipa": "/taɪr/", "phonetic": "TYRE"}]}
+{"guid": "N40_066", "forms": [{"grammatical_form": "noun/en_singular", "text": "sled", "is_base_form": true, "ipa": "/slɛd/", "phonetic": "SLED"}]}
+{"guid": "N40_067", "forms": [{"grammatical_form": "noun/en_singular", "text": "automobile", "is_base_form": true, "ipa": "/ˈɔːtəmoʊˌbiːl/", "phonetic": "AW-tuh-muh-beel"}]}
+{"guid": "N40_068", "forms": [{"grammatical_form": "noun/en_singular", "text": "canoe", "is_base_form": true, "ipa": "/kəˈnuː/", "phonetic": "kuh-NOO"}]}
+{"guid": "N40_069", "forms": [{"grammatical_form": "noun/en_singular", "text": "hull", "is_base_form": true, "ipa": "/hʌl/", "phonetic": "HULL"}]}
+{"guid": "N40_070", "forms": [{"grammatical_form": "noun/en_singular", "text": "saloon", "is_base_form": true, "ipa": "/səˈlun/", "phonetic": "suh-LOON"}]}
+{"guid": "N40_071", "forms": [{"grammatical_form": "noun/en_singular", "text": "barge", "is_base_form": true, "ipa": "/bɑrdʒ/", "phonetic": "BAHRJ"}]}
+{"guid": "N40_072", "forms": [{"grammatical_form": "noun/en_singular", "text": "buggy", "is_base_form": true, "ipa": "/ˈbʌɡi/", "phonetic": "BUG-ee"}]}
+{"guid": "N40_073", "forms": [{"grammatical_form": "noun/en_singular", "text": "buggy", "is_base_form": true, "ipa": "/ˈbʌɡi/", "phonetic": "BUG-ee"}]}
+{"guid": "N40_074", "forms": [{"grammatical_form": "noun/en_singular", "text": "locomotive", "is_base_form": true, "ipa": "/ˌloʊkəˈmoʊtɪv/", "phonetic": "loh-kuh-MOH-tiv"}]}
+{"guid": "N40_075", "forms": [{"grammatical_form": "noun/en_singular", "text": "submarine", "is_base_form": true, "ipa": "/ˌsʌbməˈrin/", "phonetic": "sub-muh-REEN"}]}
+{"guid": "N40_076", "forms": [{"grammatical_form": "noun/en_singular", "text": "manual", "is_base_form": true, "ipa": "/ˈmænjuəl/", "phonetic": "MAN-yoo-uhl"}]}
+{"guid": "N40_077", "forms": [{"grammatical_form": "noun/en_singular", "text": "underground", "is_base_form": true, "ipa": "/ˈʌndərˌɡraʊnd/", "phonetic": "UN-der-ground"}]}
+{"guid": "N40_078", "forms": [{"grammatical_form": "noun/en_singular", "text": "tube", "is_base_form": true, "ipa": "/tuːb/", "phonetic": "TOOB"}]}
+{"guid": "N40_079", "forms": [{"grammatical_form": "noun/en_singular", "text": "auto", "is_base_form": true, "ipa": "/ˈɔːtoʊ/", "phonetic": "AW-toh"}]}
+{"guid": "N40_080", "forms": [{"grammatical_form": "noun/en_singular", "text": "raft", "is_base_form": true, "ipa": "/ræft/", "phonetic": "RAFT"}]}
+{"guid": "N40_081", "forms": [{"grammatical_form": "noun/en_singular", "text": "raft", "is_base_form": true, "ipa": "/ræft/", "phonetic": "RAFT"}]}
+{"guid": "N40_082", "forms": [{"grammatical_form": "noun/en_singular", "text": "transportation", "is_base_form": true, "ipa": "/ˌtrænspərˈteɪʃən/", "phonetic": "trans-por-TAY-shun"}]}
+{"guid": "N40_083", "forms": [{"grammatical_form": "noun/en_singular", "text": "transportation", "is_base_form": true, "ipa": "/ˌtrænspərˈteɪʃən/", "phonetic": "trans-por-TAY-shun"}]}

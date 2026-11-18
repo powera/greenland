@@ -5,3 +5,20 @@
 {"guid": "N77_009", "forms": [{"grammatical_form": "noun/en_singular", "text": "neutrino", "is_base_form": true}]}
 {"guid": "N77_011", "forms": [{"grammatical_form": "noun/en_singular", "text": "micro-organisms", "is_base_form": true}]}
 {"guid": "N77_013", "variants": [{"kind": "equivalent", "key": "fermions", "forms": [{"grammatical_form": "noun/en_singular", "text": "fermions", "is_base_form": true}]}]}
+{"guid": "N77_015", "forms": [{"grammatical_form": "noun/en_singular", "text": "yeast", "is_base_form": true, "ipa": "/jist/", "phonetic": "YEEST"}]}
+{"guid": "N77_016", "forms": [{"grammatical_form": "noun/en_singular", "text": "bacteria", "is_base_form": true, "ipa": "/bækˈtɪriə/", "phonetic": "bak-TEER-ee-uh"}]}
+{"guid": "N77_017", "forms": [{"grammatical_form": "noun/en_singular", "text": "bacterium", "is_base_form": true, "ipa": "/bækˈtɪriəm/", "phonetic": "bak-TEER-ee-um"}]}
+{"guid": "N77_018", "forms": [{"grammatical_form": "noun/en_singular", "text": "chromosome", "is_base_form": true, "ipa": "/ˈkroʊməˌsoʊm/", "phonetic": "KROH-muh-sohm"}]}
+{"guid": "N77_019", "forms": [{"grammatical_form": "noun/en_singular", "text": "genome", "is_base_form": true, "ipa": "/ˈdʒiːnoʊm/", "phonetic": "JEE-nohm"}]}
+{"guid": "N77_020", "forms": [{"grammatical_form": "noun/en_singular", "text": "neuron", "is_base_form": true, "ipa": "/ˈnʊrɑːn/", "phonetic": "NOOR-on"}]}
+{"guid": "N77_021", "forms": [{"grammatical_form": "noun/en_singular", "text": "pathogen", "is_base_form": true, "ipa": "/ˈpæθədʒən/", "phonetic": "PATH-uh-jen"}]}
+{"guid": "N77_022", "forms": [{"grammatical_form": "noun/en_singular", "text": "flora", "is_base_form": true, "ipa": "/ˈflɔːrə/", "phonetic": "FLOR-uh"}]}
+{"guid": "N77_023", "forms": [{"grammatical_form": "noun/en_singular", "text": "allele", "is_base_form": true, "ipa": "/əˈlil/", "phonetic": "uh-LEEL"}]}
+{"guid": "N77_024", "forms": [{"grammatical_form": "noun/en_singular", "text": "chloroplasts", "is_base_form": true, "ipa": "/ˈklɔr.əˌplæsts/", "phonetic": "KLOR-uh-plasts"}]}
+{"guid": "N77_025", "forms": [{"grammatical_form": "noun/en_singular", "text": "mitochondria", "is_base_form": true, "ipa": "/ˌmaɪtəˈkɑːndriə/", "phonetic": "my-tuh-KON-dree-uh"}]}
+{"guid": "N77_026", "forms": [{"grammatical_form": "noun/en_singular", "text": "mould", "is_base_form": true, "ipa": "/moʊld/", "phonetic": "MOHLD"}]}
+{"guid": "N77_027", "forms": [{"grammatical_form": "noun/en_singular", "text": "nucleus", "is_base_form": true, "ipa": "/ˈnuːkliəs/", "phonetic": "NOO-klee-us"}]}
+{"guid": "N77_028", "forms": [{"grammatical_form": "noun/en_singular", "text": "nucleus", "is_base_form": true, "ipa": "/ˈnuːkliəs/", "phonetic": "NOO-klee-us"}]}
+{"guid": "N77_029", "forms": [{"grammatical_form": "noun/en_singular", "text": "variant", "is_base_form": true, "ipa": "/ˈvɛriənt/", "phonetic": "VAIR-ee-unt"}]}
+{"guid": "N77_030", "forms": [{"grammatical_form": "noun/en_singular", "text": "germ", "is_base_form": true, "ipa": "/dʒɝm/", "phonetic": "JERM"}]}
+{"guid": "N77_031", "forms": [{"grammatical_form": "noun/en_singular", "text": "gene", "is_base_form": true, "ipa": "/dʒin/", "phonetic": "JEEN"}]}

@@ -756,3 +756,14 @@
 {"guid": "N16_770", "forms": [{"grammatical_form": "noun/en_singular", "text": "barium", "is_base_form": true}]}
 {"guid": "N16_771", "forms": [{"grammatical_form": "noun/en_singular", "text": "gadolinium-based contrast agent", "is_base_form": true}], "variants": [{"kind": "equivalent", "key": "gadolinium", "forms": [{"grammatical_form": "noun/en_singular", "text": "gadolinium", "is_base_form": true}]}]}
 {"guid": "N16_772", "forms": [{"grammatical_form": "noun/en_singular", "text": "radiation therapy", "is_base_form": true}]}
+{"guid": "N16_773", "forms": [{"grammatical_form": "noun/en_singular", "text": "drug", "is_base_form": true, "ipa": "/drʌɡ/", "phonetic": "DRUG"}]}
+{"guid": "N16_774", "forms": [{"grammatical_form": "noun/en_singular", "text": "compression", "is_base_form": true, "ipa": "/kəmˈprɛʃən/", "phonetic": "kuhm-PRESH-uhn"}]}
+{"guid": "N16_775", "forms": [{"grammatical_form": "noun/en_singular", "text": "ecstasy", "is_base_form": true, "ipa": "/ˈɛk.stə.si/", "phonetic": "EK-stuh-see"}]}
+{"guid": "N16_776", "forms": [{"grammatical_form": "noun/en_singular", "text": "cocaine", "is_base_form": true, "ipa": "/koʊˈkeɪn/", "phonetic": "koh-KAYN"}]}
+{"guid": "N16_777", "forms": [{"grammatical_form": "noun/en_singular", "text": "medication", "is_base_form": true, "ipa": "/ˌmɛdɪˈkeɪʃən/", "phonetic": "med-ih-KAY-shun"}]}
+{"guid": "N16_778", "forms": [{"grammatical_form": "noun/en_singular", "text": "pharmaceutical", "is_base_form": true, "ipa": "/ˌfɑrməˈsuːtɪkəl/", "phonetic": "far-muh-SOO-ti-kuhl"}]}
+{"guid": "N16_779", "forms": [{"grammatical_form": "noun/en_singular", "text": "therapy", "is_base_form": true, "ipa": "/ˈθɛrəpi/", "phonetic": "THAIR-uh-pee"}]}
+{"guid": "N16_780", "forms": [{"grammatical_form": "noun/en_singular", "text": "therapy", "is_base_form": true, "ipa": "/ˈθɛrəpi/", "phonetic": "THAIR-uh-pee"}]}
+{"guid": "N16_781", "forms": [{"grammatical_form": "noun/en_singular", "text": "therapy", "is_base_form": true, "ipa": "/ˈθɛrəpi/", "phonetic": "THAIR-uh-pee"}]}
+{"guid": "N16_782", "forms": [{"grammatical_form": "noun/en_singular", "text": "cure", "is_base_form": true, "ipa": "/kjʊr/", "phonetic": "KYOOR"}]}
+{"guid": "N16_783", "forms": [{"grammatical_form": "noun/en_singular", "text": "cream", "is_base_form": true, "ipa": "/kriːm/", "phonetic": "KREEM"}]}

@@ -47,3 +47,26 @@
 {"guid": "D07_048", "forms": [{"grammatical_form": "adverb/en_positive", "text": "halfway", "is_base_form": true}], "variants": [{"kind": "spelling", "key": "half-way", "forms": [{"grammatical_form": "adverb/en_positive", "text": "half-way", "is_base_form": true}]}]}
 {"guid": "D07_049", "forms": [{"grammatical_form": "adverb/en_positive", "text": "worldwide", "is_base_form": true}], "variants": [{"kind": "spelling", "key": "world-wide", "forms": [{"grammatical_form": "adverb/en_positive", "text": "world-wide", "is_base_form": true}]}]}
 {"guid": "D07_050", "forms": [{"grammatical_form": "adverb/en_positive", "text": "widely", "is_base_form": true, "ipa": "/ˈwaɪdli/", "phonetic": "WIDE-lee"}]}
+{"guid": "D07_051", "forms": [{"grammatical_form": "adverb/en_positive", "text": "in situ", "is_base_form": true, "ipa": "/ɪn ˈsɪtu/", "phonetic": "in SIT-oo"}]}
+{"guid": "D07_052", "forms": [{"grammatical_form": "adverb/en_positive", "text": "in vitro", "is_base_form": true, "ipa": "/ɪn ˈviːtroʊ/", "phonetic": "in VEE-troh"}]}
+{"guid": "D07_053", "forms": [{"grammatical_form": "adverb/en_positive", "text": "in vivo", "is_base_form": true, "ipa": "/ɪn ˈviːvoʊ/", "phonetic": "in VEE-voh"}]}
+{"guid": "D07_054", "forms": [{"grammatical_form": "adverb/en_positive", "text": "aboard", "is_base_form": true, "ipa": "/əˈbɔrd/", "phonetic": "uh-BORD"}]}
+{"guid": "D07_055", "forms": [{"grammatical_form": "adverb/en_positive", "text": "overseas", "is_base_form": true, "ipa": "/ˌoʊvərˈsiːz/", "phonetic": "oh-ver-SEEZ"}]}
+{"guid": "D07_056", "forms": [{"grammatical_form": "adverb/en_positive", "text": "aloft", "is_base_form": true, "ipa": "/əˈlɔft/", "phonetic": "uh-LOFT"}]}
+{"guid": "D07_057", "forms": [{"grammatical_form": "adverb/en_positive", "text": "aft", "is_base_form": true, "ipa": "/æft/", "phonetic": "AFT"}]}
+{"guid": "D07_058", "forms": [{"grammatical_form": "adverb/en_positive", "text": "nationally", "is_base_form": true, "ipa": "/ˈnæʃənəli/", "phonetic": "NASH-uh-nuh-lee"}]}
+{"guid": "D07_059", "forms": [{"grammatical_form": "adverb/en_positive", "text": "elsewhere", "is_base_form": true, "ipa": "/ˌɛlsˈwɛr/", "phonetic": "ELS-wair"}]}
+{"guid": "D07_060", "forms": [{"grammatical_form": "adverb/en_positive", "text": "indoors", "is_base_form": true, "ipa": "/ɪnˈdɔrz/", "phonetic": "in-DORZ"}]}
+{"guid": "D07_061", "forms": [{"grammatical_form": "adverb/en_positive", "text": "outdoors", "is_base_form": true, "ipa": "/ˌaʊtˈdɔrz/", "phonetic": "out-DORZ"}]}
+{"guid": "D07_062", "forms": [{"grammatical_form": "adverb/en_positive", "text": "underwater", "is_base_form": true, "ipa": "/ˌʌndɚˈwɔtɚ/", "phonetic": "UN-der-WAW-ter"}]}
+{"guid": "D07_063", "forms": [{"grammatical_form": "adverb/en_positive", "text": "globally", "is_base_form": true, "ipa": "/ˈɡloʊbəli/", "phonetic": "GLOH-buh-lee"}]}
+{"guid": "D07_064", "forms": [{"grammatical_form": "adverb/en_positive", "text": "internally", "is_base_form": true, "ipa": "/ɪnˈtɝː.nəl.i/", "phonetic": "in-TER-nuh-lee"}]}
+{"guid": "D07_065", "forms": [{"grammatical_form": "adverb/en_positive", "text": "internally", "is_base_form": true, "ipa": "/ɪnˈtɝː.nəl.i/", "phonetic": "in-TER-nuh-lee"}]}
+{"guid": "D07_066", "forms": [{"grammatical_form": "adverb/en_positive", "text": "internally", "is_base_form": true, "ipa": "/ɪnˈtɝː.nəl.i/", "phonetic": "in-TER-nuh-lee"}]}
+{"guid": "D07_067", "forms": [{"grammatical_form": "adverb/en_positive", "text": "locally", "is_base_form": true, "ipa": "/ˈloʊkəli/", "phonetic": "LOH-kuh-lee"}]}
+{"guid": "D07_068", "forms": [{"grammatical_form": "adverb/en_positive", "text": "locally", "is_base_form": true, "ipa": "/ˈloʊkəli/", "phonetic": "LOH-kuh-lee"}]}
+{"guid": "D07_069", "forms": [{"grammatical_form": "adverb/en_positive", "text": "nationwide", "is_base_form": true, "ipa": "/ˌneɪʃənˈwaɪd/", "phonetic": "NAY-shun-WYDE"}]}
+{"guid": "D07_070", "forms": [{"grammatical_form": "adverb/en_positive", "text": "therein", "is_base_form": true, "ipa": "/ˌðɛrˈɪn/", "phonetic": "thair-IN"}]}
+{"guid": "D07_071", "forms": [{"grammatical_form": "adverb/en_positive", "text": "publicly", "is_base_form": true, "ipa": "/ˈpʌblɪkli/", "phonetic": "PUB-lik-lee"}]}
+{"guid": "D07_072", "forms": [{"grammatical_form": "adverb/en_positive", "text": "underground", "is_base_form": true, "ipa": "/ˌʌndərˈɡraʊnd/", "phonetic": "UN-der-ground"}]}
+{"guid": "D07_073", "forms": [{"grammatical_form": "adverb/en_positive", "text": "abroad", "is_base_form": true, "ipa": "/əˈbrɔd/", "phonetic": "uh-BRAWD"}]}

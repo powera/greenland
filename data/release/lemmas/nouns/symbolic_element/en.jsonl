@@ -43,3 +43,34 @@
 {"guid": "N18_060", "forms": [{"grammatical_form": "noun/en_singular", "text": "speech bubble", "is_base_form": true}], "variants": [{"kind": "equivalent", "key": "balloon", "forms": [{"grammatical_form": "noun/en_singular", "text": "balloon", "is_base_form": true}]}]}
 {"guid": "N18_062", "forms": [{"grammatical_form": "noun/en_singular", "text": "capital letter", "is_base_form": true}], "variants": [{"kind": "equivalent", "key": "capital", "forms": [{"grammatical_form": "noun/en_singular", "text": "capital", "is_base_form": true}]}]}
 {"guid": "N18_063", "forms": [{"grammatical_form": "noun/en_singular", "text": "alto part", "is_base_form": true}]}
+{"guid": "N18_065", "forms": [{"grammatical_form": "noun/en_singular", "text": "dash", "is_base_form": true, "ipa": "/dæʃ/", "phonetic": "DASH"}]}
+{"guid": "N18_066", "forms": [{"grammatical_form": "noun/en_singular", "text": "memento mori", "is_base_form": true, "ipa": "/məˈmɛntoʊ ˈmɔri/", "phonetic": "muh-MEN-toh MOR-ee"}]}
+{"guid": "N18_067", "forms": [{"grammatical_form": "noun/en_singular", "text": "grid", "is_base_form": true, "ipa": "/ɡrɪd/", "phonetic": "GRID"}]}
+{"guid": "N18_068", "forms": [{"grammatical_form": "noun/en_singular", "text": "grid", "is_base_form": true, "ipa": "/ɡrɪd/", "phonetic": "GRID"}]}
+{"guid": "N18_069", "forms": [{"grammatical_form": "noun/en_singular", "text": "bubble", "is_base_form": true, "ipa": "/ˈbʌbəl/", "phonetic": "BUB-uhl"}]}
+{"guid": "N18_070", "forms": [{"grammatical_form": "noun/en_singular", "text": "charm", "is_base_form": true, "ipa": "/tʃɑrm/", "phonetic": "CHARM"}]}
+{"guid": "N18_071", "forms": [{"grammatical_form": "noun/en_singular", "text": "rating", "is_base_form": true, "ipa": "/ˈreɪtɪŋ/", "phonetic": "RAY-ting"}]}
+{"guid": "N18_072", "forms": [{"grammatical_form": "noun/en_singular", "text": "crest", "is_base_form": true, "ipa": "/krɛst/", "phonetic": "KREST"}]}
+{"guid": "N18_073", "forms": [{"grammatical_form": "noun/en_singular", "text": "mask", "is_base_form": true, "ipa": "/mæsk/", "phonetic": "MASK"}]}
+{"guid": "N18_074", "forms": [{"grammatical_form": "noun/en_singular", "text": "profile", "is_base_form": true, "ipa": "/ˈproʊˌfaɪl/", "phonetic": "PROH-file"}]}
+{"guid": "N18_075", "forms": [{"grammatical_form": "noun/en_singular", "text": "symbolism", "is_base_form": true, "ipa": "/ˈsɪmbəˌlɪzəm/", "phonetic": "SIM-buh-liz-um"}]}
+{"guid": "N18_076", "forms": [{"grammatical_form": "noun/en_singular", "text": "initial", "is_base_form": true, "ipa": "/ɪˈnɪʃəl/", "phonetic": "ih-NISH-uhl"}]}
+{"guid": "N18_077", "forms": [{"grammatical_form": "noun/en_singular", "text": "representation", "is_base_form": true, "ipa": "/ˌrɛprɪzɛnˈteɪʃən/", "phonetic": "rep-ruh-zen-TAY-shun"}]}
+{"guid": "N18_078", "forms": [{"grammatical_form": "noun/en_singular", "text": "symbol", "is_base_form": true, "ipa": "/ˈsɪmbəl/", "phonetic": "SIM-buhl"}]}
+{"guid": "N18_079", "forms": [{"grammatical_form": "noun/en_singular", "text": "symbol", "is_base_form": true, "ipa": "/ˈsɪmbəl/", "phonetic": "SIM-buhl"}]}
+{"guid": "N18_080", "forms": [{"grammatical_form": "noun/en_singular", "text": "beta", "is_base_form": true, "ipa": "/ˈbeɪtə/", "phonetic": "BAY-tuh"}]}
+{"guid": "N18_081", "forms": [{"grammatical_form": "noun/en_singular", "text": "gamma", "is_base_form": true, "ipa": "/ˈɡæmə/", "phonetic": "GAM-uh"}]}
+{"guid": "N18_082", "forms": [{"grammatical_form": "noun/en_singular", "text": "diagram", "is_base_form": true, "ipa": "/ˈdaɪəˌɡræm/", "phonetic": "DYE-uh-gram"}]}
+{"guid": "N18_083", "forms": [{"grammatical_form": "noun/en_singular", "text": "signature", "is_base_form": true, "ipa": "/ˈsɪɡnətʃər/", "phonetic": "SIG-nuh-cher"}]}
+{"guid": "N18_084", "forms": [{"grammatical_form": "noun/en_singular", "text": "signature", "is_base_form": true, "ipa": "/ˈsɪɡnətʃər/", "phonetic": "SIG-nuh-cher"}]}
+{"guid": "N18_085", "forms": [{"grammatical_form": "noun/en_singular", "text": "logo", "is_base_form": true, "ipa": "/ˈloʊɡoʊ/", "phonetic": "LOH-goh"}]}
+{"guid": "N18_086", "forms": [{"grammatical_form": "noun/en_singular", "text": "logo", "is_base_form": true, "ipa": "/ˈloʊɡoʊ/", "phonetic": "LOH-goh"}]}
+{"guid": "N18_087", "forms": [{"grammatical_form": "noun/en_singular", "text": "dot", "is_base_form": true, "ipa": "/dɑt/", "phonetic": "DAHT"}]}
+{"guid": "N18_088", "forms": [{"grammatical_form": "noun/en_singular", "text": "dot", "is_base_form": true, "ipa": "/dɑt/", "phonetic": "DAHT"}]}
+{"guid": "N18_089", "forms": [{"grammatical_form": "noun/en_singular", "text": "banner", "is_base_form": true, "ipa": "/ˈbænər/", "phonetic": "BAN-er"}]}
+{"guid": "N18_090", "forms": [{"grammatical_form": "noun/en_singular", "text": "metaphor", "is_base_form": true, "ipa": "/ˈmɛtəˌfɔr/", "phonetic": "MET-uh-for"}]}
+{"guid": "N18_091", "forms": [{"grammatical_form": "noun/en_singular", "text": "cross", "is_base_form": true, "ipa": "/krɔs/", "phonetic": "KROSS"}]}
+{"guid": "N18_092", "forms": [{"grammatical_form": "noun/en_singular", "text": "cross", "is_base_form": true, "ipa": "/krɔs/", "phonetic": "KRAWS"}], "variants": [{"kind": "spelling", "key": "Cross", "forms": [{"grammatical_form": "noun/en_singular", "text": "Cross", "is_base_form": true}]}]}
+{"guid": "N18_093", "forms": [{"grammatical_form": "noun/en_singular", "text": "index", "is_base_form": true, "ipa": "/ˈɪnˌdɛks/", "phonetic": "IN-deks"}]}
+{"guid": "N18_094", "forms": [{"grammatical_form": "noun/en_singular", "text": "label", "is_base_form": true, "ipa": "/ˈleɪbəl/", "phonetic": "LAY-buhl"}]}
+{"guid": "N18_095", "forms": [{"grammatical_form": "noun/en_singular", "text": "colon", "is_base_form": true, "ipa": "/ˈkoʊlən/", "phonetic": "KOH-lun"}]}

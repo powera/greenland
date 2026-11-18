@@ -158,3 +158,21 @@
 {"guid": "N15_173", "forms": [{"grammatical_form": "noun/en_singular", "text": "polar molecule", "is_base_form": true}], "variants": [{"kind": "equivalent", "key": "dipole", "forms": [{"grammatical_form": "noun/en_singular", "text": "dipole", "is_base_form": true}]}]}
 {"guid": "N15_174", "forms": [{"grammatical_form": "noun/en_singular", "text": "pesticide", "is_base_form": true, "ipa": "/ˈpɛstəˌsaɪd/", "phonetic": "PES-tuh-side"}]}
 {"guid": "N15_175", "forms": [{"grammatical_form": "noun/en_singular", "text": "herbicide", "is_base_form": true, "ipa": "/ˈɝːbəˌsaɪd/", "phonetic": "HER-buh-side"}]}
+{"guid": "N15_176", "forms": [{"grammatical_form": "noun/en_singular", "text": "sulphur", "is_base_form": true, "ipa": "/ˈsʌlfɚ/", "phonetic": "SUL-fur"}]}
+{"guid": "N15_177", "forms": [{"grammatical_form": "noun/en_singular", "text": "protein", "is_base_form": true, "ipa": "/ˈproʊˌtin/", "phonetic": "PRO-teen"}]}
+{"guid": "N15_178", "forms": [{"grammatical_form": "noun/en_singular", "text": "potash", "is_base_form": true, "ipa": "/ˈpɑtˌæʃ/", "phonetic": "POT-ash"}]}
+{"guid": "N15_179", "forms": [{"grammatical_form": "noun/en_singular", "text": "drug", "is_base_form": true, "ipa": "/drʌɡ/", "phonetic": "DRUG"}]}
+{"guid": "N15_180", "forms": [{"grammatical_form": "noun/en_singular", "text": "acetate", "is_base_form": true, "ipa": "/ˈæsəˌteɪt/", "phonetic": "ASS-uh-tayt"}]}
+{"guid": "N15_181", "forms": [{"grammatical_form": "noun/en_singular", "text": "alkali", "is_base_form": true, "ipa": "/ˈæl.kəˌlaɪ/", "phonetic": "AL-kuh-lye"}]}
+{"guid": "N15_182", "forms": [{"grammatical_form": "noun/en_singular", "text": "aluminium", "is_base_form": true, "ipa": "/ˌæləˈmɪniəm/", "phonetic": "al-uh-MIN-ee-um"}]}
+{"guid": "N15_183", "forms": [{"grammatical_form": "noun/en_singular", "text": "cellulose", "is_base_form": true, "ipa": "/ˈsɛljəˌloʊs/", "phonetic": "SEL-yuh-lohs"}]}
+{"guid": "N15_184", "forms": [{"grammatical_form": "noun/en_singular", "text": "cholesterol", "is_base_form": true, "ipa": "/kəˈlɛstərɔl/", "phonetic": "kuh-LESS-tuh-rawl"}]}
+{"guid": "N15_185", "forms": [{"grammatical_form": "noun/en_singular", "text": "dopamine", "is_base_form": true, "ipa": "/ˈdoʊpəˌmin/", "phonetic": "DOH-puh-meen"}]}
+{"guid": "N15_186", "forms": [{"grammatical_form": "noun/en_singular", "text": "enzyme", "is_base_form": true, "ipa": "/ˈɛnzaɪm/", "phonetic": "EN-zym"}]}
+{"guid": "N15_187", "forms": [{"grammatical_form": "noun/en_singular", "text": "ethanol", "is_base_form": true, "ipa": "/ˈɛθəˌnɔl/", "phonetic": "ETH-uh-nawl"}]}
+{"guid": "N15_188", "forms": [{"grammatical_form": "noun/en_singular", "text": "glucose", "is_base_form": true, "ipa": "/ˈɡluˌkoʊs/", "phonetic": "GLOO-kohs"}]}
+{"guid": "N15_189", "forms": [{"grammatical_form": "noun/en_singular", "text": "hormone", "is_base_form": true, "ipa": "/ˈhɔrˌmoʊn/", "phonetic": "HOR-mohn"}]}
+{"guid": "N15_190", "forms": [{"grammatical_form": "noun/en_singular", "text": "lipid", "is_base_form": true, "ipa": "/ˈlɪpɪd/", "phonetic": "LIP-id"}]}
+{"guid": "N15_191", "forms": [{"grammatical_form": "noun/en_singular", "text": "neurotransmitter", "is_base_form": true, "ipa": "/ˌnʊroʊtrænzˈmɪtər/", "phonetic": "NOOR-oh-trans-MIT-er"}]}
+{"guid": "N15_192", "forms": [{"grammatical_form": "noun/en_singular", "text": "polymer", "is_base_form": true, "ipa": "/ˈpɑːləmɚ/", "phonetic": "PAH-luh-mer"}]}
+{"guid": "N15_193", "forms": [{"grammatical_form": "noun/en_singular", "text": "alcohol", "is_base_form": true, "ipa": "/ˈæl.kəˌhɔl/", "phonetic": "AL-kuh-hawl"}]}

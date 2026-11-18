@@ -2,3 +2,18 @@
 {"guid": "D10_002", "forms": [{"grammatical_form": "adverb/en_positive", "text": "all", "is_base_form": true, "ipa": "/ɔːl/", "phonetic": "AOH-l"}], "grammar_facts": [{"fact_type": "gradability", "fact_value": "non_gradable"}, {"fact_type": "comparative_status", "fact_value": "not_applicable"}, {"fact_type": "superlative_status", "fact_value": "not_applicable"}]}
 {"guid": "D10_006", "forms": [{"grammatical_form": "adverb/en_positive", "text": "thoroughly", "is_base_form": true, "ipa": "/ˈθɝːoʊli/", "phonetic": "THUR-oh-lee"}]}
 {"guid": "D10_007", "forms": [{"grammatical_form": "adverb/en_positive", "text": "partially", "is_base_form": true, "ipa": "/ˈpɑrʃəli/", "phonetic": "PAR-shuh-lee"}]}
+{"guid": "D10_008", "forms": [{"grammatical_form": "adverb/en_positive", "text": "universally", "is_base_form": true, "ipa": "/ˌjuːnəˈvɝsəli/", "phonetic": "yoo-nuh-VUR-suh-lee"}]}
+{"guid": "D10_009", "forms": [{"grammatical_form": "adverb/en_positive", "text": "utterly", "is_base_form": true, "ipa": "/ˈʌtərli/", "phonetic": "UH-ter-lee"}]}
+{"guid": "D10_010", "forms": [{"grammatical_form": "adverb/en_positive", "text": "utterly", "is_base_form": true, "ipa": "/ˈʌtərli/", "phonetic": "UH-ter-lee"}]}
+{"guid": "D10_011", "forms": [{"grammatical_form": "adverb/en_positive", "text": "altogether", "is_base_form": true, "ipa": "/ˌɔl.təˈɡɛð.ɚ/", "phonetic": "awl-tuh-GETH-er"}]}
+{"guid": "D10_012", "forms": [{"grammatical_form": "adverb/en_positive", "text": "altogether", "is_base_form": true, "ipa": "/ˌɔl.təˈɡɛð.ɚ/", "phonetic": "awl-tuh-GETH-er"}]}
+{"guid": "D10_013", "forms": [{"grammatical_form": "adverb/en_positive", "text": "perfectly", "is_base_form": true, "ipa": "/ˈpɝːfɪktli/", "phonetic": "PER-fikt-lee"}]}
+{"guid": "D10_014", "forms": [{"grammatical_form": "adverb/en_positive", "text": "perfectly", "is_base_form": true, "ipa": "/ˈpɝːfɪktli/", "phonetic": "PER-fikt-lee"}]}
+{"guid": "D10_015", "forms": [{"grammatical_form": "adverb/en_positive", "text": "properly", "is_base_form": true, "ipa": "/ˈprɑːpərli/", "phonetic": "PROP-er-lee"}]}
+{"guid": "D10_016", "forms": [{"grammatical_form": "adverb/en_positive", "text": "truly", "is_base_form": true, "ipa": "/ˈtruːli/", "phonetic": "TROO-lee"}]}
+{"guid": "D10_017", "forms": [{"grammatical_form": "adverb/en_positive", "text": "finitely", "is_base_form": true, "ipa": "/ˈfaɪnaɪtli/", "phonetic": "FY-nite-lee"}]}
+{"guid": "D10_018", "forms": [{"grammatical_form": "adverb/en_positive", "text": "bodily", "is_base_form": true, "ipa": "/ˈbɑːdəli/", "phonetic": "BAH-duh-lee"}]}
+{"guid": "D10_019", "forms": [{"grammatical_form": "adverb/en_positive", "text": "collectively", "is_base_form": true, "ipa": "/kəˈlɛktɪvli/", "phonetic": "kuh-LEK-tiv-lee"}]}
+{"guid": "D10_020", "forms": [{"grammatical_form": "adverb/en_positive", "text": "substantially", "is_base_form": true, "ipa": "/səbˈstænʃəli/", "phonetic": "suhb-STAN-shuh-lee"}]}
+{"guid": "D10_021", "forms": [{"grammatical_form": "adverb/en_positive", "text": "outright", "is_base_form": true, "ipa": "/ˌaʊtˈraɪt/", "phonetic": "OWT-ryt"}]}
+{"guid": "D10_022", "forms": [{"grammatical_form": "adverb/en_positive", "text": "outright", "is_base_form": true, "ipa": "/ˌaʊtˈraɪt/", "phonetic": "OWT-ryt"}]}

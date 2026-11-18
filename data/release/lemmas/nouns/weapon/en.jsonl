@@ -12,3 +12,12 @@
 {"guid": "N44_024", "forms": [{"grammatical_form": "noun/en_singular", "text": "club", "is_base_form": true, "ipa": "/klʌb/", "phonetic": "KLUB"}]}
 {"guid": "N44_026", "forms": [{"grammatical_form": "noun/en_singular", "text": "javelin", "is_base_form": true, "ipa": "/ˈdʒævəlɪn/", "phonetic": "JAV-uh-lin"}]}
 {"guid": "N44_028", "forms": [{"grammatical_form": "noun/en_singular", "text": "cartridge case", "is_base_form": true}]}
+{"guid": "N44_030", "forms": [{"grammatical_form": "noun/en_singular", "text": "mace", "is_base_form": true, "ipa": "/meɪs/", "phonetic": "MAYS"}]}
+{"guid": "N44_031", "forms": [{"grammatical_form": "noun/en_singular", "text": "mace", "is_base_form": true, "ipa": "/meɪs/", "phonetic": "MAYS"}]}
+{"guid": "N44_032", "forms": [{"grammatical_form": "noun/en_singular", "text": "mortar", "is_base_form": true, "ipa": "/ˈmɔrtər/", "phonetic": "MOR-ter"}]}
+{"guid": "N44_033", "forms": [{"grammatical_form": "noun/en_singular", "text": "explosive", "is_base_form": true, "ipa": "/ɪkˈsploʊsɪv/", "phonetic": "ik-SPLOH-siv"}]}
+{"guid": "N44_034", "forms": [{"grammatical_form": "noun/en_singular", "text": "artillery", "is_base_form": true, "ipa": "/ˈɑːrtələri/", "phonetic": "ar-TIL-uh-ree"}]}
+{"guid": "N44_035", "forms": [{"grammatical_form": "noun/en_singular", "text": "dart", "is_base_form": true, "ipa": "/dɑrt/", "phonetic": "DART"}]}
+{"guid": "N44_036", "forms": [{"grammatical_form": "noun/en_singular", "text": "firearm", "is_base_form": true, "ipa": "/ˈfaɪərˌɑrm/", "phonetic": "FYRE-arm"}]}
+{"guid": "N44_037", "forms": [{"grammatical_form": "noun/en_singular", "text": "trigger", "is_base_form": true, "ipa": "/ˈtrɪɡər/", "phonetic": "TRIG-er"}]}
+{"guid": "N44_038", "forms": [{"grammatical_form": "noun/en_singular", "text": "revolver", "is_base_form": true, "ipa": "/rɪˈvɑlvər/", "phonetic": "rih-VOL-ver"}]}

@@ -21,3 +21,16 @@
 {"guid": "N42_032", "forms": [{"grammatical_form": "noun/en_singular", "text": "tonic water", "is_base_form": true}]}
 {"guid": "N42_033", "forms": [{"grammatical_form": "noun/en_singular", "text": "yerba mate", "is_base_form": true}]}
 {"guid": "N42_036", "forms": [{"grammatical_form": "noun/en_singular", "text": "maraschino liqueur", "is_base_form": true}], "variants": [{"kind": "equivalent", "key": "maraschino", "forms": [{"grammatical_form": "noun/en_singular", "text": "maraschino", "is_base_form": true}]}]}
+{"guid": "N42_037", "forms": [{"grammatical_form": "noun/en_singular", "text": "brandy", "is_base_form": true, "ipa": "/ˈbrændi/", "phonetic": "BRAN-dee"}]}
+{"guid": "N42_038", "forms": [{"grammatical_form": "noun/en_singular", "text": "pint", "is_base_form": true, "ipa": "/paɪnt/", "phonetic": "PYNT"}]}
+{"guid": "N42_039", "forms": [{"grammatical_form": "noun/en_singular", "text": "squash", "is_base_form": true, "ipa": "/skwɑʃ/", "phonetic": "SKWOSH"}]}
+{"guid": "N42_040", "forms": [{"grammatical_form": "noun/en_singular", "text": "stout", "is_base_form": true, "ipa": "/staʊt/", "phonetic": "STOUT"}]}
+{"guid": "N42_041", "forms": [{"grammatical_form": "noun/en_singular", "text": "cordial", "is_base_form": true, "ipa": "/ˈkɔrdʒəl/", "phonetic": "KOR-juhl"}]}
+{"guid": "N42_042", "forms": [{"grammatical_form": "noun/en_singular", "text": "cordial", "is_base_form": true, "ipa": "/ˈkɔrdʒəl/", "phonetic": "KOR-juhl"}]}
+{"guid": "N42_043", "forms": [{"grammatical_form": "noun/en_singular", "text": "freshwater", "is_base_form": true, "ipa": "/ˈfrɛʃˌwɔtɚ/", "phonetic": "FRESH-waw-ter"}]}
+{"guid": "N42_044", "forms": [{"grammatical_form": "noun/en_singular", "text": "cocoa", "is_base_form": true, "ipa": "/ˈkoʊkoʊ/", "phonetic": "KOH-koh"}]}
+{"guid": "N42_045", "forms": [{"grammatical_form": "noun/en_singular", "text": "punch", "is_base_form": true, "ipa": "/pʌntʃ/", "phonetic": "PUNCH"}]}
+{"guid": "N42_046", "forms": [{"grammatical_form": "noun/en_singular", "text": "spirit", "is_base_form": true, "ipa": "/ˈspɪrɪt/", "phonetic": "SPIR-it"}]}
+{"guid": "N42_047", "forms": [{"grammatical_form": "noun/en_singular", "text": "alcohol", "is_base_form": true, "ipa": "/ˈæl.kəˌhɔl/", "phonetic": "AL-kuh-hawl"}]}
+{"guid": "N42_048", "forms": [{"grammatical_form": "noun/en_singular", "text": "ale", "is_base_form": true, "ipa": "/eɪl/", "phonetic": "AYL"}]}
+{"guid": "N42_049", "forms": [{"grammatical_form": "noun/en_singular", "text": "draught", "is_base_form": true, "ipa": "/dræft/", "phonetic": "DRAFT"}]}

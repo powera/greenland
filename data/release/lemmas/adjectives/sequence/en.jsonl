@@ -21,3 +21,48 @@
 {"guid": "A15_033", "forms": [{"grammatical_form": "adjective/en_positive", "text": "low-level", "is_base_form": true}]}
 {"guid": "A15_034", "forms": [{"grammatical_form": "adjective/en_positive", "text": "fastest-growing", "is_base_form": true}]}
 {"guid": "A15_035", "forms": [{"grammatical_form": "adjective/en_positive", "text": "one-act", "is_base_form": true}]}
+{"guid": "A15_036", "forms": [{"grammatical_form": "adjective/en_positive", "text": "seeded", "is_base_form": true, "ipa": "/ˈsiːdɪd/", "phonetic": "SEE-did"}]}
+{"guid": "A15_037", "forms": [{"grammatical_form": "adjective/en_positive", "text": "post hoc", "is_base_form": true, "ipa": "/ˌpoʊst ˈhɑk/", "phonetic": "POHST HOK"}]}
+{"guid": "A15_038", "forms": [{"grammatical_form": "adjective/en_positive", "text": "junior", "is_base_form": true, "ipa": "/ˈdʒuːnjɚ/", "phonetic": "JOON-yur"}]}
+{"guid": "A15_039", "forms": [{"grammatical_form": "adjective/en_positive", "text": "junior", "is_base_form": true, "ipa": "/ˈdʒuːnjɚ/", "phonetic": "JOON-yur"}]}
+{"guid": "A15_040", "forms": [{"grammatical_form": "adjective/en_positive", "text": "ascending", "is_base_form": true, "ipa": "/əˈsɛndɪŋ/", "phonetic": "uh-SEN-ding"}]}
+{"guid": "A15_041", "forms": [{"grammatical_form": "adjective/en_positive", "text": "eldest", "is_base_form": true, "ipa": "/ˈɛldɪst/", "phonetic": "EL-dist"}]}
+{"guid": "A15_042", "forms": [{"grammatical_form": "adjective/en_positive", "text": "prompt", "is_base_form": true, "ipa": "/prɑmpt/", "phonetic": "PROMPT"}]}
+{"guid": "A15_043", "forms": [{"grammatical_form": "adjective/en_positive", "text": "culminating", "is_base_form": true, "ipa": "/ˈkʌlməˌneɪtɪŋ/", "phonetic": "KUL-muh-nay-ting"}]}
+{"guid": "A15_044", "forms": [{"grammatical_form": "adjective/en_positive", "text": "aforementioned", "is_base_form": true, "ipa": "/əˈfɔrˌmɛnʃənd/", "phonetic": "uh-FORE-men-shund"}]}
+{"guid": "A15_045", "forms": [{"grammatical_form": "adjective/en_positive", "text": "foregoing", "is_base_form": true, "ipa": "/fɔrˈɡoʊɪŋ/", "phonetic": "for-GOH-ing"}]}
+{"guid": "A15_046", "forms": [{"grammatical_form": "adjective/en_positive", "text": "introductory", "is_base_form": true, "ipa": "/ˌɪntrəˈdʌktəri/", "phonetic": "in-truh-DUK-tuh-ree"}]}
+{"guid": "A15_047", "forms": [{"grammatical_form": "adjective/en_positive", "text": "sequential", "is_base_form": true, "ipa": "/sɪˈkwɛnʃəl/", "phonetic": "sih-KWEN-shuhl"}]}
+{"guid": "A15_048", "forms": [{"grammatical_form": "adjective/en_positive", "text": "sequential", "is_base_form": true, "ipa": "/sɪˈkwɛnʃəl/", "phonetic": "sih-KWEN-shuhl"}]}
+{"guid": "A15_049", "forms": [{"grammatical_form": "adjective/en_positive", "text": "serial", "is_base_form": true, "ipa": "/ˈsɪriəl/", "phonetic": "SEER-ee-uhl"}]}
+{"guid": "A15_050", "forms": [{"grammatical_form": "adjective/en_positive", "text": "serial", "is_base_form": true, "ipa": "/ˈsɪriəl/", "phonetic": "SEER-ee-uhl"}]}
+{"guid": "A15_051", "forms": [{"grammatical_form": "adjective/en_positive", "text": "utmost", "is_base_form": true, "ipa": "/ˈʌtˌmoʊst/", "phonetic": "UT-most"}]}
+{"guid": "A15_052", "forms": [{"grammatical_form": "adjective/en_positive", "text": "immediate", "is_base_form": true, "ipa": "/ɪˈmiːdiət/", "phonetic": "ih-MEE-dee-it"}]}
+{"guid": "A15_053", "forms": [{"grammatical_form": "adjective/en_positive", "text": "initial", "is_base_form": true, "ipa": "/ɪˈnɪʃəl/", "phonetic": "ih-NISH-uhl"}]}
+{"guid": "A15_054", "forms": [{"grammatical_form": "adjective/en_positive", "text": "prior", "is_base_form": true, "ipa": "/ˈpraɪər/", "phonetic": "PRY-er"}]}
+{"guid": "A15_055", "forms": [{"grammatical_form": "adjective/en_positive", "text": "secondary", "is_base_form": true, "ipa": "/ˈsɛkənˌdɛri/", "phonetic": "SEK-un-dair-ee"}]}
+{"guid": "A15_056", "forms": [{"grammatical_form": "adjective/en_positive", "text": "secondary", "is_base_form": true, "ipa": "/ˈsɛkənˌdɛri/", "phonetic": "SEK-un-dair-ee"}]}
+{"guid": "A15_057", "forms": [{"grammatical_form": "adjective/en_positive", "text": "subsequent", "is_base_form": true, "ipa": "/ˈsʌbsɪkwənt/", "phonetic": "SUB-suh-kwent"}]}
+{"guid": "A15_058", "forms": [{"grammatical_form": "adjective/en_positive", "text": "superior", "is_base_form": true, "ipa": "/suˈpɪriər/", "phonetic": "soo-PEER-ee-er"}]}
+{"guid": "A15_059", "forms": [{"grammatical_form": "adjective/en_positive", "text": "downstream", "is_base_form": true, "ipa": "/ˌdaʊnˈstriːm/", "phonetic": "DOWN-streem"}]}
+{"guid": "A15_060", "forms": [{"grammatical_form": "adjective/en_positive", "text": "tertiary", "is_base_form": true, "ipa": "/ˈtɝːʃiˌɛri/", "phonetic": "TER-shee-air-ee"}]}
+{"guid": "A15_061", "forms": [{"grammatical_form": "adjective/en_positive", "text": "tertiary", "is_base_form": true, "ipa": "/ˈtɝːʃiˌɛri/", "phonetic": "TER-shee-air-ee"}]}
+{"guid": "A15_062", "forms": [{"grammatical_form": "adjective/en_positive", "text": "beta", "is_base_form": true, "ipa": "/ˈbeɪtə/", "phonetic": "BAY-tuh"}]}
+{"guid": "A15_063", "forms": [{"grammatical_form": "adjective/en_positive", "text": "rotational", "is_base_form": true, "ipa": "/roʊˈteɪʃənəl/", "phonetic": "roh-TAY-shuh-nuhl"}]}
+{"guid": "A15_064", "forms": [{"grammatical_form": "adjective/en_positive", "text": "cumulative", "is_base_form": true, "ipa": "/ˈkjuːmjəˌleɪtɪv/", "phonetic": "KYOO-myuh-luh-tiv"}]}
+{"guid": "A15_065", "forms": [{"grammatical_form": "adjective/en_positive", "text": "cumulative", "is_base_form": true, "ipa": "/ˈkjuːmjəˌleɪtɪv/", "phonetic": "KYOO-myuh-luh-tiv"}]}
+{"guid": "A15_066", "forms": [{"grammatical_form": "adjective/en_positive", "text": "simultaneous", "is_base_form": true, "ipa": "/ˌsaɪməlˈteɪniəs/", "phonetic": "sye-mul-TAY-nee-us"}]}
+{"guid": "A15_067", "forms": [{"grammatical_form": "adjective/en_positive", "text": "timely", "is_base_form": true, "ipa": "/ˈtaɪmli/", "phonetic": "TIME-lee"}]}
+{"guid": "A15_068", "forms": [{"grammatical_form": "adjective/en_positive", "text": "consecutive", "is_base_form": true, "ipa": "/kənˈsɛkjətɪv/", "phonetic": "kun-SEK-yuh-tiv"}]}
+{"guid": "A15_069", "forms": [{"grammatical_form": "adjective/en_positive", "text": "consecutive", "is_base_form": true, "ipa": "/kənˈsɛkjətɪv/", "phonetic": "kun-SEK-yuh-tiv"}]}
+{"guid": "A15_070", "forms": [{"grammatical_form": "adjective/en_positive", "text": "incoming", "is_base_form": true, "ipa": "/ˈɪnˌkʌmɪŋ/", "phonetic": "IN-kuh-ming"}]}
+{"guid": "A15_071", "forms": [{"grammatical_form": "adjective/en_positive", "text": "resultant", "is_base_form": true, "ipa": "/rɪˈzʌltənt/", "phonetic": "ri-ZUL-tunt"}]}
+{"guid": "A15_072", "forms": [{"grammatical_form": "adjective/en_positive", "text": "alternate", "is_base_form": true, "ipa": "/ˈɔltərnət/", "phonetic": "AWL-ter-nit"}]}
+{"guid": "A15_073", "forms": [{"grammatical_form": "adjective/en_positive", "text": "intermediate", "is_base_form": true, "ipa": "/ˌɪntərˈmidiət/", "phonetic": "in-ter-MEE-dee-it"}]}
+{"guid": "A15_074", "forms": [{"grammatical_form": "adjective/en_positive", "text": "linear", "is_base_form": true, "ipa": "/ˈlɪniər/", "phonetic": "LIN-ee-er"}]}
+{"guid": "A15_075", "forms": [{"grammatical_form": "adjective/en_positive", "text": "logical", "is_base_form": true, "ipa": "/ˈlɑdʒɪkəl/", "phonetic": "LOJ-ih-kuhl"}]}
+{"guid": "A15_076", "forms": [{"grammatical_form": "adjective/en_positive", "text": "consequent", "is_base_form": true, "ipa": "/ˈkɑnsəkwənt/", "phonetic": "KON-suh-kwent"}]}
+{"guid": "A15_077", "forms": [{"grammatical_form": "adjective/en_positive", "text": "inferior", "is_base_form": true, "ipa": "/ɪnˈfɪriər/", "phonetic": "in-FEER-ee-er"}]}
+{"guid": "A15_078", "forms": [{"grammatical_form": "adjective/en_positive", "text": "respective", "is_base_form": true, "ipa": "/rɪˈspɛktɪv/", "phonetic": "ri-SPEK-tiv"}]}
+{"guid": "A15_079", "forms": [{"grammatical_form": "adjective/en_positive", "text": "successive", "is_base_form": true, "ipa": "/səkˈsɛsɪv/", "phonetic": "suk-SESS-iv"}]}
+{"guid": "A15_080", "forms": [{"grammatical_form": "adjective/en_positive", "text": "ultimate", "is_base_form": true, "ipa": "/ˈʌltəmət/", "phonetic": "UL-tuh-mit"}]}

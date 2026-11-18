@@ -1,0 +1,513 @@
+[
+  {
+    "level": 1004,
+    "name": "Visual Art and Design",
+    "boundary": "Art materials, composition and design practice; exclude musical performance and general aesthetic adjectives.",
+    "examples": [
+      "palette",
+      "engraving",
+      "typography"
+    ],
+    "cefr": "C1"
+  },
+  {
+    "level": 1006,
+    "name": "Music and Performance",
+    "boundary": "Musical structure and performance; exclude general art and electronics.",
+    "examples": [
+      "syncopation",
+      "cadence",
+      "overture"
+    ],
+    "cefr": "C1"
+  },
+  {
+    "level": 1014,
+    "name": "Ecology and Conservation",
+    "boundary": "Organisms in ecosystems and conservation; exclude cellular biology and geographic landforms.",
+    "examples": [
+      "habitat",
+      "biodiversity",
+      "invasive"
+    ],
+    "cefr": "C1"
+  },
+  {
+    "level": 1016,
+    "name": "Genetics and Cellular Biology",
+    "boundary": "Heredity and cellular processes; exclude figurative reproduction and social inheritance.",
+    "examples": [
+      "chromosome",
+      "mitosis",
+      "allele"
+    ],
+    "cefr": "C2"
+  },
+  {
+    "level": 1018,
+    "name": "Disease and Epidemiology",
+    "boundary": "Disease transmission and population health; exclude medicines and purely anatomical terms.",
+    "examples": [
+      "vector (disease carrier)",
+      "pathogen",
+      "outbreak"
+    ],
+    "cefr": "C1"
+  },
+  {
+    "level": 1024,
+    "name": "Geology and Earth Processes",
+    "boundary": "Rocks, strata and geological change; exclude human geography.",
+    "examples": [
+      "sediment",
+      "erosion",
+      "fault (geological)"
+    ],
+    "cefr": "C1"
+  },
+  {
+    "level": 1026,
+    "name": "Weather and Climate",
+    "boundary": "Atmosphere, weather systems and climate; exclude astronomical bodies.",
+    "examples": [
+      "humidity",
+      "monsoon",
+      "isobar"
+    ],
+    "cefr": "C1"
+  },
+  {
+    "level": 1029,
+    "name": "Agriculture and Land Management",
+    "boundary": "Cultivation and agricultural production; exclude cooking and wild ecosystems.",
+    "examples": [
+      "irrigation",
+      "crop rotation",
+      "pasture"
+    ],
+    "cefr": "C1"
+  },
+  {
+    "level": 1034,
+    "name": "Historical Periods and Movements",
+    "boundary": "Named historical periods and historical change; exclude current civic procedures.",
+    "examples": [
+      "Reconstruction (US history)",
+      "Renaissance",
+      "feudalism"
+    ],
+    "cefr": "C1"
+  },
+  {
+    "level": 1036,
+    "name": "Government and Civic Institutions",
+    "boundary": "Government institutions and public administration; exclude litigation and social theory.",
+    "examples": [
+      "legislature",
+      "bureaucracy",
+      "constituency"
+    ],
+    "cefr": "C1"
+  },
+  {
+    "level": 1038,
+    "name": "War and Diplomacy",
+    "boundary": "Military organization, conflict and international relations; exclude metaphorical attacks.",
+    "examples": [
+      "armistice",
+      "siege",
+      "treaty"
+    ],
+    "cefr": "C1"
+  },
+  {
+    "level": 1042,
+    "name": "Mechanics and Machines",
+    "boundary": "Machine parts and mechanical motion; exclude mathematical uses.",
+    "examples": [
+      "differential (gearing)",
+      "torque",
+      "piston"
+    ],
+    "cefr": "C1"
+  },
+  {
+    "level": 1044,
+    "name": "Construction and Civil Engineering",
+    "boundary": "Built structures, construction and infrastructure; exclude historical periods.",
+    "examples": [
+      "reconstruction (building)",
+      "scaffolding",
+      "abutment"
+    ],
+    "cefr": "C1"
+  },
+  {
+    "level": 1046,
+    "name": "Electronics and Electrical Engineering",
+    "boundary": "Circuits and electrical devices; exclude figurative connections.",
+    "examples": [
+      "capacitor",
+      "resistor",
+      "voltage"
+    ],
+    "cefr": "C2"
+  },
+  {
+    "level": 1048,
+    "name": "Computing and Software",
+    "boundary": "Computational systems, programming and networking; exclude ordinary senses of technical homonyms.",
+    "examples": [
+      "compiler",
+      "algorithm",
+      "protocol (computing)"
+    ],
+    "cefr": "C1"
+  },
+  {
+    "level": 1052,
+    "name": "Materials and Chemical Processes",
+    "boundary": "Material properties and chemical transformations; exclude fixed element cohorts.",
+    "examples": [
+      "polymer",
+      "oxidation",
+      "alloy"
+    ],
+    "cefr": "C2"
+  },
+  {
+    "level": 1058,
+    "name": "Physics and Measurement",
+    "boundary": "Physical principles and scientific measurement; exclude figurative wavelengths.",
+    "examples": [
+      "wavelength (physics)",
+      "momentum (physics)",
+      "calibration"
+    ],
+    "cefr": "C2"
+  },
+  {
+    "level": 1062,
+    "name": "Psychology and Cognition",
+    "boundary": "Mental processes and psychological constructs; exclude casual evaluations.",
+    "examples": [
+      "cognition",
+      "conditioning",
+      "perception"
+    ],
+    "cefr": "C1"
+  },
+  {
+    "level": 1064,
+    "name": "Society and Social Behavior",
+    "boundary": "Social conventions, groups and interactions; exclude mathematical norms and religious doctrine.",
+    "examples": [
+      "norm (social)",
+      "conformity",
+      "solidarity"
+    ],
+    "cefr": "C1"
+  },
+  {
+    "level": 1068,
+    "name": "Philosophy and Ethics",
+    "boundary": "Philosophical arguments and ethical frameworks; exclude religious offices and everyday praise.",
+    "examples": [
+      "epistemology",
+      "utilitarianism",
+      "determinism"
+    ],
+    "cefr": "C2"
+  },
+  {
+    "level": 1072,
+    "name": "Economics and Markets",
+    "boundary": "Economic mechanisms and market analysis; exclude accounting procedures.",
+    "examples": [
+      "inflation",
+      "elasticity (economics)",
+      "monopoly"
+    ],
+    "cefr": "C1"
+  },
+  {
+    "level": 1074,
+    "name": "Finance and Accounting",
+    "boundary": "Financial instruments, accounts and financial reporting; exclude general quantities.",
+    "examples": [
+      "equity (finance)",
+      "depreciation",
+      "liquidity"
+    ],
+    "cefr": "C1"
+  },
+  {
+    "level": 1076,
+    "name": "Business and Organizations",
+    "boundary": "Organizational management and commercial operations; exclude legal proceedings.",
+    "examples": [
+      "procurement",
+      "logistics",
+      "merger"
+    ],
+    "cefr": "C1"
+  },
+  {
+    "level": 1082,
+    "name": "Statistics and Data Analysis",
+    "boundary": "Probability, statistical inference and data interpretation; exclude social norms.",
+    "examples": [
+      "variance",
+      "regression",
+      "sampling"
+    ],
+    "cefr": "C2"
+  },
+  {
+    "level": 1112,
+    "name": "Communication and Rhetoric",
+    "boundary": "Discourse, rhetorical devices and communication practices; exclude grammatical structure.",
+    "examples": [
+      "metaphor",
+      "rhetoric",
+      "paraphrase"
+    ],
+    "cefr": "C1"
+  },
+  {
+    "level": 1182,
+    "name": "Figurative Language and Imagery",
+    "cefr": "C1",
+    "boundary": "Conventional nonliteral senses with a recognizable physical, natural or concrete image. This is not a destination for every abstract word or an unfamiliar literal sense. Exclude plain personal qualities (1300), evaluations (1303), and abstract states/relations (1304).",
+    "examples": [
+      "wavelength (mutual understanding)",
+      "glacial (slow)",
+      "kernel (essential core)"
+    ]
+  },
+  {
+    "level": 1300,
+    "name": "Advanced Character, Thought and Feelings",
+    "cefr": "C1",
+    "boundary": "Everyday advanced vocabulary for character, attitudes, emotions, thought, personal judgment and interpersonal behavior. Exclude clinical/academic psychology (1062), general evaluation of objects or claims (1303), and physical-image metaphors (1182).",
+    "examples": [
+      "pragmatic",
+      "aspiration",
+      "indignant",
+      "consolation"
+    ]
+  },
+  {
+    "level": 1301,
+    "name": "Advanced Actions, Change and Movement",
+    "cefr": "C1",
+    "boundary": "Concrete or everyday actions, movement, handling, gradual change, time and spatial arrangement. Exclude technical domain processes, personal thought/feeling (1300), metaphorical images (1182), and abstract conditions/causality (1304).",
+    "examples": [
+      "thrust",
+      "prolong",
+      "accommodate",
+      "clockwise"
+    ]
+  },
+  {
+    "level": 1302,
+    "name": "Advanced Everyday Life, Roles and Objects",
+    "cefr": "C1",
+    "boundary": "Daily living, household items, clothing, accommodation, services, social titles/roles and practical routines. Exclude specialist domain senses, abstract states (1304), evaluation (1303), and descriptive modifiers without a daily-life topic (1180).",
+    "examples": [
+      "lodging",
+      "housekeeping",
+      "recipient",
+      "postal"
+    ]
+  },
+  {
+    "level": 1303,
+    "name": "Advanced Evaluation, Value and Certainty",
+    "cefr": "C1",
+    "boundary": "General judgments about merit, usefulness, importance, correctness, originality and certainty, expressed as adjectives, nouns, adverbs or verbs. Exclude personal temperament and emotional states (1300), sensory description or mere degree (1180), specialist formal logic, and concrete imagery (1182).",
+    "examples": [
+      "indispensable",
+      "negligible",
+      "merit",
+      "undoubtedly"
+    ]
+  },
+  {
+    "level": 1304,
+    "name": "Advanced States, Relations and Consequences",
+    "cefr": "C1",
+    "boundary": "Abstract conditions, limits, dependencies, mutual relations, developments, outcomes and causal/temporal relationships. Exclude personal emotions/attitudes (1300), concrete actions or movements (1301), evaluative claims (1303), recognizable figurative images (1182), and specialist domain terms.",
+    "examples": [
+      "conditional",
+      "parameter (scope limit)",
+      "onset",
+      "succession"
+    ]
+  },
+  {
+    "level": 1310,
+    "name": "Advanced Character, Thought and Feelings 2",
+    "cefr": "C1",
+    "boundary": "Everyday advanced vocabulary for character, attitudes, emotions, thought, personal judgment and interpersonal behavior. Exclude clinical/academic psychology (1062), general evaluation of objects or claims (1303), and physical-image metaphors (1182).",
+    "examples": [
+      "pragmatic",
+      "aspiration",
+      "indignant",
+      "consolation"
+    ]
+  },
+  {
+    "level": 1311,
+    "name": "Advanced Character, Thought and Feelings 3",
+    "cefr": "C1",
+    "boundary": "Everyday advanced vocabulary for character, attitudes, emotions, thought, personal judgment and interpersonal behavior. Exclude clinical/academic psychology (1062), general evaluation of objects or claims (1303), and physical-image metaphors (1182).",
+    "examples": [
+      "pragmatic",
+      "aspiration",
+      "indignant",
+      "consolation"
+    ]
+  },
+  {
+    "level": 1320,
+    "name": "Advanced Actions, Change and Movement 2",
+    "cefr": "C1",
+    "boundary": "Concrete or everyday actions, movement, handling, gradual change, time and spatial arrangement. Exclude technical domain processes, personal thought/feeling (1300), metaphorical images (1182), and abstract conditions/causality (1304).",
+    "examples": [
+      "thrust",
+      "prolong",
+      "accommodate",
+      "clockwise"
+    ]
+  },
+  {
+    "level": 1321,
+    "name": "Advanced Actions, Change and Movement 3",
+    "cefr": "C1",
+    "boundary": "Concrete or everyday actions, movement, handling, gradual change, time and spatial arrangement. Exclude technical domain processes, personal thought/feeling (1300), metaphorical images (1182), and abstract conditions/causality (1304).",
+    "examples": [
+      "thrust",
+      "prolong",
+      "accommodate",
+      "clockwise"
+    ]
+  },
+  {
+    "level": 1330,
+    "name": "Figurative Language and Imagery 2",
+    "cefr": "C1",
+    "boundary": "Conventional nonliteral senses with a recognizable physical, natural or concrete image. This is not a destination for every abstract word or an unfamiliar literal sense. Exclude plain personal qualities (1300), evaluations (1303), and abstract states/relations (1304).",
+    "examples": [
+      "wavelength (mutual understanding)",
+      "glacial (slow)",
+      "kernel (essential core)"
+    ]
+  },
+  {
+    "level": 1340,
+    "name": "Advanced Adverbs",
+    "cefr": "C1",
+    "boundary": "Advanced general manner and usage adverbs that do not fit a dedicated adverb type or specialist subject. Share this boundary with volume 2. Exclude ordinary A1\u2013B1 senses (105/324), degree/focus (1342), stance/certainty (1343), linking (1344), and time/frequency/direction (1345).",
+    "examples": [
+      "meticulously",
+      "haphazardly",
+      "painstakingly"
+    ]
+  },
+  {
+    "level": 1341,
+    "name": "Advanced Adverbs 2",
+    "cefr": "C1",
+    "boundary": "Advanced general manner and usage adverbs that do not fit a dedicated adverb type or specialist subject. Share this boundary with volume 2. Exclude ordinary A1\u2013B1 senses (105/324), degree/focus (1342), stance/certainty (1343), linking (1344), and time/frequency/direction (1345).",
+    "examples": [
+      "meticulously",
+      "haphazardly",
+      "painstakingly"
+    ]
+  },
+  {
+    "level": 1342,
+    "name": "Advanced Degree and Focus Adverbs",
+    "cefr": "C1",
+    "boundary": "Advanced adverb senses expressing extent, intensity, approximation, limitation, emphasis or focus. Exclude general manner, stance/certainty, discourse linking and literal temporal/spatial direction. Familiar headword CEFR does not make every intensifying sense elementary.",
+    "examples": [
+      "markedly",
+      "exceedingly",
+      "solely",
+      "profoundly"
+    ]
+  },
+  {
+    "level": 1343,
+    "name": "Advanced Stance and Certainty Adverbs",
+    "cefr": "C1",
+    "boundary": "Advanced epistemic, evidential, attitudinal and viewpoint adverb senses: how a claim is known, qualified, interpreted or regarded. Exclude ordinary manner, mere degree, and discourse connectors.",
+    "examples": [
+      "presumably",
+      "ostensibly",
+      "arguably",
+      "admittedly"
+    ]
+  },
+  {
+    "level": 1344,
+    "name": "Advanced Linking and Organizing Adverbs",
+    "cefr": "C1",
+    "boundary": "Advanced adverbs connecting or organizing propositions, arguments or discourse through contrast, consequence, addition, concession or sequence. Ordinary connectors remain in general units, including 227.",
+    "examples": [
+      "nonetheless",
+      "conversely",
+      "furthermore",
+      "consequently"
+    ]
+  },
+  {
+    "level": 1345,
+    "name": "Advanced Time, Frequency and Direction Adverbs",
+    "cefr": "C1",
+    "boundary": "Advanced temporal, frequency, duration, spatial-location and directional adverb senses. Exclude argumentative/discourse sequencing (1344), epistemic stance (1343), and ordinary everyday time/direction adverbs in general units.",
+    "examples": [
+      "hitherto",
+      "intermittently",
+      "subsequently",
+      "homeward"
+    ]
+  },
+  {
+    "level": 1350,
+    "name": "Advanced Feelings and Reactions",
+    "cefr": "C1",
+    "boundary": "Advanced or nuanced senses of emotions, affective reactions, emotional expressions and their sources or effects; a continuation of 100. Ordinary everyday feelings remain at 100/303. Character/cognition belongs in 1300-family units, and clinical/academic psychology belongs in 1062.",
+    "examples": [
+      "consternation",
+      "elation",
+      "apprehension",
+      "resentment"
+    ]
+  },
+  {
+    "level": 1351,
+    "name": "Advanced Ideas, Roles and Results",
+    "cefr": "C1",
+    "boundary": "Advanced abstract noun senses for ideas, conceptual roles, functions, implications, outcomes, achievements and fulfillment; a continuation of 222. Exclude ordinary everyday noun senses, concrete objects, and clear specialist meanings with their own topic. Do not infer sense difficulty solely from spelling-level CEFR.",
+    "examples": [
+      "contingency",
+      "ramification",
+      "capacity (official role)",
+      "satisfaction (fulfillment of a requirement)"
+    ]
+  },
+  {
+    "level": 1352,
+    "name": "Advanced Describing and Qualifying Words",
+    "cefr": "C1",
+    "boundary": "Advanced or nuanced adjective senses qualifying condition, composition, scope, suitability, implications or interpretation; a shared advanced continuation of 106 and 318. Ordinary everyday descriptions remain in general units. Prefer specific specialist topics when the definition is explicitly domain-specific; adverbs have separate units.",
+    "examples": [
+      "provisional",
+      "intrinsic",
+      "virtual (in effect)",
+      "fine (subtle or finely divided)"
+    ]
+  }
+]

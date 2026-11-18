@@ -23,6 +23,10 @@
             adding. Stopwords, contractions and bare initials are filtered out by default:
             they rank high precisely because they are not vocabulary anyone needs to add.
         </p>
+        <p class="text-muted small mt-1 mb-0">
+            <i class="bi bi-hourglass-split" aria-hidden="true"></i>
+            marks a word awaiting review in the pending queue, with no lemma yet.
+        </p>
     </div>
 </div>
 
@@ -80,6 +84,15 @@
                         <td class="text-end text-muted">{{ loop.index }}</td>
                         <td>
                             <a href="{{ url_for('word_tokens.detail', word_token_id=token.id) }}">{{ token.token }}</a>
+                            {% set pending_ids = pending_entries.get(token.token|lower, []) %}
+                            {% if pending_ids %}
+                            <a href="{{ url_for('pending_imports.detail', pending_import_id=pending_ids[0]) }}"
+                               class="text-warning ms-1"
+                               title="{{ pending_ids|length }} pending queue {{ 'entry' if pending_ids|length == 1 else 'entries' }}; no lemma yet"
+                               aria-label="{{ token.token }}: {{ pending_ids|length }} pending queue {{ 'entry' if pending_ids|length == 1 else 'entries' }}; no lemma yet">
+                                <i class="bi bi-hourglass-split" aria-hidden="true"></i>
+                            </a>
+                            {% endif %}
                         </td>
                         <td class="text-end wt-score">{{ token.frequency_rank }}</td>
                     </tr>

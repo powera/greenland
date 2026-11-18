@@ -25,3 +25,7 @@
 {"guid": "N70_027", "forms": [{"grammatical_form": "noun/en_singular", "text": "saddle", "is_base_form": true, "ipa": "/ˈsædəl/", "phonetic": "SAD-uhl"}]}
 {"guid": "N70_028", "forms": [{"grammatical_form": "noun/en_singular", "text": "bridle", "is_base_form": true, "ipa": "/ˈbraɪdəl/", "phonetic": "BRY-dul"}]}
 {"guid": "N70_029", "forms": [{"grammatical_form": "noun/en_singular", "text": "stirrup", "is_base_form": true, "ipa": "/ˈstɪr.ʌp/", "phonetic": "STIR-up"}]}
+{"guid": "N70_030", "forms": [{"grammatical_form": "noun/en_singular", "text": "squash", "is_base_form": true, "ipa": "/skwɑʃ/", "phonetic": "SKWOSH"}]}
+{"guid": "N70_031", "forms": [{"grammatical_form": "noun/en_singular", "text": "poker", "is_base_form": true, "ipa": "/ˈpoʊkɚ/", "phonetic": "POH-ker"}]}
+{"guid": "N70_032", "forms": [{"grammatical_form": "noun/en_singular", "text": "monopoly", "is_base_form": true, "ipa": "/məˈnɑpəli/", "phonetic": "muh-NOP-uh-lee"}]}
+{"guid": "N70_033", "forms": [{"grammatical_form": "noun/en_singular", "text": "slide", "is_base_form": true, "ipa": "/slaɪd/", "phonetic": "SLYD"}]}

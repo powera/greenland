@@ -9,7 +9,6 @@
 {"guid": "N59_009", "forms": [{"grammatical_form": "noun/en_singular", "text": "forum non conveniens", "is_base_form": true}]}
 {"guid": "N59_010", "forms": [{"grammatical_form": "noun/en_singular", "text": "lis pendens", "is_base_form": true}]}
 {"guid": "N59_011", "forms": [{"grammatical_form": "noun/en_singular", "text": "caveat emptor", "is_base_form": true}]}
-{"guid": "N59_012", "forms": [{"grammatical_form": "noun/en_singular", "text": "quid pro quo", "is_base_form": true}]}
 {"guid": "N59_013", "forms": [{"grammatical_form": "noun/en_singular", "text": "laches", "is_base_form": true}]}
 {"guid": "N59_019", "forms": [{"grammatical_form": "noun/en_singular", "text": "promissory estoppel", "is_base_form": true}]}
 {"guid": "N59_020", "forms": [{"grammatical_form": "noun/en_singular", "text": "collateral estoppel", "is_base_form": true}]}
@@ -51,6 +50,7 @@
 {"guid": "N59_056", "forms": [{"grammatical_form": "noun/en_singular", "text": "bail bond", "is_base_form": true}], "variants": [{"kind": "equivalent", "key": "bond", "forms": [{"grammatical_form": "noun/en_singular", "text": "bond", "is_base_form": true}]}]}
 {"guid": "N59_058", "forms": [{"grammatical_form": "noun/en_singular", "text": "status", "is_base_form": true}]}
 {"guid": "N59_060", "variants": [{"kind": "equivalent", "key": "provision", "forms": [{"grammatical_form": "noun/en_singular", "text": "provision", "is_base_form": true}]}]}
+{"guid": "N59_062", "variants": [{"kind": "spelling", "key": "judgement", "forms": [{"grammatical_form": "noun/en_singular", "text": "judgement", "is_base_form": true}]}]}
 {"guid": "N59_071", "forms": [{"grammatical_form": "noun/en_singular", "text": "ballot measure", "is_base_form": true}], "variants": [{"kind": "equivalent", "key": "proposition", "forms": [{"grammatical_form": "noun/en_singular", "text": "proposition", "is_base_form": true}]}]}
 {"guid": "N59_072", "forms": [{"grammatical_form": "noun/en_singular", "text": "right to privacy", "is_base_form": true}]}
 {"guid": "N59_074", "forms": [{"grammatical_form": "noun/en_singular", "text": "legal immunity", "is_base_form": true}]}
@@ -60,3 +60,31 @@
 {"guid": "N59_096", "forms": [{"grammatical_form": "noun/en_singular", "text": "child custody", "is_base_form": true}], "variants": [{"kind": "equivalent", "key": "custody", "forms": [{"grammatical_form": "noun/en_singular", "text": "custody", "is_base_form": true}]}]}
 {"guid": "N59_102", "forms": [{"grammatical_form": "noun/en_singular", "text": "obiter dictum", "is_base_form": true}]}
 {"guid": "N59_103", "forms": [{"grammatical_form": "noun/en_singular", "text": "right", "is_base_form": true, "ipa": "/raɪt/", "phonetic": "RYTE"}]}
+{"guid": "N59_104", "forms": [{"grammatical_form": "noun/en_singular", "text": "pardon", "is_base_form": true, "ipa": "/ˈpɑrdən/", "phonetic": "PAR-dun"}]}
+{"guid": "N59_105", "forms": [{"grammatical_form": "noun/en_singular", "text": "robbery", "is_base_form": true, "ipa": "/ˈrɑbəri/", "phonetic": "ROB-uh-ree"}]}
+{"guid": "N59_106", "forms": [{"grammatical_form": "noun/en_singular", "text": "offence", "is_base_form": true, "ipa": "/əˈfɛns/", "phonetic": "uh-FENS"}]}
+{"guid": "N59_107", "forms": [{"grammatical_form": "noun/en_singular", "text": "concession", "is_base_form": true, "ipa": "/kənˈsɛʃən/", "phonetic": "kuhn-SESH-uhn"}]}
+{"guid": "N59_108", "forms": [{"grammatical_form": "noun/en_singular", "text": "recourse", "is_base_form": true, "ipa": "/ˈriˌkɔrs/", "phonetic": "REE-kors"}]}
+{"guid": "N59_109", "forms": [{"grammatical_form": "noun/en_singular", "text": "asylum", "is_base_form": true, "ipa": "/əˈsaɪləm/", "phonetic": "uh-SY-lum"}]}
+{"guid": "N59_110", "forms": [{"grammatical_form": "noun/en_singular", "text": "duty", "is_base_form": true, "ipa": "/ˈduːti/", "phonetic": "DOO-tee"}]}
+{"guid": "N59_111", "forms": [{"grammatical_form": "noun/en_singular", "text": "vote", "is_base_form": true, "ipa": "/voʊt/", "phonetic": "VOHT"}]}
+{"guid": "N59_112", "forms": [{"grammatical_form": "noun/en_singular", "text": "bankruptcy", "is_base_form": true, "ipa": "/ˈbæŋkˌrʌptsi/", "phonetic": "BANK-rupt-see"}]}
+{"guid": "N59_113", "forms": [{"grammatical_form": "noun/en_singular", "text": "certiorari", "is_base_form": true, "ipa": "/ˌsɝːʃiəˈrɛraɪ/", "phonetic": "sur-shee-uh-RARE-eye"}]}
+{"guid": "N59_114", "forms": [{"grammatical_form": "noun/en_singular", "text": "habeas", "is_base_form": true, "ipa": "/ˈheɪbiəs/", "phonetic": "HAY-bee-us"}]}
+{"guid": "N59_115", "forms": [{"grammatical_form": "noun/en_singular", "text": "jurisprudence", "is_base_form": true, "ipa": "/ˌdʒʊrɪsˈpruːdəns/", "phonetic": "joor-is-PROO-dens"}]}
+{"guid": "N59_116", "forms": [{"grammatical_form": "noun/en_singular", "text": "citizenship", "is_base_form": true, "ipa": "/ˈsɪtɪzənˌʃɪp/", "phonetic": "SIT-uh-zuhn-ship"}]}
+{"guid": "N59_117", "forms": [{"grammatical_form": "noun/en_singular", "text": "copyright", "is_base_form": true, "ipa": "/ˈkɑːpiˌraɪt/", "phonetic": "KOP-ee-rite"}]}
+{"guid": "N59_118", "forms": [{"grammatical_form": "noun/en_singular", "text": "option", "is_base_form": true, "ipa": "/ˈɑpʃən/", "phonetic": "OP-shun"}]}
+{"guid": "N59_119", "forms": [{"grammatical_form": "noun/en_singular", "text": "nationality", "is_base_form": true, "ipa": "/ˌnæʃəˈnæləti/", "phonetic": "NASH-uh-NAL-uh-tee"}]}
+{"guid": "N59_120", "forms": [{"grammatical_form": "noun/en_singular", "text": "default", "is_base_form": true, "ipa": "/dɪˈfɔlt/", "phonetic": "dee-FAWLT"}]}
+{"guid": "N59_121", "forms": [{"grammatical_form": "noun/en_singular", "text": "franchise", "is_base_form": true, "ipa": "/ˈfrænˌtʃaɪz/", "phonetic": "FRAN-chyz"}]}
+{"guid": "N59_122", "forms": [{"grammatical_form": "noun/en_singular", "text": "validity", "is_base_form": true, "ipa": "/vəˈlɪdəti/", "phonetic": "vuh-LID-uh-tee"}]}
+{"guid": "N59_123", "forms": [{"grammatical_form": "noun/en_singular", "text": "ban", "is_base_form": true, "ipa": "/bæn/", "phonetic": "BAN"}]}
+{"guid": "N59_124", "forms": [{"grammatical_form": "noun/en_singular", "text": "objection", "is_base_form": true, "ipa": "/əbˈdʒɛkʃən/", "phonetic": "uhb-JEK-shuhn"}]}
+{"guid": "N59_125", "forms": [{"grammatical_form": "noun/en_singular", "text": "ownership", "is_base_form": true, "ipa": "/ˈoʊnərˌʃɪp/", "phonetic": "OH-ner-ship"}]}
+{"guid": "N59_126", "forms": [{"grammatical_form": "noun/en_singular", "text": "priority", "is_base_form": true, "ipa": "/praɪˈɔrəti/", "phonetic": "pry-OR-uh-tee"}]}
+{"guid": "N59_127", "forms": [{"grammatical_form": "noun/en_singular", "text": "legislation", "is_base_form": true, "ipa": "/ˌlɛdʒɪˈsleɪʃən/", "phonetic": "LEJ-is-LAY-shun"}]}
+{"guid": "N59_128", "forms": [{"grammatical_form": "noun/en_singular", "text": "dominion", "is_base_form": true, "ipa": "/dəˈmɪnjən/", "phonetic": "duh-MIN-yun"}]}
+{"guid": "N59_129", "forms": [{"grammatical_form": "noun/en_singular", "text": "legitimacy", "is_base_form": true, "ipa": "/ləˈdʒɪtəməsi/", "phonetic": "luh-JI-tuh-muh-see"}]}
+{"guid": "N59_130", "forms": [{"grammatical_form": "noun/en_singular", "text": "rape", "is_base_form": true, "ipa": "/reɪp/", "phonetic": "RAYP"}]}
+{"guid": "N59_131", "forms": [{"grammatical_form": "noun/en_singular", "text": "sovereignty", "is_base_form": true, "ipa": "/ˈsɑːvərnti/", "phonetic": "SOV-rin-tee"}]}

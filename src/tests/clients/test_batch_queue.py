@@ -7,6 +7,9 @@ import sys
 import tempfile
 import unittest
 from datetime import datetime
+from pathlib import Path
+
+import pytest
 from unittest.mock import MagicMock, Mock, patch
 
 sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), "../..")))
@@ -262,9 +265,9 @@ class BatchQueueManagerTestCase(unittest.TestCase):
         # Verify status was returned
         self.assertEqual(batch_info["status"], BatchStatus.FAILED.value)
 
-        # Verify request status was updated to failed
+        # Status checks must leave rows pollable until partial output is retrieved.
         self.session.refresh(record)
-        self.assertEqual(record.status, BatchRequestStatus.FAILED.value)
+        self.assertEqual(record.status, BatchRequestStatus.SUBMITTED.value)
 
     def test_retrieve_batch_results(self) -> None:
         """Test retrieving batch results."""
@@ -314,6 +317,97 @@ class BatchQueueManagerTestCase(unittest.TestCase):
         self.assertEqual(record.status, BatchRequestStatus.COMPLETED.value)
         self.assertIsNotNone(record.response_body)
         self.assertIsNotNone(record.completed_at)
+
+    def test_terminal_batches_preserve_partial_results(self) -> None:
+        """Expired/cancelled output must survive alongside errors and missing rows."""
+        for remote_status in (
+            BatchStatus.EXPIRED.value,
+            BatchStatus.CANCELLED.value,
+            BatchStatus.FAILED.value,
+        ):
+            with self.subTest(status=remote_status):
+                batch_id = f"batch_{remote_status}"
+                records = []
+                for suffix in ("success", "error", "missing"):
+                    custom_id = f"{remote_status}_{suffix}"
+                    record = self.manager.queue_request(
+                        custom_id,
+                        {"model": "gpt-4o-mini"},
+                        BatchRequestMetadata(custom_id, "voras", "populate_translations"),
+                    )
+                    record.batch_id = batch_id
+                    record.status = BatchRequestStatus.SUBMITTED.value
+                    records.append(record)
+                self.session.commit()
+                self.mock_batch_client.get_batch_status.return_value = {
+                    "id": batch_id,
+                    "status": remote_status,
+                    "output_file_id": "output",
+                    "error_file_id": "errors",
+                }
+                self.mock_batch_client.download_batch_results.side_effect = [
+                    [
+                        {
+                            "custom_id": records[0].custom_id,
+                            "response": {"status_code": 200, "body": {"answer": "saved"}},
+                        }
+                    ],
+                    [{"custom_id": records[1].custom_id, "error": {"code": "batch_expired"}}],
+                ]
+
+                self.manager.check_batch_status(batch_id)
+                self.assertTrue(all(row.status == "submitted" for row in records))
+                self.assertEqual(self.manager.retrieve_batch_results(batch_id), 2)
+                for record in records:
+                    self.session.refresh(record)
+                self.assertEqual(records[0].status, "completed")
+                self.assertEqual(
+                    json.loads(records[0].response_body or "{}")["body"], {"answer": "saved"}
+                )
+                self.assertEqual(records[1].status, "failed")
+                self.assertIn("batch_expired", records[1].error_message or "")
+                self.assertEqual(records[2].status, "failed")
+                self.assertIn(remote_status, records[2].error_message or "")
+
+    def test_failed_partial_download_remains_pollable(self) -> None:
+        """An error-file download failure must not lose output or stop polling."""
+        record = self.manager.queue_request(
+            "partial",
+            {"model": "gpt-4o-mini"},
+            BatchRequestMetadata("partial", "voras", "populate_translations"),
+        )
+        record.batch_id = "expired"
+        record.status = "submitted"
+        self.session.commit()
+        self.mock_batch_client.get_batch_status.return_value = {
+            "status": "expired",
+            "output_file_id": "output",
+            "error_file_id": "errors",
+        }
+        self.mock_batch_client.download_batch_results.side_effect = [
+            [{"custom_id": "partial", "response": {"status_code": 200, "body": {}}}],
+            RuntimeError("Download unavailable"),
+        ]
+        self.manager.check_batch_status("expired")
+        with self.assertRaisesRegex(RuntimeError, "Download unavailable"):
+            self.manager.retrieve_batch_results("expired")
+        self.session.refresh(record)
+        self.assertEqual(record.status, "submitted")
+        self.assertIsNone(record.response_body)
+
+    def test_terminal_batch_without_files_finishes_unanswered_requests(self) -> None:
+        """A validation failure without files still releases pending work."""
+        record = self.manager.queue_request(
+            "no_output", {}, BatchRequestMetadata("no_output", "voras", "populate_translations")
+        )
+        record.batch_id = "failed"
+        record.status = "submitted"
+        self.session.commit()
+        self.mock_batch_client.get_batch_status.return_value = {"status": "failed"}
+        self.assertEqual(self.manager.retrieve_batch_results("failed"), 0)
+        self.session.refresh(record)
+        self.assertEqual(record.status, "failed")
+        self.assertEqual(record.error_message, "No result in failed batch")
 
     def test_retrieve_batch_results_with_error(self) -> None:
         """Test retrieving batch results with errors."""
@@ -508,3 +602,24 @@ class BatchRequestMetadataTestCase(unittest.TestCase):
 
 if __name__ == "__main__":
     unittest.main()
+
+
+def test_manager_defers_remote_client_until_needed(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    """Queue planning must not load credentials or initialize a remote client."""
+    from unittest.mock import Mock
+
+    from clients.batch_queue import BatchQueueManager, create_batch_database_session
+
+    factory = Mock()
+    monkeypatch.setattr("clients.batch_queue.OpenAIBatchClient", factory)
+    session = create_batch_database_session(str(tmp_path / "lazy.sqlite"))
+    try:
+        manager = BatchQueueManager(session)
+        factory.assert_not_called()
+        assert manager.batch_client is factory.return_value
+        assert manager.batch_client is factory.return_value
+        factory.assert_called_once_with(debug=False)
+    finally:
+        session.close()

@@ -6,3 +6,16 @@
 {"guid": "A10_006", "forms": [{"grammatical_form": "adjective/en_positive", "text": "acrylic", "is_base_form": true, "ipa": "/əˈkrɪlɪk/", "phonetic": "uh-KRIL-ik"}]}
 {"guid": "A10_007", "forms": [{"grammatical_form": "adjective/en_positive", "text": "tungsten", "is_base_form": true, "ipa": "/ˈtʌŋstən/", "phonetic": "TUNG-stun"}]}
 {"guid": "A10_008", "forms": [{"grammatical_form": "adjective/en_positive", "text": "terracotta", "is_base_form": true, "ipa": "/ˌtɛrəˈkɑtə/", "phonetic": "ter-uh-KOT-uh"}]}
+{"guid": "A10_009", "forms": [{"grammatical_form": "adjective/en_positive", "text": "buttered", "is_base_form": true, "ipa": "/ˈbʌtərd/", "phonetic": "BUH-terd"}]}
+{"guid": "A10_010", "forms": [{"grammatical_form": "adjective/en_positive", "text": "creamed", "is_base_form": true, "ipa": "/krimd/", "phonetic": "KREEMD"}]}
+{"guid": "A10_011", "forms": [{"grammatical_form": "adjective/en_positive", "text": "floured", "is_base_form": true, "ipa": "/ˈflaʊərd/", "phonetic": "FLOW-erd"}]}
+{"guid": "A10_012", "forms": [{"grammatical_form": "adjective/en_positive", "text": "graham", "is_base_form": true, "ipa": "/ˈɡreɪəm/", "phonetic": "GRAY-um"}]}
+{"guid": "A10_013", "forms": [{"grammatical_form": "adjective/en_positive", "text": "porcelain", "is_base_form": true, "ipa": "/ˈpɔːrsəlɪn/", "phonetic": "POR-suh-lin"}]}
+{"guid": "A10_014", "forms": [{"grammatical_form": "adjective/en_positive", "text": "textile", "is_base_form": true, "ipa": "/ˈtɛkstaɪl/", "phonetic": "TEKS-tile"}]}
+{"guid": "A10_015", "forms": [{"grammatical_form": "adjective/en_positive", "text": "sandy", "is_base_form": true, "ipa": "/ˈsændi/", "phonetic": "SAN-dee"}]}
+{"guid": "A10_016", "forms": [{"grammatical_form": "adjective/en_positive", "text": "coral", "is_base_form": true, "ipa": "/ˈkɔːrəl/", "phonetic": "KOR-uhl"}]}
+{"guid": "A10_017", "forms": [{"grammatical_form": "adjective/en_positive", "text": "gilded", "is_base_form": true, "ipa": "/ˈɡɪldɪd/", "phonetic": "GIL-did"}]}
+{"guid": "A10_018", "forms": [{"grammatical_form": "adjective/en_positive", "text": "stony", "is_base_form": true, "ipa": "/ˈstoʊni/", "phonetic": "STOH-nee"}]}
+{"guid": "A10_019", "forms": [{"grammatical_form": "adjective/en_positive", "text": "golden", "is_base_form": true, "ipa": "/ˈɡoʊldən/", "phonetic": "GOHL-duhn"}]}
+{"guid": "A10_020", "forms": [{"grammatical_form": "adjective/en_positive", "text": "stuffed", "is_base_form": true, "ipa": "/stʌft/", "phonetic": "STUFT"}]}
+{"guid": "A10_021", "forms": [{"grammatical_form": "adjective/en_positive", "text": "synthetic", "is_base_form": true, "ipa": "/sɪnˈθɛtɪk/", "phonetic": "sin-THET-ik"}]}

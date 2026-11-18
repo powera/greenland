@@ -1,4 +1,4 @@
-{"guid": "N34_001", "forms": [{"grammatical_form": "noun/en_singular", "text": "meter", "is_base_form": true, "ipa": "/ˈmiːtər/", "phonetic": "MEE-ter"}]}
+{"guid": "N34_001", "forms": [{"grammatical_form": "noun/en_singular", "text": "meter", "is_base_form": true, "ipa": "/ˈmiːtər/", "phonetic": "MEE-ter"}], "variants": [{"kind": "spelling", "key": "metre", "forms": [{"grammatical_form": "noun/en_singular", "text": "metre", "is_base_form": true}]}]}
 {"guid": "N34_002", "forms": [{"grammatical_form": "noun/en_singular", "text": "centimeter", "is_base_form": true, "ipa": "/ˈsɛntɪmətɚ/", "phonetic": "SEN-tuh-meh-tuh"}]}
 {"guid": "N34_003", "forms": [{"grammatical_form": "noun/en_singular", "text": "kilometer", "is_base_form": true, "ipa": "/ˌkaɪlɒˈmɪtər/", "phonetic": "KIL-uh-MIT-er"}]}
 {"guid": "N34_004", "forms": [{"grammatical_form": "noun/en_singular", "text": "mile", "is_base_form": true, "ipa": "/maɪl/", "phonetic": "MYE-l"}]}
@@ -22,3 +22,10 @@
 {"guid": "N34_023", "forms": [{"grammatical_form": "noun/en_singular", "text": "imperial gallon", "is_base_form": true}], "variants": [{"kind": "equivalent", "key": "gallon", "forms": [{"grammatical_form": "noun/en_singular", "text": "gallon", "is_base_form": true}]}]}
 {"guid": "N34_024", "variants": [{"kind": "equivalent", "key": "radians", "forms": [{"grammatical_form": "noun/en_singular", "text": "radians", "is_base_form": true}]}]}
 {"guid": "N34_025", "forms": [{"grammatical_form": "noun/en_singular", "text": "light-year", "is_base_form": true}], "variants": [{"kind": "equivalent", "key": "light-years", "forms": [{"grammatical_form": "noun/en_singular", "text": "light-years", "is_base_form": true}]}]}
+{"guid": "N34_026", "forms": [{"grammatical_form": "noun/en_singular", "text": "ounce", "is_base_form": true, "ipa": "/aʊns/", "phonetic": "OWNS"}]}
+{"guid": "N34_027", "forms": [{"grammatical_form": "noun/en_singular", "text": "pint", "is_base_form": true, "ipa": "/paɪnt/", "phonetic": "PYNT"}]}
+{"guid": "N34_028", "forms": [{"grammatical_form": "noun/en_singular", "text": "acre", "is_base_form": true, "ipa": "/ˈeɪkər/", "phonetic": "AY-ker"}]}
+{"guid": "N34_029", "forms": [{"grammatical_form": "noun/en_singular", "text": "pound", "is_base_form": true, "ipa": "/paʊnd/", "phonetic": "POWND"}]}
+{"guid": "N34_030", "forms": [{"grammatical_form": "noun/en_singular", "text": "wavelength", "is_base_form": true, "ipa": "/ˈweɪvˌlɛŋkθ/", "phonetic": "WAYV-length"}]}
+{"guid": "N34_031", "forms": [{"grammatical_form": "noun/en_singular", "text": "barrel", "is_base_form": true, "ipa": "/ˈbærəl/", "phonetic": "BAIR-uhl"}]}
+{"guid": "N34_032", "forms": [{"grammatical_form": "noun/en_singular", "text": "inch", "is_base_form": true, "ipa": "/ɪntʃ/", "phonetic": "INCH"}]}

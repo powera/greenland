@@ -1,0 +1,6 @@
+{"guid": "V19_004", "grammar_facts": [{"fact_type": "verb_reflexivity", "fact_value": "inherently_reflexive"}, {"fact_type": "auxiliary_verb", "fact_value": "être"}, {"fact_type": "past_participle", "fact_value": "donné"}]}
+{"guid": "V19_005", "grammar_facts": [{"fact_type": "verb_reflexivity", "fact_value": "non_reflexive"}, {"fact_type": "auxiliary_verb", "fact_value": "avoir"}, {"fact_type": "past_participle", "fact_value": "omis"}]}
+{"guid": "V19_006", "grammar_facts": [{"fact_type": "verb_reflexivity", "fact_value": "inherently_reflexive"}, {"fact_type": "auxiliary_verb", "fact_value": "être"}, {"fact_type": "past_participle", "fact_value": "abstenu"}]}
+{"guid": "V19_007", "grammar_facts": [{"fact_type": "verb_reflexivity", "fact_value": "inherently_reflexive"}, {"fact_type": "auxiliary_verb", "fact_value": "être"}, {"fact_type": "past_participle", "fact_value": "efforcé"}]}
+{"guid": "V19_008", "grammar_facts": [{"fact_type": "verb_reflexivity", "fact_value": "non_reflexive"}, {"fact_type": "auxiliary_verb", "fact_value": "avoir"}, {"fact_type": "past_participle", "fact_value": "commencé"}]}
+{"guid": "V19_009", "grammar_facts": [{"fact_type": "verb_reflexivity", "fact_value": "non_reflexive"}, {"fact_type": "auxiliary_verb", "fact_value": "avoir"}, {"fact_type": "past_participle", "fact_value": "lancé"}]}
