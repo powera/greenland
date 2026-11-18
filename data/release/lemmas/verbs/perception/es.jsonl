@@ -1,3 +1,10 @@
 {"guid": "V10_001", "grammar_facts": [{"fact_type": "verb_reflexivity", "fact_value": "non_reflexive"}, {"fact_type": "past_participle", "fact_value": "visto"}]}
 {"guid": "V10_002", "grammar_facts": [{"fact_type": "verb_reflexivity", "fact_value": "non_reflexive"}, {"fact_type": "past_participle", "fact_value": "oído"}]}
 {"guid": "V10_006", "grammar_facts": [{"fact_type": "verb_reflexivity", "fact_value": "non_reflexive"}, {"fact_type": "past_participle", "fact_value": "mirado"}]}
+{"guid": "V10_027", "grammar_facts": [{"fact_type": "verb_reflexivity", "fact_value": "non_reflexive"}, {"fact_type": "past_participle", "fact_value": "navegado"}]}
+{"guid": "V10_028", "grammar_facts": [{"fact_type": "verb_reflexivity", "fact_value": "non_reflexive"}, {"fact_type": "past_participle", "fact_value": "vigilado"}]}
+{"guid": "V10_029", "grammar_facts": [{"fact_type": "verb_reflexivity", "fact_value": "non_reflexive"}, {"fact_type": "past_participle", "fact_value": "mirado"}]}
+{"guid": "V10_030", "grammar_facts": [{"fact_type": "verb_reflexivity", "fact_value": "non_reflexive"}, {"fact_type": "past_participle", "fact_value": "mirado"}]}
+{"guid": "V10_031", "grammar_facts": [{"fact_type": "verb_reflexivity", "fact_value": "non_reflexive"}, {"fact_type": "past_participle", "fact_value": "contemplado"}]}
+{"guid": "V10_032", "grammar_facts": [{"fact_type": "verb_reflexivity", "fact_value": "non_reflexive"}, {"fact_type": "past_participle", "fact_value": "resplandecido"}]}
+{"guid": "V10_033", "grammar_facts": [{"fact_type": "verb_reflexivity", "fact_value": "non_reflexive"}, {"fact_type": "past_participle", "fact_value": "percibido"}]}

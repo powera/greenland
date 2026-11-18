@@ -24,9 +24,9 @@
 {"guid": "V07_024", "grammar_facts": [{"fact_type": "past", "fact_value": "fueled"}, {"fact_type": "past_participle", "fact_value": "fueled"}]}
 {"guid": "V07_025", "grammar_facts": [{"fact_type": "past", "fact_value": "experienced"}, {"fact_type": "past_participle", "fact_value": "experienced"}]}
 {"guid": "V07_026", "grammar_facts": [{"fact_type": "past", "fact_value": "gathered"}, {"fact_type": "past_participle", "fact_value": "gathered"}]}
-{"guid": "V07_027", "forms": [{"grammatical_form": "verb/en_infinitive", "text": "heal", "is_base_form": true, "ipa": "/hiːl/", "phonetic": "HEEL"}]}
-{"guid": "V07_028", "forms": [{"grammatical_form": "verb/en_infinitive", "text": "swell", "is_base_form": true, "ipa": "/swɛl/", "phonetic": "SWEL"}]}
-{"guid": "V07_029", "forms": [{"grammatical_form": "verb/en_infinitive", "text": "foster", "is_base_form": true, "ipa": "/ˈfɑstər/", "phonetic": "FAH-ster"}]}
+{"guid": "V07_027", "forms": [{"grammatical_form": "verb/en_infinitive", "text": "heal", "is_base_form": true, "ipa": "/hiːl/", "phonetic": "HEEL"}], "grammar_facts": [{"fact_type": "verb_transitivity", "fact_value": "intransitive"}, {"fact_type": "past", "fact_value": "healed"}, {"fact_type": "past_participle", "fact_value": "healed"}]}
+{"guid": "V07_028", "forms": [{"grammatical_form": "verb/en_infinitive", "text": "swell", "is_base_form": true, "ipa": "/swɛl/", "phonetic": "SWEL"}], "grammar_facts": [{"fact_type": "verb_transitivity", "fact_value": "intransitive"}, {"fact_type": "past", "fact_value": "swelled"}, {"fact_type": "past_participle", "fact_value": "swollen"}]}
+{"guid": "V07_029", "forms": [{"grammatical_form": "verb/en_infinitive", "text": "foster", "is_base_form": true, "ipa": "/ˈfɑstər/", "phonetic": "FAH-ster"}], "grammar_facts": [{"fact_type": "verb_transitivity", "fact_value": "transitive"}, {"fact_type": "past", "fact_value": "fostered"}, {"fact_type": "past_participle", "fact_value": "fostered"}]}
 {"guid": "V07_030", "forms": [{"grammatical_form": "verb/en_infinitive", "text": "groom", "is_base_form": true, "ipa": "/ɡruːm/", "phonetic": "GROOM"}]}
 {"guid": "V07_031", "forms": [{"grammatical_form": "verb/en_infinitive", "text": "accumulate", "is_base_form": true, "ipa": "/əˈkjuːmjəˌleɪt/", "phonetic": "uh-KYOO-myuh-layt"}]}
 {"guid": "V07_032", "forms": [{"grammatical_form": "verb/en_infinitive", "text": "thrive", "is_base_form": true, "ipa": "/θraɪv/", "phonetic": "THRIVE"}]}

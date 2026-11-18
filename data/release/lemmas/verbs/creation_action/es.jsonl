@@ -1,2 +1,9 @@
 {"guid": "V02_001", "grammar_facts": [{"fact_type": "verb_reflexivity", "fact_value": "non_reflexive"}, {"fact_type": "past_participle", "fact_value": "hecho"}]}
 {"guid": "V02_002", "grammar_facts": [{"fact_type": "verb_reflexivity", "fact_value": "non_reflexive"}, {"fact_type": "past_participle", "fact_value": "construido"}]}
+{"guid": "V02_070", "grammar_facts": [{"fact_type": "verb_reflexivity", "fact_value": "non_reflexive"}, {"fact_type": "past_participle", "fact_value": "sentado"}]}
+{"guid": "V02_071", "grammar_facts": [{"fact_type": "verb_reflexivity", "fact_value": "non_reflexive"}, {"fact_type": "past_participle", "fact_value": "ideado"}]}
+{"guid": "V02_072", "grammar_facts": [{"fact_type": "verb_reflexivity", "fact_value": "non_reflexive"}, {"fact_type": "past_participle", "fact_value": "erigido"}]}
+{"guid": "V02_074", "grammar_facts": [{"fact_type": "verb_reflexivity", "fact_value": "non_reflexive"}]}
+{"guid": "V02_075", "grammar_facts": [{"fact_type": "verb_reflexivity", "fact_value": "non_reflexive"}, {"fact_type": "past_participle", "fact_value": "reimpreso"}]}
+{"guid": "V02_076", "grammar_facts": [{"fact_type": "verb_reflexivity", "fact_value": "non_reflexive"}, {"fact_type": "past_participle", "fact_value": "ideado"}]}
+{"guid": "V02_091", "grammar_facts": [{"fact_type": "verb_reflexivity", "fact_value": "non_reflexive"}, {"fact_type": "past_participle", "fact_value": "manifestado"}]}
