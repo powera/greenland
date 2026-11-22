@@ -944,7 +944,7 @@ def main() -> None:
     parser.add_argument("--old", default="6e3f0114")
     parser.add_argument("--new", default="641589ba")
     parser.add_argument("--phase", choices=["topics", "staging", "unlevelled"], default="topics")
-    parser.add_argument("--model", default="gpt-5-mini")
+    parser.add_argument("--model", default="gpt-6-luna")
     parser.add_argument("--catalogue", type=Path)
     parser.add_argument("--cefr-pass", action="store_true")
     parser.add_argument(

@@ -2,6 +2,9 @@
 
 """Routes for viewing batch operations."""
 
+import json
+from typing import Any
+
 from flask import Blueprint, flash, g, redirect, render_template, request, url_for
 from flask.typing import ResponseReturnValue
 
@@ -13,8 +16,37 @@ from clients.batch_queue import (
 )
 from clients.openai.batch_client import BatchStatus, OpenAIBatchClient
 from barsukas.batch_poller import apply_completed_requests
+from storage.models.schema import Lemma
 
 bp = Blueprint("batch_operations", __name__, url_prefix="/batch-operations")
+
+
+def batch_status(counts: dict[str, int]) -> str:
+    """Keep active batches active and distinguish mixed terminal outcomes."""
+    for active in ("processing", "submitted", "queued", "pending"):
+        if counts.get(active, 0):
+            return active
+    if counts.get("failed", 0):
+        return "completed with errors" if counts.get("completed", 0) else "failed"
+    if counts.get("cancelled", 0):
+        return "cancelled"
+    return "completed" if counts.get("completed", 0) else "pending"
+
+
+def failure_details(row: BatchQueue) -> dict[str, Any]:
+    """Expose stored provider or application errors without another remote call."""
+    raw = row.error_message or "No error details were recorded."
+    try:
+        parsed = json.loads(raw)
+    except (ValueError, TypeError):
+        parsed = {}
+    details = parsed if isinstance(parsed, dict) else {}
+    return {
+        "request": row,
+        "code": details.get("code") or details.get("type") or "Request or processing error",
+        "message": details.get("message") or raw,
+        "raw": raw,
+    }
 
 
 @bp.route("/")
@@ -74,17 +106,7 @@ def list_batches() -> ResponseReturnValue:
 
         # Determine overall status for each batch
         for batch_info in batches_dict.values():
-            counts = batch_info["status_counts"]
-            if counts.get(BatchRequestStatus.FAILED.value, 0) > 0:
-                batch_info["overall_status"] = "failed"
-            elif counts.get(BatchRequestStatus.PROCESSING.value, 0) > 0:
-                batch_info["overall_status"] = "processing"
-            elif counts.get(BatchRequestStatus.SUBMITTED.value, 0) > 0:
-                batch_info["overall_status"] = "submitted"
-            elif counts.get(BatchRequestStatus.COMPLETED.value, 0) == batch_info["total"]:
-                batch_info["overall_status"] = "completed"
-            else:
-                batch_info["overall_status"] = "pending"
+            batch_info["overall_status"] = batch_status(batch_info["status_counts"])
 
         # Filter by status if requested
         batches = list(batches_dict.values())
@@ -100,7 +122,16 @@ def list_batches() -> ResponseReturnValue:
             agents=agents,
             status_filter=status_filter,
             agent_filter=agent_filter,
-            statuses=["pending", "submitted", "processing", "completed", "failed"],
+            statuses=[
+                "pending",
+                "queued",
+                "submitted",
+                "processing",
+                "completed",
+                "completed with errors",
+                "failed",
+                "cancelled",
+            ],
         )
     finally:
         batch_session.close()
@@ -111,7 +142,7 @@ def view_batch(batch_id: str) -> ResponseReturnValue:
     """View details of a specific batch."""
     batch_session = create_batch_database_session()
     try:
-        manager = BatchQueueManager(batch_session, OpenAIBatchClient())
+        manager = BatchQueueManager(batch_session)
         summary = manager.get_batch_summary(batch_id)
 
         # Get individual requests for this batch
@@ -122,10 +153,22 @@ def view_batch(batch_id: str) -> ResponseReturnValue:
             .all()
         )
 
+        failures = [failure_details(row) for row in requests if row.status == "failed"]
+        lemma_ids = {
+            row.entity_id for row in requests if row.entity_type == "lemma" and row.entity_id
+        }
+        lemmas = (
+            {lemma.id: lemma for lemma in g.db.query(Lemma).filter(Lemma.id.in_(lemma_ids)).all()}
+            if lemma_ids
+            else {}
+        )
         return render_template(
             "batch_operations/detail.html",
             batch_id=batch_id,
             summary=summary,
+            overall_status=batch_status(summary["status_counts"]),
+            failures=failures,
+            lemmas=lemmas,
             requests=requests,
         )
     finally:
