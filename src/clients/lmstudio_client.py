@@ -31,6 +31,20 @@ MODEL_OPERATION_TIMEOUT = 30
 MODEL_READY_POLL_TIMEOUT = 600
 MODEL_READY_POLL_INTERVAL = 2.0
 
+# Fixed reasoning effort per model family, matched by substring of the LM Studio
+# model id.  As with the OpenAI cheap tier, every call to a family runs at one
+# known effort rather than a per-caller choice.  LM Studio only honors
+# reasoning_effort for models whose model.yaml declares a reasoning-effort custom
+# field (mapped onto the chat template's variable); for any other model it is
+# silently dropped, and the template default applies.
+#
+# inkling-2: the template default is "high" (0.9).  The local manifest that
+# exposes the field lives at ~/.cache/lm-studio/hub/models/powera/inkling-2-mini-iq2.
+LMSTUDIO_REASONING_EFFORTS: Dict[str, str] = {
+    "inkling-2": "low",
+}
+VALID_REASONING_EFFORTS = frozenset(["none", "minimal", "low", "medium", "high"])
+
 
 class LMStudioError(Exception):
     """Base exception for LMStudio client errors."""
@@ -54,6 +68,23 @@ class LMStudioModelMismatchError(LMStudioError):
     """Raised when LMStudio responds with a model different from the requested model."""
 
     pass
+
+
+def reasoning_effort_for_model(model: str) -> Optional[str]:
+    """Return the fixed reasoning effort for an LM Studio model, or None to omit it.
+
+    Raises ValueError if LMSTUDIO_REASONING_EFFORTS holds an invalid value.
+    """
+    model_lower = model.lower()
+    for family, effort in LMSTUDIO_REASONING_EFFORTS.items():
+        if family in model_lower:
+            if effort not in VALID_REASONING_EFFORTS:
+                raise ValueError(
+                    f"Invalid reasoning effort '{effort}' for model family '{family}'. "
+                    f"Valid values: {sorted(VALID_REASONING_EFFORTS)}"
+                )
+            return effort
+    return None
 
 
 class LMStudioClient:
@@ -391,6 +422,10 @@ class LMStudioClient:
 
         if brief:
             data["max_tokens"] = 256
+
+        reasoning_effort = reasoning_effort_for_model(model)
+        if reasoning_effort:
+            data["reasoning_effort"] = reasoning_effort
 
         if json_schema:
             data["response_format"] = {
