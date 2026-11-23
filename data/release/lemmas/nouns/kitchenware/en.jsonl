@@ -16,3 +16,10 @@
 {"guid": "N71_018", "forms": [{"grammatical_form": "noun/en_singular", "text": "cup", "is_base_form": true, "ipa": "/kʌp/", "phonetic": "KUP"}], "grammar_facts": [{"fact_type": "countability", "fact_value": "countable"}, {"fact_type": "number_type", "fact_value": "regular"}, {"fact_type": "animacy", "fact_value": "inanimate"}, {"fact_type": "plural_status", "fact_value": "regular"}]}
 {"guid": "N71_019", "forms": [{"grammatical_form": "noun/en_singular", "text": "plate", "is_base_form": true, "ipa": "/plɛɪt/", "phonetic": "PLAY-it"}], "grammar_facts": [{"fact_type": "countability", "fact_value": "countable"}, {"fact_type": "number_type", "fact_value": "regular"}, {"fact_type": "animacy", "fact_value": "inanimate"}, {"fact_type": "plural_status", "fact_value": "regular"}]}
 {"guid": "N71_021", "forms": [{"grammatical_form": "noun/en_singular", "text": "casserole dish", "is_base_form": true}], "variants": [{"kind": "equivalent", "key": "casserole", "forms": [{"grammatical_form": "noun/en_singular", "text": "casserole", "is_base_form": true}]}]}
+{"guid": "N71_022", "forms": [{"grammatical_form": "noun/en_singular", "text": "colander", "is_base_form": true, "ipa": "/ˈkʌləndɚ/", "phonetic": "KUH-lun-der"}]}
+{"guid": "N71_023", "forms": [{"grammatical_form": "noun/en_singular", "text": "mortar", "is_base_form": true, "ipa": "/ˈmɔrtər/", "phonetic": "MOR-ter"}]}
+{"guid": "N71_024", "forms": [{"grammatical_form": "noun/en_singular", "text": "platter", "is_base_form": true, "ipa": "/ˈplætər/", "phonetic": "PLAT-er"}]}
+{"guid": "N71_025", "forms": [{"grammatical_form": "noun/en_singular", "text": "funnel", "is_base_form": true, "ipa": "/ˈfʌnəl/", "phonetic": "FUN-ul"}]}
+{"guid": "N71_026", "forms": [{"grammatical_form": "noun/en_singular", "text": "dish", "is_base_form": true, "ipa": "/dɪʃ/", "phonetic": "DISH"}]}
+{"guid": "N71_027", "forms": [{"grammatical_form": "noun/en_singular", "text": "napkin", "is_base_form": true, "ipa": "/ˈnæpkɪn/", "phonetic": "NAP-kin"}]}
+{"guid": "N71_028", "forms": [{"grammatical_form": "noun/en_singular", "text": "sink", "is_base_form": true, "ipa": "/sɪŋk/", "phonetic": "SINK"}]}

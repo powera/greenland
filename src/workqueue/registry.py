@@ -8,6 +8,7 @@ from __future__ import annotations
 
 from typing import Dict, Optional
 
+from workqueue.handlers.level_placement import PLACEMENT_JOB
 from workqueue.handlers.audio import handle_audio_generate_lemma, handle_audio_generate_sentence
 from workqueue.handlers.conversations import (
     handle_conversations_definitions_generate,
@@ -116,6 +117,7 @@ TASK_HANDLERS = {
 # needs only an entry in this table.
 LLM_JOBS: Dict[str, Job] = {
     ADD_WORD_JOB.name: ADD_WORD_JOB,
+    PLACEMENT_JOB.name: PLACEMENT_JOB,
     DEFINITIONS_JOB.name: DEFINITIONS_JOB,
     LAPE2_JOB.name: LAPE2_JOB,
     FORMS_JOB.name: FORMS_JOB,

@@ -3,3 +3,14 @@
 {"guid": "D13_003", "forms": [{"grammatical_form": "adverb/en_positive", "text": "occasionally", "is_base_form": true, "ipa": "/əˈkeɪʒənəli/", "phonetic": "uh-KAY-zhuh-nuh-lee"}]}
 {"guid": "D13_004", "forms": [{"grammatical_form": "adverb/en_positive", "text": "rarely", "is_base_form": true, "ipa": "/ˈrɛrli/", "phonetic": "RAIR-lee"}]}
 {"guid": "D13_005", "forms": [{"grammatical_form": "adverb/en_positive", "text": "constantly", "is_base_form": true, "ipa": "/ˈkɑnstəntli/", "phonetic": "KON-stunt-lee"}]}
+{"guid": "D13_006", "forms": [{"grammatical_form": "adverb/en_positive", "text": "inevitably", "is_base_form": true, "ipa": "/ɪnˈɛvɪtəbli/", "phonetic": "in-EV-uh-tuh-blee"}]}
+{"guid": "D13_007", "forms": [{"grammatical_form": "adverb/en_positive", "text": "invariably", "is_base_form": true, "ipa": "/ɪnˈvɛriəbli/", "phonetic": "in-VAIR-ee-uh-blee"}]}
+{"guid": "D13_008", "forms": [{"grammatical_form": "adverb/en_positive", "text": "universally", "is_base_form": true, "ipa": "/ˌjuːnəˈvɝsəli/", "phonetic": "yoo-nuh-VUR-suh-lee"}]}
+{"guid": "D13_009", "forms": [{"grammatical_form": "adverb/en_positive", "text": "periodically", "is_base_form": true, "ipa": "/ˌpɪriˈɑdɪkli/", "phonetic": "peer-ee-OD-ih-kuh-lee"}]}
+{"guid": "D13_010", "forms": [{"grammatical_form": "adverb/en_positive", "text": "consistently", "is_base_form": true, "ipa": "/kənˈsɪstəntli/", "phonetic": "kuhn-SIS-tuhnt-lee"}]}
+{"guid": "D13_011", "forms": [{"grammatical_form": "adverb/en_positive", "text": "ordinarily", "is_base_form": true, "ipa": "/ˌɔrdəˈnɛrəli/", "phonetic": "OR-duh-NAIR-uh-lee"}]}
+{"guid": "D13_012", "forms": [{"grammatical_form": "adverb/en_positive", "text": "ordinarily", "is_base_form": true, "ipa": "/ˌɔrdəˈnɛrəli/", "phonetic": "OR-duh-NAIR-uh-lee"}]}
+{"guid": "D13_013", "forms": [{"grammatical_form": "adverb/en_positive", "text": "routinely", "is_base_form": true, "ipa": "/ruːˈtiːnli/", "phonetic": "roo-TEEN-lee"}]}
+{"guid": "D13_014", "forms": [{"grammatical_form": "adverb/en_positive", "text": "repeatedly", "is_base_form": true, "ipa": "/rɪˈpiːtɪdli/", "phonetic": "ri-PEE-tid-lee"}]}
+{"guid": "D13_015", "forms": [{"grammatical_form": "adverb/en_positive", "text": "continually", "is_base_form": true, "ipa": "/kənˈtɪnjuəli/", "phonetic": "kun-TIN-yoo-uh-lee"}]}
+{"guid": "D13_016", "forms": [{"grammatical_form": "adverb/en_positive", "text": "continuously", "is_base_form": true, "ipa": "/kənˈtɪn.ju.əs.li/", "phonetic": "kun-TIN-yoo-us-lee"}]}

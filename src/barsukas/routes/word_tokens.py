@@ -22,6 +22,10 @@ from typing import Any, Dict, List, Optional
 
 from flask import Blueprint, g, redirect, render_template, request, url_for
 from flask.typing import ResponseReturnValue
+from sqlalchemy import func
+
+from storage.models.imports import PendingImport
+from storage.models.schema import Lemma
 
 from storage.word_token_view import (
     WordTokenView,
@@ -253,11 +257,35 @@ def unlinked() -> ResponseReturnValue:
         exclude_function_words=not include_function_words,
     )
 
+    # Pending imports hold English headwords, not translations. Fetch matches
+    # for the whole page at once and suppress the marker when a lemma exists
+    # but has not yet acquired a form linking it to this token.
+    pending_entries: Dict[str, List[int]] = {}
+    if language_code == "en" and tokens:
+        token_texts = {token.token.lower() for token in tokens}
+        lemma_exists = (
+            g.db.query(Lemma.id)
+            .filter(func.lower(Lemma.lemma_text) == func.lower(PendingImport.english_word))
+            .exists()
+        )
+        pending_rows = (
+            g.db.query(PendingImport.id, PendingImport.english_word)
+            .filter(
+                func.lower(PendingImport.english_word).in_(token_texts),
+                ~lemma_exists,
+            )
+            .order_by(PendingImport.id)
+            .all()
+        )
+        for pending_id, pending_word in pending_rows:
+            pending_entries.setdefault(pending_word.lower(), []).append(pending_id)
+
     return render_template(
         "word_tokens/unlinked.html",
         language_code=language_code,
         max_rank=max_rank,
         include_function_words=include_function_words,
         tokens=tokens,
+        pending_entries=pending_entries,
         page_size=UNLINKED_PAGE_SIZE,
     )

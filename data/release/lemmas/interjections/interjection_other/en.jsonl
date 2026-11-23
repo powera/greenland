@@ -12,3 +12,15 @@
 {"guid": "I99_012", "forms": [{"grammatical_form": "interjection/base", "text": "ouch", "is_base_form": true}]}
 {"guid": "I99_013", "forms": [{"grammatical_form": "interjection/base", "text": "congratulations", "is_base_form": true}]}
 {"guid": "I99_015", "forms": [{"grammatical_form": "interjection/base", "text": "fore", "is_base_form": true, "ipa": "/fɔr/", "phonetic": "FOR"}]}
+{"guid": "I99_016", "forms": [{"grammatical_form": "interjection/base", "text": "carpe diem", "is_base_form": true, "ipa": "/ˈkɑrpeɪ ˈdiːɛm/", "phonetic": "KAR-pay DEE-em"}]}
+{"guid": "I99_017", "forms": [{"grammatical_form": "interjection/base", "text": "hey", "is_base_form": true, "ipa": "/heɪ/", "phonetic": "HAY"}]}
+{"guid": "I99_018", "forms": [{"grammatical_form": "interjection/base", "text": "hi", "is_base_form": true, "ipa": "/haɪ/", "phonetic": "HIGH"}]}
+{"guid": "I99_019", "forms": [{"grammatical_form": "interjection/base", "text": "alas", "is_base_form": true, "ipa": "/əˈlæs/", "phonetic": "uh-LASS"}]}
+{"guid": "I99_020", "forms": [{"grammatical_form": "interjection/base", "text": "damn", "is_base_form": true, "ipa": "/dæm/", "phonetic": "DAM"}]}
+{"guid": "I99_021", "forms": [{"grammatical_form": "interjection/base", "text": "tut", "is_base_form": true, "ipa": "/tʌt/", "phonetic": "TUT"}]}
+{"guid": "I99_022", "forms": [{"grammatical_form": "interjection/base", "text": "pardon", "is_base_form": true, "ipa": "/ˈpɑrdən/", "phonetic": "PAR-dun"}]}
+{"guid": "I99_023", "forms": [{"grammatical_form": "interjection/base", "text": "farewell", "is_base_form": true, "ipa": "/ˌferˈwɛl/", "phonetic": "fair-WEL"}]}
+{"guid": "I99_024", "forms": [{"grammatical_form": "interjection/base", "text": "honestly", "is_base_form": true, "ipa": "/ˈɑnəstli/", "phonetic": "ON-uhst-lee"}]}
+{"guid": "I99_025", "forms": [{"grammatical_form": "interjection/base", "text": "goodness", "is_base_form": true, "ipa": "/ˈɡʊdnəs/", "phonetic": "GOOD-nis"}]}
+{"guid": "I99_026", "forms": [{"grammatical_form": "interjection/base", "text": "hush", "is_base_form": true, "ipa": "/hʌʃ/", "phonetic": "HUSH"}]}
+{"guid": "I99_027", "forms": [{"grammatical_form": "interjection/base", "text": "hell", "is_base_form": true, "ipa": "/hɛl/", "phonetic": "HEL"}]}

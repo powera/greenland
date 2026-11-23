@@ -90,6 +90,8 @@
                                         <td>
                                             {% if batch.overall_status == 'completed' %}
                                                 <span class="badge bg-success">completed</span>
+                                            {% elif batch.overall_status == 'completed with errors' %}
+                                                <span class="badge bg-warning text-dark">completed with errors</span>
                                             {% elif batch.overall_status == 'failed' %}
                                                 <span class="badge bg-danger">failed</span>
                                             {% elif batch.overall_status == 'processing' %}

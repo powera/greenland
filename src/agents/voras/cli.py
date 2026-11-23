@@ -139,6 +139,9 @@ def _handle_single_lemma_populate(
         uncertain_translation_languages,
     )
 
+    # The lemma was loaded in a session main() has closed; bind it to this one
+    # so lazy relationships (lemma_facts, for person nouns) can load.
+    lemma = session.merge(lemma)
     translations = agent.collect_translations(session, lemma)
     cli_display.display_lemma_translations(lemma, translations)
     missing_langs = [lang_code for lang_code, value in translations.items() if not value]

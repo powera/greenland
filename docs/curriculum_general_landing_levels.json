@@ -1,0 +1,157 @@
+[
+  {
+    "level": 105,
+    "name": "Adverbs",
+    "cefr": "B1",
+    "notes": "Ordinary everyday adverb senses with clear sense-level A1\u2013B1 suitability; shared with Adverbs 2. Familiar spelling or headword CEFR alone is not enough for a secondary, formal or nuanced sense. Advanced general adverbs belong in 1340/1341, and advanced degree, stance, linking and temporal/spatial senses in 1342\u20131345. Examples: quietly; carefully; easily; partly.",
+    "expected_cefr": "B1"
+  },
+  {
+    "level": 134,
+    "name": "Health Care and Recovery",
+    "cefr": null,
+    "notes": "Ordinary health care, patients, treatment, symptoms, emergencies and recovery.",
+    "expected_cefr": null
+  },
+  {
+    "level": 151,
+    "name": "Opinions, Intentions and Communication",
+    "cefr": null,
+    "notes": "Thinking, intentions, opinions, advice, agreement and disagreement.",
+    "expected_cefr": null
+  },
+  {
+    "level": 176,
+    "name": "Money, Payments and Agreements",
+    "cefr": null,
+    "notes": "Everyday finances, payments, budgets, loans and agreements.",
+    "expected_cefr": null
+  },
+  {
+    "level": 216,
+    "name": "Appointments, Services and Scheduling",
+    "cefr": null,
+    "notes": "Service requests, appointments, schedules, delays, requirements and guarantees.",
+    "expected_cefr": null
+  },
+  {
+    "level": 227,
+    "name": "Linking, Time and Degree Adverbs",
+    "cefr": null,
+    "notes": "Ordinary linking/discourse, time, focus, completeness and degree adverbs.",
+    "expected_cefr": null
+  },
+  {
+    "level": 278,
+    "name": "Farming and Livestock",
+    "cefr": null,
+    "notes": "Everyday farming, crops, livestock, farm processes and agricultural places.",
+    "expected_cefr": null
+  },
+  {
+    "level": 281,
+    "name": "Religions and Beliefs",
+    "cefr": null,
+    "notes": "Religions, religious identities, beliefs, practices and institutions.",
+    "expected_cefr": null
+  },
+  {
+    "level": 296,
+    "name": "Work and Employment",
+    "cefr": null,
+    "notes": "Employment, employees, working conditions, responsibilities, pay and applications.",
+    "expected_cefr": null
+  },
+  {
+    "level": 312,
+    "name": "Relationships and Social Interaction",
+    "cefr": null,
+    "notes": "Personal relationships, interpersonal expectations, cooperation and social conduct.",
+    "expected_cefr": null
+  },
+  {
+    "level": 324,
+    "name": "Adverbs 2",
+    "cefr": "B1",
+    "notes": "Ordinary everyday adverb senses with clear sense-level A1\u2013B1 suitability; shared with Adverbs 2. Familiar spelling or headword CEFR alone is not enough for a secondary, formal or nuanced sense. Advanced general adverbs belong in 1340/1341, and advanced degree, stance, linking and temporal/spatial senses in 1342\u20131345. Examples: quietly; carefully; easily; partly.",
+    "expected_cefr": null
+  },
+  {
+    "level": 341,
+    "name": "Digital Information and Access",
+    "cefr": null,
+    "notes": "Everyday digital accounts, electronic information, permissions, privacy and access.",
+    "expected_cefr": null
+  },
+  {
+    "level": 1340,
+    "name": "Advanced Adverbs",
+    "cefr": "C1",
+    "notes": "Advanced general manner and usage adverbs that do not fit a dedicated adverb type or specialist subject. Share this boundary with volume 2. Exclude ordinary A1\u2013B1 senses (105/324), degree/focus (1342), stance/certainty (1343), linking (1344), and time/frequency/direction (1345).\nExamples (illustrative, not mandatory members): meticulously, haphazardly, painstakingly",
+    "expected_cefr": null
+  },
+  {
+    "level": 1341,
+    "name": "Advanced Adverbs 2",
+    "cefr": "C1",
+    "notes": "Advanced general manner and usage adverbs that do not fit a dedicated adverb type or specialist subject. Share this boundary with volume 2. Exclude ordinary A1\u2013B1 senses (105/324), degree/focus (1342), stance/certainty (1343), linking (1344), and time/frequency/direction (1345).\nExamples (illustrative, not mandatory members): meticulously, haphazardly, painstakingly",
+    "expected_cefr": null
+  },
+  {
+    "level": 1342,
+    "name": "Advanced Degree and Focus Adverbs",
+    "cefr": "C1",
+    "notes": "Advanced adverb senses expressing extent, intensity, approximation, limitation, emphasis or focus. Exclude general manner, stance/certainty, discourse linking and literal temporal/spatial direction. Familiar headword CEFR does not make every intensifying sense elementary.\nExamples (illustrative, not mandatory members): markedly, exceedingly, solely, profoundly",
+    "expected_cefr": null
+  },
+  {
+    "level": 1343,
+    "name": "Advanced Stance and Certainty Adverbs",
+    "cefr": "C1",
+    "notes": "Advanced epistemic, evidential, attitudinal and viewpoint adverb senses: how a claim is known, qualified, interpreted or regarded. Exclude ordinary manner, mere degree, and discourse connectors.\nExamples (illustrative, not mandatory members): presumably, ostensibly, arguably, admittedly",
+    "expected_cefr": null
+  },
+  {
+    "level": 1344,
+    "name": "Advanced Linking and Organizing Adverbs",
+    "cefr": "C1",
+    "notes": "Advanced adverbs connecting or organizing propositions, arguments or discourse through contrast, consequence, addition, concession or sequence. Ordinary connectors remain in general units, including 227.\nExamples (illustrative, not mandatory members): nonetheless, conversely, furthermore, consequently",
+    "expected_cefr": null
+  },
+  {
+    "level": 1345,
+    "name": "Advanced Time, Frequency and Direction Adverbs",
+    "cefr": "C1",
+    "notes": "Advanced temporal, frequency, duration, spatial-location and directional adverb senses. Exclude argumentative/discourse sequencing (1344), epistemic stance (1343), and ordinary everyday time/direction adverbs in general units.\nExamples (illustrative, not mandatory members): hitherto, intermittently, subsequently, homeward",
+    "expected_cefr": null
+  },
+  {
+    "level": 1350,
+    "name": "Advanced Feelings and Reactions",
+    "cefr": "C1",
+    "notes": "Advanced or nuanced senses of emotions, affective reactions, emotional expressions and their sources or effects; a continuation of 100. Ordinary everyday feelings remain at 100/303. Character/cognition belongs in 1300-family units, and clinical/academic psychology belongs in 1062.\nExamples (illustrative, not mandatory members): consternation, elation, apprehension, resentment",
+    "expected_cefr": null
+  },
+  {
+    "level": 1351,
+    "name": "Advanced Ideas, Roles and Results",
+    "cefr": "C1",
+    "notes": "Advanced abstract noun senses for ideas, conceptual roles, functions, implications, outcomes, achievements and fulfillment; a continuation of 222. Exclude ordinary everyday noun senses, concrete objects, and clear specialist meanings with their own topic. Do not infer sense difficulty solely from spelling-level CEFR.\nExamples (illustrative, not mandatory members): contingency, ramification, capacity (official role), satisfaction (fulfillment of a requirement)",
+    "expected_cefr": null
+  },
+  {
+    "level": 1352,
+    "name": "Advanced Describing and Qualifying Words",
+    "cefr": "C1",
+    "notes": "Advanced or nuanced adjective senses qualifying condition, composition, scope, suitability, implications or interpretation; a shared advanced continuation of 106 and 318. Ordinary everyday descriptions remain in general units. Prefer specific specialist topics when the definition is explicitly domain-specific; adverbs have separate units.\nExamples (illustrative, not mandatory members): provisional, intrinsic, virtual (in effect), fine (subtle or finely divided)",
+    "expected_cefr": null
+  },
+  {
+    "level": 1399,
+    "name": "Staging: Awaiting Curriculum Placement",
+    "cefr": null,
+    "notes": "Reserved staging sentinel, not an offered curriculum topic or a teaching unit.",
+    "reserved": true,
+    "expected_cefr": null
+  }
+]

@@ -14,3 +14,9 @@
 {"guid": "C99_042", "forms": [{"grammatical_form": "conjunction/base", "text": "after", "is_base_form": true, "ipa": "/ˈæftɚ/", "phonetic": "AF-ter"}]}
 {"guid": "C99_043", "forms": [{"grammatical_form": "conjunction/base", "text": "unless", "is_base_form": true, "ipa": "/ənˈlɛs/", "phonetic": "un-LESS"}]}
 {"guid": "C99_044", "forms": [{"grammatical_form": "conjunction/base", "text": "whereas", "is_base_form": true, "ipa": "/ˌwɛrˈæz/", "phonetic": "WAIR-az"}]}
+{"guid": "C99_045", "forms": [{"grammatical_form": "conjunction/base", "text": "whenever", "is_base_form": true, "ipa": "/wɛnˈɛvər/", "phonetic": "wen-EV-er"}]}
+{"guid": "C99_046", "forms": [{"grammatical_form": "conjunction/base", "text": "wherever", "is_base_form": true, "ipa": "/wɛrˈɛvər/", "phonetic": "wair-EV-er"}]}
+{"guid": "C99_047", "forms": [{"grammatical_form": "conjunction/base", "text": "lest", "is_base_form": true, "ipa": "/lɛst/", "phonetic": "LEST"}]}
+{"guid": "C99_048", "forms": [{"grammatical_form": "conjunction/base", "text": "inasmuch", "is_base_form": true, "ipa": "/ˌɪnəzˈmʌtʃ/", "phonetic": "in-uhz-MUCH"}]}
+{"guid": "C99_049", "forms": [{"grammatical_form": "conjunction/base", "text": "insofar", "is_base_form": true, "ipa": "/ˌɪnsoʊˈfɑr/", "phonetic": "in-soh-FAR"}]}
+{"guid": "C99_050", "forms": [{"grammatical_form": "conjunction/base", "text": "albeit", "is_base_form": true, "ipa": "/ɔlˈbiːɪt/", "phonetic": "awl-BEE-it"}]}

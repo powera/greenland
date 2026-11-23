@@ -151,7 +151,7 @@ class BatchQueueManager:
         db_session: Session,
         batch_client: Optional[OpenAIBatchClient] = None,
         debug: bool = False,
-    ):
+    ) -> None:
         """Initialize batch queue manager.
 
         Args:
@@ -160,10 +160,21 @@ class BatchQueueManager:
             debug: Enable debug logging
         """
         self.db = db_session
-        self.batch_client = batch_client or OpenAIBatchClient(debug=debug)
+        self._batch_client = batch_client
         self.debug = debug
         if debug:
             logger.setLevel(logging.DEBUG)
+
+    @property
+    def batch_client(self) -> OpenAIBatchClient:
+        """Load credentials only when a remote operation actually needs the client."""
+        if self._batch_client is None:
+            self._batch_client = OpenAIBatchClient(debug=self.debug)
+        return self._batch_client
+
+    @batch_client.setter
+    def batch_client(self, client: OpenAIBatchClient) -> None:
+        self._batch_client = client
 
     def queue_request(
         self,
@@ -315,23 +326,14 @@ class BatchQueueManager:
                 )
             ).update({"status": BatchRequestStatus.PROCESSING.value})
             self.db.commit()
-        elif status in [
-            BatchStatus.FAILED.value,
-            BatchStatus.EXPIRED.value,
-            BatchStatus.CANCELLED.value,
-        ]:
-            # Update all pending requests to failed/cancelled
-            self.db.query(BatchQueue).filter_by(batch_id=batch_id).filter(
-                BatchQueue.status.in_(
-                    [BatchRequestStatus.SUBMITTED.value, BatchRequestStatus.PROCESSING.value]
-                )
-            ).update({"status": BatchRequestStatus.FAILED.value})
-            self.db.commit()
+        # A terminal batch can still have successful partial output. Leave its
+        # rows in flight until retrieval succeeds, so a failed download is retried
+        # by the poller instead of silently dropping paid-for answers.
 
         return batch_info
 
     def retrieve_batch_results(self, batch_id: str) -> int:
-        """Retrieve and store results from a completed batch.
+        """Retrieve results from a terminal batch, including partial output.
 
         Args:
             batch_id: OpenAI batch ID
@@ -343,8 +345,13 @@ class BatchQueueManager:
         batch_info = self.batch_client.get_batch_status(batch_id)
         status = batch_info["status"]
 
-        if status != BatchStatus.COMPLETED.value:
-            raise ValueError(f"Batch {batch_id} is not completed (status: {status})")
+        if status not in (
+            BatchStatus.COMPLETED.value,
+            BatchStatus.EXPIRED.value,
+            BatchStatus.CANCELLED.value,
+            BatchStatus.FAILED.value,
+        ):
+            raise ValueError(f"Batch {batch_id} is not terminal (status: {status})")
 
         # Download success and error files. OpenAI returns one or both:
         #   - output_file_id: per-request successes (and errors surfaced as response.body.error)
@@ -397,9 +404,27 @@ class BatchQueueManager:
             else:
                 req.status = BatchRequestStatus.COMPLETED.value
                 req.response_body = json.dumps(response)
+                req.error_message = None
 
             req.completed_at = completed_at
             processed_count += 1
+
+        # Only after every available file has downloaded may unanswered rows
+        # become failed. Preserve successful rows and specific per-request errors.
+        unanswered = (
+            self.db.query(BatchQueue)
+            .filter(
+                BatchQueue.batch_id == batch_id,
+                BatchQueue.status.in_(
+                    [BatchRequestStatus.SUBMITTED.value, BatchRequestStatus.PROCESSING.value]
+                ),
+            )
+            .all()
+        )
+        for unanswered_request in unanswered:
+            unanswered_request.status = BatchRequestStatus.FAILED.value
+            unanswered_request.error_message = f"No result in {status} batch"
+            unanswered_request.completed_at = completed_at
 
         self.db.commit()
         logger.info(f"Processed {processed_count} results for batch {batch_id}")

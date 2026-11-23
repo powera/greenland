@@ -79,3 +79,6 @@
 {"guid": "N02_110", "grammar_facts": [{"fact_type": "grammatical_gender", "fact_value": "masculine"}]}
 {"guid": "N02_112", "grammar_facts": [{"fact_type": "grammatical_gender", "fact_value": "masculine"}]}
 {"guid": "N02_113", "grammar_facts": [{"fact_type": "grammatical_gender", "fact_value": "masculine"}]}
+{"guid": "N02_727", "grammar_facts": [{"fact_type": "grammatical_gender", "fact_value": "feminine"}]}
+{"guid": "N02_728", "grammar_facts": [{"fact_type": "grammatical_gender", "fact_value": "masculine"}]}
+{"guid": "N02_729", "grammar_facts": [{"fact_type": "grammatical_gender", "fact_value": "feminine"}]}

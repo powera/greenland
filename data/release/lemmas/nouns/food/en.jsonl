@@ -69,9 +69,6 @@
 {"guid": "N06_076", "forms": [{"grammatical_form": "noun/en_singular", "text": "beef", "is_base_form": true, "ipa": "/biːf/", "phonetic": "BEEF"}], "grammar_facts": [{"fact_type": "countability", "fact_value": "uncountable"}, {"fact_type": "number_type", "fact_value": "regular"}, {"fact_type": "animacy", "fact_value": "inanimate"}, {"fact_type": "plural", "fact_value": "beefs"}, {"fact_type": "plural_status", "fact_value": "override"}]}
 {"guid": "N06_077", "forms": [{"grammatical_form": "noun/en_singular", "text": "pork", "is_base_form": true, "ipa": "/pɔːrk/", "phonetic": "POHRK"}]}
 {"guid": "N06_078", "forms": [{"grammatical_form": "noun/en_singular", "text": "lamb", "is_base_form": true, "ipa": "/læm/", "phonetic": "LAM"}]}
-{"guid": "N06_079", "forms": [{"grammatical_form": "noun/en_plural", "text": "salmon", "is_base_form": false}]}
-{"guid": "N06_080", "forms": [{"grammatical_form": "noun/en_singular", "text": "tuna", "is_base_form": true, "ipa": "/ˈtuːnə/", "phonetic": "TOO-nuh"}, {"grammatical_form": "noun/en_plural", "text": "tuna", "is_base_form": false}]}
-{"guid": "N06_081", "forms": [{"grammatical_form": "noun/en_singular", "text": "shrimp", "is_base_form": true, "ipa": "/ʃrɪmp/", "phonetic": "SHRIP"}, {"grammatical_form": "noun/en_plural", "text": "shrimp", "is_base_form": false}]}
 {"guid": "N06_082", "forms": [{"grammatical_form": "noun/en_singular", "text": "crab", "is_base_form": true, "ipa": "/kræb/", "phonetic": "KRAB"}]}
 {"guid": "N06_083", "forms": [{"grammatical_form": "noun/en_singular", "text": "lobster", "is_base_form": true, "ipa": "/lɑb.stɚ/", "phonetic": "LAH-buh-stuh"}]}
 {"guid": "N06_084", "forms": [{"grammatical_form": "noun/en_singular", "text": "carrot", "is_base_form": true, "ipa": "[ˈkæɹət]", "phonetic": "KAR-ət"}], "grammar_facts": [{"fact_type": "countability", "fact_value": "countable"}, {"fact_type": "number_type", "fact_value": "regular"}, {"fact_type": "animacy", "fact_value": "inanimate"}, {"fact_type": "plural_status", "fact_value": "regular"}]}
@@ -196,3 +193,67 @@
 {"guid": "N06_221", "forms": [{"grammatical_form": "noun/en_singular", "text": "hay", "is_base_form": true, "ipa": "/heɪ/", "phonetic": "HAY"}]}
 {"guid": "N06_222", "forms": [{"grammatical_form": "noun/en_singular", "text": "fodder", "is_base_form": true, "ipa": "/ˈfɑdər/", "phonetic": "FAH-der"}]}
 {"guid": "N06_223", "forms": [{"grammatical_form": "noun/en_singular", "text": "silage", "is_base_form": true, "ipa": "/ˈsaɪlɪdʒ/", "phonetic": "SY-lij"}]}
+{"guid": "N06_225", "forms": [{"grammatical_form": "noun/en_singular", "text": "brine", "is_base_form": true, "ipa": "/braɪn/", "phonetic": "BRINE"}]}
+{"guid": "N06_226", "forms": [{"grammatical_form": "noun/en_singular", "text": "chop", "is_base_form": true, "ipa": "/tʃɑp/", "phonetic": "CHOP"}]}
+{"guid": "N06_227", "forms": [{"grammatical_form": "noun/en_singular", "text": "cinnamon", "is_base_form": true, "ipa": "/ˈsɪnəmən/", "phonetic": "SIN-uh-mun"}]}
+{"guid": "N06_228", "forms": [{"grammatical_form": "noun/en_singular", "text": "cocoanut", "is_base_form": true, "ipa": "/ˈkoʊ.kəˌnʌt/", "phonetic": "KOH-kuh-nut"}]}
+{"guid": "N06_229", "forms": [{"grammatical_form": "noun/en_singular", "text": "dash", "is_base_form": true, "ipa": "/dæʃ/", "phonetic": "DASH"}]}
+{"guid": "N06_230", "forms": [{"grammatical_form": "noun/en_singular", "text": "dip", "is_base_form": true, "ipa": "/dɪp/", "phonetic": "DIP"}]}
+{"guid": "N06_231", "forms": [{"grammatical_form": "noun/en_singular", "text": "dough", "is_base_form": true, "ipa": "/doʊ/", "phonetic": "DOH"}]}
+{"guid": "N06_232", "forms": [{"grammatical_form": "noun/en_singular", "text": "gluten", "is_base_form": true, "ipa": "/ˈɡluːtən/", "phonetic": "GLOO-tuhn"}]}
+{"guid": "N06_233", "forms": [{"grammatical_form": "noun/en_singular", "text": "gum", "is_base_form": true, "ipa": "/ɡʌm/", "phonetic": "GUM"}]}
+{"guid": "N06_234", "forms": [{"grammatical_form": "noun/en_singular", "text": "lard", "is_base_form": true, "ipa": "/lɑrd/", "phonetic": "LARD"}]}
+{"guid": "N06_235", "forms": [{"grammatical_form": "noun/en_singular", "text": "luncheon", "is_base_form": true, "ipa": "/ˈlʌntʃən/", "phonetic": "LUN-chuhn"}]}
+{"guid": "N06_236", "forms": [{"grammatical_form": "noun/en_singular", "text": "mace", "is_base_form": true, "ipa": "/meɪs/", "phonetic": "MAYS"}]}
+{"guid": "N06_237", "forms": [{"grammatical_form": "noun/en_singular", "text": "marrow", "is_base_form": true, "ipa": "/ˈmæroʊ/", "phonetic": "MAIR-oh"}]}
+{"guid": "N06_238", "forms": [{"grammatical_form": "noun/en_singular", "text": "mutton", "is_base_form": true, "ipa": "/ˈmʌtən/", "phonetic": "MUT-un"}]}
+{"guid": "N06_239", "forms": [{"grammatical_form": "noun/en_singular", "text": "noodles", "is_base_form": true, "ipa": "/ˈnuːdəlz/", "phonetic": "NOO-dulz"}]}
+{"guid": "N06_240", "forms": [{"grammatical_form": "noun/en_singular", "text": "nourishment", "is_base_form": true, "ipa": "/ˈnɝɪʃmənt/", "phonetic": "NUH-rish-munt"}]}
+{"guid": "N06_241", "forms": [{"grammatical_form": "noun/en_singular", "text": "pastry", "is_base_form": true, "ipa": "/ˈpeɪstri/", "phonetic": "PAY-stree"}]}
+{"guid": "N06_242", "forms": [{"grammatical_form": "noun/en_singular", "text": "pastry", "is_base_form": true, "ipa": "/ˈpeɪstri/", "phonetic": "PAY-stree"}]}
+{"guid": "N06_243", "forms": [{"grammatical_form": "noun/en_singular", "text": "platter", "is_base_form": true, "ipa": "/ˈplætər/", "phonetic": "PLAT-er"}]}
+{"guid": "N06_244", "forms": [{"grammatical_form": "noun/en_singular", "text": "pudding", "is_base_form": true, "ipa": "/ˈpʊdɪŋ/", "phonetic": "POOD-ing"}]}
+{"guid": "N06_245", "forms": [{"grammatical_form": "noun/en_singular", "text": "pulp", "is_base_form": true, "ipa": "/pʌlp/", "phonetic": "PULP"}]}
+{"guid": "N06_246", "forms": [{"grammatical_form": "noun/en_singular", "text": "pumpkin", "is_base_form": true, "ipa": "/ˈpʌmpkɪn/", "phonetic": "PUMP-kin"}]}
+{"guid": "N06_247", "forms": [{"grammatical_form": "noun/en_singular", "text": "raisins", "is_base_form": true, "ipa": "/ˈreɪzɪnz/", "phonetic": "RAY-zinz"}]}
+{"guid": "N06_248", "forms": [{"grammatical_form": "noun/en_singular", "text": "rind", "is_base_form": true, "ipa": "/raɪnd/", "phonetic": "RYND"}]}
+{"guid": "N06_249", "forms": [{"grammatical_form": "noun/en_singular", "text": "sprinkle", "is_base_form": true, "ipa": "/ˈsprɪŋkəl/", "phonetic": "SPRING-kuhl"}]}
+{"guid": "N06_250", "forms": [{"grammatical_form": "noun/en_singular", "text": "squash", "is_base_form": true, "ipa": "/skwɑʃ/", "phonetic": "SKWOSH"}]}
+{"guid": "N06_251", "forms": [{"grammatical_form": "noun/en_singular", "text": "starch", "is_base_form": true, "ipa": "/stɑrtʃ/", "phonetic": "STARCH"}]}
+{"guid": "N06_252", "forms": [{"grammatical_form": "noun/en_singular", "text": "stew", "is_base_form": true, "ipa": "/stuː/", "phonetic": "STOO"}]}
+{"guid": "N06_253", "forms": [{"grammatical_form": "noun/en_singular", "text": "syrup", "is_base_form": true, "ipa": "/ˈsɪrəp/", "phonetic": "SIR-up"}]}
+{"guid": "N06_254", "forms": [{"grammatical_form": "noun/en_singular", "text": "yeast", "is_base_form": true, "ipa": "/jist/", "phonetic": "YEEST"}]}
+{"guid": "N06_255", "forms": [{"grammatical_form": "noun/en_singular", "text": "yolk", "is_base_form": true, "ipa": "/joʊk/", "phonetic": "YOHK"}]}
+{"guid": "N06_256", "forms": [{"grammatical_form": "noun/en_singular", "text": "coating", "is_base_form": true, "ipa": "/ˈkoʊtɪŋ/", "phonetic": "KOH-ting"}]}
+{"guid": "N06_257", "forms": [{"grammatical_form": "noun/en_singular", "text": "cuisine", "is_base_form": true, "ipa": "/kwɪˈzin/", "phonetic": "kwih-ZEEN"}]}
+{"guid": "N06_258", "forms": [{"grammatical_form": "noun/en_singular", "text": "fiber", "is_base_form": true, "ipa": "/ˈfaɪbər/", "phonetic": "FY-ber"}]}
+{"guid": "N06_259", "forms": [{"grammatical_form": "noun/en_singular", "text": "curry", "is_base_form": true, "ipa": "/ˈkɝi/", "phonetic": "KUR-ee"}]}
+{"guid": "N06_260", "forms": [{"grammatical_form": "noun/en_singular", "text": "curry", "is_base_form": true, "ipa": "/ˈkɝi/", "phonetic": "KUR-ee"}]}
+{"guid": "N06_261", "forms": [{"grammatical_form": "noun/en_singular", "text": "dessert", "is_base_form": true, "ipa": "/dɪˈzɝt/", "phonetic": "dih-ZURT"}]}
+{"guid": "N06_262", "forms": [{"grammatical_form": "noun/en_singular", "text": "fare", "is_base_form": true, "ipa": "/fɛr/", "phonetic": "FAIR"}]}
+{"guid": "N06_263", "forms": [{"grammatical_form": "noun/en_singular", "text": "ginger", "is_base_form": true, "ipa": "/ˈdʒɪndʒər/", "phonetic": "JIN-jer"}]}
+{"guid": "N06_264", "forms": [{"grammatical_form": "noun/en_singular", "text": "ingredient", "is_base_form": true, "ipa": "/ɪnˈɡriːdiənt/", "phonetic": "in-GREE-dee-unt"}]}
+{"guid": "N06_265", "forms": [{"grammatical_form": "noun/en_singular", "text": "loaf", "is_base_form": true, "ipa": "/loʊf/", "phonetic": "LOHF"}]}
+{"guid": "N06_266", "forms": [{"grammatical_form": "noun/en_singular", "text": "loaf", "is_base_form": true, "ipa": "/loʊf/", "phonetic": "LOHF"}]}
+{"guid": "N06_267", "forms": [{"grammatical_form": "noun/en_singular", "text": "nutrition", "is_base_form": true, "ipa": "/nuˈtrɪʃən/", "phonetic": "noo-TRISH-un"}]}
+{"guid": "N06_268", "forms": [{"grammatical_form": "noun/en_singular", "text": "toast", "is_base_form": true, "ipa": "/toʊst/", "phonetic": "TOHST"}]}
+{"guid": "N06_269", "forms": [{"grammatical_form": "noun/en_singular", "text": "fig", "is_base_form": true, "ipa": "/fɪɡ/", "phonetic": "FIG"}]}
+{"guid": "N06_270", "forms": [{"grammatical_form": "noun/en_singular", "text": "relish", "is_base_form": true, "ipa": "/ˈrɛlɪʃ/", "phonetic": "REL-ish"}]}
+{"guid": "N06_271", "forms": [{"grammatical_form": "noun/en_singular", "text": "maize", "is_base_form": true, "ipa": "/meɪz/", "phonetic": "MAYZ"}]}
+{"guid": "N06_272", "forms": [{"grammatical_form": "noun/en_singular", "text": "cocoa", "is_base_form": true, "ipa": "/ˈkoʊkoʊ/", "phonetic": "KOH-koh"}]}
+{"guid": "N06_273", "forms": [{"grammatical_form": "noun/en_singular", "text": "delicacy", "is_base_form": true, "ipa": "/ˈdɛlɪkəsi/", "phonetic": "DEL-ih-kuh-see"}]}
+{"guid": "N06_274", "forms": [{"grammatical_form": "noun/en_singular", "text": "dish", "is_base_form": true, "ipa": "/dɪʃ/", "phonetic": "DISH"}]}
+{"guid": "N06_275", "forms": [{"grammatical_form": "noun/en_singular", "text": "kernel", "is_base_form": true, "ipa": "/ˈkɝːnəl/", "phonetic": "KER-nuhl"}]}
+{"guid": "N06_276", "forms": [{"grammatical_form": "noun/en_singular", "text": "feast", "is_base_form": true, "ipa": "/fist/", "phonetic": "FEEST"}]}
+{"guid": "N06_277", "forms": [{"grammatical_form": "noun/en_singular", "text": "roast", "is_base_form": true, "ipa": "/roʊst/", "phonetic": "ROHST"}]}
+{"guid": "N06_278", "forms": [{"grammatical_form": "noun/en_singular", "text": "chili", "is_base_form": true, "ipa": "/ˈtʃɪli/", "phonetic": "CHIL-ee"}]}
+{"guid": "N06_279", "forms": [{"grammatical_form": "noun/en_singular", "text": "spice", "is_base_form": true, "ipa": "/spaɪs/", "phonetic": "SPYS"}]}
+{"guid": "N06_280", "forms": [{"grammatical_form": "noun/en_singular", "text": "staple", "is_base_form": true, "ipa": "/ˈsteɪpəl/", "phonetic": "STAY-puhl"}]}
+{"guid": "N06_281", "forms": [{"grammatical_form": "noun/en_singular", "text": "fusion", "is_base_form": true, "ipa": "/ˈfjuːʒən/", "phonetic": "FYOO-zhun"}]}
+{"guid": "N06_282", "forms": [{"grammatical_form": "noun/en_singular", "text": "supper", "is_base_form": true, "ipa": "/ˈsʌpər/", "phonetic": "SUP-er"}]}
+{"guid": "N06_283", "forms": [{"grammatical_form": "noun/en_singular", "text": "supper", "is_base_form": true, "ipa": "/ˈsʌpər/", "phonetic": "SUP-er"}]}
+{"guid": "N06_284", "forms": [{"grammatical_form": "noun/en_singular", "text": "breast", "is_base_form": true, "ipa": "/brɛst/", "phonetic": "BREST"}]}
+{"guid": "N06_285", "forms": [{"grammatical_form": "noun/en_singular", "text": "cream", "is_base_form": true, "ipa": "/kriːm/", "phonetic": "KREEM"}]}
+{"guid": "N06_286", "forms": [{"grammatical_form": "noun/en_singular", "text": "cream", "is_base_form": true, "ipa": "/kriːm/", "phonetic": "KREEM"}]}
+{"guid": "N06_287", "forms": [{"grammatical_form": "noun/en_singular", "text": "chestnut", "is_base_form": true, "ipa": "/ˈtʃɛsˌnʌt/", "phonetic": "CHES-nut"}]}
+{"guid": "N06_288", "forms": [{"grammatical_form": "noun/en_singular", "text": "herb", "is_base_form": true, "ipa": "/ɝb/", "phonetic": "URB"}]}

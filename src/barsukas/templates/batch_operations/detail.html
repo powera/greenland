@@ -22,6 +22,34 @@
     </div>
 </div>
 
+{% if failures %}
+<div class="card border-warning mb-4">
+    <div class="card-header bg-warning text-dark">
+        <strong>{{ overall_status | capitalize }}</strong> — {{ failures | length }} failed request(s),
+        {{ summary.status_counts.get('completed', 0) }} completed
+    </div>
+    <div class="card-body">
+        <p>These requests failed individually. Successful requests are listed below; no retries are started by this page.</p>
+        {% for failure in failures %}
+        {% set req = failure.request %}
+        <div class="border-bottom pb-3 mb-3">
+            {% if req.entity_type == 'lemma' and req.entity_id %}
+                <a href="{{ url_for('lemmas.view_lemma', lemma_id=req.entity_id) }}">{% if req.entity_id in lemmas %}{{ lemmas[req.entity_id].lemma_text }} ({{ lemmas[req.entity_id].guid }}){% else %}lemma #{{ req.entity_id }}{% endif %}</a>
+            {% elif req.entity_type == 'sentence' and req.entity_id %}
+                <a href="{{ url_for('sentences.view_sentence', sentence_id=req.entity_id) }}">sentence #{{ req.entity_id }}</a>
+            {% else %}{{ req.entity_type or 'Request' }} {{ req.entity_id or '' }}{% endif %}
+            <div><code>{{ failure.code }}</code></div>
+            <p class="text-break mb-2">{{ failure.message }}</p>
+            <details><summary>Request ID and stored error details</summary>
+                <div class="text-break"><code>{{ req.custom_id }}</code></div>
+                <pre class="text-wrap text-break mb-0">{{ failure.raw }}</pre>
+            </details>
+        </div>
+        {% endfor %}
+    </div>
+</div>
+{% endif %}
+
 <!-- Summary -->
 <div class="row mb-4">
     <div class="col">

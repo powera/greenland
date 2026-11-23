@@ -84,3 +84,15 @@
 {"guid": "N63_085", "forms": [{"grammatical_form": "noun/en_singular", "text": "role", "is_base_form": true, "ipa": "/roʊl/", "phonetic": "ROHL"}]}
 {"guid": "N63_086", "forms": [{"grammatical_form": "noun/en_singular", "text": "role", "is_base_form": true, "ipa": "/roʊl/", "phonetic": "ROHL"}]}
 {"guid": "N63_087", "forms": [{"grammatical_form": "noun/en_singular", "text": "contact", "is_base_form": true, "ipa": "/ˈkɑn.tækt/", "phonetic": "KON-takt"}]}
+{"guid": "N63_088", "forms": [{"grammatical_form": "noun/en_singular", "text": "chairman", "is_base_form": true, "ipa": "/ˈtʃɛrmən/", "phonetic": "CHAIR-muhn"}]}
+{"guid": "N63_089", "forms": [{"grammatical_form": "noun/en_singular", "text": "favourite", "is_base_form": true, "ipa": "/ˈfeɪvərɪt/", "phonetic": "FAY-vuh-rit"}]}
+{"guid": "N63_090", "forms": [{"grammatical_form": "noun/en_singular", "text": "offence", "is_base_form": true, "ipa": "/əˈfɛns/", "phonetic": "uh-FENS"}]}
+{"guid": "N63_091", "forms": [{"grammatical_form": "noun/en_singular", "text": "holder", "is_base_form": true, "ipa": "/ˈhoʊldər/", "phonetic": "HOHL-der"}]}
+{"guid": "N63_092", "forms": [{"grammatical_form": "noun/en_singular", "text": "foreman", "is_base_form": true, "ipa": "/ˈfɔrˌmən/", "phonetic": "FOR-muhn"}]}
+{"guid": "N63_093", "forms": [{"grammatical_form": "noun/en_singular", "text": "capacity", "is_base_form": true, "ipa": "/kəˈpæsəti/", "phonetic": "kuh-PASS-uh-tee"}]}
+{"guid": "N63_094", "forms": [{"grammatical_form": "noun/en_singular", "text": "representation", "is_base_form": true, "ipa": "/ˌrɛprɪzɛnˈteɪʃən/", "phonetic": "rep-ruh-zen-TAY-shun"}]}
+{"guid": "N63_095", "forms": [{"grammatical_form": "noun/en_singular", "text": "incumbent", "is_base_form": true, "ipa": "/ɪnˈkʌmbənt/", "phonetic": "in-KUM-bent"}]}
+{"guid": "N63_096", "forms": [{"grammatical_form": "noun/en_singular", "text": "competitor", "is_base_form": true, "ipa": "/kəmˈpɛtɪtər/", "phonetic": "kuhm-PET-uh-ter"}]}
+{"guid": "N63_097", "forms": [{"grammatical_form": "noun/en_singular", "text": "deputy", "is_base_form": true, "ipa": "/ˈdɛpjəti/", "phonetic": "DEP-yuh-tee"}]}
+{"guid": "N63_098", "forms": [{"grammatical_form": "noun/en_singular", "text": "deputy", "is_base_form": true, "ipa": "/ˈdɛpjəti/", "phonetic": "DEP-yuh-tee"}]}
+{"guid": "N63_099", "forms": [{"grammatical_form": "noun/en_singular", "text": "defence", "is_base_form": true, "ipa": "/dɪˈfɛns/", "phonetic": "dih-FENS"}]}

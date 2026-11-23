@@ -21,3 +21,5 @@
 {"guid": "N43_030", "forms": [{"grammatical_form": "noun/en_singular", "text": "shower", "is_base_form": true, "ipa": "/ˈʃaʊər/", "phonetic": "SHOW-er"}], "grammar_facts": [{"fact_type": "countability", "fact_value": "countable"}, {"fact_type": "number_type", "fact_value": "regular"}, {"fact_type": "animacy", "fact_value": "inanimate"}, {"fact_type": "plural_status", "fact_value": "regular"}]}
 {"guid": "N43_031", "forms": [{"grammatical_form": "noun/en_singular", "text": "cooker", "is_base_form": true, "ipa": "/ˈkʊkər/", "phonetic": "KOOK-er"}]}
 {"guid": "N43_033", "forms": [{"grammatical_form": "noun/en_singular", "text": "food processor", "is_base_form": true}]}
+{"guid": "N43_034", "forms": [{"grammatical_form": "noun/en_singular", "text": "boiler", "is_base_form": true, "ipa": "/ˈbɔɪlər/", "phonetic": "BOY-ler"}]}
+{"guid": "N43_035", "forms": [{"grammatical_form": "noun/en_singular", "text": "furnace", "is_base_form": true, "ipa": "/ˈfɝːnɪs/", "phonetic": "FUR-nis"}]}

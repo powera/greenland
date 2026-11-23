@@ -71,3 +71,38 @@
 {"guid": "A20_071", "forms": [{"grammatical_form": "adjective/en_positive", "text": "worldwide", "is_base_form": true}], "variants": [{"kind": "spelling", "key": "world-wide", "forms": [{"grammatical_form": "adjective/en_positive", "text": "world-wide", "is_base_form": true}]}]}
 {"guid": "A20_072", "forms": [{"grammatical_form": "adjective/en_positive", "text": "high-school", "is_base_form": true}]}
 {"guid": "A20_073", "forms": [{"grammatical_form": "adjective/en_positive", "text": "central", "is_base_form": true, "ipa": "/ˈsɛntrəl/", "phonetic": "SEN-truhl"}]}
+{"guid": "A20_074", "forms": [{"grammatical_form": "adjective/en_positive", "text": "overseas", "is_base_form": true, "ipa": "/ˌoʊvərˈsiːz/", "phonetic": "oh-ver-SEEZ"}]}
+{"guid": "A20_075", "forms": [{"grammatical_form": "adjective/en_positive", "text": "civic", "is_base_form": true, "ipa": "/ˈsɪvɪk/", "phonetic": "SIV-ik"}]}
+{"guid": "A20_076", "forms": [{"grammatical_form": "adjective/en_positive", "text": "earthly", "is_base_form": true, "ipa": "/ˈɝθli/", "phonetic": "URTH-lee"}]}
+{"guid": "A20_077", "forms": [{"grammatical_form": "adjective/en_positive", "text": "aerial", "is_base_form": true, "ipa": "/ˈɛriəl/", "phonetic": "AIR-ee-ul"}]}
+{"guid": "A20_078", "forms": [{"grammatical_form": "adjective/en_positive", "text": "subtropical", "is_base_form": true, "ipa": "/ˌsʌbˈtrɑpɪkəl/", "phonetic": "sub-TROP-i-kuhl"}]}
+{"guid": "A20_079", "forms": [{"grammatical_form": "adjective/en_positive", "text": "ambient", "is_base_form": true, "ipa": "/ˈæmbiənt/", "phonetic": "AM-bee-uhnt"}]}
+{"guid": "A20_080", "forms": [{"grammatical_form": "adjective/en_positive", "text": "neighbouring", "is_base_form": true, "ipa": "/ˈneɪbərɪŋ/", "phonetic": "NAY-ber-ing"}]}
+{"guid": "A20_081", "forms": [{"grammatical_form": "adjective/en_positive", "text": "ubiquitous", "is_base_form": true, "ipa": "/juˈbɪkwɪtəs/", "phonetic": "yoo-BIK-wi-tuhs"}]}
+{"guid": "A20_082", "forms": [{"grammatical_form": "adjective/en_positive", "text": "lonesome", "is_base_form": true, "ipa": "/ˈloʊn.səm/", "phonetic": "LOHN-sum"}]}
+{"guid": "A20_083", "forms": [{"grammatical_form": "adjective/en_positive", "text": "pastoral", "is_base_form": true, "ipa": "/ˈpæs.tɚ.əl/", "phonetic": "PAS-tuh-rul"}]}
+{"guid": "A20_084", "forms": [{"grammatical_form": "adjective/en_positive", "text": "wooded", "is_base_form": true, "ipa": "/ˈwʊdɪd/", "phonetic": "WOOD-id"}]}
+{"guid": "A20_085", "forms": [{"grammatical_form": "adjective/en_positive", "text": "domestic", "is_base_form": true, "ipa": "/dəˈmɛstɪk/", "phonetic": "duh-MES-tik"}]}
+{"guid": "A20_086", "forms": [{"grammatical_form": "adjective/en_positive", "text": "environmental", "is_base_form": true, "ipa": "/ɪnˌvaɪrənˈmɛntəl/", "phonetic": "en-vy-ruhn-MEN-tuhl"}]}
+{"guid": "A20_087", "forms": [{"grammatical_form": "adjective/en_positive", "text": "interior", "is_base_form": true, "ipa": "/ɪnˈtɪriɚ/", "phonetic": "in-TEER-ee-er"}]}
+{"guid": "A20_088", "forms": [{"grammatical_form": "adjective/en_positive", "text": "alpine", "is_base_form": true, "ipa": "/ˈælˌpaɪn/", "phonetic": "AL-pine"}]}
+{"guid": "A20_089", "forms": [{"grammatical_form": "adjective/en_positive", "text": "endemic", "is_base_form": true, "ipa": "/ɛnˈdɛmɪk/", "phonetic": "en-DEM-ik"}]}
+{"guid": "A20_090", "forms": [{"grammatical_form": "adjective/en_positive", "text": "maritime", "is_base_form": true, "ipa": "/ˈmærəˌtaɪm/", "phonetic": "MAIR-uh-time"}]}
+{"guid": "A20_091", "forms": [{"grammatical_form": "adjective/en_positive", "text": "mountainous", "is_base_form": true, "ipa": "/ˈmaʊntənəs/", "phonetic": "MOWN-tuh-nus"}]}
+{"guid": "A20_092", "forms": [{"grammatical_form": "adjective/en_positive", "text": "nomadic", "is_base_form": true, "ipa": "/noʊˈmædɪk/", "phonetic": "noh-MAD-ik"}]}
+{"guid": "A20_093", "forms": [{"grammatical_form": "adjective/en_positive", "text": "territorial", "is_base_form": true, "ipa": "/ˌtɛrəˈtɔriəl/", "phonetic": "ter-ih-TOR-ee-ul"}]}
+{"guid": "A20_094", "forms": [{"grammatical_form": "adjective/en_positive", "text": "celestial", "is_base_form": true, "ipa": "/səˈlɛstʃəl/", "phonetic": "suh-LES-chuhl"}]}
+{"guid": "A20_095", "forms": [{"grammatical_form": "adjective/en_positive", "text": "equatorial", "is_base_form": true, "ipa": "/ˌikwəˈtɔriəl/", "phonetic": "ee-kwuh-TOR-ee-uhl"}]}
+{"guid": "A20_096", "forms": [{"grammatical_form": "adjective/en_positive", "text": "oceanic", "is_base_form": true, "ipa": "/ˌoʊʃiˈænɪk/", "phonetic": "oh-shee-AN-ik"}]}
+{"guid": "A20_097", "forms": [{"grammatical_form": "adjective/en_positive", "text": "terrestrial", "is_base_form": true, "ipa": "/təˈrɛstriəl/", "phonetic": "tuh-RES-tree-uhl"}]}
+{"guid": "A20_098", "forms": [{"grammatical_form": "adjective/en_positive", "text": "geographic", "is_base_form": true, "ipa": "/ˌdʒiːəˈɡræfɪk/", "phonetic": "jee-uh-GRAF-ik"}]}
+{"guid": "A20_099", "forms": [{"grammatical_form": "adjective/en_positive", "text": "indoor", "is_base_form": true, "ipa": "/ˈɪnˌdɔr/", "phonetic": "IN-dor"}]}
+{"guid": "A20_100", "forms": [{"grammatical_form": "adjective/en_positive", "text": "underwater", "is_base_form": true, "ipa": "/ˌʌndɚˈwɔtɚ/", "phonetic": "UN-der-WAW-ter"}]}
+{"guid": "A20_101", "forms": [{"grammatical_form": "adjective/en_positive", "text": "localized", "is_base_form": true, "ipa": "/ˈloʊkəˌlaɪzd/", "phonetic": "LOH-kuh-lyzd"}]}
+{"guid": "A20_102", "forms": [{"grammatical_form": "adjective/en_positive", "text": "nationwide", "is_base_form": true, "ipa": "/ˌneɪʃənˈwaɪd/", "phonetic": "NAY-shun-WYDE"}]}
+{"guid": "A20_103", "forms": [{"grammatical_form": "adjective/en_positive", "text": "pandemic", "is_base_form": true, "ipa": "/pænˈdɛmɪk/", "phonetic": "pan-DEM-ik"}]}
+{"guid": "A20_104", "forms": [{"grammatical_form": "adjective/en_positive", "text": "geographical", "is_base_form": true, "ipa": "/ˌdʒiːəˈɡræfɪkəl/", "phonetic": "jee-uh-GRAF-ih-kuhl"}]}
+{"guid": "A20_105", "forms": [{"grammatical_form": "adjective/en_positive", "text": "neighboring", "is_base_form": true, "ipa": "/ˈneɪbərɪŋ/", "phonetic": "NAY-ber-ing"}]}
+{"guid": "A20_106", "forms": [{"grammatical_form": "adjective/en_positive", "text": "underground", "is_base_form": true, "ipa": "/ˈʌndərˌɡraʊnd/", "phonetic": "UN-der-ground"}]}
+{"guid": "A20_107", "forms": [{"grammatical_form": "adjective/en_positive", "text": "absent", "is_base_form": true, "ipa": "/ˈæbsənt/", "phonetic": "AB-sent"}]}
+{"guid": "A20_108", "forms": [{"grammatical_form": "adjective/en_positive", "text": "public", "is_base_form": true, "ipa": "/ˈpʌblɪk/", "phonetic": "PUB-lik"}], "variants": [{"kind": "spelling", "key": "Public", "forms": [{"grammatical_form": "adjective/en_positive", "text": "Public", "is_base_form": true}]}]}

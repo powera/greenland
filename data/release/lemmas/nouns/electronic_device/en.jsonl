@@ -44,3 +44,20 @@
 {"guid": "N57_065", "forms": [{"grammatical_form": "noun/en_singular", "text": "CD", "is_base_form": true}]}
 {"guid": "N57_066", "forms": [{"grammatical_form": "noun/en_singular", "text": "telephone handset", "is_base_form": true}], "variants": [{"kind": "equivalent", "key": "receiver", "forms": [{"grammatical_form": "noun/en_singular", "text": "receiver", "is_base_form": true}]}]}
 {"guid": "N57_067", "forms": [{"grammatical_form": "noun/en_singular", "text": "tablet computer", "is_base_form": true}], "variants": [{"kind": "equivalent", "key": "tablet", "forms": [{"grammatical_form": "noun/en_singular", "text": "tablet", "is_base_form": true}]}]}
+{"guid": "N57_068", "forms": [{"grammatical_form": "noun/en_singular", "text": "generator", "is_base_form": true, "ipa": "/ˈdʒɛnəˌreɪtər/", "phonetic": "JEN-uh-ray-ter"}]}
+{"guid": "N57_069", "forms": [{"grammatical_form": "noun/en_singular", "text": "interface", "is_base_form": true, "ipa": "/ˈɪn.tɚˌfeɪs/", "phonetic": "IN-ter-fays"}]}
+{"guid": "N57_070", "forms": [{"grammatical_form": "noun/en_singular", "text": "laser", "is_base_form": true, "ipa": "/ˈleɪzɚ/", "phonetic": "LAY-zer"}]}
+{"guid": "N57_071", "forms": [{"grammatical_form": "noun/en_singular", "text": "radar", "is_base_form": true, "ipa": "/ˈreɪdɑr/", "phonetic": "RAY-dar"}]}
+{"guid": "N57_072", "forms": [{"grammatical_form": "noun/en_singular", "text": "radar", "is_base_form": true, "ipa": "/ˈreɪdɑr/", "phonetic": "RAY-dar"}]}
+{"guid": "N57_073", "forms": [{"grammatical_form": "noun/en_singular", "text": "semiconductor", "is_base_form": true, "ipa": "/ˌsɛmɪkənˈdʌktər/", "phonetic": "SEM-ee-kuhn-DUK-ter"}]}
+{"guid": "N57_074", "forms": [{"grammatical_form": "noun/en_singular", "text": "monitor", "is_base_form": true, "ipa": "/ˈmɑnɪtɚ/", "phonetic": "MON-uh-ter"}]}
+{"guid": "N57_075", "forms": [{"grammatical_form": "noun/en_singular", "text": "monitor", "is_base_form": true, "ipa": "/ˈmɑnɪtɚ/", "phonetic": "MON-uh-ter"}]}
+{"guid": "N57_076", "forms": [{"grammatical_form": "noun/en_singular", "text": "console", "is_base_form": true, "ipa": "/kənˈsoʊl/", "phonetic": "kun-SOHL"}]}
+{"guid": "N57_077", "forms": [{"grammatical_form": "noun/en_singular", "text": "node", "is_base_form": true, "ipa": "/noʊd/", "phonetic": "NOHD"}]}
+{"guid": "N57_078", "forms": [{"grammatical_form": "noun/en_singular", "text": "dish", "is_base_form": true, "ipa": "/dɪʃ/", "phonetic": "DISH"}]}
+{"guid": "N57_079", "forms": [{"grammatical_form": "noun/en_singular", "text": "alarm", "is_base_form": true, "ipa": "/əˈlɑrm/", "phonetic": "uh-LARM"}]}
+{"guid": "N57_080", "forms": [{"grammatical_form": "noun/en_singular", "text": "disk", "is_base_form": true, "ipa": "/dɪsk/", "phonetic": "DISK"}]}
+{"guid": "N57_081", "forms": [{"grammatical_form": "noun/en_singular", "text": "hub", "is_base_form": true, "ipa": "/hʌb/", "phonetic": "HUB"}]}
+{"guid": "N57_082", "forms": [{"grammatical_form": "noun/en_singular", "text": "viewer", "is_base_form": true, "ipa": "/ˈvjuːər/", "phonetic": "VYOO-er"}]}
+{"guid": "N57_083", "forms": [{"grammatical_form": "noun/en_singular", "text": "extension", "is_base_form": true, "ipa": "/ɪkˈstɛnʃən/", "phonetic": "ik-STEN-shun"}]}
+{"guid": "N57_084", "forms": [{"grammatical_form": "noun/en_singular", "text": "reader", "is_base_form": true, "ipa": "/ˈriːdər/", "phonetic": "REE-der"}]}

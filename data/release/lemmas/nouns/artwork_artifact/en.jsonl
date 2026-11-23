@@ -79,3 +79,19 @@
 {"guid": "N10_112", "variants": [{"kind": "equivalent", "key": "cymbals", "forms": [{"grammatical_form": "noun/en_singular", "text": "cymbals", "is_base_form": true}]}]}
 {"guid": "N10_114", "forms": [{"grammatical_form": "noun/en_singular", "text": "music mix", "is_base_form": true}]}
 {"guid": "N10_115", "forms": [{"grammatical_form": "noun/en_singular", "text": "alto", "is_base_form": true}]}
+{"guid": "N10_116", "forms": [{"grammatical_form": "noun/en_singular", "text": "chord", "is_base_form": true, "ipa": "/kɔrd/", "phonetic": "KORD"}]}
+{"guid": "N10_117", "forms": [{"grammatical_form": "noun/en_singular", "text": "graphic", "is_base_form": true, "ipa": "/ˈɡræfɪk/", "phonetic": "GRAF-ik"}]}
+{"guid": "N10_118", "forms": [{"grammatical_form": "noun/en_singular", "text": "fiddle", "is_base_form": true, "ipa": "/ˈfɪdəl/", "phonetic": "FID-uhl"}]}
+{"guid": "N10_119", "forms": [{"grammatical_form": "noun/en_singular", "text": "wreath", "is_base_form": true, "ipa": "/riːθ/", "phonetic": "REETH"}]}
+{"guid": "N10_120", "forms": [{"grammatical_form": "noun/en_singular", "text": "creation", "is_base_form": true, "ipa": "/kriˈeɪʃən/", "phonetic": "kree-AY-shun"}]}
+{"guid": "N10_121", "forms": [{"grammatical_form": "noun/en_singular", "text": "proof", "is_base_form": true, "ipa": "/pruːf/", "phonetic": "PROOF"}]}
+{"guid": "N10_122", "forms": [{"grammatical_form": "noun/en_singular", "text": "visual", "is_base_form": true, "ipa": "/ˈvɪʒuəl/", "phonetic": "VIZH-oo-uhl"}]}
+{"guid": "N10_123", "forms": [{"grammatical_form": "noun/en_singular", "text": "memorial", "is_base_form": true, "ipa": "/məˈmɔriəl/", "phonetic": "muh-MOR-ee-uhl"}]}
+{"guid": "N10_124", "forms": [{"grammatical_form": "noun/en_singular", "text": "panel", "is_base_form": true, "ipa": "/ˈpænəl/", "phonetic": "PAN-uhl"}]}
+{"guid": "N10_125", "forms": [{"grammatical_form": "noun/en_singular", "text": "likeness", "is_base_form": true, "ipa": "/ˈlaɪknəs/", "phonetic": "LIKE-niss"}]}
+{"guid": "N10_126", "forms": [{"grammatical_form": "noun/en_singular", "text": "scenery", "is_base_form": true, "ipa": "/ˈsiːnəri/", "phonetic": "SEE-nuh-ree"}]}
+{"guid": "N10_127", "forms": [{"grammatical_form": "noun/en_singular", "text": "antiquity", "is_base_form": true, "ipa": "/ænˈtɪkwəti/", "phonetic": "an-TIK-wuh-tee"}]}
+{"guid": "N10_128", "forms": [{"grammatical_form": "noun/en_singular", "text": "illustration", "is_base_form": true, "ipa": "/ˌɪləˈstreɪʃən/", "phonetic": "il-uh-STRAY-shun"}]}
+{"guid": "N10_129", "forms": [{"grammatical_form": "noun/en_singular", "text": "exhibit", "is_base_form": true, "ipa": "/ˈɪɡzɪbɪt/", "phonetic": "IG-zib-it"}]}
+{"guid": "N10_130", "forms": [{"grammatical_form": "noun/en_singular", "text": "organ", "is_base_form": true, "ipa": "/ˈɔrɡən/", "phonetic": "OR-gun"}]}
+{"guid": "N10_131", "forms": [{"grammatical_form": "noun/en_singular", "text": "tattoo", "is_base_form": true, "ipa": "/tæˈtuː/", "phonetic": "ta-TOO"}]}

@@ -19,3 +19,10 @@
 {"guid": "P99_019", "forms": [{"grammatical_form": "pronoun/en_subjective", "text": "anything", "is_base_form": true}], "variants": [{"kind": "informal", "key": "anythin", "forms": [{"grammatical_form": "pronoun/en_subjective", "text": "anythin", "is_base_form": true}]}]}
 {"guid": "P99_020", "forms": [{"grammatical_form": "pronoun/en_subjective", "text": "others", "is_base_form": true, "ipa": "/ˈʌðɚz/", "phonetic": "UH-thurz"}]}
 {"guid": "P99_021", "forms": [{"grammatical_form": "pronoun/en_subjective", "text": "ones", "is_base_form": true, "ipa": "/wʌnz/", "phonetic": "WUNZ"}]}
+{"guid": "P99_022", "forms": [{"grammatical_form": "pronoun/en_subjective", "text": "everybody", "is_base_form": true, "ipa": "/ˈɛvriˌbɑdi/", "phonetic": "EV-ree-bah-dee"}]}
+{"guid": "P99_023", "forms": [{"grammatical_form": "pronoun/en_subjective", "text": "wherein", "is_base_form": true, "ipa": "/wɛrˈɪn/", "phonetic": "wair-IN"}]}
+{"guid": "P99_024", "forms": [{"grammatical_form": "pronoun/en_subjective", "text": "anybody", "is_base_form": true, "ipa": "/ˈɛniˌbɑdi/", "phonetic": "EN-ee-bod-ee"}]}
+{"guid": "P99_025", "forms": [{"grammatical_form": "pronoun/en_subjective", "text": "somebody", "is_base_form": true, "ipa": "/ˈsʌmˌbɑdi/", "phonetic": "SUM-bah-dee"}]}
+{"guid": "P99_026", "forms": [{"grammatical_form": "pronoun/en_subjective", "text": "whoever", "is_base_form": true, "ipa": "/huˈɛvər/", "phonetic": "hoo-EV-er"}]}
+{"guid": "P99_027", "forms": [{"grammatical_form": "pronoun/en_subjective", "text": "oneself", "is_base_form": true, "ipa": "/wʌnˈsɛlf/", "phonetic": "wun-SELF"}]}
+{"guid": "P99_028", "forms": [{"grammatical_form": "pronoun/en_subjective", "text": "aught", "is_base_form": true, "ipa": "/ɔt/", "phonetic": "AWT"}]}

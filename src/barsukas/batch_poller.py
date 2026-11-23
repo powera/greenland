@@ -10,14 +10,14 @@ thread). Every 5 minutes it:
    (``submitted`` / ``processing``).
 2. For each unique ``batch_id``, calls ``BatchQueueManager.check_batch_status``
    so the local state mirrors OpenAI.
-3. If a batch has reached ``completed`` on OpenAI, downloads results via
+3. If a batch has reached a terminal status on OpenAI, downloads results via
    ``retrieve_batch_results`` and applies them to the main database with
    the agent's applier (``apply_results_for_agent`` for sentences,
    ``apply_populate_results`` for lemma translations,
    ``workqueue.llm_batch.complete_rows`` for staged jobs, which also
    submits a job's next stage once the whole run is through this one).
-   A staged job's batch that failed or expired is marked finished so the
-   rest of its run can move on.
+   Expired, cancelled and failed batches can have successful partial output:
+   apply it before finishing the remaining requests so the run can move on.
 
 If no batches are in flight the poller does nothing and goes back to sleep.
 """
@@ -186,10 +186,7 @@ def poll_once(main_session_factory: Callable[[], Session]) -> None:
             logger.info("Batch %s (%s) status: %s", batch_id, agent_name, status)
             remote.append((batch_id, agent_name, info))
 
-            if status in _TERMINAL_FAILED_STATUSES:
-                _fail_staged_job_batch(agent_name, batch_id, manager, main_session_factory)
-                continue
-            if status != BatchStatus.COMPLETED.value:
+            if status not in (BatchStatus.COMPLETED.value, *_TERMINAL_FAILED_STATUSES):
                 continue
 
             try:
@@ -200,7 +197,10 @@ def poll_once(main_session_factory: Callable[[], Session]) -> None:
 
             completed = manager.get_completed_requests(agent_name=agent_name, batch_id=batch_id)
             if not completed:
-                logger.warning("Batch %s reported completed but no requests found", batch_id)
+                if status in _TERMINAL_FAILED_STATUSES:
+                    _fail_staged_job_batch(agent_name, batch_id, manager, main_session_factory)
+                else:
+                    logger.warning("Batch %s reported completed but no requests found", batch_id)
                 continue
 
             main_session = main_session_factory()

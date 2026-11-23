@@ -21,3 +21,36 @@
 {"guid": "N72_031", "forms": [{"grammatical_form": "noun/en_singular", "text": "heating element", "is_base_form": true}]}
 {"guid": "N72_032", "forms": [{"grammatical_form": "noun/en_singular", "text": "baler", "is_base_form": true, "ipa": "/ˈbeɪlər/", "phonetic": "BAY-ler"}]}
 {"guid": "N72_033", "forms": [{"grammatical_form": "noun/en_singular", "text": "combine harvester", "is_base_form": true, "ipa": "/ˈkɑmˌbaɪn ˈhɑrvəstər/", "phonetic": "KUM-bine HAR-ves-ter"}]}
+{"guid": "N72_034", "forms": [{"grammatical_form": "noun/en_singular", "text": "cutter", "is_base_form": true, "ipa": "/ˈkʌtər/", "phonetic": "KUT-er"}]}
+{"guid": "N72_035", "forms": [{"grammatical_form": "noun/en_singular", "text": "fuse", "is_base_form": true, "ipa": "/fjuːz/", "phonetic": "FYOOZ"}]}
+{"guid": "N72_036", "forms": [{"grammatical_form": "noun/en_singular", "text": "hardware", "is_base_form": true, "ipa": "/ˈhɑrdˌwɛr/", "phonetic": "HARD-wair"}]}
+{"guid": "N72_037", "forms": [{"grammatical_form": "noun/en_singular", "text": "interface", "is_base_form": true, "ipa": "/ˈɪn.tɚˌfeɪs/", "phonetic": "IN-ter-fays"}]}
+{"guid": "N72_038", "forms": [{"grammatical_form": "noun/en_singular", "text": "valve", "is_base_form": true, "ipa": "/vælv/", "phonetic": "VALV"}]}
+{"guid": "N72_039", "forms": [{"grammatical_form": "noun/en_singular", "text": "cab", "is_base_form": true, "ipa": "/kæb/", "phonetic": "KAB"}]}
+{"guid": "N72_040", "forms": [{"grammatical_form": "noun/en_singular", "text": "maker", "is_base_form": true, "ipa": "/ˈmeɪkər/", "phonetic": "MAY-ker"}]}
+{"guid": "N72_041", "forms": [{"grammatical_form": "noun/en_singular", "text": "hood", "is_base_form": true, "ipa": "/hʊd/", "phonetic": "HOOD"}]}
+{"guid": "N72_042", "forms": [{"grammatical_form": "noun/en_singular", "text": "muzzle", "is_base_form": true, "ipa": "/ˈmʌzəl/", "phonetic": "MUZ-ul"}]}
+{"guid": "N72_043", "forms": [{"grammatical_form": "noun/en_singular", "text": "crane", "is_base_form": true, "ipa": "/kreɪn/", "phonetic": "KRAYN"}]}
+{"guid": "N72_044", "forms": [{"grammatical_form": "noun/en_singular", "text": "pivot", "is_base_form": true, "ipa": "/ˈpɪvət/", "phonetic": "PIV-uht"}]}
+{"guid": "N72_045", "forms": [{"grammatical_form": "noun/en_singular", "text": "aperture", "is_base_form": true, "ipa": "/ˈæpərtʃər/", "phonetic": "AP-er-cher"}]}
+{"guid": "N72_046", "forms": [{"grammatical_form": "noun/en_singular", "text": "mast", "is_base_form": true, "ipa": "/mæst/", "phonetic": "MAST"}]}
+{"guid": "N72_047", "forms": [{"grammatical_form": "noun/en_singular", "text": "loom", "is_base_form": true, "ipa": "/luːm/", "phonetic": "LOOM"}]}
+{"guid": "N72_048", "forms": [{"grammatical_form": "noun/en_singular", "text": "component", "is_base_form": true, "ipa": "/kəmˈpoʊnənt/", "phonetic": "kuhm-POH-nuhnt"}]}
+{"guid": "N72_049", "forms": [{"grammatical_form": "noun/en_singular", "text": "framework", "is_base_form": true, "ipa": "/ˈfreɪmˌwɝk/", "phonetic": "FRAYM-wurk"}]}
+{"guid": "N72_050", "forms": [{"grammatical_form": "noun/en_singular", "text": "mode", "is_base_form": true, "ipa": "/moʊd/", "phonetic": "MOHD"}]}
+{"guid": "N72_051", "forms": [{"grammatical_form": "noun/en_singular", "text": "suspension", "is_base_form": true, "ipa": "/səˈspɛnʃən/", "phonetic": "suh-SPEN-shun"}]}
+{"guid": "N72_052", "forms": [{"grammatical_form": "noun/en_singular", "text": "cathode", "is_base_form": true, "ipa": "/ˈkæˌθoʊd/", "phonetic": "KATH-ohd"}]}
+{"guid": "N72_053", "forms": [{"grammatical_form": "noun/en_singular", "text": "differential", "is_base_form": true, "ipa": "/ˌdɪfəˈrɛnʃəl/", "phonetic": "dif-uh-REN-shul"}]}
+{"guid": "N72_054", "forms": [{"grammatical_form": "noun/en_singular", "text": "barrel", "is_base_form": true, "ipa": "/ˈbærəl/", "phonetic": "BAIR-uhl"}]}
+{"guid": "N72_055", "forms": [{"grammatical_form": "noun/en_singular", "text": "panel", "is_base_form": true, "ipa": "/ˈpænəl/", "phonetic": "PAN-uhl"}]}
+{"guid": "N72_056", "forms": [{"grammatical_form": "noun/en_singular", "text": "panel", "is_base_form": true, "ipa": "/ˈpænəl/", "phonetic": "PAN-uhl"}]}
+{"guid": "N72_057", "forms": [{"grammatical_form": "noun/en_singular", "text": "hub", "is_base_form": true, "ipa": "/hʌb/", "phonetic": "HUB"}]}
+{"guid": "N72_058", "forms": [{"grammatical_form": "noun/en_singular", "text": "intake", "is_base_form": true, "ipa": "/ˈɪnˌteɪk/", "phonetic": "IN-tayk"}]}
+{"guid": "N72_059", "forms": [{"grammatical_form": "noun/en_singular", "text": "module", "is_base_form": true, "ipa": "/ˈmɑdʒuːl/", "phonetic": "MOJ-ool"}]}
+{"guid": "N72_060", "forms": [{"grammatical_form": "noun/en_singular", "text": "module", "is_base_form": true, "ipa": "/ˈmɑdʒuːl/", "phonetic": "MOJ-ool"}]}
+{"guid": "N72_061", "forms": [{"grammatical_form": "noun/en_singular", "text": "motor", "is_base_form": true, "ipa": "/ˈmoʊtər/", "phonetic": "MOH-ter"}]}
+{"guid": "N72_062", "forms": [{"grammatical_form": "noun/en_singular", "text": "reverse", "is_base_form": true, "ipa": "/rɪˈvɝs/", "phonetic": "rih-VURS"}]}
+{"guid": "N72_063", "forms": [{"grammatical_form": "noun/en_singular", "text": "transmission", "is_base_form": true, "ipa": "/trænzˈmɪʃən/", "phonetic": "trans-MISH-un"}]}
+{"guid": "N72_064", "forms": [{"grammatical_form": "noun/en_singular", "text": "bonnet", "is_base_form": true, "ipa": "/ˈbɑnɪt/", "phonetic": "BON-it"}]}
+{"guid": "N72_065", "forms": [{"grammatical_form": "noun/en_singular", "text": "clutch", "is_base_form": true, "ipa": "/klʌtʃ/", "phonetic": "KLUCH"}]}
+{"guid": "N72_066", "forms": [{"grammatical_form": "noun/en_singular", "text": "tread", "is_base_form": true, "ipa": "/trɛd/", "phonetic": "TRED"}]}

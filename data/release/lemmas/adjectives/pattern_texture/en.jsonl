@@ -7,3 +7,42 @@
 {"guid": "A04_007", "forms": [{"grammatical_form": "adjective/en_positive", "text": "smooth", "is_base_form": true, "ipa": "/smuːθ/", "phonetic": "SMOOTH"}], "grammar_facts": [{"fact_type": "gradability", "fact_value": "synthetic"}, {"fact_type": "comparative_status", "fact_value": "regular"}, {"fact_type": "superlative_status", "fact_value": "regular"}]}
 {"guid": "A04_008", "forms": [{"grammatical_form": "adjective/en_positive", "text": "rough", "is_base_form": true, "ipa": "/rʌf/", "phonetic": "ROOF"}], "grammar_facts": [{"fact_type": "gradability", "fact_value": "synthetic"}, {"fact_type": "comparative_status", "fact_value": "regular"}, {"fact_type": "superlative_status", "fact_value": "regular"}]}
 {"guid": "A04_011", "forms": [{"grammatical_form": "adjective/en_positive", "text": "polka-dotted", "is_base_form": true}]}
+{"guid": "A04_024", "forms": [{"grammatical_form": "adjective/en_positive", "text": "granulated", "is_base_form": true, "ipa": "/ˈɡræn.jəˌleɪ.tɪd/", "phonetic": "GRAN-yuh-lay-tid"}]}
+{"guid": "A04_025", "forms": [{"grammatical_form": "adjective/en_positive", "text": "crisp", "is_base_form": true, "ipa": "/krɪsp/", "phonetic": "KRISP"}]}
+{"guid": "A04_026", "forms": [{"grammatical_form": "adjective/en_positive", "text": "sheer", "is_base_form": true, "ipa": "/ʃɪr/", "phonetic": "SHEER"}]}
+{"guid": "A04_027", "forms": [{"grammatical_form": "adjective/en_positive", "text": "rugged", "is_base_form": true, "ipa": "/ˈrʌɡɪd/", "phonetic": "RUG-id"}]}
+{"guid": "A04_028", "forms": [{"grammatical_form": "adjective/en_positive", "text": "wrinkled", "is_base_form": true, "ipa": "/ˈrɪŋkəld/", "phonetic": "RING-kuld"}]}
+{"guid": "A04_029", "forms": [{"grammatical_form": "adjective/en_positive", "text": "woody", "is_base_form": true, "ipa": "/ˈwʊdi/", "phonetic": "WOO-dee"}]}
+{"guid": "A04_030", "forms": [{"grammatical_form": "adjective/en_positive", "text": "coarse", "is_base_form": true, "ipa": "/kɔrs/", "phonetic": "KORS"}]}
+{"guid": "A04_031", "forms": [{"grammatical_form": "adjective/en_positive", "text": "polished", "is_base_form": true, "ipa": "/ˈpɑlɪʃt/", "phonetic": "PAH-lisht"}]}
+{"guid": "A04_032", "forms": [{"grammatical_form": "adjective/en_positive", "text": "muddy", "is_base_form": true, "ipa": "/ˈmʌdi/", "phonetic": "MUH-dee"}]}
+{"guid": "A04_033", "forms": [{"grammatical_form": "adjective/en_positive", "text": "greasy", "is_base_form": true, "ipa": "/ˈɡriːsi/", "phonetic": "GREE-see"}]}
+{"guid": "A04_034", "forms": [{"grammatical_form": "adjective/en_positive", "text": "satin", "is_base_form": true, "ipa": "/ˈsætɪn/", "phonetic": "SAT-in"}]}
+{"guid": "A04_035", "forms": [{"grammatical_form": "adjective/en_positive", "text": "tangled", "is_base_form": true, "ipa": "/ˈtæŋɡəld/", "phonetic": "TANG-guhld"}]}
+{"guid": "A04_036", "forms": [{"grammatical_form": "adjective/en_positive", "text": "uneven", "is_base_form": true, "ipa": "/ʌnˈivən/", "phonetic": "un-EE-vun"}]}
+{"guid": "A04_037", "forms": [{"grammatical_form": "adjective/en_positive", "text": "consistent", "is_base_form": true, "ipa": "/kənˈsɪstənt/", "phonetic": "kuhn-SIS-tuhnt"}]}
+{"guid": "A04_038", "forms": [{"grammatical_form": "adjective/en_positive", "text": "dusty", "is_base_form": true, "ipa": "/ˈdʌsti/", "phonetic": "DUS-tee"}]}
+{"guid": "A04_039", "forms": [{"grammatical_form": "adjective/en_positive", "text": "oily", "is_base_form": true, "ipa": "/ˈɔɪli/", "phonetic": "OY-lee"}]}
+{"guid": "A04_040", "forms": [{"grammatical_form": "adjective/en_positive", "text": "orderly", "is_base_form": true, "ipa": "/ˈɔrdərli/", "phonetic": "OR-der-lee"}]}
+{"guid": "A04_041", "forms": [{"grammatical_form": "adjective/en_positive", "text": "shiny", "is_base_form": true, "ipa": "/ˈʃaɪni/", "phonetic": "SHY-nee"}]}
+{"guid": "A04_042", "forms": [{"grammatical_form": "adjective/en_positive", "text": "bold", "is_base_form": true, "ipa": "/boʊld/", "phonetic": "BOHLD"}]}
+{"guid": "A04_043", "forms": [{"grammatical_form": "adjective/en_positive", "text": "clinging", "is_base_form": true, "ipa": "/ˈklɪŋɪŋ/", "phonetic": "KLING-ing"}]}
+{"guid": "A04_044", "forms": [{"grammatical_form": "adjective/en_positive", "text": "dotted", "is_base_form": true, "ipa": "/ˈdɑtɪd/", "phonetic": "DOT-id"}]}
+{"guid": "A04_045", "forms": [{"grammatical_form": "adjective/en_positive", "text": "dotted", "is_base_form": true, "ipa": "/ˈdɑtɪd/", "phonetic": "DOT-id"}]}
+{"guid": "A04_046", "forms": [{"grammatical_form": "adjective/en_positive", "text": "glazed", "is_base_form": true, "ipa": "/ɡleɪzd/", "phonetic": "GLAYZD"}]}
+{"guid": "A04_047", "forms": [{"grammatical_form": "adjective/en_positive", "text": "glazed", "is_base_form": true, "ipa": "/ɡleɪzd/", "phonetic": "GLAYZD"}]}
+{"guid": "A04_048", "forms": [{"grammatical_form": "adjective/en_positive", "text": "glossy", "is_base_form": true, "ipa": "/ˈɡlɔsi/", "phonetic": "GLOSS-ee"}]}
+{"guid": "A04_049", "forms": [{"grammatical_form": "adjective/en_positive", "text": "hairy", "is_base_form": true, "ipa": "/ˈhɛri/", "phonetic": "HAIR-ee"}]}
+{"guid": "A04_050", "forms": [{"grammatical_form": "adjective/en_positive", "text": "ragged", "is_base_form": true, "ipa": "/ˈræɡɪd/", "phonetic": "RAG-id"}]}
+{"guid": "A04_051", "forms": [{"grammatical_form": "adjective/en_positive", "text": "ragged", "is_base_form": true, "ipa": "/ˈræɡɪd/", "phonetic": "RAG-id"}]}
+{"guid": "A04_052", "forms": [{"grammatical_form": "adjective/en_positive", "text": "dense", "is_base_form": true, "ipa": "/dɛns/", "phonetic": "DENS"}]}
+{"guid": "A04_053", "forms": [{"grammatical_form": "adjective/en_positive", "text": "dense", "is_base_form": true, "ipa": "/dɛns/", "phonetic": "DENS"}]}
+{"guid": "A04_054", "forms": [{"grammatical_form": "adjective/en_positive", "text": "wavy", "is_base_form": true, "ipa": "/ˈweɪvi/", "phonetic": "WAY-vee"}]}
+{"guid": "A04_055", "forms": [{"grammatical_form": "adjective/en_positive", "text": "bushy", "is_base_form": true, "ipa": "/ˈbʊʃi/", "phonetic": "BOO-shee"}]}
+{"guid": "A04_056", "forms": [{"grammatical_form": "adjective/en_positive", "text": "freckled", "is_base_form": true, "ipa": "/ˈfrɛkəld/", "phonetic": "FREK-uhld"}]}
+{"guid": "A04_057", "forms": [{"grammatical_form": "adjective/en_positive", "text": "frizzy", "is_base_form": true, "ipa": "/ˈfrɪzi/", "phonetic": "FRIZ-ee"}]}
+{"guid": "A04_058", "forms": [{"grammatical_form": "adjective/en_positive", "text": "spiky", "is_base_form": true, "ipa": "/ˈspaɪki/", "phonetic": "SPY-kee"}]}
+{"guid": "A04_059", "forms": [{"grammatical_form": "adjective/en_positive", "text": "wizened", "is_base_form": true, "ipa": "/ˈwɪzənd/", "phonetic": "WIZ-und"}]}
+{"guid": "A04_060", "forms": [{"grammatical_form": "adjective/en_positive", "text": "pockmarked", "is_base_form": true, "ipa": "/ˈpɑkˌmɑrkt/", "phonetic": "POK-markt"}]}
+{"guid": "A04_061", "forms": [{"grammatical_form": "adjective/en_positive", "text": "hirsute", "is_base_form": true, "ipa": "/ˈhɝˌsut/", "phonetic": "HUR-soot"}]}
+{"guid": "A04_062", "forms": [{"grammatical_form": "adjective/en_positive", "text": "tousled", "is_base_form": true, "ipa": "/ˈtaʊzəld/", "phonetic": "TOW-zuhld"}]}

@@ -60,3 +60,36 @@
 {"guid": "A26_060", "variants": [{"kind": "spelling", "key": "non-linear", "forms": [{"grammatical_form": "adjective/en_positive", "text": "non-linear", "is_base_form": true}]}]}
 {"guid": "A26_061", "forms": [{"grammatical_form": "adjective/en_positive", "text": "per-capita", "is_base_form": true}]}
 {"guid": "A26_062", "forms": [{"grammatical_form": "adjective/en_positive", "text": "negative", "is_base_form": true, "ipa": "/ˈnɛɡətɪv/", "phonetic": "NEG-uh-tiv"}]}
+{"guid": "A26_063", "forms": [{"grammatical_form": "adjective/en_positive", "text": "minus", "is_base_form": true, "ipa": "/ˈmaɪnəs/", "phonetic": "MY-nus"}]}
+{"guid": "A26_064", "forms": [{"grammatical_form": "adjective/en_positive", "text": "cardinal", "is_base_form": true, "ipa": "/ˈkɑrdənəl/", "phonetic": "KAR-duh-nuhl"}]}
+{"guid": "A26_065", "forms": [{"grammatical_form": "adjective/en_positive", "text": "mathematical", "is_base_form": true, "ipa": "/ˌmæθəˈmætɪkəl/", "phonetic": "math-uh-MAT-ih-kul"}]}
+{"guid": "A26_066", "forms": [{"grammatical_form": "adjective/en_positive", "text": "variable", "is_base_form": true, "ipa": "/ˈvɛriəbəl/", "phonetic": "VAIR-ee-uh-bul"}]}
+{"guid": "A26_067", "forms": [{"grammatical_form": "adjective/en_positive", "text": "proportional", "is_base_form": true, "ipa": "/prəˈpɔrʃənəl/", "phonetic": "pruh-POR-shuh-nul"}]}
+{"guid": "A26_068", "forms": [{"grammatical_form": "adjective/en_positive", "text": "additive", "is_base_form": true, "ipa": "/ˈædətɪv/", "phonetic": "AD-uh-tiv"}]}
+{"guid": "A26_069", "forms": [{"grammatical_form": "adjective/en_positive", "text": "arithmetic", "is_base_form": true, "ipa": "/əˈrɪθmətɪk/", "phonetic": "uh-RITH-muh-tik"}]}
+{"guid": "A26_070", "forms": [{"grammatical_form": "adjective/en_positive", "text": "binary", "is_base_form": true, "ipa": "/ˈbaɪˌnɛri/", "phonetic": "BYE-nuh-ree"}]}
+{"guid": "A26_071", "forms": [{"grammatical_form": "adjective/en_positive", "text": "binary", "is_base_form": true, "ipa": "/ˈbaɪˌnɛri/", "phonetic": "BYE-nuh-ree"}]}
+{"guid": "A26_072", "forms": [{"grammatical_form": "adjective/en_positive", "text": "canonical", "is_base_form": true, "ipa": "/kəˈnɑnɪkəl/", "phonetic": "kuh-NON-i-kuhl"}]}
+{"guid": "A26_073", "forms": [{"grammatical_form": "adjective/en_positive", "text": "cyclic", "is_base_form": true, "ipa": "/ˈsaɪklɪk/", "phonetic": "SYK-lik"}]}
+{"guid": "A26_074", "forms": [{"grammatical_form": "adjective/en_positive", "text": "discrete", "is_base_form": true, "ipa": "/dɪˈskrit/", "phonetic": "dih-SKREET"}]}
+{"guid": "A26_075", "forms": [{"grammatical_form": "adjective/en_positive", "text": "fractional", "is_base_form": true, "ipa": "/ˈfrækʃənəl/", "phonetic": "FRAK-shuh-nuhl"}]}
+{"guid": "A26_076", "forms": [{"grammatical_form": "adjective/en_positive", "text": "geometric", "is_base_form": true, "ipa": "/ˌdʒiːəˈmɛtrɪk/", "phonetic": "jee-uh-MET-rik"}]}
+{"guid": "A26_077", "forms": [{"grammatical_form": "adjective/en_positive", "text": "geometrical", "is_base_form": true, "ipa": "/ˌdʒiːəˈmɛtrɪkəl/", "phonetic": "jee-uh-MET-ri-kuhl"}]}
+{"guid": "A26_078", "forms": [{"grammatical_form": "adjective/en_positive", "text": "irrational", "is_base_form": true, "ipa": "/ɪˈræʃənəl/", "phonetic": "ih-RASH-uh-nuhl"}]}
+{"guid": "A26_079", "forms": [{"grammatical_form": "adjective/en_positive", "text": "nonzero", "is_base_form": true, "ipa": "/ˌnɑnˈzɪroʊ/", "phonetic": "non-ZEER-oh"}]}
+{"guid": "A26_080", "forms": [{"grammatical_form": "adjective/en_positive", "text": "numerical", "is_base_form": true, "ipa": "/nuːˈmɛrɪkəl/", "phonetic": "noo-MAIR-ih-kuhl"}]}
+{"guid": "A26_081", "forms": [{"grammatical_form": "adjective/en_positive", "text": "numerical", "is_base_form": true, "ipa": "/nuːˈmɛrɪkəl/", "phonetic": "noo-MAIR-ih-kuhl"}]}
+{"guid": "A26_082", "forms": [{"grammatical_form": "adjective/en_positive", "text": "parabolic", "is_base_form": true, "ipa": "/ˌpɛrəˈbɑlɪk/", "phonetic": "PAIR-uh-BOL-ik"}]}
+{"guid": "A26_083", "forms": [{"grammatical_form": "adjective/en_positive", "text": "scalar", "is_base_form": true, "ipa": "/ˈskeɪlər/", "phonetic": "SKAY-ler"}]}
+{"guid": "A26_084", "forms": [{"grammatical_form": "adjective/en_positive", "text": "squared", "is_base_form": true, "ipa": "/skwɛrd/", "phonetic": "SKWAIRD"}]}
+{"guid": "A26_085", "forms": [{"grammatical_form": "adjective/en_positive", "text": "symmetric", "is_base_form": true, "ipa": "/sɪˈmɛtrɪk/", "phonetic": "suh-MET-rik"}]}
+{"guid": "A26_086", "forms": [{"grammatical_form": "adjective/en_positive", "text": "composite", "is_base_form": true, "ipa": "/kəmˈpɑzɪt/", "phonetic": "kuhm-POZ-it"}]}
+{"guid": "A26_087", "forms": [{"grammatical_form": "adjective/en_positive", "text": "dual", "is_base_form": true, "ipa": "/ˈduːəl/", "phonetic": "DOO-uhl"}]}
+{"guid": "A26_088", "forms": [{"grammatical_form": "adjective/en_positive", "text": "gross", "is_base_form": true, "ipa": "/ɡroʊs/", "phonetic": "GROHSS"}]}
+{"guid": "A26_089", "forms": [{"grammatical_form": "adjective/en_positive", "text": "infinite", "is_base_form": true, "ipa": "/ˈɪn.fə.nət/", "phonetic": "IN-fuh-nit"}]}
+{"guid": "A26_090", "forms": [{"grammatical_form": "adjective/en_positive", "text": "linear", "is_base_form": true, "ipa": "/ˈlɪniər/", "phonetic": "LIN-ee-er"}]}
+{"guid": "A26_091", "forms": [{"grammatical_form": "adjective/en_positive", "text": "rational", "is_base_form": true, "ipa": "/ˈræʃənəl/", "phonetic": "RASH-uh-nul"}]}
+{"guid": "A26_092", "forms": [{"grammatical_form": "adjective/en_positive", "text": "finite", "is_base_form": true, "ipa": "/ˈfaɪˌnaɪt/", "phonetic": "FYE-nite"}]}
+{"guid": "A26_093", "forms": [{"grammatical_form": "adjective/en_positive", "text": "statistical", "is_base_form": true, "ipa": "/stəˈtɪstɪkəl/", "phonetic": "stuh-TIS-ti-kuhl"}]}
+{"guid": "A26_094", "forms": [{"grammatical_form": "adjective/en_positive", "text": "statistical", "is_base_form": true, "ipa": "/stəˈtɪstɪkəl/", "phonetic": "stuh-TIS-ti-kuhl"}]}
+{"guid": "A26_095", "forms": [{"grammatical_form": "adjective/en_positive", "text": "nominal", "is_base_form": true, "ipa": "/ˈnɑmənəl/", "phonetic": "NOM-uh-nuhl"}]}

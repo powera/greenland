@@ -122,7 +122,7 @@ class PlannedMove:
 
     lemma_id: int
     guid: str
-    old_level: int
+    old_level: Optional[int]
     new_level: int
     reason: str
 
@@ -147,6 +147,8 @@ def band_of(level: Optional[int]) -> str:
         return "core"
     if constants.NAMED_DIFFICULTY_LEVEL_MIN <= level <= constants.GENERAL_DIFFICULTY_LEVEL_MAX:
         return "named"
+    if level == constants.STAGING_DIFFICULTY_LEVEL:
+        return "gap"
     if constants.TOPIC_DIFFICULTY_LEVEL_MIN <= level <= constants.TOPIC_DIFFICULTY_LEVEL_MAX:
         return "topic"
     return "gap"

@@ -28,6 +28,9 @@
 {"guid": "N33_028", "grammar_facts": [{"fact_type": "countability", "fact_value": "countable"}, {"fact_type": "measure_words", "fact_value": "人"}]}
 {"guid": "N33_029", "grammar_facts": [{"fact_type": "countability", "fact_value": "countable"}, {"fact_type": "measure_words", "fact_value": "个"}]}
 {"guid": "N33_030", "grammar_facts": [{"fact_type": "countability", "fact_value": "countable"}, {"fact_type": "measure_words", "fact_value": "个"}]}
+{"guid": "N33_031", "grammar_facts": [{"fact_type": "gender_variant_status", "fact_value": "none"}]}
+{"guid": "N33_032", "grammar_facts": [{"fact_type": "gender_variant_status", "fact_value": "none"}]}
+{"guid": "N33_033", "grammar_facts": [{"fact_type": "gender_variant_status", "fact_value": "none"}]}
 {"guid": "N33_034", "grammar_facts": [{"fact_type": "countability", "fact_value": "countable"}, {"fact_type": "measure_words", "fact_value": "位"}]}
 {"guid": "N33_035", "grammar_facts": [{"fact_type": "countability", "fact_value": "countable"}, {"fact_type": "measure_words", "fact_value": "位"}]}
 {"guid": "N33_038", "grammar_facts": [{"fact_type": "countability", "fact_value": "countable"}, {"fact_type": "measure_words", "fact_value": "个"}]}

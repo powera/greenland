@@ -56,3 +56,32 @@
 {"guid": "N09_061", "forms": [{"grammatical_form": "noun/en_singular", "text": "swim fin", "is_base_form": true}], "variants": [{"kind": "equivalent", "key": "fin", "forms": [{"grammatical_form": "noun/en_singular", "text": "fin", "is_base_form": true}]}]}
 {"guid": "N09_062", "forms": [{"grammatical_form": "noun/en_singular", "text": "polo shirt", "is_base_form": true}]}
 {"guid": "N09_064", "forms": [{"grammatical_form": "noun/en_singular", "text": "ice skate", "is_base_form": true}], "variants": [{"kind": "equivalent", "key": "ice skates", "forms": [{"grammatical_form": "noun/en_singular", "text": "ice skates", "is_base_form": true}]}]}
+{"guid": "N09_066", "forms": [{"grammatical_form": "noun/en_singular", "text": "charm", "is_base_form": true, "ipa": "/tʃɑrm/", "phonetic": "CHARM"}]}
+{"guid": "N09_067", "forms": [{"grammatical_form": "noun/en_singular", "text": "garment", "is_base_form": true, "ipa": "/ˈɡɑrmənt/", "phonetic": "GAR-muhnt"}]}
+{"guid": "N09_068", "forms": [{"grammatical_form": "noun/en_singular", "text": "veil", "is_base_form": true, "ipa": "/veɪl/", "phonetic": "VAYL"}]}
+{"guid": "N09_069", "forms": [{"grammatical_form": "noun/en_singular", "text": "frock", "is_base_form": true, "ipa": "/frɑk/", "phonetic": "FROK"}]}
+{"guid": "N09_070", "forms": [{"grammatical_form": "noun/en_singular", "text": "hood", "is_base_form": true, "ipa": "/hʊd/", "phonetic": "HOOD"}]}
+{"guid": "N09_071", "forms": [{"grammatical_form": "noun/en_singular", "text": "overcoat", "is_base_form": true, "ipa": "/ˈoʊvɚˌkoʊt/", "phonetic": "OH-ver-koht"}]}
+{"guid": "N09_072", "forms": [{"grammatical_form": "noun/en_singular", "text": "robe", "is_base_form": true, "ipa": "/roʊb/", "phonetic": "ROHB"}]}
+{"guid": "N09_073", "forms": [{"grammatical_form": "noun/en_singular", "text": "robe", "is_base_form": true, "ipa": "/roʊb/", "phonetic": "ROHB"}]}
+{"guid": "N09_074", "forms": [{"grammatical_form": "noun/en_singular", "text": "robe", "is_base_form": true, "ipa": "/roʊb/", "phonetic": "ROHB"}]}
+{"guid": "N09_075", "forms": [{"grammatical_form": "noun/en_singular", "text": "slippers", "is_base_form": true, "ipa": "/ˈslɪpərz/", "phonetic": "SLIP-erz"}]}
+{"guid": "N09_076", "forms": [{"grammatical_form": "noun/en_singular", "text": "lace", "is_base_form": true, "ipa": "/leɪs/", "phonetic": "LAYS"}]}
+{"guid": "N09_077", "forms": [{"grammatical_form": "noun/en_singular", "text": "mask", "is_base_form": true, "ipa": "/mæsk/", "phonetic": "MASK"}]}
+{"guid": "N09_078", "forms": [{"grammatical_form": "noun/en_singular", "text": "vest", "is_base_form": true, "ipa": "/vɛst/", "phonetic": "VEST"}]}
+{"guid": "N09_079", "forms": [{"grammatical_form": "noun/en_singular", "text": "waistcoat", "is_base_form": true, "ipa": "/ˈweɪstˌkoʊt/", "phonetic": "WAYST-koht"}]}
+{"guid": "N09_080", "forms": [{"grammatical_form": "noun/en_singular", "text": "brief", "is_base_form": true, "ipa": "/briːf/", "phonetic": "BREEF"}]}
+{"guid": "N09_081", "forms": [{"grammatical_form": "noun/en_singular", "text": "gown", "is_base_form": true, "ipa": "/ɡaʊn/", "phonetic": "GOWN"}]}
+{"guid": "N09_082", "forms": [{"grammatical_form": "noun/en_singular", "text": "gown", "is_base_form": true, "ipa": "/ɡaʊn/", "phonetic": "GOWN"}]}
+{"guid": "N09_083", "forms": [{"grammatical_form": "noun/en_singular", "text": "jewellery", "is_base_form": true, "ipa": "/ˈdʒuːəlri/", "phonetic": "JOO-uhl-ree"}]}
+{"guid": "N09_084", "forms": [{"grammatical_form": "noun/en_singular", "text": "sleeve", "is_base_form": true, "ipa": "/sliv/", "phonetic": "SLEEV"}]}
+{"guid": "N09_085", "forms": [{"grammatical_form": "noun/en_singular", "text": "cap", "is_base_form": true, "ipa": "/kæp/", "phonetic": "KAP"}]}
+{"guid": "N09_086", "forms": [{"grammatical_form": "noun/en_singular", "text": "bonnet", "is_base_form": true, "ipa": "/ˈbɑnɪt/", "phonetic": "BON-it"}]}
+{"guid": "N09_087", "forms": [{"grammatical_form": "noun/en_singular", "text": "disguise", "is_base_form": true, "ipa": "/dɪsˈɡaɪz/", "phonetic": "dis-GIZE"}]}
+{"guid": "N09_088", "forms": [{"grammatical_form": "noun/en_singular", "text": "shawl", "is_base_form": true, "ipa": "/ʃɔl/", "phonetic": "SHAWL"}]}
+{"guid": "N09_089", "forms": [{"grammatical_form": "noun/en_singular", "text": "pigtail", "is_base_form": true, "ipa": "/ˈpɪɡˌteɪl/", "phonetic": "PIG-tail"}]}
+{"guid": "N09_090", "forms": [{"grammatical_form": "noun/en_singular", "text": "wig", "is_base_form": true, "ipa": "/wɪɡ/", "phonetic": "WIG"}]}
+{"guid": "N09_091", "forms": [{"grammatical_form": "noun/en_singular", "text": "bun", "is_base_form": true, "ipa": "/bʌn/", "phonetic": "BUN"}]}
+{"guid": "N09_092", "forms": [{"grammatical_form": "noun/en_singular", "text": "bob", "is_base_form": true, "ipa": "/bɑb/", "phonetic": "BAHB"}]}
+{"guid": "N09_093", "forms": [{"grammatical_form": "noun/en_singular", "text": "afro", "is_base_form": true, "ipa": "/ˈæfroʊ/", "phonetic": "AF-roh"}]}
+{"guid": "N09_094", "forms": [{"grammatical_form": "noun/en_singular", "text": "cornrows", "is_base_form": true, "ipa": "/ˈkɔrnˌroʊz/", "phonetic": "KORN-rohz"}]}
