@@ -7,11 +7,13 @@ its own list).  This sets them for:
 
 * the five families that list held, which word placement treats as
   interchangeable volumes (shared CEFR and subject-boundary notes); and
-* the numbered levels whose volume 1 exists under the bare name.
+* the numbered levels whose volume 1 exists under the bare name;
+* numbered levels whose volume 1 is a core level (the series starts at the
+  first extra level instead);
+* advanced and "II" continuations that their notes name.
 
-Numbered levels whose volume 1 is a core level with a different name, or is
-missing ("Describing Qualities 2"-6, "Jobs 2"/3, ...), are left for a curator
-to group in Barsukas.
+Single numbered levels with no partner outside the core (Clothing and
+Accessories 2, Vehicles 2, Personality Traits 2, ...) stay standalone.
 
 Each level's current English name is checked first, so a renamed or
 renumbered level stops the run rather than joining the wrong series.
@@ -93,6 +95,68 @@ SERIES: Dict[str, List[Tuple[int, str]]] = {
         (295, "Writing and Communication"),
         (400, "Writing and Communication 2"),
     ],
+    # Numbered levels whose first volume is a core level (Jobs and Places in
+    # Town, Activities and Everyday Objects, ...): the series starts at the
+    # first extra level, so finishing the late core is not a hard gate.  The
+    # volume number is the order within the series, not the number in the name.
+    "jobs": [(305, "Jobs 2"), (311, "Jobs 3")],
+    "everyday-objects": [
+        (194, "Everyday Objects 2"),
+        (199, "Everyday Objects 3"),
+        (200, "Everyday Objects 4"),
+    ],
+    "describing-qualities": [
+        (318, "Describing Qualities 2"),
+        (320, "Describing Qualities 3"),
+        (355, "Describing Qualities 4"),
+        (430, "Describing Qualities 5"),
+        (469, "Describing Qualities 6"),
+    ],
+    "everyday-concepts": [(274, "Everyday Concepts 3"), (275, "Everyday Concepts 4")],
+    "food-and-ingredients": [(409, "Food and Ingredients 3"), (410, "Food and Ingredients 4")],
+    "food-and-cooking": [
+        (279, "Food and Cooking 2"),
+        (1090, "Food and Cooking 3"),
+        (1095, "Food and Cooking 4"),
+    ],
+    # Same topic under a slightly different first name.
+    "abstract-concepts": [(221, "Abstract Ideas and Concepts"), (270, "Abstract Concepts 2")],
+    "regions-and-locations": [(249, "Regions and Directions"), (350, "Regions and Locations 2")],
+    # Advanced continuations, as their notes say ("a continuation of 100").
+    "feelings-and-reactions": [
+        (100, "Feelings and Reactions"),
+        (1350, "Advanced Feelings and Reactions"),
+    ],
+    "ideas-roles-results": [
+        (222, "Ideas, Roles and Results"),
+        (1351, "Advanced Ideas, Roles and Results"),
+    ],
+    "describing-qualifying-words": [
+        (106, "Describing and Qualifying Words"),
+        (1352, "Advanced Describing and Qualifying Words"),
+    ],
+    # Topic-band "II" units, each noted as a continuation of the first.
+    "biology-and-anatomy": [
+        (1010, "Advanced Biology and Anatomy"),
+        (1015, "Biology and Anatomy II"),
+    ],
+    "geography-and-migration": [
+        (1020, "Advanced Geography and Migration"),
+        (1025, "Geography and Migration II"),
+    ],
+    "industrial-technology": [
+        (1040, "Industrial Technology and Processes"),
+        (1045, "Industrial Technology and Processes II"),
+    ],
+    "religion-and-society": [
+        (1060, "Religion and Social Theory"),
+        (1065, "Religion and Society II"),
+    ],
+    "legal-terms": [
+        (1070, "Legal Terms and Proceedings"),
+        (1075, "Legal Terms and Proceedings II"),
+    ],
+    "linguistics": [(1110, "Linguistics and Language"), (1115, "Linguistics and Language II")],
 }
 
 
