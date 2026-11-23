@@ -1,1 +1,8 @@
-{"guid": "V11_028", "forms": [{"grammatical_form": "verb/es-419_3s_present", "text": "hay", "is_base_form": false}]}
+{"guid": "V11_004", "grammar_facts": [{"fact_type": "past_participle", "fact_value": "vivido"}, {"fact_type": "verb_reflexivity", "fact_value": "non_reflexive"}]}
+{"guid": "V11_027", "grammar_facts": [{"fact_type": "past_participle", "fact_value": "estado"}, {"fact_type": "verb_reflexivity", "fact_value": "non_reflexive"}]}
+{"guid": "V11_028", "forms": [{"grammatical_form": "verb/es-419_3s_present", "text": "hay", "is_base_form": false}], "grammar_facts": [{"fact_type": "past_participle", "fact_value": "habido"}, {"fact_type": "verb_reflexivity", "fact_value": "non_reflexive"}]}
+{"guid": "V11_029", "grammar_facts": [{"fact_type": "past_participle", "fact_value": "sido"}, {"fact_type": "verb_reflexivity", "fact_value": "non_reflexive"}]}
+{"guid": "V11_031", "grammar_facts": [{"fact_type": "past_participle", "fact_value": "esperado"}, {"fact_type": "verb_reflexivity", "fact_value": "non_reflexive"}]}
+{"guid": "V11_032", "grammar_facts": [{"fact_type": "past_participle", "fact_value": "residido"}, {"fact_type": "verb_reflexivity", "fact_value": "non_reflexive"}]}
+{"guid": "V11_033", "grammar_facts": [{"fact_type": "past_participle", "fact_value": "habitado"}, {"fact_type": "verb_reflexivity", "fact_value": "non_reflexive"}]}
+{"guid": "V11_034", "grammar_facts": [{"fact_type": "past_participle", "fact_value": "perecido"}, {"fact_type": "verb_reflexivity", "fact_value": "non_reflexive"}]}

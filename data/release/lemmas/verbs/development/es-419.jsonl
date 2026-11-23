@@ -1,0 +1,10 @@
+{"guid": "V07_001", "grammar_facts": [{"fact_type": "past_participle", "fact_value": "entrenado"}, {"fact_type": "verb_reflexivity", "fact_value": "non_reflexive"}]}
+{"guid": "V07_027", "grammar_facts": [{"fact_type": "past_participle", "fact_value": "sanado"}, {"fact_type": "verb_reflexivity", "fact_value": "non_reflexive"}]}
+{"guid": "V07_028", "grammar_facts": [{"fact_type": "past_participle", "fact_value": "aumentado"}, {"fact_type": "verb_reflexivity", "fact_value": "non_reflexive"}]}
+{"guid": "V07_029", "grammar_facts": [{"fact_type": "past_participle", "fact_value": "fomentado"}, {"fact_type": "verb_reflexivity", "fact_value": "non_reflexive"}]}
+{"guid": "V07_030", "grammar_facts": [{"fact_type": "past_participle", "fact_value": "preparado"}, {"fact_type": "verb_reflexivity", "fact_value": "non_reflexive"}]}
+{"guid": "V07_031", "grammar_facts": [{"fact_type": "past_participle", "fact_value": "acumulado"}, {"fact_type": "verb_reflexivity", "fact_value": "inherently_reflexive"}]}
+{"guid": "V07_032", "grammar_facts": [{"fact_type": "past_participle", "fact_value": "prosperado"}, {"fact_type": "verb_reflexivity", "fact_value": "non_reflexive"}]}
+{"guid": "V07_033", "grammar_facts": [{"fact_type": "past_participle", "fact_value": "crecido"}, {"fact_type": "verb_reflexivity", "fact_value": "non_reflexive"}]}
+{"guid": "V07_034", "grammar_facts": [{"fact_type": "past_participle", "fact_value": "alcanzado"}, {"fact_type": "verb_reflexivity", "fact_value": "non_reflexive"}]}
+{"guid": "V07_035", "grammar_facts": [{"fact_type": "past_participle", "fact_value": "desarrollado"}, {"fact_type": "verb_reflexivity", "fact_value": "inherently_reflexive"}]}
