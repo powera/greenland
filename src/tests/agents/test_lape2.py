@@ -15,7 +15,6 @@ from sqlalchemy.orm import Session
 from agents.lape2 import results as lape2_results
 from agents.lape2.catalog import CATALOG
 from agents.lape2.cli import get_argument_parser, main, select_plans
-from agents.lape2.job import LAPE2_JOB, apply, prepare
 from agents.lape2.planner import RequestPlan, plan_request, stored_values
 from agents.lape2.query import build_context, build_query
 from agents.lape2.results import apply_answers, validate_answer
@@ -28,6 +27,7 @@ from storage.models.schema import DerivativeForm
 from storage.models.grammar_fact import GrammarFact
 from storage.models.lemma_fact import LemmaFact
 from storage.translation_helpers import set_translation
+from workqueue.handlers.words.lape2 import LAPE2_JOB, apply, prepare
 from workqueue.llm_batch import StageContext, run_inline
 from workqueue.registry import get_llm_job
 

@@ -8,7 +8,6 @@ from __future__ import annotations
 
 from typing import Dict, Optional
 
-from agents.lape2.job import LAPE2_JOB
 from workqueue.handlers.audio import handle_audio_generate_lemma, handle_audio_generate_sentence
 from workqueue.handlers.conversations import (
     handle_conversations_definitions_generate,
@@ -52,6 +51,7 @@ from workqueue.handlers.words.forms import FORMS_JOB
 from workqueue.handlers.words.gender_variant_forms import GENDER_VARIANT_FORMS_JOB
 from workqueue.handlers.words.gender_variants import GENDER_VARIANTS_JOB
 from workqueue.handlers.words.grammar_facts import GRAMMAR_FACT_JOB
+from workqueue.handlers.words.lape2 import LAPE2_JOB
 from workqueue.handlers.words.pronunciations import PRONUNCIATIONS_JOB
 from workqueue.handlers.words.translations import TRANSLATIONS_JOB
 from workqueue.llm_batch import Job
