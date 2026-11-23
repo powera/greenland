@@ -976,7 +976,11 @@ class TranslationWorkflow:
         try:
             # Use provided lemmas or query for them
             if lemmas is not None:
-                all_lemmas = lemmas[:limit] if limit else lemmas
+                # Callers load lemmas in a session they have since closed; bind
+                # them to this one so lazy relationships (lemma_facts, read by
+                # the person-noun check) can load.
+                selected = lemmas[:limit] if limit else lemmas
+                all_lemmas = [session.merge(lemma) for lemma in selected]
             else:
                 # Build query to find words missing ANY of the target translations
                 # For simplicity, we'll get all lemmas and check missing translations using helper method
