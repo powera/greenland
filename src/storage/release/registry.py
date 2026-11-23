@@ -62,6 +62,9 @@ class ReleaseEntitySpec:
     accepts_categories: bool = False
     #: Whether ``--prune`` may delete rows the files no longer list.
     accepts_prune: bool = False
+    #: Element types that are exported whenever this one is, so the release
+    #: never shows this one's changes without the records that go with them.
+    exports_with: tuple[str, ...] = ()
 
     def supports(self, direction: str) -> bool:
         """Whether this element type can move in ``direction``."""
@@ -92,6 +95,9 @@ ENTITY_SPECS: Dict[str, ReleaseEntitySpec] = {
         export=lemma.export_to_release,
         # Lemmas are imported by the whole-database load rather than one at a
         # time; there is no per-element importer to point at yet.
+        # A lemma deleted or merged away leaves a tombstone, so a lemma export
+        # without one would drop the GUID without saying where it went.
+        exports_with=("tombstones",),
     ),
     "sentences": ReleaseEntitySpec(
         name="sentences",
@@ -155,16 +161,22 @@ def specs_for(direction: str, names: Optional[Any] = None) -> list[ReleaseEntity
     supports ``direction``, skipping the rest rather than failing: coverage is
     deliberately asymmetric, so ``export all`` and ``import all`` should both
     work and widen on their own as importers are added.
+
+    On export, each chosen type's ``exports_with`` companions are added too.
+    The result is in registry order with no repeats, so naming a companion
+    explicitly as well changes nothing.
     """
     if names is None or "all" in names:
         return [spec for spec in ENTITY_SPECS.values() if spec.supports(direction)]
 
-    chosen: list[ReleaseEntitySpec] = []
+    chosen_names: set[str] = set()
     for token in names:
         spec = ENTITY_SPECS.get(token)
         if spec is None:
             raise KeyError(f"unknown element type {token!r}")
         if not spec.supports(direction):
             raise ValueError(f"{token!r} does not support {direction}")
-        chosen.append(spec)
-    return chosen
+        chosen_names.add(token)
+        if direction == "export":
+            chosen_names.update(spec.exports_with)
+    return [spec for spec in ENTITY_SPECS.values() if spec.name in chosen_names]

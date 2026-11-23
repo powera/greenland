@@ -54,6 +54,24 @@ class TestDatabaseSelection:
         assert "lemmas" not in printed
 
 
+class TestExportCompanions:
+    """A lemma export carries the tombstones that record lemmas it dropped."""
+
+    def test_lemmas_export_also_exports_tombstones(self, capsys: Any) -> None:
+        assert cli.main(["export", "lemmas", "--dry-run"]) == 0
+        lines = capsys.readouterr().out.splitlines()
+        assert [line.split()[2] for line in lines] == ["lemmas", "tombstones"]
+
+    def test_naming_tombstones_too_does_not_repeat_it(self, capsys: Any) -> None:
+        assert cli.main(["export", "tombstones", "lemmas", "levels", "--dry-run"]) == 0
+        lines = capsys.readouterr().out.splitlines()
+        assert [line.split()[2] for line in lines] == ["lemmas", "levels", "tombstones"]
+
+    def test_other_exports_do_not_add_tombstones(self, capsys: Any) -> None:
+        assert cli.main(["export", "levels", "--dry-run"]) == 0
+        assert "tombstones" not in capsys.readouterr().out
+
+
 class TestDatabaseOrdering:
     """The whole-database load replaces the file, so it must go first."""
 
