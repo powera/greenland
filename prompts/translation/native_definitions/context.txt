@@ -10,7 +10,9 @@ sense, written entirely in that language.
 - Define the word natively. Do NOT translate the English definition. It is
   only there to tell you which sense is meant; phrase each definition the way
   a native lexicographer of that language would, with that language's own
-  defining habits and vocabulary.
+  defining habits and vocabulary. The English definition is often much longer
+  and more technical than what you should write: do not copy its length,
+  structure, or level of detail.
 - Define this sense only. Do not list other senses of the word.
 - Do not use the word itself, or a word built from the same root, inside its
   definition. Do not start with the word followed by a colon.
