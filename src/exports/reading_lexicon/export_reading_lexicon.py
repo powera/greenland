@@ -43,7 +43,11 @@ from storage.crud.grammar_fact import bulk_get_effective_grammar_facts
 from storage.models.guid_tombstone import GuidTombstone
 from storage.models.schema import SYNONYM_GRAMMATICAL_FORMS, DerivativeForm, Lemma
 from storage.models.variant_form import ACCEPTED_ANSWER_VARIANT_KINDS, VariantForm
-from storage.translation_helpers import bulk_get_translations
+from storage.translation_helpers import (
+    LANGUAGE_FIELDS,
+    bulk_get_definitions,
+    bulk_get_translations,
+)
 
 logger = logging.getLogger(__name__)
 
@@ -51,6 +55,10 @@ SCHEMA = "greenland-reading-lexicon/1"
 
 #: Glosses shipped by default: the five reading languages.
 DEFAULT_GLOSS_LANGUAGES: Tuple[str, ...] = ("en", "es", "fr", "zh", "lt")
+
+#: ``--definition-languages`` value meaning "English, the text language and
+#: every gloss language".
+DEFINITION_LANGUAGES_GLOSS = "gloss"
 
 #: Grammar facts that describe the word to a reader.  Principal parts and
 #: form overrides are already visible as ``forms``; the rest is noise here.
@@ -175,6 +183,7 @@ class ReadingLexiconExporter:
         gloss_languages: Sequence[str] = DEFAULT_GLOSS_LANGUAGES,
         include_staging: bool = False,
         derive_forms: bool = True,
+        definition_languages: Optional[Sequence[str]] = None,
     ) -> None:
         """
         Args:
@@ -186,12 +195,33 @@ class ReadingLexiconExporter:
             derive_forms: Fill paradigms by rule where no row is stored, so
                 a database whose forms were never generated still exports
                 them.  Turn off to export exactly what is stored.
+            definition_languages: Languages to ship definitions in, in
+                order.  None means English and the text language (a
+                monolingual definition); ``["gloss"]`` adds every gloss
+                language.  A lemma without a definition in a language simply
+                has no key for it -- never an English stand-in.
         """
         self.language = language
         self.config = config or DataSourceConfig(backend_type=BackendType.SQLITE)
         self.gloss_languages = tuple(code for code in gloss_languages if code != language)
         self.include_staging = include_staging
         self.derive_forms = derive_forms
+        self.definition_languages = self._resolve_definition_languages(definition_languages)
+
+    def _resolve_definition_languages(self, requested: Optional[Sequence[str]]) -> Tuple[str, ...]:
+        """Expand ``gloss``, drop duplicates (first wins) and reject unknown codes."""
+        if requested is None:
+            requested = ["en", self.language]
+        expanded: List[str] = []
+        for code in requested:
+            if code == DEFINITION_LANGUAGES_GLOSS:
+                expanded.extend(["en", self.language, *self.gloss_languages])
+            else:
+                expanded.append(code)
+        unknown = [code for code in expanded if code not in LANGUAGE_FIELDS]
+        if unknown:
+            raise ValueError(f"Unknown definition language(s): {', '.join(unknown)}")
+        return tuple(dict.fromkeys(expanded))
 
     # -- selection -----------------------------------------------------------
 
@@ -308,6 +338,7 @@ class ReadingLexiconExporter:
         headword: str,
         level: Optional[int],
         glosses: Dict[str, Dict[int, Optional[str]]],
+        definitions: Dict[str, Dict[int, str]],
         facts: Dict[str, Optional[str]],
     ) -> Dict[str, Any]:
         entry: Dict[str, Any] = {
@@ -318,8 +349,13 @@ class ReadingLexiconExporter:
             entry["subtype"] = lemma.pos_subtype
         if level is not None:
             entry["level"] = level
-        if lemma.definition_text:
-            entry["definition"] = {"en": lemma.definition_text}
+        definition = {
+            code: text
+            for code in self.definition_languages
+            if (text := definitions[code].get(lemma.id))
+        }
+        if definition:
+            entry["definition"] = definition
         if lemma.disambiguation:
             entry["sense"] = {"en": lemma.disambiguation}
         gloss: Dict[str, str] = {}
@@ -360,6 +396,9 @@ class ReadingLexiconExporter:
             for code in self.gloss_languages
             if code != "en"
         }
+        definitions = {
+            code: bulk_get_definitions(session, lemmas, code) for code in self.definition_languages
+        }
         facts_by_lemma = bulk_get_effective_grammar_facts(session, lemma_ids, self.language)
         stored = self._stored_forms(session, lemma_ids)
         rules = self._rule_forms(session, lemmas) if self.derive_forms else {}
@@ -386,7 +425,12 @@ class ReadingLexiconExporter:
             guid = lemma.guid
             headword = headwords[lemma.id]
             lemma_entries[guid] = self._lemma_entry(
-                lemma, headword, levels.get(lemma.id), glosses, facts_by_lemma.get(lemma.id, {})
+                lemma,
+                headword,
+                levels.get(lemma.id),
+                glosses,
+                definitions,
+                facts_by_lemma.get(lemma.id, {}),
             )
             stored_rows = stored.get(lemma.id, [])
             stored_slots = {grammatical_form for grammatical_form, _ in stored_rows}
@@ -414,6 +458,7 @@ class ReadingLexiconExporter:
             "schema": SCHEMA,
             "language": self.language,
             "gloss_languages": list(self.gloss_languages),
+            "definition_languages": list(self.definition_languages),
             "exported_at": datetime.now(timezone.utc).isoformat(timespec="seconds"),
             "lemma_count": len(lemma_entries),
             "form_count": len(forms),

@@ -1,4 +1,10 @@
-"""One saved request manifest shared by inline and OpenAI batch execution."""
+"""Lape2's staged job: one saved request manifest shared by inline and OpenAI batch runs.
+
+Defined here rather than in ``agents.lape2`` like every other agent's job, so
+the registry never imports an agent module: ``workqueue/__init__`` loads the
+registry, and an agent module that imports ``workqueue`` while the registry
+imports it back is a circular import whenever the agent module loads first.
+"""
 
 from typing import Any
 

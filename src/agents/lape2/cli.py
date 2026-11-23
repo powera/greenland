@@ -21,7 +21,6 @@ from agents.common.common_args import (
     get_data_source_config,
 )
 from agents.lape2.catalog import CATALOG
-from agents.lape2.job import LAPE2_JOB
 from agents.lape2.planner import RequestPlan, plan_request
 from agents.lape2.query import build_query
 from clients.unified_client import UnifiedLLMClient
@@ -30,6 +29,7 @@ from constants import DEFAULT_MODEL
 from storage.backend import create_session
 from storage.backend.config import BackendType
 from words.lemma_selection import get_lemmas_for_agent
+from workqueue.handlers.words.lape2 import LAPE2_JOB
 from workqueue.llm_batch import DEFAULT_ITEMS_PER_BATCH, run_inline
 
 

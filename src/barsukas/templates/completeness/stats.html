@@ -86,6 +86,7 @@
                 <th class="text-center">Tier 2</th>
                 <th class="text-center">Tier 3</th>
                 <th class="text-center" title="Translations with IPA pronunciation (tier 1/2)">IPA</th>
+                <th class="text-center" title="Translations with a native definition (tier 1/2)">Defs</th>
                 <th class="text-center" title="Audio files (total / production-ready)">Audio</th>
                 <th class="text-center" title="Relation / synonym group memberships">Relations</th>
                 <th class="text-center" title="Sentences using this lemma (total / verified)">Sentences</th>
@@ -138,6 +139,7 @@
                     </span>
                 </td>
                 <td class="text-center">{{ row.ipa_count }}</td>
+                <td class="text-center">{{ row.definition_count }}</td>
                 <td class="text-center">
                     {{ row.audio_total }}
                     {% if row.audio_prod %}<small class="text-success">({{ row.audio_prod }}✓)</small>{% endif %}

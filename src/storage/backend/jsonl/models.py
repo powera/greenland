@@ -203,6 +203,7 @@ class Lemma:
         default_factory=dict
     )  # lang_code -> disambiguation string
     # translation_metadata: per-language translation_status / translation_status_note
+    # and the native definition ("definition")
     # from base.jsonl and the grouped translation files (secondary.jsonl,
     # ancient.jsonl). Kept separate from the flat translations map so the release
     # shape round-trips unchanged.

@@ -8,7 +8,6 @@ from __future__ import annotations
 
 from typing import Dict, Optional
 
-from agents.lape2.job import LAPE2_JOB
 from workqueue.handlers.level_placement import PLACEMENT_JOB
 from workqueue.handlers.audio import handle_audio_generate_lemma, handle_audio_generate_sentence
 from workqueue.handlers.conversations import (
@@ -48,10 +47,12 @@ from workqueue.handlers.words import (
 )
 from workqueue.handlers.sentences.translation import SENTENCE_TRANSLATION_JOB
 from workqueue.handlers.words.add_word import ADD_WORD_JOB
+from workqueue.handlers.words.definitions import DEFINITIONS_JOB
 from workqueue.handlers.words.forms import FORMS_JOB
 from workqueue.handlers.words.gender_variant_forms import GENDER_VARIANT_FORMS_JOB
 from workqueue.handlers.words.gender_variants import GENDER_VARIANTS_JOB
 from workqueue.handlers.words.grammar_facts import GRAMMAR_FACT_JOB
+from workqueue.handlers.words.lape2 import LAPE2_JOB
 from workqueue.handlers.words.pronunciations import PRONUNCIATIONS_JOB
 from workqueue.handlers.words.translations import TRANSLATIONS_JOB
 from workqueue.llm_batch import Job
@@ -117,6 +118,7 @@ TASK_HANDLERS = {
 LLM_JOBS: Dict[str, Job] = {
     ADD_WORD_JOB.name: ADD_WORD_JOB,
     PLACEMENT_JOB.name: PLACEMENT_JOB,
+    DEFINITIONS_JOB.name: DEFINITIONS_JOB,
     LAPE2_JOB.name: LAPE2_JOB,
     FORMS_JOB.name: FORMS_JOB,
     GENDER_VARIANT_FORMS_JOB.name: GENDER_VARIANT_FORMS_JOB,

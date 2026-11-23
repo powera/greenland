@@ -8,12 +8,12 @@ import pytest
 from sqlalchemy import create_engine
 from sqlalchemy.orm import Session
 
-from agents.lape2.job import LAPE2_JOB
 from agents.lape2.planner import plan_request, stored_values
 from agents.lape2.query import build_query
 from clients.batch_queue import BatchQueueManager, create_batch_database_session
 from storage.models import Base, Lemma
 from storage.translation_helpers import set_translation
+from workqueue.handlers.words.lape2 import LAPE2_JOB
 from workqueue.llm_batch import complete_rows, start_batch_run
 
 

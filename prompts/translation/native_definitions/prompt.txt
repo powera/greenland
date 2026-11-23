@@ -1,0 +1,9 @@
+Write a native definition of each language's word for this sense.
+
+Sense:
+{source}
+
+Register: CEFR {register} or simpler.
+
+Requested languages (answer keys are these language codes):
+{languages}

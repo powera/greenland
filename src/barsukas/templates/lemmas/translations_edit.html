@@ -80,7 +80,35 @@
                                 </form>
                             {% endif %}
 
-                            {% if definitions[lang_code] %}
+                            {# Native definition of this language's word, on its own form so
+                               saving it never resubmits the translation. English's is the
+                               lemma's own definition, edited on the lemma edit page. #}
+                            {% if lang_code != 'en' and translations[lang_code] %}
+                                <form method="post"
+                                      action="{{ url_for('translations.update_definition', lemma_id=lemma.id, lang_code=lang_code) }}"
+                                      class="mt-3">
+                                    <label for="definition_{{ lang_code }}" class="form-label">
+                                        {{ STRINGS.sentences.definition }}
+                                        <small class="text-muted">
+                                            (written in {{ lang_name }}, defining
+                                            &ldquo;{{ translations[lang_code] }}&rdquo;; leave blank to clear)
+                                        </small>
+                                    </label>
+                                    <div class="row g-2 align-items-end">
+                                        <div class="col-md-9">
+                                            <textarea class="form-control" id="definition_{{ lang_code }}"
+                                                      name="definition" rows="2"
+                                                      {% if config.get('READONLY', False) %}disabled{% endif %}>{{ definitions[lang_code] or '' }}</textarea>
+                                        </div>
+                                        <div class="col-md-3">
+                                            <button type="submit" class="btn btn-outline-primary"
+                                                    {% if config.get('READONLY', False) %}disabled title="Not available in hosted mode"{% endif %}>
+                                                <i class="bi bi-save"></i> {{ STRINGS.sentences.save }}
+                                            </button>
+                                        </div>
+                                    </div>
+                                </form>
+                            {% elif definitions[lang_code] %}
                                 <div class="form-text mt-2">
                                     {{ STRINGS.sentences.definition }}: {{ definitions[lang_code] }}
                                 </div>
