@@ -1567,6 +1567,9 @@ def apply_translations() -> ResponseReturnValue:
                             trans_obj.translation_status_note = release_lang_metadata.get(
                                 "translation_status_note"
                             )
+                            trans_obj.definition_text = (
+                                release_lang_metadata.get("definition") or None
+                            )
                             trans_obj.sort_key = compute_sort_key(lang_code, release_val)
                         else:
                             trans_obj = LemmaTranslation(
@@ -1578,6 +1581,7 @@ def apply_translations() -> ResponseReturnValue:
                                 translation_status_note=release_lang_metadata.get(
                                     "translation_status_note"
                                 ),
+                                definition_text=release_lang_metadata.get("definition") or None,
                                 sort_key=compute_sort_key(lang_code, release_val),
                                 verified=False,
                             )

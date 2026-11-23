@@ -318,6 +318,8 @@ class JSONLSession(BaseSession):
                         trans_entry["translation_status_note"] = lang_metadata[
                             "translation_status_note"
                         ]
+                    if lang_metadata.get("definition"):
+                        trans_entry["definition_text"] = lang_metadata["definition"]
                 translations.append(trans_entry)
 
             # Per-language difficulty overrides (stored in base.jsonl).

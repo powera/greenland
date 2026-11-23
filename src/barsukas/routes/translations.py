@@ -9,11 +9,13 @@ from barsukas.helpers.lemma_urls import resolve_lemma_ref
 from flask import Blueprint, flash, g, jsonify, redirect, request, url_for
 from werkzeug.wrappers import Response
 
-from storage.crud.operation_log import log_translation_change
+from storage.crud.operation_log import log_operation, log_translation_change
 from storage.models.schema import Lemma
 from storage.translation_helpers import (
+    get_definition,
     get_supported_languages,
     get_translation,
+    set_definition,
     set_translation,
     set_translation_disambiguation,
 )
@@ -100,6 +102,65 @@ def update_translation(lemma_id: int, lang_code: str) -> Response:
         return redirect(url_for("lemmas.edit_lemma_translations", lemma_id=lemma_id))
     else:
         return redirect(url_for("lemmas.view_lemma", lemma_id=lemma_id))
+
+
+@bp.route("/<lemma:lemma_id>/<lang_code>/definition", methods=["POST"])
+def update_definition(lemma_id: int, lang_code: str) -> Response:
+    """Set (or, when blank, clear) a lemma's native definition in one language.
+
+    English is not edited here: its definition is the lemma's own, on the
+    lemma edit page.  Always returns to the translations edit page.
+    """
+    from flask import current_app
+
+    target = url_for("lemmas.edit_lemma_translations", lemma_id=lemma_id)
+    if current_app.config.get("READONLY", False):
+        flash("Cannot update: running in read-only mode", "error")
+        return redirect(target)
+
+    lemma = g.db.query(Lemma).get(lemma_id)
+    if not lemma:
+        flash("Lemma not found", "error")
+        return redirect(url_for("lemmas.list_lemmas"))
+
+    if lang_code == "en" or lang_code not in get_supported_languages():
+        flash("Invalid language code for a translation definition", "error")
+        return redirect(target)
+
+    new_definition = request.form.get("definition", "").strip()
+    old_definition = get_definition(g.db, lemma, lang_code)
+    if (old_definition or "") == new_definition:
+        flash("Definition unchanged", "info")
+        return redirect(target)
+
+    try:
+        set_definition(g.db, lemma, lang_code, new_definition)
+    except ValueError as e:
+        flash(str(e), "error")
+        return redirect(target)
+
+    log_operation(
+        g.db,
+        operation_type="definition",
+        source=Config.OPERATION_LOG_SOURCE,
+        entity_type="lemma",
+        entity_id=lemma.id,
+        lemma_id=lemma.id,
+        entity_guid=lemma.guid,
+        details={
+            "language_code": lang_code,
+            "old_definition": old_definition,
+            "new_definition": new_definition or None,
+        },
+    )
+    g.db.commit()
+
+    language_name = get_supported_languages()[lang_code]
+    if new_definition:
+        flash(f"Updated {language_name} definition", "success")
+    else:
+        flash(f"Cleared {language_name} definition", "success")
+    return redirect(target)
 
 
 @bp.route("/<lemma:lemma_id>/<lang_code>/check", methods=["GET"])

@@ -2,8 +2,8 @@
 
 """Data completeness reports.
 
-Shows per-lemma and per-sentence coverage of translations, IPA,
-audio, and relation-group (synonym) membership, filterable by
+Shows per-lemma and per-sentence coverage of translations, native
+definitions, IPA, audio, and relation-group (synonym) membership, filterable by
 Trakaido difficulty level.
 """
 
@@ -43,6 +43,14 @@ def _parse_int(value: str) -> Optional[int]:
         return None
 
 
+def _has_definition() -> Any:
+    """SQL condition: the translation row carries a (non-blank) native definition."""
+    return and_(
+        LemmaTranslation.definition_text.isnot(None),
+        func.trim(LemmaTranslation.definition_text) != "",
+    )
+
+
 def _lemma_completeness_rows(
     min_level: Optional[int],
     max_level: Optional[int],
@@ -63,6 +71,16 @@ def _lemma_completeness_rows(
         ),
         else_=0,
     )
+    definition_tier12_case = case(
+        (
+            and_(
+                _has_definition(),
+                LemmaTranslation.language_code.in_(TIER_1_LANGUAGES + TIER_2_LANGUAGES),
+            ),
+            1,
+        ),
+        else_=0,
+    )
 
     # Per-lemma translation aggregates
     trans_sub = (
@@ -73,6 +91,7 @@ def _lemma_completeness_rows(
             func.sum(tier2_case).label("tier2_count"),
             func.sum(tier3_case).label("tier3_count"),
             func.sum(ipa_tier12_case).label("ipa_count"),
+            func.sum(definition_tier12_case).label("definition_count"),
         )
         .group_by(LemmaTranslation.lemma_id)
         .subquery()
@@ -134,6 +153,7 @@ def _lemma_completeness_rows(
             func.coalesce(trans_sub.c.tier2_count, 0).label("tier2_count"),
             func.coalesce(trans_sub.c.tier3_count, 0).label("tier3_count"),
             func.coalesce(trans_sub.c.ipa_count, 0).label("ipa_count"),
+            func.coalesce(trans_sub.c.definition_count, 0).label("definition_count"),
             func.coalesce(audio_sub.c.audio_total, 0).label("audio_total"),
             func.coalesce(audio_sub.c.audio_prod, 0).label("audio_prod"),
             func.coalesce(relation_sub.c.relation_count, 0).label("relation_count"),
@@ -173,6 +193,7 @@ def _lemma_completeness_rows(
                 "tier2_count": int(r.tier2_count or 0),
                 "tier3_count": int(r.tier3_count or 0),
                 "ipa_count": int(r.ipa_count or 0),
+                "definition_count": int(r.definition_count or 0),
                 "audio_total": int(r.audio_total or 0),
                 "audio_prod": int(r.audio_prod or 0),
                 "relation_count": int(r.relation_count or 0),
@@ -314,6 +335,7 @@ def _language_summary(
             func.sum(case((LemmaTranslation.verified == True, 1), else_=0)).label(  # noqa: E712
                 "verified_count"
             ),
+            func.sum(case((_has_definition(), 1), else_=0)).label("definition_count"),
         )
         .join(Lemma, Lemma.id == LemmaTranslation.lemma_id)
         .group_by(LemmaTranslation.language_code)
@@ -321,11 +343,12 @@ def _language_summary(
     for cond in lemma_filter:
         lemma_trans_q = lemma_trans_q.filter(cond)
     lemma_trans_by_lang: Dict[str, Dict[str, int]] = {}
-    for lc, lemma_count, ipa_count, verified_count in lemma_trans_q.all():
+    for lc, lemma_count, ipa_count, verified_count, definition_count in lemma_trans_q.all():
         lemma_trans_by_lang[lc] = {
             "lemma_count": int(lemma_count or 0),
             "ipa_count": int(ipa_count or 0),
             "verified_count": int(verified_count or 0),
+            "definition_count": int(definition_count or 0),
         }
 
     # Per-language sentence translation counts
@@ -433,6 +456,7 @@ def _language_summary(
                 "lemma_translations": lt.get("lemma_count", 0),
                 "lemma_verified": lt.get("verified_count", 0),
                 "lemma_ipa": lt.get("ipa_count", 0),
+                "lemma_definitions": lt.get("definition_count", 0),
                 "lemma_audio_total": la.get("audio_total", 0),
                 "lemma_audio_prod": la.get("audio_prod", 0),
                 "sentence_translations": sentence_trans_by_lang.get(lc, 0),

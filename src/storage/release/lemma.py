@@ -58,11 +58,17 @@ from storage.models.schema import Lemma, LemmaTranslation
 
 #: Per-language translation extras, as (release key, model field). Each is
 #: omitted from ``translation_metadata`` when unset so a hand-edited file stays
-#: readable.
-_TRANSLATION_METADATA_FIELDS: Tuple[Tuple[str, str], ...] = (
+#: readable.  The status pair is also dropped when it is uninformative; see
+#: :func:`translation_metadata_record`.
+_TRANSLATION_STATUS_FIELDS: Tuple[Tuple[str, str], ...] = (
     ("translation_status", "translation_status"),
     ("translation_status_note", "translation_status_note"),
 )
+
+#: Per-language extras written whenever set, whatever the status.
+#: ``definition`` is the native definition of that language's translation;
+#: English's lives on the lemma as ``concept_definition`` instead.
+_TRANSLATION_CONTENT_FIELDS: Tuple[Tuple[str, str], ...] = (("definition", "definition_text"),)
 
 #: Difficulty written when a lemma has none. ``-1`` is the release convention
 #: for "not levelled yet" (see data/release/README.md).
@@ -174,16 +180,20 @@ def translation_metadata_record(translation: LemmaTranslation) -> Dict[str, str]
     An uninformative ``translation_status`` - a bare ``conventional`` on a
     living language, which is what every ordinary word is - is dropped along
     with its note, so it never reaches the file. See
-    ``translation_helpers.translation_status_is_informative``.
+    ``translation_helpers.translation_status_is_informative``.  That gate is
+    the status pair's alone: a definition is written whenever it is set.
     """
     metadata: Dict[str, str] = {}
-    if not translation_helpers.translation_status_is_informative(
+    if translation_helpers.translation_status_is_informative(
         translation.language_code,
         translation.translation_status,
         translation.translation_status_note,
     ):
-        return metadata
-    for release_key, model_field in _TRANSLATION_METADATA_FIELDS:
+        for release_key, model_field in _TRANSLATION_STATUS_FIELDS:
+            value = getattr(translation, model_field, None)
+            if value:
+                metadata[release_key] = value
+    for release_key, model_field in _TRANSLATION_CONTENT_FIELDS:
         value = getattr(translation, model_field, None)
         if value:
             metadata[release_key] = value
@@ -362,6 +372,7 @@ def apply_translations(session: Session, lemma: Lemma, record: Dict[str, Any]) -
         translation.disambiguation = disambiguations.get(language_code)
         translation.translation_status = metadata.get("translation_status")
         translation.translation_status_note = metadata.get("translation_status_note")
+        translation.definition_text = metadata.get("definition") or None
         translation.sort_key = translation_helpers.compute_sort_key(language_code, text)
         written += 1
     return written
