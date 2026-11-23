@@ -12,6 +12,7 @@ import json
 import logging
 import os
 import re
+import statistics
 import sys
 from datetime import datetime, timezone
 from pathlib import Path
@@ -26,7 +27,7 @@ from langtools.dialect_overrides import get_dialect_override
 from langtools.manifest_grammar import get_manifest_conjugation_config
 from storage.backend.config import DataSourceConfig
 from storage.backend.factory import create_session
-from storage.crud.curriculum_level import list_curriculum_levels, to_manifest_entry
+from storage.crud.curriculum_level import list_curriculum_levels, manifest_entries
 from storage.translation_helpers import LANGUAGE_NAMES
 from exports.wireword.readings import get_manifest_reading_config
 
@@ -75,11 +76,15 @@ def get_word_file_stats(filepath: str) -> Dict[str, Any]:
 
         levels: set[int] = set()
         groups: set[str] = set()
+        frequency_ranks: Dict[int, List[int]] = {}
 
         for item in data:
             if isinstance(item, dict):
                 if "level" in item and item["level"] is not None:
                     levels.add(item["level"])
+                    rank = item.get("frequency_rank")
+                    if isinstance(rank, int) and rank > 0:
+                        frequency_ranks.setdefault(item["level"], []).append(rank)
                 if "group" in item and item["group"]:
                     groups.add(item["group"])
 
@@ -87,6 +92,7 @@ def get_word_file_stats(filepath: str) -> Dict[str, Any]:
             "count": len(data),
             "levels": sorted(levels),
             "groups": sorted(groups),
+            "frequency_ranks": frequency_ranks,
         }
     except (json.JSONDecodeError, IOError):
         return {}
@@ -126,13 +132,28 @@ def load_level_metadata(config: DataSourceConfig) -> List[Dict[str, Any]]:
     """Every curriculum level's manifest entry, for ``generate_manifest``."""
     session = create_session(config)
     try:
-        return [to_manifest_entry(row) for row in list_curriculum_levels(session)]
+        return manifest_entries(list_curriculum_levels(session))
     finally:
         session.close()
 
 
+def median_frequency_ranks(frequency_ranks: Mapping[int, Sequence[int]]) -> Dict[int, int]:
+    """Level -> median ``frequency_rank`` of its words (rounded), for levels with any.
+
+    The median rather than the mean, so a handful of rare words in an
+    otherwise everyday unit do not make it look obscure.
+    """
+    return {
+        level: int(round(statistics.median(ranks)))
+        for level, ranks in frequency_ranks.items()
+        if ranks
+    }
+
+
 def build_manifest_levels(
-    level_metadata: Sequence[Mapping[str, Any]], shipped_levels: Set[int]
+    level_metadata: Sequence[Mapping[str, Any]],
+    shipped_levels: Set[int],
+    freq_ranks: Optional[Mapping[int, int]] = None,
 ) -> List[Dict[str, Any]]:
     """Select the ``config.levels`` entries for the levels this export ships.
 
@@ -141,6 +162,10 @@ def build_manifest_levels(
     client could never complete it, so keeping it would lock the unit forever.
     An unshipped prerequisite is treated as met, which matches what a learner
     of that bundle has actually been offered.
+
+    ``freq_ranks`` (level -> median word frequency rank in this bundle) adds
+    ``freq_rank`` to the entries it covers.  It is per bundle because
+    difficulty overrides move words between levels per target language.
     """
     levels: List[Dict[str, Any]] = []
     for entry in sorted(level_metadata, key=lambda item: int(item["level"])):
@@ -153,6 +178,8 @@ def build_manifest_levels(
                 shipped_entry["prerequisites"] = kept
             else:
                 del shipped_entry["prerequisites"]
+        if freq_ranks and int(entry["level"]) in freq_ranks:
+            shipped_entry["freq_rank"] = freq_ranks[int(entry["level"])]
         levels.append(shipped_entry)
     return levels
 
@@ -181,7 +208,7 @@ def generate_manifest(
             When set, non-manifest filenames in the manifest use the file's MD5
             hash so they can be served as immutable cache objects.
         level_metadata: Manifest entries for named levels, as built by
-            ``storage.crud.curriculum_level.to_manifest_entry``.  Those for
+            ``storage.crud.curriculum_level.manifest_entries``.  Those for
             levels present in the word files are written to ``config.levels``;
             the key is omitted when none apply.
 
@@ -269,6 +296,7 @@ def generate_manifest(
 
     level_files = sorted(glob.glob(level_file_pattern), key=_level_sort_key)
     shipped_levels: Set[int] = set()
+    frequency_ranks: Dict[int, List[int]] = {}
 
     for filepath in level_files:
         disk_filename = os.path.basename(filepath)
@@ -288,6 +316,8 @@ def generate_manifest(
 
         file_stats = get_word_file_stats(filepath)
         shipped_levels.update(file_stats.get("levels", []))
+        for rank_level, ranks in file_stats.get("frequency_ranks", {}).items():
+            frequency_ranks.setdefault(rank_level, []).extend(ranks)
         file_entry: Dict[str, Any] = {
             "id": file_id,
             "filename": manifest_filename,
@@ -305,7 +335,9 @@ def generate_manifest(
         manifest["word_files"].append(file_entry)
 
     if level_metadata:
-        manifest_levels = build_manifest_levels(level_metadata, shipped_levels)
+        manifest_levels = build_manifest_levels(
+            level_metadata, shipped_levels, median_frequency_ranks(frequency_ranks)
+        )
         if manifest_levels:
             manifest["config"]["levels"] = manifest_levels
 

@@ -1,6 +1,7 @@
 #!/usr/bin/python3
 
-"""Routes for curriculum level metadata: names, translations, CEFR, prerequisites.
+"""Routes for curriculum level metadata: names, translations, CEFR, prerequisites,
+series, themes and content flags.
 
 Every level that has words is listed, named or not, because the point of the
 page is to find the unnamed ones. Naming and translating by LLM are queued as
@@ -33,7 +34,7 @@ from storage.crud.curriculum_level import (
     list_curriculum_levels,
     set_curriculum_level,
 )
-from storage.models.curriculum_level import CEFR_LEVELS
+from storage.models.curriculum_level import CEFR_LEVELS, CONTENT_FLAGS, LEVEL_THEMES
 from storage.models.schema import Lemma
 from storage.translation_helpers import get_supported_languages
 from words.level_naming import default_translation_languages, level_word_counts, level_words
@@ -185,6 +186,9 @@ def edit_level(level: int) -> ResponseReturnValue:
         languages=languages,
         language_names=get_supported_languages(),
         cefr_levels=CEFR_LEVELS,
+        level_themes=LEVEL_THEMES,
+        content_flags=CONTENT_FLAGS,
+        min_prerequisite_level=constants.MIN_PREREQUISITE_LEVEL,
         extra_json=json.dumps(meta.get_extra(), ensure_ascii=False, indent=2) if meta else "",
         prerequisites_text=", ".join(str(p) for p in meta.get_prerequisites()) if meta else "",
     )
@@ -205,6 +209,13 @@ def save_level(level: int) -> ResponseReturnValue:
         ]
     except ValueError:
         flash("Prerequisites must be level numbers separated by commas", "error")
+        return redirect(target)
+
+    volume_text = form.get("volume", "").strip()
+    try:
+        volume = int(volume_text) if volume_text else None
+    except ValueError:
+        flash("Volume must be a whole number", "error")
         return redirect(target)
 
     extra_text = form.get("extra", "").strip()
@@ -230,6 +241,10 @@ def save_level(level: int) -> ResponseReturnValue:
             name=form.get("name", ""),
             cefr=form.get("cefr"),
             prerequisites=prerequisites,
+            series=form.get("series", ""),
+            volume=volume,
+            themes=form.getlist("themes"),
+            content_flags=form.getlist("content_flags"),
             extra=extra,
             notes=form.get("notes"),
             translations=translations,

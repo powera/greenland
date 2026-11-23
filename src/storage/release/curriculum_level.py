@@ -6,7 +6,9 @@ per level, in level order:
 
     {"level": 120, "name": "Food & Cooking II",
      "translations": {"es": "Comida y cocina II", "lt": "Maistas ir gaminimas II"},
-     "cefr": "B1", "prerequisites": [100], "extra": {"icon": "🍳"}, "notes": "..."}
+     "cefr": "B1", "prerequisites": [100], "series": "food-and-cooking", "volume": 2,
+     "themes": ["daily-life", "travel"], "content_flags": ["drugs"],
+     "extra": {"icon": "🍳"}, "notes": "..."}
 
 Optional fields are omitted rather than written as ``null`` so a hand-edited
 file stays readable and re-exporting an unchanged database is byte-stable.
@@ -38,6 +40,15 @@ def to_release_record(row: CurriculumLevel) -> Dict[str, Any]:
     prerequisites = row.get_prerequisites()
     if prerequisites:
         record["prerequisites"] = prerequisites
+    if row.series is not None:
+        record["series"] = row.series
+        record["volume"] = row.volume
+    themes = row.get_themes()
+    if themes:
+        record["themes"] = themes
+    flags = row.get_content_flags()
+    if flags:
+        record["content_flags"] = flags
     extra = row.get_extra()
     if extra:
         record["extra"] = extra
@@ -70,13 +81,20 @@ def export_to_release(session: Session, release_dir: Path) -> int:
 
 
 def import_release_record(session: Session, record: Dict[str, Any]) -> CurriculumLevel:
-    """Create or replace one level from a release record."""
+    """Create or replace one level from a release record.
+
+    The record is the whole truth for its level: a field it omits is cleared.
+    """
     return set_curriculum_level(
         session,
         level=int(record["level"]),
         name=str(record.get("name") or ""),
         cefr=record.get("cefr"),
         prerequisites=record.get("prerequisites") or (),
+        series=record.get("series"),
+        volume=record.get("volume"),
+        themes=record.get("themes") or (),
+        content_flags=record.get("content_flags") or (),
         extra=record.get("extra"),
         notes=record.get("notes"),
         translations=record.get("translations") or {},

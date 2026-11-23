@@ -27,14 +27,38 @@ Lithuanian sees the Spanish title.
 JSON columns
 ------------
 ``prerequisites``
-    Sorted list of level numbers that must be completed first. Only the named
-    band needs these (see the band comment in ``constants``): the core is
-    sequential by construction, and the named units are reached by
-    prerequisite rather than by number. Not validated beyond being integers.
+    Sorted list of level numbers that must be completed first. These are
+    *hard*: Trakaido locks the unit until they are done (a client may choose
+    to treat them as advice). Only the named band needs these (see the band
+    comment in ``constants``): the core is sequential by construction, and the
+    named units are reached by prerequisite rather than by number. A
+    prerequisite names a level at or above ``constants.MIN_PREREQUISITE_LEVEL``,
+    and the graph may not have a cycle. The previous volume of a series is an
+    *implied* prerequisite and is not stored here (see below).
+``themes``
+    Ordered list of use-case slugs from ``LEVEL_THEMES``, most relevant first:
+    "is this unit useful for travel / a high-school class / ...". Shipped so
+    the client can suggest units without the learner hunting through 100+.
+``content_flags``
+    Sorted list of slugs from ``CONTENT_FLAGS``, marking units a client may
+    want to hide (weapons, drugs and alcohol, sexual, explicit anatomy).
+    Recorded and shipped; no client filters on them yet.
 ``extra``
     Free-form object for anything Trakaido wants that has not earned a column
-    yet (an icon, a colour). Its keys are merged into the manifest entry, so
-    they may not shadow the columns above.
+    yet. Only the keys in ``storage.crud.curriculum_level.CLIENT_EXTRA_KEYS``
+    are copied into the manifest entry; the rest (editorial bookkeeping such
+    as a CEFR estimate's rationale) stays in the database and the release.
+
+Series
+------
+``series`` and ``volume`` say that a level is one volume of a topic split over
+several levels ("Plants and Growth" is volume 1, "Plants and Growth 2" is
+volume 2). This is the only place that grouping is recorded: names are display
+text and nothing parses their numbers. The manifest export turns it into a
+prerequisite on the previous volume, so a client never offers volume 3 before
+volume 2, and ships both fields so a client can show the series as one row.
+``quality.curriculum_volumes`` also reads it to find interchangeable volumes
+for word placement.
 """
 
 import datetime
@@ -66,6 +90,17 @@ CEFR_LEVELS: tuple[str, ...] = (
     "C2",
 )
 
+# Use-case hints: which units are worth suggesting to a learner with a given
+# goal.  ``school`` means "I'm taking this language in high school" (classroom
+# objects, school subjects, typical textbook units), not academic register --
+# the topic band covers that.
+LEVEL_THEMES: tuple[str, ...] = ("travel", "school", "daily-life", "work", "heritage")
+
+# Content a client may want to filter out.  ``drugs`` includes alcohol.  There
+# is deliberately no general ``violence`` flag: martial arts and contact sports
+# need no filter, and weapons have their own.
+CONTENT_FLAGS: tuple[str, ...] = ("weapons", "drugs", "sexual", "explicit-anatomy")
+
 
 def _decode_json(raw: Optional[str], default: Any) -> Any:
     """Decode a JSON text column, treating NULL or blank as ``default``."""
@@ -92,7 +127,18 @@ class CurriculumLevel(Base):
     # JSON list of level numbers; NULL means none.
     prerequisites: Mapped[Optional[str]] = mapped_column(Text, nullable=True)
 
-    # JSON object merged into the manifest entry; NULL means none.
+    # Series slug (e.g. "plants-and-growth") and this level's 1-based volume
+    # within it; both NULL for a standalone level.
+    series: Mapped[Optional[str]] = mapped_column(String, nullable=True, index=True)
+    volume: Mapped[Optional[int]] = mapped_column(Integer, nullable=True)
+
+    # JSON list of LEVEL_THEMES slugs, most relevant first; NULL means none.
+    themes: Mapped[Optional[str]] = mapped_column(Text, nullable=True)
+
+    # JSON list of CONTENT_FLAGS slugs; NULL means none.
+    content_flags: Mapped[Optional[str]] = mapped_column(Text, nullable=True)
+
+    # JSON object; whitelisted keys are merged into the manifest entry. NULL means none.
     extra: Mapped[Optional[str]] = mapped_column(Text, nullable=True)
 
     # Editorial notes for people curating the course. Shipped to data/release,
@@ -114,6 +160,16 @@ class CurriculumLevel(Base):
     def get_prerequisites(self) -> List[int]:
         """The decoded ``prerequisites`` list (empty when none)."""
         decoded: List[int] = _decode_json(self.prerequisites, [])
+        return decoded
+
+    def get_themes(self) -> List[str]:
+        """The decoded ``themes`` list (empty when none)."""
+        decoded: List[str] = _decode_json(self.themes, [])
+        return decoded
+
+    def get_content_flags(self) -> List[str]:
+        """The decoded ``content_flags`` list (empty when none)."""
+        decoded: List[str] = _decode_json(self.content_flags, [])
         return decoded
 
     def get_extra(self) -> Dict[str, Any]:

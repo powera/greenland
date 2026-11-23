@@ -406,3 +406,27 @@ def test_generate_manifest_omits_levels_without_metadata(tmp_path: Path) -> None
 
     assert success
     assert "levels" not in _load_manifest(manifest_path)["config"]
+
+
+def test_generate_manifest_adds_median_frequency_rank(tmp_path: Path) -> None:
+    """freq_rank is the median of the bundle's word ranks per level, ignoring unranked words."""
+    words = [
+        {"guid": "N01_001", "level": 120, "frequency_rank": 100},
+        {"guid": "N01_002", "level": 120, "frequency_rank": 300},
+        {"guid": "N01_003", "level": 120, "frequency_rank": 90000},
+        {"guid": "N01_004", "level": 120},
+        {"guid": "N01_005", "level": 130},
+    ]
+    _write_json_file(tmp_path / "wireword_levels_100_499.json", json.dumps(words))
+    level_metadata = [
+        {"level": 120, "name": {"en": "Food 2"}},
+        {"level": 130, "name": {"en": "Unranked"}},
+    ]
+
+    success, manifest_path = generate_manifest(str(tmp_path), "lt", level_metadata=level_metadata)
+
+    assert success
+    assert _load_manifest(manifest_path)["config"]["levels"] == [
+        {"level": 120, "name": {"en": "Food 2"}, "freq_rank": 300},
+        {"level": 130, "name": {"en": "Unranked"}},
+    ]
