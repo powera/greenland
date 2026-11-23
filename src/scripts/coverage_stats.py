@@ -1,32 +1,45 @@
 #!/usr/bin/python3
 
-"""Report what fraction of curated lemmas have their translations and grammar facts.
+"""Pipeline progress: what fraction of curated lemmas have each piece of data.
 
-Read-only, and no LLM client is loaded.  Every number comes from a handful of
-bulk column queries (one per table), so the run takes seconds and its memory
-stays at a few sets of lemma ids however large the database grows.  The
-agents' own reports (``voras --coverage``, ``lape2 coverage``) instead walk
-the lemmas one at a time, issuing queries per lemma and language.
+One standardized, read-only report in place of each agent's own coverage mode
+(``voras --coverage``, ``lape2 coverage``, ``papuga --coverage``, ...).  No LLM
+client is loaded, and every number comes from one bulk column query per table,
+so the run takes seconds and its memory stays at a few sets of lemma ids.
 
-The rules match the fill agents, so "missing" here is what a run would ask for:
+The report is one matrix: a row per item, a column per language, and an
+``all`` column for items that are not per-language.  Each cell is the percent
+done among the lemmas the item applies to (``--counts`` shows the number still
+missing instead).  The rules match the agents that fill each item, so
+"missing" is what a run of that agent would work on:
 
-  * Translations follow voras: a lemma is translated in a language when it has
-    a non-blank translation there (English falls back to ``lemma_text``), and a
-    blank translation beside a -1 difficulty override is a deliberate gap,
-    counted as excluded rather than missing.
-  * Grammar facts follow lape2's catalog (``agents.lape2.catalog``): a fact
-    applies to a lemma when its POS and language are in the fact's registry
-    entry and the lemma is translated in that language; it is complete when
-    its completion fact is stored (for override facts, a ``regular`` or
-    ``not_applicable`` status, or ``override`` with the form beside it).
-    Previously uncertain answers count as missing, which lape2 only re-asks
-    with --retry-uncertain.
+  translations  voras: a non-blank translation (English is the lemma itself,
+                so it has no translation row here).  A blank translation beside
+                a -1 difficulty override is a deliberate gap: that lemma is
+                left out of every row for that language.
+  definitions   the English definition, and a disambiguation for each sense
+                whose spelling and POS another curated sense shares.
+                (Per-language definitions are not reported: nothing fills
+                them.)
+  grammar       lape2's catalog (agents.lape2.catalog): a fact applies when its
+                POS and language are in its registry entry and the lemma is
+                translated there; it is done when its completion fact is stored
+                (for override facts, a regular/not_applicable status, or
+                "override" with the form beside it).  Previously uncertain
+                answers count as missing.
+  ipa           papuga: the base form (or the translation row) has both IPA
+                and simplified phonetic pronunciation.
+  audio         served audio: a lemma audio file with a staging or prod URL
+                that is not needs_replacement (pending_review is served);
+                "audio approved" is the reviewed subset.
+
+Per-language items apply only to lemmas translated in that language.  The
+grammar section ends with "every applicable fact": the lemmas with nothing
+left for lape2 to ask in that column.
 
     GREENLAND_TEST_MODE=1 PYTHONPATH=src python src/scripts/coverage_stats.py
     GREENLAND_TEST_MODE=1 PYTHONPATH=src python src/scripts/coverage_stats.py \\
-        --level 1-20 --languages all --section translations
-    GREENLAND_TEST_MODE=1 PYTHONPATH=src python src/scripts/coverage_stats.py \\
-        --pos-type noun --section grammar --grammar-languages fr de
+        --level 1-20 --sections translations audio --counts
 """
 
 import sys
@@ -40,57 +53,68 @@ import contextlib
 import json
 from collections import defaultdict
 from dataclasses import asdict, dataclass, field
-from typing import Dict, List, Optional, Sequence, Set, Tuple
+from typing import Any, Dict, List, Optional, Sequence, Set, Tuple
 
-from sqlalchemy import Select, func, select
-from sqlalchemy.orm import Session
+from sqlalchemy import ColumnElement, Select, func, not_, or_, select
+from sqlalchemy.orm import QueryableAttribute, Session
 
 import constants
 from agents.common.common_args import parse_level_arg
-from agents.lape2.catalog import CATALOG, SPECS, FactSpec
+from agents.lape2.catalog import SPECS, FactSpec
 from storage.backend import create_session
 from storage.backend.config import DataSourceConfig
 from storage.config.lemma_fact_registry import LEMMA_FACT_DEFINITIONS
+from storage.crud.derivative_form import needs_pronunciation_update_filter
 from storage.models.grammar_fact import GrammarFact
 from storage.models.lemma_fact import LemmaFact
-from storage.models.schema import Lemma, LemmaDifficultyOverride, LemmaTranslation
-from storage.translation_helpers import (
-    LANGUAGE_FIELDS,
-    TIER_1_LANGUAGES,
-    TIER_2_LANGUAGES,
-    TIER_3_LANGUAGES,
-    TIER_4_LANGUAGES,
+from storage.models.schema import (
+    AudioQualityReview,
+    DerivativeForm,
+    Lemma,
+    LemmaDifficultyOverride,
+    LemmaTranslation,
 )
-from words.translation_workflow import resolve_generation_languages
+from storage.translation_helpers import LANGUAGE_FIELDS
+from words.translation_workflow import (
+    DEFAULT_POPULATE_LANGUAGES,
+    POPULATE_LANGUAGE_GROUPS,
+    all_populate_languages,
+)
 
-# What lape2 covers when given no --languages: every language some
-# per-language fact is defined for.
-DEFAULT_GRAMMAR_LANGUAGES: List[str] = sorted(
-    {language for spec in SPECS if spec.kind != "concept" for language in spec.languages()}
-)
+SECTIONS = ("translations", "definitions", "grammar", "ipa", "audio")
+
+# The column for items that are not per-language.
+ALL = "all"
 
 # Override facts are complete on one of these statuses, or on "override"
 # with the overriding form stored beside it.
 OVERRIDE_DONE_STATUSES = ("regular", "not_applicable")
 
-
-@dataclass
-class TranslationRow:
-    language: str
-    tier: str
-    translated: int
-    excluded: int
-    missing: int
-    percent: float
+APPROVED_AUDIO_STATUSES = ("approved", "approved_with_issues")
+REJECTED_AUDIO_STATUS = "needs_replacement"
 
 
 @dataclass
-class FactRow:
-    fact_type: str
-    language: Optional[str]
+class Cell:
     applicable: int
-    complete: int
-    percent: float
+    done: int
+
+    @property
+    def missing(self) -> int:
+        return self.applicable - self.done
+
+    @property
+    def percent(self) -> float:
+        return self.done / self.applicable * 100 if self.applicable else 0.0
+
+
+@dataclass
+class Row:
+    section: str
+    item: str
+    # language code (or ALL) -> cell; a language the item does not apply to
+    # has no cell.
+    cells: Dict[str, Cell] = field(default_factory=dict)
 
 
 @dataclass
@@ -98,35 +122,80 @@ class Report:
     lemma_count: int
     level: Optional[str]
     pos_type: Optional[str]
-    translations: List[TranslationRow] = field(default_factory=list)
-    fully_translated: Optional[int] = None
-    facts: List[FactRow] = field(default_factory=list)
-    # language ("concept" for language-independent facts) -> (lemmas with an
-    # applicable fact, of which every applicable fact is complete)
-    fact_readiness: Dict[str, Tuple[int, int]] = field(default_factory=dict)
+    languages: List[str]
+    rows: List[Row] = field(default_factory=list)
 
 
-def tier_of(language: str) -> str:
-    """The tier name a language is served at, for the report's tier column."""
-    for name, members in (
-        ("1", TIER_1_LANGUAGES),
-        ("2", TIER_2_LANGUAGES),
-        ("3", TIER_3_LANGUAGES),
-        ("4", TIER_4_LANGUAGES),
-    ):
-        if language in members:
-            return name
-    return "-"
+@dataclass
+class Selection:
+    """The curated lemmas in scope, and what every section shares about them."""
+
+    lemma_ids: Select[Tuple[int]]
+    pos: Dict[int, str]
+    # language -> lemmas with a word there; "en" is every lemma
+    translated: Dict[str, Set[int]]
+    # language -> lemmas deliberately left without a word there (-1, blank)
+    excluded: Dict[str, Set[int]]
 
 
-def percent(part: int, whole: int) -> float:
-    return part / whole * 100 if whole else 0.0
+class Tally:
+    """Collects rows and, per column, which lemmas still have a gap in the section."""
+
+    def __init__(self) -> None:
+        self.rows: List[Row] = []
+        self.applicable: Dict[str, Set[int]] = defaultdict(set)
+        self.gaps: Dict[str, Set[int]] = defaultdict(set)
+
+    def add(self, section: str, item: str, cells: Dict[str, Tuple[Set[int], Set[int]]]) -> None:
+        """Record a row from language -> (applicable ids, done ids)."""
+        row = Row(section, item)
+        for language, (applicable, done) in cells.items():
+            if not applicable:
+                continue
+            complete = applicable & done
+            row.cells[language] = Cell(len(applicable), len(complete))
+            self.applicable[language] |= applicable
+            self.gaps[language] |= applicable - complete
+        if row.cells:
+            self.rows.append(row)
+
+    def reset(self) -> None:
+        """Start the next summary from here."""
+        self.applicable.clear()
+        self.gaps.clear()
+
+    def summarize(self, section: str, item: str) -> None:
+        """Add a row of lemmas with every item recorded since the last reset done."""
+        row = Row(section, item)
+        for language, ids in self.applicable.items():
+            row.cells[language] = Cell(len(ids), len(ids - self.gaps[language]))
+        self.rows.append(row)
+        self.reset()
+
+
+def resolve_languages(requested: Optional[Sequence[str]]) -> List[str]:
+    """English plus voras's languages: tiers 1-2 by default, 'all' for 1-3, or groups."""
+    codes: List[str] = []
+    for code in requested or ["en", *DEFAULT_POPULATE_LANGUAGES]:
+        lowered = code.strip().lower()
+        if lowered == "all":
+            codes.extend(["en", *all_populate_languages()])
+        else:
+            codes.extend(POPULATE_LANGUAGE_GROUPS.get(lowered, [lowered]))
+    unknown = sorted(set(codes) - set(LANGUAGE_FIELDS))
+    if unknown:
+        raise ValueError(f"Unknown language codes: {', '.join(unknown)}")
+    return list(dict.fromkeys(codes))
+
+
+def nonblank(column: QueryableAttribute[Any]) -> ColumnElement[bool]:
+    return func.trim(column) != ""
 
 
 def curated_lemma_ids(
     min_level: Optional[int], max_level: Optional[int], pos_type: Optional[str]
 ) -> Select[Tuple[int]]:
-    """The selection voras and lape2 work over: curated (GUID) lemmas, filtered."""
+    """The selection the agents work over: curated (GUID) lemmas, filtered."""
     query = select(Lemma.id).where(Lemma.guid.isnot(None))
     if min_level is not None:
         query = query.where(Lemma.difficulty_level >= min_level)
@@ -137,140 +206,95 @@ def curated_lemma_ids(
     return query
 
 
-def load_lemma_pos(session: Session, lemma_ids: Select[Tuple[int]]) -> Dict[int, str]:
-    rows = session.execute(
-        select(Lemma.id, Lemma.pos_type).where(Lemma.id.in_(lemma_ids.scalar_subquery()))
-    )
-    return {lemma_id: pos or "" for lemma_id, pos in rows}
+def in_selection(
+    column: QueryableAttribute[Any], lemma_ids: Select[Tuple[int]]
+) -> ColumnElement[bool]:
+    return column.in_(lemma_ids.scalar_subquery())
 
 
-def load_translated(
+def load_selection(
     session: Session, lemma_ids: Select[Tuple[int]], languages: Sequence[str]
-) -> Dict[str, Set[int]]:
-    """Language -> ids of the selected lemmas translated in it, as get_translation reads it."""
-    field_to_code = {LANGUAGE_FIELDS[code][0]: code for code in languages}
+) -> Selection:
+    pos = {
+        lemma_id: pos_type or ""
+        for lemma_id, pos_type in session.execute(
+            select(Lemma.id, Lemma.pos_type).where(in_selection(Lemma.id, lemma_ids))
+        )
+    }
+    field_to_code = {LANGUAGE_FIELDS[code][0]: code for code in languages if code != "en"}
     translated: Dict[str, Set[int]] = {code: set() for code in languages}
-    rows = session.execute(
+    if "en" in translated:
+        translated["en"] = set(pos)
+    for lemma_id, field_name in session.execute(
         select(LemmaTranslation.lemma_id, LemmaTranslation.language_code).where(
             LemmaTranslation.language_code.in_(list(field_to_code)),
-            LemmaTranslation.lemma_id.in_(lemma_ids.scalar_subquery()),
-            func.trim(LemmaTranslation.translation) != "",
+            in_selection(LemmaTranslation.lemma_id, lemma_ids),
+            nonblank(LemmaTranslation.translation),
         )
-    )
-    for lemma_id, field_name in rows:
+    ):
         translated[field_to_code[field_name]].add(lemma_id)
-    if "en" in translated:
-        # get_translation reads lemma_text when a lemma has no en row at all
-        # (an en row that is present but blank stays blank).
-        en_field = LANGUAGE_FIELDS["en"][0]
-        has_en_row = select(LemmaTranslation.lemma_id).where(
-            LemmaTranslation.language_code == en_field
-        )
-        fallback = session.execute(
-            select(Lemma.id).where(
-                Lemma.id.in_(lemma_ids.scalar_subquery()),
-                Lemma.id.not_in(has_en_row.scalar_subquery()),
-                func.trim(Lemma.lemma_text) != "",
-            )
-        )
-        translated["en"].update(lemma_id for (lemma_id,) in fallback)
-    return translated
-
-
-def load_excluded(
-    session: Session, lemma_ids: Select[Tuple[int]], languages: Sequence[str]
-) -> Dict[str, Set[int]]:
-    """Language -> ids of the selected lemmas with a -1 (excluded) override there."""
     excluded: Dict[str, Set[int]] = {code: set() for code in languages}
-    rows = session.execute(
+    for lemma_id, language in session.execute(
         select(LemmaDifficultyOverride.lemma_id, LemmaDifficultyOverride.language_code).where(
             LemmaDifficultyOverride.difficulty_level == constants.EXCLUDE_DIFFICULTY_LEVEL,
             LemmaDifficultyOverride.language_code.in_(list(languages)),
-            LemmaDifficultyOverride.lemma_id.in_(lemma_ids.scalar_subquery()),
+            in_selection(LemmaDifficultyOverride.lemma_id, lemma_ids),
         )
+    ):
+        if lemma_id not in translated[language]:
+            excluded[language].add(lemma_id)
+    return Selection(lemma_ids, pos, translated, excluded)
+
+
+def add_translations(tally: Tally, selection: Selection, languages: Sequence[str]) -> None:
+    every = set(selection.pos)
+    tally.add(
+        "translations",
+        "translation",
+        {
+            language: (every - selection.excluded[language], selection.translated[language])
+            for language in languages
+            if language != "en"
+        },
     )
-    for lemma_id, language in rows:
-        excluded[language].add(lemma_id)
-    return excluded
 
 
-def translation_rows(
-    languages: Sequence[str],
-    lemma_count: int,
-    translated: Dict[str, Set[int]],
-    excluded: Dict[str, Set[int]],
-) -> List[TranslationRow]:
-    rows = []
-    for language in languages:
-        done = len(translated[language])
-        gaps = len(excluded[language] - translated[language])
-        rows.append(
-            TranslationRow(
-                language=language,
-                tier=tier_of(language),
-                translated=done,
-                excluded=gaps,
-                missing=lemma_count - done - gaps,
-                percent=percent(done, lemma_count - gaps),
+def add_definitions(session: Session, tally: Tally, selection: Selection) -> None:
+    every = set(selection.pos)
+    defined = {
+        lemma_id
+        for (lemma_id,) in session.execute(
+            select(Lemma.id).where(
+                in_selection(Lemma.id, selection.lemma_ids), nonblank(Lemma.definition_text)
             )
         )
-    return rows
+    }
+    tally.add("definitions", "definition (en)", {ALL: (every, defined)})
 
-
-def count_fully_translated(
-    lemma_ids: Set[int],
-    languages: Sequence[str],
-    translated: Dict[str, Set[int]],
-    excluded: Dict[str, Set[int]],
-) -> int:
-    """Lemmas with nothing missing in any of *languages*."""
-    remaining = set(lemma_ids)
-    for language in languages:
-        remaining &= translated[language] | excluded[language]
-    return len(remaining)
-
-
-def load_grammar_facts(
-    session: Session,
-    lemma_ids: Select[Tuple[int]],
-    fact_types: Set[str],
-    languages: Sequence[str],
-) -> Dict[Tuple[str, str], Dict[int, str]]:
-    """(fact_type, language) -> {lemma_id: value} for the non-blank stored facts."""
-    stored: Dict[Tuple[str, str], Dict[int, str]] = defaultdict(dict)
-    rows = session.execute(
-        select(
-            GrammarFact.lemma_id,
-            GrammarFact.language_code,
-            GrammarFact.fact_type,
-            GrammarFact.fact_value,
-        ).where(
-            GrammarFact.fact_type.in_(sorted(fact_types)),
-            GrammarFact.language_code.in_(list(languages)),
-            GrammarFact.lemma_id.in_(lemma_ids.scalar_subquery()),
-            func.trim(GrammarFact.fact_value) != "",
-        )
+    # A spelling shared with a curated sense outside the filter still needs
+    # telling apart, so homonyms are found over every curated lemma.
+    spelling = (func.lower(Lemma.lemma_text), Lemma.pos_type)
+    shared = (
+        select(*spelling)
+        .where(Lemma.guid.isnot(None))
+        .group_by(*spelling)
+        .having(func.count() > 1)
+        .subquery()
     )
-    for lemma_id, language, fact_type, value in rows:
-        stored[(fact_type, language)][lemma_id] = value
-    return stored
-
-
-def load_concept_facts(
-    session: Session, lemma_ids: Select[Tuple[int]], fact_types: Set[str]
-) -> Dict[str, Set[int]]:
-    """fact_type -> ids of the selected lemmas with a non-blank language-free fact."""
-    stored: Dict[str, Set[int]] = defaultdict(set)
-    rows = session.execute(
-        select(LemmaFact.lemma_id, LemmaFact.fact_type).where(
-            LemmaFact.fact_type.in_(sorted(fact_types)),
-            LemmaFact.lemma_id.in_(lemma_ids.scalar_subquery()),
-            func.trim(LemmaFact.fact_value) != "",
+    homonyms: Set[int] = set()
+    disambiguated: Set[int] = set()
+    for lemma_id, has_disambiguation in session.execute(
+        select(Lemma.id, func.coalesce(nonblank(Lemma.disambiguation), False))
+        .join(
+            shared,
+            (func.lower(Lemma.lemma_text) == shared.c[0]) & (Lemma.pos_type == shared.c[1]),
         )
-    )
-    for lemma_id, fact_type in rows:
-        stored[fact_type].add(lemma_id)
-    return stored
+        .where(in_selection(Lemma.id, selection.lemma_ids))
+    ):
+        homonyms.add(lemma_id)
+        if has_disambiguation:
+            disambiguated.add(lemma_id)
+    tally.add("definitions", "disambiguation (homonyms)", {ALL: (homonyms, disambiguated)})
 
 
 def completed_ids(
@@ -288,73 +312,127 @@ def completed_ids(
     }
 
 
-def fact_rows(
-    session: Session,
-    lemma_ids: Select[Tuple[int]],
-    lemma_pos: Dict[int, str],
-    specs: Sequence[FactSpec],
-    languages: Sequence[str],
-    translated: Dict[str, Set[int]],
-) -> Tuple[List[FactRow], Dict[str, Tuple[int, int]]]:
-    language_specs = [spec for spec in specs if spec.kind != "concept"]
-    concept_specs = [spec for spec in specs if spec.kind == "concept"]
-    stored = load_grammar_facts(
-        session,
-        lemma_ids,
-        {spec.completion_type for spec in language_specs}
-        | {spec.fact_type for spec in language_specs if spec.kind == "override"},
-        languages,
-    )
-    concepts = load_concept_facts(session, lemma_ids, {spec.fact_type for spec in concept_specs})
-
-    rows: List[FactRow] = []
-    # language -> lemmas with an applicable fact / lemmas with one missing
-    has_fact: Dict[str, Set[int]] = defaultdict(set)
-    has_gap: Dict[str, Set[int]] = defaultdict(set)
+def add_grammar(
+    session: Session, tally: Tally, selection: Selection, languages: Sequence[str]
+) -> None:
+    language_specs = [spec for spec in SPECS if spec.kind != "concept"]
+    concept_specs = [spec for spec in SPECS if spec.kind == "concept"]
+    fact_types = {spec.completion_type for spec in language_specs} | {
+        spec.fact_type for spec in language_specs if spec.kind == "override"
+    }
+    stored: Dict[Tuple[str, str], Dict[int, str]] = defaultdict(dict)
+    for lemma_id, language, fact_type, value in session.execute(
+        select(
+            GrammarFact.lemma_id,
+            GrammarFact.language_code,
+            GrammarFact.fact_type,
+            GrammarFact.fact_value,
+        ).where(
+            GrammarFact.fact_type.in_(sorted(fact_types)),
+            GrammarFact.language_code.in_(list(languages)),
+            in_selection(GrammarFact.lemma_id, selection.lemma_ids),
+            nonblank(GrammarFact.fact_value),
+        )
+    ):
+        stored[(fact_type, language)][lemma_id] = value
+    tally.reset()
     for spec in language_specs:
-        for language in languages:
-            if language not in spec.languages():
-                continue
-            applicable = {
-                lemma_id
-                for lemma_id in translated[language]
-                if spec.applies(lemma_pos[lemma_id], language)
-            }
-            if not applicable:
-                continue
-            complete = applicable & completed_ids(spec, language, stored)
-            rows.append(
-                FactRow(
-                    spec.fact_type,
-                    language,
-                    len(applicable),
-                    len(complete),
-                    percent(len(complete), len(applicable)),
+        tally.add(
+            "grammar",
+            spec.fact_type,
+            {
+                language: (
+                    {
+                        lemma_id
+                        for lemma_id in selection.translated[language]
+                        if spec.applies(selection.pos[lemma_id], language)
+                    },
+                    completed_ids(spec, language, stored),
                 )
-            )
-            has_fact[language] |= applicable
-            has_gap[language] |= applicable - complete
+                for language in languages
+                if language in spec.languages()
+            },
+        )
+
+    concepts: Dict[str, Set[int]] = defaultdict(set)
+    for lemma_id, fact_type in session.execute(
+        select(LemmaFact.lemma_id, LemmaFact.fact_type).where(
+            LemmaFact.fact_type.in_(sorted(spec.fact_type for spec in concept_specs)),
+            in_selection(LemmaFact.lemma_id, selection.lemma_ids),
+            nonblank(LemmaFact.fact_value),
+        )
+    ):
+        concepts[fact_type].add(lemma_id)
     for spec in concept_specs:
         required_pos = LEMMA_FACT_DEFINITIONS[spec.fact_type].required_pos
-        applicable = {lemma_id for lemma_id, pos in lemma_pos.items() if pos in required_pos}
-        if not applicable:
-            continue
-        complete = applicable & concepts[spec.fact_type]
-        rows.append(
-            FactRow(
-                spec.fact_type,
-                None,
-                len(applicable),
-                len(complete),
-                percent(len(complete), len(applicable)),
-            )
+        applicable = {lemma_id for lemma_id, pos in selection.pos.items() if pos in required_pos}
+        tally.add("grammar", spec.fact_type, {ALL: (applicable, concepts[spec.fact_type])})
+    tally.summarize("grammar", "every applicable fact")
+
+
+def add_ipa(session: Session, tally: Tally, selection: Selection, languages: Sequence[str]) -> None:
+    pronounced: Dict[str, Set[int]] = defaultdict(set)
+    for lemma_id, language in session.execute(
+        select(DerivativeForm.lemma_id, DerivativeForm.language_code).where(
+            DerivativeForm.is_base_form.is_(True),
+            not_(needs_pronunciation_update_filter()),
+            DerivativeForm.language_code.in_(list(languages)),
+            in_selection(DerivativeForm.lemma_id, selection.lemma_ids),
         )
-        has_fact["concept"] |= applicable
-        has_gap["concept"] |= applicable - complete
-    readiness = {
-        language: (len(ids), len(ids - has_gap[language])) for language, ids in has_fact.items()
-    }
-    return rows, readiness
+    ):
+        pronounced[language].add(lemma_id)
+    field_to_code = {LANGUAGE_FIELDS[code][0]: code for code in languages}
+    for lemma_id, field_name in session.execute(
+        select(LemmaTranslation.lemma_id, LemmaTranslation.language_code).where(
+            LemmaTranslation.language_code.in_(list(field_to_code)),
+            nonblank(LemmaTranslation.ipa_pronunciation),
+            nonblank(LemmaTranslation.phonetic_pronunciation),
+            in_selection(LemmaTranslation.lemma_id, selection.lemma_ids),
+        )
+    ):
+        pronounced[field_to_code[field_name]].add(lemma_id)
+    tally.add(
+        "ipa",
+        "ipa + phonetic",
+        {
+            language: (selection.translated[language], pronounced[language])
+            for language in languages
+        },
+    )
+
+
+def add_audio(
+    session: Session, tally: Tally, selection: Selection, languages: Sequence[str]
+) -> None:
+    served: Dict[str, Set[int]] = defaultdict(set)
+    approved: Dict[str, Set[int]] = defaultdict(set)
+    for lemma_id, language, status in session.execute(
+        select(Lemma.id, AudioQualityReview.language_code, AudioQualityReview.status)
+        .join(AudioQualityReview, AudioQualityReview.guid == Lemma.guid)
+        .where(
+            in_selection(Lemma.id, selection.lemma_ids),
+            AudioQualityReview.grammatical_form.is_(None),
+            AudioQualityReview.language_code.in_(list(languages)),
+            AudioQualityReview.status != REJECTED_AUDIO_STATUS,
+            or_(
+                AudioQualityReview.s3_staging_url.isnot(None),
+                AudioQualityReview.s3_prod_url.isnot(None),
+            ),
+        )
+    ):
+        served[language].add(lemma_id)
+        if status in APPROVED_AUDIO_STATUSES:
+            approved[language].add(lemma_id)
+    tally.add(
+        "audio",
+        "audio (served)",
+        {language: (selection.translated[language], served[language]) for language in languages},
+    )
+    tally.add(
+        "audio",
+        "audio (approved)",
+        {language: (selection.translated[language], approved[language]) for language in languages},
+    )
 
 
 def build_report(
@@ -362,32 +440,39 @@ def build_report(
     *,
     level: Optional[str],
     pos_type: Optional[str],
-    translation_languages: Sequence[str],
-    grammar_languages: Sequence[str],
-    specs: Sequence[FactSpec],
+    languages: Sequence[str],
+    sections: Sequence[str],
 ) -> Report:
     min_level, max_level = parse_level_arg(level)
     lemma_ids = curated_lemma_ids(min_level, max_level, pos_type)
-    lemma_pos = load_lemma_pos(session, lemma_ids)
-    report = Report(lemma_count=len(lemma_pos), level=level, pos_type=pos_type)
-    all_languages = list(dict.fromkeys([*translation_languages, *grammar_languages]))
-    translated = load_translated(session, lemma_ids, all_languages)
-    if translation_languages:
-        excluded = load_excluded(session, lemma_ids, translation_languages)
-        report.translations = translation_rows(
-            translation_languages, report.lemma_count, translated, excluded
-        )
-        report.fully_translated = count_fully_translated(
-            set(lemma_pos), translation_languages, translated, excluded
-        )
-    if specs:
-        report.facts, report.fact_readiness = fact_rows(
-            session, lemma_ids, lemma_pos, specs, grammar_languages, translated
-        )
-    return report
+    selection = load_selection(session, lemma_ids, languages)
+    tally = Tally()
+    if "translations" in sections:
+        add_translations(tally, selection, languages)
+    if "definitions" in sections:
+        add_definitions(session, tally, selection)
+    if "grammar" in sections:
+        add_grammar(session, tally, selection, languages)
+    if "ipa" in sections:
+        add_ipa(session, tally, selection, languages)
+    if "audio" in sections:
+        add_audio(session, tally, selection, languages)
+    return Report(
+        lemma_count=len(selection.pos),
+        level=level,
+        pos_type=pos_type,
+        languages=list(languages),
+        rows=tally.rows,
+    )
 
 
-def print_report(report: Report) -> None:
+def format_cell(cell: Optional[Cell], counts: bool) -> str:
+    if cell is None:
+        return f"{'·':>7}"
+    return f"{cell.missing:>7}" if counts else f"{cell.percent:>6.1f}%"
+
+
+def print_report(report: Report, counts: bool) -> None:
     scope = ", ".join(
         part
         for part in (
@@ -397,83 +482,50 @@ def print_report(report: Report) -> None:
         if part
     )
     print(f"Curated lemmas: {report.lemma_count}" + (f" ({scope})" if scope else ""))
-
-    if report.translations:
-        print("\nTRANSLATIONS  (percent = translated / (lemmas - excluded))")
-        print(f"  {'lang':<14}{'tier':>4}{'translated':>12}{'excluded':>10}{'missing':>9}{'%':>8}")
-        for row in report.translations:
-            print(
-                f"  {row.language:<14}{row.tier:>4}{row.translated:>12}{row.excluded:>10}"
-                f"{row.missing:>9}{row.percent:>7.1f}%"
-            )
-        if report.fully_translated is not None:
-            print(
-                f"  Nothing missing in any of these languages: {report.fully_translated}"
-                f"/{report.lemma_count} ({percent(report.fully_translated, report.lemma_count):.1f}%)"
-            )
-
-    if report.facts:
-        print("\nGRAMMAR FACTS  (complete / applicable; applicable needs a translation)")
-        by_fact: Dict[str, List[FactRow]] = defaultdict(list)
-        for fact in report.facts:
-            by_fact[fact.fact_type].append(fact)
-        for fact_type, rows in by_fact.items():
-            complete = sum(row.complete for row in rows)
-            applicable = sum(row.applicable for row in rows)
-            cells = "  ".join(
-                f"{row.language or 'concept'} {row.percent:.0f}% ({row.applicable - row.complete})"
-                for row in rows
-            )
-            print(
-                f"  {fact_type:<26}{percent(complete, applicable):>6.1f}%"
-                f"  missing {applicable - complete:>6}   {cells}"
-            )
-        print("  (per language: percent complete, then missing count in brackets)")
-        print("\n  Lemmas with every applicable fact complete:")
-        for language, (with_facts, ready) in sorted(report.fact_readiness.items()):
-            print(
-                f"    {language:<10}{ready:>7}/{with_facts:<7}{percent(ready, with_facts):>6.1f}%"
-            )
+    print(
+        "Cells: "
+        + (
+            "number still missing"
+            if counts
+            else "percent done among the lemmas the item applies to"
+        )
+        + "; · = does not apply"
+    )
+    columns = [*report.languages, ALL]
+    label_width = 28
+    header = f"{'':<{label_width}}" + "".join(f"{code:>7}" for code in columns) + f"{'missing':>9}"
+    section = ""
+    for row in report.rows:
+        if row.section != section:
+            section = row.section
+            print(f"\n{section.upper()}")
+            print(header)
+        cells = "".join(format_cell(row.cells.get(code), counts) for code in columns)
+        missing = sum(cell.missing for cell in row.cells.values())
+        print(f"  {row.item:<{label_width - 2}}{cells}{missing:>9}")
 
 
 def get_argument_parser() -> argparse.ArgumentParser:
     parser = argparse.ArgumentParser(
-        description="Translation and grammar-fact coverage of curated lemmas (read-only, fast)"
+        description="Pipeline progress for curated lemmas: translations, definitions, "
+        "grammar facts, IPA and audio (read-only, no LLM)"
     )
-    parser.add_argument("--db-path", type=str, default=None, help="SQLite database path")
-    parser.add_argument(
-        "--level", type=str, default=None, help="Difficulty level, e.g. '5' or '1-20'"
-    )
+    parser.add_argument("--level", type=str, default=None, help="Level, e.g. '5' or '1-20'")
     parser.add_argument("--pos-type", type=str, default=None, help="e.g. noun, verb, adjective")
-    parser.add_argument(
-        "--section",
-        choices=("all", "translations", "grammar"),
-        default="all",
-        help="Which report to print (default: both)",
-    )
     parser.add_argument(
         "--languages",
         nargs="+",
         default=None,
-        help="Translation languages, as voras takes them: codes, 'all' (tiers 1-3) or "
-        "'ancient'. Default: tiers 1-2, voras's default",
+        help="Language codes, 'all' (en + tiers 1-3) or 'ancient'. Default: en + tiers 1-2",
     )
     parser.add_argument(
-        "--grammar-languages",
-        nargs="+",
-        choices=DEFAULT_GRAMMAR_LANGUAGES,
-        default=None,
-        help="Grammar-fact languages. Default: every language lape2 covers",
+        "--sections", nargs="+", choices=SECTIONS, default=None, help="Default: all sections"
     )
     parser.add_argument(
-        "--facts",
-        nargs="+",
-        choices=sorted(CATALOG),
-        default=None,
-        help="Only these lape2 facts (default: all)",
+        "--counts", action="store_true", help="Show the number missing instead of percent"
     )
     parser.add_argument("--json", type=str, default=None, help="Also write the report here")
-    parser.add_argument("--debug", action="store_true")
+    parser.add_argument("--db-path", type=str, default=None, help="SQLite database override")
     return parser
 
 
@@ -482,29 +534,21 @@ def main(argv: Optional[List[str]] = None) -> int:
     args = parser.parse_args(argv)
     try:
         parse_level_arg(args.level)
+        languages = resolve_languages(args.languages)
     except ValueError as error:
         parser.error(str(error))
+    sections = [section for section in SECTIONS if section in (args.sections or SECTIONS)]
 
-    translation_languages: List[str] = []
-    if args.section in ("all", "translations"):
-        translation_languages = resolve_generation_languages(args.languages)
-    specs: List[FactSpec] = []
-    grammar_languages: List[str] = []
-    if args.section in ("all", "grammar"):
-        specs = [CATALOG[fact] for fact in args.facts] if args.facts else list(SPECS)
-        grammar_languages = list(args.grammar_languages or DEFAULT_GRAMMAR_LANGUAGES)
-
-    config = DataSourceConfig(sqlite_path=args.db_path, debug=args.debug)
+    config = DataSourceConfig(sqlite_path=args.db_path)
     with contextlib.closing(create_session(config, readonly=True)) as session:
         report = build_report(
             session,
             level=args.level,
             pos_type=args.pos_type,
-            translation_languages=translation_languages,
-            grammar_languages=grammar_languages,
-            specs=specs,
+            languages=languages,
+            sections=sections,
         )
-    print_report(report)
+    print_report(report, args.counts)
     if args.json:
         with open(args.json, "w", encoding="utf-8") as handle:
             json.dump(asdict(report), handle, indent=2, ensure_ascii=False)

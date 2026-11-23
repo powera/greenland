@@ -153,7 +153,7 @@ THEMES: Dict[int, Tuple[str, List[str]]] = {
 
 # level -> (expected English name, content flags)
 CONTENT_FLAGS: Dict[int, Tuple[str, List[str]]] = {
-    172: ("Drinks", ["drugs"]),
+    173: ("Alcoholic Drinks", ["drugs"]),
     204: ("Weapons and Combat", ["weapons"]),
     1011: ("Anatomy and Body Systems", ["explicit-anatomy"]),
     1038: ("War and Diplomacy", ["weapons"]),

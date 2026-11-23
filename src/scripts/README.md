@@ -38,6 +38,7 @@ use `GREENLAND_DISABLE_LLM=1` and back up the database before risky changes.
 - `manage_difficulty_overrides.py`: manage individual overrides and CSV import/export.
 - `import_ancient_translations.py`: import ancient translations from release files.
 - `level_corpus_profile.py`: report the corpus mix of each Trakaido level (read-only).
-- `coverage_stats.py`: fraction of curated lemmas with each translation (voras's
-  rules) and each grammar fact (lape2's catalog), by bulk query in seconds
-  (read-only; use it instead of `voras --coverage` / `lape2 coverage`).
+- `coverage_stats.py`: pipeline progress report — one matrix of what fraction of
+  curated lemmas have translations, definitions, grammar facts, IPA and audio, by
+  language, using each filling agent's rules.  Bulk queries, seconds, read-only;
+  use it instead of the agents' own `--coverage` modes.

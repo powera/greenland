@@ -98,6 +98,7 @@ PARTICIPLE_OVERRIDE_LANGUAGES: Tuple[str, ...] = (
     "de",
     "it",
     "es",
+    "es-419",
     "pt",
     "nl",
     "sv",
@@ -215,7 +216,9 @@ GRAMMAR_FACT_DEFINITIONS: Dict[str, GrammarFactDefinition] = {
     ),
     "verb_reflexivity": GrammarFactDefinition(
         fact_type="verb_reflexivity",
-        languages=("fr", "es", "de", "lt", "it"),
+        # es-419 is asked separately: its verb can be a different word
+        # (salir/irse), so its reflexivity is not es's.
+        languages=("fr", "es", "es-419", "de", "lt", "it"),
         required_pos=("verb",),
         display_label="Verb Reflexivity",
         description="Identify inherently reflexive, optionally reflexive, or non-reflexive verbs",

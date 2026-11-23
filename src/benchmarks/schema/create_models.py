@@ -544,6 +544,29 @@ def create_local_models(postgres_url=None):
         max_benchmark_tier=2,
     )
 
+    # --- Thinking Machines ---
+
+    # 26.4B-total / 3.4B-active looped MoE.  IQ2_XXS (bartowski) is the largest
+    # quant that fits a 16 GB Mac; 3-bit builds start around 11.7 GB.  Needs an
+    # LM Studio llama.cpp runtime with inkling2_loop support (2.80.1 or later).
+    # Loaded through a local model.yaml (powera/inkling-2-mini-iq2) so that
+    # reasoning effort reaches the chat template; the effort itself is fixed in
+    # lmstudio_client.LMSTUDIO_REASONING_EFFORTS.
+    # On a 16 GB M4 with runtime 2.80.1 it ran ~18 tok/s (~8 s/question at
+    # "low") and twice hung mid-generation after 15-55 requests, so only
+    # 0011 and 0023 completed.  Retry after an LM Studio runtime update.
+    _insert_lmstudio_model(
+        s,
+        codename="inkling-2-mini-lms",
+        displayname="Inkling 2 Mini IQ2_XXS (LMStudio)",
+        launch_date="2026-11-20",
+        filesize_mb=10960,
+        license_name="Apache 2.0",
+        lmstudio_model="powera/inkling-2-mini-iq2",
+        lmstudio_model_name="powera/inkling-2-mini-iq2",
+        max_benchmark_tier=2,
+    )
+
 
 def request_lmstudio_install_for_local_models(postgres_url=None):
     """Request LMStudio to install local models from the benchmark model table.
