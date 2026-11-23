@@ -317,7 +317,8 @@ word's curriculum level, never below B1 (A1-B2 words: B1; C1: B2; C2: C1;
 unestimated: B1); see `words.definition_populate.definition_register`.  An
 answer below `--min-confidence` (0.7) is recorded in `uncertain_llm_results`
 and skipped on later runs unless `--retry-uncertain`.  The staged job is
-`workqueue.handlers.words.definitions.DEFINITIONS_JOB`.
+`workqueue.handlers.words.definitions.DEFINITIONS_JOB`; agents never define their
+job themselves, since the registry must not import an agent module.
 
 ### sernas (Synonyms)
 
