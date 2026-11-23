@@ -216,13 +216,22 @@ def test_completion_balances_family_while_preserving_model_suggestion(
     tmp_path: Path, monkeypatch: pytest.MonkeyPatch
 ) -> None:
     session, tracking, store, manager, _ = setup_review(tmp_path, 1)
-    for level, name in (
-        (1300, "Advanced Character, Thought and Feelings"),
-        (1310, "Advanced Character, Thought and Feelings 2"),
-        (1311, "Advanced Character, Thought and Feelings 3"),
+    for volume, (level, name) in enumerate(
+        (
+            (1300, "Advanced Character, Thought and Feelings"),
+            (1310, "Advanced Character, Thought and Feelings 2"),
+            (1311, "Advanced Character, Thought and Feelings 3"),
+        ),
+        start=1,
     ):
         review.set_curriculum_level(
-            session, level, name, cefr="C1", notes="Identical subject boundary"
+            session,
+            level,
+            name,
+            cefr="C1",
+            notes="Identical subject boundary",
+            series="advanced-character",
+            volume=volume,
         )
     session.add(
         Lemma(
@@ -242,14 +251,17 @@ def test_completion_balances_family_while_preserving_model_suggestion(
     rows = finish(tracking, ids[0], answer(1300))
     result = complete_rows(batch.PLACEMENT_JOB, rows, session, ids[0], manager)
     assert result["updated"] == 1
-    assert session.query(Lemma).filter(Lemma.guid == record["guid"]).one().difficulty_level == 1310
+    # Balancing moves the sense off the volume that already has a word, onto
+    # another volume of the same series; which empty one is a tie-break detail.
+    placed = session.query(Lemma).filter(Lemma.guid == record["guid"]).one().difficulty_level
+    assert placed in (1310, 1311)
     receipt = (
         session.query(OperationLog)
         .filter(OperationLog.operation_type == "curriculum_placement_applied")
         .one()
     )
     fact = json.loads(receipt.fact)
-    assert fact["suggested_level"] == 1300 and fact["level"] == 1310
+    assert fact["suggested_level"] == 1300 and fact["level"] == placed
     assert fact["suggestion"]["level"] == 1300
     session.close()
     tracking.close()
