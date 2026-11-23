@@ -82,3 +82,16 @@ GREENLAND_DISABLE_LLM=1 PYTHONPATH=src python migrations/20261101_repair_audio_g
 The migration is safe to rerun and does not upload or delete audio. Future
 subtype changes carry audio references forward in the same transaction as the
 lemma and tombstone; recordings for cleared translations/forms are invalidated.
+
+## Curriculum level series
+
+`20261123_set_level_series.py` records `series`/`volume` on the existing
+multi-volume levels (the five families `quality.curriculum_volumes` used to
+hard-code, plus numbered levels whose first volume exists by name). Each level's
+current name is checked first. Preview, then apply (takes a minor backup), then
+export the levels release from Barsukas:
+
+```bash
+GREENLAND_DISABLE_LLM=1 PYTHONPATH=src python migrations/20261123_set_level_series.py
+GREENLAND_DISABLE_LLM=1 PYTHONPATH=src python migrations/20261123_set_level_series.py --apply
+```

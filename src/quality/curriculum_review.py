@@ -289,7 +289,7 @@ def prepare(
             "explain that sense-level evidence in the reasoning. In uncertainty, prefer "
             "an appropriate advanced unit or no suitable level; do not default downward.\n"
         )
-        context += volume_context()
+        context += volume_context(session)
         context += (
             "\nFor adverbs, distinguish ordinary B1-or-easier units 105/324 from advanced units. "
             "Advanced general manner/usage belongs in 1340/1341; prefer 1342 for degree/focus, "

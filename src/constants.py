@@ -67,6 +67,14 @@ STAGING_DIFFICULTY_LEVEL: int = 1399
 MAX_DIFFICULTY_LEVEL: int = TOPIC_DIFFICULTY_LEVEL_MAX
 EXCLUDE_DIFFICULTY_LEVEL: int = -1
 
+# The lowest level a curriculum-level prerequisite may name.  Prerequisites are
+# hard (Trakaido locks a unit until they are completed), and the client only
+# offers the named band once a learner is well into the core, so naming an
+# early core level would be a prerequisite every learner has already met.
+# Kept a little below the client's cutoff so moving that cutoff does not mean
+# re-curating prerequisites.
+MIN_PREREQUISITE_LEVEL: int = 16
+
 # Wordfreq directories
 WORDFREQ_DATA_DIR = os.path.join(PROJECT_ROOT, "data", "wordfreq")
 WORDFREQ_DB_PATH = os.path.join(WORDFREQ_DATA_DIR, "linguistics.sqlite")

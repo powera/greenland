@@ -129,7 +129,7 @@ def test_level_names_preserve_human_edits_and_rollback() -> None:
             231,
             "Human title",
             cefr="B1",
-            prerequisites=[15],
+            prerequisites=[20],
             notes="Keep this",
             translations={"lt": "Žmogaus vardas"},
         )
