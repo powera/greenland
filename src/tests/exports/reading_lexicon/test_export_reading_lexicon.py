@@ -254,3 +254,77 @@ def test_cli_writes_one_file_per_language(engine: Engine, tmp_path: Path, monkey
         path = tmp_path / f"reading-lexicon.{language}.json"
         document = json.loads(path.read_text(encoding="utf-8"))
         assert document["_meta"]["language"] == language
+
+
+def _seed_native_definitions(engine: Engine) -> None:
+    """Native definitions for "speak": es and fr; "lead" (verb) has fr only."""
+    with Session(engine) as session:
+        rows = {
+            (row.lemma.guid, row.language_code): row
+            for row in session.query(LemmaTranslation).join(Lemma).all()
+        }
+        rows[("V01_002", "es")].definition_text = "Decir palabras con la voz."
+        rows[("V01_002", "fr")].definition_text = "Dire des mots avec la voix."
+        rows[("V01_001", "fr")].definition_text = "Guider un groupe."
+        session.commit()
+
+
+def test_default_definitions_are_english_and_the_text_language(engine: Engine) -> None:
+    _seed(engine)
+    _seed_native_definitions(engine)
+    document = _build(engine, "es")
+    assert document["_meta"]["definition_languages"] == ["en", "es"]
+    speak = document["lemmas"]["V01_002"]["definition"]
+    assert speak == {"en": "definition of speak", "es": "Decir palabras con la voz."}
+    assert list(speak) == ["en", "es"]
+    # No Spanish definition: only English, never an English stand-in under "es".
+    assert document["lemmas"]["V01_001"]["definition"] == {"en": "definition of lead"}
+
+
+def test_english_text_defaults_to_english_definitions_only(engine: Engine) -> None:
+    _seed(engine)
+    _seed_native_definitions(engine)
+    document = _build(engine, "en")
+    assert document["_meta"]["definition_languages"] == ["en"]
+    assert document["lemmas"]["V01_002"]["definition"] == {"en": "definition of speak"}
+
+
+def test_gloss_definitions_add_every_gloss_language(engine: Engine) -> None:
+    _seed(engine)
+    _seed_native_definitions(engine)
+    document = _build(engine, "es", definition_languages=["gloss"])
+    assert document["_meta"]["definition_languages"] == ["en", "es", "fr", "zh", "lt"]
+    assert document["lemmas"]["V01_002"]["definition"] == {
+        "en": "definition of speak",
+        "es": "Decir palabras con la voz.",
+        "fr": "Dire des mots avec la voix.",
+    }
+    assert document["lemmas"]["V01_001"]["definition"]["fr"] == "Guider un groupe."
+
+
+def test_explicit_definition_languages_can_drop_english(engine: Engine) -> None:
+    _seed(engine)
+    _seed_native_definitions(engine)
+    lemmas = _build(engine, "es", definition_languages=["fr"])["lemmas"]
+    assert lemmas["V01_002"]["definition"] == {"fr": "Dire des mots avec la voix."}
+    # A lemma with no definition in any requested language has no key at all.
+    assert "definition" not in lemmas["N01_001"]
+
+
+def test_unknown_definition_language_is_rejected() -> None:
+    with pytest.raises(ValueError, match="xx"):
+        ReadingLexiconExporter(language="es", definition_languages=["en", "xx"])
+
+
+def test_cli_passes_definition_languages(engine: Engine, tmp_path: Path, monkeypatch: Any) -> None:
+    _seed(engine)
+    _seed_native_definitions(engine)
+    monkeypatch.setattr(
+        "exports.reading_lexicon.export_reading_lexicon.create_session",
+        lambda config: Session(engine),
+    )
+    out = tmp_path / "es.json"
+    cli_main(["--language", "es", "--output", str(out), "--definition-languages", "es,fr"])
+    document = json.loads(out.read_text(encoding="utf-8"))
+    assert document["_meta"]["definition_languages"] == ["es", "fr"]
+    assert set(document["lemmas"]["V01_002"]["definition"]) == {"es", "fr"}
