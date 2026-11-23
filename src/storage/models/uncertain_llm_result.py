@@ -37,6 +37,10 @@ TOPIC_TRANSLATION = "translation"
 # The topic of a lemma's generated forms (its paradigm) in ``language_code``.
 TOPIC_FORMS = "forms"
 
+# The topic of a lemma's native definition in ``language_code`` (the
+# LemmaTranslation row's definition_text).  set_definition clears it.
+TOPIC_DEFINITION = "definition"
+
 
 class UncertainLLMResult(Base):
     """A question an LLM answered with too little confidence to store.

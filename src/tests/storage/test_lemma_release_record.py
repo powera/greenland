@@ -30,6 +30,7 @@ from storage.models.schema import (
     LemmaTranslation,
 )
 from storage.release.lemma import (
+    apply_translations,
     build_concept_label,
     decode_db_emoji,
     import_release_record,
@@ -225,6 +226,31 @@ class TestLemmaToReleaseRecord(unittest.TestCase):
             {"translation_status": "descriptive"}, record["translation_metadata"]["lt"]
         )
 
+    def test_a_definition_is_written_beside_a_default_status(self) -> None:
+        """The uninformative-status gate drops the status pair, not the definition."""
+        translation = next(t for t in self.lemma.translations if t.language_code == "fr")
+        translation.translation_status = "conventional"
+        translation.definition_text = "Petit mammifère volant qui sort la nuit."
+
+        record = lemma_to_release_record(self.lemma)
+        self.assertEqual(
+            {"definition": "Petit mammifère volant qui sort la nuit."},
+            record["translation_metadata"]["fr"],
+        )
+
+    def test_a_definition_sits_with_an_informative_status(self) -> None:
+        translation = next(t for t in self.lemma.translations if t.language_code == "lt")
+        translation.definition_text = "Naktinis skraidantis žinduolis."
+
+        self.assertEqual(
+            {
+                "translation_status": "needs_review",
+                "translation_status_note": "checked against LKŽ",
+                "definition": "Naktinis skraidantis žinduolis.",
+            },
+            lemma_to_release_record(self.lemma)["translation_metadata"]["lt"],
+        )
+
 
 class TestRoundTrip(unittest.TestCase):
     """release -> database -> release must be a fixed point."""
@@ -241,7 +267,12 @@ class TestRoundTrip(unittest.TestCase):
                 "translations": {"en": "crane", "lt": "gervė"},
                 "difficulty_level": 5,
                 "disambiguation": {"lt": "paukštis", "en": "bird"},
-                "translation_metadata": {"lt": {"translation_status": "verified"}},
+                "translation_metadata": {
+                    "lt": {
+                        "translation_status": "verified",
+                        "definition": "Didelis ilgakojis paukštis, gyvenantis prie vandens.",
+                    }
+                },
                 "notes": "not the machine",
                 "emoji": [{"type": "unicode", "value": "🐦"}],
             }
@@ -252,6 +283,26 @@ class TestRoundTrip(unittest.TestCase):
             # qid is passed in rather than stored on the lemma, and the original
             # record carries none, so nothing to thread through here.
             self.assertEqual(original, lemma_to_release_record(lemma))
+        finally:
+            session.close()
+
+    def test_reimport_without_a_definition_clears_it(self) -> None:
+        """The release is the source of truth: a definition removed there goes."""
+        session = _make_session()
+        try:
+            record: Dict[str, Any] = {
+                "guid": "N08_005",
+                "pos_type": "noun",
+                "concept_label": "owl",
+                "translations": {"en": "owl", "fr": "hibou"},
+                "translation_metadata": {"fr": {"definition": "Oiseau de nuit."}},
+            }
+            lemma = import_release_record(session, record)
+            session.commit()
+            french = next(t for t in lemma.translations if t.language_code == "fr")
+            self.assertEqual("Oiseau de nuit.", french.definition_text)
+            apply_translations(session, lemma, {**record, "translation_metadata": {}})
+            self.assertIsNone(french.definition_text)
         finally:
             session.close()
 

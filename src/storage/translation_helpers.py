@@ -23,7 +23,7 @@ from sqlalchemy.orm import Session
 
 from storage.crud.uncertain_llm_result import clear_uncertain_llm_result
 from storage.models.schema import AudioQualityReview, Lemma, LemmaTranslation
-from storage.models.uncertain_llm_result import TOPIC_TRANSLATION
+from storage.models.uncertain_llm_result import TOPIC_DEFINITION, TOPIC_TRANSLATION
 
 logger = logging.getLogger(__name__)
 
@@ -985,17 +985,24 @@ def set_definition(
     """
     Set definition for a lemma in the specified language.
 
+    A non-English definition is a native definition of that language's
+    translation (see words.definition_populate), stored on its
+    LemmaTranslation row, so the translation has to exist first.  A blank
+    *definition* clears it.  Any write answers the language's uncertain
+    definition question (TOPIC_DEFINITION), however it was written.
+
     Args:
         session: Database session
         lemma: Lemma object
         lang_code: Language code (e.g., 'es', 'fr', 'zh', 'en')
-        definition: Definition text to set
+        definition: Definition text to set; blank clears a non-English one
 
     Returns:
         Tuple of (old_definition, new_definition)
 
     Raises:
-        ValueError: If lang_code is not supported
+        ValueError: If lang_code is not supported, or a non-English language
+            has no translation row
     """
     if lang_code not in LANGUAGE_FIELDS:
         raise ValueError(f"Unsupported language code: {lang_code}")
@@ -1019,10 +1026,11 @@ def set_definition(
     )
 
     if translation_obj:
-        translation_obj.definition_text = definition
+        translation_obj.definition_text = definition.strip() or None
     else:
         raise ValueError(f"Cannot set definition for {lang_code} without translation")
 
+    clear_uncertain_llm_result(session, TOPIC_DEFINITION, lang_code, lemma_id=lemma.id)
     return old_definition, definition
 
 

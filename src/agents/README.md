@@ -30,6 +30,7 @@ can launch or that back a Barsukas page.
 | **jonvabalis** | firefly | Reviews pending imports that propose a new head word | inline | no | yes |
 | **voras** | spider | Translation coverage/population | queue, batch | yes | yes |
 | **vilkas** | wolf | Word forms (lt, fr, de, es, es-419, pt, en) | queue, batch | yes | partly (mechanical first) |
+| **ezys** | hedgehog | Native definitions for lemma translations (each language's word defined in that language) | inline, batch | no | yes |
 | **papuga** | parrot | Pronunciations (IPA, simplified phonetic) | queue, batch | yes | yes |
 | **sernas** | boar | Synonyms, abbreviations, expanded forms | queue | yes | yes |
 | **lape** | fox | Grammar facts (measure words, gender, declension class, ...) | queue, batch | yes | yes |
@@ -291,6 +292,32 @@ papuga.py --populate --languages fr es --base-forms-only --use-workqueue
 papuga.py --coverage --all-languages
 papuga.py --populate --languages fr --batch                  # OpenAI batches
 ```
+
+### ezys (Native Definitions)
+
+Writes, for each translation of a lemma, the definition a monolingual
+dictionary of that language would give: written in that language, for that
+language's word, in this sense.  It is not a translation of the English
+definition, which (with the sense note) is sent only to pin down the sense.
+English definitions stay on `Lemma.definition_text` and are never generated
+here; the others go on the `LemmaTranslation` row (`definition_text`) and
+round-trip through `translation_metadata` in `data/release`.
+
+```bash
+ezys.py coverage --level 1-20                      # Translated vs defined, per language
+ezys.py preview --guid N08_001 --languages fr lt   # The exact request, no model call
+ezys.py populate --languages fr es zh lt --limit 20
+ezys.py populate --languages fr --batch            # OpenAI batches
+ezys.py populate --languages fr --regenerate       # Overwrite where confident
+```
+
+Only languages with a translation are asked (and not ones excluded by a -1
+override), at most 10 per request.  The register is one CEFR step below the
+word's curriculum level, never below B1 (A1-B2 words: B1; C1: B2; C2: C1;
+unestimated: B1); see `words.definition_populate.definition_register`.  An
+answer below `--min-confidence` (0.7) is recorded in `uncertain_llm_results`
+and skipped on later runs unless `--retry-uncertain`.  The staged job is
+`workqueue.handlers.words.definitions.DEFINITIONS_JOB`.
 
 ### sernas (Synonyms)
 
@@ -589,6 +616,7 @@ Batched today, all through `workqueue/llm_batch.py`:
 - papuga (pronunciations, two stages: forms, then the translation from the
   filled base form);
 - voras (translations);
+- ezys (native definitions);
 - zvirblis and the Barsukas sentence batches (two stages: Phase 1 translation,
   then Phases 2+3 candidate lookup and decomposition; the optional Phase-4
   dependency pass is not part of the job).
