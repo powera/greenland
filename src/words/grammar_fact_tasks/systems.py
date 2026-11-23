@@ -84,6 +84,11 @@ REFLEXIVITY_SYSTEMS: Dict[str, Dict[str, Any]] = {
         "values": ["inherently_reflexive", "optionally_reflexive", "non_reflexive"],
         "description": "se + verb for reflexive forms",
     },
+    "es-419": {
+        "name": "Spanish (Latin America)",
+        "values": ["inherently_reflexive", "optionally_reflexive", "non_reflexive"],
+        "description": "se + verb for reflexive forms",
+    },
     "de": {
         "name": "German",
         "values": ["inherently_reflexive", "optionally_reflexive", "non_reflexive"],
