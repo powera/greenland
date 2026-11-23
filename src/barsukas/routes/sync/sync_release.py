@@ -47,6 +47,7 @@ from storage.release.lemma import (
     decode_db_emoji as _decode_db_emoji,
 )
 from storage.release import lemma as release_lemma
+from storage.release.registry import ENTITY_SPECS
 from storage.release.lemma import (
     lemma_to_release_record,
 )
@@ -88,6 +89,24 @@ _DISAMBIG_PREFIX = "_disambig_"
 def _get_release_dir() -> Path:
     """Get the path to the data/release/lemmas directory."""
     return DEFAULT_RELEASE_DIR
+
+
+def _export_lemma_companions() -> None:
+    """Export what the release CLI exports alongside lemmas (the tombstones).
+
+    These pages write lemmas a few rows at a time rather than through
+    ``export lemmas``, so they apply the registry's ``exports_with`` rule
+    themselves after each successful write or deletion.  Each companion export
+    rewrites its whole file from the database, so running it again is harmless.
+    """
+    release_root = _get_release_dir().parent
+    for companion in ENTITY_SPECS["lemmas"].exports_with:
+        spec = ENTITY_SPECS[companion]
+        try:
+            spec.callable_for("export")(g.db, spec.release_dir(release_root))
+        except Exception as e:  # noqa: BLE001 - surfaced to the user
+            logger.error(f"Release {spec.name} export error: {e}")
+            flash(f"Lemmas were written, but exporting {spec.name} failed: {e}", "error")
 
 
 def _load_release_lemmas(release_dir: Path) -> Dict[str, Dict[str, Any]]:
@@ -423,6 +442,8 @@ def apply_difficulty() -> ResponseReturnValue:
 
     outcome.commit(g.db)
     outcome.write_release(lambda: release_io.apply_field_updates(release_updates))
+    if outcome.updated_release:
+        _export_lemma_companions()
     outcome.flash_summary()
     return redirect(url_for("sync_release.difficulty"))
 
@@ -908,6 +929,10 @@ def apply_removals() -> ResponseReturnValue:
             outcome.record_error(f"Error deleting lemma {lemma_id_str}: {e}")
 
     outcome.commit(g.db)
+    # Each deletion retired its GUID with a tombstone; the release already
+    # lacks the lemma, so the tombstone file is the only release record of it.
+    if outcome.deleted:
+        _export_lemma_companions()
     outcome.flash_summary()
     return redirect(url_for("sync_release.removals"))
 
@@ -1024,6 +1049,7 @@ def export_removals_to_release() -> ResponseReturnValue:
     else:
         if outcome.exported:
             g.db.commit()
+            _export_lemma_companions()
 
     outcome.flash_summary()
     return redirect(url_for("sync_release.removals"))
@@ -1294,6 +1320,8 @@ def apply_changes() -> ResponseReturnValue:
 
     outcome.commit(g.db)
     outcome.write_release(lambda: release_io.apply_field_updates(release_updates))
+    if outcome.updated_release:
+        _export_lemma_companions()
     outcome.flash_summary()
     return redirect(url_for("sync_release.changes"))
 
@@ -1650,6 +1678,8 @@ def apply_translations() -> ResponseReturnValue:
 
     outcome.commit(g.db)
     outcome.write_release(lambda: _apply_release_translation_updates(release_updates))
+    if outcome.updated_release:
+        _export_lemma_companions()
     outcome.flash_summary()
 
     return redirect(url_for("sync_release.translations"))
@@ -2028,6 +2058,8 @@ def apply_secondary_translations() -> ResponseReturnValue:
 
     outcome.commit(g.db)
     outcome.write_release(lambda: _apply_secondary_translation_updates(release_updates))
+    if outcome.updated_release:
+        _export_lemma_companions()
     outcome.flash_summary()
     return redirect(url_for("sync_release.secondary_translations"))
 
