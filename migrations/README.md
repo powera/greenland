@@ -85,13 +85,21 @@ lemma and tombstone; recordings for cleared translations/forms are invalidated.
 
 ## Curriculum level series
 
-`20261123_set_level_series.py` records `series`/`volume` on the existing
-multi-volume levels (the five families `quality.curriculum_volumes` used to
-hard-code, plus numbered levels whose first volume exists by name). Each level's
-current name is checked first. Preview, then apply (takes a minor backup), then
+`20261123_set_level_series.py` records `series`/`volume` on 70 multi-volume
+levels (the five families `quality.curriculum_volumes` used to hard-code,
+numbered levels, and advanced/"II" continuations). Each level's current name is
+checked first.
+
+`20261123_tag_level_themes.py` sets first-pass themes on 103 levels and content
+flags on 6. Levels already tagged are left alone; renamed levels are skipped
+with a warning.
+
+Run each as preview, then `--apply` (takes a minor backup), series first, then
 export the levels release from Barsukas:
 
 ```bash
 GREENLAND_DISABLE_LLM=1 PYTHONPATH=src python migrations/20261123_set_level_series.py
 GREENLAND_DISABLE_LLM=1 PYTHONPATH=src python migrations/20261123_set_level_series.py --apply
+GREENLAND_DISABLE_LLM=1 PYTHONPATH=src python migrations/20261123_tag_level_themes.py
+GREENLAND_DISABLE_LLM=1 PYTHONPATH=src python migrations/20261123_tag_level_themes.py --apply
 ```
