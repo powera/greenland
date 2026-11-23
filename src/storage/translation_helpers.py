@@ -1457,6 +1457,49 @@ def bulk_get_translations(
     return {t.lemma_id: t.translation for t in translation_rows}
 
 
+def bulk_get_definitions(session: Session, lemmas: list, lang_code: str) -> Dict[int, str]:
+    """
+    Get definitions in one language for multiple lemmas in a single query.
+
+    English comes from ``Lemma.definition_text`` (see :func:`get_definition`);
+    any other language from its LemmaTranslation row's native definition.
+    Lemmas with no (or a blank) definition are left out.
+
+    Args:
+        session: Database session
+        lemmas: List of Lemma objects
+        lang_code: Language code (e.g., 'en', 'es', 'zh')
+
+    Returns:
+        Dictionary mapping lemma_id to definition text
+
+    Raises:
+        ValueError: If lang_code is not supported
+    """
+    if lang_code not in LANGUAGE_FIELDS:
+        raise ValueError(f"Unsupported language code: {lang_code}")
+    if lang_code == "en":
+        return {
+            lemma.id: lemma.definition_text.strip()
+            for lemma in lemmas
+            if lemma.definition_text and lemma.definition_text.strip()
+        }
+    if not lemmas:
+        return {}
+
+    field_name, _ = LANGUAGE_FIELDS[lang_code]
+    rows = (
+        session.query(LemmaTranslation.lemma_id, LemmaTranslation.definition_text)
+        .filter(
+            LemmaTranslation.lemma_id.in_([lemma.id for lemma in lemmas]),
+            LemmaTranslation.language_code == field_name,
+            LemmaTranslation.definition_text.isnot(None),
+        )
+        .all()
+    )
+    return {lemma_id: text.strip() for lemma_id, text in rows if text and text.strip()}
+
+
 def get_reference_translation(
     session: Session,
     lemma: Lemma,

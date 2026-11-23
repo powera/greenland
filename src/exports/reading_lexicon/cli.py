@@ -18,6 +18,7 @@ from typing import List, Optional
 from agents.common.common_args import add_backend_args, get_data_source_config
 from exports.reading_lexicon.export_reading_lexicon import (
     DEFAULT_GLOSS_LANGUAGES,
+    DEFINITION_LANGUAGES_GLOSS,
     ReadingLexiconExporter,
 )
 
@@ -48,6 +49,15 @@ def main(argv: Optional[List[str]] = None) -> None:
         help="Comma-separated languages to gloss lemmas in (default: %(default)s)",
     )
     parser.add_argument(
+        "--definition-languages",
+        default=None,
+        help=(
+            "Comma-separated languages to ship definitions in (default: en and the text "
+            f"language); '{DEFINITION_LANGUAGES_GLOSS}' means en, the text language and "
+            "every gloss language"
+        ),
+    )
+    parser.add_argument(
         "--include-staging",
         action="store_true",
         help="Also export unreviewed staging-band lemmas",
@@ -76,15 +86,24 @@ def main(argv: Optional[List[str]] = None) -> None:
     gloss_languages = tuple(
         code.strip() for code in args.gloss_languages.split(",") if code.strip()
     )
+    definition_languages = (
+        [code.strip() for code in args.definition_languages.split(",") if code.strip()]
+        if args.definition_languages
+        else None
+    )
     for language in args.language:
         path = args.output or os.path.join(args.output_dir, output_filename(language))
-        exporter = ReadingLexiconExporter(
-            language=language,
-            config=config,
-            gloss_languages=gloss_languages,
-            include_staging=args.include_staging,
-            derive_forms=not args.stored_forms_only,
-        )
+        try:
+            exporter = ReadingLexiconExporter(
+                language=language,
+                config=config,
+                gloss_languages=gloss_languages,
+                include_staging=args.include_staging,
+                derive_forms=not args.stored_forms_only,
+                definition_languages=definition_languages,
+            )
+        except ValueError as error:
+            parser.error(str(error))
         document = exporter.export(path, pretty=args.pretty)
         meta = document["_meta"]
         print(
