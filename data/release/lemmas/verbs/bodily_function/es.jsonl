@@ -16,3 +16,14 @@
 {"guid": "V16_016", "grammar_facts": [{"fact_type": "verb_reflexivity", "fact_value": "non_reflexive"}, {"fact_type": "past_participle", "fact_value": "hecho pis"}]}
 {"guid": "V16_017", "grammar_facts": [{"fact_type": "verb_reflexivity", "fact_value": "inherently_reflexive"}, {"fact_type": "past_participle", "fact_value": "sonreído"}]}
 {"guid": "V16_018", "grammar_facts": [{"fact_type": "verb_reflexivity", "fact_value": "non_reflexive"}, {"fact_type": "past_participle", "fact_value": "gemido"}]}
+{"guid": "V16_019", "grammar_facts": [{"fact_type": "verb_reflexivity", "fact_value": "non_reflexive"}, {"fact_type": "past_participle", "fact_value": "gemido"}]}
+{"guid": "V16_020", "grammar_facts": [{"fact_type": "verb_reflexivity", "fact_value": "non_reflexive"}, {"fact_type": "past_participle", "fact_value": "latido"}]}
+{"guid": "V16_021", "grammar_facts": [{"fact_type": "verb_reflexivity", "fact_value": "inherently_reflexive"}, {"fact_type": "past_participle", "fact_value": "reproducido"}]}
+{"guid": "V16_022", "grammar_facts": [{"fact_type": "verb_reflexivity", "fact_value": "non_reflexive"}, {"fact_type": "past_participle", "fact_value": "escocido"}]}
+{"guid": "V16_023", "grammar_facts": [{"fact_type": "verb_reflexivity", "fact_value": "non_reflexive"}, {"fact_type": "past_participle", "fact_value": "dolido"}]}
+{"guid": "V16_024", "grammar_facts": [{"fact_type": "verb_reflexivity", "fact_value": "inherently_reflexive"}, {"fact_type": "past_participle", "fact_value": "sonrojado"}]}
+{"guid": "V16_025", "grammar_facts": [{"fact_type": "verb_reflexivity", "fact_value": "non_reflexive"}, {"fact_type": "past_participle", "fact_value": "gritado"}]}
+{"guid": "V16_026", "grammar_facts": [{"fact_type": "verb_reflexivity", "fact_value": "non_reflexive"}, {"fact_type": "past_participle", "fact_value": "temblado"}]}
+{"guid": "V16_027", "grammar_facts": [{"fact_type": "verb_reflexivity", "fact_value": "non_reflexive"}, {"fact_type": "past_participle", "fact_value": "llorado"}]}
+{"guid": "V16_028", "grammar_facts": [{"fact_type": "verb_reflexivity", "fact_value": "non_reflexive"}, {"fact_type": "past_participle", "fact_value": "gritado"}]}
+{"guid": "V16_029", "grammar_facts": [{"fact_type": "verb_reflexivity", "fact_value": "non_reflexive"}, {"fact_type": "past_participle", "fact_value": "digerido"}]}

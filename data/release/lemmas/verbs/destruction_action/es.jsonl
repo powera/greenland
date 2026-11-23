@@ -21,4 +21,13 @@
 {"guid": "V03_040", "grammar_facts": [{"fact_type": "verb_reflexivity", "fact_value": "non_reflexive"}, {"fact_type": "past_participle", "fact_value": "cancelado"}]}
 {"guid": "V03_041", "grammar_facts": [{"fact_type": "verb_reflexivity", "fact_value": "non_reflexive"}, {"fact_type": "past_participle", "fact_value": "abolido"}]}
 {"guid": "V03_042", "grammar_facts": [{"fact_type": "verb_reflexivity", "fact_value": "non_reflexive"}, {"fact_type": "past_participle", "fact_value": "desarticulado"}]}
+{"guid": "V03_043", "grammar_facts": [{"fact_type": "verb_reflexivity", "fact_value": "non_reflexive"}, {"fact_type": "past_participle", "fact_value": "destrozado"}]}
+{"guid": "V03_044", "grammar_facts": [{"fact_type": "verb_reflexivity", "fact_value": "non_reflexive"}, {"fact_type": "past_participle", "fact_value": "dañado"}]}
+{"guid": "V03_045", "grammar_facts": [{"fact_type": "verb_reflexivity", "fact_value": "inherently_reflexive"}, {"fact_type": "past_participle", "fact_value": "deshecho"}]}
+{"guid": "V03_046", "grammar_facts": [{"fact_type": "verb_reflexivity", "fact_value": "non_reflexive"}, {"fact_type": "past_participle", "fact_value": "devorado"}]}
+{"guid": "V03_047", "grammar_facts": [{"fact_type": "verb_reflexivity", "fact_value": "non_reflexive"}, {"fact_type": "past_participle", "fact_value": "manchado"}]}
+{"guid": "V03_048", "grammar_facts": [{"fact_type": "verb_reflexivity", "fact_value": "non_reflexive"}, {"fact_type": "past_participle", "fact_value": "socavado"}]}
+{"guid": "V03_049", "grammar_facts": [{"fact_type": "verb_reflexivity", "fact_value": "non_reflexive"}, {"fact_type": "past_participle", "fact_value": "destrozado"}]}
+{"guid": "V03_050", "grammar_facts": [{"fact_type": "verb_reflexivity", "fact_value": "non_reflexive"}, {"fact_type": "past_participle", "fact_value": "molido"}]}
+{"guid": "V03_051", "grammar_facts": [{"fact_type": "verb_reflexivity", "fact_value": "non_reflexive"}, {"fact_type": "past_participle", "fact_value": "desechado"}]}
 {"guid": "V03_052", "grammar_facts": [{"fact_type": "verb_reflexivity", "fact_value": "non_reflexive"}, {"fact_type": "past_participle", "fact_value": "matado"}]}

@@ -10,3 +10,15 @@
 {"guid": "V17_011", "grammar_facts": [{"fact_type": "verb_reflexivity", "fact_value": "non_reflexive"}, {"fact_type": "past_participle", "fact_value": "murmurado"}]}
 {"guid": "V17_012", "grammar_facts": [{"fact_type": "verb_reflexivity", "fact_value": "optionally_reflexive"}, {"fact_type": "past_participle", "fact_value": "podrido"}]}
 {"guid": "V17_013", "grammar_facts": [{"fact_type": "verb_reflexivity", "fact_value": "inherently_reflexive"}, {"fact_type": "past_participle", "fact_value": "oxidado"}]}
+{"guid": "V17_014", "grammar_facts": [{"fact_type": "verb_reflexivity", "fact_value": "non_reflexive"}, {"fact_type": "past_participle", "fact_value": "aullado"}]}
+{"guid": "V17_015", "grammar_facts": [{"fact_type": "verb_reflexivity", "fact_value": "non_reflexive"}, {"fact_type": "past_participle", "fact_value": "eclipsado"}]}
+{"guid": "V17_016", "grammar_facts": [{"fact_type": "verb_reflexivity", "fact_value": "inherently_reflexive"}, {"fact_type": "past_participle", "fact_value": "filtrado"}]}
+{"guid": "V17_017", "grammar_facts": [{"fact_type": "verb_reflexivity", "fact_value": "non_reflexive"}, {"fact_type": "past_participle", "fact_value": "cubierto"}]}
+{"guid": "V17_018", "grammar_facts": [{"fact_type": "verb_reflexivity", "fact_value": "inherently_reflexive"}, {"fact_type": "past_participle", "fact_value": "desatado"}]}
+{"guid": "V17_019", "grammar_facts": [{"fact_type": "verb_reflexivity", "fact_value": "non_reflexive"}, {"fact_type": "past_participle", "fact_value": "florecido"}]}
+{"guid": "V17_020", "grammar_facts": [{"fact_type": "verb_reflexivity", "fact_value": "non_reflexive"}, {"fact_type": "past_participle", "fact_value": "caído"}]}
+{"guid": "V17_021", "grammar_facts": [{"fact_type": "verb_reflexivity", "fact_value": "non_reflexive"}, {"fact_type": "past_participle", "fact_value": "llovido"}]}
+{"guid": "V17_022", "grammar_facts": [{"fact_type": "verb_reflexivity", "fact_value": "non_reflexive"}, {"fact_type": "past_participle", "fact_value": "ardido"}]}
+{"guid": "V17_023", "grammar_facts": [{"fact_type": "verb_reflexivity", "fact_value": "non_reflexive"}, {"fact_type": "past_participle", "fact_value": "resplandecido"}]}
+{"guid": "V17_024", "grammar_facts": [{"fact_type": "verb_reflexivity", "fact_value": "non_reflexive"}, {"fact_type": "past_participle", "fact_value": "florecido"}]}
+{"guid": "V17_025", "grammar_facts": [{"fact_type": "verb_reflexivity", "fact_value": "non_reflexive"}, {"fact_type": "past_participle", "fact_value": "brillado"}]}

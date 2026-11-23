@@ -107,3 +107,6 @@
 {"guid": "N02_110", "translations": {"ms": "anak anjing", "hi": "पिल्ला", "tr": "yavru köpek"}}
 {"guid": "N02_112", "translations": {"ms": "dinosaur", "hi": "डायनासोर", "tr": "dinozor"}}
 {"guid": "N02_113", "translations": {"ms": "kura-kura darat", "hi": "कछुआ", "tr": "kara kaplumbağası"}}
+{"guid": "N02_727", "translations": {"ro": "somon", "pl": "łosoś", "th": "ปลาแซลมอน", "ms": "ikan salmon", "ta": "சால்மன்", "kn": "ಸಾಲ್ಮನ್", "uk": "лосось", "bn": "স্যালমন", "hi": "सालमन", "tr": "somon", "bs": "losos"}}
+{"guid": "N02_728", "translations": {"ro": "ton", "pl": "tuńczyk", "th": "ปลาทูน่า", "ms": "ikan tuna", "ta": "சூரை மீன்", "kn": "ಟ್ಯೂನ", "uk": "тунець", "bn": "টুনা", "hi": "टूना", "tr": "ton balığı", "bs": "tuna"}}
+{"guid": "N02_729", "translations": {"ro": "crevete", "pl": "krewetka", "th": "กุ้ง", "ms": "udang", "ta": "இறால்", "kn": "ಸೀಗಡಿ", "uk": "креветка", "bn": "চিংড়ি", "hi": "झींगा", "tr": "karides", "bs": "škamp"}}

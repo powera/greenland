@@ -37,3 +37,12 @@
 {"guid": "A04_051", "forms": [{"grammatical_form": "adjective/en_positive", "text": "ragged", "is_base_form": true, "ipa": "/ˈræɡɪd/", "phonetic": "RAG-id"}]}
 {"guid": "A04_052", "forms": [{"grammatical_form": "adjective/en_positive", "text": "dense", "is_base_form": true, "ipa": "/dɛns/", "phonetic": "DENS"}]}
 {"guid": "A04_053", "forms": [{"grammatical_form": "adjective/en_positive", "text": "dense", "is_base_form": true, "ipa": "/dɛns/", "phonetic": "DENS"}]}
+{"guid": "A04_054", "forms": [{"grammatical_form": "adjective/en_positive", "text": "wavy", "is_base_form": true, "ipa": "/ˈweɪvi/", "phonetic": "WAY-vee"}]}
+{"guid": "A04_055", "forms": [{"grammatical_form": "adjective/en_positive", "text": "bushy", "is_base_form": true, "ipa": "/ˈbʊʃi/", "phonetic": "BOO-shee"}]}
+{"guid": "A04_056", "forms": [{"grammatical_form": "adjective/en_positive", "text": "freckled", "is_base_form": true, "ipa": "/ˈfrɛkəld/", "phonetic": "FREK-uhld"}]}
+{"guid": "A04_057", "forms": [{"grammatical_form": "adjective/en_positive", "text": "frizzy", "is_base_form": true, "ipa": "/ˈfrɪzi/", "phonetic": "FRIZ-ee"}]}
+{"guid": "A04_058", "forms": [{"grammatical_form": "adjective/en_positive", "text": "spiky", "is_base_form": true, "ipa": "/ˈspaɪki/", "phonetic": "SPY-kee"}]}
+{"guid": "A04_059", "forms": [{"grammatical_form": "adjective/en_positive", "text": "wizened", "is_base_form": true, "ipa": "/ˈwɪzənd/", "phonetic": "WIZ-und"}]}
+{"guid": "A04_060", "forms": [{"grammatical_form": "adjective/en_positive", "text": "pockmarked", "is_base_form": true, "ipa": "/ˈpɑkˌmɑrkt/", "phonetic": "POK-markt"}]}
+{"guid": "A04_061", "forms": [{"grammatical_form": "adjective/en_positive", "text": "hirsute", "is_base_form": true, "ipa": "/ˈhɝˌsut/", "phonetic": "HUR-soot"}]}
+{"guid": "A04_062", "forms": [{"grammatical_form": "adjective/en_positive", "text": "tousled", "is_base_form": true, "ipa": "/ˈtaʊzəld/", "phonetic": "TOW-zuhld"}]}

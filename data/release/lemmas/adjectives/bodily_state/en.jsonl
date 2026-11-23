@@ -48,3 +48,10 @@
 {"guid": "A30_048", "forms": [{"grammatical_form": "adjective/en_positive", "text": "sighted", "is_base_form": true, "ipa": "/ˈsaɪtɪd/", "phonetic": "SY-tid"}]}
 {"guid": "A30_049", "forms": [{"grammatical_form": "adjective/en_positive", "text": "afflicted", "is_base_form": true, "ipa": "/əˈflɪktɪd/", "phonetic": "uh-FLIK-tid"}]}
 {"guid": "A30_050", "forms": [{"grammatical_form": "adjective/en_positive", "text": "voiceless", "is_base_form": true, "ipa": "/ˈvɔɪsləs/", "phonetic": "VOYS-lis"}]}
+{"guid": "A30_051", "forms": [{"grammatical_form": "adjective/en_positive", "text": "overweight", "is_base_form": true, "ipa": "/ˌoʊvərˈweɪt/", "phonetic": "OH-ver-WAYT"}]}
+{"guid": "A30_052", "forms": [{"grammatical_form": "adjective/en_positive", "text": "fit", "is_base_form": true, "ipa": "/fɪt/", "phonetic": "FIT"}]}
+{"guid": "A30_053", "forms": [{"grammatical_form": "adjective/en_positive", "text": "obese", "is_base_form": true, "ipa": "/oʊˈbis/", "phonetic": "oh-BEES"}]}
+{"guid": "A30_054", "forms": [{"grammatical_form": "adjective/en_positive", "text": "short-sighted", "is_base_form": true, "ipa": "/ˌʃɔrtˈsaɪtɪd/", "phonetic": "SHORT-SY-tid"}]}
+{"guid": "A30_055", "forms": [{"grammatical_form": "adjective/en_positive", "text": "emaciated", "is_base_form": true, "ipa": "/ɪˈmeɪʃiˌeɪtɪd/", "phonetic": "ih-MAY-shee-ay-tid"}]}
+{"guid": "A30_056", "forms": [{"grammatical_form": "adjective/en_positive", "text": "careworn", "is_base_form": true, "ipa": "/ˈkɛrˌwɔrn/", "phonetic": "KAIR-worn"}]}
+{"guid": "A30_057", "forms": [{"grammatical_form": "adjective/en_positive", "text": "bleary-eyed", "is_base_form": true, "ipa": "/ˌblɪriˈaɪd/", "phonetic": "BLEER-ee-eyed"}]}

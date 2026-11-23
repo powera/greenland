@@ -181,5 +181,9 @@
 {"guid": "A17_181", "forms": [{"grammatical_form": "adjective/en_positive", "text": "naked", "is_base_form": true, "ipa": "/ˈneɪkɪd/", "phonetic": "NAY-kid"}]}
 {"guid": "A17_182", "forms": [{"grammatical_form": "adjective/en_positive", "text": "naked", "is_base_form": true, "ipa": "/ˈneɪkɪd/", "phonetic": "NAY-kid"}]}
 {"guid": "A17_183", "forms": [{"grammatical_form": "adjective/en_positive", "text": "naked", "is_base_form": true, "ipa": "/ˈneɪkɪd/", "phonetic": "NAY-kid"}]}
+{"guid": "A17_184", "forms": [{"grammatical_form": "adjective/en_positive", "text": "tanned", "is_base_form": true, "ipa": "/tænd/", "phonetic": "TAND"}]}
+{"guid": "A17_185", "forms": [{"grammatical_form": "adjective/en_positive", "text": "unkempt", "is_base_form": true, "ipa": "/ʌnˈkɛmpt/", "phonetic": "un-KEMPT"}]}
+{"guid": "A17_186", "forms": [{"grammatical_form": "adjective/en_positive", "text": "disheveled", "is_base_form": true, "ipa": "/dɪˈʃɛvəld/", "phonetic": "dih-SHEV-uhld"}]}
+{"guid": "A17_187", "forms": [{"grammatical_form": "adjective/en_positive", "text": "bedraggled", "is_base_form": true, "ipa": "/bɪˈdræɡəld/", "phonetic": "bih-DRAG-uhld"}]}
 {"guid": "A27_038", "forms": [{"grammatical_form": "adjective/en_positive", "text": "de facto", "is_base_form": true, "ipa": "/də ˈfæktoʊ/", "phonetic": "duh-FAK-toh"}]}
 {"guid": "A27_042", "forms": [{"grammatical_form": "adjective/en_positive", "text": "de jure", "is_base_form": true}]}

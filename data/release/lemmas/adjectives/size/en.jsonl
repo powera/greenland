@@ -53,3 +53,15 @@
 {"guid": "A01_056", "forms": [{"grammatical_form": "adjective/en_positive", "text": "insignificant", "is_base_form": true, "ipa": "/ˌɪnsɪɡˈnɪfɪkənt/", "phonetic": "in-sig-NIF-uh-kunt"}]}
 {"guid": "A01_057", "forms": [{"grammatical_form": "adjective/en_positive", "text": "biblical", "is_base_form": true, "ipa": "/ˈbɪblɪkəl/", "phonetic": "BIB-li-kuhl"}]}
 {"guid": "A01_058", "forms": [{"grammatical_form": "adjective/en_positive", "text": "compact", "is_base_form": true, "ipa": "/kəmˈpækt/", "phonetic": "kuhm-PAKT"}]}
+{"guid": "A01_059", "forms": [{"grammatical_form": "adjective/en_positive", "text": "skinny", "is_base_form": true, "ipa": "/ˈskɪni/", "phonetic": "SKIN-ee"}]}
+{"guid": "A01_060", "forms": [{"grammatical_form": "adjective/en_positive", "text": "chubby", "is_base_form": true, "ipa": "/ˈtʃʌbi/", "phonetic": "CHUH-bee"}]}
+{"guid": "A01_061", "forms": [{"grammatical_form": "adjective/en_positive", "text": "petite", "is_base_form": true, "ipa": "/pəˈtit/", "phonetic": "puh-TEET"}]}
+{"guid": "A01_062", "forms": [{"grammatical_form": "adjective/en_positive", "text": "lanky", "is_base_form": true, "ipa": "/ˈlæŋki/", "phonetic": "LANG-kee"}]}
+{"guid": "A01_063", "forms": [{"grammatical_form": "adjective/en_positive", "text": "burly", "is_base_form": true, "ipa": "/ˈbɝːli/", "phonetic": "BUR-lee"}]}
+{"guid": "A01_064", "forms": [{"grammatical_form": "adjective/en_positive", "text": "heavyset", "is_base_form": true, "ipa": "/ˌhɛviˈsɛt/", "phonetic": "HEV-ee-set"}]}
+{"guid": "A01_065", "forms": [{"grammatical_form": "adjective/en_positive", "text": "scrawny", "is_base_form": true, "ipa": "/ˈskrɔni/", "phonetic": "SKRAW-nee"}]}
+{"guid": "A01_066", "forms": [{"grammatical_form": "adjective/en_positive", "text": "shoulder-length", "is_base_form": true, "ipa": "/ˈʃoʊldɚˌlɛŋθ/", "phonetic": "SHOHL-der-length"}]}
+{"guid": "A01_067", "forms": [{"grammatical_form": "adjective/en_positive", "text": "gaunt", "is_base_form": true, "ipa": "/ɡɔnt/", "phonetic": "GAWNT"}]}
+{"guid": "A01_068", "forms": [{"grammatical_form": "adjective/en_positive", "text": "strapping", "is_base_form": true, "ipa": "/ˈstræpɪŋ/", "phonetic": "STRAP-ing"}]}
+{"guid": "A01_069", "forms": [{"grammatical_form": "adjective/en_positive", "text": "corpulent", "is_base_form": true, "ipa": "/ˈkɔrpjələnt/", "phonetic": "KOR-pyuh-lent"}]}
+{"guid": "A01_070", "forms": [{"grammatical_form": "adjective/en_positive", "text": "portly", "is_base_form": true, "ipa": "/ˈpɔrtli/", "phonetic": "PORT-lee"}]}

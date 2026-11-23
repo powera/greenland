@@ -38,3 +38,20 @@
 {"guid": "A02_047", "forms": [{"grammatical_form": "adjective/en_positive", "text": "shaded", "is_base_form": true, "ipa": "/ˈʃeɪdɪd/", "phonetic": "SHAY-did"}]}
 {"guid": "A02_048", "forms": [{"grammatical_form": "adjective/en_positive", "text": "silvery", "is_base_form": true, "ipa": "/ˈsɪlvəri/", "phonetic": "SIL-ver-ee"}]}
 {"guid": "A02_049", "forms": [{"grammatical_form": "adjective/en_positive", "text": "wan", "is_base_form": true, "ipa": "/wɑn/", "phonetic": "WAN"}]}
+{"guid": "A02_050", "forms": [{"grammatical_form": "adjective/en_positive", "text": "fair-haired", "is_base_form": true, "ipa": "/ˌfɛr ˈhɛrd/", "phonetic": "FAIR-haird"}]}
+{"guid": "A02_051", "forms": [{"grammatical_form": "adjective/en_positive", "text": "fair", "is_base_form": true, "ipa": "/fɛr/", "phonetic": "FAIR"}]}
+{"guid": "A02_052", "forms": [{"grammatical_form": "adjective/en_positive", "text": "auburn", "is_base_form": true, "ipa": "/ˈɔːbɚn/", "phonetic": "AW-burn"}]}
+{"guid": "A02_053", "forms": [{"grammatical_form": "adjective/en_positive", "text": "hazel", "is_base_form": true, "ipa": "/ˈheɪzəl/", "phonetic": "HAY-zuhl"}]}
+{"guid": "A02_054", "forms": [{"grammatical_form": "adjective/en_positive", "text": "dyed", "is_base_form": true, "ipa": "/daɪd/", "phonetic": "DYED"}]}
+{"guid": "A02_055", "forms": [{"grammatical_form": "adjective/en_positive", "text": "blue-eyed", "is_base_form": true, "ipa": "/ˌbluːˈaɪd/", "phonetic": "BLOO-EYED"}]}
+{"guid": "A02_056", "forms": [{"grammatical_form": "adjective/en_positive", "text": "fair-skinned", "is_base_form": true, "ipa": "/ˌfer ˈskaɪnd/", "phonetic": "FAIR-SKIND"}]}
+{"guid": "A02_057", "forms": [{"grammatical_form": "adjective/en_positive", "text": "dark-skinned", "is_base_form": true, "ipa": "/ˌdɑrk ˈskɪnd/", "phonetic": "DARK-SKIND"}]}
+{"guid": "A02_058", "forms": [{"grammatical_form": "adjective/en_positive", "text": "olive-skinned", "is_base_form": true, "ipa": "/ˈɑlɪvˌskaɪnd/", "phonetic": "AH-liv-SKIND"}]}
+{"guid": "A02_059", "forms": [{"grammatical_form": "adjective/en_positive", "text": "pallid", "is_base_form": true, "ipa": "/ˈpælɪd/", "phonetic": "PAL-id"}]}
+{"guid": "A02_060", "forms": [{"grammatical_form": "adjective/en_positive", "text": "sallow", "is_base_form": true, "ipa": "/ˈsæloʊ/", "phonetic": "SAL-oh"}]}
+{"guid": "A02_061", "forms": [{"grammatical_form": "adjective/en_positive", "text": "swarthy", "is_base_form": true, "ipa": "/ˈswɔrði/", "phonetic": "SWOR-thee"}]}
+{"guid": "A02_062", "forms": [{"grammatical_form": "adjective/en_positive", "text": "florid", "is_base_form": true, "ipa": "/ˈflɔrɪd/", "phonetic": "FLOR-id"}]}
+{"guid": "A02_063", "forms": [{"grammatical_form": "adjective/en_positive", "text": "grizzled", "is_base_form": true, "ipa": "/ˈɡrɪzəld/", "phonetic": "GRIZ-uhld"}]}
+{"guid": "A02_064", "forms": [{"grammatical_form": "adjective/en_positive", "text": "mousy", "is_base_form": true, "ipa": "/ˈmaʊsi/", "phonetic": "MOW-see"}]}
+{"guid": "A02_065", "forms": [{"grammatical_form": "adjective/en_positive", "text": "jet-black", "is_base_form": true, "ipa": "/ˌdʒɛtˈblæk/", "phonetic": "JET-blak"}]}
+{"guid": "A02_066", "forms": [{"grammatical_form": "adjective/en_positive", "text": "strawberry blonde", "is_base_form": true, "ipa": "/ˈstrɔˌbɛri blɑnd/", "phonetic": "STRAW-ber-ee BLOND"}]}

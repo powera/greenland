@@ -42,3 +42,10 @@
 {"guid": "A03_043", "forms": [{"grammatical_form": "adjective/en_positive", "text": "edged", "is_base_form": true, "ipa": "/ɛdʒd/", "phonetic": "EJD"}]}
 {"guid": "A03_044", "forms": [{"grammatical_form": "adjective/en_positive", "text": "ragged", "is_base_form": true, "ipa": "/ˈræɡɪd/", "phonetic": "RAG-id"}]}
 {"guid": "A03_045", "forms": [{"grammatical_form": "adjective/en_positive", "text": "irregular", "is_base_form": true, "ipa": "/ɪˈrɛɡjələr/", "phonetic": "ih-REG-yuh-ler"}]}
+{"guid": "A03_046", "forms": [{"grammatical_form": "adjective/en_positive", "text": "curvy", "is_base_form": true, "ipa": "/ˈkɝvi/", "phonetic": "KUR-vee"}]}
+{"guid": "A03_047", "forms": [{"grammatical_form": "adjective/en_positive", "text": "rotund", "is_base_form": true, "ipa": "/roʊˈtʌnd/", "phonetic": "roh-TUND"}]}
+{"guid": "A03_048", "forms": [{"grammatical_form": "adjective/en_positive", "text": "willowy", "is_base_form": true, "ipa": "/ˈwɪloʊi/", "phonetic": "WIL-oh-ee"}]}
+{"guid": "A03_049", "forms": [{"grammatical_form": "adjective/en_positive", "text": "bow-legged", "is_base_form": true, "ipa": "/ˈboʊˌlɛɡɪd/", "phonetic": "BOH-LEG-id"}]}
+{"guid": "A03_050", "forms": [{"grammatical_form": "adjective/en_positive", "text": "knock-kneed", "is_base_form": true, "ipa": "/ˌnɑkˈnid/", "phonetic": "NOK-need"}]}
+{"guid": "A03_051", "forms": [{"grammatical_form": "adjective/en_positive", "text": "aquiline", "is_base_form": true, "ipa": "/ˈæk.wəˌlaɪn/", "phonetic": "AK-wuh-line"}]}
+{"guid": "A03_052", "forms": [{"grammatical_form": "adjective/en_positive", "text": "snub-nosed", "is_base_form": true, "ipa": "/ˈsnʌbˌnoʊzd/", "phonetic": "SNUB-nohzd"}]}

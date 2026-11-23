@@ -129,7 +129,7 @@
 {"guid": "A18_143", "forms": [{"grammatical_form": "adjective/en_positive", "text": "short-handed", "is_base_form": true, "ipa": "/ˌʃɔrtˈhændɪd/", "phonetic": "short-HAN-did"}]}
 {"guid": "A18_144", "forms": [{"grammatical_form": "adjective/en_positive", "text": "chromatic", "is_base_form": true, "ipa": "/kroʊˈmætɪk/", "phonetic": "kroh-MAT-ik"}]}
 {"guid": "A18_145", "forms": [{"grammatical_form": "adjective/en_positive", "text": "black-and-white", "is_base_form": true, "ipa": "/ˌblæk ən ˈwaɪt/", "phonetic": "black-and-WHITE"}]}
-{"guid": "A18_146", "forms": [{"grammatical_form": "adjective/en_positive", "text": "blond", "is_base_form": true, "ipa": "/blɑnd/", "phonetic": "BLOND"}]}
+{"guid": "A18_146", "forms": [{"grammatical_form": "adjective/en_positive", "text": "blond", "is_base_form": true, "ipa": "/blɑnd/", "phonetic": "BLOND"}], "variants": [{"kind": "spelling", "key": "blonde", "forms": [{"grammatical_form": "adjective/en_positive", "text": "blonde", "is_base_form": true}]}]}
 {"guid": "A18_147", "grammar_facts": [{"fact_type": "gradability", "fact_value": "synthetic"}, {"fact_type": "comparative_status", "fact_value": "regular"}, {"fact_type": "superlative_status", "fact_value": "regular"}]}
 {"guid": "A18_148", "grammar_facts": [{"fact_type": "gradability", "fact_value": "periphrastic"}, {"fact_type": "comparative_status", "fact_value": "regular"}, {"fact_type": "superlative_status", "fact_value": "regular"}]}
 {"guid": "A18_152", "forms": [{"grammatical_form": "adjective/en_positive", "text": "stand-alone", "is_base_form": true}]}
@@ -275,3 +275,13 @@
 {"guid": "A18_292", "forms": [{"grammatical_form": "adjective/en_positive", "text": "shallow", "is_base_form": true, "ipa": "/ˈʃæloʊ/", "phonetic": "SHAL-oh"}]}
 {"guid": "A18_293", "forms": [{"grammatical_form": "adjective/en_positive", "text": "transparent", "is_base_form": true, "ipa": "/trænsˈpɛrənt/", "phonetic": "trans-PAIR-unt"}]}
 {"guid": "A18_294", "forms": [{"grammatical_form": "adjective/en_positive", "text": "uncertain", "is_base_form": true, "ipa": "/ʌnˈsɝtən/", "phonetic": "un-SER-tin"}]}
+{"guid": "A18_295", "forms": [{"grammatical_form": "adjective/en_positive", "text": "stocky", "is_base_form": true, "ipa": "/ˈstɑki/", "phonetic": "STAHK-ee"}]}
+{"guid": "A18_296", "forms": [{"grammatical_form": "adjective/en_positive", "text": "well-built", "is_base_form": true, "ipa": "/ˌwɛl ˈbɪlt/", "phonetic": "WEL-BILT"}]}
+{"guid": "A18_297", "forms": [{"grammatical_form": "adjective/en_positive", "text": "broad-shouldered", "is_base_form": true, "ipa": "/ˌbrɔdˈʃoʊldərd/", "phonetic": "BRAW-d-SHOHL-derd"}]}
+{"guid": "A18_298", "forms": [{"grammatical_form": "adjective/en_positive", "text": "wiry", "is_base_form": true, "ipa": "/ˈwaɪri/", "phonetic": "WY-ree"}]}
+{"guid": "A18_299", "forms": [{"grammatical_form": "adjective/en_positive", "text": "sinewy", "is_base_form": true, "ipa": "/ˈsɪnjuːi/", "phonetic": "SIN-yoo-ee"}]}
+{"guid": "A18_300", "forms": [{"grammatical_form": "adjective/en_positive", "text": "brawny", "is_base_form": true, "ipa": "/ˈbrɔni/", "phonetic": "BRAW-nee"}]}
+{"guid": "A18_301", "forms": [{"grammatical_form": "adjective/en_positive", "text": "lithe", "is_base_form": true, "ipa": "/laɪð/", "phonetic": "LYTHE"}]}
+{"guid": "A18_302", "forms": [{"grammatical_form": "adjective/en_positive", "text": "gangly", "is_base_form": true, "ipa": "/ˈɡæŋɡli/", "phonetic": "GANG-lee"}]}
+{"guid": "A18_303", "forms": [{"grammatical_form": "adjective/en_positive", "text": "buck-toothed", "is_base_form": true, "ipa": "/ˈbʌkˌtuːθt/", "phonetic": "BUK-TOOTHT"}]}
+{"guid": "A18_304", "forms": [{"grammatical_form": "adjective/en_positive", "text": "hoary", "is_base_form": true, "ipa": "/ˈhɔri/", "phonetic": "HOR-ee"}]}

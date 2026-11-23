@@ -115,6 +115,7 @@
 {"guid": "N01_225", "forms": [{"grammatical_form": "noun/en_singular", "text": "alto", "is_base_form": true}]}
 {"guid": "N01_226", "variants": [{"kind": "equivalent", "key": "emigrants", "forms": [{"grammatical_form": "noun/en_singular", "text": "emigrants", "is_base_form": true}]}]}
 {"guid": "N01_227", "variants": [{"kind": "equivalent", "key": "medalists", "forms": [{"grammatical_form": "noun/en_singular", "text": "medalists", "is_base_form": true}]}]}
+{"guid": "N01_230", "variants": [{"kind": "spelling", "key": "blonde", "forms": [{"grammatical_form": "noun/en_singular", "text": "blonde", "is_base_form": true}]}]}
 {"guid": "N01_231", "variants": [{"kind": "equivalent", "key": "student", "forms": [{"grammatical_form": "noun/en_singular", "text": "student", "is_base_form": true}]}]}
 {"guid": "N01_232", "forms": [{"grammatical_form": "noun/en_singular", "text": "person with dwarfism", "is_base_form": true}], "variants": [{"kind": "equivalent", "key": "dwarf", "forms": [{"grammatical_form": "noun/en_singular", "text": "dwarf", "is_base_form": true}]}]}
 {"guid": "N01_235", "forms": [{"grammatical_form": "noun/en_singular", "text": "independent", "is_base_form": true, "ipa": "/ˌɪndɪˈpɛndənt/", "phonetic": "in-duh-PEN-dent"}]}
@@ -349,3 +350,5 @@
 {"guid": "N01_464", "forms": [{"grammatical_form": "noun/en_singular", "text": "witness", "is_base_form": true, "ipa": "/ˈwɪtnəs/", "phonetic": "WIT-niss"}]}
 {"guid": "N01_465", "forms": [{"grammatical_form": "noun/en_singular", "text": "constituent", "is_base_form": true, "ipa": "/kənˈstɪtʃuənt/", "phonetic": "kuhn-STICH-oo-uhnt"}]}
 {"guid": "N01_466", "forms": [{"grammatical_form": "noun/en_singular", "text": "interpreter", "is_base_form": true, "ipa": "/ɪnˈtɝːprɪtɚ/", "phonetic": "in-TUR-pruh-ter"}]}
+{"guid": "N01_467", "forms": [{"grammatical_form": "noun/en_singular", "text": "brunette", "is_base_form": true, "ipa": "/bruˈnɛt/", "phonetic": "broo-NET"}]}
+{"guid": "N01_468", "forms": [{"grammatical_form": "noun/en_singular", "text": "redhead", "is_base_form": true, "ipa": "/ˈrɛdˌhɛd/", "phonetic": "RED-hed"}]}

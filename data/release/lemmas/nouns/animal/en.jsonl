@@ -151,3 +151,547 @@
 {"guid": "N02_183", "forms": [{"grammatical_form": "noun/en_singular", "text": "quarry", "is_base_form": true, "ipa": "/ˈkwɔri/", "phonetic": "KWOR-ee"}]}
 {"guid": "N02_184", "forms": [{"grammatical_form": "noun/en_singular", "text": "stray", "is_base_form": true, "ipa": "/streɪ/", "phonetic": "STRAY"}]}
 {"guid": "N02_185", "forms": [{"grammatical_form": "noun/en_singular", "text": "seal", "is_base_form": true, "ipa": "/sil/", "phonetic": "SEEL"}]}
+{"guid": "N02_186", "forms": [{"grammatical_form": "noun/en_singular", "text": "beaver", "is_base_form": true, "ipa": "/ˈbiːvər/", "phonetic": "BEE-ver"}]}
+{"guid": "N02_187", "forms": [{"grammatical_form": "noun/en_singular", "text": "otter", "is_base_form": true, "ipa": "/ˈɑtər/", "phonetic": "AH-ter"}]}
+{"guid": "N02_188", "forms": [{"grammatical_form": "noun/en_singular", "text": "hedgehog", "is_base_form": true, "ipa": "/ˈhɛdʒˌhɔɡ/", "phonetic": "HEJ-hawg"}]}
+{"guid": "N02_189", "forms": [{"grammatical_form": "noun/en_singular", "text": "raccoon", "is_base_form": true, "ipa": "/ræˈkuːn/", "phonetic": "ra-KOON"}]}
+{"guid": "N02_190", "forms": [{"grammatical_form": "noun/en_singular", "text": "cheetah", "is_base_form": true, "ipa": "/ˈtʃiːtə/", "phonetic": "CHEE-tuh"}]}
+{"guid": "N02_191", "forms": [{"grammatical_form": "noun/en_singular", "text": "koala", "is_base_form": true, "ipa": "/koʊˈɑːlə/", "phonetic": "koh-AH-luh"}]}
+{"guid": "N02_192", "forms": [{"grammatical_form": "noun/en_singular", "text": "hamster", "is_base_form": true, "ipa": "/ˈhæmstər/", "phonetic": "HAM-ster"}]}
+{"guid": "N02_193", "forms": [{"grammatical_form": "noun/en_singular", "text": "reindeer", "is_base_form": true, "ipa": "/ˈreɪnˌdɪr/", "phonetic": "RAYN-deer"}]}
+{"guid": "N02_194", "forms": [{"grammatical_form": "noun/en_singular", "text": "skunk", "is_base_form": true, "ipa": "/skʌŋk/", "phonetic": "SKUNGK"}]}
+{"guid": "N02_195", "forms": [{"grammatical_form": "noun/en_singular", "text": "badger", "is_base_form": true, "ipa": "/ˈbædʒər/", "phonetic": "BAJ-er"}]}
+{"guid": "N02_196", "forms": [{"grammatical_form": "noun/en_singular", "text": "chimpanzee", "is_base_form": true, "ipa": "/ˌtʃɪmpænˈzi/", "phonetic": "CHIM-pan-ZEE"}]}
+{"guid": "N02_197", "forms": [{"grammatical_form": "noun/en_singular", "text": "hyena", "is_base_form": true, "ipa": "/haɪˈiːnə/", "phonetic": "hy-EE-nuh"}]}
+{"guid": "N02_198", "forms": [{"grammatical_form": "noun/en_singular", "text": "jaguar", "is_base_form": true, "ipa": "/ˈdʒæɡwɑr/", "phonetic": "JAG-wahr"}]}
+{"guid": "N02_199", "forms": [{"grammatical_form": "noun/en_singular", "text": "llama", "is_base_form": true, "ipa": "/ˈlɑmə/", "phonetic": "LAH-muh"}]}
+{"guid": "N02_200", "forms": [{"grammatical_form": "noun/en_singular", "text": "walrus", "is_base_form": true, "ipa": "/ˈwɔlrəs/", "phonetic": "WAWL-ruhs"}]}
+{"guid": "N02_201", "forms": [{"grammatical_form": "noun/en_singular", "text": "antelope", "is_base_form": true, "ipa": "/ˈæn.təˌloʊp/", "phonetic": "AN-tuh-lohp"}]}
+{"guid": "N02_202", "forms": [{"grammatical_form": "noun/en_singular", "text": "porcupine", "is_base_form": true, "ipa": "/ˈpɔɹ.kjəˌpaɪn/", "phonetic": "POR-kyuh-pine"}]}
+{"guid": "N02_203", "forms": [{"grammatical_form": "noun/en_singular", "text": "mole", "is_base_form": true, "ipa": "/moʊl/", "phonetic": "MOHL"}]}
+{"guid": "N02_204", "forms": [{"grammatical_form": "noun/en_singular", "text": "sloth", "is_base_form": true, "ipa": "/sloʊθ/", "phonetic": "SLOHTH"}]}
+{"guid": "N02_205", "forms": [{"grammatical_form": "noun/en_singular", "text": "lynx", "is_base_form": true, "ipa": "/lɪŋks/", "phonetic": "LINKS"}]}
+{"guid": "N02_206", "forms": [{"grammatical_form": "noun/en_singular", "text": "ostrich", "is_base_form": true, "ipa": "/ˈɑːstrɪtʃ/", "phonetic": "OS-trich"}]}
+{"guid": "N02_207", "forms": [{"grammatical_form": "noun/en_singular", "text": "robin", "is_base_form": true, "ipa": "/ˈrɑbɪn/", "phonetic": "ROB-in"}]}
+{"guid": "N02_208", "forms": [{"grammatical_form": "noun/en_singular", "text": "turkey", "is_base_form": true, "ipa": "/ˈtɝki/", "phonetic": "TUR-kee"}]}
+{"guid": "N02_209", "forms": [{"grammatical_form": "noun/en_singular", "text": "pelican", "is_base_form": true, "ipa": "/ˈpɛlɪkən/", "phonetic": "PEL-uh-kuhn"}]}
+{"guid": "N02_210", "forms": [{"grammatical_form": "noun/en_singular", "text": "woodpecker", "is_base_form": true, "ipa": "/ˈwʊdˌpɛkər/", "phonetic": "WOOD-peck-er"}]}
+{"guid": "N02_211", "forms": [{"grammatical_form": "noun/en_singular", "text": "vulture", "is_base_form": true, "ipa": "/ˈvʌltʃər/", "phonetic": "VUL-cher"}]}
+{"guid": "N02_212", "forms": [{"grammatical_form": "noun/en_singular", "text": "falcon", "is_base_form": true, "ipa": "/ˈfɔlkən/", "phonetic": "FAWL-kuhn"}]}
+{"guid": "N02_213", "forms": [{"grammatical_form": "noun/en_singular", "text": "canary", "is_base_form": true, "ipa": "/kəˈnɛri/", "phonetic": "kuh-NAIR-ee"}]}
+{"guid": "N02_214", "forms": [{"grammatical_form": "noun/en_singular", "text": "hummingbird", "is_base_form": true, "ipa": "/ˈhʌmɪŋˌbɝd/", "phonetic": "HUM-ing-burd"}]}
+{"guid": "N02_215", "forms": [{"grammatical_form": "noun/en_singular", "text": "stork", "is_base_form": true, "ipa": "/stɔrk/", "phonetic": "STORK"}]}
+{"guid": "N02_216", "forms": [{"grammatical_form": "noun/en_singular", "text": "fly", "is_base_form": true, "ipa": "/flaɪ/", "phonetic": "FLY"}]}
+{"guid": "N02_217", "forms": [{"grammatical_form": "noun/en_singular", "text": "wasp", "is_base_form": true, "ipa": "/wɑsp/", "phonetic": "WOSP"}]}
+{"guid": "N02_218", "forms": [{"grammatical_form": "noun/en_singular", "text": "caterpillar", "is_base_form": true, "ipa": "/ˈkætərˌpɪlər/", "phonetic": "KAT-er-pil-er"}]}
+{"guid": "N02_219", "forms": [{"grammatical_form": "noun/en_singular", "text": "ladybug", "is_base_form": true, "ipa": "/ˈleɪdiˌbʌɡ/", "phonetic": "LAY-dee-bug"}]}
+{"guid": "N02_220", "forms": [{"grammatical_form": "noun/en_singular", "text": "grasshopper", "is_base_form": true, "ipa": "/ˈɡræsˌhɑpər/", "phonetic": "GRASS-hop-er"}]}
+{"guid": "N02_221", "forms": [{"grammatical_form": "noun/en_singular", "text": "dragonfly", "is_base_form": true, "ipa": "/ˈdræɡənˌflaɪ/", "phonetic": "DRAG-uhn-fly"}]}
+{"guid": "N02_222", "forms": [{"grammatical_form": "noun/en_singular", "text": "cockroach", "is_base_form": true, "ipa": "/ˈkɑkˌroʊtʃ/", "phonetic": "KAHK-rohch"}]}
+{"guid": "N02_223", "forms": [{"grammatical_form": "noun/en_singular", "text": "flea", "is_base_form": true, "ipa": "/fliː/", "phonetic": "FLEE"}]}
+{"guid": "N02_224", "forms": [{"grammatical_form": "noun/en_singular", "text": "toad", "is_base_form": true, "ipa": "/toʊd/", "phonetic": "TOHD"}]}
+{"guid": "N02_225", "forms": [{"grammatical_form": "noun/en_singular", "text": "tadpole", "is_base_form": true, "ipa": "/ˈtædˌpoʊl/", "phonetic": "TAD-pohl"}]}
+{"guid": "N02_226", "forms": [{"grammatical_form": "noun/en_singular", "text": "alligator", "is_base_form": true, "ipa": "/ˈælɪˌɡeɪtər/", "phonetic": "AL-uh-gay-ter"}]}
+{"guid": "N02_227", "forms": [{"grammatical_form": "noun/en_singular", "text": "cobra", "is_base_form": true, "ipa": "/ˈkoʊ.brə/", "phonetic": "KOH-bruh"}]}
+{"guid": "N02_228", "forms": [{"grammatical_form": "noun/en_singular", "text": "python", "is_base_form": true, "ipa": "/ˈpaɪθɑn/", "phonetic": "PY-thon"}]}
+{"guid": "N02_229", "forms": [{"grammatical_form": "noun/en_singular", "text": "chameleon", "is_base_form": true, "ipa": "/kəˈmiːliən/", "phonetic": "kuh-MEEL-yun"}]}
+{"guid": "N02_230", "forms": [{"grammatical_form": "noun/en_singular", "text": "eel", "is_base_form": true, "ipa": "/iːl/", "phonetic": "EEL"}]}
+{"guid": "N02_231", "forms": [{"grammatical_form": "noun/en_singular", "text": "goldfish", "is_base_form": true, "ipa": "/ˈɡoʊldˌfɪʃ/", "phonetic": "GOLD-fish"}]}
+{"guid": "N02_232", "forms": [{"grammatical_form": "noun/en_singular", "text": "seahorse", "is_base_form": true, "ipa": "/ˈsiˌhɔrs/", "phonetic": "SEE-hors"}]}
+{"guid": "N02_233", "forms": [{"grammatical_form": "noun/en_singular", "text": "starfish", "is_base_form": true, "ipa": "/ˈstɑɹˌfɪʃ/", "phonetic": "STAR-fish"}]}
+{"guid": "N02_234", "forms": [{"grammatical_form": "noun/en_singular", "text": "squid", "is_base_form": true, "ipa": "/skwɪd/", "phonetic": "SKWID"}]}
+{"guid": "N02_235", "forms": [{"grammatical_form": "noun/en_singular", "text": "slug", "is_base_form": true, "ipa": "/slʌɡ/", "phonetic": "SLUG"}]}
+{"guid": "N02_236", "forms": [{"grammatical_form": "noun/en_singular", "text": "scorpion", "is_base_form": true, "ipa": "/ˈskɔrpiən/", "phonetic": "SKOR-pee-un"}]}
+{"guid": "N02_237", "forms": [{"grammatical_form": "noun/en_singular", "text": "centipede", "is_base_form": true, "ipa": "/ˈsɛntɪˌpid/", "phonetic": "SEN-tuh-peed"}]}
+{"guid": "N02_238", "forms": [{"grammatical_form": "noun/en_singular", "text": "earthworm", "is_base_form": true, "ipa": "/ˈɝːθˌwɝːm/", "phonetic": "URTH-wurm"}]}
+{"guid": "N02_239", "forms": [{"grammatical_form": "noun/en_singular", "text": "armadillo", "is_base_form": true, "ipa": "/ˌɑrməˈdɪloʊ/", "phonetic": "ar-muh-DIL-oh"}]}
+{"guid": "N02_240", "forms": [{"grammatical_form": "noun/en_singular", "text": "anteater", "is_base_form": true, "ipa": "/ˈænˌtiːtər/", "phonetic": "AN-tee-ter"}]}
+{"guid": "N02_241", "forms": [{"grammatical_form": "noun/en_singular", "text": "baboon", "is_base_form": true, "ipa": "/bæˈbun/", "phonetic": "ba-BOON"}]}
+{"guid": "N02_242", "forms": [{"grammatical_form": "noun/en_singular", "text": "chipmunk", "is_base_form": true, "ipa": "/ˈtʃɪpˌmʌŋk/", "phonetic": "CHIP-munk"}]}
+{"guid": "N02_243", "forms": [{"grammatical_form": "noun/en_singular", "text": "coyote", "is_base_form": true, "ipa": "/kaɪˈoʊt/", "phonetic": "ky-OHT"}]}
+{"guid": "N02_244", "forms": [{"grammatical_form": "noun/en_singular", "text": "elk", "is_base_form": true, "ipa": "/ɛlk/", "phonetic": "ELK"}]}
+{"guid": "N02_245", "forms": [{"grammatical_form": "noun/en_singular", "text": "ferret", "is_base_form": true, "ipa": "/ˈfɛrɪt/", "phonetic": "FEH-ruht"}]}
+{"guid": "N02_246", "forms": [{"grammatical_form": "noun/en_singular", "text": "gazelle", "is_base_form": true, "ipa": "/ɡəˈzɛl/", "phonetic": "guh-ZEL"}]}
+{"guid": "N02_247", "forms": [{"grammatical_form": "noun/en_singular", "text": "gerbil", "is_base_form": true, "ipa": "/ˈdʒɝbəl/", "phonetic": "JER-bil"}]}
+{"guid": "N02_248", "forms": [{"grammatical_form": "noun/en_singular", "text": "lemur", "is_base_form": true, "ipa": "/ˈliːmər/", "phonetic": "LEE-mer"}]}
+{"guid": "N02_249", "forms": [{"grammatical_form": "noun/en_singular", "text": "alpaca", "is_base_form": true, "ipa": "/ælˈpækə/", "phonetic": "al-PAK-uh"}]}
+{"guid": "N02_250", "forms": [{"grammatical_form": "noun/en_singular", "text": "meerkat", "is_base_form": true, "ipa": "/ˈmɪrˌkæt/", "phonetic": "MEER-kat"}]}
+{"guid": "N02_251", "forms": [{"grammatical_form": "noun/en_singular", "text": "mongoose", "is_base_form": true, "ipa": "/ˈmɑŋˌɡus/", "phonetic": "MON-goos"}]}
+{"guid": "N02_252", "forms": [{"grammatical_form": "noun/en_singular", "text": "orangutan", "is_base_form": true, "ipa": "/əˈræŋəˌtæn/", "phonetic": "uh-RANG-uh-tan"}]}
+{"guid": "N02_253", "forms": [{"grammatical_form": "noun/en_singular", "text": "panther", "is_base_form": true, "ipa": "/ˈpænθɚ/", "phonetic": "PAN-ther"}]}
+{"guid": "N02_254", "forms": [{"grammatical_form": "noun/en_singular", "text": "porpoise", "is_base_form": true, "ipa": "/ˈpɔrpəs/", "phonetic": "POR-pus"}]}
+{"guid": "N02_255", "forms": [{"grammatical_form": "noun/en_singular", "text": "weasel", "is_base_form": true, "ipa": "/ˈwiːzəl/", "phonetic": "WEE-zuhl"}]}
+{"guid": "N02_256", "forms": [{"grammatical_form": "noun/en_singular", "text": "wolverine", "is_base_form": true, "ipa": "/ˌwʊlvəˈriːn/", "phonetic": "wool-vuh-REEN"}]}
+{"guid": "N02_257", "forms": [{"grammatical_form": "noun/en_singular", "text": "yak", "is_base_form": true, "ipa": "/jæk/", "phonetic": "YAK"}]}
+{"guid": "N02_258", "forms": [{"grammatical_form": "noun/en_singular", "text": "wombat", "is_base_form": true, "ipa": "/ˈwɑmˌbæt/", "phonetic": "WOM-bat"}]}
+{"guid": "N02_259", "forms": [{"grammatical_form": "noun/en_singular", "text": "wallaby", "is_base_form": true, "ipa": "/ˈwɑːləbi/", "phonetic": "WOL-uh-bee"}]}
+{"guid": "N02_260", "forms": [{"grammatical_form": "noun/en_singular", "text": "blue whale", "is_base_form": true, "ipa": "/ˈbluː ˌweɪl/", "phonetic": "BLOO-WAYL"}]}
+{"guid": "N02_261", "forms": [{"grammatical_form": "noun/en_singular", "text": "sea otter", "is_base_form": true, "ipa": "/ˈsiː ˌɑtər/", "phonetic": "SEE OT-er"}]}
+{"guid": "N02_262", "forms": [{"grammatical_form": "noun/en_singular", "text": "jackal", "is_base_form": true, "ipa": "/ˈdʒækəl/", "phonetic": "JAK-uhl"}]}
+{"guid": "N02_263", "forms": [{"grammatical_form": "noun/en_singular", "text": "wild boar", "is_base_form": true, "ipa": "/ˌwaɪld ˈbɔr/", "phonetic": "WYL-d bor"}]}
+{"guid": "N02_264", "forms": [{"grammatical_form": "noun/en_singular", "text": "blackbird", "is_base_form": true, "ipa": "/ˈblækˌbɝd/", "phonetic": "BLAK-burd"}]}
+{"guid": "N02_265", "forms": [{"grammatical_form": "noun/en_singular", "text": "cuckoo", "is_base_form": true, "ipa": "/ˈkʊkuː/", "phonetic": "KOO-koo"}]}
+{"guid": "N02_266", "forms": [{"grammatical_form": "noun/en_singular", "text": "finch", "is_base_form": true, "ipa": "/fɪntʃ/", "phonetic": "FINCH"}]}
+{"guid": "N02_267", "forms": [{"grammatical_form": "noun/en_singular", "text": "heron", "is_base_form": true, "ipa": "/ˈhɛrən/", "phonetic": "HAIR-un"}]}
+{"guid": "N02_268", "forms": [{"grammatical_form": "noun/en_singular", "text": "kingfisher", "is_base_form": true, "ipa": "/ˈkɪŋˌfɪʃər/", "phonetic": "KING-fish-er"}]}
+{"guid": "N02_269", "forms": [{"grammatical_form": "noun/en_singular", "text": "magpie", "is_base_form": true, "ipa": "/ˈmæɡˌpaɪ/", "phonetic": "MAG-pye"}]}
+{"guid": "N02_270", "forms": [{"grammatical_form": "noun/en_singular", "text": "nightingale", "is_base_form": true, "ipa": "/ˈnaɪtɪŋˌɡeɪl/", "phonetic": "NYE-tin-gayl"}]}
+{"guid": "N02_271", "forms": [{"grammatical_form": "noun/en_singular", "text": "pheasant", "is_base_form": true, "ipa": "/ˈfɛzənt/", "phonetic": "FEH-zuhnt"}]}
+{"guid": "N02_272", "forms": [{"grammatical_form": "noun/en_singular", "text": "puffin", "is_base_form": true, "ipa": "/ˈpʌfɪn/", "phonetic": "PUF-in"}]}
+{"guid": "N02_273", "forms": [{"grammatical_form": "noun/en_singular", "text": "toucan", "is_base_form": true, "ipa": "/ˈtuːkæn/", "phonetic": "TOO-kan"}]}
+{"guid": "N02_274", "forms": [{"grammatical_form": "noun/en_singular", "text": "emu", "is_base_form": true, "ipa": "/ˈiːmjuː/", "phonetic": "EE-myoo"}]}
+{"guid": "N02_275", "forms": [{"grammatical_form": "noun/en_singular", "text": "wren", "is_base_form": true, "ipa": "/rɛn/", "phonetic": "REN"}]}
+{"guid": "N02_276", "forms": [{"grammatical_form": "noun/en_singular", "text": "macaw", "is_base_form": true, "ipa": "/məˈkɔː/", "phonetic": "muh-KAW"}]}
+{"guid": "N02_277", "forms": [{"grammatical_form": "noun/en_singular", "text": "condor", "is_base_form": true, "ipa": "/ˈkɑːn.dɔr/", "phonetic": "KON-dor"}]}
+{"guid": "N02_278", "forms": [{"grammatical_form": "noun/en_singular", "text": "iguana", "is_base_form": true, "ipa": "/ɪˈɡwɑnə/", "phonetic": "ih-GWAH-nuh"}]}
+{"guid": "N02_279", "forms": [{"grammatical_form": "noun/en_singular", "text": "gecko", "is_base_form": true, "ipa": "/ˈɡɛkoʊ/", "phonetic": "GEK-oh"}]}
+{"guid": "N02_280", "forms": [{"grammatical_form": "noun/en_singular", "text": "viper", "is_base_form": true, "ipa": "/ˈvaɪpər/", "phonetic": "VY-per"}]}
+{"guid": "N02_281", "forms": [{"grammatical_form": "noun/en_singular", "text": "anaconda", "is_base_form": true, "ipa": "/ˌænəˈkɑndə/", "phonetic": "a-nuh-KON-duh"}]}
+{"guid": "N02_282", "forms": [{"grammatical_form": "noun/en_singular", "text": "salamander", "is_base_form": true, "ipa": "/ˈsæləmændər/", "phonetic": "SAL-uh-man-der"}]}
+{"guid": "N02_283", "forms": [{"grammatical_form": "noun/en_singular", "text": "newt", "is_base_form": true, "ipa": "/nuːt/", "phonetic": "NOOT"}]}
+{"guid": "N02_284", "forms": [{"grammatical_form": "noun/en_singular", "text": "sardine", "is_base_form": true, "ipa": "/sɑrˈdin/", "phonetic": "sar-DEEN"}]}
+{"guid": "N02_285", "forms": [{"grammatical_form": "noun/en_singular", "text": "mackerel", "is_base_form": true, "ipa": "/ˈmækərəl/", "phonetic": "MAK-uh-ruhl"}]}
+{"guid": "N02_286", "forms": [{"grammatical_form": "noun/en_singular", "text": "carp", "is_base_form": true, "ipa": "/kɑrp/", "phonetic": "KARP"}]}
+{"guid": "N02_287", "forms": [{"grammatical_form": "noun/en_singular", "text": "swordfish", "is_base_form": true, "ipa": "/ˈsɔrdˌfɪʃ/", "phonetic": "SORD-fish"}]}
+{"guid": "N02_288", "forms": [{"grammatical_form": "noun/en_singular", "text": "stingray", "is_base_form": true, "ipa": "/ˈstɪŋˌreɪ/", "phonetic": "STING-ray"}]}
+{"guid": "N02_289", "forms": [{"grammatical_form": "noun/en_singular", "text": "piranha", "is_base_form": true, "ipa": "/pɪˈrɑnə/", "phonetic": "puh-RAH-nuh"}]}
+{"guid": "N02_290", "forms": [{"grammatical_form": "noun/en_singular", "text": "clownfish", "is_base_form": true, "ipa": "/ˈklaʊnˌfɪʃ/", "phonetic": "KLOWN-fish"}]}
+{"guid": "N02_291", "forms": [{"grammatical_form": "noun/en_singular", "text": "hornet", "is_base_form": true, "ipa": "/ˈhɔrnət/", "phonetic": "HOR-nit"}]}
+{"guid": "N02_292", "forms": [{"grammatical_form": "noun/en_singular", "text": "bumblebee", "is_base_form": true, "ipa": "/ˈbʌm.bəlˌbi/", "phonetic": "BUM-buhl-bee"}]}
+{"guid": "N02_293", "forms": [{"grammatical_form": "noun/en_singular", "text": "cricket", "is_base_form": true, "ipa": "/ˈkrɪkɪt/", "phonetic": "KRIK-it"}]}
+{"guid": "N02_294", "forms": [{"grammatical_form": "noun/en_singular", "text": "locust", "is_base_form": true, "ipa": "/ˈloʊkəst/", "phonetic": "LOH-kuhst"}]}
+{"guid": "N02_295", "forms": [{"grammatical_form": "noun/en_singular", "text": "termite", "is_base_form": true, "ipa": "/ˈtɝːmaɪt/", "phonetic": "TER-myt"}]}
+{"guid": "N02_296", "forms": [{"grammatical_form": "noun/en_singular", "text": "firefly", "is_base_form": true, "ipa": "/ˈfaɪərˌflaɪ/", "phonetic": "FIRE-fly"}]}
+{"guid": "N02_297", "forms": [{"grammatical_form": "noun/en_singular", "text": "praying mantis", "is_base_form": true, "ipa": "/ˈpreɪɪŋ ˈmæntɪs/", "phonetic": "PRAY-ing MAN-tis"}]}
+{"guid": "N02_298", "forms": [{"grammatical_form": "noun/en_singular", "text": "tarantula", "is_base_form": true, "ipa": "/təˈræntʃələ/", "phonetic": "tuh-RAN-chuh-luh"}]}
+{"guid": "N02_299", "forms": [{"grammatical_form": "noun/en_singular", "text": "prawn", "is_base_form": true, "ipa": "/prɔn/", "phonetic": "PRAWN"}]}
+{"guid": "N02_300", "forms": [{"grammatical_form": "noun/en_singular", "text": "mussel", "is_base_form": true, "ipa": "/ˈmʌsəl/", "phonetic": "MUH-suhl"}]}
+{"guid": "N02_301", "forms": [{"grammatical_form": "noun/en_singular", "text": "leech", "is_base_form": true, "ipa": "/litʃ/", "phonetic": "LEECH"}]}
+{"guid": "N02_302", "forms": [{"grammatical_form": "noun/en_singular", "text": "millipede", "is_base_form": true, "ipa": "/ˈmɪləˌpiːd/", "phonetic": "MIL-uh-peed"}]}
+{"guid": "N02_303", "forms": [{"grammatical_form": "noun/en_singular", "text": "sea urchin", "is_base_form": true, "ipa": "/ˈsiː ˌɝːtʃɪn/", "phonetic": "SEE UR-chin"}]}
+{"guid": "N02_304", "forms": [{"grammatical_form": "noun/en_singular", "text": "reptile", "is_base_form": true, "ipa": "/ˈrɛpˌtaɪl/", "phonetic": "REP-tile"}]}
+{"guid": "N02_305", "forms": [{"grammatical_form": "noun/en_singular", "text": "amphibian", "is_base_form": true, "ipa": "/æmˈfɪbiən/", "phonetic": "am-FIB-ee-un"}]}
+{"guid": "N02_306", "forms": [{"grammatical_form": "noun/en_singular", "text": "rodent", "is_base_form": true, "ipa": "/ˈroʊdənt/", "phonetic": "ROH-dent"}]}
+{"guid": "N02_307", "forms": [{"grammatical_form": "noun/en_singular", "text": "primate", "is_base_form": true, "ipa": "/ˈpraɪˌmeɪt/", "phonetic": "PRY-mayt"}]}
+{"guid": "N02_308", "forms": [{"grammatical_form": "noun/en_singular", "text": "marsupial", "is_base_form": true, "ipa": "/mɑrˈsuːpiəl/", "phonetic": "mar-SOO-pee-uhl"}]}
+{"guid": "N02_309", "forms": [{"grammatical_form": "noun/en_singular", "text": "crustacean", "is_base_form": true, "ipa": "/krʌˈsteɪʃən/", "phonetic": "kruh-STAY-shuhn"}]}
+{"guid": "N02_310", "forms": [{"grammatical_form": "noun/en_singular", "text": "arachnid", "is_base_form": true, "ipa": "/əˈræknɪd/", "phonetic": "uh-RAK-nid"}]}
+{"guid": "N02_311", "forms": [{"grammatical_form": "noun/en_singular", "text": "mollusc", "is_base_form": true, "ipa": "/ˈmɑlɪsk/", "phonetic": "MOL-usk"}]}
+{"guid": "N02_312", "forms": [{"grammatical_form": "noun/en_singular", "text": "carnivore", "is_base_form": true, "ipa": "/ˈkɑrnəˌvɔr/", "phonetic": "KAR-nuh-vor"}]}
+{"guid": "N02_313", "forms": [{"grammatical_form": "noun/en_singular", "text": "herbivore", "is_base_form": true, "ipa": "/ˈɝː.bə.vɔːr/", "phonetic": "ER-buh-vor"}]}
+{"guid": "N02_314", "forms": [{"grammatical_form": "noun/en_singular", "text": "omnivore", "is_base_form": true, "ipa": "/ˈɑːmnɪvɔːr/", "phonetic": "OM-nih-vor"}]}
+{"guid": "N02_315", "forms": [{"grammatical_form": "noun/en_singular", "text": "songbird", "is_base_form": true, "ipa": "/ˈsɔŋˌbɝd/", "phonetic": "SAWNG-burd"}]}
+{"guid": "N02_316", "forms": [{"grammatical_form": "noun/en_singular", "text": "seabird", "is_base_form": true, "ipa": "/ˈsiˌbɝd/", "phonetic": "SEE-burd"}]}
+{"guid": "N02_317", "forms": [{"grammatical_form": "noun/en_singular", "text": "bird of prey", "is_base_form": true, "ipa": "/ˌbɝd əv ˈpreɪ/", "phonetic": "BURD-uhv-PRAY"}]}
+{"guid": "N02_318", "forms": [{"grammatical_form": "noun/en_singular", "text": "invertebrate", "is_base_form": true, "ipa": "/ɪnˈvɝːtəbrət/", "phonetic": "in-VUR-tuh-brut"}]}
+{"guid": "N02_319", "forms": [{"grammatical_form": "noun/en_singular", "text": "chordate", "is_base_form": true, "ipa": "/ˈkɔrˌdeɪt/", "phonetic": "KOR-dayt"}]}
+{"guid": "N02_320", "forms": [{"grammatical_form": "noun/en_singular", "text": "arthropod", "is_base_form": true, "ipa": "/ˈɑrθrəˌpɑd/", "phonetic": "AR-thruh-pod"}]}
+{"guid": "N02_321", "forms": [{"grammatical_form": "noun/en_singular", "text": "myriapod", "is_base_form": true, "ipa": "/ˈmɪriəˌpɑd/", "phonetic": "MEER-ee-uh-pod"}]}
+{"guid": "N02_322", "forms": [{"grammatical_form": "noun/en_singular", "text": "decapod", "is_base_form": true, "ipa": "/ˈdɛkəˌpɑd/", "phonetic": "DEK-uh-pod"}]}
+{"guid": "N02_323", "forms": [{"grammatical_form": "noun/en_singular", "text": "cnidarian", "is_base_form": true, "ipa": "/naɪˈdɛriən/", "phonetic": "nye-DAIR-ee-un"}]}
+{"guid": "N02_324", "forms": [{"grammatical_form": "noun/en_singular", "text": "echinoderm", "is_base_form": true, "ipa": "/ɪˈkaɪnəˌdɝːm/", "phonetic": "ih-KY-nuh-durm"}]}
+{"guid": "N02_325", "forms": [{"grammatical_form": "noun/en_singular", "text": "bivalve", "is_base_form": true, "ipa": "/ˈbaɪˌvælv/", "phonetic": "BYE-valv"}]}
+{"guid": "N02_326", "forms": [{"grammatical_form": "noun/en_singular", "text": "gastropod", "is_base_form": true, "ipa": "/ˈɡæstrəˌpɑd/", "phonetic": "GAS-truh-pod"}]}
+{"guid": "N02_327", "forms": [{"grammatical_form": "noun/en_singular", "text": "cephalopod", "is_base_form": true, "ipa": "/ˈsɛfələˌpɑd/", "phonetic": "seh-FAL-uh-pod"}]}
+{"guid": "N02_328", "forms": [{"grammatical_form": "noun/en_singular", "text": "annelid", "is_base_form": true, "ipa": "/ˈænəlɪd/", "phonetic": "AN-uh-lid"}]}
+{"guid": "N02_329", "forms": [{"grammatical_form": "noun/en_singular", "text": "nematode", "is_base_form": true, "ipa": "/ˈnɛməˌtoʊd/", "phonetic": "NEE-muh-tohd"}]}
+{"guid": "N02_330", "forms": [{"grammatical_form": "noun/en_singular", "text": "tetrapod", "is_base_form": true, "ipa": "/ˈtɛtrəˌpɑd/", "phonetic": "TET-ruh-pod"}]}
+{"guid": "N02_331", "forms": [{"grammatical_form": "noun/en_singular", "text": "cetacean", "is_base_form": true, "ipa": "/sɪˈteɪʃən/", "phonetic": "suh-TAY-shun"}]}
+{"guid": "N02_332", "forms": [{"grammatical_form": "noun/en_singular", "text": "pinniped", "is_base_form": true, "ipa": "/ˈpɪnəˌpɛd/", "phonetic": "PIN-uh-ped"}]}
+{"guid": "N02_333", "forms": [{"grammatical_form": "noun/en_singular", "text": "ungulate", "is_base_form": true, "ipa": "/ˈʌŋɡjələt/", "phonetic": "UNG-yuh-lit"}]}
+{"guid": "N02_334", "forms": [{"grammatical_form": "noun/en_singular", "text": "ruminant", "is_base_form": true, "ipa": "/ˈruːmɪnənt/", "phonetic": "ROO-muh-nuhnt"}]}
+{"guid": "N02_335", "forms": [{"grammatical_form": "noun/en_singular", "text": "monotreme", "is_base_form": true, "ipa": "/ˈmɑnəˌtrim/", "phonetic": "MON-uh-treem"}]}
+{"guid": "N02_336", "forms": [{"grammatical_form": "noun/en_singular", "text": "lagomorph", "is_base_form": true, "ipa": "/ˈlæɡəˌmɔrf/", "phonetic": "LAG-uh-morf"}]}
+{"guid": "N02_337", "forms": [{"grammatical_form": "noun/en_singular", "text": "hominid", "is_base_form": true, "ipa": "/ˈhɑmɪnɪd/", "phonetic": "HOM-uh-nid"}]}
+{"guid": "N02_338", "forms": [{"grammatical_form": "noun/en_singular", "text": "passerine", "is_base_form": true, "ipa": "/ˈpæsəˌraɪn/", "phonetic": "PASS-uh-rine"}]}
+{"guid": "N02_339", "forms": [{"grammatical_form": "noun/en_singular", "text": "sirenian", "is_base_form": true, "ipa": "/səˈrɪniən/", "phonetic": "sih-REE-nee-uhn"}]}
+{"guid": "N02_340", "forms": [{"grammatical_form": "noun/en_singular", "text": "bryozoan", "is_base_form": true, "ipa": "/ˌbraɪ.əˈzoʊ.ən/", "phonetic": "BRY-uh-ZOH-uhn"}]}
+{"guid": "N02_341", "forms": [{"grammatical_form": "noun/en_singular", "text": "aardvark", "is_base_form": true, "ipa": "/ˈɑrdˌvɑrk/", "phonetic": "AHRD-vark"}]}
+{"guid": "N02_342", "forms": [{"grammatical_form": "noun/en_singular", "text": "bobcat", "is_base_form": true, "ipa": "/ˈbɑbˌkæt/", "phonetic": "BAHB-kat"}]}
+{"guid": "N02_343", "forms": [{"grammatical_form": "noun/en_singular", "text": "chinchilla", "is_base_form": true, "ipa": "/tʃɪnˈtʃɪlə/", "phonetic": "chin-CHIL-uh"}]}
+{"guid": "N02_344", "forms": [{"grammatical_form": "noun/en_singular", "text": "dingo", "is_base_form": true, "ipa": "/ˈdɪŋɡoʊ/", "phonetic": "DING-go"}]}
+{"guid": "N02_345", "forms": [{"grammatical_form": "noun/en_singular", "text": "dormouse", "is_base_form": true, "ipa": "/ˈdɔrˌmaʊs/", "phonetic": "DOR-mows"}]}
+{"guid": "N02_346", "forms": [{"grammatical_form": "noun/en_singular", "text": "ermine", "is_base_form": true, "ipa": "/ˈɝːmɪn/", "phonetic": "UR-min"}]}
+{"guid": "N02_347", "forms": [{"grammatical_form": "noun/en_singular", "text": "gibbon", "is_base_form": true, "ipa": "/ˈɡɪbən/", "phonetic": "GIB-un"}]}
+{"guid": "N02_348", "forms": [{"grammatical_form": "noun/en_singular", "text": "wildebeest", "is_base_form": true, "ipa": "/ˈwɪldəˌbiːst/", "phonetic": "WIL-duh-beest"}]}
+{"guid": "N02_349", "forms": [{"grammatical_form": "noun/en_singular", "text": "ibex", "is_base_form": true, "ipa": "/ˈaɪbɛks/", "phonetic": "EYE-beks"}]}
+{"guid": "N02_350", "forms": [{"grammatical_form": "noun/en_singular", "text": "impala", "is_base_form": true, "ipa": "/ɪmˈpɑːlə/", "phonetic": "im-PAH-luh"}]}
+{"guid": "N02_351", "forms": [{"grammatical_form": "noun/en_singular", "text": "manatee", "is_base_form": true, "ipa": "/ˈmænəˌti/", "phonetic": "MAN-uh-tee"}]}
+{"guid": "N02_352", "forms": [{"grammatical_form": "noun/en_singular", "text": "marmot", "is_base_form": true, "ipa": "/ˈmɑrmət/", "phonetic": "MAR-mut"}]}
+{"guid": "N02_353", "forms": [{"grammatical_form": "noun/en_singular", "text": "mink", "is_base_form": true, "ipa": "/mɪŋk/", "phonetic": "MINK"}]}
+{"guid": "N02_354", "forms": [{"grammatical_form": "noun/en_singular", "text": "muskrat", "is_base_form": true, "ipa": "/ˈmʌsˌkræt/", "phonetic": "MUS-krat"}]}
+{"guid": "N02_355", "forms": [{"grammatical_form": "noun/en_singular", "text": "narwhal", "is_base_form": true, "ipa": "/ˈnɑɹwəl/", "phonetic": "NAR-wuhl"}]}
+{"guid": "N02_356", "forms": [{"grammatical_form": "noun/en_singular", "text": "ocelot", "is_base_form": true, "ipa": "/ˈɑːsəˌlɑːt/", "phonetic": "OSS-uh-lot"}]}
+{"guid": "N02_357", "forms": [{"grammatical_form": "noun/en_singular", "text": "opossum", "is_base_form": true, "ipa": "/əˈpɑsəm/", "phonetic": "uh-POS-um"}]}
+{"guid": "N02_358", "forms": [{"grammatical_form": "noun/en_singular", "text": "shrew", "is_base_form": true, "ipa": "/ʃruː/", "phonetic": "SHROO"}]}
+{"guid": "N02_359", "forms": [{"grammatical_form": "noun/en_singular", "text": "stoat", "is_base_form": true, "ipa": "/stoʊt/", "phonetic": "STOHT"}]}
+{"guid": "N02_360", "forms": [{"grammatical_form": "noun/en_singular", "text": "tapir", "is_base_form": true, "ipa": "/ˈteɪpɚ/", "phonetic": "TAY-pur"}]}
+{"guid": "N02_361", "forms": [{"grammatical_form": "noun/en_singular", "text": "vole", "is_base_form": true, "ipa": "/voʊl/", "phonetic": "VOHL"}]}
+{"guid": "N02_362", "forms": [{"grammatical_form": "noun/en_singular", "text": "warthog", "is_base_form": true, "ipa": "/ˈwɔrtˌhɔɡ/", "phonetic": "WORT-hog"}]}
+{"guid": "N02_363", "forms": [{"grammatical_form": "noun/en_singular", "text": "beluga", "is_base_form": true, "ipa": "/bəˈluːɡə/", "phonetic": "buh-LOO-guh"}]}
+{"guid": "N02_364", "forms": [{"grammatical_form": "noun/en_singular", "text": "humpback whale", "is_base_form": true, "ipa": "/ˈhʌmpˌbæk weɪl/", "phonetic": "HUMP-back whale"}]}
+{"guid": "N02_365", "forms": [{"grammatical_form": "noun/en_singular", "text": "sperm whale", "is_base_form": true, "ipa": "/ˈspɝːm ˌweɪl/", "phonetic": "SPURM-wayl"}]}
+{"guid": "N02_366", "forms": [{"grammatical_form": "noun/en_singular", "text": "echidna", "is_base_form": true, "ipa": "/ɪˈkɪdnə/", "phonetic": "ih-KID-nuh"}]}
+{"guid": "N02_367", "forms": [{"grammatical_form": "noun/en_singular", "text": "okapi", "is_base_form": true, "ipa": "/oʊˈkɑpi/", "phonetic": "oh-KAH-pee"}]}
+{"guid": "N02_368", "forms": [{"grammatical_form": "noun/en_singular", "text": "chamois", "is_base_form": true, "ipa": "/ˈʃæmi/", "phonetic": "SHAM-ee"}]}
+{"guid": "N02_369", "forms": [{"grammatical_form": "noun/en_singular", "text": "lemming", "is_base_form": true, "ipa": "/ˈlɛmɪŋ/", "phonetic": "LEM-ing"}]}
+{"guid": "N02_370", "forms": [{"grammatical_form": "noun/en_singular", "text": "pangolin", "is_base_form": true, "ipa": "/ˈpæŋɡəlɪn/", "phonetic": "PAN-guh-lin"}]}
+{"guid": "N02_371", "forms": [{"grammatical_form": "noun/en_singular", "text": "capybara", "is_base_form": true, "ipa": "/ˌkæpɪˈbɛrə/", "phonetic": "kap-ih-BAIR-uh"}]}
+{"guid": "N02_372", "forms": [{"grammatical_form": "noun/en_singular", "text": "bonobo", "is_base_form": true, "ipa": "/bəˈnoʊboʊ/", "phonetic": "buh-NOH-boh"}]}
+{"guid": "N02_373", "forms": [{"grammatical_form": "noun/en_singular", "text": "mandrill", "is_base_form": true, "ipa": "/ˈmæn.drɪl/", "phonetic": "MAN-drill"}]}
+{"guid": "N02_374", "forms": [{"grammatical_form": "noun/en_singular", "text": "marmoset", "is_base_form": true, "ipa": "/ˈmɑrməˌsɛt/", "phonetic": "MAR-muh-set"}]}
+{"guid": "N02_375", "forms": [{"grammatical_form": "noun/en_singular", "text": "macaque", "is_base_form": true, "ipa": "/məˈkæk/", "phonetic": "muh-KAK"}]}
+{"guid": "N02_376", "forms": [{"grammatical_form": "noun/en_singular", "text": "dugong", "is_base_form": true, "ipa": "/ˈduːɡɑːŋ/", "phonetic": "DOO-gong"}]}
+{"guid": "N02_377", "forms": [{"grammatical_form": "noun/en_singular", "text": "Tasmanian devil", "is_base_form": true, "ipa": "/tæzˈmeɪniən ˈdɛvəl/", "phonetic": "taz-MAY-nee-uhn DEV-uhl"}]}
+{"guid": "N02_378", "forms": [{"grammatical_form": "noun/en_singular", "text": "hyrax", "is_base_form": true, "ipa": "/ˈhaɪræks/", "phonetic": "HY-raks"}]}
+{"guid": "N02_379", "forms": [{"grammatical_form": "noun/en_singular", "text": "fruit bat", "is_base_form": true, "ipa": "/ˈfruːt ˌbæt/", "phonetic": "FROOT bat"}]}
+{"guid": "N02_380", "forms": [{"grammatical_form": "noun/en_singular", "text": "vampire bat", "is_base_form": true, "ipa": "/ˈvæmˌpaɪɚ bæt/", "phonetic": "VAM-pire bat"}]}
+{"guid": "N02_381", "forms": [{"grammatical_form": "noun/en_singular", "text": "brown bear", "is_base_form": true, "ipa": "/ˈbraʊn ˌbɛr/", "phonetic": "BROWN BAIR"}]}
+{"guid": "N02_382", "forms": [{"grammatical_form": "noun/en_singular", "text": "snow leopard", "is_base_form": true, "ipa": "/ˈsnoʊ ˌlɛpərd/", "phonetic": "SNOH LEP-erd"}]}
+{"guid": "N02_383", "forms": [{"grammatical_form": "noun/en_singular", "text": "honey badger", "is_base_form": true, "ipa": "/ˈhʌni ˌbædʒər/", "phonetic": "HUH-nee BAD-jer"}]}
+{"guid": "N02_384", "forms": [{"grammatical_form": "noun/en_singular", "text": "marten", "is_base_form": true, "ipa": "/ˈmɑrtən/", "phonetic": "MAR-tin"}]}
+{"guid": "N02_385", "forms": [{"grammatical_form": "noun/en_singular", "text": "gaur", "is_base_form": true, "ipa": "/ɡaʊr/", "phonetic": "GOWR"}]}
+{"guid": "N02_386", "forms": [{"grammatical_form": "noun/en_singular", "text": "muskox", "is_base_form": true, "ipa": "/ˈmʌskˌɑks/", "phonetic": "MUSK-oks"}]}
+{"guid": "N02_387", "forms": [{"grammatical_form": "noun/en_singular", "text": "water buffalo", "is_base_form": true, "ipa": "/ˈwɔtər ˈbʌfəloʊ/", "phonetic": "WAW-ter BUH-fuh-loh"}]}
+{"guid": "N02_388", "forms": [{"grammatical_form": "noun/en_singular", "text": "dromedary", "is_base_form": true, "ipa": "/ˈdrɑːməˌdɛri/", "phonetic": "DRAH-muh-dair-ee"}]}
+{"guid": "N02_389", "forms": [{"grammatical_form": "noun/en_singular", "text": "Bactrian camel", "is_base_form": true, "ipa": "/ˈbæk.tri.ən ˈkæm.əl/", "phonetic": "BAK-tree-uhn KAM-uhl"}]}
+{"guid": "N02_390", "forms": [{"grammatical_form": "noun/en_singular", "text": "red deer", "is_base_form": true, "ipa": "/ˌrɛd ˈdɪr/", "phonetic": "RED DEER"}]}
+{"guid": "N02_391", "forms": [{"grammatical_form": "noun/en_singular", "text": "guanaco", "is_base_form": true, "ipa": "/ɡwəˈnɑkoʊ/", "phonetic": "gwah-NAH-koh"}]}
+{"guid": "N02_392", "forms": [{"grammatical_form": "noun/en_singular", "text": "peccary", "is_base_form": true, "ipa": "/ˈpɛkəri/", "phonetic": "PEK-uh-ree"}]}
+{"guid": "N02_393", "forms": [{"grammatical_form": "noun/en_singular", "text": "pronghorn", "is_base_form": true, "ipa": "/ˈprɔŋˌhɔrn/", "phonetic": "PRONG-horn"}]}
+{"guid": "N02_394", "forms": [{"grammatical_form": "noun/en_singular", "text": "vicuña", "is_base_form": true, "ipa": "/vɪˈkuːnjə/", "phonetic": "vih-KOON-yuh"}]}
+{"guid": "N02_395", "forms": [{"grammatical_form": "noun/en_singular", "text": "nutria", "is_base_form": true, "ipa": "/ˈnuːtriə/", "phonetic": "NOO-tree-uh"}]}
+{"guid": "N02_396", "forms": [{"grammatical_form": "noun/en_singular", "text": "slow loris", "is_base_form": true, "ipa": "/ˌsloʊ ˈlɔrɪs/", "phonetic": "SLOH LOHR-iss"}]}
+{"guid": "N02_397", "forms": [{"grammatical_form": "noun/en_singular", "text": "galago", "is_base_form": true, "ipa": "/ɡəˈleɪɡoʊ/", "phonetic": "guh-LAY-go"}]}
+{"guid": "N02_398", "forms": [{"grammatical_form": "noun/en_singular", "text": "tarsier", "is_base_form": true, "ipa": "/ˈtɑrsiɚ/", "phonetic": "TAR-see-er"}]}
+{"guid": "N02_399", "forms": [{"grammatical_form": "noun/en_singular", "text": "capuchin monkey", "is_base_form": true, "ipa": "/ˈkæpətʃɪn ˈmʌŋki/", "phonetic": "kuh-POO-chin MUNG-kee"}]}
+{"guid": "N02_400", "forms": [{"grammatical_form": "noun/en_singular", "text": "spider monkey", "is_base_form": true, "ipa": "/ˈspaɪdər ˌmʌŋki/", "phonetic": "SPY-der MUN-kee"}]}
+{"guid": "N02_401", "forms": [{"grammatical_form": "noun/en_singular", "text": "albatross", "is_base_form": true, "ipa": "/ˈæl.bəˌtrɔːs/", "phonetic": "AL-buh-tross"}]}
+{"guid": "N02_402", "forms": [{"grammatical_form": "noun/en_singular", "text": "budgerigar", "is_base_form": true, "ipa": "/ˈbʌdʒəˌrɪɡɑr/", "phonetic": "BUH-juh-ri-gar"}]}
+{"guid": "N02_403", "forms": [{"grammatical_form": "noun/en_singular", "text": "buzzard", "is_base_form": true, "ipa": "/ˈbʌzɚd/", "phonetic": "BUZ-erd"}]}
+{"guid": "N02_404", "forms": [{"grammatical_form": "noun/en_singular", "text": "cockatoo", "is_base_form": true, "ipa": "/ˌkɑkəˈtu/", "phonetic": "kah-kuh-TOO"}]}
+{"guid": "N02_405", "forms": [{"grammatical_form": "noun/en_singular", "text": "cormorant", "is_base_form": true, "ipa": "/ˈkɔrmərənt/", "phonetic": "KOR-muh-ruhント"}]}
+{"guid": "N02_406", "forms": [{"grammatical_form": "noun/en_singular", "text": "curlew", "is_base_form": true, "ipa": "/ˈkɝː.luː/", "phonetic": "KUR-loo"}]}
+{"guid": "N02_407", "forms": [{"grammatical_form": "noun/en_singular", "text": "goldfinch", "is_base_form": true, "ipa": "/ˈɡoʊldˌfɪntʃ/", "phonetic": "GOHLD-finch"}]}
+{"guid": "N02_408", "forms": [{"grammatical_form": "noun/en_singular", "text": "grouse", "is_base_form": true, "ipa": "/ɡraʊs/", "phonetic": "GROUS"}]}
+{"guid": "N02_409", "forms": [{"grammatical_form": "noun/en_singular", "text": "ibis", "is_base_form": true, "ipa": "/ˈaɪbɪs/", "phonetic": "EYE-bis"}]}
+{"guid": "N02_410", "forms": [{"grammatical_form": "noun/en_singular", "text": "jay", "is_base_form": true, "ipa": "/dʒeɪ/", "phonetic": "JAY"}]}
+{"guid": "N02_411", "forms": [{"grammatical_form": "noun/en_singular", "text": "kestrel", "is_base_form": true, "ipa": "/ˈkɛstrəl/", "phonetic": "KES-truhl"}]}
+{"guid": "N02_412", "forms": [{"grammatical_form": "noun/en_singular", "text": "lark", "is_base_form": true, "ipa": "/lɑrk/", "phonetic": "LARK"}]}
+{"guid": "N02_413", "forms": [{"grammatical_form": "noun/en_singular", "text": "mallard", "is_base_form": true, "ipa": "/ˈmælɚd/", "phonetic": "MAL-erd"}]}
+{"guid": "N02_414", "forms": [{"grammatical_form": "noun/en_singular", "text": "oriole", "is_base_form": true, "ipa": "/ˈɔːriˌoʊl/", "phonetic": "OR-ee-ohl"}]}
+{"guid": "N02_415", "forms": [{"grammatical_form": "noun/en_singular", "text": "osprey", "is_base_form": true, "ipa": "/ˈɑːs.preɪ/", "phonetic": "OS-pray"}]}
+{"guid": "N02_416", "forms": [{"grammatical_form": "noun/en_singular", "text": "partridge", "is_base_form": true, "ipa": "/ˈpɑrtrɪdʒ/", "phonetic": "PAR-trij"}]}
+{"guid": "N02_417", "forms": [{"grammatical_form": "noun/en_singular", "text": "plover", "is_base_form": true, "ipa": "/ˈplʌvər/", "phonetic": "PLUH-ver"}]}
+{"guid": "N02_418", "forms": [{"grammatical_form": "noun/en_singular", "text": "rook", "is_base_form": true, "ipa": "/rʊk/", "phonetic": "RUUK"}]}
+{"guid": "N02_419", "forms": [{"grammatical_form": "noun/en_singular", "text": "sandpiper", "is_base_form": true, "ipa": "/ˈsændˌpaɪpər/", "phonetic": "SAND-py-per"}]}
+{"guid": "N02_420", "forms": [{"grammatical_form": "noun/en_singular", "text": "starling", "is_base_form": true, "ipa": "/ˈstɑɹlɪŋ/", "phonetic": "STAR-ling"}]}
+{"guid": "N02_421", "forms": [{"grammatical_form": "noun/en_singular", "text": "swift", "is_base_form": true, "ipa": "/swɪft/", "phonetic": "SWIFT"}]}
+{"guid": "N02_422", "forms": [{"grammatical_form": "noun/en_singular", "text": "tern", "is_base_form": true, "ipa": "/tɝn/", "phonetic": "TURN"}]}
+{"guid": "N02_423", "forms": [{"grammatical_form": "noun/en_singular", "text": "thrush", "is_base_form": true, "ipa": "/θrʌʃ/", "phonetic": "THRUSH"}]}
+{"guid": "N02_424", "forms": [{"grammatical_form": "noun/en_singular", "text": "wagtail", "is_base_form": true, "ipa": "/ˈwæɡˌteɪl/", "phonetic": "WAG-tail"}]}
+{"guid": "N02_425", "forms": [{"grammatical_form": "noun/en_singular", "text": "warbler", "is_base_form": true, "ipa": "/ˈwɔrbələr/", "phonetic": "WOR-blur"}]}
+{"guid": "N02_426", "forms": [{"grammatical_form": "noun/en_singular", "text": "cockatiel", "is_base_form": true, "ipa": "/ˌkɑkəˈtil/", "phonetic": "KOK-uh-teel"}]}
+{"guid": "N02_427", "forms": [{"grammatical_form": "noun/en_singular", "text": "egret", "is_base_form": true, "ipa": "/ˈiːɡrət/", "phonetic": "EE-gret"}]}
+{"guid": "N02_428", "forms": [{"grammatical_form": "noun/en_singular", "text": "jackdaw", "is_base_form": true, "ipa": "/ˈdʒækˌdɔ/", "phonetic": "JAK-daw"}]}
+{"guid": "N02_429", "forms": [{"grammatical_form": "noun/en_singular", "text": "bullfinch", "is_base_form": true, "ipa": "/ˈbʊlˌfɪntʃ/", "phonetic": "BOOL-finch"}]}
+{"guid": "N02_430", "forms": [{"grammatical_form": "noun/en_singular", "text": "chaffinch", "is_base_form": true, "ipa": "/ˈtʃæfɪntʃ/", "phonetic": "CHAF-inch"}]}
+{"guid": "N02_431", "forms": [{"grammatical_form": "noun/en_singular", "text": "lapwing", "is_base_form": true, "ipa": "/ˈlæpˌwɪŋ/", "phonetic": "LAP-wing"}]}
+{"guid": "N02_432", "forms": [{"grammatical_form": "noun/en_singular", "text": "woodcock", "is_base_form": true, "ipa": "/ˈwʊdˌkɑk/", "phonetic": "WOOD-kok"}]}
+{"guid": "N02_433", "forms": [{"grammatical_form": "noun/en_singular", "text": "hoopoe", "is_base_form": true, "ipa": "/ˈhuːpuː/", "phonetic": "HOO-poo"}]}
+{"guid": "N02_434", "forms": [{"grammatical_form": "noun/en_singular", "text": "mynah", "is_base_form": true, "ipa": "/ˈmaɪnə/", "phonetic": "MY-nuh"}]}
+{"guid": "N02_435", "forms": [{"grammatical_form": "noun/en_singular", "text": "golden eagle", "is_base_form": true, "ipa": "/ˈɡoʊldən ˈiːɡəl/", "phonetic": "GOHL-duhn EE-guhl"}]}
+{"guid": "N02_436", "forms": [{"grammatical_form": "noun/en_singular", "text": "peregrine falcon", "is_base_form": true, "ipa": "/ˈpɛrɪɡrɪn ˈfælkən/", "phonetic": "PER-uh-grin FAL-kuhn"}]}
+{"guid": "N02_437", "forms": [{"grammatical_form": "noun/en_singular", "text": "secretary bird", "is_base_form": true, "ipa": "/ˈsɛkrəˌtɛri bɝd/", "phonetic": "SEK-ruh-ter-ee bird"}]}
+{"guid": "N02_438", "forms": [{"grammatical_form": "noun/en_singular", "text": "nightjar", "is_base_form": true, "ipa": "/ˈnaɪtˌdʒɑr/", "phonetic": "NITE-jar"}]}
+{"guid": "N02_439", "forms": [{"grammatical_form": "noun/en_singular", "text": "auk", "is_base_form": true, "ipa": "/ɔk/", "phonetic": "AWK"}]}
+{"guid": "N02_440", "forms": [{"grammatical_form": "noun/en_singular", "text": "hornbill", "is_base_form": true, "ipa": "/ˈhɔrnˌbɪl/", "phonetic": "HORN-bil"}]}
+{"guid": "N02_441", "forms": [{"grammatical_form": "noun/en_singular", "text": "hoatzin", "is_base_form": true, "ipa": "/wɑːtˈsɪn/", "phonetic": "WAT-sin"}]}
+{"guid": "N02_442", "forms": [{"grammatical_form": "noun/en_singular", "text": "turaco", "is_base_form": true, "ipa": "/təˈrɑkoʊ/", "phonetic": "tuh-RAH-koh"}]}
+{"guid": "N02_443", "forms": [{"grammatical_form": "noun/en_singular", "text": "guineafowl", "is_base_form": true, "ipa": "/ˈɡɪniˌfaʊl/", "phonetic": "GI-nee-fowl"}]}
+{"guid": "N02_444", "forms": [{"grammatical_form": "noun/en_singular", "text": "loon", "is_base_form": true, "ipa": "/luːn/", "phonetic": "LOON"}]}
+{"guid": "N02_445", "forms": [{"grammatical_form": "noun/en_singular", "text": "bustard", "is_base_form": true, "ipa": "/ˈbʌstərd/", "phonetic": "BUS-turd"}]}
+{"guid": "N02_446", "forms": [{"grammatical_form": "noun/en_singular", "text": "rail", "is_base_form": true, "ipa": "/reɪl/", "phonetic": "RAYL"}]}
+{"guid": "N02_447", "forms": [{"grammatical_form": "noun/en_singular", "text": "bird of paradise", "is_base_form": true, "ipa": "/ˌbɝd əv ˈpɛrəˌdaɪs/", "phonetic": "BURD-uhv-PAIR-uh-dाइस"}]}
+{"guid": "N02_448", "forms": [{"grammatical_form": "noun/en_singular", "text": "lyrebird", "is_base_form": true, "ipa": "/ˈlaɪrˌbɝd/", "phonetic": "LYRE-burd"}]}
+{"guid": "N02_449", "forms": [{"grammatical_form": "noun/en_singular", "text": "shrike", "is_base_form": true, "ipa": "/ʃraɪk/", "phonetic": "SHRYKE"}]}
+{"guid": "N02_450", "forms": [{"grammatical_form": "noun/en_singular", "text": "bulbul", "is_base_form": true, "ipa": "/ˈbʊlˌbʊl/", "phonetic": "BUL-bul"}]}
+{"guid": "N02_451", "forms": [{"grammatical_form": "noun/en_singular", "text": "mockingbird", "is_base_form": true, "ipa": "/ˈmɑkɪŋˌbɝd/", "phonetic": "MAHK-ing-burd"}]}
+{"guid": "N02_452", "forms": [{"grammatical_form": "noun/en_singular", "text": "flycatcher", "is_base_form": true, "ipa": "/ˈflaɪˌkætʃər/", "phonetic": "FLY-kach-er"}]}
+{"guid": "N02_453", "forms": [{"grammatical_form": "noun/en_singular", "text": "weaverbird", "is_base_form": true, "ipa": "/ˈwiːvərˌbɝd/", "phonetic": "WEE-ver-burd"}]}
+{"guid": "N02_454", "forms": [{"grammatical_form": "noun/en_singular", "text": "sunbird", "is_base_form": true, "ipa": "/ˈsʌnˌbɝd/", "phonetic": "SUN-burd"}]}
+{"guid": "N02_455", "forms": [{"grammatical_form": "noun/en_singular", "text": "titmouse", "is_base_form": true, "ipa": "/ˈtɪtˌmaʊs/", "phonetic": "TIT-mows"}]}
+{"guid": "N02_456", "forms": [{"grammatical_form": "noun/en_singular", "text": "frigatebird", "is_base_form": true, "ipa": "/ˈfrɪɡɪtˌbɝd/", "phonetic": "FRIG-it-burd"}]}
+{"guid": "N02_457", "forms": [{"grammatical_form": "noun/en_singular", "text": "shoebill", "is_base_form": true, "ipa": "/ˈʃuːˌbɪl/", "phonetic": "SHOO-bil"}]}
+{"guid": "N02_458", "forms": [{"grammatical_form": "noun/en_singular", "text": "gannet", "is_base_form": true, "ipa": "/ˈɡænɪt/", "phonetic": "GAN-it"}]}
+{"guid": "N02_459", "forms": [{"grammatical_form": "noun/en_singular", "text": "honeyguide", "is_base_form": true, "ipa": "/ˈhʌniˌɡaɪd/", "phonetic": "HUN-ee-gाइड"}]}
+{"guid": "N02_460", "forms": [{"grammatical_form": "noun/en_singular", "text": "petrel", "is_base_form": true, "ipa": "/ˈpɛtrəl/", "phonetic": "PET-ruhl"}]}
+{"guid": "N02_461", "forms": [{"grammatical_form": "noun/en_singular", "text": "cassowary", "is_base_form": true, "ipa": "/ˈkæsəˌwɛri/", "phonetic": "KAS-uh-wair-ee"}]}
+{"guid": "N02_462", "forms": [{"grammatical_form": "noun/en_singular", "text": "rhea", "is_base_form": true, "ipa": "/ˈriːə/", "phonetic": "REE-uh"}]}
+{"guid": "N02_463", "forms": [{"grammatical_form": "noun/en_singular", "text": "quetzal", "is_base_form": true, "ipa": "/kɛtˈsɑl/", "phonetic": "ket-SAL"}]}
+{"guid": "N02_464", "forms": [{"grammatical_form": "noun/en_singular", "text": "barn owl", "is_base_form": true, "ipa": "/ˈbɑrn ˌaʊl/", "phonetic": "BARN OWL"}]}
+{"guid": "N02_465", "forms": [{"grammatical_form": "noun/en_singular", "text": "eagle owl", "is_base_form": true, "ipa": "/ˈiːɡəl aʊl/", "phonetic": "EE-guhl owl"}]}
+{"guid": "N02_466", "forms": [{"grammatical_form": "noun/en_singular", "text": "honeyeater", "is_base_form": true, "ipa": "/ˈhʌniˌitər/", "phonetic": "HUN-ee-ee-ter"}]}
+{"guid": "N02_467", "forms": [{"grammatical_form": "noun/en_singular", "text": "tinamou", "is_base_form": true, "ipa": "/ˈtɪnəˌmuː/", "phonetic": "TIN-uh-moo"}]}
+{"guid": "N02_468", "forms": [{"grammatical_form": "noun/en_singular", "text": "trogon", "is_base_form": true, "ipa": "/ˈtroʊɡɑːn/", "phonetic": "TROH-gon"}]}
+{"guid": "N02_469", "forms": [{"grammatical_form": "noun/en_singular", "text": "antbird", "is_base_form": true, "ipa": "/ˈæntˌbɝd/", "phonetic": "ANT-burd"}]}
+{"guid": "N02_470", "forms": [{"grammatical_form": "noun/en_singular", "text": "boa constrictor", "is_base_form": true, "ipa": "/ˌboʊə kənˈstrɪktər/", "phonetic": "BOH-uh kuhn-STRIK-ter"}]}
+{"guid": "N02_471", "forms": [{"grammatical_form": "noun/en_singular", "text": "Komodo dragon", "is_base_form": true, "ipa": "/kəˈmoʊdoʊ ˈdræɡən/", "phonetic": "kuh-MOH-doh DRAG-un"}]}
+{"guid": "N02_472", "forms": [{"grammatical_form": "noun/en_singular", "text": "monitor lizard", "is_base_form": true, "ipa": "/ˈmɑnɪtɚ ˈlɪzɚd/", "phonetic": "MON-uh-ter LIZ-erd"}]}
+{"guid": "N02_473", "forms": [{"grammatical_form": "noun/en_singular", "text": "adder", "is_base_form": true, "ipa": "/ˈædər/", "phonetic": "AD-er"}]}
+{"guid": "N02_474", "forms": [{"grammatical_form": "noun/en_singular", "text": "mamba", "is_base_form": true, "ipa": "/ˈmæm.bə/", "phonetic": "MAM-buh"}]}
+{"guid": "N02_475", "forms": [{"grammatical_form": "noun/en_singular", "text": "king cobra", "is_base_form": true, "ipa": "/ˈkɪŋ ˈkoʊ.brə/", "phonetic": "KING-KOH-bruh"}]}
+{"guid": "N02_476", "forms": [{"grammatical_form": "noun/en_singular", "text": "terrapin", "is_base_form": true, "ipa": "/ˈtɛrəpɪn/", "phonetic": "TAIR-uh-pin"}]}
+{"guid": "N02_477", "forms": [{"grammatical_form": "noun/en_singular", "text": "caiman", "is_base_form": true, "ipa": "/ˈkeɪmən/", "phonetic": "KAY-muhn"}]}
+{"guid": "N02_478", "forms": [{"grammatical_form": "noun/en_singular", "text": "sea turtle", "is_base_form": true, "ipa": "/ˈsi ˌtɝtəl/", "phonetic": "SEE TUR-tul"}]}
+{"guid": "N02_479", "forms": [{"grammatical_form": "noun/en_singular", "text": "skink", "is_base_form": true, "ipa": "/skɪŋk/", "phonetic": "SKINK"}]}
+{"guid": "N02_480", "forms": [{"grammatical_form": "noun/en_singular", "text": "axolotl", "is_base_form": true, "ipa": "/ˈæk.səˌlɑː.təl/", "phonetic": "AK-suh-lot-ul"}]}
+{"guid": "N02_481", "forms": [{"grammatical_form": "noun/en_singular", "text": "bullfrog", "is_base_form": true, "ipa": "/ˈbʊlˌfrɔɡ/", "phonetic": "BOOL-frog"}]}
+{"guid": "N02_482", "forms": [{"grammatical_form": "noun/en_singular", "text": "tree frog", "is_base_form": true, "ipa": "/ˈtriˌfrɔɡ/", "phonetic": "TREE-FRAWG"}]}
+{"guid": "N02_483", "forms": [{"grammatical_form": "noun/en_singular", "text": "cane toad", "is_base_form": true, "ipa": "/ˈkeɪn ˌtoʊd/", "phonetic": "KAYN TOHD"}]}
+{"guid": "N02_484", "forms": [{"grammatical_form": "noun/en_singular", "text": "caecilian", "is_base_form": true, "ipa": "/sɪˈsɪliən/", "phonetic": "sih-SIL-yuhn"}]}
+{"guid": "N02_485", "forms": [{"grammatical_form": "noun/en_singular", "text": "Gila monster", "is_base_form": true, "ipa": "/ˈhiːlə ˈmɑːnstər/", "phonetic": "HEE-luh MON-ster"}]}
+{"guid": "N02_486", "forms": [{"grammatical_form": "noun/en_singular", "text": "horned lizard", "is_base_form": true, "ipa": "/ˈhɔrnd ˈlɪzərd/", "phonetic": "HORND LIZ-erd"}]}
+{"guid": "N02_487", "forms": [{"grammatical_form": "noun/en_singular", "text": "copperhead", "is_base_form": true, "ipa": "/ˈkɑpərˌhɛd/", "phonetic": "KOP-er-hed"}]}
+{"guid": "N02_488", "forms": [{"grammatical_form": "noun/en_singular", "text": "cottonmouth", "is_base_form": true, "ipa": "/ˈkɑtənˌmaʊθ/", "phonetic": "KAH-tuhn-mouth"}]}
+{"guid": "N02_489", "forms": [{"grammatical_form": "noun/en_singular", "text": "coral snake", "is_base_form": true, "ipa": "/ˈkɔrəl sneɪk/", "phonetic": "KOR-uhl snayk"}]}
+{"guid": "N02_490", "forms": [{"grammatical_form": "noun/en_singular", "text": "garter snake", "is_base_form": true, "ipa": "/ˈɡɑrtər sneɪk/", "phonetic": "GAR-ter snayk"}]}
+{"guid": "N02_491", "forms": [{"grammatical_form": "noun/en_singular", "text": "sea snake", "is_base_form": true, "ipa": "/ˈsiː ˌsneɪk/", "phonetic": "SEE-SNAKE"}]}
+{"guid": "N02_492", "forms": [{"grammatical_form": "noun/en_singular", "text": "tuatara", "is_base_form": true, "ipa": "/ˌtuːəˈtɑrə/", "phonetic": "too-uh-TAHR-uh"}]}
+{"guid": "N02_493", "forms": [{"grammatical_form": "noun/en_singular", "text": "snapping turtle", "is_base_form": true, "ipa": "/ˈsnæpɪŋ ˈtɝtəl/", "phonetic": "SNAP-ing TUR-tl"}]}
+{"guid": "N02_494", "forms": [{"grammatical_form": "noun/en_singular", "text": "box turtle", "is_base_form": true, "ipa": "/ˈbɑks ˌtɝtəl/", "phonetic": "BOKS TUR-tuhl"}]}
+{"guid": "N02_495", "forms": [{"grammatical_form": "noun/en_singular", "text": "painted turtle", "is_base_form": true, "ipa": "/ˈpeɪntɪd ˈtɝtəl/", "phonetic": "PAYN-tid TUR-tul"}]}
+{"guid": "N02_496", "forms": [{"grammatical_form": "noun/en_singular", "text": "red-eared slider", "is_base_form": true, "ipa": "/ˌrɛd ˈɪrd ˈslaɪdər/", "phonetic": "red-EERD SLY-der"}]}
+{"guid": "N02_497", "forms": [{"grammatical_form": "noun/en_singular", "text": "giant tortoise", "is_base_form": true, "ipa": "/ˈdʒaɪənt ˈtɔrtəs/", "phonetic": "JY-unt TOR-tus"}]}
+{"guid": "N02_498", "forms": [{"grammatical_form": "noun/en_singular", "text": "flounder", "is_base_form": true, "ipa": "/ˈflaʊndər/", "phonetic": "FLOUN-der"}]}
+{"guid": "N02_499", "forms": [{"grammatical_form": "noun/en_singular", "text": "pike", "is_base_form": true, "ipa": "/paɪk/", "phonetic": "PIKE"}]}
+{"guid": "N02_500", "forms": [{"grammatical_form": "noun/en_singular", "text": "sturgeon", "is_base_form": true, "ipa": "/ˈstɝːdʒən/", "phonetic": "STUR-jun"}]}
+{"guid": "N02_501", "forms": [{"grammatical_form": "noun/en_singular", "text": "ray", "is_base_form": true, "ipa": "/reɪ/", "phonetic": "RAY"}]}
+{"guid": "N02_502", "forms": [{"grammatical_form": "noun/en_singular", "text": "manta ray", "is_base_form": true, "ipa": "/ˈmæntə reɪ/", "phonetic": "MAN-tuh ray"}]}
+{"guid": "N02_503", "forms": [{"grammatical_form": "noun/en_singular", "text": "barracuda", "is_base_form": true, "ipa": "/ˌbærəˈkuːdə/", "phonetic": "bar-uh-KOO-duh"}]}
+{"guid": "N02_504", "forms": [{"grammatical_form": "noun/en_singular", "text": "guppy", "is_base_form": true, "ipa": "/ˈɡʌpi/", "phonetic": "GUH-pee"}]}
+{"guid": "N02_505", "forms": [{"grammatical_form": "noun/en_singular", "text": "minnow", "is_base_form": true, "ipa": "/ˈmɪnoʊ/", "phonetic": "MIN-oh"}]}
+{"guid": "N02_506", "forms": [{"grammatical_form": "noun/en_singular", "text": "angelfish", "is_base_form": true, "ipa": "/ˈeɪn.dʒəlˌfɪʃ/", "phonetic": "AYN-juhl-fish"}]}
+{"guid": "N02_507", "forms": [{"grammatical_form": "noun/en_singular", "text": "pufferfish", "is_base_form": true, "ipa": "/ˈpʌfɚˌfɪʃ/", "phonetic": "PUF-er-fish"}]}
+{"guid": "N02_508", "forms": [{"grammatical_form": "noun/en_singular", "text": "haddock", "is_base_form": true, "ipa": "/ˈhædək/", "phonetic": "HAD-uhk"}]}
+{"guid": "N02_509", "forms": [{"grammatical_form": "noun/en_singular", "text": "plaice", "is_base_form": true, "ipa": "/pleɪs/", "phonetic": "PLAYS"}]}
+{"guid": "N02_510", "forms": [{"grammatical_form": "noun/en_singular", "text": "sole", "is_base_form": true, "ipa": "/soʊl/", "phonetic": "SOHL"}]}
+{"guid": "N02_511", "forms": [{"grammatical_form": "noun/en_singular", "text": "turbot", "is_base_form": true, "ipa": "/ˈtɝːbət/", "phonetic": "TUR-but"}]}
+{"guid": "N02_512", "forms": [{"grammatical_form": "noun/en_singular", "text": "hake", "is_base_form": true, "ipa": "/heɪk/", "phonetic": "HAYK"}]}
+{"guid": "N02_513", "forms": [{"grammatical_form": "noun/en_singular", "text": "pollock", "is_base_form": true, "ipa": "/ˈpɑlək/", "phonetic": "PAH-luk"}]}
+{"guid": "N02_514", "forms": [{"grammatical_form": "noun/en_singular", "text": "mullet", "is_base_form": true, "ipa": "/ˈmʌlɪt/", "phonetic": "MUL-it"}]}
+{"guid": "N02_515", "forms": [{"grammatical_form": "noun/en_singular", "text": "tilapia", "is_base_form": true, "ipa": "/təˈlɑpiə/", "phonetic": "tuh-LAH-pee-uh"}]}
+{"guid": "N02_516", "forms": [{"grammatical_form": "noun/en_singular", "text": "snapper", "is_base_form": true, "ipa": "/ˈsnæpər/", "phonetic": "SNAP-er"}]}
+{"guid": "N02_517", "forms": [{"grammatical_form": "noun/en_singular", "text": "grouper", "is_base_form": true, "ipa": "/ˈɡruːpər/", "phonetic": "GROO-per"}]}
+{"guid": "N02_518", "forms": [{"grammatical_form": "noun/en_singular", "text": "bream", "is_base_form": true, "ipa": "/briːm/", "phonetic": "BREEM"}]}
+{"guid": "N02_519", "forms": [{"grammatical_form": "noun/en_singular", "text": "lamprey", "is_base_form": true, "ipa": "/ˈlæmpri/", "phonetic": "LAM-pree"}]}
+{"guid": "N02_520", "forms": [{"grammatical_form": "noun/en_singular", "text": "hammerhead", "is_base_form": true, "ipa": "/ˈhæmərˌhɛd/", "phonetic": "HAM-er-hed"}]}
+{"guid": "N02_521", "forms": [{"grammatical_form": "noun/en_singular", "text": "great white shark", "is_base_form": true, "ipa": "/ˌɡreɪt ˈwaɪt ˌʃɑrk/", "phonetic": "GRAYT-WHAYT-SHARK"}]}
+{"guid": "N02_522", "forms": [{"grammatical_form": "noun/en_singular", "text": "whale shark", "is_base_form": true, "ipa": "/ˈweɪl ˌʃɑrk/", "phonetic": "WHALE-shark"}]}
+{"guid": "N02_523", "forms": [{"grammatical_form": "noun/en_singular", "text": "marlin", "is_base_form": true, "ipa": "/ˈmɑrlɪn/", "phonetic": "MAR-lin"}]}
+{"guid": "N02_524", "forms": [{"grammatical_form": "noun/en_singular", "text": "flying fish", "is_base_form": true, "ipa": "/ˈflaɪɪŋ fɪʃ/", "phonetic": "FLY-ing FISH"}]}
+{"guid": "N02_525", "forms": [{"grammatical_form": "noun/en_singular", "text": "lionfish", "is_base_form": true, "ipa": "/ˈlaɪənˌfɪʃ/", "phonetic": "LYE-un-fish"}]}
+{"guid": "N02_526", "forms": [{"grammatical_form": "noun/en_singular", "text": "koi", "is_base_form": true, "ipa": "/kɔɪ/", "phonetic": "KOY"}]}
+{"guid": "N02_527", "forms": [{"grammatical_form": "noun/en_singular", "text": "monkfish", "is_base_form": true, "ipa": "/ˈmʌŋkˌfɪʃ/", "phonetic": "MUNK-fish"}]}
+{"guid": "N02_528", "forms": [{"grammatical_form": "noun/en_singular", "text": "dogfish", "is_base_form": true, "ipa": "/ˈdɔɡˌfɪʃ/", "phonetic": "DAWG-fish"}]}
+{"guid": "N02_529", "forms": [{"grammatical_form": "noun/en_singular", "text": "skate", "is_base_form": true, "ipa": "/skeɪt/", "phonetic": "SKAYT"}]}
+{"guid": "N02_530", "forms": [{"grammatical_form": "noun/en_singular", "text": "stickleback", "is_base_form": true, "ipa": "/ˈstɪkəlˌbæk/", "phonetic": "STIK-uhl-bak"}]}
+{"guid": "N02_531", "forms": [{"grammatical_form": "noun/en_singular", "text": "sprat", "is_base_form": true, "ipa": "/spræt/", "phonetic": "SPRAT"}]}
+{"guid": "N02_532", "forms": [{"grammatical_form": "noun/en_singular", "text": "coelacanth", "is_base_form": true, "ipa": "/ˈsiːləˌkænθ/", "phonetic": "SEE-luh-kanth"}]}
+{"guid": "N02_533", "forms": [{"grammatical_form": "noun/en_singular", "text": "anglerfish", "is_base_form": true, "ipa": "/ˈæŋɡlərˌfɪʃ/", "phonetic": "ANG-gler-fish"}]}
+{"guid": "N02_534", "forms": [{"grammatical_form": "noun/en_singular", "text": "electric eel", "is_base_form": true, "ipa": "/ɪˈlɛktrɪk iːl/", "phonetic": "ih-LEK-trik EEL"}]}
+{"guid": "N02_535", "forms": [{"grammatical_form": "noun/en_singular", "text": "moray eel", "is_base_form": true, "ipa": "/məˈreɪ iːl/", "phonetic": "muh-RAY EEL"}]}
+{"guid": "N02_536", "forms": [{"grammatical_form": "noun/en_singular", "text": "parrotfish", "is_base_form": true, "ipa": "/ˈpærətˌfɪʃ/", "phonetic": "PAIR-uht-fish"}]}
+{"guid": "N02_537", "forms": [{"grammatical_form": "noun/en_singular", "text": "arapaima", "is_base_form": true, "ipa": "/ˌærəˈpaɪmə/", "phonetic": "ar-uh-PIE-muh"}]}
+{"guid": "N02_538", "forms": [{"grammatical_form": "noun/en_singular", "text": "chimaera", "is_base_form": true, "ipa": "/kaɪˈmɪrə/", "phonetic": "ky-MEER-uh"}]}
+{"guid": "N02_539", "forms": [{"grammatical_form": "noun/en_singular", "text": "milkfish", "is_base_form": true, "ipa": "/ˈmɪlkˌfɪʃ/", "phonetic": "MILK-fish"}]}
+{"guid": "N02_540", "forms": [{"grammatical_form": "noun/en_singular", "text": "oarfish", "is_base_form": true, "ipa": "/ˈɔrˌfɪʃ/", "phonetic": "OR-fish"}]}
+{"guid": "N02_541", "forms": [{"grammatical_form": "noun/en_singular", "text": "scorpionfish", "is_base_form": true, "ipa": "/ˈskɔr.pi.ənˌfɪʃ/", "phonetic": "SKOR-pee-un-fish"}]}
+{"guid": "N02_542", "forms": [{"grammatical_form": "noun/en_singular", "text": "sawfish", "is_base_form": true, "ipa": "/ˈsɔˌfɪʃ/", "phonetic": "SAW-fish"}]}
+{"guid": "N02_543", "forms": [{"grammatical_form": "noun/en_singular", "text": "electric ray", "is_base_form": true, "ipa": "/ɪˈlɛktrɪk reɪ/", "phonetic": "ih-LEK-trik RAY"}]}
+{"guid": "N02_544", "forms": [{"grammatical_form": "noun/en_singular", "text": "cichlid", "is_base_form": true, "ipa": "/ˈsɪklɪd/", "phonetic": "SIK-lid"}]}
+{"guid": "N02_545", "forms": [{"grammatical_form": "noun/en_singular", "text": "killifish", "is_base_form": true, "ipa": "/ˈkɪliˌfɪʃ/", "phonetic": "KIL-ee-fish"}]}
+{"guid": "N02_546", "forms": [{"grammatical_form": "noun/en_singular", "text": "flatfish", "is_base_form": true, "ipa": "/ˈflætˌfɪʃ/", "phonetic": "FLAT-fish"}]}
+{"guid": "N02_547", "forms": [{"grammatical_form": "noun/en_singular", "text": "goby", "is_base_form": true, "ipa": "/ˈɡoʊbi/", "phonetic": "GOH-bee"}]}
+{"guid": "N02_548", "forms": [{"grammatical_form": "noun/en_singular", "text": "mahi-mahi", "is_base_form": true, "ipa": "/ˌmɑːhiˈmɑːhi/", "phonetic": "MAH-hee-MAH-hee"}]}
+{"guid": "N02_549", "forms": [{"grammatical_form": "noun/en_singular", "text": "sea bass", "is_base_form": true, "ipa": "/ˈsiˌbæs/", "phonetic": "SEE-bass"}]}
+{"guid": "N02_550", "forms": [{"grammatical_form": "noun/en_singular", "text": "betta", "is_base_form": true, "ipa": "/ˈbɛtə/", "phonetic": "BET-uh"}]}
+{"guid": "N02_551", "forms": [{"grammatical_form": "noun/en_singular", "text": "remora", "is_base_form": true, "ipa": "/rɪˈmɔrə/", "phonetic": "rih-MOR-uh"}]}
+{"guid": "N02_552", "forms": [{"grammatical_form": "noun/en_singular", "text": "sunfish", "is_base_form": true, "ipa": "/ˈsʌnˌfɪʃ/", "phonetic": "SUN-fish"}]}
+{"guid": "N02_553", "forms": [{"grammatical_form": "noun/en_singular", "text": "wrasse", "is_base_form": true, "ipa": "/ræs/", "phonetic": "RASS"}]}
+{"guid": "N02_554", "forms": [{"grammatical_form": "noun/en_singular", "text": "tetra", "is_base_form": true, "ipa": "/ˈtɛtrə/", "phonetic": "TEH-truh"}]}
+{"guid": "N02_555", "forms": [{"grammatical_form": "noun/en_singular", "text": "bichir", "is_base_form": true, "ipa": "/ˈbɪtʃər/", "phonetic": "BIH-chur"}]}
+{"guid": "N02_556", "forms": [{"grammatical_form": "noun/en_singular", "text": "hilsa", "is_base_form": true, "ipa": "/ˈhɪlsə/", "phonetic": "HIL-suh"}]}
+{"guid": "N02_557", "forms": [{"grammatical_form": "noun/en_singular", "text": "smelt", "is_base_form": true, "ipa": "/smɛlt/", "phonetic": "SMELT"}]}
+{"guid": "N02_558", "forms": [{"grammatical_form": "noun/en_singular", "text": "tiger shark", "is_base_form": true, "ipa": "/ˈtaɪɡər ʃɑrk/", "phonetic": "TY-gur shark"}]}
+{"guid": "N02_559", "forms": [{"grammatical_form": "noun/en_singular", "text": "nurse shark", "is_base_form": true, "ipa": "/ˈnɝs ˌʃɑrk/", "phonetic": "NURS-SHARK"}]}
+{"guid": "N02_560", "forms": [{"grammatical_form": "noun/en_singular", "text": "tsetse fly", "is_base_form": true, "ipa": "/ˈtsɛtsi flaɪ/", "phonetic": "TSET-see fly"}]}
+{"guid": "N02_561", "forms": [{"grammatical_form": "noun/en_singular", "text": "housefly", "is_base_form": true, "ipa": "/ˈhaʊsˌflaɪ/", "phonetic": "HOUSE-fly"}]}
+{"guid": "N02_562", "forms": [{"grammatical_form": "noun/en_singular", "text": "cicada", "is_base_form": true, "ipa": "/sɪˈkeɪdə/", "phonetic": "suh-KAY-duh"}]}
+{"guid": "N02_563", "forms": [{"grammatical_form": "noun/en_singular", "text": "louse", "is_base_form": true, "ipa": "/laʊs/", "phonetic": "LOWS"}]}
+{"guid": "N02_564", "forms": [{"grammatical_form": "noun/en_singular", "text": "bedbug", "is_base_form": true, "ipa": "/ˈbɛdˌbʌɡ/", "phonetic": "BED-bug"}]}
+{"guid": "N02_565", "forms": [{"grammatical_form": "noun/en_singular", "text": "mayfly", "is_base_form": true, "ipa": "/ˈmeɪˌflaɪ/", "phonetic": "MAY-fly"}]}
+{"guid": "N02_566", "forms": [{"grammatical_form": "noun/en_singular", "text": "stick insect", "is_base_form": true, "ipa": "/ˈstɪk ˌɪnˌsɛkt/", "phonetic": "STIK IN-sekt"}]}
+{"guid": "N02_567", "forms": [{"grammatical_form": "noun/en_singular", "text": "earwig", "is_base_form": true, "ipa": "/ˈɪrˌwɪɡ/", "phonetic": "EER-wig"}]}
+{"guid": "N02_568", "forms": [{"grammatical_form": "noun/en_singular", "text": "aphid", "is_base_form": true, "ipa": "/ˈeɪfɪd/", "phonetic": "AY-fid"}]}
+{"guid": "N02_569", "forms": [{"grammatical_form": "noun/en_singular", "text": "weevil", "is_base_form": true, "ipa": "/ˈwiːvəl/", "phonetic": "WEE-vuhl"}]}
+{"guid": "N02_570", "forms": [{"grammatical_form": "noun/en_singular", "text": "maggot", "is_base_form": true, "ipa": "/ˈmæɡət/", "phonetic": "MAG-uht"}]}
+{"guid": "N02_571", "forms": [{"grammatical_form": "noun/en_singular", "text": "gnat", "is_base_form": true, "ipa": "/næt/", "phonetic": "NAT"}]}
+{"guid": "N02_572", "forms": [{"grammatical_form": "noun/en_singular", "text": "midge", "is_base_form": true, "ipa": "/mɪdʒ/", "phonetic": "MIJ"}]}
+{"guid": "N02_573", "forms": [{"grammatical_form": "noun/en_singular", "text": "horsefly", "is_base_form": true, "ipa": "/ˈhɔːrsˌflaɪ/", "phonetic": "HORS-fly"}]}
+{"guid": "N02_574", "forms": [{"grammatical_form": "noun/en_singular", "text": "fruit fly", "is_base_form": true, "ipa": "/ˈfruːt ˌflaɪ/", "phonetic": "FROOT-fly"}]}
+{"guid": "N02_575", "forms": [{"grammatical_form": "noun/en_singular", "text": "scarab beetle", "is_base_form": true, "ipa": "/ˈskærəb ˈbiːtəl/", "phonetic": "SKAIR-uhb BEE-tuhl"}]}
+{"guid": "N02_576", "forms": [{"grammatical_form": "noun/en_singular", "text": "stag beetle", "is_base_form": true, "ipa": "/ˈstæɡ ˌbiːtəl/", "phonetic": "STAG BEE-tuhl"}]}
+{"guid": "N02_577", "forms": [{"grammatical_form": "noun/en_singular", "text": "dung beetle", "is_base_form": true, "ipa": "/ˈdʌŋ ˌbiːtəl/", "phonetic": "DUNG BEE-tul"}]}
+{"guid": "N02_578", "forms": [{"grammatical_form": "noun/en_singular", "text": "silkworm", "is_base_form": true, "ipa": "/ˈsɪlkˌwɝːm/", "phonetic": "SILK-wurm"}]}
+{"guid": "N02_579", "forms": [{"grammatical_form": "noun/en_singular", "text": "monarch butterfly", "is_base_form": true, "ipa": "/ˈmɑːnɑrk ˈbʌtərˌflaɪ/", "phonetic": "MAH-nark BUT-er-fly"}]}
+{"guid": "N02_580", "forms": [{"grammatical_form": "noun/en_singular", "text": "fire ant", "is_base_form": true, "ipa": "/ˈfaɪər ˌænt/", "phonetic": "FY-er ant"}]}
+{"guid": "N02_581", "forms": [{"grammatical_form": "noun/en_singular", "text": "black fly", "is_base_form": true, "ipa": "/ˈblæk ˌflaɪ/", "phonetic": "BLAK-FLY"}]}
+{"guid": "N02_582", "forms": [{"grammatical_form": "noun/en_singular", "text": "botfly", "is_base_form": true, "ipa": "/ˈbɑtˌflaɪ/", "phonetic": "BOT-fly"}]}
+{"guid": "N02_583", "forms": [{"grammatical_form": "noun/en_singular", "text": "crane fly", "is_base_form": true, "ipa": "/ˈkreɪnˌflaɪ/", "phonetic": "KRAYN-fly"}]}
+{"guid": "N02_584", "forms": [{"grammatical_form": "noun/en_singular", "text": "blowfly", "is_base_form": true, "ipa": "/ˈbloʊˌflaɪ/", "phonetic": "BLOH-fly"}]}
+{"guid": "N02_585", "forms": [{"grammatical_form": "noun/en_singular", "text": "leafhopper", "is_base_form": true, "ipa": "/ˈliːfˌhɑpər/", "phonetic": "LEEF-hop-er"}]}
+{"guid": "N02_586", "forms": [{"grammatical_form": "noun/en_singular", "text": "scale insect", "is_base_form": true, "ipa": "/ˈskeɪl ˌɪnˌsɛkt/", "phonetic": "SKAYL IN-sekt"}]}
+{"guid": "N02_587", "forms": [{"grammatical_form": "noun/en_singular", "text": "whitefly", "is_base_form": true, "ipa": "/ˈwaɪtˌflaɪ/", "phonetic": "WYTE-fly"}]}
+{"guid": "N02_588", "forms": [{"grammatical_form": "noun/en_singular", "text": "carpenter ant", "is_base_form": true, "ipa": "/ˈkɑrpəntər ænt/", "phonetic": "KAR-pen-ter ant"}]}
+{"guid": "N02_589", "forms": [{"grammatical_form": "noun/en_singular", "text": "killer bee", "is_base_form": true, "ipa": "/ˈkɪlər biː/", "phonetic": "KIL-er BEE"}]}
+{"guid": "N02_590", "forms": [{"grammatical_form": "noun/en_singular", "text": "cabbage white", "is_base_form": true, "ipa": "/ˈkæbɪdʒ waɪt/", "phonetic": "KAB-ij-wाइट"}]}
+{"guid": "N02_591", "forms": [{"grammatical_form": "noun/en_singular", "text": "swallowtail", "is_base_form": true, "ipa": "/ˈswɑːloʊˌteɪl/", "phonetic": "SWAH-loh-tail"}]}
+{"guid": "N02_592", "forms": [{"grammatical_form": "noun/en_singular", "text": "damselfly", "is_base_form": true, "ipa": "/ˈdæmzəlˌflaɪ/", "phonetic": "DAM-zuhl-fly"}]}
+{"guid": "N02_593", "forms": [{"grammatical_form": "noun/en_singular", "text": "mole cricket", "is_base_form": true, "ipa": "/ˈmoʊl ˌkrɪtɪk/", "phonetic": "MOHL-KRIT-ik"}]}
+{"guid": "N02_594", "forms": [{"grammatical_form": "noun/en_singular", "text": "katydid", "is_base_form": true, "ipa": "/ˈkeɪtiˌdɪd/", "phonetic": "KAY-tee-did"}]}
+{"guid": "N02_595", "forms": [{"grammatical_form": "noun/en_singular", "text": "black widow", "is_base_form": true, "ipa": "/ˌblæk ˈwɪdoʊ/", "phonetic": "blak WID-oh"}]}
+{"guid": "N02_596", "forms": [{"grammatical_form": "noun/en_singular", "text": "mite", "is_base_form": true, "ipa": "/maɪt/", "phonetic": "MYTE"}]}
+{"guid": "N02_597", "forms": [{"grammatical_form": "noun/en_singular", "text": "barnacle", "is_base_form": true, "ipa": "/ˈbɑr.nə.kəl/", "phonetic": "BAR-nuh-kuhl"}]}
+{"guid": "N02_598", "forms": [{"grammatical_form": "noun/en_singular", "text": "krill", "is_base_form": true, "ipa": "/krɪl/", "phonetic": "KRIL"}]}
+{"guid": "N02_599", "forms": [{"grammatical_form": "noun/en_singular", "text": "woodlouse", "is_base_form": true, "ipa": "/ˈwʊdˌlaʊs/", "phonetic": "WOOD-lows"}]}
+{"guid": "N02_600", "forms": [{"grammatical_form": "noun/en_singular", "text": "hermit crab", "is_base_form": true, "ipa": "/ˈhɝːmɪt kræb/", "phonetic": "HUR-mit krab"}]}
+{"guid": "N02_601", "forms": [{"grammatical_form": "noun/en_singular", "text": "cuttlefish", "is_base_form": true, "ipa": "/ˈkʌtəlˌfɪʃ/", "phonetic": "KUT-uhl-fish"}]}
+{"guid": "N02_602", "forms": [{"grammatical_form": "noun/en_singular", "text": "scallop", "is_base_form": true, "ipa": "/ˈskɑləp/", "phonetic": "SKAH-lup"}]}
+{"guid": "N02_603", "forms": [{"grammatical_form": "noun/en_singular", "text": "cockle", "is_base_form": true, "ipa": "/ˈkɑkəl/", "phonetic": "KAH-kuhl"}]}
+{"guid": "N02_604", "forms": [{"grammatical_form": "noun/en_singular", "text": "whelk", "is_base_form": true, "ipa": "/wɛlk/", "phonetic": "WELK"}]}
+{"guid": "N02_605", "forms": [{"grammatical_form": "noun/en_singular", "text": "limpet", "is_base_form": true, "ipa": "/ˈlɪmpɪt/", "phonetic": "LIM-pit"}]}
+{"guid": "N02_606", "forms": [{"grammatical_form": "noun/en_singular", "text": "nautilus", "is_base_form": true, "ipa": "/ˈnɔːtələs/", "phonetic": "NAW-tuh-lus"}]}
+{"guid": "N02_607", "forms": [{"grammatical_form": "noun/en_singular", "text": "sea slug", "is_base_form": true, "ipa": "/ˈsiː ˌslʌɡ/", "phonetic": "SEE-SLUG"}]}
+{"guid": "N02_608", "forms": [{"grammatical_form": "noun/en_singular", "text": "tapeworm", "is_base_form": true, "ipa": "/ˈteɪpˌwɝːm/", "phonetic": "TAPE-wurm"}]}
+{"guid": "N02_609", "forms": [{"grammatical_form": "noun/en_singular", "text": "roundworm", "is_base_form": true, "ipa": "/ˈraʊndˌwɝm/", "phonetic": "ROUND-wurm"}]}
+{"guid": "N02_610", "forms": [{"grammatical_form": "noun/en_singular", "text": "sea anemone", "is_base_form": true, "ipa": "/ˌsiː əˈnɛməni/", "phonetic": "SEE uh-NEM-uh-nee"}]}
+{"guid": "N02_611", "forms": [{"grammatical_form": "noun/en_singular", "text": "sea cucumber", "is_base_form": true, "ipa": "/ˈsiː ˌkjuːˌkʌmbər/", "phonetic": "SEE-KYOO-kum-ber"}]}
+{"guid": "N02_612", "forms": [{"grammatical_form": "noun/en_singular", "text": "sand dollar", "is_base_form": true, "ipa": "/ˈsænd ˌdɑlər/", "phonetic": "SAND DOL-er"}]}
+{"guid": "N02_613", "forms": [{"grammatical_form": "noun/en_singular", "text": "sponge", "is_base_form": true, "ipa": "/spʌndʒ/", "phonetic": "SPUNJ"}]}
+{"guid": "N02_614", "forms": [{"grammatical_form": "noun/en_singular", "text": "Portuguese man o' war", "is_base_form": true, "ipa": "/ˌpɔrtʃəˈɡiz ˌmæn oʊ ˈwɔr/", "phonetic": "por-chuh-GEEZ man oh WAR"}]}
+{"guid": "N02_615", "forms": [{"grammatical_form": "noun/en_singular", "text": "pseudoscorpion", "is_base_form": true, "ipa": "/ˌsuːdoʊˈskɔrpiən/", "phonetic": "SOO-doh-SKOR-pee-un"}]}
+{"guid": "N02_616", "forms": [{"grammatical_form": "noun/en_singular", "text": "jumping spider", "is_base_form": true, "ipa": "/ˈdʒʌmpɪŋ ˈspaɪdər/", "phonetic": "JUMP-ing SPY-der"}]}
+{"guid": "N02_617", "forms": [{"grammatical_form": "noun/en_singular", "text": "ostracod", "is_base_form": true, "ipa": "/ˈɑːstrəˌkɑːd/", "phonetic": "OS-truh-kod"}]}
+{"guid": "N02_618", "forms": [{"grammatical_form": "noun/en_singular", "text": "springtail", "is_base_form": true, "ipa": "/ˈsprɪŋˌteɪl/", "phonetic": "SPRING-tail"}]}
+{"guid": "N02_619", "forms": [{"grammatical_form": "noun/en_singular", "text": "horseshoe crab", "is_base_form": true, "ipa": "/ˈhɔrˌʃuː kræb/", "phonetic": "HOR-she-shoo krab"}]}
+{"guid": "N02_620", "forms": [{"grammatical_form": "noun/en_singular", "text": "tardigrade", "is_base_form": true, "ipa": "/ˈtɑrdɪˌɡreɪd/", "phonetic": "TAR-duh-grayd"}]}
+{"guid": "N02_621", "forms": [{"grammatical_form": "noun/en_singular", "text": "bristle worm", "is_base_form": true, "ipa": "/ˈbrɪsəl wɝːm/", "phonetic": "BRIS-uhl-wurm"}]}
+{"guid": "N02_622", "forms": [{"grammatical_form": "noun/en_singular", "text": "flatworm", "is_base_form": true, "ipa": "/ˈflætˌwɝm/", "phonetic": "FLAT-wurm"}]}
+{"guid": "N02_623", "forms": [{"grammatical_form": "noun/en_singular", "text": "tyrannosaurus", "is_base_form": true, "ipa": "/tɪˌrænəˈsɔrəs/", "phonetic": "tuh-RAN-uh-SOR-us"}]}
+{"guid": "N02_624", "forms": [{"grammatical_form": "noun/en_singular", "text": "triceratops", "is_base_form": true, "ipa": "/traɪˈsɛrəˌtɑps/", "phonetic": "try-SAIR-uh-tops"}]}
+{"guid": "N02_625", "forms": [{"grammatical_form": "noun/en_singular", "text": "stegosaurus", "is_base_form": true, "ipa": "/ˌstɛɡəˈsɔrəs/", "phonetic": "STEG-uh-SOR-us"}]}
+{"guid": "N02_626", "forms": [{"grammatical_form": "noun/en_singular", "text": "velociraptor", "is_base_form": true, "ipa": "/vəˌlɑsɪˈræptər/", "phonetic": "vuh-LOSS-ih-RAP-tor"}]}
+{"guid": "N02_627", "forms": [{"grammatical_form": "noun/en_singular", "text": "diplodocus", "is_base_form": true, "ipa": "/dɪˈplɑːdəkəs/", "phonetic": "dih-PLOD-uh-kuhs"}]}
+{"guid": "N02_628", "forms": [{"grammatical_form": "noun/en_singular", "text": "iguanodon", "is_base_form": true, "ipa": "/ɪˈɡwɑːnəˌdɑːn/", "phonetic": "ih-GWAH-nuh-don"}]}
+{"guid": "N02_629", "forms": [{"grammatical_form": "noun/en_singular", "text": "allosaurus", "is_base_form": true, "ipa": "/ˌæləˈsɔrəs/", "phonetic": "AL-uh-SOR-us"}]}
+{"guid": "N02_630", "forms": [{"grammatical_form": "noun/en_singular", "text": "sauropod", "is_base_form": true, "ipa": "/ˈsɔrəˌpɑd/", "phonetic": "SAWR-uh-pod"}]}
+{"guid": "N02_631", "forms": [{"grammatical_form": "noun/en_singular", "text": "theropod", "is_base_form": true, "ipa": "/ˈθɛrəˌpɑd/", "phonetic": "THAIR-uh-pod"}]}
+{"guid": "N02_632", "forms": [{"grammatical_form": "noun/en_singular", "text": "pterosaur", "is_base_form": true, "ipa": "/ˈtɛrəˌsɔr/", "phonetic": "TEH-ruh-sawr"}]}
+{"guid": "N02_633", "forms": [{"grammatical_form": "noun/en_singular", "text": "pterodactyl", "is_base_form": true, "ipa": "/ˌtɛrəˈdæktɪl/", "phonetic": "TEH-ruh-DAK-til"}]}
+{"guid": "N02_634", "forms": [{"grammatical_form": "noun/en_singular", "text": "plesiosaur", "is_base_form": true, "ipa": "/ˈpliːsiəˌsɔr/", "phonetic": "PLEE-see-uh-sawr"}]}
+{"guid": "N02_635", "forms": [{"grammatical_form": "noun/en_singular", "text": "archaeopteryx", "is_base_form": true, "ipa": "/ˌɑrkiˈɑptərɪks/", "phonetic": "AR-kee-OP-tuh-riks"}]}
+{"guid": "N02_636", "forms": [{"grammatical_form": "noun/en_singular", "text": "dimetrodon", "is_base_form": true, "ipa": "/daɪˈmɛtrəˌdɑn/", "phonetic": "dye-MET-ruh-don"}]}
+{"guid": "N02_637", "forms": [{"grammatical_form": "noun/en_singular", "text": "trilobite", "is_base_form": true, "ipa": "/ˈtraɪloʊˌbaɪt/", "phonetic": "TRY-loh-bाइट"}]}
+{"guid": "N02_638", "forms": [{"grammatical_form": "noun/en_singular", "text": "sea scorpion", "is_base_form": true, "ipa": "/ˈsiː ˌskɔrpiən/", "phonetic": "SEE-SKOR-pee-uhn"}]}
+{"guid": "N02_639", "forms": [{"grammatical_form": "noun/en_singular", "text": "mammoth", "is_base_form": true, "ipa": "/ˈmæməθ/", "phonetic": "MAM-uhth"}]}
+{"guid": "N02_640", "forms": [{"grammatical_form": "noun/en_singular", "text": "mastodon", "is_base_form": true, "ipa": "/ˈmæstədɑn/", "phonetic": "MAS-tuh-don"}]}
+{"guid": "N02_641", "forms": [{"grammatical_form": "noun/en_singular", "text": "aurochs", "is_base_form": true, "ipa": "/ˈɔːrɑːks/", "phonetic": "OW-roks"}]}
+{"guid": "N02_642", "forms": [{"grammatical_form": "noun/en_singular", "text": "dodo", "is_base_form": true, "ipa": "/ˈdoʊdoʊ/", "phonetic": "DOH-doh"}]}
+{"guid": "N02_643", "forms": [{"grammatical_form": "noun/en_singular", "text": "moa", "is_base_form": true, "ipa": "/ˈmoʊə/", "phonetic": "MOH-uh"}]}
+{"guid": "N02_644", "forms": [{"grammatical_form": "noun/en_singular", "text": "passenger pigeon", "is_base_form": true, "ipa": "/ˈpæsəndʒər ˈpɪdʒən/", "phonetic": "PAS-en-jer PIJ-un"}]}
+{"guid": "N02_645", "forms": [{"grammatical_form": "noun/en_singular", "text": "Neanderthal", "is_base_form": true, "ipa": "/niˈændərˌθɔl/", "phonetic": "nee-AN-der-thawl"}]}
+{"guid": "N02_646", "forms": [{"grammatical_form": "noun/en_singular", "text": "australopithecus", "is_base_form": true, "ipa": "/ˌɔːstrəloʊˈpɪθɪkəs/", "phonetic": "aw-struh-loh-PITH-ih-kuhs"}]}
+{"guid": "N02_647", "forms": [{"grammatical_form": "noun/en_singular", "text": "terrier", "is_base_form": true, "ipa": "/ˈtɛriər/", "phonetic": "TAIR-ee-er"}]}
+{"guid": "N02_648", "forms": [{"grammatical_form": "noun/en_singular", "text": "mastiff", "is_base_form": true, "ipa": "/ˈmæstɪf/", "phonetic": "MAS-tif"}]}
+{"guid": "N02_649", "forms": [{"grammatical_form": "noun/en_singular", "text": "spitz", "is_base_form": true, "ipa": "/spɪts/", "phonetic": "SPITS"}]}
+{"guid": "N02_650", "forms": [{"grammatical_form": "noun/en_singular", "text": "gun dog", "is_base_form": true, "ipa": "/ˈɡʌn ˌdɔɡ/", "phonetic": "GUN-dawg"}]}
+{"guid": "N02_651", "forms": [{"grammatical_form": "noun/en_singular", "text": "poodle", "is_base_form": true, "ipa": "/ˈpuːdəl/", "phonetic": "POO-duhl"}]}
+{"guid": "N02_652", "forms": [{"grammatical_form": "noun/en_singular", "text": "bulldog", "is_base_form": true, "ipa": "/ˈbʊlˌdɔɡ/", "phonetic": "BOOL-dawg"}]}
+{"guid": "N02_653", "forms": [{"grammatical_form": "noun/en_singular", "text": "Labrador", "is_base_form": true, "ipa": "/ˈlæbrəˌdɔr/", "phonetic": "LAB-ruh-dor"}]}
+{"guid": "N02_654", "forms": [{"grammatical_form": "noun/en_singular", "text": "golden retriever", "is_base_form": true, "ipa": "/ˌɡoʊldən rɪˈtriːvər/", "phonetic": "GOHL-duhn ri-TREE-ver"}]}
+{"guid": "N02_655", "forms": [{"grammatical_form": "noun/en_singular", "text": "German shepherd", "is_base_form": true, "ipa": "/ˌdʒɝːmən ˈʃɛpɚd/", "phonetic": "jer-MUHN SHEP-erd"}]}
+{"guid": "N02_656", "forms": [{"grammatical_form": "noun/en_singular", "text": "beagle", "is_base_form": true, "ipa": "/ˈbiːɡəl/", "phonetic": "BEE-guhl"}]}
+{"guid": "N02_657", "forms": [{"grammatical_form": "noun/en_singular", "text": "dachshund", "is_base_form": true, "ipa": "/ˈdɑːksˌhʊnd/", "phonetic": "DAKS-hund"}]}
+{"guid": "N02_658", "forms": [{"grammatical_form": "noun/en_singular", "text": "chihuahua", "is_base_form": true, "ipa": "/tʃɪˈwɑːwə/", "phonetic": "chuh-WAH-wuh"}]}
+{"guid": "N02_659", "forms": [{"grammatical_form": "noun/en_singular", "text": "rottweiler", "is_base_form": true, "ipa": "/ˈrɑtˌwaɪlər/", "phonetic": "ROT-wy-ler"}]}
+{"guid": "N02_660", "forms": [{"grammatical_form": "noun/en_singular", "text": "boxer", "is_base_form": true, "ipa": "/ˈbɑksər/", "phonetic": "BOK-ser"}]}
+{"guid": "N02_661", "forms": [{"grammatical_form": "noun/en_singular", "text": "Dalmatian", "is_base_form": true, "ipa": "/dælˈmeɪʃən/", "phonetic": "dal-MAY-shun"}]}
+{"guid": "N02_662", "forms": [{"grammatical_form": "noun/en_singular", "text": "greyhound", "is_base_form": true, "ipa": "/ˈɡreɪˌhaʊnd/", "phonetic": "GRAY-hownd"}]}
+{"guid": "N02_663", "forms": [{"grammatical_form": "noun/en_singular", "text": "husky", "is_base_form": true, "ipa": "/ˈhʌski/", "phonetic": "HUS-kee"}]}
+{"guid": "N02_664", "forms": [{"grammatical_form": "noun/en_singular", "text": "collie", "is_base_form": true, "ipa": "/ˈkɑli/", "phonetic": "KAH-lee"}]}
+{"guid": "N02_665", "forms": [{"grammatical_form": "noun/en_singular", "text": "pug", "is_base_form": true, "ipa": "/pʌɡ/", "phonetic": "PUG"}]}
+{"guid": "N02_666", "forms": [{"grammatical_form": "noun/en_singular", "text": "Great Dane", "is_base_form": true, "ipa": "/ˌɡreɪt ˈdeɪn/", "phonetic": "GRAYT DAYN"}]}
+{"guid": "N02_667", "forms": [{"grammatical_form": "noun/en_singular", "text": "Doberman", "is_base_form": true, "ipa": "/ˈdoʊbɚmən/", "phonetic": "DOH-ber-muhn"}]}
+{"guid": "N02_668", "forms": [{"grammatical_form": "noun/en_singular", "text": "Pomeranian", "is_base_form": true, "ipa": "/ˌpɑməˈreɪniən/", "phonetic": "pom-uh-RAI-nee-un"}]}
+{"guid": "N02_669", "forms": [{"grammatical_form": "noun/en_singular", "text": "corgi", "is_base_form": true, "ipa": "/ˈkɔrɡi/", "phonetic": "KOR-gee"}]}
+{"guid": "N02_670", "forms": [{"grammatical_form": "noun/en_singular", "text": "bloodhound", "is_base_form": true, "ipa": "/ˈblʌdˌhaʊnd/", "phonetic": "BLOOD-hownd"}]}
+{"guid": "N02_671", "forms": [{"grammatical_form": "noun/en_singular", "text": "Saint Bernard", "is_base_form": true, "ipa": "/ˌseɪnt ˈbɝːnərd/", "phonetic": "saynt BUR-nurd"}]}
+{"guid": "N02_672", "forms": [{"grammatical_form": "noun/en_singular", "text": "schnauzer", "is_base_form": true, "ipa": "/ˈʃnaʊzər/", "phonetic": "SHNOW-zer"}]}
+{"guid": "N02_673", "forms": [{"grammatical_form": "noun/en_singular", "text": "cocker spaniel", "is_base_form": true, "ipa": "/ˈkɑkər ˈspænjəl/", "phonetic": "KAH-ker SPAN-yuhl"}]}
+{"guid": "N02_674", "forms": [{"grammatical_form": "noun/en_singular", "text": "shih tzu", "is_base_form": true, "ipa": "/ˈʃiː ˌtsuː/", "phonetic": "SHEE-tsoo"}]}
+{"guid": "N02_675", "forms": [{"grammatical_form": "noun/en_singular", "text": "basset hound", "is_base_form": true, "ipa": "/ˈbæsɪt haʊnd/", "phonetic": "BASS-it HOUND"}]}
+{"guid": "N02_676", "forms": [{"grammatical_form": "noun/en_singular", "text": "Shiba Inu", "is_base_form": true, "ipa": "/ˈʃiːbə ˈiːnuː/", "phonetic": "SHEE-buh EE-noo"}]}
+{"guid": "N02_677", "forms": [{"grammatical_form": "noun/en_singular", "text": "spaniel", "is_base_form": true, "ipa": "/ˈspænjəl/", "phonetic": "SPAN-yuhl"}]}
+{"guid": "N02_678", "forms": [{"grammatical_form": "noun/en_singular", "text": "retriever", "is_base_form": true, "ipa": "/rɪˈtriːvər/", "phonetic": "ri-TREE-ver"}]}
+{"guid": "N02_679", "forms": [{"grammatical_form": "noun/en_singular", "text": "mongrel", "is_base_form": true, "ipa": "/ˈmʌŋɡrəl/", "phonetic": "MUNG-gruhl"}]}
+{"guid": "N02_680", "forms": [{"grammatical_form": "noun/en_singular", "text": "Siamese cat", "is_base_form": true, "ipa": "/ˌsaɪəˈmiːz kæt/", "phonetic": "sye-uh-MEEZ kat"}]}
+{"guid": "N02_681", "forms": [{"grammatical_form": "noun/en_singular", "text": "Persian cat", "is_base_form": true, "ipa": "/ˈpɝːʒən kæt/", "phonetic": "PUR-zhuhn kat"}]}
+{"guid": "N02_682", "forms": [{"grammatical_form": "noun/en_singular", "text": "Maine Coon", "is_base_form": true, "ipa": "/ˌmeɪn ˈkuːn/", "phonetic": "MAYN-KOON"}]}
+{"guid": "N02_683", "forms": [{"grammatical_form": "noun/en_singular", "text": "Sphynx", "is_base_form": true, "ipa": "/sfɪŋks/", "phonetic": "SFINKS"}]}
+{"guid": "N02_684", "forms": [{"grammatical_form": "noun/en_singular", "text": "Bengal cat", "is_base_form": true, "ipa": "/ˈbɛŋɡəl kæt/", "phonetic": "BEN-guhl kat"}]}
+{"guid": "N02_685", "forms": [{"grammatical_form": "noun/en_singular", "text": "ragdoll", "is_base_form": true, "ipa": "/ˈræɡˌdɔl/", "phonetic": "RAG-dawl"}]}
+{"guid": "N02_686", "forms": [{"grammatical_form": "noun/en_singular", "text": "British Shorthair", "is_base_form": true, "ipa": "/ˈbrɪtɪʃ ˈʃɔrtˌhɛr/", "phonetic": "BRIT-ish SHORT-hair"}]}
+{"guid": "N02_687", "forms": [{"grammatical_form": "noun/en_singular", "text": "Abyssinian", "is_base_form": true, "ipa": "/ˌæbəˈsɪniən/", "phonetic": "ab-uh-SIN-ee-uhn"}]}
+{"guid": "N02_688", "forms": [{"grammatical_form": "noun/en_singular", "text": "Burmese", "is_base_form": true, "ipa": "/bɚˈmiːz/", "phonetic": "bur-MEEZ"}]}
+{"guid": "N02_689", "forms": [{"grammatical_form": "noun/en_singular", "text": "Russian Blue", "is_base_form": true, "ipa": "/ˈrʌʃən bluː/", "phonetic": "RUH-shun BLOO"}]}
+{"guid": "N02_690", "forms": [{"grammatical_form": "noun/en_singular", "text": "Scottish Fold", "is_base_form": true, "ipa": "/ˈskɑtɪʃ foʊld/", "phonetic": "SKOT-ish FOHLD"}]}
+{"guid": "N02_691", "forms": [{"grammatical_form": "noun/en_singular", "text": "Manx", "is_base_form": true, "ipa": "/mæŋks/", "phonetic": "MANKS"}]}
+{"guid": "N02_692", "forms": [{"grammatical_form": "noun/en_singular", "text": "tabby", "is_base_form": true, "ipa": "/ˈtæbi/", "phonetic": "TAB-ee"}]}
+{"guid": "N02_693", "forms": [{"grammatical_form": "noun/en_singular", "text": "thoroughbred", "is_base_form": true, "ipa": "/ˈθɝˌoʊˌbrɛd/", "phonetic": "THUR-oh-bred"}]}
+{"guid": "N02_694", "forms": [{"grammatical_form": "noun/en_singular", "text": "Arabian horse", "is_base_form": true, "ipa": "/əˈreɪbiən hɔrs/", "phonetic": "uh-RAY-bee-uhn HORS"}]}
+{"guid": "N02_695", "forms": [{"grammatical_form": "noun/en_singular", "text": "Andalusian horse", "is_base_form": true, "ipa": "/ˌændəˈluːʒən hɔːrs/", "phonetic": "an-duh-LOO-zhuhn hawrs"}]}
+{"guid": "N02_696", "forms": [{"grammatical_form": "noun/en_singular", "text": "Friesian horse", "is_base_form": true, "ipa": "/ˈfriːʒən hɔrs/", "phonetic": "FREE-zhuhn hors"}]}
+{"guid": "N02_697", "forms": [{"grammatical_form": "noun/en_singular", "text": "Shetland pony", "is_base_form": true, "ipa": "/ˈʃɛtlənd ˈpoʊni/", "phonetic": "SHET-lund POH-nee"}]}
+{"guid": "N02_698", "forms": [{"grammatical_form": "noun/en_singular", "text": "Clydesdale", "is_base_form": true, "ipa": "/ˈklaɪdzˌdeɪl/", "phonetic": "KLYDZ-dayl"}]}
+{"guid": "N02_699", "forms": [{"grammatical_form": "noun/en_singular", "text": "Shire horse", "is_base_form": true, "ipa": "/ˈʃaɪər ˌhɔrs/", "phonetic": "SHY-er hawrs"}]}
+{"guid": "N02_700", "forms": [{"grammatical_form": "noun/en_singular", "text": "mustang", "is_base_form": true, "ipa": "/ˈmʌstæŋ/", "phonetic": "MUS-tang"}]}
+{"guid": "N02_701", "forms": [{"grammatical_form": "noun/en_singular", "text": "Appaloosa", "is_base_form": true, "ipa": "/ˌæpəˈluːsə/", "phonetic": "ap-uh-LOO-suh"}]}
+{"guid": "N02_702", "forms": [{"grammatical_form": "noun/en_singular", "text": "quarter horse", "is_base_form": true, "ipa": "/ˈkwɔrtər hɔrs/", "phonetic": "KWOR-ter hors"}]}
+{"guid": "N02_703", "forms": [{"grammatical_form": "noun/en_singular", "text": "Lipizzaner", "is_base_form": true, "ipa": "/ˌlɪpɪtˈsɑːnər/", "phonetic": "lip-it-SAH-ner"}]}
+{"guid": "N02_704", "forms": [{"grammatical_form": "noun/en_singular", "text": "palomino", "is_base_form": true, "ipa": "/ˌpæləˈmiːnoʊ/", "phonetic": "pal-uh-MEE-noh"}]}
+{"guid": "N02_705", "forms": [{"grammatical_form": "noun/en_singular", "text": "Percheron", "is_base_form": true, "ipa": "/pərˈʃərɑn/", "phonetic": "puh-SHUH-ron"}]}
+{"guid": "N02_706", "forms": [{"grammatical_form": "noun/en_singular", "text": "draught horse", "is_base_form": true, "ipa": "/ˈdræft ˌhɔrs/", "phonetic": "DRAFT-hors"}]}
+{"guid": "N02_707", "forms": [{"grammatical_form": "noun/en_singular", "text": "Hereford", "is_base_form": true, "ipa": "/ˈhɛrəfərd/", "phonetic": "HER-uh-furd"}]}
+{"guid": "N02_708", "forms": [{"grammatical_form": "noun/en_singular", "text": "Holstein", "is_base_form": true, "ipa": "/ˈhoʊlstiːn/", "phonetic": "HOHL-steen"}]}
+{"guid": "N02_709", "forms": [{"grammatical_form": "noun/en_singular", "text": "Brahman", "is_base_form": true, "ipa": "/ˈbrɑːmən/", "phonetic": "BRAH-muhn"}]}
+{"guid": "N02_710", "forms": [{"grammatical_form": "noun/en_singular", "text": "Angus", "is_base_form": true, "ipa": "/ˈæŋɡəs/", "phonetic": "ANG-guhs"}]}
+{"guid": "N02_711", "forms": [{"grammatical_form": "noun/en_singular", "text": "Jersey", "is_base_form": true, "ipa": "/ˈdʒɝːzi/", "phonetic": "JER-zee"}]}
+{"guid": "N02_712", "forms": [{"grammatical_form": "noun/en_singular", "text": "Guernsey", "is_base_form": true, "ipa": "/ˈɡɝːnzi/", "phonetic": "GURN-zee"}]}
+{"guid": "N02_713", "forms": [{"grammatical_form": "noun/en_singular", "text": "Highland cattle", "is_base_form": true, "ipa": "/ˈhaɪlənd ˈkætəl/", "phonetic": "HY-land KAT-uhl"}]}
+{"guid": "N02_714", "forms": [{"grammatical_form": "noun/en_singular", "text": "Texas Longhorn", "is_base_form": true, "ipa": "/ˈtɛksəs ˈlɔŋˌhɔrn/", "phonetic": "TEK-suhs LONG-horn"}]}
+{"guid": "N02_715", "forms": [{"grammatical_form": "noun/en_singular", "text": "Charolais", "is_base_form": true, "ipa": "/ˌʃærəˈleɪ/", "phonetic": "shar-uh-LAY"}]}
+{"guid": "N02_716", "forms": [{"grammatical_form": "noun/en_singular", "text": "Wagyu", "is_base_form": true, "ipa": "/ˈwɑːɡjuː/", "phonetic": "WAG-yoo"}]}
+{"guid": "N02_717", "forms": [{"grammatical_form": "noun/en_singular", "text": "merino", "is_base_form": true, "ipa": "/məˈriːnoʊ/", "phonetic": "muh-REE-noh"}]}
+{"guid": "N02_718", "forms": [{"grammatical_form": "noun/en_singular", "text": "Suffolk", "is_base_form": true, "ipa": "/ˈsʌfək/", "phonetic": "SUF-uhk"}]}
+{"guid": "N02_719", "forms": [{"grammatical_form": "noun/en_singular", "text": "Angora goat", "is_base_form": true, "ipa": "/æŋˈɡɔrə ɡoʊt/", "phonetic": "ang-GOR-uh goht"}]}
+{"guid": "N02_720", "forms": [{"grammatical_form": "noun/en_singular", "text": "cashmere goat", "is_base_form": true, "ipa": "/ˈkæʃmɪr ɡoʊt/", "phonetic": "KASH-meer goht"}]}
+{"guid": "N02_721", "forms": [{"grammatical_form": "noun/en_singular", "text": "Angora rabbit", "is_base_form": true, "ipa": "/ˈæŋɡɔr ə ˈræbɪt/", "phonetic": "ang-GOR-uh RAB-it"}]}
+{"guid": "N02_722", "forms": [{"grammatical_form": "noun/en_singular", "text": "Berkshire", "is_base_form": true, "ipa": "/ˈbɝːkʃɪr/", "phonetic": "BURK-sheer"}]}
+{"guid": "N02_723", "forms": [{"grammatical_form": "noun/en_singular", "text": "pot-bellied pig", "is_base_form": true, "ipa": "/ˈpɑtˌbɛlid ˌpɪɡ/", "phonetic": "POT-BEL-leed PIG"}]}
+{"guid": "N02_724", "forms": [{"grammatical_form": "noun/en_singular", "text": "Leghorn", "is_base_form": true, "ipa": "/ˈlɛɡˌhɔrn/", "phonetic": "LEG-horn"}]}
+{"guid": "N02_725", "forms": [{"grammatical_form": "noun/en_singular", "text": "Rhode Island Red", "is_base_form": true, "ipa": "/ˌroʊd ˈaɪlənd ˈrɛd/", "phonetic": "ROHD EYE-lund RED"}]}
+{"guid": "N02_726", "forms": [{"grammatical_form": "noun/en_singular", "text": "bantam", "is_base_form": true, "ipa": "/ˈbæntəm/", "phonetic": "BAN-tuhm"}]}
+{"guid": "N02_727", "forms": [{"grammatical_form": "noun/en_plural", "text": "salmon", "is_base_form": false}]}
+{"guid": "N02_728", "forms": [{"grammatical_form": "noun/en_singular", "text": "tuna", "is_base_form": true, "ipa": "/ˈtuːnə/", "phonetic": "TOO-nuh"}, {"grammatical_form": "noun/en_plural", "text": "tuna", "is_base_form": false}]}
+{"guid": "N02_729", "forms": [{"grammatical_form": "noun/en_singular", "text": "shrimp", "is_base_form": true, "ipa": "/ʃrɪmp/", "phonetic": "SHRIP"}, {"grammatical_form": "noun/en_plural", "text": "shrimp", "is_base_form": false}]}
